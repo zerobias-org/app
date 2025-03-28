@@ -1,82 +1,73 @@
-# NgxExample
+# Example Angular App
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+This app is an example Angular v17.1.3 app that shows:
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is almost ready ✨.
+    1. how to use the Zerobias Client API to interact with the Zerobias Platform
+    2. how to use a Zerobias Module to interact with a product via the Zerobias Platform
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/getting-started/tutorials/angular-standalone-tutorial?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
+There are many helpful comments in the code itself, so as you familiarize yourself with the code, also closely read the code comments.
 
-## Finish your CI setup
+## Key Info
 
-[Click here to finish setting up your workspace!](https://cloud.nx.app/connect/Y1It5ILHn4)
+1. [The Zerobias Client Library](#the-zerobias-client-library)
+2. [Using `ZerobiasAppService` and `APP_INITIALIZER`](#using-zerobiasappservice)
+3. [Make Calls Using the Zerobias Client Library](#make-calls-using-the-zerobias-client-library)
+4. [Including and Making Calls Using a Zerobias Module](#including-and-making-calls-using-a-zerobias-module)
 
+### The Zerobias Client Library
 
-## Run tasks
+The first step is to use the `@auditmation/ngx-zb-client-lib` in your project.  This will pull in all of the services and APIs you will need in order to interact with our platform and enable you to use modules to interact with your products.
 
-To run the dev server for your app, use:
+You will see in the `package.json` at the root of our example project, under `dependencies` we have included this package:
 
-```sh
-npx nx serve ngx-example
+```
+  "dependencies": {
+    ...
+    "@auditmation/ngx-zb-client-lib": "^0.0.30",
+    ...
+  }
 ```
 
-To create a production bundle:
+After you run `npm install` you will see the code under `node_modules/@auditmation/ngx-zb-client-lib`.  Now you have all of the services and APIs you will need for deep integration with the Zerobias platform.
 
-```sh
-npx nx build ngx-example
+
+### Using `ZerobiasAppService`
+
+Included within the `@auditmation/ngx-zb-client-lib` is the `ZerobiasAppService`.  We initialize this example app using the `ZerobiasAppService`,  which contains code that will give you several tools to use for interacting with the platform e.g. logging in, logging out, setting and enforcing session time limits, etc.  You may end up using many or most of these tools.
+
+Learn more in `src/app/app.module.ts`  
+      
+
+
+### How to Make Calls Using the Zerobias Client Library
+
+Next we will use several of the client APIs to interact with the Zerobias Platform.  You can follow along by opening the `src/app/app.component.ts` and `src/app/app.component.html` files where we have written additional comments which you can learn more from.
+
+In `src/app/app.component.ts` we import all of the types and modules that what we will be using.
+
+We inject the clients we will use in the constructor, as well as the `environment` variables:
+``` 
+  constructor(
+    protected clientApi: ZerobiasClientApiService,
+    protected zerobiasAppService: ZerobiasAppService,
+    @Inject('environment') private environment: any
+  ) {}
 ```
 
-To see all available targets to run for a project, run:
+Learn more by reading through the code and comments in `src/app/app.component.ts`
 
-```sh
-npx nx show project ngx-example
+### Including and Making Calls Using a Zerobias Module
+
+For our demo, we'll be using our Github Module to interact with Github through the Platform, by first including it as a dependency in our `package.json`:
+
+```
+  "dependencies": {
+    ...
+    "@auditlogic/module-github-github-client-ts": "^6.3.11",
+    ...
+  }
 ```
 
-These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
+After `npm install` is run you will see this module code in `node_modules/@auditlogic/module-github-github-client-ts`.  This module will give you all of the tools you will need in order to interact with Github through one of your own Connections.  **Please Note:** You will need to have a working Connection in the Zerobias Platform as a prerequisite for this portion of the demo to work, as this module will utilize that Connection via the Platform.
 
-[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Add new projects
-
-While you could add new projects to your workspace manually, you might want to leverage [Nx plugins](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) and their [code generation](https://nx.dev/features/generate-code?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) feature.
-
-Use the plugin's generator to create new projects.
-
-To generate a new application, use:
-
-```sh
-npx nx g @nx/angular:app demo
-```
-
-To generate a new library, use:
-
-```sh
-npx nx g @nx/angular:lib mylib
-```
-
-You can use `npx nx list` to get a list of installed plugins. Then, run `npx nx list <plugin-name>` to learn about more specific capabilities of a particular plugin. Alternatively, [install Nx Console](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) to browse plugins and generators in your IDE.
-
-[Learn more about Nx plugins &raquo;](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) | [Browse the plugin registry &raquo;](https://nx.dev/plugin-registry?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Install Nx Console
-
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
-
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Useful links
-
-Learn more:
-
-- [Learn more about this workspace setup](https://nx.dev/getting-started/tutorials/angular-standalone-tutorial?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects)
-- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-And join the Nx community:
-- [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+Learn more by reading through the code and comments in `src/app/app.component.ts`

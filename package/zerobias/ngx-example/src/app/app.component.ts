@@ -1,13 +1,14 @@
-import { Component, Inject, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
-import { getZerobiasClientApiUrl, ZerobiasAppService, ZerobiasClientApiService } from '@auditmation/ngx-zb-client-lib';
-import { PagedResults } from '@auditmation/types-core-js';
-import { ProductExtended } from '@auditmation/module-auditmation-auditmation-portal';
-import { ConnectionListView, ScopeListView, SearchConnectionBody, SearchScopeBody, SortObject } from '@auditmation/module-auditmation-auditmation-hub';
-import { Org, ServiceAccount, User } from '@auditmation/module-auditmation-auditmation-dana';
-import { GithubClient, newGithub, Organization, OrganizationApi, Repository } from '@auditlogic/module-github-github-client-ts';
 import { combineLatest, Subscription } from 'rxjs';
 import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
+import { Component, Inject, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
+
+import { PagedResults } from '@auditmation/types-core-js';
 import { ModuleSearch } from '@auditmation/module-auditmation-auditmation-store';
+import { ProductExtended } from '@auditmation/module-auditmation-auditmation-portal';
+import { Org, ServiceAccount, User } from '@auditmation/module-auditmation-auditmation-dana';
+import { getZerobiasClientApiUrl, ZerobiasAppService, ZerobiasClientApiService } from '@auditmation/ngx-zb-client-lib';
+import { GithubClient, newGithub, Organization, OrganizationApi, Repository } from '@auditlogic/module-github-github-client-ts';
+import { ConnectionListView, ScopeListView, SearchConnectionBody, SearchScopeBody, SortObject } from '@auditmation/module-auditmation-auditmation-hub';
 
   /*
   1.  catalog example:  box list of 5 products w/ logo
