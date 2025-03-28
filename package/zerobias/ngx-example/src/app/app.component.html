@@ -125,6 +125,7 @@
       gap: 16px;
     }
 
+    /* for styled select */
     *,
     *::before,
     *::after {
@@ -227,6 +228,29 @@
       font-weight: 400;
     }
 
+    .spinner {
+      position: relative;
+      top: calc(50% - 1rem);
+      left: calc(50% - 1rem);
+      width: 20px;
+      height: 20px;
+      border: 3px solid #03aff0;
+      border-bottom: 3px solid rgba(0, 0, 0, 0);
+      border-radius: 50%;
+      animation: spin 1.25s linear infinite;
+      z-index: 9999;
+    }
+
+    .spinner--hidden {
+      /* display: none; */
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
   </style>
   <div class="content-wrapper flex-column gap16">
 
@@ -258,16 +282,6 @@
     <div class="demo-item">
       <h2>Module Usage Example</h2>
       <p>This example will use our GitHub Module to make calls to retrieve a list of your organization's GitHub Repositories.</p>
-<!--       <ul>
-        <li>select ZeroBias org - preset to current</li>
-        <li>select Github org - default first</li>
-        <li>select connection (github) to get target</li>
-        <li>select scope <-- default</li>
-        <li>params: as needed (org)</li>
-        <li>call list repository on connection</li>
-        <li>show list of repositories</li>
-      </ul> -->
-
 
       <form [formGroup]="formGroup" autocomplete="off">
 
@@ -380,9 +394,14 @@
           }
         }
 
-        <div style="height: 500px;"></div>
-
       </form>
+      @if(loading) {
+        <div class="spinner"></div>
+      }
+
+
+      <div style="height: 300px;"><!-- breathing room --></div>
+
     </div>
   </div>
 </div>

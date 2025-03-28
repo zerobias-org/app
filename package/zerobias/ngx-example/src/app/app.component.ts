@@ -11,14 +11,14 @@ import { GithubClient, newGithub, Organization, OrganizationApi, Repository } fr
 import { ConnectionListView, ScopeListView, SearchConnectionBody, SearchScopeBody, SortObject } from '@auditmation/module-auditmation-auditmation-hub';
 
   /*
-  1.  catalog example:  box list of 5 products w/ logo
-  2.  module example:   box, <--- use auditlogic module for github
-    select Zerobias org 
-    select connection (github) to get target <--- hubClient.getConnectionApi().search
+    1. catalog example:  section, list of 5 products w/ logo
+    2. module example:   section, <--- use auditlogic module for github
+      select a Zerobias org 
+      select a Connection (github) to get target <--- hubClient.getConnectionApi().search
         TODO: if creating a connection (future path) go to oauth page
-    select scope <-- set to default scope hubClient.getScopeApi().search()
-    call list github orgs on connection
-    show list of repos by org
+      select scope <-- set to default scope if only 1 - hubClient.getScopeApi().search()
+      call list github orgs on connection
+      show list of repos by org
   */
 
 @Component({
@@ -31,6 +31,9 @@ export class AppComponent implements OnInit, OnDestroy {
 
   private subscriptions = new Subscription();
 
+  public loading = false;
+
+  // Zerobias library and modules give us many types
   public orgs: Org[] = [];
   public githubOrgs: Organization[] = [];
   public currentOrg: Org = null;
@@ -44,10 +47,10 @@ export class AppComponent implements OnInit, OnDestroy {
   public selectedGithubOrg: Organization;
   public githubRepos: Repository[];
 
-  // github client module 
+  // github client Module 
   public githubClient: GithubClient;
 
-  // FormControl for selectors 
+  // FormGroup for html selectors 
   public formGroup: UntypedFormGroup = new UntypedFormGroup({
     org: new UntypedFormControl(null),
     product: new UntypedFormControl(null),
@@ -63,17 +66,19 @@ export class AppComponent implements OnInit, OnDestroy {
   ) {}
 
   public ngOnInit(): void {
+    this.loading = true;
 
-    // for Product List demo block
+    // for Product List demo block, calls to Zerobias Catalog
     this.getProducts();
 
-    // for zb org selector
+    // for Zerobias Org selector
     this.subscriptions.add(this.zerobiasAppService.orgs.subscribe((orgs: Org[]) => {
       this.orgs = orgs;
     }));
 
-    // subscribe to the Org and WhoAmI observables; combineLatest since we need both at the same time
-    // this runs when either org or whoAmI changes - like when you change orgs
+    // subscribe to the Org and WhoAmI observables; 
+    // combineLatest since we need both at the same time so 
+    // this runs when either org or whoAmI changes i.e. changing Zerobias Org
     this.subscriptions.add(combineLatest(
       [this.zerobiasAppService.whoAmI, this.zerobiasAppService.org]).subscribe(([whoAmI, org]:any[]) => {
       this.currentUser = whoAmI;
@@ -89,9 +94,9 @@ export class AppComponent implements OnInit, OnDestroy {
           this.getGithubProduct().then((githubProduct) => {
             this.githubProduct = githubProduct;
             this.formGroup.get('product').setValue(githubProduct, {emitEvent: false});
-            this.formGroup.get('product').disable(); // we're only using github for this demo - make not changeable
+            this.formGroup.get('product').disable(); // we're only using github for this demo - not changeable
 
-            // update list of connections
+            // update list of Connections
             this.getConnections();
           });
         }
@@ -110,11 +115,12 @@ export class AppComponent implements OnInit, OnDestroy {
 
     // listen for Connection select changes
     this.subscriptions.add(this.formGroup.get('connection').valueChanges.subscribe((connection: ConnectionListView) => {
-      console.log('connection change', connection);
+      console.log('Connection change', connection);
 
       if (connection.id && (connection.id.toString() !== this.selectedConnection?.id.toString())) {
         this.selectedConnection = connection;
-        // get scopes for this connection
+
+        // get Scopes for this Connection
         this.getConnectionScopes();
       }
     }));
@@ -125,6 +131,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
       if (scope.id && (scope.id.toString() !== this.selectedScope?.id.toString())) {
         this.selectedScope = scope;
+
         // get Github orgs using this scope
         this.getGithubOrgs();
       }
@@ -137,7 +144,7 @@ export class AppComponent implements OnInit, OnDestroy {
       if (githubOrg.id && (githubOrg.id.toString() !== this.selectedGithubOrg?.id.toString())) {
         this.selectedGithubOrg = githubOrg;
         // get repos for this Github org
-        this.getRepos();
+        this.listRepositories();
       }
     }));
 
@@ -154,7 +161,7 @@ export class AppComponent implements OnInit, OnDestroy {
   public getProducts() {
     this.clientApi.portalClient.getProductApi().search({}, 1, 5, null).then((pagedResults:PagedResults<ProductExtended>) => {
       this.products = pagedResults.items;
-    });
+    })
   }
 
   public async getGithubProduct() {
@@ -179,6 +186,7 @@ export class AppComponent implements OnInit, OnDestroy {
   public async getConnections() {
     // don't bother unless we have a githubProduct
     if (this.githubProduct) {
+      this.loading = true;
 
       // find list of Module ids that use Github Product
       const moduleIds = await this.clientApi.storeClient.getModuleApi().search({products: [this.githubProduct.id]}, 1, 50, null).then((pagedResults:PagedResults<ModuleSearch>) => {
@@ -203,8 +211,9 @@ export class AppComponent implements OnInit, OnDestroy {
       };
       this.clientApi.hubClient.getConnectionApi().search(searchConnectionBody, 1, 50, null).then((pagedResults:PagedResults<ConnectionListView>) => {
         this.connections = pagedResults.items.length > 0 ? pagedResults.items : [];
+      }).finally(() => {
+        this.loading = false;
       });
-
     }
   }
 
@@ -227,6 +236,7 @@ export class AppComponent implements OnInit, OnDestroy {
         'direction'?: string; // asc, desc
     */
 
+    this.loading = true;
     const searchScopeBody: SearchScopeBody = {
       connections: [this.selectedConnection.id],
     };
@@ -235,39 +245,45 @@ export class AppComponent implements OnInit, OnDestroy {
       this.scopes = pagedResults.items.length > 0 ? pagedResults.items : [];
       if (this.scopes.length === 1) {
         this.formGroup.get('scope').setValue(this.scopes[0]);
+      } else {
+        this.loading = false;
       }
-    });
+    })
   }
 
-
-  
-  private getGithubOrgs() {
+  public async getGithubOrgs() {
+    this.loading = true;
     this.githubClient = newGithub(); // type GithubClient
     const hubConnectionProfile = {
       server: getZerobiasClientApiUrl('hub', this.environment.isLocalDev),
       targetId: this.clientApi.toUUID(this.selectedScope.id)  // <--- connection id if one scope/ scope id if multi-scope
     }
-
-    console.log('hubConnectionProfile: ',hubConnectionProfile);
+    // console.log('hubConnectionProfile: ',hubConnectionProfile);
 
     // get GITHUB orgs
-    this.githubClient.connect(hubConnectionProfile).then(() => {
-      this.githubClient.getOrganizationApi().listMyOrganizations(1,5).then((pagedResults: PagedResults<Organization>) => {
+    this.githubClient.connect(hubConnectionProfile).then(async () => {
+      
+      await this.githubClient.getOrganizationApi().listMyOrganizations(1,5).then((pagedResults: PagedResults<Organization>) => {
         this.githubOrgs = pagedResults.items.length > 0 ? pagedResults.items : [];
-        console.log('github orgs', pagedResults.items);
+        // console.log('github orgs', pagedResults.items);
+      }).finally(() => {
+        this.loading = false;
       });
     });
   }
 
-  private async getRepos() {
+  private listRepositories() {
     /* 
-      organizationName: string, 
-      type?: OrganizationApi.TypeEnumDef, 
-      sort?: OrganizationApi.SortEnumDef, 
-      direction?: OrganizationApi.DirectionEnumDef, 
-      pageNumber?: number, 
-      pageSize?: number
+      githubClient.getOrganizationApi().listRepositories(
+        organizationName: string, 
+        type?: OrganizationApi.TypeEnumDef, 
+        sort?: OrganizationApi.SortEnumDef, 
+        direction?: OrganizationApi.DirectionEnumDef, 
+        pageNumber?: number, 
+        pageSize?: number
+      ) 
     */
+    this.loading = true;
     this.githubClient.getOrganizationApi().listRepositories(
       this.selectedGithubOrg?.name,
       OrganizationApi.TypeEnum.All,
@@ -277,7 +293,9 @@ export class AppComponent implements OnInit, OnDestroy {
       25
     ).then((pagedResults: PagedResults<Repository>) => {
       this.githubRepos = pagedResults.items.length > 0 ? pagedResults.items : [];
-      console.log('repos', pagedResults.items);
+      // console.log('repos', pagedResults.items);
+    }).finally(() => {
+      this.loading = false;
     });
   }
 
