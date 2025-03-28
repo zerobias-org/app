@@ -5,13 +5,14 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { environment } from '../environments/environment';
 import { APP_BASE_HREF, PlatformLocation } from '@angular/common';
-import { ZerobiasClientApiService } from '@auditmation/ngx-zb-client-lib';
-import { ZerobiasAppService } from './services/zerobias-app.service';
+import { ZerobiasAppService } from '@auditmation/ngx-zb-client-lib';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+
 
 
 @NgModule({
   declarations: [AppComponent],
-  imports: [BrowserModule, AppRoutingModule],
+  imports: [BrowserModule, AppRoutingModule, FormsModule, ReactiveFormsModule],
   exports: [],
   providers: [
     { provide: 'environment', useValue: environment },
@@ -23,7 +24,7 @@ import { ZerobiasAppService } from './services/zerobias-app.service';
     {
       provide: APP_INITIALIZER,
       useFactory: initializeAppFactory,
-      deps: [ZerobiasClientApiService],
+      deps: [ZerobiasAppService],
       multi: true
     },
   ],

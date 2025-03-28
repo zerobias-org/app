@@ -1,13 +1,13 @@
 <div class="toolbar">
   <div class="app-bar">
     <img src="https://cdn.zerobias.com/static/images/zerobias/zerobias_white.svg" alt="ZeroBias" height="28">
+    <h1>ZeroBias Client API Demo</h1>
     <span style="flex: 1 1 auto;"></span>
   </div>
   <div class="zerobias-bar"></div>
 </div>
 
 <div class="content-wrap">
-  <h1>ZeroBias Client API Demo</h1>
   <style>
     body {
       padding:0;
@@ -17,7 +17,9 @@
       background-repeat: no-repeat;
       background-attachment: scroll;
       background-position: center;
-      font-family: Montserrat, sans-serif;
+      font-family: Roboto, sans-serif;
+      font-size: 14px;
+      line-height: 20px;
     }
     .content-wrap {
       padding: 0 8%;
@@ -46,6 +48,20 @@
       margin: 0px 16px 0;
       padding: 8px 0 0;
     }
+    .app-bar h1 {
+      font-family: Montserrat, sans-serif;
+      color: #fff;
+      max-width: 200px;
+      min-width: 100px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+      font-size: 16px;
+      font-weight: 500;
+      line-height: 22px;
+      min-width: 500px;
+      padding: 0 16px;
+    }
     .zerobias-bar {
       background: #03aff0;
       background: linear-gradient(90deg, #03aff0 25%, #232323 75%);
@@ -53,21 +69,42 @@
       height: 4px;
     }
     .content-wrapper .demo-item {
-      width: 50%;
+      width: 100%;
     }
-    .demo-item .products .product-item{
-      align-items: center;
-      border-bottom: 2px solid #eee;
+    .demo-item table.table {
+      width: 100%;
+      border-collapse: collapse;
     }
-    .demo-item .products .product-item > div {
-      flex-basis: 200px;
-      align-items: center;
+    .demo-item .table tr {
+      color: #0000008a !important;
+      font-size: 14px !important;
+      font-family: Roboto, sans-serif;
     }
-    .demo-item .products .product-item > div img {
+    .demo-item .table tr th {
+      text-align: left;
+    }
+    .demo-item .table tr td {
+      font-family: Roboto, sans-serif;
+      vertical-align: top;
+      padding: 8px 4px;
+      line-height: 20px;
+      border-bottom: 1px solid #ddd;
+      max-width: clamp(200px, 30vw, 500px);
+
+      border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+      border-collapse: separate;
+      box-sizing: border-box;
+    }
+
+    .demo-item .table .product-item .product-logo img {
       height: 100%; 
       width: auto; 
       max-width: 100%; 
-      max-height: 32px;
+      max-height: 20px;
+    }
+    .demo-item .table .product-item .product-name {
+      font-weight: 500;
+      white-space: nowrap;
     }
     .flex-row {
       display: flex;
@@ -77,43 +114,275 @@
       display: flex;
       flex-direction: column;
     }
+    .align-center {
+      vertical-align: middle;
+      align-items: center;
+    }
     .gap8 {
       gap: 8px;
     }
     .gap16 {
       gap: 16px;
     }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    :root {
+      --select-border: #777;
+      --select-focus: blue;
+      --select-arrow: var(--select-border);
+    }
+
+    select {
+      -webkit-appearance: none;
+        -moz-appearance: none;
+              appearance: none;
+      background-color: transparent;
+      border: none;
+      padding: 0 1em 0 0;
+      margin: 0;
+      width: 100%;
+      font-family: inherit;
+      font-size: inherit;
+      cursor: inherit;
+      line-height: inherit;
+      z-index: 1;
+      outline: none;
+    }
+    select::-ms-expand {
+      display: none;
+    }
+
+    .select {
+      display: grid;
+      grid-template-areas: "select";
+      align-items: center;
+      position: relative;
+      min-width: 15ch;
+      max-width: 64ch;
+      border: 1px solid var(--select-border);
+      border-radius: 0.25em;
+      padding: 4px 0.5em;
+      cursor: pointer;
+      line-height: 1.1;
+      background-color: #fff;
+      background-image: linear-gradient(to top, #f9f9f9, #fff 33%);
+    }
+    .select select, .select::after {
+      grid-area: select;
+    }
+    .select:not(.select--multiple)::after {
+      content: "";
+      justify-self: end;
+      width: 0.8em;
+      height: 0.5em;
+      background-color: var(--select-arrow);
+      -webkit-clip-path: polygon(100% 0%, 0 0%, 50% 100%);
+              clip-path: polygon(100% 0%, 0 0%, 50% 100%);
+    }
+
+    select:focus + .focus {
+      position: absolute;
+      top: -1px;
+      left: -1px;
+      right: -1px;
+      bottom: -1px;
+      border: 2px solid var(--select-focus);
+      border-radius: inherit;
+    }
+
+    select[multiple] {
+      padding-right: 0;
+      /*
+      * Safari will not reveal an option
+      * unless the select height has room to 
+      * show all of it
+      * Firefox and Chrome allow showing 
+      * a partial option
+      */
+      height: 6rem;
+      /* 
+      * Experimental - styling of selected options
+      * in the multiselect
+      * Not supported crossbrowser
+      */
+    }
+    select[multiple] option {
+      white-space: normal;
+      outline-color: var(--select-focus);
+    }
+
+    .select--disabled {
+      cursor: not-allowed;
+      background-color: #eee;
+      background-image: linear-gradient(to top, #ddd, #eee 33%);
+    }
+
+    label {
+      font-size: 16px;
+      font-weight: 400;
+    }
+
   </style>
-  <div class="content-wrapper flex-row gap16">
+  <div class="content-wrapper flex-column gap16">
 
     <div class="demo-item">
       <h2>Catalog Products Example</h2>
-      <p>This example calls the Catalog API <code>clientApi.portalClient.getProductApi().search()</code> endpoint to get a list of 5 products from the ZeroBias Catalog</p>
-      <ul class="products flex-column gap8">
+      <p>This example calls the ZeroBias Catalog API <code>clientApi.portalClient.getProductApi().search()</code> endpoint to get a list of 5 products from the ZeroBias Catalog</p>
+      <table class="table">
+        <tr class="product-item">
+          <th>Logo</th>
+          <th>Name</th>
+          <th>Description</th>
+          <th>Package Code</th>
+          <th>Status</th>
+        </tr>
         @for(product of products; track product.id.toString()) {
-          <li class="product-item flex-row gap8">
-            <div>
+          <tr class="product-item">
+            <td class="product-logo">
               <img src="{{ product.logo.toString() }}" alt="{{ product.name }}" />
-            </div>
-            <h4>{{ product.name }}</h4>
-          </li>
-        } 
-      </ul>
+            </td>
+            <td class="product-name">{{ product.name }}</td>
+            <td class="product-description">{{ product.description }}</td>
+            <td class="product-packageCode">{{ product.packageCode }}</td>
+            <td class="product-status">{{ product.status.toString() }}</td>
+          </tr>
+        }
+      </table>
     </div>
 
     <div class="demo-item">
-
       <h2>Module Usage Example</h2>
       <p>This example will use our GitHub Module to make calls to retrieve a list of your organization's GitHub Repositories.</p>
-      <ul>
-        <li>select org - already have org need select?</li>
+<!--       <ul>
+        <li>select ZeroBias org - preset to current</li>
+        <li>select Github org - default first</li>
         <li>select connection (github) to get target</li>
         <li>select scope <-- default</li>
         <li>params: as needed (org)</li>
         <li>call list repository on connection</li>
         <li>show list of repositories</li>
-      </ul>
+      </ul> -->
 
+
+      <form [formGroup]="formGroup" autocomplete="off">
+
+        <!-- Select ZeroBias Organization -->
+        <section>
+          <h3>Select ZeroBias Platform Organization </h3>
+          <div class="flex-row gap16 align-center">
+            <div class="select">
+              <select id="selectOrg" name="selectOrg" [formControlName]="'org'" [compareWith]="compareObjects">
+                <option [ngValue]="">Select Organization</option>
+                @for(org of orgs; track org.id.toString()) {
+                  <option [ngValue]="org">{{ org.name }}</option>
+                }
+              </select>
+            </div>
+            <label for="selectOrg">{{ currentOrg?.name }}</label>
+          </div>
+        </section>
+
+        <!-- Select Product: Github -->
+        <section>
+          <h3>Select Product </h3>
+          <div class="flex-row gap16 align-center">
+            <div class="select">
+              <select id="selectProduct" name="selectProduct" [formControlName]="'product'" [compareWith]="compareObjects">
+                <option [ngValue]="githubProduct">{{ githubProduct?.name }}</option>
+              </select>
+            </div>
+            <label for="selectProduct">{{ githubProduct?.name }}</label>
+          </div>
+        </section>
+
+        <!-- Select Connection -->
+        <section>
+          <h3>Select Connection </h3>
+          <div class="flex-row gap16 align-center">
+            <div class="select">
+              <select name="selectConnection" id="selectConnection" [formControlName]="'connection'" [compareWith]="compareObjects">
+                <option [ngValue]="">Select a Connection</option>
+                @for(connection of connections; track connection.id.toString()) {
+                  <option [ngValue]="connection">{{ connection.name }} {{ connection.description }}</option>
+                } 
+              </select>
+            </div>
+            <label for="selectConnection">{{ formGroup.get('connection').value?.name }}</label>
+          </div>
+        </section>
+
+        <!-- Select Connection Scope if applicable -->
+        @if(formGroup.get('scope').value) {
+          <section>
+            <h3>Select Scope </h3>
+            <div class="flex-row gap16 align-center">
+              <div class="select">
+                <select name="selectScope" id="selectScope" [formControlName]="'scope'" [compareWith]="compareObjects">
+                  <option [ngValue]="">Select a Scope</option>
+                  @for(scope of scopes; track scope.id.toString()) {
+                    <option [ngValue]="scope">{{ scope.name }} {{ scope.description }}</option>
+                  } 
+                </select>
+              </div>
+              <label for="selectScope">{{ formGroup.get('scope').value?.name }}</label>
+            </div>
+          </section>
+        
+
+          <!-- Select Github Org -->
+          <section>
+            <h3>Select Github Org </h3>
+            <div class="flex-row gap16 align-center">
+              <div class="select">
+                <select name="selectGithubOrg" id="selectGithubOrg" [formControlName]="'githubOrg'" [compareWith]="compareObjects">
+                  <option [ngValue]="">Select a Github Organization</option>
+                  @for(org of githubOrgs; track org.id.toString()) {
+                    <option [ngValue]="org">{{ org.name }} {{ org.description }}</option>
+                  } 
+                </select>
+              </div>
+              <label for="selectGithubOrg">{{ formGroup.get('githubOrg').value?.name }}</label>
+            </div>
+          </section>
+
+
+          <!-- List Github Repos for Github Org -->
+          @if(githubRepos?.length > 0) {
+            <section>
+              <h3>List of Repositories for Selected Github Org (limit 25)</h3>
+
+              <table class="table">
+
+                <tr class="repo-item">
+                  <th>Name</th>
+                  <th>Description</th>
+                  <th>Default Branch</th>
+                  <th>Last Pushed</th>
+                </tr>
+
+                @for(repo of githubRepos; track repo.id.toString()) {
+                  <tr class="repo-item">
+                    <td class="repo-name">{{ repo.name }}</td>
+                    <td class="repo-description">{{ repo.description }}</td>
+                    <td class="repo-defaultBranch">{{ repo.defaultBranch }}</td>
+                    <td class="repo-pushed">{{ repo.pushed|date }}</td>
+                  </tr>
+                }
+                
+              </table>
+
+            </section>
+          }
+        }
+
+        <div style="height: 500px;"></div>
+
+      </form>
     </div>
   </div>
 </div>

@@ -7,9 +7,9 @@
       "!{projectRoot}/.eslintrc.json",
       "!{projectRoot}/eslint.config.mjs"
     ],
-    "sharedGlobals": ["{workspaceRoot}/.github/workflows/ci.yml"]
+    "sharedGlobals": []
   },
-  "nxCloudId": "67ddaa55b275394a24321d85",
+  "nxCloudId": "",
   "targetDefaults": {
     "@angular-devkit/build-angular:browser": {
       "cache": true,
