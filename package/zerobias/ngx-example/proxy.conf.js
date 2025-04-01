@@ -1,6 +1,6 @@
 const proxyConfig ={
   "/cc/api/*": {
-    "target": "https://api.ci.zerobias.com/cc/api",
+    "target": "https://api.zerobias.com/cc/api",
     "secure": false,
     "changeOrigin": true,
     "pathRewrite": {
@@ -12,7 +12,7 @@ const proxyConfig ={
     }
   },
   "/api/*": {
-    "target": "https://api.ci.zerobias.com/api",
+    "target": "https://api.zerobias.com/api",
     "secure": false,
     "changeOrigin": true,
     "pathRewrite": {
@@ -24,7 +24,7 @@ const proxyConfig ={
     }
   },
   "/platform/*": {
-    "target": "https://api.ci.zerobias.com/platform",
+    "target": "https://api.zerobias.com/platform",
     "secure": false,
     "changeOrigin": true,
     "pathRewrite": {
@@ -36,7 +36,7 @@ const proxyConfig ={
     }
   },
   "/cc/graphql/*": {
-    "target": "https://api.ci.zerobias.com/cc/graphql",
+    "target": "https://api.zerobias.com/cc/graphql",
     "secure": false,
     "changeOrigin": true,
     "pathRewrite": {
@@ -48,7 +48,7 @@ const proxyConfig ={
     }
   },
   "/graphql/*": {
-    "target": "https://api.ci.zerobias.com/graphql",
+    "target": "https://api.zerobias.com/graphql",
     "secure": false,
     "changeOrigin": true,
     "pathRewrite": {
@@ -60,7 +60,7 @@ const proxyConfig ={
     }
   },
   "/card/*": {
-    "target": "https://api.ci.zerobias.com/card",
+    "target": "https://api.zerobias.com/card",
     "secure": false,
     "changeOrigin": true,
     "pathRewrite": {
@@ -72,7 +72,7 @@ const proxyConfig ={
     }
   },
   "/file-service/*": {
-    "target": "https://api.ci.zerobias.com/file-service",
+    "target": "https://api.zerobias.com/file-service",
     "secure": false,
     "changeOrigin": true,
     "pathRewrite": {
@@ -84,7 +84,7 @@ const proxyConfig ={
     }
   },
   "/store/*": {
-    "target": "https://api.ci.zerobias.com/store",
+    "target": "https://api.zerobias.com/store",
     "secure": true,
     "changeOrigin": true,
     "logLevel": "debug",
@@ -96,7 +96,7 @@ const proxyConfig ={
     }
   },
   "/hub/*": {
-    "target": "https://api.ci.zerobias.com/hub",
+    "target": "https://api.zerobias.com/hub",
     "secure": true,
     "changeOrigin": true,
     "logLevel": "debug",
@@ -108,7 +108,7 @@ const proxyConfig ={
     }
   },
   "/dana/api/v2/*": {
-    "target": "https://api.ci.zerobias.com/dana/api/v2",
+    "target": "https://api.zerobias.com/dana/api/v2",
     "secure": true,
     "changeOrigin": true,
     "logLevel": "debug",
@@ -123,7 +123,7 @@ const proxyConfig ={
     }
   },
   "/dana/api/v1/*": {
-    "target": "https://api.ci.zerobias.com/dana/api/v2",
+    "target": "https://api.zerobias.com/dana/api/v2",
     "secure": true,
     "changeOrigin": true,
     "logLevel": "debug",
@@ -138,7 +138,7 @@ const proxyConfig ={
     }
   },
   "/card/*": {
-    "target": "https://api.ci.zerobias.com/card",
+    "target": "https://api.zerobias.com/card",
     "secure": false,
     "changeOrigin": true,
     "pathRewrite": {
@@ -150,7 +150,7 @@ const proxyConfig ={
     }
   },
   "/portal/*": {
-    "target": "https://api.ci.zerobias.com/portal",
+    "target": "https://api.zerobias.com/portal",
     "secure": false,
     "changeOrigin": true,
     "pathRewrite": {
@@ -162,7 +162,7 @@ const proxyConfig ={
     }
   },
   "/events/*": {
-    "target": "https://api.ci.zerobias.com/events",
+    "target": "https://api.zerobias.com/events",
     "secure": false,
     "changeOrigin": true,
     "pathRewrite": {

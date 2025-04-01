@@ -11,10 +11,11 @@ import { GithubClient, newGithub, Organization, OrganizationApi, Repository } fr
 import { ConnectionListView, ScopeListView, SearchConnectionBody, SearchScopeBody, SortObject } from '@auditmation/module-auditmation-auditmation-hub';
 
   /*
+    // basic outline of this demo
     1. catalog example:  section, list of 5 products w/ logo
     2. module example:   section, <--- use auditlogic module for github
       select a Zerobias org 
-      select a Connection (github) to get target <--- hubClient.getConnectionApi().search
+      select a Connection (for github product) to get target <--- hubClient.getConnectionApi().search
         TODO: if creating a connection (future path) go to oauth page
       select scope <-- set to default scope if only 1 - hubClient.getScopeApi().search()
       call list github orgs on connection
@@ -33,7 +34,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
   public loading = false;
 
-  // Zerobias library and modules give us many types
+  // Zerobias client library and modules give us many strongly typed interfaces!
   public orgs: Org[] = [];
   public githubOrgs: Organization[] = [];
   public currentOrg: Org = null;
@@ -165,19 +166,6 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   public async getGithubProduct() {
-    /* 
-    ResourceSearchFilter {
-        'types'?: Array<Nmtoken>;
-        'keywords'?: Array<string>;
-        'tags'?: Array<Nmtoken>;
-        'inflate'?: boolean;
-        'conditions'?: Array<Condition>;
-          'property': string;
-            'operation': ConditionOperationDef;
-            'value'?: string | number | boolean | Array<string | number | boolean> | null;
-        'alerts'?: AlertFilterDef;
-        'boundaryId'?: Array<UUID>;
-    */
     return this.clientApi.portalClient.getProductApi().search({packageCode: 'github.github'}, 1, 1).then((pagedResults:PagedResults<ProductExtended>) => {
       return pagedResults.items[0];
     });
@@ -244,6 +232,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.clientApi.hubClient.getScopeApi().search(searchScopeBody, 1, 50, new SortObject('name', 'asc')).then((pagedResults:PagedResults<ScopeListView>) => {
       this.scopes = pagedResults.items.length > 0 ? pagedResults.items : [];
       if (this.scopes.length === 1) {
+        // if only one scope go ahead and select it by setting value of `scope` formControl
         this.formGroup.get('scope').setValue(this.scopes[0]);
       } else {
         this.loading = false;
