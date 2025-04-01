@@ -77,16 +77,16 @@ Learn more by reading through the code and comments in `src/app/app.component.ts
 
 #### Proxy Configuration
 
-You will likely be developing your site locally, so we have included the file `proxy.conf.js` at the root of the example app project.  We have configured the example app to use this proxy config file, (from line 53 in the `project.json` file at the root of the example app project) This is also where the `port` is set for the dev app url, which we defaulted to port `4200` i.e. `http://localhost:4200`.  You are welcome to change this as you need to in the `project.json` file.  This configuration file provides all of the API endpoints so your local app will know where to look for these endpoints. If you take a look in this file, you will notice that each proxy config entry has an `Authorization` header attribute, which in turn uses a local environment variable named `API_KEY` in order to tell our API that you are indeed authorized to use it.  
+You will likely be developing your site locally, so we have included the file `proxy.conf.js` at the root of the example app project.  We have configured the example app to use this proxy config file, (from line 53 in the `project.json` file at the root of the example app project) This is also where the `port` is set for the dev app url, which we defaulted to port `4200` i.e. `http://localhost:4200`.  You are welcome to change this as you need to in the `project.json` file.  This configuration file provides all of the API endpoints so your local app will know where to look for these endpoints. If you take a look in this file, you will notice that each proxy config entry has an `Authorization` header attribute, which in turn uses a local environment variable named `ZEROBIAS_PROD_API_KEY` in order to tell our API that you are indeed authorized to use it.  
 
 ```
   ...
     "headers": {
-      "Authorization": "APIKey " + process.env.API_KEY,
+      "Authorization": "APIKey " + process.env.ZEROBIAS_PROD_API_KEY,
     }
   ...
 ```
 
-#### Add `API_KEY` to Your Local Development Environment
+#### Add `ZEROBIAS_PROD_API_KEY` to Your Local Development Environment
 
-You will need to add this `API_KEY` to your local dev environment.  First, obtain your `API_KEY` by logging into the platform, and under the user/org switcher in the top right, click on `Create New API Key`.  Copy the presented API key, and add it to your dev environment.  Once this is set, the `proxy.conf.js` will be able to provide the key to the API endpoints, granting you access to the endpoint.
+You will need to add this `ZEROBIAS_PROD_API_KEY` to your local dev environment.  First, obtain your `ZEROBIAS_PROD_API_KEY` by logging into the platform, and under the user/org switcher in the top right, click on `Create New API Key`.  Copy the presented API key, and add it to your dev environment.  Once this is set, the `proxy.conf.js` will be able to provide the key to the API endpoints, granting you access to the endpoint.

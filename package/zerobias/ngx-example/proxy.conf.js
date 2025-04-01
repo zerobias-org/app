@@ -1,6 +1,6 @@
 const proxyConfig ={
   "/cc/api/*": {
-    "target": "https://api.zerobias.com/cc/api",
+    "target": "https://api.app.zerobias.com/cc/api",
     "secure": false,
     "changeOrigin": true,
     "pathRewrite": {
@@ -8,11 +8,11 @@ const proxyConfig ={
     },
     "logLevel": "info",
     "headers": {
-      "Authorization": "APIKey " + process.env.PROD_API_KEY,
+      "Authorization": "APIKey " + process.env.ZEROBIAS_PROD_API_KEY,
     }
   },
   "/api/*": {
-    "target": "https://api.zerobias.com/api",
+    "target": "https://api.app.zerobias.com/api",
     "secure": false,
     "changeOrigin": true,
     "pathRewrite": {
@@ -20,11 +20,11 @@ const proxyConfig ={
     },
     "logLevel": "debug",
     "headers": {
-      "Authorization": "APIKey " + process.env.PROD_API_KEY,
+      "Authorization": "APIKey " + process.env.ZEROBIAS_PROD_API_KEY,
     }
   },
   "/platform/*": {
-    "target": "https://api.zerobias.com/platform",
+    "target": "https://api.app.zerobias.com/platform",
     "secure": false,
     "changeOrigin": true,
     "pathRewrite": {
@@ -32,11 +32,11 @@ const proxyConfig ={
     },
     "logLevel": "debug",
     "headers": {
-      "Authorization": "APIKey " + process.env.PROD_API_KEY,
+      "Authorization": "APIKey " + process.env.ZEROBIAS_PROD_API_KEY,
     }
   },
   "/cc/graphql/*": {
-    "target": "https://api.zerobias.com/cc/graphql",
+    "target": "https://api.app.zerobias.com/cc/graphql",
     "secure": false,
     "changeOrigin": true,
     "pathRewrite": {
@@ -44,11 +44,11 @@ const proxyConfig ={
     },
     "logLevel": "info",
     "headers": {
-      "Authorization": "APIKey " + process.env.PROD_API_KEY,
+      "Authorization": "APIKey " + process.env.ZEROBIAS_PROD_API_KEY,
     }
   },
   "/graphql/*": {
-    "target": "https://api.zerobias.com/graphql",
+    "target": "https://api.app.zerobias.com/graphql",
     "secure": false,
     "changeOrigin": true,
     "pathRewrite": {
@@ -56,11 +56,11 @@ const proxyConfig ={
     },
     "logLevel": "info",
     "headers": {
-      "Authorization": "APIKey " + process.env.PROD_API_KEY,
+      "Authorization": "APIKey " + process.env.ZEROBIAS_PROD_API_KEY,
     }
   },
   "/card/*": {
-    "target": "https://api.zerobias.com/card",
+    "target": "https://api.app.zerobias.com/card",
     "secure": false,
     "changeOrigin": true,
     "pathRewrite": {
@@ -68,11 +68,11 @@ const proxyConfig ={
     },
     "logLevel": "info",
     "headers": {
-      "Authorization": "APIKey " + process.env.PROD_API_KEY,
+      "Authorization": "APIKey " + process.env.ZEROBIAS_PROD_API_KEY,
     }
   },
   "/file-service/*": {
-    "target": "https://api.zerobias.com/file-service",
+    "target": "https://api.app.zerobias.com/file-service",
     "secure": false,
     "changeOrigin": true,
     "pathRewrite": {
@@ -80,11 +80,11 @@ const proxyConfig ={
     },
     "logLevel": "info",
     "headers": {
-      "Authorization": "APIKey " + process.env.PROD_API_KEY,
+      "Authorization": "APIKey " + process.env.ZEROBIAS_PROD_API_KEY,
     }
   },
   "/store/*": {
-    "target": "https://api.zerobias.com/store",
+    "target": "https://api.app.zerobias.com/store",
     "secure": true,
     "changeOrigin": true,
     "logLevel": "debug",
@@ -92,11 +92,11 @@ const proxyConfig ={
       "^/store": ""
     },
     "headers": {
-      "Authorization": "APIKey " + process.env.PROD_API_KEY,
+      "Authorization": "APIKey " + process.env.ZEROBIAS_PROD_API_KEY,
     }
   },
   "/hub/*": {
-    "target": "https://api.zerobias.com/hub",
+    "target": "https://api.app.zerobias.com/hub",
     "secure": true,
     "changeOrigin": true,
     "logLevel": "debug",
@@ -104,11 +104,11 @@ const proxyConfig ={
       "^/hub": ""
     },
     "headers": {
-      "Authorization": "APIKey " + process.env.PROD_API_KEY,
+      "Authorization": "APIKey " + process.env.ZEROBIAS_PROD_API_KEY,
     }
   },
   "/dana/api/v2/*": {
-    "target": "https://api.zerobias.com/dana/api/v2",
+    "target": "https://api.app.zerobias.com/dana/api/v2",
     "secure": true,
     "changeOrigin": true,
     "logLevel": "debug",
@@ -116,14 +116,14 @@ const proxyConfig ={
       "^/dana/api/v2/": ""
     },
     "headers": {
-      "Authorization": "APIKey " + process.env.PROD_API_KEY,
+      "Authorization": "APIKey " + process.env.ZEROBIAS_PROD_API_KEY,
     },
     "cookieDomainRewrite": {
       "*": ""
     }
   },
   "/dana/api/v1/*": {
-    "target": "https://api.zerobias.com/dana/api/v2",
+    "target": "https://api.app.zerobias.com/dana/api/v2",
     "secure": true,
     "changeOrigin": true,
     "logLevel": "debug",
@@ -131,14 +131,14 @@ const proxyConfig ={
       "^/dana/api/v1/": ""
     },
     "headers": {
-      "Authorization": "APIKey " + process.env.PROD_API_KEY,
+      "Authorization": "APIKey " + process.env.ZEROBIAS_PROD_API_KEY,
     },
     "cookieDomainRewrite": {
       "*": ""
     }
   },
   "/card/*": {
-    "target": "https://api.zerobias.com/card",
+    "target": "https://api.app.zerobias.com/card",
     "secure": false,
     "changeOrigin": true,
     "pathRewrite": {
@@ -146,11 +146,11 @@ const proxyConfig ={
     },
     "logLevel": "info",
     "headers": {
-      "Authorization": "APIKey " + process.env.PROD_API_KEY,
+      "Authorization": "APIKey " + process.env.ZEROBIAS_PROD_API_KEY,
     }
   },
   "/portal/*": {
-    "target": "https://api.zerobias.com/portal",
+    "target": "https://api.app.zerobias.com/portal",
     "secure": false,
     "changeOrigin": true,
     "pathRewrite": {
@@ -158,11 +158,11 @@ const proxyConfig ={
     },
     "logLevel": "info",
     "headers": {
-      "Authorization": "APIKey " + process.env.PROD_API_KEY,
+      "Authorization": "APIKey " + process.env.ZEROBIAS_PROD_API_KEY,
     }
   },
   "/events/*": {
-    "target": "https://api.zerobias.com/events",
+    "target": "https://api.app.zerobias.com/events",
     "secure": false,
     "changeOrigin": true,
     "pathRewrite": {
@@ -170,7 +170,7 @@ const proxyConfig ={
     },
     "logLevel": "info",
     "headers": {
-      "Authorization": "APIKey " + process.env.PROD_API_KEY,
+      "Authorization": "APIKey " + process.env.ZEROBIAS_PROD_API_KEY,
     }
   },
   "/session": {
