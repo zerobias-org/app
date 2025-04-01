@@ -8,7 +8,7 @@ const proxyConfig ={
     },
     "logLevel": "info",
     "headers": {
-      "Authorization": "APIKey " + process.env.API_KEY,
+      "Authorization": "APIKey " + process.env.PROD_API_KEY,
     }
   },
   "/api/*": {
@@ -20,7 +20,7 @@ const proxyConfig ={
     },
     "logLevel": "debug",
     "headers": {
-      "Authorization": "APIKey " + process.env.API_KEY,
+      "Authorization": "APIKey " + process.env.PROD_API_KEY,
     }
   },
   "/platform/*": {
@@ -32,7 +32,7 @@ const proxyConfig ={
     },
     "logLevel": "debug",
     "headers": {
-      "Authorization": "APIKey " + process.env.API_KEY,
+      "Authorization": "APIKey " + process.env.PROD_API_KEY,
     }
   },
   "/cc/graphql/*": {
@@ -44,7 +44,7 @@ const proxyConfig ={
     },
     "logLevel": "info",
     "headers": {
-      "Authorization": "APIKey " + process.env.API_KEY,
+      "Authorization": "APIKey " + process.env.PROD_API_KEY,
     }
   },
   "/graphql/*": {
@@ -56,7 +56,7 @@ const proxyConfig ={
     },
     "logLevel": "info",
     "headers": {
-      "Authorization": "APIKey " + process.env.API_KEY,
+      "Authorization": "APIKey " + process.env.PROD_API_KEY,
     }
   },
   "/card/*": {
@@ -68,7 +68,7 @@ const proxyConfig ={
     },
     "logLevel": "info",
     "headers": {
-      "Authorization": "APIKey " + process.env.API_KEY,
+      "Authorization": "APIKey " + process.env.PROD_API_KEY,
     }
   },
   "/file-service/*": {
@@ -80,7 +80,7 @@ const proxyConfig ={
     },
     "logLevel": "info",
     "headers": {
-      "Authorization": "APIKey " + process.env.API_KEY,
+      "Authorization": "APIKey " + process.env.PROD_API_KEY,
     }
   },
   "/store/*": {
@@ -92,7 +92,7 @@ const proxyConfig ={
       "^/store": ""
     },
     "headers": {
-      "Authorization": "APIKey " + process.env.API_KEY,
+      "Authorization": "APIKey " + process.env.PROD_API_KEY,
     }
   },
   "/hub/*": {
@@ -104,7 +104,7 @@ const proxyConfig ={
       "^/hub": ""
     },
     "headers": {
-      "Authorization": "APIKey " + process.env.API_KEY,
+      "Authorization": "APIKey " + process.env.PROD_API_KEY,
     }
   },
   "/dana/api/v2/*": {
@@ -116,7 +116,7 @@ const proxyConfig ={
       "^/dana/api/v2/": ""
     },
     "headers": {
-      "Authorization": "APIKey " + process.env.API_KEY,
+      "Authorization": "APIKey " + process.env.PROD_API_KEY,
     },
     "cookieDomainRewrite": {
       "*": ""
@@ -131,7 +131,7 @@ const proxyConfig ={
       "^/dana/api/v1/": ""
     },
     "headers": {
-      "Authorization": "APIKey " + process.env.API_KEY,
+      "Authorization": "APIKey " + process.env.PROD_API_KEY,
     },
     "cookieDomainRewrite": {
       "*": ""
@@ -146,7 +146,7 @@ const proxyConfig ={
     },
     "logLevel": "info",
     "headers": {
-      "Authorization": "APIKey " + process.env.API_KEY,
+      "Authorization": "APIKey " + process.env.PROD_API_KEY,
     }
   },
   "/portal/*": {
@@ -158,7 +158,7 @@ const proxyConfig ={
     },
     "logLevel": "info",
     "headers": {
-      "Authorization": "APIKey " + process.env.API_KEY,
+      "Authorization": "APIKey " + process.env.PROD_API_KEY,
     }
   },
   "/events/*": {
@@ -170,7 +170,7 @@ const proxyConfig ={
     },
     "logLevel": "info",
     "headers": {
-      "Authorization": "APIKey " + process.env.API_KEY,
+      "Authorization": "APIKey " + process.env.PROD_API_KEY,
     }
   },
   "/session": {
