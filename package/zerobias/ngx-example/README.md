@@ -4,9 +4,9 @@ This app is an example Angular v17.1.3 app that shows:
 
     1. how to use the Zerobias Client API to interact with the Zerobias Platform
     2. how to use a Zerobias Module to interact with a product via the Zerobias Platform
-    3. where to obtain your `API_KEY` for the proxy authorization
+    3. where to obtain your `ZEROBIAS_PROD_API_KEY` for the proxy authorization
 
-There are many helpful comments in the code itself, so as you familiarize yourself with the code, also closely read the code comments.
+There are many helpful comments in the code itself, so as you familiarize yourself with the code, also closely read the code comments.  You will want to familiarize yourself with the information presented here before you get started, as there are a few things you need to setup and aquire before the app will run.
 
 ## Key Info
 
@@ -15,6 +15,10 @@ There are many helpful comments in the code itself, so as you familiarize yourse
 3. [Make Calls Using the Zerobias Client Library](#make-calls-using-the-zerobias-client-library)
 4. [Including and Making Calls Using a Zerobias Module](#including-and-making-calls-using-a-zerobias-module)
 5. [Using a Proxy for Local Development](#using-a-proxy-for-local-development)
+    - [Proxy Configuration](#proxy-configuration)
+    - [Add `ZEROBIAS_PROD_API_KEY` to Your Local Development Environment](#add-zerobias_prod_api_key-to-your-local-development-environment)
+6. [Starting the Example App]
+
 ### The Zerobias Client Library
 
 The first step is to install the `@auditmation/ngx-zb-client-lib` into your project.  This will provide in all of the services and APIs you will need in order to interact with our platform and enable you to use Zerobias Modules to interact with your Products.
@@ -90,3 +94,7 @@ You will likely be developing your site locally, so we have included the file `p
 #### Add `ZEROBIAS_PROD_API_KEY` to Your Local Development Environment
 
 You will need to add this `ZEROBIAS_PROD_API_KEY` to your local dev environment.  First, obtain your `ZEROBIAS_PROD_API_KEY` by logging into the platform, and under the user/org switcher in the top right, click on `Create New API Key`.  Copy the presented API key, and add it to your dev environment.  Once this is set, the `proxy.conf.js` will be able to provide the key to the API endpoints, granting you access to the endpoint.
+
+### Starting the Example App
+
+After the `ZEROBIAS_PROD_API_KEY` is set in your environment, run `npm install` at the root of the example project if you haven't already done so.  Once the installation of node modules is complete, simply run `npm run start`.  Once the startup is complete, navigate to `http://localhost:4200` to interact with the running app.
