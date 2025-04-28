@@ -1,0 +1,49 @@
+{
+  "name": "nextjs-example",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@auditlogic/module-auditmation-interface-fileproducer": "^0.3.6",
+    "@auditmation/module-auditmation-auditmation-cardservice": "^2.2.1",
+    "@auditmation/module-auditmation-auditmation-dana": "^5.10.10",
+    "@auditmation/module-auditmation-auditmation-events": "^3.17.2",
+    "@auditmation/module-auditmation-auditmation-fileservice": "^1.4.15",
+    "@auditmation/module-auditmation-auditmation-graphql": "^2.16.4",
+    "@auditmation/module-auditmation-auditmation-hub": "^3.7.1",
+    "@auditmation/module-auditmation-auditmation-platform": "^3.22.2",
+    "@auditmation/module-auditmation-auditmation-portal": "^2.11.18",
+    "@auditmation/module-auditmation-auditmation-store": "^2.10.2",
+    "@auditmation/platform-query-builder": "^2.11.0",
+    "@auditmation/platform-workflow-util": "^0.1.4",
+    "@auditmation/types-amazon-js": "^4.1.0",
+    "@auditmation/types-core-js": "^4.8.0",
+    "@radix-ui/react-slot": "^1.2.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "js-cookie": "^3.0.5",
+    "lucide-react": "^0.503.0",
+    "next": "15.2.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tailwind-merge": "^3.2.0"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@types/js-cookie": "^3.0.6",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "15.2.4",
+    "tailwindcss": "^4",
+    "tw-animate-css": "^1.2.8",
+    "typescript": "^5"
+  }
+}
