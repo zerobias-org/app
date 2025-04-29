@@ -1,8 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  reactStrictMode: false,
-  distDir: "build",
+  reactStrictMode: false, 
+  distDir: "dist",
+  trailingSlash: true, // Optional: Adds a trailing slash to all generated HTML files
+  skipTrailingSlashRedirect: true, 
   async rewrites() {
     return [
       {
