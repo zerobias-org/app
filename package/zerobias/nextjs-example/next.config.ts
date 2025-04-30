@@ -4,6 +4,7 @@ const nextConfig: NextConfig = {
   reactStrictMode: false,
   distDir: "dist",
   output: "export",
+  basePath: "/cybercommand",
   trailingSlash: true, // Optional: Adds a trailing slash to all generated HTML files
   skipTrailingSlashRedirect: true,
   async rewrites() {
