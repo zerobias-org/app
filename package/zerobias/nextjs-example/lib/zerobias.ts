@@ -45,16 +45,16 @@ class ZerobiasApiServices {
     if (isLocalDev) {
       return new URL(`${location.protocol}//${location.host}/${path}`);
     } else {
-      return new URL(`${location.protocol}//api.${location.host}/${path}`);
+      return new URL(`${location.protocol}//${location.host}/api/{path}`);
     }
   };
 
   private loadConnectors = async () => {
     await this.portalClient.connect({
-      url: this.getZerobiasClientApiUrl("portal", true),
+      url: this.getZerobiasClientApiUrl("api", true),
     });
     await this.graphqlClient.connect({
-      url: this.getZerobiasClientApiUrl("graphql", true),
+      url: this.getZerobiasClientApiUrl("api", true),
     });
   };
 
