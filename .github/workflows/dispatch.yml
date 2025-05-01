@@ -114,3 +114,4 @@ jobs:
           AWS_ACCOUNT_ID: ${{ env.AWS_ACCOUNT_ID }}
           BUCKET_ENV: ${{ env.DNS_HOST }}
           GITHUB_REF_NAME: ${{ github.ref_name }}
+          CHANGED_APPS: ${{ steps.changed.outputs.dir_names }}
