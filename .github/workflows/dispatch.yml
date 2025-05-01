@@ -80,25 +80,21 @@ jobs:
             exit 0
           fi
 
-          while IFS= read -r app_path; do
-            if [ ! -f "$app_path/package.json" ]; then
-              echo "⚠️ Skipping $app_path (no package.json found)"
+          while IFS= read -r full_app_path; do
+            if [ ! -f "$full_app_path/package.json" ]; then
+              echo "⚠️ Skipping $full_app_path (no package.json found)"
               continue
             fi
 
-            app_name=$(jq -r '.name' "$app_path/package.json")
+            app_name=$(basename "$full_app_path")
+            app_path=$(dirname "$full_app_path")
 
-            if [ -z "$app_name" ] || [ "$app_name" == "null" ]; then
-              echo "❌ No valid name in $app_path/package.json"
-              continue
-            fi
-
-            echo "🚀 Triggering deploy for $app_name (from $app_path)"
+            echo "🚀 Triggering deploy for $app_name (path: $app_path)"
 
             gh workflow run deploy.yml \
               --ref "${GITHUB_REF_NAME}" \
               -f app-name="$app_name" \
-              -f app-base-path="$app_path" \
+              -f app-path="$app_path" \
               -f env-name="${ENV_NAME}" \
               -f aws-account-id="${AWS_ACCOUNT_ID}" \
               -f s3-bucket="app-${BUCKET_ENV}-zerobias.com"
