@@ -86,7 +86,7 @@ jobs:
           bucket-override-app-name: ${{ env.PKG_NAME }}
           s3-bucket: ${{ env.S3_BUCKET }}
           aws-region: ${{ env.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/gh-login-${{ env.ENV_NAME }}-custom-ui
+          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/gh-app-${{ env.ENV_NAME }}-custom-app
 
       - name: Release announcement
         if: env.SLACK_RELEASES_WEBHOOK != ''
