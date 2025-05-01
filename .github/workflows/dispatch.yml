@@ -54,30 +54,33 @@ jobs:
         id: changed
         uses: tj-actions/changed-files@v46
         with:
-          dir_names: true
-          dir_names_max_depth: 3
           files: |
             package/*/*/**
 
-      - name: Debug changed outputs
+      - name: Debug changed files
         shell: bash
         run: |
-          echo "🔎 Changed app directories:"
-          echo "${{ steps.changed.outputs.dir_names }}"
+          echo "🔎 All modified files:"
+          echo "${{ steps.changed.outputs.all_modified_files }}"
 
       - name: Dispatch deploy workflow for each app
         shell: bash
         run: |
           set -x
           export GH_TOKEN="${{ secrets.GITHUB_TOKEN }}"
-          readarray -t APPS <<< "${{ steps.changed.outputs.dir_names }}"
 
-          if [ "${#APPS[@]}" -eq 0 ]; then
+          # Extract unique app directories (e.g., package/org/app1)
+          echo "${{ steps.changed.outputs.all_modified_files }}" \
+            | grep '^package/[^/]\+/[^/]\+/' \
+            | awk -F/ '{print $1 "/" $2 "/" $3}' \
+            | sort -u > .changed_apps
+
+          if [ ! -s .changed_apps ]; then
             echo "✅ No apps changed, skipping deploy."
             exit 0
           fi
 
-          for app_path in "${APPS[@]}"; do
+          while IFS= read -r app_path; do
             if [ ! -f "$app_path/package.json" ]; then
               echo "⚠️ Skipping $app_path (no package.json found)"
               continue
@@ -99,7 +102,7 @@ jobs:
               -f env-name="${ENV_NAME}" \
               -f aws-account-id="${AWS_ACCOUNT_ID}" \
               -f s3-bucket="app-${BUCKET_ENV}-zerobias.com"
-          done
+          done < .changed_apps
         env:
           ENV_NAME: ${{ env.ENV_NAME }}
           AWS_ACCOUNT_ID: ${{ env.AWS_ACCOUNT_ID }}
