@@ -98,7 +98,7 @@ jobs:
             gh workflow run deploy.yml \
               --ref "${GITHUB_REF_NAME}" \
               -f app-name="$app_name" \
-              -f app-path="$app_path" \
+              -f app-base-path="$app_path" \
               -f env-name="${ENV_NAME}" \
               -f aws-account-id="${AWS_ACCOUNT_ID}" \
               -f s3-bucket="app-${BUCKET_ENV}-zerobias.com"
