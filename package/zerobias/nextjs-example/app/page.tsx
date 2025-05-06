@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/pagination"
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 //import Cookies from "js-cookie"
-import ZerobiasApiServices from "@/lib/zerobias";
+import ZerobiasAppService from "@/lib/zerobias-example";
 
 
 interface ProductProps {
@@ -34,7 +34,7 @@ const Products = () => {
   const getPlatafom = async () => {
     try {
 
-      const zbService = ZerobiasApiServices.instance
+      const zbService = ZerobiasAppService.instance
       console.log(state.currentPage)
       const productResult = await zbService.getProducts(state.currentPage, state.pageSize)
       setState({ ...state, products: productResult, loading: false })
