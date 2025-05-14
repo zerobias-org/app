@@ -1,14 +1,25 @@
 import { combineLatest, Subscription } from 'rxjs';
-import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
-import { Component, Inject, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
-
-import { PagedResults } from '@auditmation/types-core-js';
+import { FormControl, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
+import { Component, Inject, OnDestroy, OnInit, Renderer2, ViewEncapsulation } from '@angular/core';
+import { PagedResults, Duration } from '@auditmation/types-core-js';
 import { ModuleSearch } from '@auditmation/module-auditmation-auditmation-store';
 import { ProductExtended } from '@auditmation/module-auditmation-auditmation-portal';
-import { Org, ServiceAccount, User } from '@auditmation/module-auditmation-auditmation-dana';
-import { getZerobiasClientApiUrl, ZerobiasAppService, ZerobiasClientApiService } from '@auditmation/ngx-zb-client-lib';
+import { Org, PKV, ServiceAccount, User, ApiKey, InlineObject, SharedSessionKey, CreateSharedSessionKeyBody } from '@auditmation/module-auditmation-auditmation-dana';
+import { ZerobiasClientAppService, ZerobiasClientApiService, ZerobiasClientOrgIdService } from '@auditmation/ngx-zb-client-lib';
+import { getZerobiasClientUrl } from '@auditmation/zb-client-lib-js';
 import { GithubClient, newGithub, Organization, OrganizationApi, Repository } from '@auditlogic/module-github-github-client-ts';
 import { ConnectionListView, ScopeListView, SearchConnectionBody, SearchScopeBody, SortObject } from '@auditmation/module-auditmation-auditmation-hub';
+import { CapitalizePipe } from './pipes/capitalize.pipe';
+import { ArrayToStringPipe } from './pipes/array-to-string.pipe';
+import { ToStringPipe } from './pipes/to-string.pipe';
+
+function getFutureDate(addYears:number) {
+  const date = new Date();
+  const year = date.getFullYear() + addYears;
+  const newDate = new Date();
+  newDate.setFullYear(year);
+  return newDate;
+}
 
   /*
     // basic outline of this demo
@@ -22,15 +33,21 @@ import { ConnectionListView, ScopeListView, SearchConnectionBody, SearchScopeBod
       show list of repos by org
   */
 
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrl: './app.component.scss',
-  encapsulation: ViewEncapsulation.None
+  styleUrls: ['./app.component.scss'],
+  providers: [CapitalizePipe,ArrayToStringPipe,ToStringPipe],
+  encapsulation: ViewEncapsulation.None,
 })
 export class AppComponent implements OnInit, OnDestroy {
 
   private subscriptions = new Subscription();
+  private readonly DEFAULT_MINUTES: number = 60;
+  
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  private bodyClickListener = ()=>{};
 
   public loading = false;
 
@@ -38,7 +55,8 @@ export class AppComponent implements OnInit, OnDestroy {
   public orgs: Org[] = [];
   public githubOrgs: Organization[] = [];
   public currentOrg: Org = null;
-  public currentUser: User | ServiceAccount = null;
+  public currentUser: any = null;
+  public me: ServiceAccount | (object & User) = null;
   public products: ProductExtended[] = [];
   public githubProduct: ProductExtended;
   public connections: ConnectionListView[] = [];
@@ -47,6 +65,24 @@ export class AppComponent implements OnInit, OnDestroy {
   public selectedScope: ScopeListView;
   public selectedGithubOrg: Organization;
   public githubRepos: Repository[];
+  public pagedKvPairs: PKV[] = [];
+  public showAddPkv = false;
+  public pkvPageToken = null;
+
+  public toggle = false;
+  public previousUrl = null;
+  public overlay = {
+    active: false,
+    showAction: false,
+    showCancel: true,
+    actionLabel: '',
+    action: '', // createApiKey or createSharedSessionKey
+    title: '',
+    message: '',
+    actionProcessing: false,
+    actionDisabled: true,
+    actionButtonColor: 'primary', // 'warn', 'success', 'primary'
+  }
 
   // github client Module 
   public githubClient: GithubClient;
@@ -60,9 +96,32 @@ export class AppComponent implements OnInit, OnDestroy {
     githubOrg: new UntypedFormControl(null),
   });
 
+  // FormGroup for pKV
+  public kvFormGroup: UntypedFormGroup = new UntypedFormGroup({
+    key: new FormControl<string>(null, Validators.required),
+    value: new UntypedFormControl(null, Validators.required),
+  });
+
+  // create api key formGroup
+  public apiKeyFormGroup = new UntypedFormGroup({
+    'name': new UntypedFormControl(),
+    'expiration': new UntypedFormControl(getFutureDate(10)),
+  });
+  public apiKeyKeyForm = new UntypedFormControl();
+  public orgIdInput = new UntypedFormControl();
+
+  // create shared session key
+  public sharedSessionFormGroup = new UntypedFormGroup({
+    expireMinutes: new FormControl<number>(this.DEFAULT_MINUTES)
+  });
+  public sharedSessionKeyForm = new FormControl<string>(null);
+  public sharedSessionKey = null;
+
   constructor(
+    private renderer: Renderer2,
     protected clientApi: ZerobiasClientApiService,
-    protected zerobiasAppService: ZerobiasAppService,
+    protected zerobiasAppService: ZerobiasClientAppService,
+    protected orgIdService: ZerobiasClientOrgIdService,
     @Inject('environment') private environment: any
   ) {}
 
@@ -71,9 +130,10 @@ export class AppComponent implements OnInit, OnDestroy {
 
     // for Product List demo block, calls to Zerobias Catalog
     this.getProducts();
+    this.listPkvs();
 
     // for Zerobias Org selector
-    this.subscriptions.add(this.zerobiasAppService.orgs.subscribe((orgs: Org[]) => {
+    this.subscriptions.add(this.zerobiasAppService.getOrgs().subscribe((orgs: Org[]) => {
       this.orgs = orgs;
     }));
 
@@ -81,13 +141,17 @@ export class AppComponent implements OnInit, OnDestroy {
     // combineLatest since we need both at the same time so 
     // this runs when either org or whoAmI changes i.e. changing Zerobias Org
     this.subscriptions.add(combineLatest(
-      [this.zerobiasAppService.whoAmI, this.zerobiasAppService.org]).subscribe(([whoAmI, org]:any[]) => {
+      [this.zerobiasAppService.getWhoAmI(), this.zerobiasAppService.getCurrentOrg()]).subscribe(([whoAmI, org]:any[]) => {
+        console.log('whoAmI', whoAmI);
+      this.me = whoAmI;
       this.currentUser = whoAmI;
       this.currentOrg = org;
       
       // set the org formcontrol value
       this.formGroup.get('org').setValue(org, {emitEvent: false});
-
+      const safeName = `${whoAmI.name}_Api_Key`.replace('-','_');
+      this.apiKeyFormGroup.get('name').setValue(safeName, {emitEvent: false});
+      
       if (whoAmI && org) {
         if (this.githubProduct) {
           this.getConnections();
@@ -111,6 +175,8 @@ export class AppComponent implements OnInit, OnDestroy {
       // this will cascade and update our observables whoami and org
       if (org.id && (org.id.toString() !== this.currentOrg.id.toString())) {
         this.zerobiasAppService.selectOrg(org);
+        this.formGroup.get('connection').setValue(null, {emitEvent: false});
+        this.formGroup.get('scope').setValue(null, {emitEvent: false});
       }
     }));
 
@@ -120,7 +186,8 @@ export class AppComponent implements OnInit, OnDestroy {
 
       if (connection.id && (connection.id.toString() !== this.selectedConnection?.id.toString())) {
         this.selectedConnection = connection;
-
+        this.formGroup.get('scope').setValue(null, {emitEvent: false});
+        
         // get Scopes for this Connection
         this.getConnectionScopes();
       }
@@ -153,6 +220,106 @@ export class AppComponent implements OnInit, OnDestroy {
 
   public ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
+  }
+
+  public toggleUserClick(e) {
+    e.stopPropagation();
+  }
+
+  public setOrg(e, org: any) {
+    e.stopPropagation();
+    this.zerobiasAppService.selectOrg(org);
+  }
+
+  public onActionClick() {
+    console.log('click action');
+
+    if (this.overlay.action === 'createApiKey') {
+
+      // createApiKey
+
+      if (this.overlay.actionLabel === 'Close') {
+        this.onCloseOverlayClick();
+      } else {
+        this.overlay.actionProcessing = true;
+        this.createApiKey(this.apiKeyFormGroup.value).then((key: any) => {
+          if (key) {
+            this.overlay.actionLabel = 'Close';
+            this.overlay.actionButtonColor = 'primary';
+            this.overlay.showCancel = false;
+            navigator.clipboard.writeText(key.data).then(() => {
+              const currentOrgId = this.orgIdService.getCurrentOrgId();
+              this.apiKeyKeyForm.setValue(key.data);
+              this.orgIdInput.setValue(currentOrgId);
+              this.overlay.message = `Your API Key was successfully created, and was copied to your clipboard.`;
+            });
+          }
+        }).finally(() => {
+          this.overlay.actionProcessing = false;
+        });
+      }
+      
+    } else if(this.overlay.action === 'createSharedSessionKey') {
+      
+      // createSharedSessionKey
+
+      if (this.sharedSessionKeyForm.value) {
+        this.onCloseOverlayClick();
+      } else {
+        const expireMinutes = this.sharedSessionFormGroup.get('expireMinutes').value;
+        const duration = new Duration(this.minutesToDuration(expireMinutes));
+        if (expireMinutes) {
+          this.createSharedSessionKey(duration).then((sharedSessionKey: SharedSessionKey) => {
+            if (sharedSessionKey) {
+              this.sharedSessionKey = sharedSessionKey;
+              this.sharedSessionKeyForm.setValue(sharedSessionKey.key.toUpperCase());
+            }
+          })
+        }
+      }
+    }
+  }
+
+  public onShareSessionClick() {
+    this.overlay.action = 'createSharedSessionKey';
+    this.overlay.actionLabel = 'Create';
+    this.overlay.title = 'Create Shared Session Key';
+    this.overlay.active = true;
+    this.overlay.showAction = true;
+    this.overlay.actionDisabled = false;
+    this.overlay.actionButtonColor = 'success';
+
+  }
+
+  public onCreateApiKeyClick() {
+    this.overlay.action = 'createApiKey';
+    this.overlay.actionLabel = 'Create';
+    this.overlay.title = 'Create API Key';
+    this.overlay.active = true;
+    this.overlay.showAction = true;
+    this.overlay.actionDisabled = false;
+    this.overlay.actionButtonColor = 'success';
+    this.overlay.message = '';
+  }
+
+  public onCloseOverlayClick() {
+    this.overlay.action = '';
+    this.overlay.active = false;
+    this.overlay.actionDisabled = true;
+  }
+
+  public onToggle(ev = null) {
+    if (ev) {
+      ev.stopPropagation();
+    }
+    this.toggle = !this.toggle;
+    if (this.toggle) {
+      this.bodyClickListener = this.renderer.listen('body', 'click', (event) => {
+        this.onToggle(event);
+      });
+    } else {
+      this.bodyClickListener();
+    }
   }
 
   public compareObjects(object1: any, object2: any) {
@@ -244,7 +411,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.githubClient = newGithub(); // type GithubClient
     const hubConnectionProfile = {
-      server: getZerobiasClientApiUrl('hub', this.environment.isLocalDev),
+      server: getZerobiasClientUrl('hub', this.environment.isLocalDev),
       targetId: this.clientApi.toUUID(this.selectedScope.id)  // <--- connection id if one scope/ scope id if multi-scope
     }
     // console.log('hubConnectionProfile: ',hubConnectionProfile);
@@ -261,6 +428,73 @@ export class AppComponent implements OnInit, OnDestroy {
     });
   }
 
+  public onLogoutClick() {
+    const logoutUrl = this.getLogoutUrl();
+    location.href = logoutUrl;
+  }
+
+  public getLogoutUrl() {
+    if( this.environment.isLocalDev ) {
+      return 'http://'+location.host+'/api/dana/api/v2/me/session/logout';
+    } else {
+      return 'https://'+location.host+'/api/dana/api/v2/me/session/logout';
+    }
+  }
+
+  public addKvPair() {
+    if (this.kvFormGroup.valid) {
+      const value = JSON.parse(this.kvFormGroup.get('value').value);
+      const pkv: PKV = {
+        key: this.kvFormGroup.get('key').value,
+        value: value
+      }
+      this.clientApi.danaClient.getPkvApi().upsertPrincipalKeyValue(null,pkv).then((pkv:PKV) => {
+        console.log('pkv created: ',PKV);
+        this.listPkvs();
+      });
+    }
+  }
+
+  public listPkvs() {
+    /* 
+      [
+        {
+          "key": "string",
+          "value": {
+            "additionalProp1": {}
+          }
+        }
+      ]
+    */
+    this.clientApi.danaClient.getPkvApi().listPrincipalKeyValues(null, this.pkvPageToken ? this.pkvPageToken : null, 50).then((pagedResults: PagedResults<PKV>) => {
+      if (pagedResults) {
+        this.pkvPageToken = pagedResults.pageToken ? pagedResults.pageToken : null;
+        this.pagedKvPairs = pagedResults.items;
+      }
+    });
+  }
+
+  public onCopy(field) {
+    navigator.clipboard
+      .writeText(this[field].value ? this[field].value : '')
+      .then(() => {
+        this.overlay.message = 'copied to clipboard';
+      });
+  }
+
+  public getCurrentOrgId() {
+    return this.orgIdService.getCurrentOrgId();
+  }
+
+  private async createApiKey(inlineObject?: InlineObject): Promise<ApiKey & object> {
+    try{
+      return await this.clientApi.danaClient.getMeApi().createApiKey(inlineObject)
+    } catch(error) {
+      console.warn(error);
+      this.overlay.message = `The generation of the new API Key failed. Please contact Support.`;
+    }
+  }
+  
   private listRepositories() {
     /* 
       githubClient.getOrganizationApi().listRepositories(
@@ -286,6 +520,21 @@ export class AppComponent implements OnInit, OnDestroy {
     }).finally(() => {
       this.loading = false;
     });
+  }
+
+  private minutesToDuration(minutes:number) {
+    return `PT${minutes}M`;
+  }
+
+  private async createSharedSessionKey(expiration?: Duration): Promise<SharedSessionKey> {
+    const createSharedSessionKeyBody: CreateSharedSessionKeyBody = {};
+    createSharedSessionKeyBody.expiration  = expiration ? expiration : new Duration('PT1440M'); // 24 hr default
+    try{
+      return await this.clientApi.danaClient.getMeApi().createSharedSessionKey(createSharedSessionKeyBody);
+    } catch(error) {
+      console.warn(error);
+      this.overlay.message = 'Failed to create Shared Session Key';
+    }
   }
 
 }
