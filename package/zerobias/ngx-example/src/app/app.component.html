@@ -1,14 +1,92 @@
+<!-- eslint-disable -->
 <div class="toolbar">
   <div class="app-bar">
     <img src="https://cdn.zerobias.com/static/images/zerobias/zerobias_white.svg" alt="ZeroBias" height="28">
     <h1>ZeroBias Client API Demo</h1>
     <span style="flex: 1 1 auto;"></span>
+
+    <div class="auditmation-user">
+      <div class="auditmation-user-tooltip" [class.active]="toggle">
+        
+        <div class="top-summary menu-toggle" (click)="onToggle($event)">
+          <div class="org-user">
+            <h3 class="username">{{ currentUser?.name }}</h3>
+            <h4 class="orgname">{{ currentOrg?.name }}</h4>
+          </div>
+          <div class="user-avatar">
+            <div class="auditmation-avatar medium default">
+              @if(false) {
+                <div class="avatar-wrapper medium" [class.hasImage]="currentUser?.avatarUrl">
+                  <img class="avatar-img" [src]="currentUser?.avatarUrl" alt="{{currentUser?.name}}">
+                </div>
+              } @else {
+                <div class="avatar-wrapper">
+                  <div class="avatar-initials">
+                    {{currentUser?.name ? (currentUser?.name.charAt(0)|capitalize) : ''}}
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      
+        <div class="tooltiptext" (click)="$event.stopPropagation()">
+      
+          <div class="menu-open-panel">
+      
+            <div class="main-org-user">
+              <div class="avatar-wrapper x-large" [class.hasImage]="currentUser?.avatarUrl">
+                @if(currentUser?.avatarUrl) {
+                  <img class="avatar-img" [src]="currentUser?.avatarUrl">
+                } @else {
+                  <div class="avatar-initials">
+                    {{currentUser?.name ? (currentUser?.name.charAt(0)|capitalize) : ''}}
+                  </div>
+                }
+              </div>
+
+              <div class="user-info">
+                <span class="user-name">{{currentUser?.name}}</span>
+                <span class="user-email secondary-text" *ngIf="currentUser?.emails && currentUser?.emails.length > 0"> {{currentUser?.emails[0]}} </span>
+              </div>
+            </div>
+            
+            <div class="main-menu" flexColumn>
+              <hr />
+              <div class="menu-item">
+
+                <div class="nf-organization-switcher">
+
+                  <div class="select">
+                    <select id="selectOrg" name="selectOrg" [formControl]="formGroup.get('org')" [compareWith]="compareObjects">
+                      <option [ngValue]="">Select Organization</option>
+                      @for(org of orgs; track org.id.toString()) {
+                        <option [ngValue]="org">{{ org.name }}</option>
+                      }
+                    </select>
+                  </div>
+
+                </div>
+
+              </div>
+              <hr />
+              <span class="menu-item clickable" (click)="onCreateApiKeyClick()">Create New API Key</span>
+              <span class="menu-item clickable" (click)="onShareSessionClick()">Share Session</span>
+              <span class="menu-item clickable" (click)="onLogoutClick()">Sign Out</span>
+            </div>
+      
+          </div>
+      
+        </div>
+
+      </div>
+    </div>
   </div>
   <div class="zerobias-bar"></div>
 </div>
 
 <div class="content-wrap">
-  <style>
+  <style type="text/css">
     body {
       padding:0;
       margin:0;
@@ -47,6 +125,7 @@
       justify-content: flex-end;
       margin: 0px 16px 0;
       padding: 8px 0 0;
+      width: calc(100% - 32px);
     }
     .app-bar h1 {
       font-family: Montserrat, sans-serif;
@@ -67,188 +146,48 @@
       background: linear-gradient(90deg, #03aff0 25%, #232323 75%);
       width: 100%;
       height: 4px;
-    }
-    .content-wrapper .demo-item {
-      width: 100%;
-    }
-    .demo-item table.table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    .demo-item .table tr {
-      color: #0000008a !important;
-      font-size: 14px !important;
-      font-family: Roboto, sans-serif;
-    }
-    .demo-item .table tr th {
-      text-align: left;
-    }
-    .demo-item .table tr td {
-      font-family: Roboto, sans-serif;
-      vertical-align: top;
-      padding: 8px 4px;
-      line-height: 20px;
-      border-bottom: 1px solid #ddd;
-      max-width: clamp(200px, 30vw, 500px);
-
-      border-bottom: 1px solid rgba(0, 0, 0, 0.12);
-      border-collapse: separate;
-      box-sizing: border-box;
-    }
-
-    .demo-item .table .product-item .product-logo img {
-      height: 100%; 
-      width: auto; 
-      max-width: 100%; 
-      max-height: 20px;
-    }
-    .demo-item .table .product-item .product-name {
-      font-weight: 500;
-      white-space: nowrap;
-    }
-    .flex-row {
-      display: flex;
-      flex-direction: row;
-    }
-    .flex-column {
-      display: flex;
-      flex-direction: column;
-    }
-    .align-center {
-      vertical-align: middle;
-      align-items: center;
-    }
-    .gap8 {
-      gap: 8px;
-    }
-    .gap16 {
-      gap: 16px;
-    }
-
-    /* for styled select */
-    *,
-    *::before,
-    *::after {
-      box-sizing: border-box;
-    }
-
-    :root {
-      --select-border: #777;
-      --select-focus: blue;
-      --select-arrow: var(--select-border);
-    }
-
-    select {
-      -webkit-appearance: none;
-        -moz-appearance: none;
-              appearance: none;
-      background-color: transparent;
-      border: none;
-      padding: 0 1em 0 0;
-      margin: 0;
-      width: 100%;
-      font-family: inherit;
-      font-size: inherit;
-      cursor: inherit;
-      line-height: inherit;
-      z-index: 1;
-      outline: none;
-    }
-    select::-ms-expand {
-      display: none;
-    }
-
-    .select {
-      display: grid;
-      grid-template-areas: "select";
-      align-items: center;
-      position: relative;
-      min-width: 15ch;
-      max-width: 64ch;
-      border: 1px solid var(--select-border);
-      border-radius: 0.25em;
-      padding: 4px 0.5em;
-      cursor: pointer;
-      line-height: 1.1;
-      background-color: #fff;
-      background-image: linear-gradient(to top, #f9f9f9, #fff 33%);
-    }
-    .select select, .select::after {
-      grid-area: select;
-    }
-    .select:not(.select--multiple)::after {
-      content: "";
-      justify-self: end;
-      width: 0.8em;
-      height: 0.5em;
-      background-color: var(--select-arrow);
-      -webkit-clip-path: polygon(100% 0%, 0 0%, 50% 100%);
-              clip-path: polygon(100% 0%, 0 0%, 50% 100%);
-    }
-
-    select:focus + .focus {
       position: absolute;
-      top: -1px;
-      left: -1px;
-      right: -1px;
-      bottom: -1px;
-      border: 2px solid var(--select-focus);
-      border-radius: inherit;
     }
 
-    select[multiple] {
-      padding-right: 0;
-      /*
-      * Safari will not reveal an option
-      * unless the select height has room to 
-      * show all of it
-      * Firefox and Chrome allow showing 
-      * a partial option
-      */
-      height: 6rem;
-      /* 
-      * Experimental - styling of selected options
-      * in the multiselect
-      * Not supported crossbrowser
-      */
-    }
-    select[multiple] option {
-      white-space: normal;
-      outline-color: var(--select-focus);
-    }
-
-    .select--disabled {
-      cursor: not-allowed;
-      background-color: #eee;
-      background-image: linear-gradient(to top, #ddd, #eee 33%);
-    }
-
-    label {
-      font-size: 16px;
+    .avatar-text-wrapper span.avatar-label-label {
+      font-size: 14px;
+      line-height: 1.3;
       font-weight: 400;
     }
 
-    .spinner {
-      position: relative;
-      top: calc(50% - 1rem);
-      left: calc(50% - 1rem);
-      width: 20px;
-      height: 20px;
-      border: 3px solid #03aff0;
-      border-bottom: 3px solid rgba(0, 0, 0, 0);
-      border-radius: 50%;
-      animation: spin 1.25s linear infinite;
-      z-index: 9999;
+    .user-icon-dropdown {
+      margin-top: 5px;
     }
 
-    .spinner--hidden {
-      /* display: none; */
+    .user-dropdown {
+      display: flex;
+      border-left: 1px solid #333;
+      padding-left: 25px;
     }
 
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
+    .user-switcher-dropdown {
+      position: absolute;
+      top: 600px;
+      width: 200px;
+    }
+
+    .user-dropdown-list {
+      position: absolute;
+      top: 46px;
+      right: -20px;
+      width: 240px;
+    }
+
+    .user-dropdown-list .mat-mdc-option {
+      padding-left: 0;
+    }
+
+    .arrow_drop_down {
+      width: 0; 
+      height: 0; 
+      border-left: 4px solid transparent;
+      border-right: 4px solid transparent;
+      border-top: 4px solid rgb(32, 32, 32);
     }
 
   </style>
@@ -276,7 +215,88 @@
             <td class="product-status">{{ product.status.toString() }}</td>
           </tr>
         }
+
       </table>
+      <div class="pagination-wrap">
+
+      </div>
+    </div>
+
+    <div class="demo-item">
+      <h2>Principal Key-Value Example</h2>
+      <p>This example calls the ZeroBias Key-Value API <code>clientApi.danaClient.getPkvApi()</code> endpoint to manipulate the storage of key-value pairs</p>
+      <button (click)="showAddPkv = showAddPkv ? false : true">+ add</button>
+
+      @if(showAddPkv) {
+        <hr class="small">
+        <h3>Create KV Pair</h3>
+        <div class="new-pkv-form" flexColumn gap16>
+
+          <div flexRow gap16>
+
+            <div class="form-field-wrap">
+              <span class="label">Key</span>
+              <div>
+                <input [formControl]="kvFormGroup.get('key')" placeholder="" autocomplete="off" />
+              </div>
+            </div>
+
+            <div class="form-field-wrap">
+              <span class="label">Value</span>
+              <div>
+                <textarea [formControl]="kvFormGroup.get('value')" placeholder="{}" autocomplete="off">{{kvFormGroup.get('value').value}}</textarea>
+              </div>
+            </div>
+
+            <div class="example-obj" style="top: -20px;position: relative;">
+              <h5 style="margin:0;">Example Value: </h5>
+              <textarea style="width: 250px;height: 85px;border: 0;overflow:hidden;" readonly>
+{
+  "value": {
+    "additionalProp1": {}
+  }
+}
+              </textarea>
+            </div>
+          </div>
+
+          <div>
+            <button [disabled]="!kvFormGroup.valid" (click)="addKvPair()">Create</button>
+          </div>
+        </div>
+        <hr class="small">
+      }
+      <div class="pkv-container">
+        
+        <style type="text/css">
+          span.colon {
+            > span {
+              &:after {
+                content: ':';
+                display: inline;
+              }
+            }
+          }
+        </style>
+        <ul class="list" role="list">
+
+          @for(item of pagedKvPairs; track item) {
+            <li role="listitem">
+              <div class="text-wrapper" flexRow gap4 style="flex-wrap: wrap; align-items: stretch; flex-grow: 1;">
+                <span class="label colon" flexRow style="align-self: flex-start;flex-basis: 175px; font-size: 14px; align-items: center; flex-wrap: wrap;">
+                    <span>{{item.key}}</span>
+                </span>
+                <span class="text" style="flex-basis: 65%; font-size: 14px; word-break: break-word;">
+                  {{item.value|toString:false:64:'json'}}
+                </span> 
+              </div>
+            </li>
+          }
+
+        </ul>
+
+        
+      </div>
     </div>
 
     <div class="demo-item">
@@ -287,24 +307,16 @@
 
         <!-- Select ZeroBias Organization -->
         <section>
-          <h3>Select ZeroBias Platform Organization </h3>
-          <div class="flex-row gap16 align-center">
-            <div class="select">
-              <select id="selectOrg" name="selectOrg" [formControlName]="'org'" [compareWith]="compareObjects">
-                <option [ngValue]="">Select Organization</option>
-                @for(org of orgs; track org.id.toString()) {
-                  <option [ngValue]="org">{{ org.name }}</option>
-                }
-              </select>
-            </div>
-            <label for="selectOrg">{{ currentOrg?.name }}</label>
-          </div>
+          <h3>Selected ZeroBias Platform Organization </h3>
+
+          <h4>{{ currentOrg?.name }}</h4>
+
         </section>
 
         <!-- Select Product: Github -->
         <section>
           <h3>Select Product </h3>
-          <div class="flex-row gap16 align-center">
+          <div flexRow gap16 alignCenter>
             <div class="select">
               <select id="selectProduct" name="selectProduct" [formControlName]="'product'" [compareWith]="compareObjects">
                 <option [ngValue]="githubProduct">{{ githubProduct?.name }}</option>
@@ -317,7 +329,7 @@
         <!-- Select Connection -->
         <section>
           <h3>Select Connection </h3>
-          <div class="flex-row gap16 align-center">
+          <div flexRow gap16 alignCenter>
             <div class="select">
               <select name="selectConnection" id="selectConnection" [formControlName]="'connection'" [compareWith]="compareObjects">
                 <option [ngValue]="">Select a Connection</option>
@@ -334,7 +346,7 @@
         @if(formGroup.get('scope').value) {
           <section>
             <h3>Select Scope </h3>
-            <div class="flex-row gap16 align-center">
+            <div flexRow gap16 alignCenter>
               <div class="select">
                 <select name="selectScope" id="selectScope" [formControlName]="'scope'" [compareWith]="compareObjects">
                   <option [ngValue]="">Select a Scope</option>
@@ -351,7 +363,7 @@
           <!-- Select Github Org -->
           <section>
             <h3>Select Github Org </h3>
-            <div class="flex-row gap16 align-center">
+            <div flexRow gap16 alignCenter>
               <div class="select">
                 <select name="selectGithubOrg" id="selectGithubOrg" [formControlName]="'githubOrg'" [compareWith]="compareObjects">
                   <option [ngValue]="">Select a Github Organization</option>
@@ -401,6 +413,87 @@
 
 
       <div style="height: 300px;"><!-- breathing room --></div>
+
+    </div>
+  </div>
+</div>
+
+<div class="overlay {{overlay.action}}" [class.active]="overlay.active">
+  <div class="overlay-wrap" flexColumn>
+    <div class="overlay-header">
+      <h2>{{overlay.title}}</h2>
+    </div>
+    <div class="overlay-content">
+      
+      @if (overlay.action === 'createApiKey') {
+        <!-- createApiKey form -->
+        <div *ngIf="!apiKeyKeyForm.value" class="form-field-wrap">
+          <span class="label">API Key Name</span>
+          <input [formControl]="apiKeyFormGroup.get('name')" placeholder="" autocomplete="off" />
+        </div>
+      
+        <div *ngIf="apiKeyKeyForm.value" class="form-field-wrap">
+          <span class="label">Organization ID</span>
+          <input [formControl]="orgIdInput" placeholder="" autocomplete="off" readonly />
+          <button (click)="onCopy('orgIdInput')">
+            <span>copy</span>
+          </button>
+        </div>
+      
+        <div *ngIf="apiKeyKeyForm.value" class="form-field-wrap">
+          <span class="label">API Key</span>
+          <input [formControl]="apiKeyKeyForm" placeholder="" autocomplete="off" readonly />
+          <button (click)="onCopy('apiKeyKeyForm')">
+            <span>copy</span>
+          </button>
+        </div>
+      
+        <div *ngIf="overlay.message" class="dialog-message" [innerHTML]="overlay.message"></div>
+        
+        
+      } @else if (overlay.action === 'createSharedSessionKey') {
+        
+        <!-- createSharedSessionKey form -->
+        
+        <p>Use this form to create a Shared Session Key, which allows someone else to operate this website on your behalf for a limited period of time.</p>
+        
+        @if(sharedSessionKey) {
+          <!-- expiration in minutes -->
+          <div class="form-field-wrap">
+            <span class="label">Expires</span>
+            <input type="text" [value]="sharedSessionKey.expiration" placeholder="" autocomplete="off"/>
+          </div>
+          <!-- shared session key -->
+          <div class="form-field-wrap">
+            <span class="label">Shared Session Key</span>
+            <input [formControl]="sharedSessionKeyForm" placeholder="" autocomplete="off"/>
+            <button mat-icon-button matSuffix (click)="onCopy('sharedSessionKeyForm')">
+              <span>copy</span>
+            </button>
+          </div>
+        } @else {
+          <!-- new key -->
+          <div class="form-field-wrap">
+            <span class="label">Expiration (in Minutes)</span>
+            <input type="number" [formControl]="sharedSessionFormGroup.get('expireMinutes')" placeholder="" autocomplete="off" />
+            <span class="hint">Number of Minutes this key and shared session will be active.</span>
+          </div>
+        }
+
+
+      }
+    </div>
+    <div class="overlay-footer" flexRow>
+
+      <div *ngIf="overlay.showCancel">
+        <button class="action-button warn" (click)="onCloseOverlayClick()">Cancel</button>
+      </div>
+
+      <span flexFill></span>
+
+      <div *ngIf="overlay.showAction">
+        <button class="action-button {{actionButtonColor}}" (click)="onActionClick()" [disabled]="overlay.actionDisabled">{{overlay.actionLabel}}</button>
+      </div>
 
     </div>
   </div>
