@@ -1,6 +1,6 @@
 import { JsonPipe } from '@angular/common';
 import { Pipe, PipeTransform } from '@angular/core';
-import { StringUtils } from '@auditmation/zb-client-lib-js';
+import { StringUtils } from '@auditmation/zb-client-lib-js/dist/lib/utils/StringUtils';
 
 @Pipe({
   name: 'toString'
