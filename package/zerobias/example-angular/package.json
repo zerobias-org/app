@@ -1,6 +1,6 @@
 {
-  "name": "@ngx-example/source",
-  "version": "0.0.1",
+  "name": "example-ngx",
+  "version": "0.1.2",
   "license": "MIT",
   "scripts": {
     "start": "nx serve",

@@ -3,7 +3,8 @@ import { FormControl, UntypedFormControl, UntypedFormGroup, Validators } from '@
 import { Component, Inject, OnDestroy, OnInit, Renderer2, ViewEncapsulation } from '@angular/core';
 import { PagedResults, Duration } from '@auditmation/types-core-js';
 import { ModuleSearch } from '@auditmation/module-auditmation-auditmation-store';
-import { ProductExtended } from '@auditmation/module-auditmation-auditmation-portal';
+import { ProductWithObjectCount } from '@auditmation/module-auditmation-auditmation-platform';
+import { ProductExtended, SearchProductBody } from '@auditmation/module-auditmation-auditmation-portal';
 import { Org, PKV, ServiceAccount, User, ApiKey, InlineObject, SharedSessionKey, CreateSharedSessionKeyBody } from '@auditmation/module-auditmation-auditmation-dana';
 import { ZerobiasClientAppService, ZerobiasClientApiService, ZerobiasClientOrgIdService } from '@auditmation/ngx-zb-client-lib';
 import { getZerobiasClientUrl } from '@auditmation/zb-client-lib-js';
@@ -50,6 +51,24 @@ export class AppComponent implements OnInit, OnDestroy {
   private bodyClickListener = ()=>{};
 
   public loading = false;
+  /* 
+  SearchProductBody {
+      'productServiceFilter'?: SearchProductBody.ProductServiceFilterEnumDef;
+      'name'?: string;
+      'description'?: string;
+      'search'?: string | null;
+      'code'?: string;
+      'packageCode'?: string;
+      'vendor'?: string;
+      'suite'?: string;
+      'vendors'?: Array<UUID>;
+      'suites'?: Array<UUID>;
+      'statuses'?: Array<VspStatusEnumDef>;
+      'segments'?: Array<UUID>;
+      'factoryTypes'?: Array<FactoryTypeEnumDef>;
+      'hostingTypes'?: Array<HostingTypeEnumDef>;
+  */
+  public productsPageStateExample = { count: 0, searchProductBody: null, pageNumber: 1, pageSize: 5, sort: {active: 'name', direction: 'asc'} };
 
   // Zerobias client library and modules give us many strongly typed interfaces!
   public orgs: Org[] = [];
@@ -57,7 +76,7 @@ export class AppComponent implements OnInit, OnDestroy {
   public currentOrg: Org = null;
   public currentUser: any = null;
   public me: ServiceAccount | (object & User) = null;
-  public products: ProductExtended[] = [];
+  public products: ProductExtended[] | ProductWithObjectCount[] = [];
   public githubProduct: ProductExtended;
   public connections: ConnectionListView[] = [];
   public selectedConnection: ConnectionListView;
@@ -116,6 +135,9 @@ export class AppComponent implements OnInit, OnDestroy {
   });
   public sharedSessionKeyForm = new FormControl<string>(null);
   public sharedSessionKey = null;
+
+  public productsPageNumbers = [1];
+  public productsLastPage = null;
 
   constructor(
     private renderer: Renderer2,
@@ -326,10 +348,38 @@ export class AppComponent implements OnInit, OnDestroy {
     return object1 && object2 && object1.id.toString() === object2.id.toString();
   }
 
-  public getProducts() {
-    this.clientApi.portalClient.getProductApi().search({}, 1, 5, null).then((pagedResults:PagedResults<ProductExtended>) => {
-      this.products = pagedResults.items;
-    })
+  public getProducts(pageNum = null) {
+    if (pageNum) {
+      // user requests specific page
+      this.productsPageStateExample.pageNumber = pageNum;
+    }
+    this.clientApi.portalClient.getProductApi()
+      .search({},this.productsPageStateExample.pageNumber, this.productsPageStateExample.pageSize, this.productsPageStateExample.sort )
+      .then((pagedResults:PagedResults<ProductExtended>) => {
+        if (pagedResults.items.length > 0) {
+          if (!this.productsPageNumbers.includes(pagedResults.pageNumber)) {
+            this.productsPageNumbers.push(pagedResults.pageNumber); // page we're on
+            console.log('productsPageNumbers: ',this.productsPageNumbers);
+            this.productsPageNumbers = this.productsPageNumbers.sort();
+          }
+          this.productsPageStateExample.count = pagedResults.items.length;
+          this.products = pagedResults.items;
+        } else {
+          // no more products pages, current page is 'last page'
+          this.productsLastPage = this.productsPageStateExample.pageNumber;
+        }
+      })  
+  }
+
+  public onPageChange(e) {
+    if (e.target.className.includes('next')) {
+      this.productsPageStateExample.pageNumber = this.productsPageStateExample.pageNumber + 1;
+    } else if(e.target.className.includes('prev')) {
+      if (this.productsPageStateExample.pageNumber > 1) {
+        this.productsPageStateExample.pageNumber = this.productsPageStateExample.pageNumber - 1;
+      }
+    }
+    this.getProducts();
   }
 
   public async getGithubProduct() {
@@ -450,6 +500,9 @@ export class AppComponent implements OnInit, OnDestroy {
       }
       this.clientApi.danaClient.getPkvApi().upsertPrincipalKeyValue(null,pkv).then((pkv:PKV) => {
         console.log('pkv created: ',PKV);
+        // reset form
+        this.kvFormGroup.get('key').setValue('', {emitEvent: false});
+        this.kvFormGroup.get('value').setValue('', {emitEvent: false});
         this.listPkvs();
       });
     }
