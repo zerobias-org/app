@@ -1,18 +1,19 @@
 import { combineLatest, Subscription } from 'rxjs';
-import { FormControl, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
-import { Component, Inject, OnDestroy, OnInit, Renderer2, ViewEncapsulation } from '@angular/core';
-import { PagedResults, Duration } from '@auditmation/types-core-js';
-import { ModuleSearch } from '@auditmation/module-auditmation-auditmation-store';
-import { ProductWithObjectCount } from '@auditmation/module-auditmation-auditmation-platform';
-import { ProductExtended, SearchProductBody } from '@auditmation/module-auditmation-auditmation-portal';
-import { Org, PKV, ServiceAccount, User, ApiKey, InlineObject, SharedSessionKey, CreateSharedSessionKeyBody } from '@auditmation/module-auditmation-auditmation-dana';
-import { ZerobiasClientAppService, ZerobiasClientApiService, ZerobiasClientOrgIdService } from '@auditmation/ngx-zb-client-lib';
-import { getZerobiasClientUrl } from '@auditmation/zb-client-lib-js';
-import { GithubClient, newGithub, Organization, OrganizationApi, Repository } from '@auditlogic/module-github-github-client-ts';
-import { ConnectionListView, ScopeListView, SearchConnectionBody, SearchScopeBody, SortObject } from '@auditmation/module-auditmation-auditmation-hub';
+import { ToStringPipe } from './pipes/to-string.pipe';
 import { CapitalizePipe } from './pipes/capitalize.pipe';
 import { ArrayToStringPipe } from './pipes/array-to-string.pipe';
-import { ToStringPipe } from './pipes/to-string.pipe';
+import { FormControl, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
+import { Component, Inject, OnDestroy, OnInit, Renderer2, ViewEncapsulation } from '@angular/core';
+
+import { PagedResults, Duration } from '@auditmation/types-core-js';
+import { ModuleSearch } from '@auditmation/module-auditmation-auditmation-store';
+import { ProductExtended } from '@auditmation/module-auditmation-auditmation-portal';
+import { ProductWithObjectCount } from '@auditmation/module-auditmation-auditmation-platform';
+import { getZerobiasClientUrl } from '@auditmation/zb-client-lib-js/dist/lib/services/zerobias-client-api';
+import { GithubClient, newGithub, Organization, OrganizationApi, Repository } from '@auditlogic/module-github-github-client-ts';
+import { ZerobiasClientAppService, ZerobiasClientApiService, ZerobiasClientOrgIdService } from '@auditmation/ngx-zb-client-lib';
+import { ConnectionListView, ScopeListView, SearchConnectionBody, SearchScopeBody, SortObject } from '@auditmation/module-auditmation-auditmation-hub';
+import { Org, PKV, ServiceAccount, User, ApiKey, InlineObject, SharedSessionKey, CreateSharedSessionKeyBody } from '@auditmation/module-auditmation-auditmation-dana';
 
 function getFutureDate(addYears:number) {
   const date = new Date();
@@ -350,7 +351,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
   public getProducts(pageNum = null) {
     if (pageNum) {
-      // user requests specific page
+      // user requests specific page from pagination
       this.productsPageStateExample.pageNumber = pageNum;
     }
     this.clientApi.portalClient.getProductApi()
@@ -359,7 +360,7 @@ export class AppComponent implements OnInit, OnDestroy {
         if (pagedResults.items.length > 0) {
           if (!this.productsPageNumbers.includes(pagedResults.pageNumber)) {
             this.productsPageNumbers.push(pagedResults.pageNumber); // page we're on
-            console.log('productsPageNumbers: ',this.productsPageNumbers);
+            // console.log('productsPageNumbers: ',this.productsPageNumbers);
             this.productsPageNumbers = this.productsPageNumbers.sort();
           }
           this.productsPageStateExample.count = pagedResults.items.length;
@@ -423,13 +424,14 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   public getConnectionScopes() {
+    this.loading = true;
     /* 
     SearchScopeBody {
         'name'?: string;
         'description'?: string;
         'statuses'?: Array<ConnectionOperationalStatusDef>;
         'adminStatuses'?: Array<AdminStatusDef>;
-        'connections'?: Array<UUID>;     // <--- this is our property for this search call
+        'connections'?: Array<UUID>;                <--- this is our property for this search call
         'boundaries'?: Array<UUID>;
         'deployments'?: Array<UUID>;
         'nodes'?: Array<UUID>;
@@ -441,7 +443,6 @@ export class AppComponent implements OnInit, OnDestroy {
         'direction'?: string; // asc, desc
     */
 
-    this.loading = true;
     const searchScopeBody: SearchScopeBody = {
       connections: [this.selectedConnection.id],
     };
@@ -462,7 +463,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.githubClient = newGithub(); // type GithubClient
     const hubConnectionProfile = {
       server: getZerobiasClientUrl('hub', this.environment.isLocalDev),
-      targetId: this.clientApi.toUUID(this.selectedScope.id)  // <--- connection id if one scope/ scope id if multi-scope
+      targetId: this.clientApi.toUUID(this.selectedScope.id)  // <--- connection ID if one scope OR scope ID if multi-scope
     }
     // console.log('hubConnectionProfile: ',hubConnectionProfile);
 
