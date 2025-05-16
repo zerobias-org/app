@@ -95,6 +95,6 @@ You will likely be developing your site locally, so we have included the file `p
 
 You will need to add this `ZEROBIAS_PROD_API_KEY` to your local dev environment.  First, obtain your `ZEROBIAS_PROD_API_KEY` by logging into the platform, and under the user/org switcher in the top right, click on `Create New API Key`.  Copy the presented API key, and add it to your dev environment.  Once this is set, the `proxy.conf.js` will be able to provide the key to the API endpoints, granting you access to the endpoint.
 
-### Starting the Example App
+### Starting the Example App:
 
 After the `ZEROBIAS_PROD_API_KEY` is set in your environment, run `npm install` at the root of the example project if you haven't already done so.  Once the installation of node modules is complete, simply run `npm run start`.  Once the startup is complete, navigate to `http://localhost:4200` to interact with the running app.
