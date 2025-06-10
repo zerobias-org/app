@@ -4,31 +4,14 @@ import { useFormStatus } from 'react-dom'
 import { createApiKey } from '@/lib/actions';
 import { useRouter } from 'next/navigation';
 import Form from 'next/form'
+import { Suspense, useEffect } from 'react';
+import { Loading } from '../Loading';
 
 export default function CreateApiKeyForm() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const status = useFormStatus();
-
-  const formData = new FormData();
   let dialogMessage = '';
-
-  [ 'action', 'name', 'apiKey', 'orgId'].forEach(item => {
-    if (searchParams.has(item)) {
-      formData.set(item, `${searchParams.get(item)}`);
-    } else {
-      formData.set(item, '');
-    }
-  });
+  const router = useRouter();
+  const formData = new FormData();
   
-  if (formData.get('apiKey') !== '') {
-    dialogMessage = 'Your API Key was successfully created, and was copied to your clipboard.';
-  }
-
-  if (formData.get('action') !== 'createApiKey') {
-    return;
-  }
-
   const onNameChange = () => {
     return '';
   }
@@ -37,13 +20,38 @@ export default function CreateApiKeyForm() {
     // hide form
     router.push('/');
   }
+  
+  const setupParams = async () => {
 
-  const buildFields = () => {
+    const searchParams = useSearchParams();
+    const status = useFormStatus();
+
+    [ 'action', 'name', 'apiKey', 'orgId'].forEach(item => {
+      if (searchParams.has(item)) {
+        formData.set(item, `${searchParams.get(item)}`);
+      } else {
+        formData.set(item, '');
+      }
+    });
+    
     if (formData.get('apiKey') !== '') {
-      return KeyFields();
-    } else {
-      return NameField();
+      dialogMessage = 'Your API Key was successfully created, and was copied to your clipboard.';
     }
+
+    if (formData.get('action') !== 'createApiKey') {
+      return;
+    }
+
+  }
+
+  const buildFields = async () => {
+    const content = formData.get('apiKey') !== '' ? (KeyFields()) : (NameField());
+    return (
+      <Suspense fallback={<Loading />}>
+        {content}
+      </Suspense>
+    )
+
   }
 
   const NameField = () => {
@@ -82,6 +90,10 @@ export default function CreateApiKeyForm() {
 
     )
   }
+
+  useEffect(() => {
+    setupParams(), []
+  });
 
   return (
     <div className="create-api-key-form-wrap">
