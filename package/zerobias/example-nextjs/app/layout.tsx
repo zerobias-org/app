@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Roboto, Montserrat } from "next/font/google";
 import { CurrentUserProvider } from "@/context/CurrentUserContext";
 import "./globals.css";
-import "./styles.scss";
+import "../styles/styles.scss";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
