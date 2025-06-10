@@ -4,8 +4,8 @@ const nextConfig: NextConfig = {
   /* config options here */
   reactStrictMode: false,
   distDir: "dist",
-  // output: "export",
-  // basePath: "/example-nextjs",
+  output: "export",
+  basePath: "/example-nextjs",
   trailingSlash: true, // Optional: Adds a trailing slash to all generated HTML files
   skipTrailingSlashRedirect: true,
   images: {
@@ -13,14 +13,14 @@ const nextConfig: NextConfig = {
       new URL('https://cdn.auditmation.io/**')
     ]
   },
-  async rewrites() {
+/*   async rewrites() {
     return [
       {
         source: "/api/:path*",
-        destination: "https://ci.zerobias.com/api/:path*",
+        destination: "https://qa.zerobias.com/api/:path*",
       }
     ]
-  },
+  }, */
 };
 
 export default nextConfig;
