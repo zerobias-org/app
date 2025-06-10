@@ -1,9 +1,15 @@
+
+import { ConnectionListView, ScopeListView, SearchConnectionBody, SearchScopeBody, SortObject } from '@auditmation/module-auditmation-auditmation-hub';
+import { ModuleSearch } from '@auditmation/module-auditmation-auditmation-store';
 import { ZerobiasClientOrgId, ZerobiasClientApp, ZerobiasClientApi, getZerobiasClientUrl } from "@auditmation/zb-client-lib-js";
 import { ExecuteRawGraphqlQuery } from "@auditmation/module-auditmation-auditmation-graphql";
 import { BoundaryExtended } from "@auditmation/module-auditmation-auditmation-platform";
 import { PagedResults } from "@auditmation/types-core-js";
 import { ProductExtended } from '@auditmation/module-auditmation-auditmation-portal';
-import { ApiKey, InlineObject } from '@auditmation/module-auditmation-auditmation-dana';
+import { ApiKey, InlineObject, Org } from '@auditmation/module-auditmation-auditmation-dana';
+import { useCurrentUser } from "@/context/CurrentUserContext";
+import { useState } from "react";
+import { OrgProps } from './types';
 
 // environnment vars read from .env.development and .env.production
 export const environment = {
@@ -19,8 +25,16 @@ class ZerobiasAppService {
   public selectedBoundary: BoundaryExtended | null = null;
   public boundaries: BoundaryExtended[] = [];
   public enable = false;
+  public showApiKeyForm = false;
+  public showSharedSessionForm = false;
+  public githubProduct:ProductExtended|null = null;
+  public connections:ConnectionListView[]|null = null;
+  public selectedConnection:ConnectionListView|null = null;
+  public scopes:ScopeListView[]|null = null;
+  public formGroup:FormData|null = null;
+  public orgs:Org[]|null = null;
 
-    constructor() {
+  constructor() {
     this.zerobiasOrgId = new ZerobiasClientOrgId();
     this.zerobiasClientApi = new ZerobiasClientApi(this.zerobiasOrgId, environment);
     this.zerobiasClientApp = new ZerobiasClientApp(
@@ -30,8 +44,10 @@ class ZerobiasAppService {
   }
 
   public async initializeAppFactory() {
+    // const [loading, setLoading] = useState(true);
     this.zerobiasClientApp.init().then(() => {
       this.enable = true;
+      // setLoading(false);
       console.log("ZerobiasAppSvc initialized");
     });
   }
@@ -43,22 +59,8 @@ class ZerobiasAppService {
 
       await ZerobiasAppService.#instance.initializeAppFactory();
     } 
-    if (!ZerobiasAppService.#instance.enable) {
-      // redirect to login
-      ZerobiasAppService.#instance.redirectToLogin();
-    }
 
     return ZerobiasAppService.#instance;
-  }
-
-  public redirectToLogin = (): void => {
-    const next = location.href;
-    // change this function to whatever you need it to be if this doesn't work for you
-  
-    // NOTE: this will send you to /login - if you are in local dev you will either need 
-    // to be running your `zerobias-org/login` app or manually login on your QA platform
-    // const url = getZerobiasClientUrl('/login', false, environment.isLocalDev, false);
-    window.location.href = `https://ci.zerobias.com/login?next=${next}`;
   }
 
   public logOut = async () => {
@@ -71,18 +73,6 @@ class ZerobiasAppService {
         console.log("******")
       });
   };
-
-
-  public getProducts = async (page: number, perPage: number) => {
-    let products:Array<ProductExtended> = [];
-
-    this.zerobiasClientApi.portalClient.getProductApi().search({}, page, perPage, undefined).then((pagedResults:PagedResults<ProductExtended>) => {
-      products = pagedResults.items;
-    });
-
-    return products;
-  };
-
 
   public async createApiKey(inlineObject?: InlineObject): Promise<ApiKey & object | void> {
     if (!inlineObject) { 
