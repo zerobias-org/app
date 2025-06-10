@@ -1,45 +1,52 @@
-'use server'
-import { redirect } from 'next/navigation'
+'use client'
+import { useRouter } from 'next/navigation'
+import { ApiKey, InlineObject } from '@auditmation/module-auditmation-auditmation-dana';
+import ZerobiasAppService from "@/lib/zerobias";
+import { getFutureDate } from './utils';
+
+export async function updateModuleForm(formData: FormData) {
+
+}
 
 export async function createApiKey(formData: FormData) {
-  let apiKey = '';
+  const router = useRouter();
 
-  if (formData.get('name')) {
+  if (formData.get('action') === 'createApiKey') {
 
+    if (formData.get('name') === '') { return; }
+
+    const zbService = await ZerobiasAppService.getInstance();
     // createApiKey
+    const inlineObject: InlineObject = {
+      name: `${formData.get('name')}`,
+      expiration: getFutureDate(10)
+    };
 
-      if (this.overlay.actionLabel === 'Close') {
-        this.onCloseOverlayClick();
-      } else {
-        this.overlay.actionProcessing = true;
-        this.createApiKey(this.apiKeyFormGroup.value).then((key: any) => {
+        zbService.createApiKey(inlineObject).then((key: any) => {
           if (key) {
-            this.overlay.actionLabel = 'Close';
-            this.overlay.actionButtonColor = 'primary';
-            this.overlay.showCancel = false;
+            formData.set('apiKey',key);
             navigator.clipboard.writeText(key.data).then(() => {
-              const currentOrgId = this.orgIdService.getCurrentOrgId();
+/*               const currentOrgId = this.orgIdService.getCurrentOrgId();
               this.apiKeyKeyForm.setValue(key.data);
               this.orgIdInput.setValue(currentOrgId);
-              this.overlay.message = `Your API Key was successfully created, and was copied to your clipboard.`;
+              this.overlay.message = `Your API Key was successfully created, and was copied to your clipboard.`; */
             });
           }
         }).finally(() => {
-          this.overlay.actionProcessing = false;
+          // this.overlay.actionProcessing = false;
         });
-      }
 
 
-
-
-
-
-
-    apiKey = '';
+  }
+  const paramsObject:any = {};
+  for (let key of formData.keys()) {
+    paramsObject[key] = formData.get(key);
   }
 
-  if (apiKey !== '') {
-    redirect(`/?key=${apiKey}`)
+  if (formData.get('apiKey') !== '') {
+    router.push(`/?${JSON.stringify(paramsObject)}`);
+  } else {
+    router.push(`/`)
   }
 }
 

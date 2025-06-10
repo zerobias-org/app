@@ -1,47 +1,45 @@
-'use server'
-import { useRouter } from "next/router";
+'use client'
+import { useSearchParams } from 'next/navigation'
+import { useFormStatus } from 'react-dom'
 import { createApiKey } from '@/lib/actions';
+import { useRouter } from 'next/navigation';
 import Form from 'next/form'
 
-export default async function CreateApiKeyForm() {
-
+export default function CreateApiKeyForm() {
   const router = useRouter();
-  const { query } = router;
-  const action = query.action ? query.action : '';
-  const name = query.name ? query.name : '';
-  const apiKey = query.apiKey ? query.apiKey : '';
-  const orgId = query.orgId ? query.orgId : '';
-  
+  const searchParams = useSearchParams();
+  const status = useFormStatus();
+
   const formData = new FormData();
   let dialogMessage = '';
 
-  formData.set('action', `${action}`);
-
-  if (name !== '') 
-    formData.set('name', `${name}`);
-
-  if (apiKey !== '') {
-    formData.set('apiKey', `${apiKey}`);
+  [ 'action', 'name', 'apiKey', 'orgId'].forEach(item => {
+    if (searchParams.has(item)) {
+      formData.set(item, `${searchParams.get(item)}`);
+    } else {
+      formData.set(item, '');
+    }
+  });
+  
+  if (formData.get('apiKey') !== '') {
     dialogMessage = 'Your API Key was successfully created, and was copied to your clipboard.';
   }
 
-  if (orgId !== '') 
-    formData.set('orgId', `${orgId}`);
-
-  if (action !== 'createApiKey') {
+  if (formData.get('action') !== 'createApiKey') {
     return;
+  }
+
+  const onNameChange = () => {
+    return '';
   }
 
   const onClose = () => {
     // hide form
-  }
-
-  const hasKey = (key: string): boolean => {
-    return key && key !== '' ? true : false;
+    router.push('/');
   }
 
   const buildFields = () => {
-    if (apiKey !== '') {
+    if (formData.get('apiKey') !== '') {
       return KeyFields();
     } else {
       return NameField();
@@ -53,7 +51,7 @@ export default async function CreateApiKeyForm() {
       <Form action={createApiKey}>
         <div className="form-field-wrap">
           <span className="label">API Key Name</span>
-          <input value="{formData.name}" placeholder="" autoComplete="off" />
+          <input value={`${formData.get('name')}`} onChange={onNameChange} placeholder="" autoComplete="off" />
         </div>
 
         <div className="dialog-message">{ dialogMessage }</div>
@@ -85,6 +83,13 @@ export default async function CreateApiKeyForm() {
     )
   }
 
-  return buildFields();
-
+  return (
+    <div className="create-api-key-form-wrap">
+      <div className="api-key-form">
+        { 
+          buildFields()
+        }
+      </div>
+    </div>
+  )
 }
