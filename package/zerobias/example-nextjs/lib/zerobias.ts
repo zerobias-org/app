@@ -1,7 +1,7 @@
 
 import { ConnectionListView, ScopeListView, SearchConnectionBody, SearchScopeBody, SortObject } from '@auditmation/module-auditmation-auditmation-hub';
 import { ModuleSearch } from '@auditmation/module-auditmation-auditmation-store';
-import { ZerobiasClientOrgId, ZerobiasClientApp, ZerobiasClientApi, getZerobiasClientUrl } from "@auditmation/zb-client-lib-js";
+import { ZerobiasClientOrgId, ZerobiasClientApp, ZerobiasClientApi } from "@auditmation/zb-client-lib-js";
 import { ExecuteRawGraphqlQuery } from "@auditmation/module-auditmation-auditmation-graphql";
 import { BoundaryExtended } from "@auditmation/module-auditmation-auditmation-platform";
 import { PagedResults } from "@auditmation/types-core-js";
@@ -18,9 +18,9 @@ export const environment = {
 
 class ZerobiasAppService {
   static #instance: ZerobiasAppService;
-  public zerobiasOrgId: ZerobiasClientOrgId = new ZerobiasClientOrgId();
-  public zerobiasClientApi: ZerobiasClientApi = new ZerobiasClientApi(this.zerobiasOrgId, environment);
-  public zerobiasClientApp: ZerobiasClientApp = new ZerobiasClientApp(this.zerobiasClientApi, this.zerobiasOrgId);
+  public zerobiasOrgId = new ZerobiasClientOrgId();
+  public zerobiasClientApi = new ZerobiasClientApi(this.zerobiasOrgId, environment);
+  public zerobiasClientApp = new ZerobiasClientApp(this.zerobiasClientApi, this.zerobiasOrgId);
 
   public selectedBoundary: BoundaryExtended | null = null;
   public boundaries: BoundaryExtended[] = [];
@@ -67,7 +67,7 @@ class ZerobiasAppService {
     this.zerobiasClientApi.danaClient
       ?.getMeApi()
       .logoutGet()
-      .then((data) => {
+      .then((data:any) => {
         console.log("logout")
         console.log(data);
         console.log("******")
