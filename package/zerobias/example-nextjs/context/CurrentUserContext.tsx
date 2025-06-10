@@ -2,7 +2,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import ZerobiasAppService from '@/lib/zerobias'
 import { UserProps, OrgProps } from '@/lib/types';
-import { Org } from '@auditmation/module-auditmation-auditmation-dana';
+import { Loading } from '@/components/Loading';
 
 type CurrentUserContextType = {
   user: UserProps | null;
@@ -29,19 +29,25 @@ export const CurrentUserProvider = ({ children }: { children: ReactNode }) => {
       try {
         const instance:ZerobiasAppService = await ZerobiasAppService.getInstance();
         if (instance) {
+
           instance
             .zerobiasClientApp
             .getWhoAmI()
-            .subscribe((item) => {
+            .subscribe((item:any) => {
               if (item) {
                 setUser(user => (item as UserProps));
+              } else {
+                console.log('NO USER');
+                // instance.zerobiasClientApi.redirectLogin();
+                const loginHref = instance.zerobiasClientApi.getLoginHref();
+                console.log('loginHref = ',loginHref);
               }
             });
 
           instance
             .zerobiasClientApp
             .getCurrentOrg()
-            .subscribe((item) => {
+            .subscribe((item:any) => {
               if (item) {
                 setOrg(org => (item as OrgProps));
               }
@@ -60,10 +66,16 @@ export const CurrentUserProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   
+  if (!loading && !user) {
+    return (
+      <Loading />
+    )
+  } else {
 
-  return (
-    <CurrentUserContext.Provider value={{ user, org, loading }}>
-      {children}
-    </CurrentUserContext.Provider>
-  );
-};
+    return (
+      <CurrentUserContext.Provider value={{ user, org, loading }}>
+        {children}
+      </CurrentUserContext.Provider>
+    );
+  }
+}
