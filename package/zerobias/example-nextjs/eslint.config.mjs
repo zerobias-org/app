@@ -10,9 +10,7 @@ const compat = new FlatCompat({
 });
 
 const eslintConfig = [
-  ...compat.extends("next/core-web-vitals", "next/typescript",'airbnb-base',
-    'airbnb-typescript/base',
-    'eslint:recommended')
+  ...compat.extends("next/core-web-vitals", "next/typescript", 'eslint:recommended')
 ];
 
 export default eslintConfig;

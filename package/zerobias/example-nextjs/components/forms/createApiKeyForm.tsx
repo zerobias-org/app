@@ -4,8 +4,7 @@ import { useFormStatus } from 'react-dom'
 import { createApiKey } from '@/lib/actions';
 import { useRouter } from 'next/navigation';
 import Form from 'next/form'
-import { Suspense, useEffect } from 'react';
-import { Loading } from '../Loading';
+import { useEffect } from 'react';
 
 export default function CreateApiKeyForm() {
   let dialogMessage = '';
@@ -38,19 +37,15 @@ export default function CreateApiKeyForm() {
       dialogMessage = 'Your API Key was successfully created, and was copied to your clipboard.';
     }
 
-    if (formData.get('action') !== 'createApiKey') {
-      return;
-    }
-
   }
 
-  const buildFields = async () => {
-    const content = formData.get('apiKey') !== '' ? (KeyFields()) : (NameField());
-    return (
-      <Suspense fallback={<Loading />}>
-        {content}
-      </Suspense>
-    )
+  const buildFields = () => {
+    let content = (<></>);
+    if (formData?.get('action') !== 'createApiKey') {
+      return content;
+    }
+    content = formData.get('apiKey') !== '' ? (KeyFields()) : (NameField());
+    return content;
 
   }
 
@@ -71,7 +66,6 @@ export default function CreateApiKeyForm() {
 
   const KeyFields = () => {
     return (
-
         <Form action="{createApiKey}">
           <div className="form-field-wrap">
             <span className="label">Organization ID</span>
@@ -87,7 +81,6 @@ export default function CreateApiKeyForm() {
 
           <button onClick={() => onClose()}>Close</button>
         </Form>
-
     )
   }
 
@@ -98,9 +91,7 @@ export default function CreateApiKeyForm() {
   return (
     <div className="create-api-key-form-wrap">
       <div className="api-key-form">
-        { 
-          buildFields()
-        }
+        { buildFields() }
       </div>
     </div>
   )

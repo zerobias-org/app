@@ -1,19 +1,20 @@
 
-import { ConnectionListView, ScopeListView, SearchConnectionBody, SearchScopeBody, SortObject } from '@auditmation/module-auditmation-auditmation-hub';
-import { ModuleSearch } from '@auditmation/module-auditmation-auditmation-store';
+import { ConnectionListView, ScopeListView } from '@auditmation/module-auditmation-auditmation-hub';
 import { ZerobiasClientOrgId, ZerobiasClientApp, ZerobiasClientApi } from "@auditmation/zb-client-lib-js";
 import { ExecuteRawGraphqlQuery } from "@auditmation/module-auditmation-auditmation-graphql";
 import { BoundaryExtended } from "@auditmation/module-auditmation-auditmation-platform";
 import { PagedResults } from "@auditmation/types-core-js";
 import { ProductExtended } from '@auditmation/module-auditmation-auditmation-portal';
 import { ApiKey, InlineObject, Org } from '@auditmation/module-auditmation-auditmation-dana';
-import { useCurrentUser } from "@/context/CurrentUserContext";
-import { useState } from "react";
-import { OrgProps } from './types';
+import { fetchWithAuth } from '@/lib/fetchWithAuth';
 
 // environnment vars read from .env.development and .env.production
 export const environment = {
   isLocalDev: process.env.IS_LOCAL_DEV ? true : false,
+  apiKey: process.env.API_KEY,
+  apiHostname: process.env.NEXT_PUBLIC_API_HOSTNAME,
+  localPortalOrigin: process.env.LOCAL_PORTAL_ORIGIN,
+  zerobiasProdApiKey: process.env.ZEROBIAS_PROD_API_KEY
 };
 
 class ZerobiasAppService {
