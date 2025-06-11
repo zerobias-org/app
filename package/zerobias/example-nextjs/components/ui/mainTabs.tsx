@@ -1,12 +1,12 @@
 "use client"
-import { Suspense, useState } from 'react';
+import { useState } from 'react';
 import ProductsDemo from '../demos/ProductsDemo';
 import ModuleDemo from '../demos/ModuleDemo';
 import { Tabs, TabList, Tab, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
-import { Loading } from '../Loading';
 
 export default function MainTabs() {
+  // console.log('loading MainTabs');
   const [selectedTab, setSelectedTab] = useState('products');
 
   const onRadioChange = (tab = 'products') => {
@@ -23,14 +23,14 @@ export default function MainTabs() {
         <Tab onClick={() => {setSelectedTab(selectedTab => ('pkv'))}}>PKV</Tab>
       </TabList>
       <TabPanel>
-        <Suspense fallback={<Loading />}>
+
           <ProductsDemo />
-        </Suspense>
+
       </TabPanel>
       <TabPanel>
-        <Suspense fallback={<Loading />}>
+
           <ModuleDemo />
-        </Suspense>
+
       </TabPanel>
       <TabPanel>Content for Tab 3</TabPanel>
     </Tabs>

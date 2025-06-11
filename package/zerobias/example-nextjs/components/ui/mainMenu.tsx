@@ -1,14 +1,15 @@
 "use client"
-import { useEffect, useState, useContext } from 'react';
+import { useEffect, useState } from 'react';
 import Select from 'react-select';
-import { CurrentUserContext, useCurrentUser } from '@/context/CurrentUserContext';
+import { useCurrentUser } from '@/context/CurrentUserContext';
 import ZerobiasAppService from "@/lib/zerobias";
-import { OrgProps, OrgOption } from '@/lib/types';
+import { OrgOption } from '@/lib/types';
 import { Org } from '@auditmation/module-auditmation-auditmation-dana';
 import { PagedResults } from "@auditmation/types-core-js";
 
 
 export default function MainMenu() {
+  // console.log('loading MainMenu');
   const { user, org, loading } = useCurrentUser();
   const [selectedOrg, setSelectedOrg] = useState<Org>();
   const [orgs, setOrgs] = useState<Org[] | null>([]);

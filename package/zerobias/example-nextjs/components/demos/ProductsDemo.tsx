@@ -23,20 +23,23 @@ const ProductsDemo = () => {
 
   const ProductsTable = () => {
     if (loading || state.loading) {
-      return ('...loading');
+      return (<tbody><tr><td colSpan={5}>loading</td></tr></tbody>);
+    } else if(state.products?.length === 0) {
+      return (<tbody><tr><td colSpan={5}>products not loaded</td></tr></tbody>);
     } else {
+      const content = state.products?.map((product, idx) => (
+        <tr key={idx} className="product-item">
+          <td className="product-logo">
+            <Image width="50" src={ product.logo ? product.logo.toString() : '' } alt={ product.name } height="30" />
+          </td>
+          <td className="product-name">{ product.name }</td>
+          <td className="product-description">{ product.description }</td>
+          <td className="product-packageCode">{ product.packageCode }</td>
+          <td className="product-status">{ product.status.toString() }</td>
+        </tr>
+      ))
       return (
-        state.products?.map((product, idx) => (
-          <tr key={idx} className="product-item">
-            <td className="product-logo">
-              <Image width="50" src={ product.logo ? product.logo.toString() : '' } alt={ product.name } height="30" />
-            </td>
-            <td className="product-name">{ product.name }</td>
-            <td className="product-description">{ product.description }</td>
-            <td className="product-packageCode">{ product.packageCode }</td>
-            <td className="product-status">{ product.status.toString() }</td>
-          </tr>
-        ))
+        <tbody>{content}</tbody>
       )
     }
   }
@@ -78,9 +81,9 @@ const ProductsDemo = () => {
                   <th>Status</th>
                 </tr>
                 </thead>
-                <tbody>
+
                   {ProductsTable()}
-                </tbody>
+
               </table>
         
 
