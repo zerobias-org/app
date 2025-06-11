@@ -7,6 +7,7 @@
     "build:dev": "cp ./next.config.dev.ts ./next.config.ts &&n ext build",
     "build:qa": "cp ./next.config.qa.ts ./next.config.ts && next build",
     "build:prod": "cp ./next.config.prod.ts ./next.config.ts && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
