@@ -1,9 +1,7 @@
 "use client"
 import { useEffect, useState } from "react";
-import Form from "next/form";
-import Select, { SingleValue } from 'react-select';
-import ZerobiasAppService, { environment } from "@/lib/zerobias";
-import { updateModuleForm } from "@/lib/actions";
+import Select from 'react-select';
+import ZerobiasAppService from "@/lib/zerobias";
 import { OrgProps, UserProps } from "@/lib/types";
 import { getZerobiasClientUrl } from "@auditmation/zb-client-lib-js";
 import { ProductExtended } from '@auditmation/module-auditmation-auditmation-portal';
@@ -49,9 +47,9 @@ export default function ModuleDemo() {
   const [scopeOptions, setScopeOptions] = useState<OptionType[]>([{value: '', label: 'loading connection scope options'}]);
 
   let githubClient:GithubClient|null = null;
-  let githubOrgs:Organization[] = [];
   const [loadingGithubOrgs, setLoadingGithubOrgs] = useState(false);
   const [githubOrg, setGithubOrg] = useState<Organization|null>();
+  const [githubOrgs, setGithubOrgs] = useState<Organization[]|null>([]);
   const [githubOrgOptions, setGithubOrgOptions] = useState<OptionType[]>([{value: '', label: 'loading GitHub Org options'}]);
 
   const [loadingGithubRepos, setLoadingGithubRepos] = useState(false);
@@ -225,10 +223,12 @@ export default function ModuleDemo() {
 
   const onChangeGithubOrg = async (item:any) => {
     if (item?.value) {
+      console.log('githubOrg item: ',item);
       // not blank
-      const found = githubOrgs.find((el:Organization) => {
+      const found = githubOrgs?.find((el:Organization) => {
         return el.id.toString() === item.value;
       });
+      console.log('found githubOrg? ', found);
       if (found) {
         setGithubOrg(githubOrg => (found));
         getRepositories(found);
@@ -254,24 +254,32 @@ export default function ModuleDemo() {
       setLoadingGithubRepos(loadingGithubRepos => (true));
       const instance = await ZerobiasAppService.getInstance();
 
-      if (instance && githubClient) {
+      if (instance) {
+        githubClient = newGithub(); // type GithubClient
+        const hubConnectionProfile = {
+          // path?: string, isApiURL?: boolean, isLocalDev?: boolean, directToDev?: boolean
+          server: getZerobiasClientUrl('hub', true, instance.environment.isLocalDev),
+          targetId: instance.zerobiasClientApi.toUUID(scope?.id)  // <--- connection ID if one scope OR scope ID if multi-scope
+        }
 
-        githubClient.getOrganizationApi().listRepositories(
-          org.name,
-          OrganizationApi.TypeEnum.All,
-          OrganizationApi.SortEnum.FullName,
-          OrganizationApi.DirectionEnum.Asc,
-          1,
-          25
-        ).then((pagedResults: PagedResults<Repository>) => {
-          const repos = pagedResults.items.length > 0 ? pagedResults.items : [];
-          setGithubRepos(githubRepos => (repos));
-          // console.log('repos', pagedResults.items);
-        }).finally(() => {
-          setLoadingGithubRepos(loadingGithubRepos => (false));
+        // get GITHUB orgs
+        githubClient.connect(hubConnectionProfile).then(async () => {
+          await githubClient?.getOrganizationApi().listRepositories(
+            org.name,
+            OrganizationApi.TypeEnum.All,
+            OrganizationApi.SortEnum.FullName,
+            OrganizationApi.DirectionEnum.Asc,
+            1,
+            25
+          ).then((pagedResults: PagedResults<Repository>) => {
+            const repos = pagedResults.items.length > 0 ? pagedResults.items : [];
+            setGithubRepos(githubRepos => (repos));
+            console.log('repos', pagedResults.items);
+          }).finally(() => {
+            setLoadingGithubRepos(loadingGithubRepos => (false));
+          });
         });
       }
-      
     } catch(error) {
       console.log('error getting repos: ',error);
         
@@ -287,18 +295,21 @@ export default function ModuleDemo() {
         githubClient = newGithub(); // type GithubClient
         const hubConnectionProfile = {
           // path?: string, isApiURL?: boolean, isLocalDev?: boolean, directToDev?: boolean
-          server: getZerobiasClientUrl('hub', true, environment.isLocalDev),
+          server: getZerobiasClientUrl('hub', true, instance.environment.isLocalDev),
           targetId: instance.zerobiasClientApi.toUUID(scope.id)  // <--- connection ID if one scope OR scope ID if multi-scope
         }
 
         // get GITHUB orgs
         githubClient.connect(hubConnectionProfile).then(async () => {
           await githubClient?.getOrganizationApi().listMyOrganizations(1,5).then((pagedResults: PagedResults<Organization>) => {
-            githubOrgs = pagedResults.items.length > 0 ? pagedResults.items : [];
+            const githubOrgItems = pagedResults.items.length > 0 ? pagedResults.items : [];
+            setGithubOrgs(githubOrgs => (githubOrgItems));
+            console.log('githubOrgItems: ',githubOrgItems);
             const options = [{value:'',label: 'Select Github Organization'}];
-            githubOrgs.forEach(el => {
+            githubOrgItems.forEach(el => {
               options.push({value: el.id.toString(), label: el.name});
             });
+            console.log('githubOrg options: ',options);
             setGithubOrgOptions(githubOrgOptions => (options));
           }).finally(() => {
             setLoadingGithubOrgs(loadingGithubOrgs => (false));
@@ -447,8 +458,6 @@ export default function ModuleDemo() {
     }
 
   }
-
-
 
 
   useEffect(() => {

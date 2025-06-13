@@ -12,8 +12,9 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@auditmation/zb-client-lib-js": "^0.5.10",
     "@auditlogic/module-github-github-client-ts": "^6.5.2",
+    "@auditmation/zb-client-lib-js": "^0.5.13",
+    "lucide-react": "^0.514.0",
     "material-symbols": "^0.31.4",
     "next": "15.3.2",
     "react": "^19.0.0",

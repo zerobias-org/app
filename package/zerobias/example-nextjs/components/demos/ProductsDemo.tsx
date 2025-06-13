@@ -1,16 +1,9 @@
 "use client"
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { ProductExtended } from '@auditmation/module-auditmation-auditmation-portal';
 import ZerobiasAppService from "@/lib/zerobias";
-import { CurrentUserContext, useCurrentUser } from '@/context/CurrentUserContext';
-
-interface ProductProps {
-  products: ProductExtended[]
-  currentPage: number
-  pageSize: number
-  loading: boolean
-}
+import { useCurrentUser } from '@/context/CurrentUserContext';
+import { ProductProps } from "@/lib/types";
 
 const ProductsDemo = () => {
   const { user, org, loading } = useCurrentUser();
@@ -23,9 +16,9 @@ const ProductsDemo = () => {
 
   const ProductsTable = () => {
     if (loading || state.loading) {
-      return (<tbody><tr><td colSpan={5}>loading</td></tr></tbody>);
+      return (<tr><td colSpan={5}>loading</td></tr>);
     } else if(state.products?.length === 0) {
-      return (<tbody><tr><td colSpan={5}>products not loaded</td></tr></tbody>);
+      return (<tr><td colSpan={5}>products not loaded</td></tr>);
     } else {
       const content = state.products?.map((product, idx) => (
         <tr key={idx} className="product-item">
@@ -38,9 +31,7 @@ const ProductsDemo = () => {
           <td className="product-status">{ product.status.toString() }</td>
         </tr>
       ))
-      return (
-        <tbody>{content}</tbody>
-      )
+      return content
     }
   }
 
@@ -57,7 +48,6 @@ const ProductsDemo = () => {
       } catch (error:any) {
         console.log(error.message)
         console.log(error.stack)
-        // setState(state => ({ ...state, loading: false }));
       } 
     }
     
@@ -81,26 +71,11 @@ const ProductsDemo = () => {
                   <th>Status</th>
                 </tr>
                 </thead>
-
+                <tbody>
                   {ProductsTable()}
-
+                </tbody>
               </table>
         
-
-    {/*       <Pagination>
-            <PaginationContent>
-              <PaginationItem hidden={state.currentPage == 1 || state.loading}>
-                <PaginationPrevious
-                  onClick={() => setState({ ...state, loading: true, currentPage: state.currentPage - 1 })} href="#" />
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationLink href="#">{state.currentPage}</PaginationLink>
-              </PaginationItem>
-              <PaginationItem hidden={state.loading}>
-                <PaginationNext href="#" onClick={() => setState({ ...state, loading: true, currentPage: state.currentPage + 1 })} />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination> */}
         </div>
       </div>
 
