@@ -4,18 +4,23 @@ import ZerobiasAppService from '@/lib/zerobias'
 import { UserProps, OrgProps } from '@/lib/types';
 import { Loading } from '@/components/Loading';
 import { useRouter } from 'next/navigation';
-import { environment } from '@/lib/zerobias';
 
 type CurrentUserContextType = {
   user: UserProps | null;
   org: OrgProps | null;
   loading: boolean;
+  action: 'createApiKey' | 'createSharedSessionKey' | null;
+  setOrg: any,
+  setAction: any
 };
 
 export const CurrentUserContext = createContext<CurrentUserContextType>({
   user: null,
   org: null,
   loading: true,
+  action: null,
+  setOrg: ()=>{},
+  setAction: ()=>{}
 });
 
 export const useCurrentUser = () => useContext(CurrentUserContext);
@@ -25,6 +30,7 @@ export const CurrentUserProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<UserProps | null>(null);
   const [org, setOrg] = useState<OrgProps | null>(null);
   const [loading, setLoading] = useState(true);
+  const [action, setAction] = useState<'createApiKey'|'createSharedSessionKey'|null>(null);
 
   useEffect(() => {
     const getPlatform = async () => {
@@ -32,7 +38,7 @@ export const CurrentUserProvider = ({ children }: { children: ReactNode }) => {
       try {
         const instance:ZerobiasAppService = await ZerobiasAppService.getInstance();
         if (instance) {
-          console.log('currentUserContext getWhoAmI');
+          console.log('currentUserContext --> getWhoAmI');
 
           instance
             .zerobiasClientApp
@@ -40,9 +46,6 @@ export const CurrentUserProvider = ({ children }: { children: ReactNode }) => {
             .subscribe((item:any) => {
               if (item) {
                 setUser(user => (item as UserProps));
-              } else {
-                // window.location.href = `https://${environment.apiHostname}/login?next=${environment.localPortalOrigin}`;
-//                router.push(`https://${environment.apiHostname}/login?next=${environment.localPortalOrigin}`)
               }
             });
 
@@ -54,9 +57,7 @@ export const CurrentUserProvider = ({ children }: { children: ReactNode }) => {
                 setOrg(org => (item as OrgProps));
               }
             });
-
         }
-
       } catch(error) {
         console.error('Failed to fetch user', error);
       } finally {
@@ -68,14 +69,14 @@ export const CurrentUserProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   
-  if (!loading && !user) {
+  if (loading && !user) {
     return (
       <Loading />
     )
   } else {
 
     return (
-      <CurrentUserContext.Provider value={{ user, org, loading }}>
+      <CurrentUserContext.Provider value={{ user, org, loading, action, setOrg, setAction }}>
         {children}
       </CurrentUserContext.Provider>
     );

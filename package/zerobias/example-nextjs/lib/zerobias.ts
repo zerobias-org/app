@@ -1,27 +1,35 @@
 
 import { ConnectionListView, ScopeListView } from '@auditmation/module-auditmation-auditmation-hub';
-import { ZerobiasClientOrgId, ZerobiasClientApp, ZerobiasClientApi } from "@auditmation/zb-client-lib-js";
+import { ZerobiasClientOrgId, ZerobiasClientApp, ZerobiasClientApi, ZbEnvironment } from "@auditmation/zb-client-lib-js";
 import { ExecuteRawGraphqlQuery } from "@auditmation/module-auditmation-auditmation-graphql";
 import { BoundaryExtended } from "@auditmation/module-auditmation-auditmation-platform";
 import { PagedResults } from "@auditmation/types-core-js";
 import { ProductExtended } from '@auditmation/module-auditmation-auditmation-portal';
 import { ApiKey, InlineObject, Org } from '@auditmation/module-auditmation-auditmation-dana';
-import { fetchWithAuth } from '@/lib/fetchWithAuth';
 
 // environnment vars read from .env.development and .env.production
-export const environment = {
-  isLocalDev: process.env.IS_LOCAL_DEV ? true : false,
-  apiKey: process.env.API_KEY,
+/* 
   apiHostname: process.env.NEXT_PUBLIC_API_HOSTNAME,
   localPortalOrigin: process.env.LOCAL_PORTAL_ORIGIN,
   zerobiasProdApiKey: process.env.ZEROBIAS_PROD_API_KEY
-};
+  apiKey: process.env.API_KEY,
+*/
 
 class ZerobiasAppService {
+  public environment:any = {
+    localhostOnlyApiKey: process.env.NEXT_PUBLIC_API_KEY,
+    isLocalDev: process.env.NEXT_PUBLIC_IS_LOCAL_DEV !== undefined ? process.env.NEXT_PUBLIC_IS_LOCAL_DEV === 'true' : false,
+    production: process.env.NEXT_PUBLIC_PRODUCTION !== undefined ? process.env.NEXT_PUBLIC_PRODUCTION === 'true' : false,
+    socketUrlPath: '/session',
+    localPortalOrigin: process.env.NEXT_PUBLIC_LOCAL_PORTAL_ORIGIN ? process.env.NEXT_PUBLIC_LOCAL_PORTAL_ORIGIN : '',
+    apiHostname: process.env.NEXT_PUBLIC_API_HOSTNAME
+  };
+
+
   static #instance: ZerobiasAppService;
   public zerobiasOrgId = new ZerobiasClientOrgId();
-  public zerobiasClientApi = new ZerobiasClientApi(this.zerobiasOrgId, environment);
-  public zerobiasClientApp = new ZerobiasClientApp(this.zerobiasClientApi, this.zerobiasOrgId);
+  public zerobiasClientApi = new ZerobiasClientApi(this.zerobiasOrgId, this.environment);
+  public zerobiasClientApp = new ZerobiasClientApp(this.zerobiasClientApi, this.zerobiasOrgId, this.environment);
 
   public selectedBoundary: BoundaryExtended | null = null;
   public boundaries: BoundaryExtended[] = [];
@@ -36,26 +44,25 @@ class ZerobiasAppService {
   public orgs:Org[]|null = null;
 
   constructor() {
-    this.zerobiasOrgId = new ZerobiasClientOrgId();
-    this.zerobiasClientApi = new ZerobiasClientApi(this.zerobiasOrgId, environment);
-    this.zerobiasClientApp = new ZerobiasClientApp(
-      this.zerobiasClientApi,
-      this.zerobiasOrgId
-    );
   }
 
   public async initializeAppFactory() {
-    // const [loading, setLoading] = useState(true);
-    this.zerobiasClientApp.init().then(() => {
+    await this.zerobiasClientApp.init(
+      (req) => {
+        if (this.environment.localhostOnlyApiKey) {
+          req.headers["Authorization"] = `APIKey ${this.environment.localhostOnlyApiKey}`;
+        }
+        return req;
+      }
+    ).then(() => {
       this.enable = true;
-      // setLoading(false);
       console.log("ZerobiasAppSvc initialized");
     });
   }
 
   public static async getInstance(): Promise<ZerobiasAppService>  {
     if (!ZerobiasAppService.#instance) {
-      console.log("create new isntances");
+      console.log("create new isntance");
       ZerobiasAppService.#instance = new ZerobiasAppService();
 
       await ZerobiasAppService.#instance.initializeAppFactory();

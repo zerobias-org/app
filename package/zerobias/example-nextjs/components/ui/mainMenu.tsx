@@ -1,20 +1,23 @@
 "use client"
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Select from 'react-select';
 import { useCurrentUser } from '@/context/CurrentUserContext';
-import ZerobiasAppService from "@/lib/zerobias";
 import { OrgOption } from '@/lib/types';
-import { Org } from '@auditmation/module-auditmation-auditmation-dana';
+import ZerobiasAppService from "@/lib/zerobias";
 import { PagedResults } from "@auditmation/types-core-js";
+import { Org } from '@auditmation/module-auditmation-auditmation-dana';
 
 
 export default function MainMenu() {
   // console.log('loading MainMenu');
-  const { user, org, loading } = useCurrentUser();
+  const router = useRouter();
+  const { user, org, loading, action, setOrg, setAction } = useCurrentUser();
   const [selectedOrg, setSelectedOrg] = useState<Org>();
   const [orgs, setOrgs] = useState<Org[] | null>([]);
   const [menuActive, setMenuActive] = useState(false);
   const [apiEnabled, setApiEnabled] = useState(false);
+
   const [orgOptions, setOrgOptions] = useState<OrgOption[]>([{
       value: '', 
       label: 'loading'
@@ -26,8 +29,10 @@ export default function MainMenu() {
   }
  */
 
-  const toggleApiKeyForm = () => {
-    // show hide api key form
+  const showApiKeyForm = () => {
+    setAction((action:string) => ('createApiKey'));
+    console.log('showApiKeyForm action: ',action);
+    setMenuActive((menuActive) => (false));
   }
 
   const toggleSharedSessionKeyForm = () => {
@@ -35,6 +40,19 @@ export default function MainMenu() {
   }
 
   const onLogoutClick = async () => {
+    try {
+      const instance = await ZerobiasAppService.getInstance();
+      if (instance) {
+        await instance
+        .zerobiasClientApi
+        .danaClient
+        .getMeApi()
+        .logout();
+      }
+    } catch(error:any) {
+      console.log('error message: ',error.message);
+      console.log('error stack: ',error.stack);
+    }
 /*   
     zbService.zerobiasClientApi.danaClient
       ?.getMeApi()
@@ -52,7 +70,9 @@ export default function MainMenu() {
     const found = orgs?.find(el => option.value === el.id.toString());
     if (found) {
       setSelectedOrg(selectedOrg => (found));
+      setOrg((org:any) => (selectedOrg))
     }
+
     const instance = await ZerobiasAppService.getInstance();
     if (instance) {
       instance.zerobiasClientApp.selectOrg(found);
@@ -91,7 +111,12 @@ export default function MainMenu() {
           setApiEnabled(apiEnabled => (instance.enable));
 
           try {
-            await instance.zerobiasClientApi.danaClient?.getOrgApi().listOrgs().then((pagedResults: PagedResults<Org>) => {
+            await instance
+            .zerobiasClientApi
+            .danaClient
+            ?.getOrgApi()
+            .listOrgs()
+            .then((pagedResults: PagedResults<Org>) => {
               if (pagedResults?.items?.length > 0) {
                 setOrgs(orgs => (pagedResults.items));
               
@@ -173,7 +198,7 @@ export default function MainMenu() {
 
                   </div>
                   <hr className="small" />
-                  <span className="menu-item clickable" onClick={() => toggleApiKeyForm()}>Create New API Key</span>
+                  <span className="menu-item clickable" onClick={() => showApiKeyForm()}>Create New API Key</span>
                   <span className="menu-item clickable" onClick={() => toggleSharedSessionKeyForm()}>Share Session</span>
                   <span className="menu-item clickable" onClick={() => onLogoutClick()}>Sign Out</span>
                 </div>
