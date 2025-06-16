@@ -1,79 +1,67 @@
 "use client"
-import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { JSX, Suspense, useState } from 'react';
 import ProductsDemo from '../demos/ProductsDemo';
 import ModuleDemo from '../demos/ModuleDemo';
-import { Tabs, TabList, Tab, TabPanel } from 'react-tabs';
-import 'react-tabs/style/react-tabs.css';
 import PkvDemo from '../demos/PKV';
+import { Tabs, TabList, Tab, TabPanel } from 'react-tabs';
+import { usePathname } from 'next/navigation'
+import { DemoTabs } from '@/lib/types';
+import { Loading } from '../Loading';
 
 export default function MainTabs() {
-  // console.log('loading MainTabs');
-  const [selectedTab, setSelectedTab] = useState('products');
+  const router = useRouter();
+  const pathname = usePathname();
+  const pathsArray = pathname.split('/');
+  const [content, setContent] = useState<JSX.Element>();
+  const [selectedTab, setSelectedTab] = useState(0);
+  let path = pathsArray[1] ? pathsArray[1] : DemoTabs.PRODUCTS_DEMO;
 
-  const onRadioChange = (tab = 'products') => {
-    setSelectedTab(selectedTab => (tab));
-
+  const onTabChange = (ix:number,lastix:number,event:Event) => {
+    // onSelect: (index: number, lastIndex: number, event: Event) => ?boolean
+    setSelectedTab(ix);
+    const demoTab = ix === 0 ? DemoTabs.PRODUCTS_DEMO : ix === 1 ? DemoTabs.MODULE_DEMO : DemoTabs.PKV_DEMO;
+    router.push(`/${demoTab}`);
   } 
+
+  const setTabPanels = () => {
+    if (content === undefined) {
+      switch(path) {
+        case DemoTabs.PRODUCTS_DEMO:
+          setSelectedTab(0);
+          setContent((content) => (<><TabPanel><ProductsDemo/></TabPanel><TabPanel></TabPanel><TabPanel></TabPanel></>));
+          break;
+        case DemoTabs.MODULE_DEMO:
+          setSelectedTab(1);
+          setContent((content) => (<><TabPanel></TabPanel><TabPanel><ModuleDemo/></TabPanel><TabPanel></TabPanel></>));
+          break;
+        case DemoTabs.PKV_DEMO:
+          setSelectedTab(2);
+          setContent((content) => (<><TabPanel></TabPanel><TabPanel></TabPanel><TabPanel><PkvDemo/></TabPanel></>));
+          break;
+      }
+    }
+  }
+
+  setTabPanels();
 
   return (
 
-    <Tabs>
+    <Tabs selectedIndex={selectedTab} onSelect={onTabChange}>
+
       <TabList>
-        <Tab onClick={() => {setSelectedTab(selectedTab => ('products'))}}>Products</Tab>
-        <Tab onClick={() => {setSelectedTab(selectedTab => ('module'))}}>Module</Tab>
-        <Tab onClick={() => {setSelectedTab(selectedTab => ('pkv'))}}>PKV</Tab>
+        <Tab>Products Demo</Tab>
+        <Tab>Module Demo</Tab>
+        <Tab>PKV Demo</Tab>
       </TabList>
-      <TabPanel>
 
-          <ProductsDemo />
+      <Suspense fallback={(<Loading />)}>
+        {content}
+      </Suspense>
 
-      </TabPanel>
-      <TabPanel>
-
-          <ModuleDemo />
-
-      </TabPanel>
-      <TabPanel>
-
-        <PkvDemo />
-        
-      </TabPanel>
     </Tabs>
 
 
-    /* 
-    <ul className="tabs" role="tablist">
-      <li>
-          <input type="radio" name="tabs" id="tab-products"  checked={selectedTab === 'products' ? true : false} onChange={() => {onRadioChange('products')}} />
-          <label htmlFor="tab-products" 
-            role="tab" 
-            aria-selected="true" 
-            aria-controls="products-tab-panel" 
-            tabIndex={0}>Products</label>
-          <div id="products-tab-content" 
-            className="tab-content" 
-            role="tabpanel" 
-            aria-labelledby="products" 
-            aria-hidden="false">
-            <ProductsDemo />
-          </div>
-      </li>
-      <li>
-          <input type="radio" name="tabs" id="tab-module" checked={selectedTab === 'module' ? true : false} onChange={() => {onRadioChange('module')}} />
-          <label htmlFor="tab-module"
-            role="tab" 
-            aria-selected="false" 
-            aria-controls="module-tab-panel" 
-            tabIndex={1}>Module</label>
-          <div id="module-tab-content" 
-            className="tab-content"
-            role="tabpanel" 
-            aria-labelledby="module" 
-            aria-hidden="true">
-            <ModuleDemo />
-          </div>
-      </li>
-    </ul> */
   )
 
 
