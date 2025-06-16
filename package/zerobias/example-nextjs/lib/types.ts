@@ -1,4 +1,12 @@
 import { Duration, Email, Hostname, Nmtoken, UUID } from "@auditmation/types-core-js";
+import { ProductExtended } from '@auditmation/module-auditmation-auditmation-portal';
+
+export type ProductProps = {
+  products: ProductExtended[],
+  currentPage: number,
+  pageSize: number,
+  loading: boolean
+}
 
 export type UserPropsType = {
   'user': UserProps
