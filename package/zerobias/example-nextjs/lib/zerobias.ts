@@ -71,17 +71,6 @@ class ZerobiasAppService {
     return ZerobiasAppService.#instance;
   }
 
-  public logOut = async () => {
-    this.zerobiasClientApi.danaClient
-      ?.getMeApi()
-      .logoutGet()
-      .then((data:any) => {
-        console.log("logout")
-        console.log(data);
-        console.log("******")
-      });
-  };
-
   public async createApiKey(inlineObject?: InlineObject): Promise<ApiKey & object | void> {
     if (!inlineObject) { 
       Promise.reject() 

@@ -1,8 +1,8 @@
 "use client"
-import { useEffect, useState } from "react";
+import { JSX, useEffect, useState } from "react";
 import Select from 'react-select';
 import ZerobiasAppService from "@/lib/zerobias";
-import { OrgProps, UserProps } from "@/lib/types";
+import { SelectOptionType } from "@/lib/types";
 import { getZerobiasClientUrl } from "@auditmation/zb-client-lib-js";
 import { ProductExtended } from '@auditmation/module-auditmation-auditmation-portal';
 import { ModuleSearch } from '@auditmation/module-auditmation-auditmation-store';
@@ -11,50 +11,29 @@ import { PagedResults } from "@auditmation/types-core-js";
 import { ConnectionListView, ScopeListView, SearchConnectionBody, SearchScopeBody, SortObject } from '@auditmation/module-auditmation-auditmation-hub';
 import { GithubClient, newGithub, Organization, OrganizationApi, Repository } from '@auditlogic/module-github-github-client-ts';
 
-type PageProps = {
-  user: UserProps|null,
-  org: OrgProps|null
-}
-
-type FormGroupType = {
-  product: ProductExtended,
-  connection: any,
-  scope: any,
-  githubOrg: any
-}
-
-type OptionType = {
-  value: string,
-  label: string
-}
-
-type OptionsType = OptionType[];
-
-
 export default function ModuleDemo() {
   const { user, org, loading } = useCurrentUser();
-
+  const [apiErrorMessage, setApiErrorMessage] = useState<JSX.Element>(<></>)
   const [product, setProduct] = useState<ProductExtended|null>();
 
   const [loadingConnections, setLoadingConnections] = useState(false);
   const [connections, setConnections] = useState<ConnectionListView[]|null>([]);
   const [connection, setConnection] = useState<ConnectionListView|null>();
-  const [connectionOptions, setConnectionOptions] = useState<OptionType[]>([{value: '', label: 'loading connection options'}]);
+  const [connectionOptions, setConnectionOptions] = useState<SelectOptionType[]>([{value: '', label: 'loading connection options'}]);
 
   let connectionScopes: ScopeListView[] = [];
   const [loadingScopes, setLoadingScopes] = useState(false);
   const [scope, setScope] = useState<ScopeListView|null>();
-  const [scopeOptions, setScopeOptions] = useState<OptionType[]>([{value: '', label: 'loading connection scope options'}]);
+  const [scopeOptions, setScopeOptions] = useState<SelectOptionType[]>([{value: '', label: 'loading connection scope options'}]);
 
   let githubClient:GithubClient|null = null;
   const [loadingGithubOrgs, setLoadingGithubOrgs] = useState(false);
   const [githubOrg, setGithubOrg] = useState<Organization|null>();
   const [githubOrgs, setGithubOrgs] = useState<Organization[]|null>([]);
-  const [githubOrgOptions, setGithubOrgOptions] = useState<OptionType[]>([{value: '', label: 'loading GitHub Org options'}]);
+  const [githubOrgOptions, setGithubOrgOptions] = useState<SelectOptionType[]>([{value: '', label: 'loading GitHub Org options'}]);
 
   const [loadingGithubRepos, setLoadingGithubRepos] = useState(false);
   const [githubRepos, setGithubRepos] = useState<Repository[]>([]);
-  const [formGroup, setFormGroup] = useState<FormData>();
 
 
 
@@ -299,25 +278,41 @@ export default function ModuleDemo() {
           targetId: instance.zerobiasClientApi.toUUID(scope.id)  // <--- connection ID if one scope OR scope ID if multi-scope
         }
 
-        // get GITHUB orgs
-        githubClient.connect(hubConnectionProfile).then(async () => {
-          await githubClient?.getOrganizationApi().listMyOrganizations(1,5).then((pagedResults: PagedResults<Organization>) => {
-            const githubOrgItems = pagedResults.items.length > 0 ? pagedResults.items : [];
-            setGithubOrgs(githubOrgs => (githubOrgItems));
-            console.log('githubOrgItems: ',githubOrgItems);
-            const options = [{value:'',label: 'Select Github Organization'}];
-            githubOrgItems.forEach(el => {
-              options.push({value: el.id.toString(), label: el.name});
-            });
-            console.log('githubOrg options: ',options);
-            setGithubOrgOptions(githubOrgOptions => (options));
-          }).finally(() => {
-            setLoadingGithubOrgs(loadingGithubOrgs => (false));
+        try {
+          // get GITHUB orgs
+          await githubClient.connect(hubConnectionProfile).then(async () => {
+            try {
+              await githubClient?.getOrganizationApi().listMyOrganizations(1,5).then((pagedResults: PagedResults<Organization>) => {
+                const githubOrgItems = pagedResults.items.length > 0 ? pagedResults.items : [];
+                setGithubOrgs(githubOrgs => (githubOrgItems));
+                console.log('githubOrgItems: ',githubOrgItems);
+                const options = [{value:'',label: 'Select Github Organization'}];
+                githubOrgItems.forEach(el => {
+                  options.push({value: el.id.toString(), label: el.name});
+                });
+                console.log('githubOrg options: ',options);
+                setGithubOrgOptions(githubOrgOptions => (options));
+              }).finally(() => {
+                setLoadingGithubOrgs(loadingGithubOrgs => (false));
+              });
+            } catch(e) {
+              console.log('error listing Github Orgs: ',e);
+
+            } finally {
+              setLoadingGithubOrgs(loadingGithubOrgs => (false));
+            }
           });
-        });
+        } catch(err:any) {
+          console.log('error connecting githubClient: ',err);
+          setApiErrorMessage(() => (<><p className="warn">error connecting githubClient: </p><p><pre>{err.message}</pre></p></>));
+        } finally {
+          setLoadingGithubOrgs(loadingGithubOrgs => (false));
+        }
       }
     } catch(error) {
-      console.log('error getting github orgs: ',error);
+      console.log('error getting zerobias instancce: ',error);
+    } finally {
+      setLoadingGithubOrgs(loadingGithubOrgs => (false));
     }
   }
 
@@ -356,19 +351,19 @@ export default function ModuleDemo() {
           instance.zerobiasClientApi.hubClient.getScopeApi().search(searchScopeBody, 1, 50, new SortObject('name', 'asc')).then((pagedResults:PagedResults<ScopeListView>) => {
             connectionScopes = pagedResults.items.length > 0 ? pagedResults.items : [];
             const scopeItems = [{value: '', label: 'Select Connection Scope'}];
-            connectionScopes.forEach(el => {
-              scopeItems.push({value: el.id.toString(), label: el.name});
-            });
 
             if (connectionScopes.length === 1) {
               // if only one scope go ahead and select it by setting value of `scope` formControl
               const scopeItem:ScopeListView = connectionScopes[0];
-
               scopeItems.push({value: scopeItem.id.toString(), label: scopeItem.name});
               setScope(scope => (scopeItem));
               // go ahead and make next call
               getGithubOrgs(scopeItem);
 
+            } else if (connectionScopes.length > 1) {
+              connectionScopes.forEach(el => {
+                scopeItems.push({value: el.id.toString(), label: el.name});
+              });
             }
 
             setScopeOptions(scopeOptions => (scopeItems));
@@ -507,7 +502,7 @@ export default function ModuleDemo() {
         {GithubRepos()}
       </section>
 
-      <div className="pb-300"></div>
+      <div className="pb-300">{apiErrorMessage}</div>
 
     </div>
   );
