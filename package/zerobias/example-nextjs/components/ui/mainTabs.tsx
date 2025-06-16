@@ -4,6 +4,7 @@ import ProductsDemo from '../demos/ProductsDemo';
 import ModuleDemo from '../demos/ModuleDemo';
 import { Tabs, TabList, Tab, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
+import PkvDemo from '../demos/PKV';
 
 export default function MainTabs() {
   // console.log('loading MainTabs');
@@ -32,7 +33,11 @@ export default function MainTabs() {
           <ModuleDemo />
 
       </TabPanel>
-      <TabPanel>Content for Tab 3</TabPanel>
+      <TabPanel>
+
+        <PkvDemo />
+        
+      </TabPanel>
     </Tabs>
 
 
