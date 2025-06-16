@@ -1,6 +1,22 @@
 import { Duration, Email, Hostname, Nmtoken, UUID } from "@auditmation/types-core-js";
 import { ProductExtended } from '@auditmation/module-auditmation-auditmation-portal';
 
+export type SelectOptionType = {
+  value: string,
+  label: string
+}
+
+export type SelectOptionsType = SelectOptionType[];
+
+
+export enum DemoTabs {
+  PRODUCTS_DEMO = 'products-demo',
+  MODULE_DEMO = 'module-demo',
+  PKV_DEMO = 'pkv-demo'
+}
+
+export type DemoTab = DemoTabs.PRODUCTS_DEMO | DemoTabs.MODULE_DEMO | DemoTabs.PKV_DEMO;
+
 export type ProductProps = {
   products: ProductExtended[],
   currentPage: number,
