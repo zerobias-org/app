@@ -35,20 +35,20 @@ export default function MainMenu() {
     setMenuActive((menuActive) => (false));
   }
 
-  const toggleSharedSessionKeyForm = () => {
-    // show hide api key form
+  const showSharedSessionKeyForm = () => {
+    setAction((action:string) => ('createSharedSessionKey'));
+    console.log('createSharedSessionKey action: ',action);
+    setMenuActive((menuActive) => (false));
   }
 
   const onLogoutClick = async () => {
     try {
       const instance = await ZerobiasAppService.getInstance();
       if (instance) {
-        await instance
-        .zerobiasClientApi
-        .danaClient
-        .getMeApi()
-        .logout();
-      }
+
+        await instance.zerobiasClientApp.onLogout();
+
+      } 
     } catch(error:any) {
       console.log('error message: ',error.message);
       console.log('error stack: ',error.stack);
@@ -67,15 +67,21 @@ export default function MainMenu() {
 
   const onOrgChange = async (option:any) => {
     console.log('changed: ',option);
-    const found = orgs?.find(el => option.value === el.id.toString());
-    if (found) {
-      setSelectedOrg(selectedOrg => (found));
-      setOrg((org:any) => (selectedOrg))
-    }
+    try {
+      const found = orgs?.find(el => option.value === el.id.toString());
+      if (found) {
+        setSelectedOrg(selectedOrg => (found));
+        setOrg((org:any) => (selectedOrg))
+      }
 
-    const instance = await ZerobiasAppService.getInstance();
-    if (instance) {
-      instance.zerobiasClientApp.selectOrg(found);
+      const instance = await ZerobiasAppService.getInstance();
+      if (instance) {
+        instance.zerobiasClientApp.selectOrg(found);
+      }
+    } catch(err) {
+      console.log('error selecting org: ',err);
+    } finally {
+      setMenuActive((menuActive) => (false));
     }
   }
 
@@ -90,7 +96,7 @@ export default function MainMenu() {
             className="org-selector"
             classNamePrefix="select"
             name="selectOrg"
-            value={{value:org?.id.toString(),label:org?.name}}
+            defaultValue={{value:org?.id.toString(),label:org?.name}}
             onChange={(e) => onOrgChange(e)}
             options={orgOptions}
           />
@@ -199,7 +205,7 @@ export default function MainMenu() {
                   </div>
                   <hr className="small" />
                   <span className="menu-item clickable" onClick={() => showApiKeyForm()}>Create New API Key</span>
-                  <span className="menu-item clickable" onClick={() => toggleSharedSessionKeyForm()}>Share Session</span>
+                  <span className="menu-item clickable" onClick={() => showSharedSessionKeyForm()}>Share Session</span>
                   <span className="menu-item clickable" onClick={() => onLogoutClick()}>Sign Out</span>
                 </div>
 
