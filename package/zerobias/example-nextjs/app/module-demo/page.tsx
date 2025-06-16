@@ -1,5 +1,4 @@
 "use client"
-
 import MainTabs from "@/components/ui/mainTabs";
 import AppToolbar from "@/components/ui/appToolbar";
 import CreateApiKeyForm from "@/components/forms/FormCreateApiKey";
@@ -8,7 +7,12 @@ import { useCurrentUser } from "@/context/CurrentUserContext";
 import { Suspense, useEffect } from "react";
 import { X } from 'lucide-react';
 
-export default function Home() {
+import { usePathname } from 'next/navigation'
+
+
+export default function ModuleDemoPage() {
+
+  const pathname = usePathname();
   const { user, org, loading, action, setAction } = useCurrentUser();
 
   const onCloseModal = () => {
@@ -16,7 +20,9 @@ export default function Home() {
     setAction((action:string) => (''));
   }
 
-  return (
+
+
+  return(
     <>
       <AppToolbar/>
       
@@ -40,12 +46,17 @@ export default function Home() {
       <div className={action === 'createSharedSessionKey' ? 'modal show-modal' : 'modal'}>
         <span className="close" onClick={onCloseModal}><X/></span>
         <Suspense>
-          <CreateSharedSessionKeyForm />
+{/*           <CreateSharedSessionKeyForm /> */}
         </Suspense>
       </div>
 
-
+    
+    
     </>
-  );
+  )
+
+
 
 }
+
+

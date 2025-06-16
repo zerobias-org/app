@@ -5,3 +5,7 @@ export function getFutureDate(addYears:number) {
   newDate.setFullYear(year);
   return newDate;
 }
+
+export function minutesToDuration(minutes:number) {
+  return `PT${minutes}M`;
+}

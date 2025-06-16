@@ -1,6 +1,7 @@
 @use "material-symbols";
 @use './cdk-overlay-container.scss';
 @use './cdk-text-field.scss';
+@use '../node_modules/react-tabs/style/react-tabs.scss';
 
 *,
 *::before,
@@ -499,7 +500,13 @@ form.zb-form {
     padding: 0 8px;
     line-height: 24px;
     min-width: 300px;
+
+    &[name="expireMinutes"] {
+      min-width: 80px;
+      width: 80px;
+    }
   }
+
   .label {
     line-height: 34px;
     white-space: nowrap;
@@ -508,6 +515,12 @@ form.zb-form {
   .hint {
     font-size: 13px;
     line-height: 16px;
+    font-weight: 300;
+
+    &.lh-34 {
+      font-size: 14px;
+      line-height: 34px;
+    }
   }
 }
 

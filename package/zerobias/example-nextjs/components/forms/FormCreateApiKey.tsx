@@ -42,7 +42,7 @@ export default function CreateApiKeyForm() {
       const safeUsername = user.name.replace(' ','_');
       const safeOrgname = org.name.replace(' ','_');
       const safeName = `${safeUsername}_${safeOrgname}_API_Key`;
-      console.log('safeNamae: ',safeName);
+      // console.log('safeNamae: ',safeName);
 
       setApiKeyName((apiKeyName) => (safeName));
 

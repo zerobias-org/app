@@ -12,7 +12,11 @@ const nextConfig: NextConfig = {
       new URL('https://cdn.auditmation.io/**')
     ]
   },
-/*   async rewrites() {
+/*   env: {
+    NEXT_PUBLIC_API_HOSTNAME: process.env.NEXT_PUBLIC_API_HOSTNAME,
+    NEXT_PUBLIC_ENV: process.env.NEXT_PUBLIC_ENV,
+  }, */
+  /* async rewrites() {
     return [
       {
         source: "/api/:path*",
