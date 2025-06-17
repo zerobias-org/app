@@ -17,10 +17,10 @@ export default function MainTabs() {
   const [selectedTab, setSelectedTab] = useState(0);
   let path = pathsArray[1] ? pathsArray[1] : DemoTabs.PRODUCTS_DEMO;
 
-  const onTabChange = (ix:number,lastix:number,event:Event) => {
+  const onTabChange = (ix:number,lastix:number, event:Event) => {
     // onSelect: (index: number, lastIndex: number, event: Event) => ?boolean
-    setSelectedTab(ix);
     const demoTab = ix === 0 ? DemoTabs.PRODUCTS_DEMO : ix === 1 ? DemoTabs.MODULE_DEMO : DemoTabs.PKV_DEMO;
+    setSelectedTab(ix);
     router.push(`/${demoTab}`);
   } 
 

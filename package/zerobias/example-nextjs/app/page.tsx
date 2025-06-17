@@ -7,6 +7,7 @@ import CreateSharedSessionKeyForm from "@/components/forms/FormCreateSharedSecre
 import { useCurrentUser } from "@/context/CurrentUserContext";
 import { Suspense, useEffect } from "react";
 import { X } from 'lucide-react';
+import Link from "next/link";
 
 export default function Home() {
   const { user, org, loading, action, setAction } = useCurrentUser();
@@ -22,7 +23,9 @@ export default function Home() {
       
       <div className="content-wrap">
         <div className="content-wrapper flexColumn gap16 main-tabs-wrapper">
-          <MainTabs />
+          <div className="demo-item"><Link href={'/products-demo'}>Products List Demo</Link></div>
+          <div className="demo-item"><Link href={'/module-demo'}>Module Demo</Link></div>
+          <div className="demo-item"><Link href={'/pkv-demo'}>PKV Demo</Link></div>
         </div>
       </div>
 
