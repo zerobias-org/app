@@ -14,6 +14,7 @@
   --action-color-warn-hover: #ffd9d9;
   --action-color-success: #3b9a00;
   --action-color-success-hover: #338500;
+  --font-montserrat: "font-family: Montserrat, sans-serif;";
 }
 
 body {
