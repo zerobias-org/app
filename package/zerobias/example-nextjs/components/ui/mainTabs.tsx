@@ -10,18 +10,19 @@ import { DemoTabs } from '@/lib/types';
 import { Loading } from '../Loading';
 
 export default function MainTabs() {
+  const [content, setContent] = useState<JSX.Element>();
+  const [selectedTab, setSelectedTab] = useState(0);
+
   const router = useRouter();
   const pathname = usePathname();
   const pathsArray = pathname.split('/');
-  const [content, setContent] = useState<JSX.Element>();
-  const [selectedTab, setSelectedTab] = useState(0);
   let path = pathsArray[1] ? pathsArray[1] : DemoTabs.PRODUCTS_DEMO;
 
   const onTabChange = (ix:number,lastix:number, event:Event) => {
     // onSelect: (index: number, lastIndex: number, event: Event) => ?boolean
     const demoTab = ix === 0 ? DemoTabs.PRODUCTS_DEMO : ix === 1 ? DemoTabs.MODULE_DEMO : DemoTabs.PKV_DEMO;
-    setSelectedTab(ix);
     router.push(`/${demoTab}`);
+    setSelectedTab(ix);
   } 
 
   const setTabPanels = () => {
