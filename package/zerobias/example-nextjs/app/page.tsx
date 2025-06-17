@@ -4,8 +4,8 @@ import AppToolbar from "@/components/ui/appToolbar";
 import CreateApiKeyForm from "@/components/forms/FormCreateApiKey";
 import CreateSharedSessionKeyForm from "@/components/forms/FormCreateSharedSecret";
 import { useCurrentUser } from "@/context/CurrentUserContext";
-import { Suspense, useEffect } from "react";
-import { X, ShoppingCart, Blocks, ListCollapse, SquareArrowOutUpRight } from 'lucide-react';
+import { Suspense } from "react";
+import { X, ShoppingCart, Blocks, ListCollapse } from 'lucide-react';
 import Link from "next/link";
 
 export default function Home() {
