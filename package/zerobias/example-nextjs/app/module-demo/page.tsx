@@ -46,7 +46,7 @@ export default function ModuleDemoPage() {
       <div className={action === 'createSharedSessionKey' ? 'modal show-modal' : 'modal'}>
         <span className="close" onClick={onCloseModal}><X/></span>
         <Suspense>
-{/*           <CreateSharedSessionKeyForm /> */}
+          <CreateSharedSessionKeyForm />
         </Suspense>
       </div>
 
