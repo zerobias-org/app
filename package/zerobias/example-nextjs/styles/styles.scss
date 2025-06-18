@@ -84,6 +84,10 @@
   height: 85px;
 }
 
+h1, h2, h3, h4, h5 {
+  color: rgba(0, 0, 0, .87);
+}
+
 .spinner {
   position: relative;
   top: calc(50% - 1rem);
@@ -158,17 +162,52 @@
 }
 
 .react-tabs {
+  flex-grow: 1;
+  position: relative;
+
   ul.react-tabs__tab-list {
+    background-color: transparent;
     display: flex;
+    justify-content: center;
     flex-direction: row;
     gap:0;
+    flex-grow: 1;
+    overflow: hidden;
+    z-index: 1;
+    border-bottom: 1px solid rgba(0, 0, 0, .12);
   }
-/*   li.react-tabs__tab {
-    background-color: whitesmoke;
-    &.react-tabs__tab--selected {
-      background-color: transparent;
+  
+  li.react-tabs__tab {
+    font-family: Roboto, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    border: none;
+    background-color: #fff;
+    border-bottom: 4px solid transparent;
+    color: rgba(0, 0, 0, .6);
+    height: 48px;
+    min-width: 90px;
+    padding: 0 24px;
+    line-height: 48px;
+    z-index: 2;
+    -webkit-font-smoothing: antialiased;
+
+    &:hover {
+      background-color: #03aff008;
     }
-  } */
+
+    &.react-tabs__tab--selected {
+      color: var(--action-color-primary);
+      border: none;
+      background-color: #03aff008;
+      border-bottom: 4px solid var(--action-color-primary);
+    }
+
+  }
+
+  .react-tabs__tab-panel {
+    padding: 0 8%;
+  }
 }
 
 .select-wrappper{
@@ -594,6 +633,7 @@ button {
       width: 325px;
       white-space: pre-line;
       box-shadow: 1px 1px 4px 0px rgba(0, 0, 0, 0.12);
+      margin-top: -3px;
     }
 
     &.active{
@@ -627,12 +667,14 @@ button {
         line-height: 1;
         font-weight: 600;
         margin: 0;
+        color: #fff;
       }
       h4 {
         font-size: 12px;
         line-height: 1;
         margin: 0;
         font-weight: 500;
+        color: #fff;
       }
 
       .user-info {

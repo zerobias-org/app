@@ -8,6 +8,14 @@ import { Tabs, TabList, Tab, TabPanel } from 'react-tabs';
 import { usePathname } from 'next/navigation'
 import { DemoTabs } from '@/lib/types';
 import { Loading } from '../Loading';
+import { Roboto } from "next/font/google";
+
+  const robotoMed = Roboto({
+    weight: "500",
+    variable: "--font-roboto-medium",
+    subsets: ["latin"],
+  })
+
 
 export default function MainTabs() {
   const [content, setContent] = useState<JSX.Element>();
@@ -16,6 +24,8 @@ export default function MainTabs() {
   const router = useRouter();
   const pathname = usePathname();
   const pathsArray = pathname.split('/');
+
+
 
   // path tells us which tab we're on, default to PRODUCTS_DEMO
   let path = pathsArray[1] ? pathsArray[1] : DemoTabs.PRODUCTS_DEMO;
@@ -53,7 +63,7 @@ export default function MainTabs() {
 
     <Tabs selectedIndex={selectedTab} onSelect={onTabChange}>
 
-      <TabList>
+      <TabList className={`${robotoMed.className} react-tabs__tab-list`}>
         <Tab>Products Demo</Tab>
         <Tab>Module Demo</Tab>
         <Tab>PKV Demo</Tab>
