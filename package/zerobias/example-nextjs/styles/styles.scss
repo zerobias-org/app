@@ -1054,20 +1054,19 @@ button {
       border: 1px solid rgba(0, 0, 0, .12);
       box-shadow: none;
       border-radius: 10px;
-      text-transform: none;
-      font-size: 12px;
       padding: 6px 16px;
       color: #000000de;
       background-color: #fff;
       position: relative;
       top: 12px;
-      text-decoration: none;
-      font-weight: 400;
       display: flex;
       gap: 4px;
       align-items: center;
 
       a {
+        font-family: Montserrat, sans-serif;
+        font-weight: 400;
+        font-size: 12px;
         height: 15px;
         line-height: 15px;
         text-decoration: none;
