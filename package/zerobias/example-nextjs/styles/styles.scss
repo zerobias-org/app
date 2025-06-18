@@ -997,6 +997,7 @@ button {
     box-shadow: 8px 8px 16px -6px #0000001a;
     border-radius: 5px;
     transition: box-shadow .13s linear, transform .13s linear;
+    background-color: #fff;
 
 
     &:hover {
@@ -1019,16 +1020,16 @@ button {
         color: #333;
         text-decoration: none;
         display: flex;
-        gap: 16px;
-        line-height: 48px;
+        gap: 12px;
+        line-height: 40px;
 
         &:hover {
           color: var(--action-color-primary-hover);
         }
       }
       span.item-title {
-        font-size: 24px;
-        line-height: 48px;
+        font-size: 22px;
+        line-height: 40px;
       }
       
     }
@@ -1042,7 +1043,9 @@ button {
     }
 
     .item-actions {
+      border-top: 1px solid rgba(0, 0, 0, .12);
       justify-items: flex-end;
+      padding: 4px 16px;
     }
 
 
@@ -1051,19 +1054,19 @@ button {
       border: 1px solid rgba(0, 0, 0, .12);
       box-shadow: none;
       border-radius: 10px;
-      text-transform: none;
-      font-size: 12px;
       padding: 6px 16px;
       color: #000000de;
       background-color: #fff;
       position: relative;
-      text-decoration: none;
-      font-weight: 400;
+      top: 12px;
       display: flex;
       gap: 4px;
       align-items: center;
 
       a {
+        font-family: Montserrat, sans-serif;
+        font-weight: 400;
+        font-size: 12px;
         height: 15px;
         line-height: 15px;
         text-decoration: none;

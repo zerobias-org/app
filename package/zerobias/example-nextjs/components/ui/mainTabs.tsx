@@ -16,17 +16,20 @@ export default function MainTabs() {
   const router = useRouter();
   const pathname = usePathname();
   const pathsArray = pathname.split('/');
+
+  // path tells us which tab we're on, default to PRODUCTS_DEMO
   let path = pathsArray[1] ? pathsArray[1] : DemoTabs.PRODUCTS_DEMO;
 
-  const onTabChange = (ix:number,lastix:number, event:Event) => {
-    // onSelect: (index: number, lastIndex: number, event: Event) => ?boolean
+  const onTabChange = (ix:number, lastix:number, event:Event) => {
+    // react tabs --> onSelect: (index: number, lastIndex: number, event: Event) => ?boolean
     const demoTab = ix === 0 ? DemoTabs.PRODUCTS_DEMO : ix === 1 ? DemoTabs.MODULE_DEMO : DemoTabs.PKV_DEMO;
-    router.push(`/${demoTab}`);
-    setSelectedTab(ix);
+    router.push(`/${demoTab}`); // navigate to new tab
+    // setSelectedTab(ix);
   } 
 
+  // keeping panels empty except for current tab to speed up loading
   const setTabPanels = () => {
-    if (content === undefined) {
+    if (content === undefined) { // only if content hasn't been set - anti-loop
       switch(path) {
         case DemoTabs.PRODUCTS_DEMO:
           setSelectedTab(0);

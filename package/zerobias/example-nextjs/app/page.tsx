@@ -26,7 +26,7 @@ export default function Home() {
 
           <div className="demo-item">
             <div className="item-header">
-              <Link href={'/products-demo'}><ShoppingCart size={48} /> <span className="item-title">Products List Demo</span></Link>
+              <Link href={'/products-demo'}><ShoppingCart size={40} /><span className="item-title">Products List Demo</span></Link>
             </div>
             <div className="item-subtitle">
               <p>This example shows the use of our Catalog API <code>zerobiasClientApi.portalClient.getProductApi().search()</code> endpoint to get a list of products from the ZeroBias Catalog.</p>
@@ -38,7 +38,7 @@ export default function Home() {
 
           <div className="demo-item">
             <div className="item-header">
-              <Link href={'/module-demo'}><Blocks size={48} /> <span className="item-title">Module Usage Demo</span></Link>
+              <Link href={'/module-demo'}><Blocks size={40} /><span className="item-title">Module Usage Demo</span></Link>
             </div>
             <div className="item-subtitle">
               <p>This example shows the use of our GitHub Module to make calls to retrieve a list of <i>your</i> organization's GitHub Repositories.</p>
@@ -50,7 +50,7 @@ export default function Home() {
 
           <div className="demo-item">
             <div className="item-header">
-              <Link href={'/pkv-demo'}><ListCollapse size={48} /> <span className="item-title">PKV Demo</span></Link>
+              <Link href={'/pkv-demo'}><ListCollapse size={40} /><span className="item-title">PKV Demo</span></Link>
             </div>
             <div className="item-subtitle">
               <p>This example shows the use of our Principal Key-Value API <code>zerobiasClientApi.danaClient.getPkvApi()</code> endpoints to manipulate the storage of key-value pairs</p>
