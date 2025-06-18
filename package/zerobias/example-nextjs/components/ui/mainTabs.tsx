@@ -16,7 +16,6 @@ import { Roboto } from "next/font/google";
     subsets: ["latin"],
   })
 
-
 export default function MainTabs() {
   const [content, setContent] = useState<JSX.Element>();
   const [selectedTab, setSelectedTab] = useState(0);
