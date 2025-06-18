@@ -6,6 +6,7 @@ export function getFutureDate(addYears:number) {
   return newDate;
 }
 
+// Duration refers to the `Duration` type in `@auditmation/types-core-js`
 export function minutesToDuration(minutes:number) {
   return `PT${minutes}M`;
 }
