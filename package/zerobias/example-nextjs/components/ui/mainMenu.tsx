@@ -65,6 +65,22 @@ export default function MainMenu() {
       */
   } 
 
+  const nameToUcInitials = (name:string|undefined):string => {
+    if (!name) { return ''; };
+    const spaceMatches = name.match(/\s/g); // space
+    if (spaceMatches && spaceMatches.length > 0) {
+      const words = name.split(' ');
+      return `${words[0]?.charAt(0).toUpperCase()}${words[words.length-1]?.charAt(0).toUpperCase()}`;
+    } else {
+      const dashMatches = name.match(/-/g); // dash -
+      if (dashMatches && dashMatches.length > 0) {
+        const words = name.split('-');
+        return `${words[0]?.charAt(0).toUpperCase()}${words[words.length-1]?.charAt(0).toUpperCase()}`;
+      } 
+    }
+    return `${name?.charAt(0)?.toUpperCase()}${name?.charAt(1)}`; // i.e. Ab
+  }
+
   const onOrgChange = async (option:any) => {
     console.log('changed: ',option);
     try {
@@ -167,7 +183,7 @@ export default function MainMenu() {
 
                     <div className="avatar-wrapper">
                       <div className="avatar-initials">
-                        {user?.name ? user.name.charAt(0).toUpperCase() : ''}
+                        {nameToUcInitials(user?.name)}
                       </div>
                     </div>
                   
@@ -182,7 +198,7 @@ export default function MainMenu() {
                   <div className="avatar-wrapper x-large">
 
                       <div className="avatar-initials">
-                        {user?.name ? user?.name.charAt(0) : ''}
+                        {nameToUcInitials(user?.name)}
                       </div>
 
                   </div>
