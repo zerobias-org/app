@@ -3,7 +3,6 @@ import { Roboto, Montserrat } from "next/font/google";
 import { CurrentUserProvider } from "@/context/CurrentUserContext";
 import "./globals.css";
 import "../styles/styles.scss";
-import Link from "next/link";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
@@ -28,7 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <meta name="viewport" content="width=device-width, initial-scale=1" />
-      <link rel="icon" type="image/png" href={process.env.NEXT_PUBLIC_IS_LOCAL_DEV === 'true' ? '/favicon.png' : '/example-nextjs/favicon.png'}  />
+      <link rel="icon" type="image/png" href="favicon.png"  />
       <body>
           <CurrentUserProvider>{children}</CurrentUserProvider>
       </body>
