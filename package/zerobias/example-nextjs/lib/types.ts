@@ -8,12 +8,13 @@ export type SelectOptionType = {
 
 export type SelectOptionsType = SelectOptionType[];
 
-
 export enum DemoTabs {
   PRODUCTS_DEMO = 'products-demo',
   MODULE_DEMO = 'module-demo',
   PKV_DEMO = 'pkv-demo'
 }
+
+export type ActionType = "createApiKey" | "createSharedSessionKey" | null;
 
 export type DemoTab = DemoTabs.PRODUCTS_DEMO | DemoTabs.MODULE_DEMO | DemoTabs.PKV_DEMO;
 

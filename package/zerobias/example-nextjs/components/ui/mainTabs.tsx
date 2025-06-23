@@ -24,8 +24,6 @@ export default function MainTabs() {
   const pathname = usePathname();
   const pathsArray = pathname.split('/');
 
-
-
   // path tells us which tab we're on, default to PRODUCTS_DEMO
   let path = pathsArray[1] ? pathsArray[1] : DemoTabs.PRODUCTS_DEMO;
 
@@ -59,7 +57,6 @@ export default function MainTabs() {
   setTabPanels();
 
   return (
-
     <Tabs selectedIndex={selectedTab} onSelect={onTabChange}>
 
       <TabList className={`${robotoMed.className} react-tabs__tab-list`}>
@@ -73,8 +70,6 @@ export default function MainTabs() {
       </Suspense>
 
     </Tabs>
-
-
   )
 
 

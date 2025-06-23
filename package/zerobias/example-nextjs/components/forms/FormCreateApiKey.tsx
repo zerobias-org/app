@@ -1,26 +1,32 @@
 'use client'
 
+import { X } from 'lucide-react';
+import { ActionType } from '@/lib/types';
+import { getFutureDate } from '@/lib/utils';
+import ZerobiasAppService from '@/lib/zerobias';
 import { JSX, useEffect, useState } from 'react';
 import { useCurrentUser } from '@/context/CurrentUserContext';
-import ZerobiasAppService from '@/lib/zerobias';
-import { InlineObject } from '@auditmation/module-auditmation-auditmation-dana';
-import { getFutureDate } from '@/lib/utils';
+import { ApiKey, InlineObject } from '@auditmation/module-auditmation-auditmation-dana';
 
 export default function CreateApiKeyForm() {
   const [actionButtonLabel, setActionButtonLabel] = useState<'Create'|'Close'>('Create');
   const [content, setContent] = useState<JSX.Element|null>(null);
 
   const [apiKeyName, setApiKeyName] = useState<string>('');
-  const [apiKey, setApiKey] = useState<any|null>(null);
+  const [apiKey, setApiKey] = useState<ApiKey & any|null>(null);
   const [orgId, setOrgId] = useState<string>('');
   const [dialogMessage, setDialogMessage] = useState<JSX.Element|null>();
   
   const { user, org, loading, action, setAction } = useCurrentUser();
 
-  const onCancel = () => {
-    // hide form
-    setAction((action:string) => (''));
+  const closeModal = () => {
+    // hide modal
+    setAction((action:ActionType) => (null));
     resetForm();
+  }
+
+  const onCancel = () => {
+    closeModal();
   }
 
   const resetForm = () => {
@@ -119,10 +125,10 @@ export default function CreateApiKeyForm() {
           .zerobiasClientApi
           .danaClient
           .getMeApi()
-          .createApiKey(inlineObject).then((key: any) => {
+          .createApiKey(inlineObject).then((key: ApiKey & any) => {
             if (key) {
               /* 
-                API_Key:
+                ApiKey & object (any):
                 {
                   "id": "ab9c69db-450f-5ff6-8399-463e82f14611",
                   "ownerId": "52d1058e-d615-5efb-a137-fc40cef9bc82",
@@ -135,7 +141,7 @@ export default function CreateApiKeyForm() {
                 }
               */
             
-              setApiKey((apiKey:any) => (key));
+              setApiKey((apiKey:ApiKey & any) => (key));
 
               navigator.clipboard.writeText(key.data).then(() => {
                 const currentOrgId:string = instance.zerobiasOrgId.getCurrentOrgId();
@@ -152,7 +158,7 @@ export default function CreateApiKeyForm() {
         setDialogMessage(dialogMessage => (<p className="warn">{message}<br />{error.message}</p>));
         console.log(dialogMessage, error);
       } finally {
-        refreshContent();
+        renderContent();
       }
     }
   }
@@ -161,16 +167,15 @@ export default function CreateApiKeyForm() {
     event.preventDefault();
     if (event.type === 'submit') {
       if (apiKey) {
-        // we've already got one
-        resetForm();
-        setAction((action:string) => (''));
+        // we've already got one 
+        closeModal();
       } else {
         await getApiKey();
       }
     }
   }
 
-  const refreshContent = () => {
+  const renderContent = () => {
     const freshContent = KeyFields();
     if (content !== freshContent) {
       setContent((content) => (freshContent));
@@ -178,10 +183,11 @@ export default function CreateApiKeyForm() {
   }
 
   useEffect(() => {
-    refreshContent();
+    renderContent();
   }, [apiKeyName, apiKey, orgId, actionButtonLabel, dialogMessage])
   return (
-
+    <>
+      <span className="close" onClick={closeModal}><X/></span>
       <div className="modal-form-wrap">
         <div className="modal-form-wrap-inner">
           <div className="modal-header">
@@ -190,8 +196,9 @@ export default function CreateApiKeyForm() {
           </div>
 
           { content }
+
         </div>
       </div>
-
+    </>
   )
 }
