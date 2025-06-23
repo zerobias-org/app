@@ -3,8 +3,11 @@
 ## Example Apps
 
 ### Angular 
-Clone the `package/zerobias/ngx-example` app to get started.
+Clone the `package/zerobias/example-angular` app to get started.
+
+Run `npm install`
 
 
 
-## Vanilla
+### NextJS
+Clone the `package/zerobias/example-nextjs` app to get started.
