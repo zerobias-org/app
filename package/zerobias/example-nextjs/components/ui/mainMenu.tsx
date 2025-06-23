@@ -109,7 +109,7 @@ export default function MainMenu() {
         <div suppressHydrationWarning>
           <Select
             placeholder="Select Organization..."
-            className="org-selector"
+            className="org-selector themed-select"
             classNamePrefix="select"
             name="selectOrg"
             defaultValue={{value:org?.id.toString(),label:org?.name}}
@@ -119,19 +119,16 @@ export default function MainMenu() {
         </div>
       )
     }
-
   }
 
   useEffect(() => {
 
     const getPlatform = async () => {
       try {
-
         const instance = await ZerobiasAppService.getInstance();
 
         if (instance) {
           setApiEnabled(apiEnabled => (instance.enable));
-
           try {
             await instance
             .zerobiasClientApi
@@ -146,17 +143,12 @@ export default function MainMenu() {
                   return { value: item.id.toString(), label: item.name };
                 }); 
                 setOrgOptions(orgOptions => (options));
-            
               }
-              
             });
-
           } catch(error) {
             console.warn('orgs warning: ',error);
           }
-
         }
-
       } catch(error) {
         console.error('Failed to get orgs: ', error);
       }
@@ -168,11 +160,8 @@ export default function MainMenu() {
 
   const BuildMenu = () => {
       return (
-
         <div className="auditmation-user">
           <div className={menuActive ? 'auditmation-user-tooltip active' : 'auditmation-user-tooltip'}>
-
-
             <div className="top-summary menu-toggle" onClick={() => { setMenuActive(!menuActive) }}>
               <div className="org-user">
                 <h3 className="username">{ user?.name }</h3>
@@ -180,59 +169,45 @@ export default function MainMenu() {
               </div>
               <div className="user-avatar">
                 <div className="auditmation-avatar medium default">
-
                     <div className="avatar-wrapper">
                       <div className="avatar-initials">
                         {nameToUcInitials(user?.name)}
                       </div>
                     </div>
-                  
                 </div>
               </div>
             </div>
             <div className="tooltiptext" onClick={() => {}}>
-          
               <div className="menu-open-panel">
-
                 <div className="main-org-user">
                   <div className="avatar-wrapper x-large">
-
                       <div className="avatar-initials">
                         {nameToUcInitials(user?.name)}
                       </div>
-
                   </div>
-
                   <div className="user-info">
                     <span className="user-name">{user?.name}</span>
                     <span className="user-email secondary-text"> {user?.emails[0]} </span>
                   </div>
                 </div>
-
-
                 <div className="main-menu flexColumn" >
                   <hr className="small" />
                   <div className="menu-item">
-
                     <div className="nf-organization-switcher">
                       {orgSelect()}
                     </div>
-
                   </div>
                   <hr className="small" />
                   <span className="menu-item clickable" onClick={() => showApiKeyForm()}>Create New API Key</span>
                   <span className="menu-item clickable" onClick={() => showSharedSessionKeyForm()}>Share Session</span>
                   <span className="menu-item clickable" onClick={() => onLogoutClick()}>Sign Out</span>
                 </div>
-
               </div>
             </div>
           </div>
         </div>
       )
     }
-
-
 
   return BuildMenu()
 

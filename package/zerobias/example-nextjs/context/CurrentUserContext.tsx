@@ -3,10 +3,16 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import ZerobiasAppService from '@/lib/zerobias'
 import { UserProps, OrgProps } from '@/lib/types';
 import { Loading } from '@/components/Loading';
-import { useRouter } from 'next/navigation';
-/* 
-This context wraps every page to provide user, org, loading, action, setOrg, and setAction to all child pages.
-*/
+
+
+/**
+ * This context wraps every page to provide user, org, loading, action, setOrg, and setAction to all child pages.
+ * - user and org will be set by the zerobias api calls
+ * - loading shows while user and org and being loaded
+ * - action is used to show and hide forms
+ * - setOrg can be used in any child component to change the Org in this context which cascades to all children.
+ * - setAction can be used in any child component to set or unset an 'action', which we use to show/hide forms
+**/
 type CurrentUserContextType = {
   user: UserProps | null;
   org: OrgProps | null;
@@ -25,17 +31,17 @@ export const CurrentUserContext = createContext<CurrentUserContextType>({
   setAction: ()=>{}
 });
 
-// useCurrentUser can be imported wherever you need the context variables
+// useCurrentUser can be imported into any child component where you might need the context variables
 export const useCurrentUser = () => useContext(CurrentUserContext);
 
 export const CurrentUserProvider = ({ children }: { children: ReactNode }) => {
-  const router = useRouter();
   const [user, setUser] = useState<UserProps | null>(null);
   const [org, setOrg] = useState<OrgProps | null>(null);
   const [loading, setLoading] = useState(true);
   const [action, setAction] = useState<'createApiKey'|'createSharedSessionKey'|null>(null);
 
   useEffect(() => {
+
     const getPlatform = async () => {
       setLoading(loading => (true));
       try {
