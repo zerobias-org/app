@@ -1,39 +1,29 @@
 "use client"
+import { X } from 'lucide-react';
+import { Suspense } from "react";
 import MainTabs from "@/components/ui/mainTabs";
 import AppToolbar from "@/components/ui/appToolbar";
+import { useCurrentUser } from "@/context/CurrentUserContext";
 import CreateApiKeyForm from "@/components/forms/FormCreateApiKey";
 import CreateSharedSessionKeyForm from "@/components/forms/FormCreateSharedSecret";
-import { useCurrentUser } from "@/context/CurrentUserContext";
-import { Suspense, useEffect } from "react";
-import { X } from 'lucide-react';
-
-import { usePathname } from 'next/navigation'
-
 
 export default function ProductsDemoPage() {
-
-  const pathname = usePathname();
-  const { user, org, loading, action, setAction } = useCurrentUser();
+  const { action, setAction } = useCurrentUser();
 
   const onCloseModal = () => {
-    // hide form
+    // hide modal
     setAction((action:string) => (''));
   }
-
-
 
   return(
     <>
       <AppToolbar/>
-      
-      <div className="content-wrap">
-        <div className="content-wrapper flexColumn gap16 main-tabs-wrapper">
-          <MainTabs  />
-        </div>
+
+      <div className="content-wrapper flexColumn gap16 main-tabs-wrapper">
+        <MainTabs  />
       </div>
 
       <footer>
-      
       </footer>
 
       <div className={action === 'createApiKey' ? 'modal show-modal' : 'modal'}>
@@ -49,14 +39,7 @@ export default function ProductsDemoPage() {
           <CreateSharedSessionKeyForm />
         </Suspense>
       </div>
-
-    
-    
     </>
   )
 
-
-
 }
-
-
