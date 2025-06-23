@@ -1,74 +1,75 @@
 "use client"
-import { Suspense, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { JSX, Suspense, useState } from 'react';
 import ProductsDemo from '../demos/ProductsDemo';
 import ModuleDemo from '../demos/ModuleDemo';
+import PkvDemo from '../demos/PKV';
 import { Tabs, TabList, Tab, TabPanel } from 'react-tabs';
-import 'react-tabs/style/react-tabs.css';
+import { usePathname } from 'next/navigation'
+import { DemoTabs } from '@/lib/types';
 import { Loading } from '../Loading';
+import { Roboto } from "next/font/google";
+
+  const robotoMed = Roboto({
+    weight: "500",
+    variable: "--font-roboto-medium",
+    subsets: ["latin"],
+  })
 
 export default function MainTabs() {
-  const [selectedTab, setSelectedTab] = useState('products');
+  const [content, setContent] = useState<JSX.Element>();
+  const [selectedTab, setSelectedTab] = useState(0);
 
-  const onRadioChange = (tab = 'products') => {
-    setSelectedTab(selectedTab => (tab));
+  const router = useRouter();
+  const pathname = usePathname();
+  const pathsArray = pathname.split('/');
 
+  // path tells us which tab we're on, default to PRODUCTS_DEMO
+  let path = pathsArray[1] ? pathsArray[1] : DemoTabs.PRODUCTS_DEMO;
+
+  const onTabChange = (ix:number, lastix:number, event:Event) => {
+    // react tabs --> onSelect: (index: number, lastIndex: number, event: Event) => ?boolean
+    const demoTab = ix === 0 ? DemoTabs.PRODUCTS_DEMO : ix === 1 ? DemoTabs.MODULE_DEMO : DemoTabs.PKV_DEMO;
+    router.push(`/${demoTab}`); // navigate to new tab
+    // setSelectedTab(ix);
   } 
 
+  // keeping panels empty except for current tab to speed up loading
+  const setTabPanels = () => {
+    if (content === undefined) { // only if content hasn't been set - anti-loop
+      switch(path) {
+        case DemoTabs.PRODUCTS_DEMO:
+          setSelectedTab(0);
+          setContent((content) => (<><TabPanel><ProductsDemo/></TabPanel><TabPanel></TabPanel><TabPanel></TabPanel></>));
+          break;
+        case DemoTabs.MODULE_DEMO:
+          setSelectedTab(1);
+          setContent((content) => (<><TabPanel></TabPanel><TabPanel><ModuleDemo/></TabPanel><TabPanel></TabPanel></>));
+          break;
+        case DemoTabs.PKV_DEMO:
+          setSelectedTab(2);
+          setContent((content) => (<><TabPanel></TabPanel><TabPanel></TabPanel><TabPanel><PkvDemo/></TabPanel></>));
+          break;
+      }
+    }
+  }
+
+  setTabPanels();
+
   return (
+    <Tabs selectedIndex={selectedTab} onSelect={onTabChange}>
 
-    <Tabs>
-      <TabList>
-        <Tab onClick={() => {setSelectedTab(selectedTab => ('products'))}}>Products</Tab>
-        <Tab onClick={() => {setSelectedTab(selectedTab => ('module'))}}>Module</Tab>
-        <Tab onClick={() => {setSelectedTab(selectedTab => ('pkv'))}}>PKV</Tab>
+      <TabList className={`${robotoMed.className} react-tabs__tab-list`}>
+        <Tab>Products Demo</Tab>
+        <Tab>Module Demo</Tab>
+        <Tab>PKV Demo</Tab>
       </TabList>
-      <TabPanel>
-        <Suspense fallback={<Loading />}>
-          <ProductsDemo />
-        </Suspense>
-      </TabPanel>
-      <TabPanel>
-        <Suspense fallback={<Loading />}>
-          <ModuleDemo />
-        </Suspense>
-      </TabPanel>
-      <TabPanel>Content for Tab 3</TabPanel>
+
+      <Suspense fallback={(<Loading />)}>
+        {content}
+      </Suspense>
+
     </Tabs>
-
-
-    /* 
-    <ul className="tabs" role="tablist">
-      <li>
-          <input type="radio" name="tabs" id="tab-products"  checked={selectedTab === 'products' ? true : false} onChange={() => {onRadioChange('products')}} />
-          <label htmlFor="tab-products" 
-            role="tab" 
-            aria-selected="true" 
-            aria-controls="products-tab-panel" 
-            tabIndex={0}>Products</label>
-          <div id="products-tab-content" 
-            className="tab-content" 
-            role="tabpanel" 
-            aria-labelledby="products" 
-            aria-hidden="false">
-            <ProductsDemo />
-          </div>
-      </li>
-      <li>
-          <input type="radio" name="tabs" id="tab-module" checked={selectedTab === 'module' ? true : false} onChange={() => {onRadioChange('module')}} />
-          <label htmlFor="tab-module"
-            role="tab" 
-            aria-selected="false" 
-            aria-controls="module-tab-panel" 
-            tabIndex={1}>Module</label>
-          <div id="module-tab-content" 
-            className="tab-content"
-            role="tabpanel" 
-            aria-labelledby="module" 
-            aria-hidden="true">
-            <ModuleDemo />
-          </div>
-      </li>
-    </ul> */
   )
 
 
