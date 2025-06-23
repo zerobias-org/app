@@ -1,144 +1,56 @@
 
-import { ConnectionListView, ScopeListView, SearchConnectionBody, SearchScopeBody, SortObject } from '@auditmation/module-auditmation-auditmation-hub';
-import { ModuleSearch } from '@auditmation/module-auditmation-auditmation-store';
 import { ZerobiasClientOrgId, ZerobiasClientApp, ZerobiasClientApi } from "@auditmation/zb-client-lib-js";
-import { ExecuteRawGraphqlQuery } from "@auditmation/module-auditmation-auditmation-graphql";
-import { BoundaryExtended } from "@auditmation/module-auditmation-auditmation-platform";
-import { PagedResults } from "@auditmation/types-core-js";
-import { ProductExtended } from '@auditmation/module-auditmation-auditmation-portal';
-import { ApiKey, InlineObject, Org } from '@auditmation/module-auditmation-auditmation-dana';
-import { useCurrentUser } from "@/context/CurrentUserContext";
-import { useState } from "react";
-import { OrgProps } from './types';
-
-// environnment vars read from .env.development and .env.production
-export const environment = {
-  isLocalDev: process.env.IS_LOCAL_DEV ? true : false,
-};
 
 class ZerobiasAppService {
+  // environnment vars read from .env.development and .env.production
+  // or you can set any of these in the environment i.e. when you run a build you can set these at the start of the build
+  // you can then refer to any of these variables by `import { environment } from 'path/to/the/ZerobiasAppService'
+  public environment:any = {
+    isLocalDev: process.env.NEXT_PUBLIC_IS_LOCAL_DEV !== undefined ? (process.env.NEXT_PUBLIC_IS_LOCAL_DEV === 'true' ? true : false) : false,
+    production: process.env.NEXT_PUBLIC_PRODUCTION !== undefined ? (process.env.NEXT_PUBLIC_PRODUCTION === 'true' ? true : false) : false,
+    socketUrlPath: '/session',
+    localPortalOrigin: process.env.NEXT_PUBLIC_LOCAL_PORTAL_ORIGIN ? process.env.NEXT_PUBLIC_LOCAL_PORTAL_ORIGIN : '',
+    apiHostname: process.env.NEXT_PUBLIC_API_HOSTNAME
+  };
+
   static #instance: ZerobiasAppService;
   public zerobiasOrgId = new ZerobiasClientOrgId();
-  public zerobiasClientApi = new ZerobiasClientApi(this.zerobiasOrgId, environment);
-  public zerobiasClientApp = new ZerobiasClientApp(this.zerobiasClientApi, this.zerobiasOrgId);
+  public zerobiasClientApi = new ZerobiasClientApi(this.zerobiasOrgId, this.environment);
+  public zerobiasClientApp = new ZerobiasClientApp(this.zerobiasClientApi, this.zerobiasOrgId, this.environment);
 
-  public selectedBoundary: BoundaryExtended | null = null;
-  public boundaries: BoundaryExtended[] = [];
   public enable = false;
-  public showApiKeyForm = false;
-  public showSharedSessionForm = false;
-  public githubProduct:ProductExtended|null = null;
-  public connections:ConnectionListView[]|null = null;
-  public selectedConnection:ConnectionListView|null = null;
-  public scopes:ScopeListView[]|null = null;
-  public formGroup:FormData|null = null;
-  public orgs:Org[]|null = null;
 
   constructor() {
-    this.zerobiasOrgId = new ZerobiasClientOrgId();
-    this.zerobiasClientApi = new ZerobiasClientApi(this.zerobiasOrgId, environment);
-    this.zerobiasClientApp = new ZerobiasClientApp(
-      this.zerobiasClientApi,
-      this.zerobiasOrgId
-    );
   }
 
   public async initializeAppFactory() {
-    // const [loading, setLoading] = useState(true);
-    this.zerobiasClientApp.init().then(() => {
+    await this.zerobiasClientApp.init(
+      // zerobiasClientApp.init allows setting custom axios interceptors.  
+      // This particular interceptor function below will allow local dev 
+      // to add an Authorization header to api requests, to get data from the Zerobias platform.
+      // Set this variable in your local dev environment: NEXT_PUBLIC_API_KEY='your api key to our platform'
+      // once set, this api key will be accessible via process.env.NEXT_PUBLIC_API_KEY
+      (req) => {
+        if (this.environment.isLocalDev && process.env.NEXT_PUBLIC_API_KEY) {
+          req.headers["Authorization"] = `APIKey ${process.env.NEXT_PUBLIC_API_KEY}`;
+        }
+        return req;
+      }
+    ).then(() => {
       this.enable = true;
-      // setLoading(false);
       console.log("ZerobiasAppSvc initialized");
     });
   }
 
   public static async getInstance(): Promise<ZerobiasAppService>  {
     if (!ZerobiasAppService.#instance) {
-      console.log("create new isntances");
+      console.log("creating new ZerobiasAppService instance");
       ZerobiasAppService.#instance = new ZerobiasAppService();
-
+      
       await ZerobiasAppService.#instance.initializeAppFactory();
     } 
-
     return ZerobiasAppService.#instance;
   }
-
-  public logOut = async () => {
-    this.zerobiasClientApi.danaClient
-      ?.getMeApi()
-      .logoutGet()
-      .then((data:any) => {
-        console.log("logout")
-        console.log(data);
-        console.log("******")
-      });
-  };
-
-  public async createApiKey(inlineObject?: InlineObject): Promise<ApiKey & object | void> {
-    if (!inlineObject) { 
-      Promise.reject() 
-    }
-    try{
-      return this.zerobiasClientApi.danaClient.getMeApi().createApiKey(inlineObject);
-    } catch(error) {
-      console.warn(error);
-      // this.overlay.message = `The generation of the new API Key failed. Please contact Support.`;
-    }
-  }
-
-  public getFinding = async () => {
-    this.getBoundariesList(); //  list boundaries, choose boundary first
-
-    const executeRawGraphqlQuery: ExecuteRawGraphqlQuery = new ExecuteRawGraphqlQuery(`query { 
-            Finding 
-            (
-              state: ".eq.ACTIVE"
-            )
-            { 
-                id 
-            name 
-            state 
-            metadata { 
-                objectId 
-                versionId 
-                operation 
-            } 
-            } 
-        }`);
-
-    const resultQuery = await this.zerobiasClientApi.graphqlClient
-      .getBoundaryApi()
-      .boundaryExecuteRawQuery(
-        //new UUID("3f5a05d5-8a81-4f72-a33c-dc5be3949024"), // <--- listBoundaries(), select a boundary
-        this.zerobiasClientApi.toUUID(this.selectedBoundary?.id),
-        executeRawGraphqlQuery
-      );
-    console.log(resultQuery);
-  };
-
-  private getBoundariesList() {
-    // auditmationPlatform.getBoundaryApi().listBoundaries(), select a boundary
-    /* 
-      BoundaryApi.listBoundaries(
-        pageNumber?: number, 
-        pageSize?: number, 
-        name?: string,                <--- maybe filter by boundary name?
-        status?: BoundaryStatusEnumDef, 
-        type?: BoundaryTypeEnumDef, 
-        sort?: SortObject
-      ): Promise<PagedResults<BoundaryExtended>>
-    */
-    this.zerobiasClientApi.auditmationPlatform.getBoundaryApi().listBoundaries(0,50 /*, 'My Boundary Name' */).then((pagedResults: PagedResults<BoundaryExtended>) => {
-      if (pagedResults) {
-        this.boundaries = pagedResults.items?.length > 0 ? pagedResults.items : []; 
-        // just grabbing first one, but you might need to be more selective and 
-        // filter in the listBoundaries() args, maybe filter by name?
-        this.selectedBoundary = this.boundaries[0];
-      }
-    });
-  }
-
-
 }
 
 export default ZerobiasAppService;

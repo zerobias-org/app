@@ -1,16 +1,9 @@
 "use client"
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { ProductExtended } from '@auditmation/module-auditmation-auditmation-portal';
 import ZerobiasAppService from "@/lib/zerobias";
-import { CurrentUserContext, useCurrentUser } from '@/context/CurrentUserContext';
-
-interface ProductProps {
-  products: ProductExtended[]
-  currentPage: number
-  pageSize: number
-  loading: boolean
-}
+import { useCurrentUser } from '@/context/CurrentUserContext';
+import { ProductProps } from "@/lib/types";
 
 const ProductsDemo = () => {
   const { user, org, loading } = useCurrentUser();
@@ -23,21 +16,22 @@ const ProductsDemo = () => {
 
   const ProductsTable = () => {
     if (loading || state.loading) {
-      return ('...loading');
+      return (<tr><td colSpan={5}>loading</td></tr>);
+    } else if(state.products?.length === 0) {
+      return (<tr><td colSpan={5}>products not loaded</td></tr>);
     } else {
-      return (
-        state.products?.map((product, idx) => (
-          <tr key={idx} className="product-item">
-            <td className="product-logo">
-              <Image width="50" src={ product.logo ? product.logo.toString() : '' } alt={ product.name } height="30" />
-            </td>
-            <td className="product-name">{ product.name }</td>
-            <td className="product-description">{ product.description }</td>
-            <td className="product-packageCode">{ product.packageCode }</td>
-            <td className="product-status">{ product.status.toString() }</td>
-          </tr>
-        ))
-      )
+      const content = state.products?.map((product, idx) => (
+        <tr key={idx} className="product-item">
+          <td className="product-logo">
+            <Image width="50" src={ product.logo ? product.logo.toString() : '' } alt={ product.name } height="30" />
+          </td>
+          <td className="product-name">{ product.name }</td>
+          <td className="product-description">{ product.description }</td>
+          <td className="product-packageCode">{ product.packageCode }</td>
+          <td className="product-status">{ product.status.toString() }</td>
+        </tr>
+      ))
+      return content
     }
   }
 
@@ -54,7 +48,6 @@ const ProductsDemo = () => {
       } catch (error:any) {
         console.log(error.message)
         console.log(error.stack)
-        // setState(state => ({ ...state, loading: false }));
       } 
     }
     
@@ -83,21 +76,6 @@ const ProductsDemo = () => {
                 </tbody>
               </table>
         
-
-    {/*       <Pagination>
-            <PaginationContent>
-              <PaginationItem hidden={state.currentPage == 1 || state.loading}>
-                <PaginationPrevious
-                  onClick={() => setState({ ...state, loading: true, currentPage: state.currentPage - 1 })} href="#" />
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationLink href="#">{state.currentPage}</PaginationLink>
-              </PaginationItem>
-              <PaginationItem hidden={state.loading}>
-                <PaginationNext href="#" onClick={() => setState({ ...state, loading: true, currentPage: state.currentPage + 1 })} />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination> */}
         </div>
       </div>
 

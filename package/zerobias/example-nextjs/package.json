@@ -1,16 +1,20 @@
 {
   "name": "example-nextjs",
-  "version": "0.1.1",
+  "version": "0.1.13",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "cp ./next.config.default.ts ./next.config.ts && next dev",
+    "build:dev": "cp ./next.config.dev.ts ./next.config.ts &&n ext build",
+    "build:qa": "cp ./next.config.qa.ts ./next.config.ts && next build",
+    "build:prod": "cp ./next.config.prod.ts ./next.config.ts && next build",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
-    "@auditmation/zb-client-lib-js": "^0.5.9",
     "@auditlogic/module-github-github-client-ts": "^6.5.2",
+    "@auditmation/zb-client-lib-js": "^0.5.13",
+    "lucide-react": "^0.514.0",
     "material-symbols": "^0.31.4",
     "next": "15.3.2",
     "react": "^19.0.0",
