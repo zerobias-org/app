@@ -5,6 +5,7 @@ import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
 import CollectionViewer from './CollectionViewer';
 import FunctionInvoker from './FunctionInvoker';
+import SchemaViewer from './SchemaViewer';
 
 export default function ObjectDetails() {
   const { selectedObject, dataProducerService } = useDataExplorer();
@@ -231,13 +232,7 @@ export default function ObjectDetails() {
         {fullObject.collectionSchema && (
           <TabPanel>
             <div className="p-4">
-              <div className="bg-green-50 border-l-4 border-green-600 p-4">
-                <p className="text-sm text-green-800">
-                  Schema viewer will be implemented next.
-                  <br />
-                  This will display the collection schema properties and types.
-                </p>
-              </div>
+              <SchemaViewer schemaJson={fullObject.collectionSchema} />
             </div>
           </TabPanel>
         )}
