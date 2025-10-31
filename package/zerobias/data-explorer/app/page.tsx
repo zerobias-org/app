@@ -1,10 +1,11 @@
 "use client"
 import { useCurrentUser } from "@/context/CurrentUserContext";
 import { useDataExplorer } from "@/context/DataExplorerContext";
+import ConnectionSelector from "@/components/ConnectionSelector";
 
 export default function DataExplorerPage() {
   const { user, org, loading: userLoading } = useCurrentUser();
-  const { selectedConnection, selectedScope, loading: explorerLoading } = useDataExplorer();
+  const { dataProducerService } = useDataExplorer();
 
   if (userLoading) {
     return (
@@ -36,24 +37,45 @@ export default function DataExplorerPage() {
 
       {/* Main Content */}
       <main className="container mx-auto p-6">
-        <div className="bg-white rounded-lg shadow-md p-8">
-          <h2 className="text-2xl font-bold mb-4">Welcome to Data Explorer</h2>
-          <p className="text-gray-700 mb-4">
-            This application allows you to browse and explore data sources that implement the DataProducer interface.
-          </p>
-          <div className="bg-blue-50 border-l-4 border-blue-600 p-4 mb-4">
-            <p className="text-sm text-blue-800">
-              <strong>Status:</strong> Application scaffolding created successfully.
-              <br />
-              Next steps: Run npm install and npm build to verify dependencies and integration.
-            </p>
-          </div>
-          {!user && (
-            <div className="bg-yellow-50 border-l-4 border-yellow-600 p-4">
-              <p className="text-sm text-yellow-800">
-                <strong>Note:</strong> User authentication is still loading or not configured.
-                Please ensure you have proper Zerobias platform credentials.
-              </p>
+        <div className="max-w-4xl mx-auto space-y-6">
+          {/* Connection Selector */}
+          <ConnectionSelector />
+
+          {/* Data Browser - Will be implemented next */}
+          {dataProducerService?.enable && (
+            <div className="bg-white rounded-lg shadow-md p-8">
+              <h2 className="text-2xl font-bold mb-4">Object Browser</h2>
+              <div className="bg-blue-50 border-l-4 border-blue-600 p-4">
+                <p className="text-sm text-blue-800">
+                  <strong>Status:</strong> DataProducer client is connected and ready.
+                  <br />
+                  Next step: Implement Object Browser to navigate the data hierarchy.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Help Information */}
+          {!dataProducerService?.enable && (
+            <div className="bg-white rounded-lg shadow-md p-8">
+              <h2 className="text-2xl font-bold mb-4">Getting Started</h2>
+              <div className="space-y-4">
+                <p className="text-gray-700">
+                  To begin exploring data:
+                </p>
+                <ol className="list-decimal list-inside space-y-2 text-gray-700 ml-4">
+                  <li>Select a PostgreSQL connection from the dropdown above</li>
+                  <li>If the connection has multiple scopes, select a scope</li>
+                  <li>Once connected, you can browse the database structure</li>
+                </ol>
+                <div className="bg-gray-50 border-l-4 border-gray-400 p-4 mt-4">
+                  <p className="text-sm text-gray-700">
+                    <strong>Note:</strong> Currently limited to PostgreSQL connections for testing.
+                    Support for additional DataProducer implementations will be added when
+                    interface discovery is available in the Hub API.
+                  </p>
+                </div>
+              </div>
             </div>
           )}
         </div>
