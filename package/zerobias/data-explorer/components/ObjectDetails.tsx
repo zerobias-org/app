@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useDataExplorer } from '@/context/DataExplorerContext';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
+import CollectionViewer from './CollectionViewer';
 
 export default function ObjectDetails() {
   const { selectedObject, dataProducerService } = useDataExplorer();
@@ -207,13 +208,7 @@ export default function ObjectDetails() {
         {hasCollectionClass && (
           <TabPanel>
             <div className="p-4">
-              <div className="bg-blue-50 border-l-4 border-blue-600 p-4">
-                <p className="text-sm text-blue-800">
-                  Collection data viewer will be implemented next.
-                  <br />
-                  This will show paginated table/JSON view of collection elements.
-                </p>
-              </div>
+              <CollectionViewer objectId={fullObject.id} />
             </div>
           </TabPanel>
         )}
