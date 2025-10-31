@@ -2,6 +2,7 @@
 import { useCurrentUser } from "@/context/CurrentUserContext";
 import { useDataExplorer } from "@/context/DataExplorerContext";
 import ConnectionSelector from "@/components/ConnectionSelector";
+import ObjectBrowser from "@/components/ObjectBrowser";
 
 export default function DataExplorerPage() {
   const { user, org, loading: userLoading } = useCurrentUser();
@@ -41,17 +42,11 @@ export default function DataExplorerPage() {
           {/* Connection Selector */}
           <ConnectionSelector />
 
-          {/* Data Browser - Will be implemented next */}
+          {/* Object Browser */}
           {dataProducerService?.enable && (
-            <div className="bg-white rounded-lg shadow-md p-8">
-              <h2 className="text-2xl font-bold mb-4">Object Browser</h2>
-              <div className="bg-blue-50 border-l-4 border-blue-600 p-4">
-                <p className="text-sm text-blue-800">
-                  <strong>Status:</strong> DataProducer client is connected and ready.
-                  <br />
-                  Next step: Implement Object Browser to navigate the data hierarchy.
-                </p>
-              </div>
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-2xl font-bold mb-4">Browse Data</h2>
+              <ObjectBrowser />
             </div>
           )}
 
