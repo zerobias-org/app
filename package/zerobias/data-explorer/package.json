@@ -1,0 +1,38 @@
+{
+  "name": "data-explorer",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "cp ./next.config.default.ts ./next.config.ts && next dev",
+    "build:dev": "cp ./next.config.dev.ts ./next.config.ts && next build",
+    "build:qa": "cp ./next.config.qa.ts ./next.config.ts && next build",
+    "build:prod": "cp ./next.config.prod.ts ./next.config.ts && next build",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@auditlogic/module-auditmation-interface-dataproducer-client-ts": "latest",
+    "@auditlogic/module-github-github-client-ts": "^6.5.2",
+    "@auditmation/zb-client-lib-js": "^0.5.13",
+    "lucide-react": "^0.514.0",
+    "material-symbols": "^0.31.4",
+    "mermaid": "^11.4.1",
+    "next": "15.3.2",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-select": "^5.10.1",
+    "react-tabs": "^6.1.0"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@types/node": "^20",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "eslint": "^9",
+    "eslint-config-next": "15.3.2",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "sass": "^1.89.0",
+    "typescript": "^5"
+  }
+}
