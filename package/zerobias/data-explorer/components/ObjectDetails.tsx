@@ -4,6 +4,7 @@ import { useDataExplorer } from '@/context/DataExplorerContext';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
 import CollectionViewer from './CollectionViewer';
+import FunctionInvoker from './FunctionInvoker';
 
 export default function ObjectDetails() {
   const { selectedObject, dataProducerService } = useDataExplorer();
@@ -217,13 +218,11 @@ export default function ObjectDetails() {
         {hasFunctionClass && (
           <TabPanel>
             <div className="p-4">
-              <div className="bg-yellow-50 border-l-4 border-yellow-600 p-4">
-                <p className="text-sm text-yellow-800">
-                  Function invoker will be implemented next.
-                  <br />
-                  This will allow executing the function with parameters and viewing results.
-                </p>
-              </div>
+              <FunctionInvoker
+                objectId={fullObject.id}
+                inputSchema={fullObject.inputSchema}
+                outputSchema={fullObject.outputSchema}
+              />
             </div>
           </TabPanel>
         )}
