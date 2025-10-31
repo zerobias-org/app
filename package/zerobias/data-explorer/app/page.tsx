@@ -3,6 +3,7 @@ import { useCurrentUser } from "@/context/CurrentUserContext";
 import { useDataExplorer } from "@/context/DataExplorerContext";
 import ConnectionSelector from "@/components/ConnectionSelector";
 import ObjectBrowser from "@/components/ObjectBrowser";
+import ObjectDetails from "@/components/ObjectDetails";
 
 export default function DataExplorerPage() {
   const { user, org, loading: userLoading } = useCurrentUser();
@@ -38,15 +39,24 @@ export default function DataExplorerPage() {
 
       {/* Main Content */}
       <main className="container mx-auto p-6">
-        <div className="max-w-4xl mx-auto space-y-6">
+        <div className="max-w-7xl mx-auto space-y-6">
           {/* Connection Selector */}
           <ConnectionSelector />
 
-          {/* Object Browser */}
+          {/* Data Explorer - Two Column Layout */}
           {dataProducerService?.enable && (
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-2xl font-bold mb-4">Browse Data</h2>
-              <ObjectBrowser />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Left Column: Object Browser */}
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <h2 className="text-2xl font-bold mb-4">Browse Data</h2>
+                <ObjectBrowser />
+              </div>
+
+              {/* Right Column: Object Details */}
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <h2 className="text-2xl font-bold mb-4">Object Details</h2>
+                <ObjectDetails />
+              </div>
             </div>
           )}
 
