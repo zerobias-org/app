@@ -8,19 +8,19 @@ import FunctionInvoker from './FunctionInvoker';
 import SchemaViewer from './SchemaViewer';
 
 export default function ObjectDetails() {
-  const { selectedObject, dataProducerService } = useDataExplorer();
+  const { selectedObject, dataProducerClient } = useDataExplorer();
   const [loading, setLoading] = useState(false);
   const [fullObject, setFullObject] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
 
   // Load full object details when selection changes
   useEffect(() => {
-    if (selectedObject && dataProducerService?.enable) {
+    if (selectedObject && dataProducerClient) {
       loadObjectDetails();
     } else {
       setFullObject(null);
     }
-  }, [selectedObject?.id, dataProducerService?.enable]);
+  }, [selectedObject?.id, dataProducerClient]);
 
   const loadObjectDetails = async () => {
     if (!selectedObject) return;
@@ -28,7 +28,7 @@ export default function ObjectDetails() {
     setLoading(true);
     setError(null);
     try {
-      const obj = await dataProducerService!.client!.getObjectsApi().getObject(selectedObject.id);
+      const obj = await dataProducerClient!.getObjectsApi().getObject(selectedObject.id);
       setFullObject(obj);
     } catch (err: any) {
       console.error('Failed to load object details:', err);

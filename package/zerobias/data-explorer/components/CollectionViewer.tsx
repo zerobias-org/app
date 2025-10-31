@@ -12,7 +12,7 @@ type CollectionViewerProps = {
 };
 
 export default function CollectionViewer({ objectId }: CollectionViewerProps) {
-  const { dataProducerService } = useDataExplorer();
+  const { dataProducerClient } = useDataExplorer();
   const [viewMode, setViewMode] = useState<ViewMode>('table');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,17 +32,17 @@ export default function CollectionViewer({ objectId }: CollectionViewerProps) {
 
   // Load collection data when objectId or page changes
   useEffect(() => {
-    if (objectId && dataProducerService?.enable) {
+    if (objectId && dataProducerClient) {
       loadCollectionData();
     }
-  }, [objectId, currentPage, pageToken, dataProducerService?.enable]);
+  }, [objectId, currentPage, pageToken, dataProducerClient]);
 
   const loadCollectionData = async () => {
     setLoading(true);
     setError(null);
     try {
       // Load collection elements
-      const result = await dataProducerService!.client!.getCollectionsApi()
+      const result = await dataProducerClient!.getCollectionsApi()
         .getCollectionElements(objectId, currentPage, pageSize);
 
       setElements(result.items || []);
@@ -70,7 +70,7 @@ export default function CollectionViewer({ objectId }: CollectionViewerProps) {
       }
 
       // Load object details to get schema
-      const obj = await dataProducerService!.client!.getObjectsApi()
+      const obj = await dataProducerClient!.getObjectsApi()
         .getObject(objectId);
       setSchema(obj.collectionSchema);
     } catch (err: any) {

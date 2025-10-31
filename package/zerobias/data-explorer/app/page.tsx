@@ -7,84 +7,88 @@ import ObjectDetails from "@/components/ObjectDetails";
 
 export default function DataExplorerPage() {
   const { user, org, loading: userLoading } = useCurrentUser();
-  const { dataProducerService } = useDataExplorer();
+  const { dataProducerClient } = useDataExplorer();
 
   if (userLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ textAlign: 'center' }}>
+          <p style={{ marginTop: '1rem', color: '#4b5563' }}>Loading...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-blue-600 text-white p-6 shadow-lg">
-        <div className="container mx-auto">
-          <h1 className="text-3xl font-bold">Data Explorer</h1>
-          <p className="text-blue-100">Browse and explore data sources through the DataProducer interface</p>
-          {user && (
-            <div className="mt-2 text-sm">
-              <span className="opacity-75">Logged in as:</span> <span className="font-semibold">{user.name}</span>
-              {org && <span className="ml-4 opacity-75">Organization:</span>}
-              {org && <span className="font-semibold ml-1">{org.name}</span>}
-            </div>
-          )}
+    <div style={{ minHeight: '100vh', background: '#f9fafb' }}>
+      {/* Header with Title and Connection Selector */}
+      <header style={{ background: '#2563eb', color: 'white', padding: '1rem', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
+        <div style={{ margin: '0 16px', display: 'flex', alignItems: 'center', gap: '2rem' }}>
+          <h1 style={{ fontSize: '1.875rem', fontWeight: 'bold', margin: 0, flexShrink: 0 }}>Data Explorer</h1>
+          <div style={{ flex: 1 }}>
+            <ConnectionSelector />
+          </div>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="container mx-auto p-6">
-        <div className="max-w-7xl mx-auto space-y-6">
-          {/* Connection Selector */}
-          <ConnectionSelector />
-
-          {/* Data Explorer - Two Column Layout */}
-          {dataProducerService?.enable && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Left Column: Object Browser */}
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-2xl font-bold mb-4">Browse Data</h2>
-                <ObjectBrowser />
-              </div>
-
-              {/* Right Column: Object Details */}
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-2xl font-bold mb-4">Object Details</h2>
-                <ObjectDetails />
-              </div>
+      {/* Main Content - Resizable Two Column Layout */}
+      {dataProducerClient ? (
+        <div style={{ display: 'flex', height: 'calc(100vh - 80px)', margin: '16px', gap: 0 }}>
+          {/* Left Panel: Object Browser (40%) */}
+          <div style={{ minWidth: '250px', width: '40%', overflowY: 'auto', paddingRight: '8px' }}>
+            <div style={{ background: 'white', borderRadius: '0.5rem', boxShadow: '0 1px 3px 0 rgba(0,0,0,0.1)', padding: '1.5rem', border: '1px solid #e5e7eb' }}>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '1rem', display: 'flex', alignItems: 'center' }}>
+                <svg style={{ width: '1.5rem', height: '1.5rem', marginRight: '0.5rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+                </svg>
+                Object Browser
+              </h2>
+              <ObjectBrowser />
             </div>
-          )}
+          </div>
 
-          {/* Help Information */}
-          {!dataProducerService?.enable && (
-            <div className="bg-white rounded-lg shadow-md p-8">
-              <h2 className="text-2xl font-bold mb-4">Getting Started</h2>
-              <div className="space-y-4">
-                <p className="text-gray-700">
-                  To begin exploring data:
-                </p>
-                <ol className="list-decimal list-inside space-y-2 text-gray-700 ml-4">
-                  <li>Select a PostgreSQL connection from the dropdown above</li>
-                  <li>If the connection has multiple scopes, select a scope</li>
-                  <li>Once connected, you can browse the database structure</li>
-                </ol>
-                <div className="bg-gray-50 border-l-4 border-gray-400 p-4 mt-4">
-                  <p className="text-sm text-gray-700">
-                    <strong>Note:</strong> Currently limited to PostgreSQL connections for testing.
-                    Support for additional DataProducer implementations will be added when
-                    interface discovery is available in the Hub API.
-                  </p>
-                </div>
-              </div>
+          {/* Divider */}
+          <div
+            style={{
+              width: '8px',
+              background: '#e5e7eb',
+              cursor: 'col-resize',
+              position: 'relative',
+              flexShrink: 0
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.background = '#d1d5db'}
+            onMouseLeave={(e) => e.currentTarget.style.background = '#e5e7eb'}
+          >
+            <div style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '2px',
+              height: '40px',
+              background: '#9ca3af',
+              borderRadius: '1px'
+            }}></div>
+          </div>
+
+          {/* Right Panel: Object Details */}
+          <div style={{ flex: 1, minWidth: '400px', overflowY: 'auto', paddingLeft: '8px' }}>
+            <div style={{ background: 'white', borderRadius: '0.5rem', boxShadow: '0 1px 3px 0 rgba(0,0,0,0.1)', padding: '1.5rem', border: '1px solid #e5e7eb' }}>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '1rem' }}>Object Details</h2>
+              <ObjectDetails />
             </div>
-          )}
+          </div>
         </div>
-      </main>
+      ) : (
+        <div style={{ margin: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', height: 'calc(100vh - 100px)' }}>
+          <div style={{ textAlign: 'center', color: '#9ca3af', padding: '3rem 0' }}>
+            <svg style={{ margin: '0 auto', height: '4rem', width: '4rem', color: '#d1d5db' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path>
+            </svg>
+            <p style={{ marginTop: '1rem', fontSize: '1.125rem' }}>Select a connection to begin exploring database objects</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

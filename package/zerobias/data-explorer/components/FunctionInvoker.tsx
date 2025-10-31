@@ -10,7 +10,7 @@ type FunctionInvokerProps = {
 };
 
 export default function FunctionInvoker({ objectId, inputSchema, outputSchema }: FunctionInvokerProps) {
-  const { dataProducerService } = useDataExplorer();
+  const { dataProducerClient } = useDataExplorer();
   const [inputJson, setInputJson] = useState('{}');
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
@@ -48,7 +48,7 @@ export default function FunctionInvoker({ objectId, inputSchema, outputSchema }:
 
     try {
       const input = JSON.parse(inputJson);
-      const output = await dataProducerService!.client!.getFunctionsApi()
+      const output = await dataProducerClient!.getFunctionsApi()
         .invokeFunction(objectId, input);
       setResult(output);
     } catch (err: any) {

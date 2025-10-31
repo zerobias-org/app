@@ -16,23 +16,31 @@ type TreeNode = {
 };
 
 export default function ObjectBrowser() {
-  const { dataProducerService, setSelectedObject } = useDataExplorer();
+  const { dataProducerClient, setSelectedObject } = useDataExplorer();
   const [rootNode, setRootNode] = useState<TreeNode | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   // Load root object when client is ready
   useEffect(() => {
-    if (dataProducerService?.enable && dataProducerService?.client) {
+    if (dataProducerClient) {
       loadRootObject();
     }
-  }, [dataProducerService?.enable, dataProducerService?.client]);
+  }, [dataProducerClient]);
 
   const loadRootObject = async () => {
     setLoading(true);
     setError(null);
     try {
-      const rootObj = await dataProducerService!.client!.getObjectsApi().getRootObject();
+      console.log('Loading root object...');
+      const rootObj = await dataProducerClient!.getObjectsApi().getRootObject();
+
+      console.log('Root object loaded:', {
+        id: rootObj.id,
+        name: rootObj.name,
+        objectClass: rootObj.objectClass,
+        description: rootObj.description
+      });
 
       // Convert objectClass enum values to strings
       const objectClassStrings = rootObj.objectClass?.map(c => {
@@ -40,7 +48,9 @@ export default function ObjectBrowser() {
         return (c as any).value?.toString() || c.toString();
       }) || [];
 
-      setRootNode({
+      console.log('Object classes as strings:', objectClassStrings);
+
+      const rootNode = {
         id: rootObj.id,
         name: rootObj.name,
         objectClass: objectClassStrings,
@@ -48,18 +58,17 @@ export default function ObjectBrowser() {
         isExpanded: true, // Auto-expand root
         isLoading: false,
         hasLoadedChildren: false
-      });
+      };
 
-      // Auto-load root children
-      await loadChildren({
-        id: rootObj.id,
-        name: rootObj.name,
-        objectClass: objectClassStrings,
-        description: rootObj.description,
-        isExpanded: true,
-        isLoading: false,
-        hasLoadedChildren: false
-      });
+      setRootNode(rootNode);
+
+      // Auto-load root children if it's a container
+      if (objectClassStrings.includes('container')) {
+        console.log('Root is a container, loading children...');
+        await loadChildren(rootNode);
+      } else {
+        console.log('Root is not a container, skipping children load');
+      }
     } catch (err: any) {
       console.error('Failed to load root object:', err);
       setError(`Failed to load root: ${err.message}`);
@@ -82,7 +91,16 @@ export default function ObjectBrowser() {
       // Mark as loading
       updateNodeState(node.id, { isLoading: true });
 
-      const childrenResult = await dataProducerService!.client!.getObjectsApi().getChildren(node.id, 1, 100);
+      console.log('Loading children for node:', node.id, node.name);
+      const childrenResult = await dataProducerClient!.getObjectsApi().getChildren(node.id, 1, 100);
+
+      console.log('getChildren response:', childrenResult);
+
+      // Validate the response has the expected structure
+      if (!childrenResult || !childrenResult.items) {
+        console.error('Invalid response from getChildren - missing items array:', childrenResult);
+        throw new Error('Invalid response format: missing items array');
+      }
 
       const childNodes: TreeNode[] = childrenResult.items.map(child => {
         // Convert objectClass enum values to strings
@@ -110,6 +128,13 @@ export default function ObjectBrowser() {
       });
     } catch (err: any) {
       console.error(`Failed to load children for ${node.name}:`, err);
+
+      // Check if this is the known backend issue
+      if (err.message?.includes("Producers must return 'items'")) {
+        console.error('Backend DataProducer Error: The SQL DataProducer implementation is not properly populating the PagedResults.items array. This is a backend bug.');
+        setError('DataProducer Backend Error: The SQL producer is not returning data in the correct format. This needs to be fixed in the backend implementation.');
+      }
+
       updateNodeState(node.id, {
         isLoading: false,
         hasLoadedChildren: true,
@@ -251,7 +276,7 @@ export default function ObjectBrowser() {
     );
   };
 
-  if (!dataProducerService?.enable) {
+  if (!dataProducerClient) {
     return (
       <div className="p-4 bg-gray-100 rounded-lg">
         <p className="text-gray-600 text-sm">
