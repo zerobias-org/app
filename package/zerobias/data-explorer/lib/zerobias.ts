@@ -25,8 +25,8 @@ class ZerobiasAppService {
 
   public async initializeAppFactory() {
     await this.zerobiasClientApp.init(
-      // zerobiasClientApp.init allows setting custom axios interceptors.  
-      // This particular interceptor function below will allow local dev 
+      // zerobiasClientApp.init allows setting custom axios interceptors.
+      // This particular interceptor function below will allow local dev
       // to add an Authorization header to api requests, to get data from the Zerobias platform.
       // Set this variable in your local dev environment: NEXT_PUBLIC_API_KEY='your api key to our platform'
       // once set, this api key will be accessible via process.env.NEXT_PUBLIC_API_KEY

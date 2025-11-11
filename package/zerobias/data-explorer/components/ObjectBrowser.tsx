@@ -1,7 +1,7 @@
 "use client"
 import { useState, useEffect } from 'react';
 import { useDataExplorer } from '@/context/DataExplorerContext';
-import { ChevronRight, ChevronDown, Folder, Table, Zap, FileText, Paperclip, Database } from 'lucide-react';
+import { ChevronRight, ChevronDown, Folder, Table, Zap, FileText, Paperclip, Box } from 'lucide-react';
 
 // Object node in the tree
 type TreeNode = {
@@ -65,7 +65,79 @@ export default function ObjectBrowser() {
       // Auto-load root children if it's a container
       if (objectClassStrings.includes('container')) {
         console.log('Root is a container, loading children...');
-        await loadChildren(rootNode);
+        // Load children and ensure the root is set to expanded state
+        const updatedNode = { ...rootNode, isLoading: true };
+        setRootNode(updatedNode);
+
+        try {
+          console.log('Loading children for root node:', rootNode.id, rootNode.name);
+          // PagedResults uses 0-indexed pages, so page 0 is the first page
+          const childrenResult = await dataProducerClient!.getObjectsApi().getChildren(rootNode.id, 0, 100);
+
+          console.log('getChildren response:', childrenResult);
+          console.log('childrenResult type:', typeof childrenResult);
+          console.log('childrenResult.items:', childrenResult?.items);
+          console.log('childrenResult keys:', childrenResult ? Object.keys(childrenResult) : 'null');
+
+          // Log raw response structure
+          if (childrenResult) {
+            console.log('Full response structure:', JSON.stringify(childrenResult, null, 2));
+          }
+
+          // Validate the response has the expected structure
+          if (!childrenResult || !childrenResult.items) {
+            console.error('Invalid response from getChildren - missing items array:', childrenResult);
+            console.error('Response may have data in a different field. Checking for alternatives...');
+
+            // Check if data is in a different field (common API response patterns)
+            const possibleDataFields = ['data', 'results', 'content', 'records', 'rows'];
+            for (const field of possibleDataFields) {
+              if (childrenResult && (childrenResult as any)[field]) {
+                console.log(`Found data in '${field}' field:`, (childrenResult as any)[field]);
+              }
+            }
+
+            throw new Error('Invalid response format: missing items array');
+          }
+
+          const childNodes: TreeNode[] = childrenResult.items.map(child => {
+            // Convert objectClass enum values to strings
+            const objectClassStrings = child.objectClass?.map(c => {
+              if (typeof c === 'string') return c;
+              return (c as any).value?.toString() || c.toString();
+            }) || [];
+
+            return {
+              id: child.id,
+              name: child.name,
+              objectClass: objectClassStrings,
+              description: child.description,
+              isExpanded: false,
+              isLoading: false,
+              hasLoadedChildren: false
+            };
+          });
+
+          console.log('Loaded', childNodes.length, 'children for root');
+
+          // Update root node with children
+          setRootNode({
+            ...rootNode,
+            children: childNodes,
+            hasLoadedChildren: true,
+            isLoading: false,
+            isExpanded: true
+          });
+        } catch (err: any) {
+          console.error(`Failed to load children for root:`, err);
+          setRootNode({
+            ...rootNode,
+            isLoading: false,
+            hasLoadedChildren: true,
+            children: [],
+            isExpanded: true
+          });
+        }
       } else {
         console.log('Root is not a container, skipping children load');
       }
@@ -92,7 +164,8 @@ export default function ObjectBrowser() {
       updateNodeState(node.id, { isLoading: true });
 
       console.log('Loading children for node:', node.id, node.name);
-      const childrenResult = await dataProducerClient!.getObjectsApi().getChildren(node.id, 1, 100);
+      // PagedResults uses 0-indexed pages, so page 0 is the first page
+      const childrenResult = await dataProducerClient!.getObjectsApi().getChildren(node.id, 0, 100);
 
       console.log('getChildren response:', childrenResult);
 
@@ -131,8 +204,8 @@ export default function ObjectBrowser() {
 
       // Check if this is the known backend issue
       if (err.message?.includes("Producers must return 'items'")) {
-        console.error('Backend DataProducer Error: The SQL DataProducer implementation is not properly populating the PagedResults.items array. This is a backend bug.');
-        setError('DataProducer Backend Error: The SQL producer is not returning data in the correct format. This needs to be fixed in the backend implementation.');
+        console.error('Backend DataProducer Error: The DataProducer implementation is not properly populating the PagedResults.items array. This is a backend bug.');
+        setError('DataProducer Backend Error: The producer is not returning data in the correct format. This needs to be fixed in the backend implementation.');
       }
 
       updateNodeState(node.id, {
@@ -188,7 +261,7 @@ export default function ObjectBrowser() {
 
   const getIcon = (objectClass?: string[]) => {
     if (!objectClass || objectClass.length === 0) {
-      return <Database className="w-4 h-4 text-gray-400" />;
+      return <Box className="w-4 h-4 text-gray-400" />;
     }
 
     // Check for primary class
@@ -208,7 +281,7 @@ export default function ObjectBrowser() {
       return <Folder className="w-4 h-4 text-amber-500" />;
     }
 
-    return <Database className="w-4 h-4 text-gray-400" />;
+    return <Box className="w-4 h-4 text-gray-400" />;
   };
 
   const renderNode = (node: TreeNode, depth: number = 0) => {

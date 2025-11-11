@@ -1,50 +1,27 @@
 "use client"
 import Link from 'next/link'
-import { X } from 'lucide-react'
-import { Suspense } from 'react'
-import AppToolbar from '@/components/ui/appToolbar'
-import { useCurrentUser } from '@/context/CurrentUserContext'
-import CreateApiKeyForm from '@/components/forms/FormCreateApiKey'
-import CreateSharedSessionKeyForm from '@/components/forms/FormCreateSharedSecret'
 
 export default function NotFound() {
-
-  const { user, org, loading, action, setAction } = useCurrentUser();
-
-  const onCloseModal = () => {
-    // hide form
-    setAction((action:string) => (''));
-  }
-  
-  return(
-    <>
-      <AppToolbar/>
-    
-      <div className="content-wrapper flexColumn gap16 content-padding">
-        <h2>Not Found</h2>
-        <p>Could not find requested resource</p>
-        <Link href={'/'}>Return Home</Link>
+  return (
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f9fafb' }}>
+      <div style={{ textAlign: 'center', padding: '2rem' }}>
+        <h2 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '1rem' }}>404 - Not Found</h2>
+        <p style={{ color: '#6b7280', marginBottom: '2rem' }}>Could not find requested resource</p>
+        <Link
+          href="/"
+          style={{
+            display: 'inline-block',
+            padding: '0.5rem 1.5rem',
+            background: '#2563eb',
+            color: 'white',
+            borderRadius: '0.375rem',
+            textDecoration: 'none',
+            fontWeight: '500'
+          }}
+        >
+          Return to Data Explorer
+        </Link>
       </div>
-
-      <footer>
-      
-      </footer>
-
-      <div className={action === 'createApiKey' ? 'modal show-modal' : 'modal'}>
-        <span className="close" onClick={onCloseModal}><X/></span>
-        <Suspense>
-          <CreateApiKeyForm />
-        </Suspense>
-      </div>
-
-      <div className={action === 'createSharedSessionKey' ? 'modal show-modal' : 'modal'}>
-        <span className="close" onClick={onCloseModal}><X/></span>
-        <Suspense>
-          <CreateSharedSessionKeyForm />
-        </Suspense>
-      </div>
-
-    </>
+    </div>
   )
-
 }

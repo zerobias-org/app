@@ -2,19 +2,142 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+**Note**: For getting started, deployment workflows, and user-facing documentation, see `README.md` first. This file provides supplemental architectural guidance and AI-assistant context.
+
 ## Repository Overview
 
-This is a monorepo containing example applications demonstrating the Zerobias Client API integration. The repository houses two separate example applications (NextJS and Angular) that showcase how to integrate with the Zerobias platform for authentication, product catalog access, and external service connections (e.g., GitHub).
+This is the **ZeroBias Community Apps Monorepo** - a platform for creating custom UIs that leverage the ZeroBias platform for authentication, hosting, and access to community-generated modules and content.
+
+### Purpose
+
+This repository enables developers to:
+- **Create custom UIs** without implementing authentication or hosting infrastructure
+- **Leverage ZeroBias SDKs** and community-generated module SDKs
+- **Deploy automatically** via pull request workflow to hosted ZeroBias infrastructure
+- **Access platform capabilities** including connections, modules, schemas, queries, and more
+- **Skip integration complexity** - focus on UI/UX and business logic
+
+### Repository Type
+
+- **Public/Open Source**: Community applications hosted at `https://app.zerobias.com/{basePath}`
+- **Private Forks**: For custom/closed-source applications (same patterns, private hosting)
+
+### Current Applications
+
+- **data-explorer**: Production-ready database explorer using the DataProducer interface (reference implementation)
+- **example-nextjs**: NextJS demo showing platform integration patterns (flawed but functional examples)
+- **example-angular**: Angular demo with Nx build system (framework alternative example)
 
 ## Project Structure
 
 ```
 package/zerobias/
-├── example-nextjs/     # Next.js 15 demo application
-└── example-angular/    # Angular 17 demo with Nx
+├── data-explorer/      # Production database explorer (Next.js 15) - REFERENCE IMPLEMENTATION
+├── example-nextjs/     # Next.js 15 integration demo - FLAWED BUT FUNCTIONAL EXAMPLES
+├── example-angular/    # Angular 17 demo with Nx - FRAMEWORK ALTERNATIVE
+└── {your-app}/         # Your custom application
 ```
 
+## Creating a New Application
+
+**See `CREATING_AN_APP.md` for complete step-by-step guide.**
+
+### Quick Start
+
+1. Fork this repository
+2. Create directory: `package/zerobias/your-app-name/`
+3. Choose unique `basePath` (becomes `https://app.zerobias.com/{basePath}`)
+4. Copy from `data-explorer` (recommended) or `example-nextjs`
+5. Update `package.json` and `next.config.*.ts` files
+6. Implement `ZerobiasAppService.init()` for authentication
+7. Build your UI
+8. Submit PR to `dev`/`qa`/`main` branch
+9. Merge triggers automatic deployment
+
+### Deployment Model
+
+**Pull Request Workflow:**
+- **Fork** → **Create App** → **Submit PR** → **Review** → **Merge** → **Auto-Deploy**
+
+**Branch → Environment Mapping:**
+- `dev` branch → `https://dev.zerobias.com/{basePath}`
+- `qa` branch → `https://qa.zerobias.com/{basePath}`
+- `main/master` branch → `https://app.zerobias.com/{basePath}`
+
+**basePath Requirements:**
+- Must be globally unique across all ZeroBias apps
+- Should match directory name (recommended, not required)
+- PR review process identifies and resolves conflicts
+- Lowercase, hyphens preferred (e.g., `my-app`, `data-explorer`)
+
+## ZeroBias Platform Integration
+
+### Module Ecosystem
+
+The ZeroBias platform provides access to:
+
+**ZeroBias Core Modules** (`~/code/module`):
+- Published to **public NPM**
+- Examples: DataProducer interface, GitHub integration
+- No authentication required for installation
+
+**Community Modules** (`~/zb-org/module`):
+- Published to **private NPM** (requires API key)
+- See `~/zb-org/module/README.md` for authentication setup
+- Discovered via **ZeroBias Catalog** application
+
+**Module Discovery:**
+- Use ZeroBias platform UI → Catalog application
+- Browse modules, schemas, queries, collector bots, alert bots, etc.
+- View documentation, examples, and compatibility info
+
+### Authentication Flow
+
+**Required Pattern** (all apps must implement):
+
+```typescript
+// Singleton service for platform client lifecycle
+const zerobiasService = await ZerobiasAppService.getInstance();
+// init() checks session, redirects to /login if needed
+```
+
+**How it Works:**
+1. App calls `ZerobiasAppService.getInstance()`
+2. Service calls `init()` which checks for valid session
+3. If no session: Redirects to `/login` path
+4. Platform shows login screen (default or custom via virtual hosting)
+5. User authenticates
+6. Platform redirects back to app
+7. App continues with authenticated session
+
+**Session Management:**
+- Handled transparently by ZeroBias client libraries
+- Organization-based policies control session parameters
+- Session limits and inactivity timers applied automatically
+- No manual refresh/renewal logic needed
+
+**Alternative: Custom Login Screens**
+- Repository: `https://github.com/zerobias-org/login`
+- Location: `~/zb-org/login`
+- Combined with virtual hosting for white-label login
+- Still uses same authentication flow
+
+**API-Only / Headless Apps:**
+- Must acquire API tokens for authentication
+- See platform documentation for token generation
+- Used for backend services, CLIs, automation
+
 ## Common Development Commands
+
+### Data Explorer App
+Navigate to: `package/zerobias/data-explorer/`
+
+- **Development**: `npm run dev` - Starts dev server with default config
+- **Build for dev**: `npm run build:dev` - Copies dev config and builds
+- **Build for qa**: `npm run build:qa` - Copies QA config and builds
+- **Build for prod**: `npm run build:prod` - Copies prod config and builds
+- **Production start**: `npm start` - Starts production server
+- **Lint**: `npm run lint` - Runs ESLint
 
 ### NextJS Example App
 Navigate to: `package/zerobias/example-nextjs/`
@@ -35,7 +158,68 @@ Navigate to: `package/zerobias/example-angular/`
 
 ## Architecture
 
-### NextJS Application Architecture
+### Data Explorer Application Architecture
+
+**Purpose**: Production-quality database exploration tool using the DataProducer interface. Provides visual browsing of database objects, data viewing with filtering, schema inspection, and ERD generation.
+
+**Technology Stack:**
+- Next.js 15 with App Router
+- React 19 with TypeScript
+- `react-resizable-panels` for split-pane layout
+- `react-tabs` for tabbed interface
+- Mermaid.js for ERD diagram rendering
+- Lucide React icons
+
+**Client Libraries:**
+- `@auditmation/zb-client-lib-js` - Core Zerobias client library
+- `@auditlogic/module-auditmation-interface-dataproducer-client-ts` - DataProducer client for database exploration
+
+**State Management:**
+- `CurrentUserContext` - Zerobias authentication and organization context
+- `DataExplorerContext` - DataProducer client state and connection management
+- **No wrapper services** - Direct API client usage in contexts (clean architecture)
+
+**Service Architecture:**
+- `ZerobiasAppService` (lib/zerobias.ts) - Singleton for Zerobias client lifecycle
+  - Manages global API clients (singleton pattern is appropriate here)
+  - Handles axios interceptor for local dev API key injection
+  - Centralizes environment configuration
+- DataProducer clients managed directly in React state (per-connection instances)
+
+**Key Components:**
+- `ConnectionSelector` - Discovers and selects DataProducer connections/scopes
+- `ObjectBrowser` - Tree navigation with lazy-loading of database objects
+- `ObjectDetails` - Tabbed interface for object metadata and operations
+  - `CollectionViewer` - Data table with RFC4515 filtering and pagination
+  - `SchemaViewer` - Table metadata with primary keys, data types, constraints
+  - `FunctionInvoker` - Execute database functions with input parameters
+  - `ERDiagram` - Mermaid-based entity relationship diagrams
+
+**UI/UX Features:**
+- Professional split-pane layout with drag-to-resize
+- Modern purple gradient design theme
+- RFC4515 filter builder for intuitive queries (no SQL knowledge required)
+- Multiple view modes (table/JSON)
+- Support for both count-based and cursor-based pagination
+- ERD generation with toggle between visual and source views
+
+**Environment Configuration:**
+- Multiple `next.config.*.ts` files for different environments
+- Build scripts swap config files before building
+- Static export mode with `basePath: "/data-explorer"`
+- Environment variables: `NEXT_PUBLIC_API_HOSTNAME`, `NEXT_PUBLIC_IS_LOCAL_DEV`, `NEXT_PUBLIC_API_KEY`
+
+**Application Flow:**
+1. User authentication via Zerobias platform
+2. Discover connections implementing DataProducer interface (PostgreSQL, etc.)
+3. Handle single-scope vs multi-scope connections
+4. Initialize DataProducer client with target ID (connection or scope)
+5. Browse object hierarchy (containers → collections → functions)
+6. View/filter data, inspect schemas, invoke functions, generate ERDs
+
+### NextJS Example Application Architecture
+
+**Purpose**: Educational demo showcasing Zerobias platform integration patterns including product catalog, module discovery, external service connections (GitHub), and key-value storage.
 
 The NextJS app uses App Router (Next.js 15) with the following patterns:
 
@@ -109,9 +293,29 @@ The Angular app uses a single-component architecture with extensive reactive pat
 
 ## Key Integration Patterns
 
-### Zerobias Platform Connection Flow
+### DataProducer Interface Pattern (data-explorer)
 
-Both applications follow this pattern for connecting to external services:
+The DataProducer interface provides a generic object-oriented view of data sources:
+
+1. **Discover connections** - Find connections implementing DataProducer via product/module association
+2. **Handle scoping** - Detect single-scope vs multi-scope connections
+3. **Initialize client** - Create DataProducer client with Hub connection profile
+4. **Browse hierarchy** - Navigate object tree (root → containers → collections/functions)
+5. **Access data** - Query collections with filters, invoke functions, view schemas
+6. **Generate diagrams** - Create ERDs from schema metadata
+
+**Key APIs:**
+- `getObjectsApi().getObject(id)` - Get object metadata
+- `getObjectsApi().getRootChildObjects(page, pageSize)` - Browse root level
+- `getObjectsApi().getChildObjects(parentId, page, pageSize)` - Browse children
+- `getCollectionsApi().getCollectionElements(id, page, pageSize, filters)` - Query data with RFC4515 filters
+- `getSchemasApi().getSchema(id)` - Get collection schema
+- `getFunctionsApi().invoke(id, input)` - Execute functions
+- `getDiagramApi().getERD(id)` - Get entity relationship diagrams (if supported)
+
+### Zerobias Platform Connection Flow (example apps)
+
+Both example applications follow this pattern for connecting to external services:
 
 1. **Authenticate user** - Get current user and org via `getWhoAmI()` and `getCurrentOrg()`
 2. **Select product** - Query product catalog (e.g., GitHub product via `packageCode: 'github.github'`)
@@ -123,7 +327,7 @@ Both applications follow this pattern for connecting to external services:
 
 ### Environment-Specific Configuration
 
-**NextJS:**
+**All NextJS Apps:**
 - Environment variables control API hostname and local dev behavior
 - Build scripts swap config files for different deployment targets
 - Local development uses API key authentication via request interceptor
@@ -135,7 +339,21 @@ Both applications follow this pattern for connecting to external services:
 
 ## Development Workflow
 
-### Working with the NextJS App
+### Working with Data Explorer
+
+1. Navigate to `package/zerobias/data-explorer/`
+2. Install dependencies: `npm install`
+3. Set environment variables (for local dev, create `.env.local`):
+   ```
+   NEXT_PUBLIC_API_HOSTNAME=your-api-host
+   NEXT_PUBLIC_IS_LOCAL_DEV=true
+   NEXT_PUBLIC_API_KEY=your-api-key
+   ```
+4. Run dev server: `npm run dev`
+5. Access at `http://localhost:3000`
+6. Build for specific environment: `npm run build:dev|qa|prod`
+
+### Working with the NextJS Example App
 
 1. Navigate to `package/zerobias/example-nextjs/`
 2. Install dependencies: `npm install`
@@ -158,19 +376,52 @@ Both applications follow this pattern for connecting to external services:
 
 ## TypeScript and Dependencies
 
-Both apps use TypeScript with strict typing from the Zerobias client libraries. The libraries provide comprehensive type definitions for all API responses, including:
+All apps use TypeScript with strict typing from the Zerobias client libraries. The libraries provide comprehensive type definitions for all API responses, including:
 
+**Common Types:**
 - `User`, `Org`, `ServiceAccount` from `@auditmation/module-auditmation-auditmation-dana`
 - `ProductExtended`, `ProductWithObjectCount` from portal/platform modules
 - `ConnectionListView`, `ScopeListView` from hub module
 - `PagedResults<T>`, `Duration` from `@auditmation/types-core-js`
+
+**DataProducer Types:**
+- `DataproducerObject` - Generic object with metadata, classification, schemas
+- `CollectionElement` - Data row from collection queries
+- `ObjectClass` - Enum: container, collection, function, document, binary
+- Schema types for collections, functions, documents
+
+**Module Types:**
 - Module-specific types (e.g., GitHub's `Organization`, `Repository`)
 
 ## Important Notes
 
-- Both apps use static export mode for deployment (NextJS uses `output: "export"`)
+- All apps use static export mode for deployment (NextJS uses `output: "export"`)
 - Custom base paths are configured for sub-directory deployment
-- The NextJS app disables React strict mode
+- NextJS apps disable React strict mode
 - The Angular app uses Nx workspace for build tooling
 - Session management and authentication are handled entirely by the Zerobias platform
 - Local development requires API key configuration for backend access
+
+## Architecture Best Practices (Learned from data-explorer refactor)
+
+**✅ DO:**
+- Use singleton pattern for global Zerobias client lifecycle (`ZerobiasAppService`)
+- Manage per-connection clients (like DataProducer) directly in React state/context
+- Call API clients directly from components/contexts - avoid unnecessary wrapper services
+- Use TypeScript strict mode and leverage provided type definitions
+- Implement proper error boundaries and loading states
+- Use modern UI libraries (`react-resizable-panels`, etc.) for better UX
+
+**❌ DON'T:**
+- Create wrapper services around per-instance clients (keep them in React state)
+- Mix architectural patterns between singleton and per-instance clients
+- Ignore TypeScript errors or use `any` types unnecessarily
+- Copy UI patterns from example apps into production apps without design consideration
+- Create unnecessary abstraction layers that obscure direct API usage
+
+## Project-Specific Documentation
+
+For detailed project-specific guidance, see:
+- `package/zerobias/data-explorer/CLAUDE.md` - Data Explorer architecture and development
+- `package/zerobias/example-nextjs/CLAUDE.md` - NextJS example patterns and suggested improvements
+- `package/zerobias/example-angular/CLAUDE.md` - Angular example patterns (if created)

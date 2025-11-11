@@ -7,8 +7,8 @@ import { ConnectionListView, ScopeListView } from '@auditmation/module-auditmati
 import { UUID, PagedResults } from '@auditmation/types-core-js';
 import { ModuleSearch } from '@auditmation/module-auditmation-auditmation-store';
 
-// PostgreSQL product package code for initial testing
-const POSTGRESQL_PRODUCT_KEY = '@zerobias-org/product-oss-postgresql';
+// DataProducer interface product key for discovering compatible connections
+const DATAPRODUCER_PRODUCT_KEY = '@auditlogic/product-auditmation-interface-dataproducer';
 
 // Helper to check if a status is valid for DataProducer operations
 const isValidStatus = (status: any): boolean => {
@@ -83,14 +83,14 @@ export default function ConnectionSelector() {
       const zerobiasService = await ZerobiasAppService.getInstance();
       const clientApi = zerobiasService.zerobiasClientApi;
 
-      // Try to find PostgreSQL connections via product/module association
-      const pgProducts = await clientApi.portalClient.getProductApi()
-        .search({ packageCode: POSTGRESQL_PRODUCT_KEY }, 1, 10);
+      // Try to find DataProducer connections via product/module association
+      const dataProducerProducts = await clientApi.portalClient.getProductApi()
+        .search({ packageCode: DATAPRODUCER_PRODUCT_KEY }, 1, 10);
 
-      if (pgProducts.items && pgProducts.items.length > 0) {
-        const pgProduct = pgProducts.items[0];
+      if (dataProducerProducts.items && dataProducerProducts.items.length > 0) {
+        const dataProducerProduct = dataProducerProducts.items[0];
         const moduleSearchResults: PagedResults<ModuleSearch> = await clientApi.storeClient.getModuleApi()
-          .search({ products: [pgProduct.id] }, 1, 50, undefined);
+          .search({ products: [dataProducerProduct.id] }, 1, 50, undefined);
 
         const moduleIds = moduleSearchResults.items.map(m => m.id);
 
@@ -105,20 +105,11 @@ export default function ConnectionSelector() {
         }
       }
 
-      // Fallback: List all connections and filter by name pattern
+      // Fallback: List all connections (no filtering)
       const allConnections: PagedResults<ConnectionListView> = await clientApi.hubClient.getConnectionApi()
         .list(1, 100);
 
-      const sqlConnections = allConnections.items.filter(conn => {
-        const name = conn.name.toLowerCase();
-        return name.includes('sql') || name.includes('postgres') || name.includes('database') || name.includes('db');
-      });
-
-      if (sqlConnections.length > 0) {
-        setConnections(sqlConnections);
-      } else {
-        setConnections(allConnections.items);
-      }
+      setConnections(allConnections.items);
     } catch (err: any) {
       console.error('Failed to load connections:', err);
       setError(`Failed to load connections: ${err.message}`);

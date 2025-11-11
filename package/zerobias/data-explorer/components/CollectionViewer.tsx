@@ -1,7 +1,7 @@
 "use client"
 import { useState, useEffect } from 'react';
 import { useDataExplorer } from '@/context/DataExplorerContext';
-import { Table, FileJson } from 'lucide-react';
+import { Table, FileJson, Filter, X } from 'lucide-react';
 
 type ViewMode = 'table' | 'json';
 
@@ -17,6 +17,11 @@ export default function CollectionViewer({ objectId }: CollectionViewerProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [elements, setElements] = useState<any[]>([]);
+  const [filterString, setFilterString] = useState('');
+  const [showFilterBuilder, setShowFilterBuilder] = useState(false);
+  const [filterAttribute, setFilterAttribute] = useState('');
+  const [filterOperator, setFilterOperator] = useState('=');
+  const [filterValue, setFilterValue] = useState('');
 
   // Pagination state - supports both count-based and cursor-based
   const [paginationMode, setPaginationMode] = useState<PaginationMode>('none');
@@ -30,20 +35,21 @@ export default function CollectionViewer({ objectId }: CollectionViewerProps) {
 
   const [schema, setSchema] = useState<any>(null);
 
-  // Load collection data when objectId or page changes
+  // Load collection data when objectId, page, or filter changes
   useEffect(() => {
     if (objectId && dataProducerClient) {
       loadCollectionData();
     }
-  }, [objectId, currentPage, pageToken, dataProducerClient]);
+  }, [objectId, currentPage, pageToken, filterString, dataProducerClient]);
 
   const loadCollectionData = async () => {
     setLoading(true);
     setError(null);
     try {
-      // Load collection elements
+      // Load collection elements with optional filter
+      const filterArray = filterString ? [filterString] : undefined;
       const result = await dataProducerClient!.getCollectionsApi()
-        .getCollectionElements(objectId, currentPage, pageSize);
+        .getCollectionElements(objectId, currentPage, pageSize, filterArray);
 
       setElements(result.items || []);
 
@@ -129,6 +135,45 @@ export default function CollectionViewer({ objectId }: CollectionViewerProps) {
     }
   };
 
+  const buildFilter = () => {
+    if (!filterAttribute || !filterValue) {
+      return;
+    }
+
+    // Build RFC4515 filter
+    let filter = '';
+    switch (filterOperator) {
+      case '=':
+        filter = `(${filterAttribute}=${filterValue})`;
+        break;
+      case '~=':
+        filter = `(${filterAttribute}~=${filterValue})`;
+        break;
+      case '>=':
+        filter = `(${filterAttribute}>=${filterValue})`;
+        break;
+      case '<=':
+        filter = `(${filterAttribute}<=${filterValue})`;
+        break;
+      case '*':
+        filter = `(${filterAttribute}=*${filterValue}*)`;
+        break;
+      default:
+        filter = `(${filterAttribute}=${filterValue})`;
+    }
+
+    setFilterString(filter);
+    setShowFilterBuilder(false);
+    setCurrentPage(1); // Reset to first page
+  };
+
+  const clearFilter = () => {
+    setFilterString('');
+    setFilterAttribute('');
+    setFilterValue('');
+    setCurrentPage(1);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -152,6 +197,8 @@ export default function CollectionViewer({ objectId }: CollectionViewerProps) {
     );
   }
 
+  const columns = extractColumns();
+
   if (elements.length === 0) {
     return (
       <div className="bg-gray-50 border border-gray-200 rounded p-4">
@@ -160,10 +207,80 @@ export default function CollectionViewer({ objectId }: CollectionViewerProps) {
     );
   }
 
-  const columns = extractColumns();
-
   return (
     <div className="space-y-4">
+      {/* Filter Bar */}
+      <div className="flex items-center gap-2">
+        <button
+          onClick={() => setShowFilterBuilder(!showFilterBuilder)}
+          className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+        >
+          <Filter className="w-4 h-4 mr-1" />
+          Filter
+        </button>
+        {filterString && (
+          <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg">
+            <span className="text-sm text-blue-800 font-mono">{filterString}</span>
+            <button
+              onClick={clearFilter}
+              className="text-blue-600 hover:text-blue-800"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Filter Builder */}
+      {showFilterBuilder && (
+        <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg space-y-3">
+          <h4 className="text-sm font-semibold text-gray-700">Build Filter (RFC4515)</h4>
+          <div className="grid grid-cols-4 gap-2">
+            <input
+              type="text"
+              placeholder="Attribute"
+              value={filterAttribute}
+              onChange={(e) => setFilterAttribute(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded text-sm"
+              list="column-list"
+            />
+            <datalist id="column-list">
+              {columns.map(col => (
+                <option key={col} value={col} />
+              ))}
+            </datalist>
+            <select
+              value={filterOperator}
+              onChange={(e) => setFilterOperator(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded text-sm"
+            >
+              <option value="=">Equals (=)</option>
+              <option value="~=">Approx (~=)</option>
+              <option value=">=">{'>'}= Greater or Equal</option>
+              <option value="<=">{' <'}= Less or Equal</option>
+              <option value="*">Contains (*)</option>
+            </select>
+            <input
+              type="text"
+              placeholder="Value"
+              value={filterValue}
+              onChange={(e) => setFilterValue(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded text-sm"
+              onKeyDown={(e) => e.key === 'Enter' && buildFilter()}
+            />
+            <button
+              onClick={buildFilter}
+              className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700"
+            >
+              Apply
+            </button>
+          </div>
+          <p className="text-xs text-gray-500">
+            Example: <code className="bg-white px-1 py-0.5 rounded">(name=John)</code> or <code className="bg-white px-1 py-0.5 rounded">(age{'>'}=18)</code>
+          </p>
+        </div>
+      )}
+
       {/* View Toggle and Pagination Controls */}
       <div className="flex items-center justify-between">
         {/* View Toggle */}

@@ -2,10 +2,10 @@
 import { useState, useEffect } from 'react';
 import { useDataExplorer } from '@/context/DataExplorerContext';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
-import 'react-tabs/style/react-tabs.css';
 import CollectionViewer from './CollectionViewer';
 import FunctionInvoker from './FunctionInvoker';
 import SchemaViewer from './SchemaViewer';
+import ERDiagram from './ERDiagram';
 
 export default function ObjectDetails() {
   const { selectedObject, dataProducerClient } = useDataExplorer();
@@ -133,20 +133,21 @@ export default function ObjectDetails() {
   });
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200">
-      <div className="p-4 border-b border-gray-200 bg-gray-50">
-        <h3 className="font-bold text-lg text-gray-800">{fullObject.name}</h3>
+    <div className="object-details-container">
+      <div className="object-header">
+        <h3 className="object-title">{fullObject.name}</h3>
         {fullObject.description && (
-          <p className="text-sm text-gray-600 mt-1">{fullObject.description}</p>
+          <p className="object-description">{fullObject.description}</p>
         )}
       </div>
 
-      <Tabs>
+      <Tabs className="custom-tabs">
         <TabList>
           <Tab>Metadata</Tab>
           {hasCollectionClass && <Tab>Data</Tab>}
           {hasFunctionClass && <Tab>Function</Tab>}
           {fullObject.collectionSchema && <Tab>Schema</Tab>}
+          {fullObject.collectionSchema && <Tab>ERD</Tab>}
         </TabList>
 
         {/* Metadata Tab */}
@@ -236,7 +237,104 @@ export default function ObjectDetails() {
             </div>
           </TabPanel>
         )}
+
+        {/* ERD Tab */}
+        {fullObject.collectionSchema && (
+          <TabPanel>
+            <div className="p-4">
+              <ERDiagram objectId={fullObject.id} schemaJson={fullObject.collectionSchema} />
+            </div>
+          </TabPanel>
+        )}
       </Tabs>
+
+      <style jsx global>{`
+        .object-details-container {
+          background: white;
+          border-radius: 0.5rem;
+          border: 1px solid #e5e7eb;
+          overflow: hidden;
+        }
+
+        .object-header {
+          padding: 1.5rem;
+          border-bottom: 1px solid #e5e7eb;
+          background: linear-gradient(to bottom, #f9fafb, #ffffff);
+        }
+
+        .object-title {
+          font-size: 1.25rem;
+          font-weight: 600;
+          color: #1f2937;
+          margin: 0;
+        }
+
+        .object-description {
+          font-size: 0.875rem;
+          color: #6b7280;
+          margin-top: 0.5rem;
+        }
+
+        /* Custom Tabs Styling */
+        .custom-tabs {
+          display: flex;
+          flex-direction: column;
+          height: 100%;
+        }
+
+        .custom-tabs .react-tabs__tab-list {
+          display: flex;
+          gap: 0;
+          margin: 0;
+          padding: 0 1rem;
+          border-bottom: 2px solid #e5e7eb;
+          background: #f9fafb;
+          list-style: none;
+        }
+
+        .custom-tabs .react-tabs__tab {
+          padding: 0.75rem 1.5rem;
+          cursor: pointer;
+          font-size: 0.875rem;
+          font-weight: 500;
+          color: #6b7280;
+          border: none;
+          border-bottom: 2px solid transparent;
+          margin-bottom: -2px;
+          background: transparent;
+          transition: all 0.2s;
+          position: relative;
+        }
+
+        .custom-tabs .react-tabs__tab:hover {
+          color: #667eea;
+          background: rgba(102, 126, 234, 0.05);
+        }
+
+        .custom-tabs .react-tabs__tab--selected {
+          color: #667eea;
+          border-bottom-color: #667eea;
+          background: white;
+        }
+
+        .custom-tabs .react-tabs__tab:focus {
+          outline: none;
+          box-shadow: none;
+        }
+
+        .custom-tabs .react-tabs__tab:focus-visible {
+          outline: 2px solid #667eea;
+          outline-offset: -2px;
+        }
+
+        .custom-tabs .react-tabs__tab-panel {
+          display: none;
+        }
+
+        .custom-tabs .react-tabs__tab-panel--selected {
+          display: block;
+        }
+      `}</style>
     </div>
   );
 }
