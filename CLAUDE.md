@@ -156,140 +156,61 @@ Navigate to: `package/zerobias/example-angular/`
 - **Build**: `npm run build` - Builds for production with custom base-href
 - **Test**: `npm test` - Runs tests via Nx
 
-## Architecture
+## Application Architectures
 
-### Data Explorer Application Architecture
+This section provides high-level overviews of each application. For detailed architecture, patterns, and development guidance, see the package-specific CLAUDE.md files.
 
-**Purpose**: Production-quality database exploration tool using the DataProducer interface. Provides visual browsing of database objects, data viewing with filtering, schema inspection, and ERD generation.
+### Data Explorer
 
-**Technology Stack:**
-- Next.js 15 with App Router
-- React 19 with TypeScript
-- `react-resizable-panels` for split-pane layout
-- `react-tabs` for tabbed interface
-- Mermaid.js for ERD diagram rendering
-- Lucide React icons
+**Purpose**: Production-ready reference implementation showcasing clean architecture patterns for ZeroBias platform applications.
 
-**Client Libraries:**
-- `@auditmation/zb-client-lib-js` - Core Zerobias client library
-- `@auditlogic/module-auditmation-interface-dataproducer-client-ts` - DataProducer client for database exploration
+**Key Features:**
+- Database exploration using DataProducer interface
+- Split-pane UI with resizable panels
+- RFC4515 filter builder for queries
+- Schema inspection and ERD generation
+- Function invocation
 
-**State Management:**
-- `CurrentUserContext` - Zerobias authentication and organization context
-- `DataExplorerContext` - DataProducer client state and connection management
-- **No wrapper services** - Direct API client usage in contexts (clean architecture)
+**Architecture Highlights:**
+- Clean separation: Singleton for globals, React state for instances
+- Direct API calls from contexts (no unnecessary wrappers)
+- Modern UI/UX with professional design
+- Comprehensive error handling and loading states
 
-**Service Architecture:**
-- `ZerobiasAppService` (lib/zerobias.ts) - Singleton for Zerobias client lifecycle
-  - Manages global API clients (singleton pattern is appropriate here)
-  - Handles axios interceptor for local dev API key injection
-  - Centralizes environment configuration
-- DataProducer clients managed directly in React state (per-connection instances)
+**For detailed documentation:** See `package/zerobias/data-explorer/CLAUDE.md`
 
-**Key Components:**
-- `ConnectionSelector` - Discovers and selects DataProducer connections/scopes
-- `ObjectBrowser` - Tree navigation with lazy-loading of database objects
-- `ObjectDetails` - Tabbed interface for object metadata and operations
-  - `CollectionViewer` - Data table with RFC4515 filtering and pagination
-  - `SchemaViewer` - Table metadata with primary keys, data types, constraints
-  - `FunctionInvoker` - Execute database functions with input parameters
-  - `ERDiagram` - Mermaid-based entity relationship diagrams
+### NextJS Example Application
 
-**UI/UX Features:**
-- Professional split-pane layout with drag-to-resize
-- Modern purple gradient design theme
-- RFC4515 filter builder for intuitive queries (no SQL knowledge required)
-- Multiple view modes (table/JSON)
-- Support for both count-based and cursor-based pagination
-- ERD generation with toggle between visual and source views
+**Purpose**: Educational demo showcasing various ZeroBias platform integration patterns.
 
-**Environment Configuration:**
-- Multiple `next.config.*.ts` files for different environments
-- Build scripts swap config files before building
-- Static export mode with `basePath: "/data-explorer"`
-- Environment variables: `NEXT_PUBLIC_API_HOSTNAME`, `NEXT_PUBLIC_IS_LOCAL_DEV`, `NEXT_PUBLIC_API_KEY`
+**Key Features:**
+- Product catalog browsing
+- Module discovery
+- External service connections (GitHub)
+- Key-value storage demo
 
-**Application Flow:**
-1. User authentication via Zerobias platform
-2. Discover connections implementing DataProducer interface (PostgreSQL, etc.)
-3. Handle single-scope vs multi-scope connections
-4. Initialize DataProducer client with target ID (connection or scope)
-5. Browse object hierarchy (containers → collections → functions)
-6. View/filter data, inspect schemas, invoke functions, generate ERDs
+**Architecture Notes:**
+- App Router (Next.js 15) with singleton service pattern
+- **FLAWED BUT FUNCTIONAL** - Contains anti-patterns, not for production use
+- Useful for understanding platform capabilities
 
-### NextJS Example Application Architecture
+**For detailed documentation:** See `package/zerobias/example-nextjs/CLAUDE.md`
 
-**Purpose**: Educational demo showcasing Zerobias platform integration patterns including product catalog, module discovery, external service connections (GitHub), and key-value storage.
+### Angular Example Application
 
-The NextJS app uses App Router (Next.js 15) with the following patterns:
+**Purpose**: Framework alternative demonstrating Angular integration with ZeroBias platform.
 
-**Client Libraries:**
-- `@auditmation/zb-client-lib-js` - Core Zerobias client library for authentication and API access
-- `@auditlogic/module-github-github-client-ts` - GitHub integration module
+**Key Features:**
+- RxJS-based reactive patterns
+- Angular dependency injection
+- Similar demo scenarios as NextJS example
 
-**State Management:**
-- `CurrentUserContext` (`context/CurrentUserContext.tsx`) wraps the entire application
-- Provides global access to: `user`, `org`, `loading`, `action`, `setOrg`, `setAction`
-- Uses singleton pattern via `ZerobiasAppService` (`lib/zerobias.ts`)
+**Architecture Notes:**
+- Single-component architecture with extensive observables
+- Nx build system
+- **EXAMPLE ONLY** - Educational purposes
 
-**Service Initialization:**
-- `ZerobiasAppService.getInstance()` returns singleton instance
-- Initializes three core services:
-  - `ZerobiasClientOrgId` - Manages organization context
-  - `ZerobiasClientApi` - API client with environment config
-  - `ZerobiasClientApp` - Main application service with authentication
-- Supports custom axios interceptors for local development (API key injection)
-
-**Environment Configuration:**
-- Multiple `next.config.*.ts` files for different environments (dev, qa, prod)
-- Build scripts copy the appropriate config to `next.config.ts` before building
-- Static export mode with custom `basePath: "/example-nextjs"`
-- Environment variables: `NEXT_PUBLIC_API_HOSTNAME`, `NEXT_PUBLIC_IS_LOCAL_DEV`, `NEXT_PUBLIC_API_KEY` (local dev only)
-
-**Application Structure:**
-- `/app/page.tsx` - Main demo landing page
-- `/app/module-demo/` - GitHub module integration demo
-- `/app/products-demo/` - Product catalog demo
-- `/app/pkv-demo/` - Principal Key-Value storage demo
-- `/components/forms/` - Reusable form components
-- `/components/ui/` - UI components
-- `/components/demos/` - Demo-specific components
-
-### Angular Application Architecture
-
-The Angular app uses a single-component architecture with extensive reactive patterns:
-
-**Client Libraries:**
-- `@auditmation/ngx-zb-client-lib` - Angular-specific Zerobias client library
-- Provides injectable services: `ZerobiasClientAppService`, `ZerobiasClientApiService`, `ZerobiasClientOrgIdService`
-
-**Initialization:**
-- `APP_INITIALIZER` in `app.module.ts` bootstraps `ZerobiasClientAppService.init()`
-- Must complete before application starts
-
-**State Management:**
-- Heavy use of RxJS observables and `combineLatest` for reactive data flow
-- `app.component.ts` manages all state (594 lines) - single component handles entire demo
-- Subscriptions managed via single `Subscription` object, cleaned up in `ngOnDestroy`
-
-**Key Observables:**
-- `getOrgs()` - List of organizations
-- `getWhoAmI()` - Current user
-- `getCurrentOrg()` - Currently selected organization
-- Changes cascade through form controls to trigger related data fetches
-
-**API Access Pattern:**
-- Access client APIs via injected services:
-  - `clientApi.portalClient.getProductApi()` - Product catalog
-  - `clientApi.hubClient.getConnectionApi()` - External connections
-  - `clientApi.hubClient.getScopeApi()` - Connection scopes
-  - `clientApi.danaClient.getPkvApi()` - Key-value storage
-  - `clientApi.danaClient.getMeApi()` - User operations (API keys, session keys)
-
-**Build Configuration:**
-- Uses Nx build system
-- Builds with `--base-href /example-angular/` for proper deployment path
-- Node.js >= 18.19.1, npm >= 10.2.4 required
+**For detailed documentation:** See `package/zerobias/example-angular/CLAUDE.md` (if present)
 
 ## Key Integration Patterns
 
