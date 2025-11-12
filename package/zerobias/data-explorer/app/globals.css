@@ -1,31 +1,27 @@
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-:root {
-  --select-border: #777;
-  --select-focus: blue;
-  --select-arrow: var(--select-border);
-  --action-color-primary: #03aff0;
-  --action-color-primary-hover: #009ed7;
-  --action-color-warn: #fbfafa;
-  --action-color-warn-hover: #ffd9d9;
-  --action-color-success: #3b9a00;
-  --action-color-success-hover: #338500;
-}
+@layer base {
+  :root {
+    --select-border: #777;
+    --select-focus: blue;
+    --select-arrow: var(--select-border);
+    --action-color-primary: #03aff0;
+    --action-color-primary-hover: #009ed7;
+    --action-color-warn: #fbfafa;
+    --action-color-warn-hover: #ffd9d9;
+    --action-color-success: #3b9a00;
+    --action-color-success-hover: #338500;
+  }
 
-body {
-  padding:0;
-  margin:0;
-  background: #03aff00d;
-  background: radial-gradient(ellipse at top left, rgba(3, 175, 240, .1), transparent, transparent);
-  background-repeat: no-repeat;
-  background-attachment: scroll;
-  background-position: center;
-  font-family: Roboto, sans-serif;
-  font-size: 14px;
-  line-height: 20px;
+  body {
+    @apply m-0 p-0 text-sm leading-5;
+    font-family: Roboto, sans-serif;
+    background: radial-gradient(ellipse at top left, rgba(3, 175, 240, 0.1), transparent, transparent);
+    background-repeat: no-repeat;
+    background-attachment: scroll;
+    background-position: center;
+  }
 }
 

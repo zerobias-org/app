@@ -61,9 +61,35 @@ export default function ConnectionSelector() {
 
   // Initialize DataProducer client when scope is selected (or connection if single-scope)
   useEffect(() => {
-    if (explorerLoading) return;
-    if (selectedConnection && scopes === null && isScoped === false) return;
-    if (dataProducerClient) return;
+    console.log('Initialize effect triggered:', {
+      explorerLoading,
+      hasSelectedConnection: !!selectedConnection,
+      isScoped,
+      hasSelectedScope: !!selectedScope,
+      hasDataProducerClient: !!dataProducerClient,
+      scopesLoaded: scopes !== null
+    });
+
+    if (explorerLoading) {
+      console.log('Skipping initialization - explorer is loading');
+      return;
+    }
+
+    if (dataProducerClient) {
+      console.log('Skipping initialization - client already exists');
+      return;
+    }
+
+    if (!selectedConnection) {
+      console.log('Skipping initialization - no connection selected');
+      return;
+    }
+
+    // For scoped connections, wait until we've loaded scopes
+    if (isScoped && scopes === null) {
+      console.log('Skipping initialization - waiting for scopes to load');
+      return;
+    }
 
     if (selectedConnection && !isScoped) {
       // Single-scope connection - auto-initialize
@@ -73,8 +99,10 @@ export default function ConnectionSelector() {
       // Multi-scope connection - initialize with selected scope
       console.log('Initializing with scope ID (multi-scope):', selectedScope.id);
       handleInitialize(selectedScope.id.toString());
+    } else if (selectedConnection && isScoped && !selectedScope) {
+      console.log('Waiting for scope selection on scoped connection');
     }
-  }, [selectedConnection, selectedScope, isScoped, scopes, explorerLoading, dataProducerClient]);
+  }, [selectedConnection?.id, selectedScope?.id, isScoped, scopes !== null, dataProducerClient !== null]);
 
   const loadConnections = async () => {
     setLoading(true);
@@ -162,10 +190,18 @@ export default function ConnectionSelector() {
     setLoading(true);
     setError(null);
     try {
+      console.log('ConnectionSelector: Calling initializeDataProducer with targetId:', targetId);
       await initializeDataProducer(targetId);
+      console.log('ConnectionSelector: initializeDataProducer completed successfully');
     } catch (err: any) {
-      console.error('Failed to initialize DataProducer client:', err);
-      setError(`Failed to initialize: ${err.message}`);
+      console.error('ConnectionSelector: Failed to initialize DataProducer client');
+      console.error('ConnectionSelector: Error type:', typeof err);
+      console.error('ConnectionSelector: Error:', err);
+      console.error('ConnectionSelector: Error message:', err?.message);
+      console.error('ConnectionSelector: Error stack:', err?.stack);
+
+      const errorMessage = err?.message || err?.toString() || 'Unknown error occurred';
+      setError(`Failed to initialize: ${errorMessage}`);
     } finally {
       setLoading(false);
     }
@@ -219,31 +255,21 @@ export default function ConnectionSelector() {
   };
 
   if (userLoading) {
-    return <span style={{ fontSize: '0.875rem', color: 'rgba(255,255,255,0.8)' }}>Loading...</span>;
+    return <span className="text-sm text-white/80">Loading...</span>;
   }
 
   if (!org) {
-    return <span style={{ fontSize: '0.875rem', color: 'rgba(255,255,255,0.8)' }}>Please select an organization</span>;
+    return <span className="text-sm text-white/80">Please select an organization</span>;
   }
 
-  const selectStyle: React.CSSProperties = {
-    padding: '0.5rem 0.75rem',
-    border: '1px solid rgba(255,255,255,0.3)',
-    borderRadius: '0.25rem',
-    fontSize: '0.875rem',
-    background: 'rgba(255,255,255,0.95)',
-    color: '#1f2937',
-    minWidth: '200px',
-  };
-
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+    <div className="flex items-center gap-4">
       {/* Connection Selector */}
       <select
         value={selectedConnection?.id || ''}
         onChange={handleConnectionChange}
         disabled={explorerLoading || connections.length === 0}
-        style={selectStyle}
+        className="px-3 py-2 border border-white/30 rounded text-sm bg-white/95 text-gray-800 min-w-[200px] focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <option value="">Select a Connection</option>
         {connections.map(conn => {
@@ -254,7 +280,7 @@ export default function ConnectionSelector() {
               key={conn.id.toString()}
               value={conn.id.toString()}
               disabled={!isValid}
-              style={{ color: isValid ? '#1f2937' : '#9ca3af' }}
+              className={isValid ? 'text-gray-800' : 'text-gray-400'}
             >
               {conn.name} ({status})
             </option>
@@ -268,7 +294,7 @@ export default function ConnectionSelector() {
           value={selectedScope?.id || ''}
           onChange={handleScopeChange}
           disabled={explorerLoading}
-          style={selectStyle}
+          className="px-3 py-2 border border-white/30 rounded text-sm bg-white/95 text-gray-800 min-w-[200px] focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <option value="">Select a Scope</option>
           {scopes.map(scope => {
@@ -279,7 +305,7 @@ export default function ConnectionSelector() {
                 key={scope.id.toString()}
                 value={scope.id.toString()}
                 disabled={!isValid}
-                style={{ color: isValid ? '#1f2937' : '#9ca3af' }}
+                className={isValid ? 'text-gray-800' : 'text-gray-400'}
               >
                 {scope.name} ({status})
               </option>
@@ -290,7 +316,7 @@ export default function ConnectionSelector() {
 
       {/* Show error inline if present */}
       {error && (
-        <span style={{ fontSize: '0.875rem', color: '#fecaca', marginLeft: '0.5rem' }}>{error}</span>
+        <span className="text-sm text-red-200 ml-2">{error}</span>
       )}
     </div>
   );

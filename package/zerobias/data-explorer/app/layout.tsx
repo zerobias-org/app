@@ -11,6 +11,7 @@ const montserrat = Montserrat({
 });
 
 const roboto = Roboto({
+  weight: ['400', '500', '700'],
   variable: "--font-roboto",
   subsets: ["latin"],
 })
@@ -29,7 +30,7 @@ export default function RootLayout({
     <html lang="en">
       <meta name="viewport" content="width=device-width, initial-scale=1" />
       <link rel="icon" type="image/png" href="favicon.png"  />
-      <body>
+      <body className={`${roboto.variable} ${montserrat.variable}`} style={{ fontFamily: 'var(--font-roboto), Roboto, sans-serif' }}>
           <CurrentUserProvider>
             <DataExplorerProvider>
               {children}

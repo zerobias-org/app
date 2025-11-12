@@ -24,6 +24,12 @@ class ZerobiasAppService {
   }
 
   public async initializeAppFactory() {
+    console.log('ZerobiasAppService: Starting initialization', {
+      isLocalDev: this.environment.isLocalDev,
+      apiHostname: this.environment.apiHostname,
+      hasApiKey: !!process.env.NEXT_PUBLIC_API_KEY
+    });
+
     await this.zerobiasClientApp.init(
       // zerobiasClientApp.init allows setting custom axios interceptors.
       // This particular interceptor function below will allow local dev
@@ -31,6 +37,12 @@ class ZerobiasAppService {
       // Set this variable in your local dev environment: NEXT_PUBLIC_API_KEY='your api key to our platform'
       // once set, this api key will be accessible via process.env.NEXT_PUBLIC_API_KEY
       (req) => {
+        console.log('ZerobiasAppService: Request interceptor', {
+          url: req.url,
+          method: req.method,
+          isLocalDev: this.environment.isLocalDev,
+          willAddAuth: this.environment.isLocalDev && !!process.env.NEXT_PUBLIC_API_KEY
+        });
         if (this.environment.isLocalDev && process.env.NEXT_PUBLIC_API_KEY) {
           req.headers["Authorization"] = `APIKey ${process.env.NEXT_PUBLIC_API_KEY}`;
         }
@@ -38,7 +50,13 @@ class ZerobiasAppService {
       }
     ).then(() => {
       this.enable = true;
-      console.log("ZerobiasAppSvc initialized");
+      console.log("ZerobiasAppSvc initialized successfully");
+    }).catch((error) => {
+      console.error('ZerobiasAppService: Initialization failed', {
+        message: error.message,
+        stack: error.stack
+      });
+      throw error;
     });
   }
 

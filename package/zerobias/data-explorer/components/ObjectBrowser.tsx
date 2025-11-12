@@ -71,8 +71,7 @@ export default function ObjectBrowser() {
 
         try {
           console.log('Loading children for root node:', rootNode.id, rootNode.name);
-          // PagedResults uses 0-indexed pages, so page 0 is the first page
-          const childrenResult = await dataProducerClient!.getObjectsApi().getChildren(rootNode.id, 0, 100);
+          const childrenResult = await dataProducerClient!.getObjectsApi().getChildren(rootNode.id, 1, 100);
 
           console.log('getChildren response:', childrenResult);
           console.log('childrenResult type:', typeof childrenResult);
@@ -164,8 +163,7 @@ export default function ObjectBrowser() {
       updateNodeState(node.id, { isLoading: true });
 
       console.log('Loading children for node:', node.id, node.name);
-      // PagedResults uses 0-indexed pages, so page 0 is the first page
-      const childrenResult = await dataProducerClient!.getObjectsApi().getChildren(node.id, 0, 100);
+      const childrenResult = await dataProducerClient!.getObjectsApi().getChildren(node.id, 1, 100);
 
       console.log('getChildren response:', childrenResult);
 

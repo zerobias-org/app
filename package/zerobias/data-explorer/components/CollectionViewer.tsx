@@ -48,6 +48,8 @@ export default function CollectionViewer({ objectId }: CollectionViewerProps) {
     try {
       // Load collection elements with optional filter
       const filterArray = filterString ? [filterString] : undefined;
+      // DataProducer API uses 1-indexed pages (per OpenAPI spec and README)
+      // currentPage starts at 1 and matches the API expectation
       const result = await dataProducerClient!.getCollectionsApi()
         .getCollectionElements(objectId, currentPage, pageSize, filterArray);
 

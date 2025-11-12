@@ -41,37 +41,45 @@ export const CurrentUserProvider = ({ children }: { children: ReactNode }) => {
   const [action, setAction] = useState<'createApiKey'|'createSharedSessionKey'|null>(null);
 
   useEffect(() => {
+    console.log('CurrentUserContext: useEffect triggered');
 
     const getPlatform = async () => {
+      console.log('CurrentUserContext: Starting getPlatform');
       setLoading(loading => (true));
       try {
         const instance:ZerobiasAppService = await ZerobiasAppService.getInstance();
+        console.log('CurrentUserContext: Got ZerobiasAppService instance');
         if (instance) {
-          // console.log('currentUserContext --> getWhoAmI');
+          console.log('CurrentUserContext: Subscribing to getWhoAmI');
 
           // get current user
           instance
             .zerobiasClientApp
             .getWhoAmI()
             .subscribe((item:any) => {
+              console.log('CurrentUserContext: getWhoAmI returned:', item ? 'User data' : 'null');
               if (item) {
                 setUser(user => (item as UserProps));
               }
             });
+
+          console.log('CurrentUserContext: Subscribing to getCurrentOrg');
 
           // get current org
           instance
             .zerobiasClientApp
             .getCurrentOrg()
             .subscribe((item:any) => {
+              console.log('CurrentUserContext: getCurrentOrg returned:', item ? 'Org data' : 'null');
               if (item) {
                 setOrg(org => (item as OrgProps));
               }
             });
         }
       } catch(error) {
-        console.error('Failed to fetch User or Org', error);
+        console.error('CurrentUserContext: Failed to fetch User or Org', error);
       } finally {
+        console.log('CurrentUserContext: Setting loading to false');
         setLoading(loading => (false));
       }
     };

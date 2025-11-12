@@ -260,15 +260,35 @@ if (connection.scoped) {
 
 ### Client Initialization
 
-```typescript
-// Build Hub connection profile
-const apiHostname = process.env.NEXT_PUBLIC_API_HOSTNAME || 'https://ci.zerobias.com/api';
-const hubUrl = `${apiHostname}/hub`;
+**IMPORTANT:** Use `getZerobiasClientUrl()` for dynamic URL construction and pass authentication credentials to the connection profile.
 
-const hubConnectionProfile = {
-  server: new URL(hubUrl),
-  targetId: new UUID(targetId) // connection or scope ID
+```typescript
+import { getZerobiasClientUrl } from '@auditmation/zb-client-lib-js';
+
+// Get ZerobiasAppService instance
+const zerobiasService = await ZerobiasAppService.getInstance();
+
+// Build Hub URL using getZerobiasClientUrl (uses browser location)
+const hubUrl = getZerobiasClientUrl('hub', true, zerobiasService.environment.isLocalDev);
+
+// Create UUID for target (connection ID or scope ID)
+const uuid = zerobiasService.zerobiasClientApi.toUUID(targetId);
+
+// Build Hub connection profile with authentication
+const hubConnectionProfile: any = {
+  server: hubUrl,
+  targetId: uuid
 };
+
+// Add API key for local dev authentication
+if (zerobiasService.environment.isLocalDev && process.env.NEXT_PUBLIC_API_KEY) {
+  hubConnectionProfile.apiKey = process.env.NEXT_PUBLIC_API_KEY;
+}
+
+// Add org ID for multi-tenancy (from CurrentUserContext)
+if (org) {
+  hubConnectionProfile.orgId = zerobiasService.zerobiasClientApi.toUUID(org.id);
+}
 
 // Create and connect client
 const client = newDataproducer();
@@ -277,6 +297,12 @@ await client.connect(hubConnectionProfile);
 // Store in React state
 setDataProducerClient(client);
 ```
+
+**Why This Pattern:**
+- `getZerobiasClientUrl()` uses `window.location` for same-origin URLs (avoids CORS preflight)
+- `apiKey` in profile enables Authorization header in HubConnector
+- `orgId` in profile adds Dana-Org-Id header for multi-tenancy
+- Matches working pattern from example-nextjs app
 
 ### Object Navigation
 
@@ -440,6 +466,56 @@ Build scripts (`npm run build:dev`, etc.) copy the appropriate config to `next.c
 
 ## Troubleshooting
 
+### "ERR_CONNECTION_REFUSED" or "Failed to connect to Hub"
+
+**Symptoms:**
+- Browser console shows `net::ERR_CONNECTION_REFUSED` on `/metadata` endpoint
+- Initialization hangs or fails at Step 6 (connecting to Hub)
+- No Authorization header in Hub API requests
+- Requests not reaching proxy server
+
+**Root Causes:**
+1. **Manual URL construction** - Using `process.env.NEXT_PUBLIC_API_HOSTNAME` string concatenation instead of `getZerobiasClientUrl()`
+2. **Missing authentication** - `apiKey` and `orgId` not passed to `HubConnectionProfile`
+3. **CORS preflight failures** - Different origins cause preflight OPTIONS requests to fail
+
+**Solutions:**
+
+1. **Use `getZerobiasClientUrl()` for URL construction:**
+   ```typescript
+   // ❌ WRONG - Manual construction
+   const hubUrl = `${process.env.NEXT_PUBLIC_API_HOSTNAME}/hub`;
+
+   // ✅ CORRECT - Dynamic construction using browser location
+   const hubUrl = getZerobiasClientUrl('hub', true, isLocalDev);
+   ```
+
+2. **Pass authentication credentials to connection profile:**
+   ```typescript
+   const hubConnectionProfile: any = {
+     server: hubUrl,
+     targetId: uuid,
+     apiKey: process.env.NEXT_PUBLIC_API_KEY,  // For local dev
+     orgId: zerobiasClientApi.toUUID(org.id)   // For multi-tenancy
+   };
+   ```
+
+3. **Get org from CurrentUserContext (don't re-fetch):**
+   ```typescript
+   // ❌ WRONG - Tries to await an Observable (hangs)
+   const org = await zerobiasClientApp.getCurrentOrg().toPromise();
+
+   // ✅ CORRECT - Use already-loaded org from context
+   const { org } = useCurrentUser();
+   ```
+
+4. **Verify HubConnector receives credentials:**
+   - Check browser Network tab for `/metadata` request
+   - Verify `Authorization: APIKey ...` header is present
+   - Verify `Dana-Org-Id` header is present
+
+**Reference:** See `example-nextjs` ModuleDemo.tsx (lines 228-236, 266-271) for working Hub client pattern.
+
 ### "No connections found"
 
 **Causes:**
@@ -534,6 +610,98 @@ When contributing to Data Explorer:
 - **DataProducer Client**: `@auditlogic/module-auditmation-interface-dataproducer-client-ts`
 - **RFC4515 Filter Syntax**: https://www.rfc-editor.org/rfc/rfc4515.html
 - **Mermaid Diagrams**: https://mermaid.js.org/
+
+## Styling and UI Lessons Learned
+
+### Critical Lesson: Use Inline Styles for Reliability
+
+**Problem:** Tailwind CSS classes (`w-6`, `h-6`, `text-blue-600`, etc.) were not being applied consistently, especially after errors or HMR (Hot Module Replacement) in development. This caused:
+- Massive icon sizes (icons rendering at full SVG viewport size instead of 24px)
+- Lost styling after runtime errors
+- Inconsistent appearance across page loads
+
+**Root Cause:** CSS specificity issues and Tailwind class loading timing in Next.js App Router with client components.
+
+**Solution:** Use inline styles (`style={{ width: '1.5rem', height: '1.5rem' }}`) instead of Tailwind utility classes for critical sizing and layout.
+
+### Working Approach
+
+**✅ DO - Use inline styles for:**
+- Layout structure (`display: 'flex'`, `width: '40%'`, etc.)
+- Exact sizing (`width: '1.5rem'`, `height: '1.5rem'` for icons)
+- Critical colors and spacing
+- Font application on body element
+
+**✅ DO - Keep Tailwind for:**
+- Global styles via `@layer base` in `globals.css`
+- CSS custom properties (color variables)
+- Reset styles
+
+**Example from working code:**
+```tsx
+// ✅ CORRECT - Inline styles
+<svg style={{ width: '1.5rem', height: '1.5rem', marginRight: '0.5rem' }}
+     fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="..."/>
+</svg>
+
+// ❌ WRONG - Tailwind classes (unreliable)
+<svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="..."/>
+</svg>
+```
+
+### Font Loading Best Practices
+
+**Problem:** Fonts would disappear after errors or fail to load entirely.
+
+**Solution:**
+1. **Add required `weight` parameter** to Next.js font imports:
+   ```tsx
+   const roboto = Roboto({
+     weight: ['400', '500', '700'],  // Required!
+     variable: "--font-roboto",
+     subsets: ["latin"],
+   })
+   ```
+
+2. **Apply fonts with both className AND inline style:**
+   ```tsx
+   <body className={`${roboto.variable} ${montserrat.variable}`}
+         style={{ fontFamily: 'var(--font-roboto), Roboto, sans-serif' }}>
+   ```
+
+3. **Use proper fallback chain:** CSS variable → font name → generic family
+
+### Component Structure Lessons
+
+**Always Show Both Panels:**
+- Don't conditionally render the entire two-panel layout based on connection state
+- Keep structure consistent, only hide/show content within panels
+- This prevents layout shifts and maintains proper flex sizing
+
+**Connection Selector Placement:**
+- Place ConnectionSelector at the top of the Object Browser card
+- Show immediately on page load (before connection is made)
+- Provide clear empty states when no connection selected
+
+**Empty States:**
+- Use simple text, not large decorative icons
+- Icons should be small (4rem max) if used at all
+- Provide actionable guidance ("Select a connection above...")
+
+### Development Workflow
+
+**After making styling changes:**
+1. Do a full clean build: `rm -rf .next && npm run build:dev`
+2. Hard refresh browser (Ctrl+Shift+R) to bypass cache
+3. Test error recovery: Trigger an error, verify styles remain intact
+4. Test HMR: Make code change, verify styles don't break
+
+**If CSS gets "lost" during development:**
+1. This usually indicates Tailwind classes are being used where inline styles should be
+2. Check for any `className` attributes that should be `style` props
+3. Verify font loading in browser DevTools (check Network tab)
 
 ## Related Documentation
 

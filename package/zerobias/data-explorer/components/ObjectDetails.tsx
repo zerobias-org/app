@@ -79,10 +79,8 @@ export default function ObjectDetails() {
 
   if (!selectedObject) {
     return (
-      <div className="bg-white rounded-lg border border-gray-200 p-8">
-        <p className="text-gray-500 text-center">
-          Select an object from the browser to view details
-        </p>
+      <div style={{ textAlign: 'center', color: '#9ca3af', padding: '3rem 0' }}>
+        <p style={{ fontSize: '1rem' }}>Select an object from the browser to view details</p>
       </div>
     );
   }
@@ -288,33 +286,34 @@ export default function ObjectDetails() {
           margin: 0;
           padding: 0 1rem;
           border-bottom: 2px solid #e5e7eb;
-          background: #f9fafb;
+          background: linear-gradient(to bottom, #fafbfc, #f9fafb);
           list-style: none;
         }
 
         .custom-tabs .react-tabs__tab {
-          padding: 0.75rem 1.5rem;
+          padding: 0.875rem 1.75rem;
           cursor: pointer;
-          font-size: 0.875rem;
+          font-size: 0.9rem;
           font-weight: 500;
           color: #6b7280;
           border: none;
-          border-bottom: 2px solid transparent;
+          border-bottom: 3px solid transparent;
           margin-bottom: -2px;
           background: transparent;
-          transition: all 0.2s;
+          transition: all 0.2s ease;
           position: relative;
         }
 
         .custom-tabs .react-tabs__tab:hover {
-          color: #667eea;
-          background: rgba(102, 126, 234, 0.05);
+          color: #2563eb;
+          background: rgba(37, 99, 235, 0.05);
         }
 
         .custom-tabs .react-tabs__tab--selected {
-          color: #667eea;
-          border-bottom-color: #667eea;
+          color: #2563eb;
+          border-bottom-color: #2563eb;
           background: white;
+          font-weight: 600;
         }
 
         .custom-tabs .react-tabs__tab:focus {
@@ -323,7 +322,7 @@ export default function ObjectDetails() {
         }
 
         .custom-tabs .react-tabs__tab:focus-visible {
-          outline: 2px solid #667eea;
+          outline: 2px solid #2563eb;
           outline-offset: -2px;
         }
 

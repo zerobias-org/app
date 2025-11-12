@@ -327,14 +327,48 @@ const resource = await api.auditmationPlatform()
   .create({ name: 'My Resource', type: 'custom' });
 ```
 
-**Hub Module Client Usage:**
-```typescript
-// Use generated module client
-import { GitHubClient } from '@auditlogic/module-github-github-client-ts';
+**Hub Module Client Initialization (CRITICAL PATTERN):**
 
-const ghClient = new GitHubClient({ token: 'github-token' });
-const repos = await ghClient.getRepositories('zerobias-org');
+All Hub module clients (DataProducer, GitHub, etc.) require proper authentication setup:
+
+```typescript
+import { getZerobiasClientUrl } from '@auditmation/zb-client-lib-js';
+import { newGithub } from '@auditlogic/module-github-github-client-ts';
+
+// Get ZerobiasAppService instance
+const zerobiasService = await ZerobiasAppService.getInstance();
+
+// Build Hub URL using getZerobiasClientUrl (uses browser location for same-origin)
+const hubUrl = getZerobiasClientUrl('hub', true, zerobiasService.environment.isLocalDev);
+
+// Create Hub connection profile with authentication
+const hubConnectionProfile = {
+  server: hubUrl,
+  targetId: zerobiasService.zerobiasClientApi.toUUID(scopeId),  // scope or connection ID
+  apiKey: process.env.NEXT_PUBLIC_API_KEY,  // For local dev authentication
+  orgId: zerobiasService.zerobiasClientApi.toUUID(org.id)  // For multi-tenancy
+};
+
+// Create and connect module client
+const githubClient = newGithub();
+await githubClient.connect(hubConnectionProfile);
+
+// Use the connected client
+const orgs = await githubClient.getOrganizationApi().listMyOrganizations(1, 5);
+const repos = await githubClient.getOrganizationApi().listRepositories(orgName, ...);
 ```
+
+**Why This Pattern:**
+- ✅ `getZerobiasClientUrl()` uses `window.location` for same-origin URLs (avoids CORS preflight)
+- ✅ `apiKey` enables `Authorization: APIKey ...` header in HubConnector
+- ✅ `orgId` adds `Dana-Org-Id` header for multi-tenancy
+- ✅ Works for ALL Hub module clients (DataProducer, GitHub, etc.)
+
+**Common Mistakes:**
+- ❌ Manual URL construction: `const url = process.env.NEXT_PUBLIC_API_HOSTNAME + '/hub'`
+- ❌ Missing `apiKey` in connection profile → No Authorization header
+- ❌ Missing `orgId` → Multi-tenancy issues
+- ❌ Trying to `await getCurrentOrg().toPromise()` → Hangs (use context instead)
 
 ### Iframe Communication
 

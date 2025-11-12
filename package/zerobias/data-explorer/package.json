@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "cp ./next.config.dev.ts ./next.config.ts && next dev",
+    "dev:debug": "cp ./next.config.dev.ts ./next.config.ts && node server-dev.js",
     "dev:watch": "cp ./next.config.dev.ts ./next.config.ts && next dev",
     "build:dev": "cp ./next.config.dev.ts ./next.config.ts && next build",
     "build:qa": "cp ./next.config.qa.ts ./next.config.ts && next build",
@@ -31,13 +32,16 @@
     "@types/node": "^20",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "autoprefixer": "^10.4.22",
     "dotenv": "^17.2.3",
     "eslint": "^9",
     "eslint-config-next": "15.3.2",
     "eslint-plugin-react-hooks": "^5.2.0",
     "express": "^5.1.0",
     "http-proxy-middleware": "^3.0.5",
+    "postcss": "^8.5.6",
     "sass": "^1.89.0",
+    "tailwindcss": "^3.4.18",
     "typescript": "^5"
   }
 }
