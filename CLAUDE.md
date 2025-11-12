@@ -25,7 +25,7 @@ This repository enables developers to:
 ### Current Applications
 
 - **data-explorer**: Production-ready database explorer using the DataProducer interface (reference implementation)
-- **example-nextjs**: NextJS demo showing platform integration patterns (flawed but functional examples)
+- **example-nextjs**: NextJS demo showing platform integration patterns (educational examples)
 - **example-angular**: Angular demo with Nx build system (framework alternative example)
 
 ## Project Structure
@@ -33,8 +33,19 @@ This repository enables developers to:
 ```
 package/zerobias/
 ├── data-explorer/      # Production database explorer (Next.js 15) - REFERENCE IMPLEMENTATION
-├── example-nextjs/     # Next.js 15 integration demo - FLAWED BUT FUNCTIONAL EXAMPLES
+│   ├── app/           # Next.js App Router pages
+│   ├── components/    # React components
+│   ├── context/       # React contexts
+│   ├── lib/           # Utility libraries
+│   └── next.config.*.ts  # Environment configs
+├── example-nextjs/     # Next.js 15 integration demo - EDUCATIONAL EXAMPLES
+│   ├── app/           # Next.js App Router
+│   ├── components/    # React components
+│   └── next.config.*.ts  # Environment configs
 ├── example-angular/    # Angular 17 demo with Nx - FRAMEWORK ALTERNATIVE
+│   ├── src/app/       # Angular app components
+│   ├── src/environments/  # Environment configs
+│   └── package.json
 └── {your-app}/         # Your custom application
 ```
 
@@ -47,8 +58,8 @@ package/zerobias/
 1. Fork this repository
 2. Create directory: `package/zerobias/your-app-name/`
 3. Choose unique `basePath` (becomes `https://app.zerobias.com/{basePath}`)
-4. Copy from `data-explorer` (recommended) or `example-nextjs`
-5. Update `package.json` and `next.config.*.ts` files
+4. Copy from `data-explorer` (recommended) or `example-nextjs`/`example-angular`
+5. Update `package.json` and configuration files
 6. Implement `ZerobiasAppService.init()` for authentication
 7. Build your UI
 8. Submit PR to `dev`/`qa`/`main` branch
@@ -69,6 +80,10 @@ package/zerobias/
 - Should match directory name (recommended, not required)
 - PR review process identifies and resolves conflicts
 - Lowercase, hyphens preferred (e.g., `my-app`, `data-explorer`)
+
+**Alternative: Manual Deployment to S3/CloudFront**
+
+See "Manual Deployment" section below for S3/CloudFront deployment instructions.
 
 ## ZeroBias Platform Integration
 
@@ -127,6 +142,32 @@ const zerobiasService = await ZerobiasAppService.getInstance();
 - See platform documentation for token generation
 - Used for backend services, CLIs, automation
 
+**Authentication Modes:**
+
+**1. Session Inheritance (Iframe Mode):**
+```typescript
+// App runs in iframe, inherits session from parent portal
+const app = new ZerobiasClientApp(api, orgIdService, environment);
+await app.init(); // No custom auth needed
+
+// Session managed by parent portal
+const whoAmI = await app.whoAmI();
+```
+
+**2. Direct Authentication (Standalone Mode):**
+```typescript
+// App runs standalone, needs API key authentication
+await app.init(
+  (req) => {
+    // Add API key for authenticated requests
+    if (process.env.API_KEY) {
+      req.headers["Authorization"] = `APIKey ${process.env.API_KEY}`;
+    }
+    return req;
+  }
+);
+```
+
 ## Common Development Commands
 
 ### Data Explorer App
@@ -155,6 +196,7 @@ Navigate to: `package/zerobias/example-angular/`
 - **Development**: `npm start` - Starts dev server via Nx
 - **Build**: `npm run build` - Builds for production with custom base-href
 - **Test**: `npm test` - Runs tests via Nx
+- **Lint**: `npx nx lint`
 
 ## Application Architectures
 
@@ -177,6 +219,13 @@ This section provides high-level overviews of each application. For detailed arc
 - Modern UI/UX with professional design
 - Comprehensive error handling and loading states
 
+**Technology Stack:**
+- Next.js 15 with App Router
+- React 19 with TypeScript
+- `react-resizable-panels`, `react-tabs`, Mermaid.js
+- `@auditmation/zb-client-lib-js` - Core ZeroBias client
+- `@auditlogic/module-auditmation-interface-dataproducer-client-ts` - DataProducer client
+
 **For detailed documentation:** See `package/zerobias/data-explorer/CLAUDE.md`
 
 ### NextJS Example Application
@@ -191,8 +240,14 @@ This section provides high-level overviews of each application. For detailed arc
 
 **Architecture Notes:**
 - App Router (Next.js 15) with singleton service pattern
-- **FLAWED BUT FUNCTIONAL** - Contains anti-patterns, not for production use
+- **EDUCATIONAL EXAMPLES** - Demonstrates various integration patterns
 - Useful for understanding platform capabilities
+
+**Technology Stack:**
+- Next.js 15.3.2 with React 19
+- `@auditmation/zb-client-lib-js` - ZeroBias vanilla client
+- `@auditlogic/module-github-github-client-ts` - GitHub module client
+- TypeScript 5.x with strict mode
 
 **For detailed documentation:** See `package/zerobias/example-nextjs/CLAUDE.md`
 
@@ -204,11 +259,18 @@ This section provides high-level overviews of each application. For detailed arc
 - RxJS-based reactive patterns
 - Angular dependency injection
 - Similar demo scenarios as NextJS example
+- Angular Material UI components
 
 **Architecture Notes:**
 - Single-component architecture with extensive observables
 - Nx build system
 - **EXAMPLE ONLY** - Educational purposes
+
+**Technology Stack:**
+- Angular 17.1.3 with Angular Material
+- `@auditmation/ngx-zb-client-lib` - Angular-specific client
+- RxJS 6.6.7 for reactive programming
+- Nx 20.6.1 for build optimization
 
 **For detailed documentation:** See `package/zerobias/example-angular/CLAUDE.md` (if present)
 
@@ -245,6 +307,62 @@ Both example applications follow this pattern for connecting to external service
 5. **Get scopes** - Retrieve scopes for the selected connection (connection-level or scope-level targeting)
 6. **Initialize module client** - Connect external service client (e.g., `newGithub()`) with hub connection profile
 7. **Use external APIs** - Call methods on the connected client (e.g., `listMyOrganizations()`, `listRepositories()`)
+
+**API Integration Examples:**
+
+```typescript
+// Search for products in catalog
+const products = await api.portalClient()
+  .getProductApi()
+  .search({ name: 'GitHub' }, page, pageSize);
+
+// Get Hub connections
+const connections = await api.hubClient()
+  .getConnectionApi()
+  .search({ products: [productId] }, page, pageSize);
+
+// Create resource
+const resource = await api.auditmationPlatform()
+  .getResourceApi()
+  .create({ name: 'My Resource', type: 'custom' });
+```
+
+**Hub Module Client Usage:**
+```typescript
+// Use generated module client
+import { GitHubClient } from '@auditlogic/module-github-github-client-ts';
+
+const ghClient = new GitHubClient({ token: 'github-token' });
+const repos = await ghClient.getRepositories('zerobias-org');
+```
+
+### Iframe Communication
+
+**Send Message to Parent Portal:**
+```typescript
+window.parent.postMessage({
+  type: 'APP_NAV',
+  data: { url: '/some/path' }
+}, '*');
+```
+
+**Receive Messages from Parent:**
+```typescript
+window.addEventListener('message', (event) => {
+  if (event.data.type === 'PORTAL_HOME') {
+    // Navigate to home
+  } else if (event.data.type === 'LOGOUT') {
+    // Handle logout
+  }
+});
+```
+
+**Message Types:**
+- `APP_NAV` - Navigate within app
+- `RESOURCE_NAV` - Navigate to resource
+- `LOGOUT` - User logged out
+- `REFRESH_NAVIGATION` - Refresh navigation
+- `PORTAL_HOME` - Return to portal home
 
 ### Environment-Specific Configuration
 
@@ -314,16 +432,116 @@ All apps use TypeScript with strict typing from the Zerobias client libraries. T
 **Module Types:**
 - Module-specific types (e.g., GitHub's `Organization`, `Repository`)
 
-## Important Notes
+## Deployment
 
-- All apps use static export mode for deployment (NextJS uses `output: "export"`)
-- Custom base paths are configured for sub-directory deployment
-- NextJS apps disable React strict mode
-- The Angular app uses Nx workspace for build tooling
-- Session management and authentication are handled entirely by the Zerobias platform
-- Local development requires API key configuration for backend access
+### Automatic Deployment (Recommended)
 
-## Architecture Best Practices (Learned from data-explorer refactor)
+**Via Pull Request Workflow:**
+1. Create PR to `dev`/`qa`/`main` branch
+2. GitHub Actions automatically builds and deploys on merge
+3. App available at `https://{environment}.zerobias.com/{basePath}`
+
+### Manual Deployment to S3 + CloudFront
+
+**Build Process:**
+
+**Angular:**
+```bash
+# Build with base href for CDN deployment
+npm run build -- --base-href /example-angular/
+
+# Output: dist/example-angular/
+```
+
+**Next.js:**
+```bash
+# Build for environment
+npm run build:prod
+
+# Output: .next/ (for Node.js deployment) or out/ (for static export)
+```
+
+**Manual S3 Deployment:**
+```bash
+# Angular
+cd package/zerobias/example-angular
+npm run build
+aws s3 sync dist/example-angular/ s3://zerobias-apps/example-angular/
+aws cloudfront create-invalidation --distribution-id <ID> --paths "/example-angular/*"
+
+# Next.js
+cd package/zerobias/example-nextjs
+npm run build:prod
+aws s3 sync out/ s3://zerobias-apps/example-nextjs/
+aws cloudfront create-invalidation --distribution-id <ID> --paths "/example-nextjs/*"
+```
+
+**Via GitHub Actions:**
+```yaml
+# .github/workflows/deploy.yml
+- name: Deploy to S3
+  uses: auditmation/devops/actions/static-s3-app-release@main
+  with:
+    app-name: 'example-angular'
+    environment: 'production'
+    s3-bucket: 'zerobias-apps'
+    cloudfront-distribution-id: ${{ secrets.CLOUDFRONT_DIST_ID }}
+```
+
+### Iframe Embedding in Platform
+
+**Register App in Platform:**
+1. Create app record in platform database
+2. Specify app URL (https://cdn.zerobias.com/apps/example-angular/)
+3. Configure permissions (which orgs/users can access)
+4. Add navigation entry in portal
+
+**App URL Pattern:**
+```
+https://cdn.zerobias.com/apps/{app-name}/
+```
+
+**Iframe Configuration:**
+```html
+<iframe
+  src="https://cdn.zerobias.com/apps/example-angular/"
+  sandbox="allow-scripts allow-same-origin allow-forms"
+  style="width: 100%; height: 100%; border: none;"
+></iframe>
+```
+
+## Development Requirements
+
+### System Requirements
+- **Node.js**: >= 18.19.1
+- **npm**: >= 10.2.4
+- **Git**: >= 2.0
+
+### Environment Variables
+
+**Angular App:**
+```typescript
+// environment.ts
+export const environment = {
+  production: false,
+  apiUrl: 'https://api.zerobias.com',
+  portalUrl: 'https://portal.zerobias.com',
+  isIframe: true
+};
+```
+
+**Next.js App:**
+```bash
+# .env.local
+NEXT_PUBLIC_API_URL=https://api.zerobias.com
+NEXT_PUBLIC_PORTAL_URL=https://portal.zerobias.com
+NEXT_PUBLIC_API_KEY=your-api-key  # For local dev only
+NEXT_PUBLIC_IS_LOCAL_DEV=true
+```
+
+## Best Practices
+
+### Architecture Best Practices (Learned from data-explorer refactor)
 
 **✅ DO:**
 - Use singleton pattern for global Zerobias client lifecycle (`ZerobiasAppService`)
@@ -340,9 +558,208 @@ All apps use TypeScript with strict typing from the Zerobias client libraries. T
 - Copy UI patterns from example apps into production apps without design consideration
 - Create unnecessary abstraction layers that obscure direct API usage
 
+### App Development Best Practices
+
+**1. Authentication:**
+- Always check authentication state before making API calls
+- Handle session expiration gracefully
+- Support both iframe and standalone modes
+
+**2. API Calls:**
+- Use ZeroBias client library, don't call APIs directly
+- Handle errors properly (401, 403, 500)
+- Implement loading states
+- Cache data when appropriate
+
+**3. Iframe Communication:**
+- Always validate message origin
+- Handle all message types gracefully
+- Send status updates to parent portal
+
+**4. Performance:**
+- Lazy load routes/components
+- Optimize bundle size
+- Use CDN for static assets
+- Implement proper caching
+
+**5. Security:**
+- Never expose API keys in client code
+- Validate all user input
+- Implement CSP headers
+- Use HTTPS only
+
+### UI/UX Guidelines
+
+**1. Consistency:**
+- Follow platform design patterns
+- Use platform color scheme
+- Match typography and spacing
+
+**2. Responsiveness:**
+- Support mobile devices
+- Handle different iframe sizes
+- Test on various screen sizes
+
+**3. Accessibility:**
+- Support keyboard navigation
+- Implement ARIA labels
+- Ensure proper contrast ratios
+- Test with screen readers
+
+## Important Notes
+
+### Iframe vs Standalone Mode
+
+**Iframe Mode (Embedded in Portal):**
+- Session inherited from parent portal
+- Limited window size
+- PostMessage communication
+- Sandbox restrictions apply
+- No custom authentication needed
+
+**Standalone Mode (Direct Access):**
+- Requires API key authentication
+- Full browser window
+- Independent session management
+- No iframe restrictions
+- Direct URL access
+
+### Build Optimization
+
+**Angular:**
+- Use production build for deployment
+- Enable AOT compilation
+- Implement lazy loading for routes
+- Use OnPush change detection
+
+**Next.js:**
+- Use static generation where possible
+- Optimize images with next/image
+- Implement code splitting
+- Use React Server Components (RSC)
+
+**All Apps:**
+- All apps use static export mode for deployment (NextJS uses `output: "export"`)
+- Custom base paths are configured for sub-directory deployment
+- NextJS apps disable React strict mode (for compatibility)
+- The Angular app uses Nx workspace for build tooling
+- Session management and authentication are handled entirely by the Zerobias platform
+- Local development requires API key configuration for backend access
+
+## Troubleshooting
+
+### API Calls Return 401 Unauthorized
+
+**Problem:** App can't authenticate with platform API
+
+**Solutions:**
+1. Check API key is set (standalone mode)
+2. Verify iframe session is valid (iframe mode)
+3. Call `whoAmI()` to establish session
+4. Check CORS configuration
+
+### Iframe Not Loading
+
+**Problem:** App doesn't load in portal iframe
+
+**Solutions:**
+1. Check app URL is accessible
+2. Verify iframe sandbox attributes
+3. Check CSP headers don't block iframe
+4. Test app in standalone mode first
+
+### PostMessage Not Working
+
+**Problem:** Messages not being sent/received between app and portal
+
+**Solutions:**
+1. Verify message origin validation
+2. Check message format matches expected types
+3. Test with `console.log` to debug
+4. Ensure both app and portal listening for messages
+
+### Build Fails
+
+**Angular Solutions:**
+1. Clear node_modules and reinstall
+2. Check TypeScript version compatibility
+3. Verify all @auditmation packages are latest
+4. Run `npx nx reset` to clear cache
+
+**Next.js Solutions:**
+1. Clear .next directory
+2. Check next.config.ts syntax
+3. Verify environment variables set
+4. Run `rm -rf .next && npm run build`
+
+## Testing
+
+### Local Testing
+
+**Angular:**
+```bash
+# Run unit tests
+npm test
+
+# Run with coverage
+npm test -- --code-coverage
+
+# Run in watch mode
+npm test -- --watch
+```
+
+**Next.js:**
+```bash
+# Run tests (if configured)
+npm test
+
+# Type checking
+npx tsc --noEmit
+
+# Lint
+npm run lint
+```
+
+### Integration Testing
+
+1. **Test in Iframe:**
+   - Load portal locally
+   - Embed app as iframe
+   - Test postMessage communication
+   - Verify session sharing
+
+2. **Test API Calls:**
+   - Point to dev environment
+   - Test all API endpoints
+   - Verify error handling
+   - Check data transformations
+
+3. **Test Deployment:**
+   - Deploy to dev environment
+   - Test CDN access
+   - Verify CORS configuration
+   - Check console for errors
+
 ## Project-Specific Documentation
 
 For detailed project-specific guidance, see:
 - `package/zerobias/data-explorer/CLAUDE.md` - Data Explorer architecture and development
 - `package/zerobias/example-nextjs/CLAUDE.md` - NextJS example patterns and suggested improvements
-- `package/zerobias/example-angular/CLAUDE.md` - Angular example patterns (if created)
+- `package/zerobias/example-angular/CLAUDE.md` - Angular example patterns (if present)
+
+## Related Documentation
+
+- **[Root CLAUDE.md](../../CLAUDE.md)** - Meta-repo development guidance
+- **[Architecture.md](../../Architecture.md)** - Platform architecture
+- **[Concepts.md](../../Concepts.md)** - Domain concepts
+- **[auditmation/zb-client/CLAUDE.md](../../auditmation/zb-client/CLAUDE.md)** - Client library documentation
+- **[auditmation/ui/CLAUDE.md](../../auditmation/ui/CLAUDE.md)** - Portal UI
+- **[auditmation/hub/CLAUDE.md](../../auditmation/hub/CLAUDE.md)** - Hub modules
+- **[auditmation/devops/CLAUDE.md](../../auditmation/devops/CLAUDE.md)** - Deployment workflows
+- **[package/zerobias/example-angular/README.md](package/zerobias/example-angular/README.md)** - Angular app docs
+- **[package/zerobias/example-nextjs/README.md](package/zerobias/example-nextjs/README.md)** - Next.js app docs
+
+---
+
+**Last Updated:** 2025-11-12
+**Maintainers:** ZeroBias Community
