@@ -20,7 +20,7 @@ type Schema = {
 };
 
 type SchemaViewerProps = {
-  schemaJson?: string;
+  schemaJson?: string | object;
 };
 
 export default function SchemaViewer({ schemaJson }: SchemaViewerProps) {
@@ -30,7 +30,14 @@ export default function SchemaViewer({ schemaJson }: SchemaViewerProps) {
   useEffect(() => {
     if (schemaJson) {
       try {
-        const parsed = JSON.parse(schemaJson);
+        // Handle both string (JSON) and object inputs
+        let parsed: any;
+        if (typeof schemaJson === 'string') {
+          parsed = JSON.parse(schemaJson);
+        } else {
+          // Already an object, use it directly
+          parsed = schemaJson;
+        }
         setSchema(parsed);
         setError(null);
       } catch (err: any) {
@@ -55,7 +62,7 @@ export default function SchemaViewer({ schemaJson }: SchemaViewerProps) {
         <details className="mt-2">
           <summary className="text-xs text-red-600 cursor-pointer">Show raw schema</summary>
           <pre className="mt-2 text-xs text-red-600 overflow-x-auto bg-red-100 p-2 rounded">
-            {schemaJson}
+            {typeof schemaJson === 'string' ? schemaJson : JSON.stringify(schemaJson, null, 2)}
           </pre>
         </details>
       </div>
