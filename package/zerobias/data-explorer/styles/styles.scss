@@ -1,7 +1,7 @@
 @use "material-symbols";
 @use './cdk-overlay-container.scss';
 @use './cdk-text-field.scss';
-@use '../node_modules/react-tabs/style/react-tabs.scss';
+// @use '../node_modules/react-tabs/style/react-tabs.scss'; // Removed - conflicts with flex layout
 
 *,
 *::before,
@@ -290,7 +290,7 @@ label {
   }
 
   .react-tabs__tab-panel {
-    padding: 0 8%;
+    padding: 0.5rem min(2%, 30px);
   }
 }
 

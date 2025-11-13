@@ -139,8 +139,8 @@ export default function ObjectDetails() {
         )}
       </div>
 
-      <Tabs style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
-        <TabList style={{ display: 'flex', gap: 0, margin: 0, padding: '0 1rem', borderBottom: '2px solid #e5e7eb', background: 'linear-gradient(to bottom, #fafbfc, #f9fafb)', listStyle: 'none', flexShrink: 0 }}>
+      <Tabs style={{ display: 'flex', flexDirection: 'column', flex: '1 1 0', overflow: 'hidden', minHeight: 0 }}>
+        <TabList style={{ display: 'flex', gap: 0, margin: 0, padding: '0 0.5rem', borderBottom: '2px solid #e5e7eb', background: '#f9fafb', listStyle: 'none', flexShrink: 0, height: 'auto', alignItems: 'center' }}>
           <Tab>Metadata</Tab>
           {hasCollectionClass && <Tab>Data</Tab>}
           {hasFunctionClass && <Tab>Function</Tab>}
@@ -149,107 +149,103 @@ export default function ObjectDetails() {
         </TabList>
 
         {/* Metadata Tab */}
-        <TabPanel style={{ flex: 1, overflow: 'auto' }}>
-          <div style={{ padding: '1rem' }}>
-            <table style={{ width: '100%', fontSize: '13px', fontFamily: 'var(--font-roboto), Roboto, sans-serif' }}>
-              <tbody>
-                {renderMetadataRow('ID', fullObject.id, 'id')}
-                {renderMetadataRow('Name', fullObject.name, 'name')}
-                {renderMetadataRow('Description', fullObject.description, 'description')}
-                {renderMetadataRow('Object Classes', fullObject.objectClass, 'objectClass')}
-                {renderMetadataRow('Path', fullObject.path, 'path')}
-                {renderMetadataRow('Tags', fullObject.tags, 'tags')}
-                {renderMetadataRow('Created', fullObject.created, 'created')}
-                {renderMetadataRow('Modified', fullObject.modified, 'modified')}
-                {renderMetadataRow('ETag', fullObject.etag, 'etag')}
-                {renderMetadataRow('Version ID', fullObject.versionId, 'versionId')}
+        <TabPanel style={{ height: '100%' }}>
+          <table style={{ width: '100%', fontSize: '13px', fontFamily: 'var(--font-roboto), Roboto, sans-serif' }}>
+            <tbody>
+              {renderMetadataRow('ID', fullObject.id, 'id')}
+              {renderMetadataRow('Name', fullObject.name, 'name')}
+              {renderMetadataRow('Description', fullObject.description, 'description')}
+              {renderMetadataRow('Object Classes', fullObject.objectClass, 'objectClass')}
+              {renderMetadataRow('Path', fullObject.path, 'path')}
+              {renderMetadataRow('Tags', fullObject.tags, 'tags')}
+              {renderMetadataRow('Created', fullObject.created, 'created')}
+              {renderMetadataRow('Modified', fullObject.modified, 'modified')}
+              {renderMetadataRow('ETag', fullObject.etag, 'etag')}
+              {renderMetadataRow('Version ID', fullObject.versionId, 'versionId')}
 
-                {/* Collection-specific */}
-                {fullObject.collectionSchema && (
-                  <>
-                    {renderMetadataRow('Collection Schema', fullObject.collectionSchema, 'collectionSchema')}
-                    {renderMetadataRow('Collection Size', fullObject.collectionSize, 'collectionSize')}
-                  </>
-                )}
+              {/* Collection-specific */}
+              {fullObject.collectionSchema && (
+                <>
+                  {renderMetadataRow('Collection Schema', fullObject.collectionSchema, 'collectionSchema')}
+                  {renderMetadataRow('Collection Size', fullObject.collectionSize, 'collectionSize')}
+                </>
+              )}
 
-                {/* Function-specific */}
-                {fullObject.inputSchema && (
-                  <>
-                    {renderMetadataRow('Input Schema', fullObject.inputSchema, 'inputSchema')}
-                    {renderMetadataRow('Output Schema', fullObject.outputSchema, 'outputSchema')}
-                  </>
-                )}
+              {/* Function-specific */}
+              {fullObject.inputSchema && (
+                <>
+                  {renderMetadataRow('Input Schema', fullObject.inputSchema, 'inputSchema')}
+                  {renderMetadataRow('Output Schema', fullObject.outputSchema, 'outputSchema')}
+                </>
+              )}
 
-                {/* Document-specific */}
-                {fullObject.documentSchema && renderMetadataRow('Document Schema', fullObject.documentSchema, 'documentSchema')}
+              {/* Document-specific */}
+              {fullObject.documentSchema && renderMetadataRow('Document Schema', fullObject.documentSchema, 'documentSchema')}
 
-                {/* Binary-specific */}
-                {fullObject.mimeType && (
-                  <>
-                    {renderMetadataRow('MIME Type', fullObject.mimeType, 'mimeType')}
-                    {renderMetadataRow('File Name', fullObject.fileName, 'fileName')}
-                    {renderMetadataRow('Size', fullObject.size ? `${fullObject.size} bytes` : null, 'size')}
-                  </>
-                )}
+              {/* Binary-specific */}
+              {fullObject.mimeType && (
+                <>
+                  {renderMetadataRow('MIME Type', fullObject.mimeType, 'mimeType')}
+                  {renderMetadataRow('File Name', fullObject.fileName, 'fileName')}
+                  {renderMetadataRow('Size', fullObject.size ? `${fullObject.size} bytes` : null, 'size')}
+                </>
+              )}
 
-                {/* HTTP-specific */}
-                {fullObject.httpMethod && (
-                  <>
-                    {renderMetadataRow('HTTP Method', fullObject.httpMethod, 'httpMethod')}
-                    {renderMetadataRow('HTTP Path', fullObject.httpPath, 'httpPath')}
-                    {renderMetadataRow('Timeout', fullObject.timeout ? `${fullObject.timeout}ms` : null, 'timeout')}
-                  </>
-                )}
-              </tbody>
-            </table>
-          </div>
+              {/* HTTP-specific */}
+              {fullObject.httpMethod && (
+                <>
+                  {renderMetadataRow('HTTP Method', fullObject.httpMethod, 'httpMethod')}
+                  {renderMetadataRow('HTTP Path', fullObject.httpPath, 'httpPath')}
+                  {renderMetadataRow('Timeout', fullObject.timeout ? `${fullObject.timeout}ms` : null, 'timeout')}
+                </>
+              )}
+            </tbody>
+          </table>
         </TabPanel>
 
         {/* Data Tab (for collections) */}
         {hasCollectionClass && (
-          <TabPanel style={{ flex: 1, overflow: 'auto' }}>
-            <div style={{ padding: '1rem' }}>
-              <CollectionViewer objectId={fullObject.id} />
-            </div>
+          <TabPanel style={{ height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+            <CollectionViewer objectId={fullObject.id} />
           </TabPanel>
         )}
 
         {/* Function Tab */}
         {hasFunctionClass && (
-          <TabPanel style={{ flex: 1, overflow: 'auto' }}>
-            <div style={{ padding: '1rem' }}>
-              <FunctionInvoker
-                objectId={fullObject.id}
-                inputSchema={fullObject.inputSchema}
-                outputSchema={fullObject.outputSchema}
-              />
-            </div>
+          <TabPanel style={{ height: '100%' }}>
+            <FunctionInvoker
+              objectId={fullObject.id}
+              inputSchema={fullObject.inputSchema}
+              outputSchema={fullObject.outputSchema}
+            />
           </TabPanel>
         )}
 
         {/* Schema Tab */}
         {fullObject.collectionSchema && (
-          <TabPanel style={{ flex: 1, overflow: 'auto' }}>
-            <div style={{ padding: '1rem' }}>
-              <SchemaViewer schemaJson={fullObject.collectionSchema} />
-            </div>
+          <TabPanel style={{ height: '100%' }}>
+            <SchemaViewer schemaJson={fullObject.collectionSchema} />
           </TabPanel>
         )}
 
         {/* ERD Tab */}
         {fullObject.collectionSchema && (
-          <TabPanel style={{ flex: 1, overflow: 'auto' }}>
-            <div style={{ padding: '1rem' }}>
-              <ERDiagram objectId={fullObject.id} schemaJson={fullObject.collectionSchema} />
-            </div>
+          <TabPanel style={{ height: '100%' }}>
+            <ERDiagram objectId={fullObject.id} schemaJson={fullObject.collectionSchema} />
           </TabPanel>
         )}
       </Tabs>
 
       <style jsx global>{`
+        /* Override global styles from styles.scss */
+        .react-tabs__tab-list {
+          flex-grow: 0 !important;
+          justify-content: flex-start !important;
+        }
+
         /* Custom Tab Styling - react-tabs overrides */
         .react-tabs__tab {
-          padding: 0.625rem 1.5rem;
+          padding: 0.5rem 1rem;
           cursor: pointer;
           font-size: 13px;
           font-family: var(--font-roboto), Roboto, sans-serif;
@@ -261,6 +257,7 @@ export default function ObjectDetails() {
           background: transparent;
           transition: all 0.2s ease;
           position: relative;
+          line-height: 1.2;
         }
 
         .react-tabs__tab:hover {
@@ -290,10 +287,7 @@ export default function ObjectDetails() {
         }
 
         .react-tabs__tab-panel--selected {
-          display: flex;
-          flex-direction: column;
-          flex: 1;
-          overflow: hidden;
+          display: block;
         }
 
         /* Spinner animation */

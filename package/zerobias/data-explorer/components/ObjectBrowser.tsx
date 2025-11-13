@@ -243,44 +243,19 @@ export default function ObjectBrowser() {
 
           {/* Icon, name, and badges */}
           <div
-            style={{ display: 'flex', alignItems: 'center', flex: 1, minWidth: 0, gap: '6px' }}
+            style={{ display: 'flex', alignItems: 'center', flex: 1, minWidth: 0, gap: '6px', overflow: 'hidden' }}
             onClick={() => handleSelectObject(node)}
           >
             <span style={{ flexShrink: 0, display: 'flex', alignItems: 'center' }}>
               {getIcon(node.objectClass)}
             </span>
-            <span style={{ fontSize: '13px', fontFamily: 'var(--font-roboto), Roboto, sans-serif', flexShrink: 0 }} title={node.name}>
+            <span style={{ fontSize: '13px', fontFamily: 'var(--font-roboto), Roboto, sans-serif', whiteSpace: 'nowrap', flexShrink: 1, minWidth: 0 }} title={node.name}>
               {node.name}
             </span>
 
-            {/* ObjectClass badges */}
-            {node.objectClass && node.objectClass.length > 0 && (
-              <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
-                {node.objectClass.map((oc, idx) => {
-                  const colors = getObjectClassColor(oc);
-                  return (
-                    <span
-                      key={idx}
-                      style={{
-                        fontSize: '0.688rem',
-                        padding: '2px 6px',
-                        borderRadius: '3px',
-                        backgroundColor: colors.bg,
-                        color: colors.text,
-                        fontWeight: '500',
-                        whiteSpace: 'nowrap'
-                      }}
-                    >
-                      {oc}
-                    </span>
-                  );
-                })}
-              </div>
-            )}
-
             {/* Tag badges */}
             {node.tags && node.tags.length > 0 && (
-              <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: '4px', flexWrap: 'nowrap', overflow: 'hidden', flexShrink: 1, minWidth: 0 }}>
                 {node.tags.map((tag, idx) => (
                   <span
                     key={idx}

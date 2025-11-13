@@ -210,9 +210,9 @@ export default function CollectionViewer({ objectId }: CollectionViewerProps) {
   }
 
   return (
-    <div className="space-y-4">
+    <div style={{ display: 'flex', flexDirection: 'column', flex: 1, gap: '0.5rem', padding: 0, minHeight: 0, height: '100%', overflow: 'hidden' }}>
       {/* Filter Bar */}
-      <div className="flex items-center gap-2">
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
         <button
           onClick={() => setShowFilterBuilder(!showFilterBuilder)}
           className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
@@ -235,7 +235,7 @@ export default function CollectionViewer({ objectId }: CollectionViewerProps) {
 
       {/* Filter Builder */}
       {showFilterBuilder && (
-        <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg space-y-3">
+        <div style={{ padding: '1rem', background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', flexShrink: 0 }}>
           <h4 className="text-sm font-semibold text-gray-700">Build Filter (RFC4515)</h4>
           <div className="grid grid-cols-4 gap-2">
             <input
@@ -284,7 +284,7 @@ export default function CollectionViewer({ objectId }: CollectionViewerProps) {
       )}
 
       {/* View Toggle and Pagination Controls */}
-      <div className="flex items-center justify-between">
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
         {/* View Toggle */}
         <div className="flex items-center space-x-2">
           <button
@@ -327,12 +327,25 @@ export default function CollectionViewer({ objectId }: CollectionViewerProps) {
 
       {/* Table View */}
       {viewMode === 'table' && (
-        <div className="overflow-x-auto border border-gray-200 rounded-lg">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-100 border-b border-gray-200">
+        <div style={{
+          flex: 1,
+          overflow: 'auto',
+          border: '1px solid #e5e7eb',
+          borderRadius: '0.5rem',
+          minHeight: 0,
+          position: 'relative'
+        }}>
+          <table style={{
+            fontSize: '13px',
+            borderCollapse: 'collapse',
+            fontFamily: 'var(--font-roboto), Roboto, sans-serif',
+            width: 'auto',
+            display: 'table'
+          }}>
+            <thead style={{ background: '#f3f4f6', borderBottom: '1px solid #e5e7eb', position: 'sticky', top: 0, zIndex: 1 }}>
               <tr>
                 {columns.map(col => (
-                  <th key={col} className="px-4 py-2 text-left font-semibold text-gray-700">
+                  <th key={col} style={{ padding: '0.5rem 1rem', textAlign: 'left', fontWeight: '600', color: '#374151', whiteSpace: 'nowrap', background: '#f3f4f6' }}>
                     {col}
                   </th>
                 ))}
@@ -340,9 +353,9 @@ export default function CollectionViewer({ objectId }: CollectionViewerProps) {
             </thead>
             <tbody>
               {elements.map((element, idx) => (
-                <tr key={idx} className="border-b border-gray-100 hover:bg-gray-50">
+                <tr key={idx} style={{ borderBottom: '1px solid #f3f4f6' }}>
                   {columns.map(col => (
-                    <td key={col} className="px-4 py-2 text-gray-900">
+                    <td key={col} style={{ padding: '0.5rem 1rem', color: '#111827', whiteSpace: 'nowrap' }}>
                       {formatCellValue(element[col])}
                     </td>
                   ))}
@@ -355,7 +368,7 @@ export default function CollectionViewer({ objectId }: CollectionViewerProps) {
 
       {/* JSON View */}
       {viewMode === 'json' && (
-        <div className="bg-gray-900 text-green-400 p-4 rounded-lg overflow-x-auto">
+        <div style={{ flex: 1, overflow: 'auto', background: '#111827', color: '#4ade80', padding: '1rem', borderRadius: '0.5rem', minHeight: 0 }}>
           <pre className="text-xs font-mono whitespace-pre">
             {JSON.stringify(elements, null, 2)}
           </pre>
@@ -364,7 +377,7 @@ export default function CollectionViewer({ objectId }: CollectionViewerProps) {
 
       {/* Pagination Controls */}
       {paginationMode === 'count' && totalPages && totalPages > 1 && (
-        <div className="flex items-center justify-center space-x-2">
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', flexShrink: 0 }}>
           <button
             onClick={handlePreviousPage}
             disabled={currentPage === 1}
@@ -395,7 +408,7 @@ export default function CollectionViewer({ objectId }: CollectionViewerProps) {
 
       {/* Cursor-based Pagination Controls */}
       {paginationMode === 'cursor' && (
-        <div className="flex items-center justify-center space-x-2">
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', flexShrink: 0 }}>
           <button
             onClick={handleNextPage}
             disabled={!hasMore}

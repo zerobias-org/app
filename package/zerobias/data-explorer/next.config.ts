@@ -8,9 +8,6 @@ const nextConfig: NextConfig = {
   // basePath: "/data-explorer",
   skipTrailingSlashRedirect: true,
   trailingSlash: true,
-  devIndicators: {
-    buildActivity: false,
-  },
   images: {
     remotePatterns: [
       new URL('https://cdn.auditmation.io/**')

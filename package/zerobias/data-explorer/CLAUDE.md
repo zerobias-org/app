@@ -690,6 +690,66 @@ When contributing to Data Explorer:
 - Icons should be small (4rem max) if used at all
 - Provide actionable guidance ("Select a connection above...")
 
+### Flex Layout and Scrolling: Critical Patterns
+
+**Problem:** Getting tab content (especially tables) to fill available vertical space AND show horizontal scrollbars was extremely difficult.
+
+**Root Causes:**
+1. React-tabs library CSS (`display: block`) conflicting with flexbox layouts
+2. Missing `height: 100%` on TabPanel components
+3. Incorrect flex container setup in parent chain
+4. Tab panel padding from global styles (`padding: 0 8%`) consuming too much space
+
+**Solution - Complete Flex Chain:**
+
+For scrollable content inside tabs to work, you need a complete flex container chain from root to scrollable element:
+
+```tsx
+// 1. TabPanel: Must use height: 100% (not flex) and be a flex container
+<TabPanel style={{
+  height: '100%',           // Critical: provides height constraint
+  overflow: 'hidden',       // Prevents content overflow
+  display: 'flex',          // Makes it a flex container
+  flexDirection: 'column'   // Vertical flex layout
+}}>
+
+// 2. Child component root: Flex item that fills parent
+<div style={{
+  display: 'flex',
+  flexDirection: 'column',
+  flex: 1,                  // Grows to fill TabPanel
+  height: '100%',           // Uses parent's height
+  overflow: 'hidden'        // Contains its children
+}}>
+
+// 3. Scrollable container: Where scrollbars actually appear
+<div style={{
+  flex: 1,                  // Grows to fill available space
+  overflow: 'auto',         // Shows scrollbars when needed
+  minHeight: 0              // Allows shrinking below content size
+}}>
+
+// 4. Table: Auto-sizes to content, triggers scrollbars
+<table style={{
+  width: 'auto',            // Sizes to content, not container
+  whiteSpace: 'nowrap'      // Prevents cell wrapping
+}}>
+```
+
+**Key Principles:**
+1. **TabPanel needs `height: 100%`**, not `flex: 1` - this is specific to react-tabs
+2. **Every container in the chain needs explicit flex settings**
+3. **The scrollable container needs `overflow: 'auto'` and `flex: 1`**
+4. **Content inside scrollable container should size naturally** (`width: 'auto'` for tables)
+5. **Global CSS can interfere** - check for padding/overflow rules on `.react-tabs__tab-panel`
+
+**Common Mistakes:**
+- ❌ Using `flex: 1` on TabPanel (use `height: 100%` instead)
+- ❌ Missing `overflow: 'hidden'` on intermediate containers
+- ❌ Using `width: '100%'` on tables (prevents horizontal expansion)
+- ❌ Forgetting `minHeight: 0` on flex children
+- ❌ Not checking global styles for conflicting rules
+
 ### Development Workflow
 
 **After making styling changes:**
@@ -702,6 +762,13 @@ When contributing to Data Explorer:
 1. This usually indicates Tailwind classes are being used where inline styles should be
 2. Check for any `className` attributes that should be `style` props
 3. Verify font loading in browser DevTools (check Network tab)
+
+**If scrollbars don't appear:**
+1. Check the complete flex container chain from root to scrollable element
+2. Verify each parent has proper flex properties and height constraints
+3. Check global CSS files for conflicting rules (especially react-tabs styles)
+4. Use browser DevTools to inspect computed styles on each container
+5. Ensure content has `whiteSpace: 'nowrap'` if it should trigger horizontal scrolling
 
 ## Related Documentation
 

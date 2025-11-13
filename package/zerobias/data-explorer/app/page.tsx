@@ -34,7 +34,7 @@ export default function DataExplorerPage() {
       <div style={{ height: 'calc(100vh - 42px)', padding: '8px' }}>
         <PanelGroup direction="horizontal">
           {/* Left Panel: Object Browser */}
-          <Panel defaultSize={35} minSize={20} maxSize={60}>
+          <Panel defaultSize={30} minSize={25} maxSize={50}>
             <div style={{ height: '100%', display: 'flex', flexDirection: 'column', paddingRight: '4px' }}>
               <div style={{ background: 'white', borderRadius: '0.25rem', boxShadow: '0 1px 2px 0 rgba(0,0,0,0.05)', border: '1px solid #e5e7eb', height: '100%', display: 'flex', flexDirection: 'column' }}>
                 <h2 style={{ fontSize: '0.875rem', fontWeight: '600', padding: '0.5rem 0.75rem', display: 'flex', alignItems: 'center', borderBottom: '1px solid #e5e7eb', flexShrink: 0 }}>

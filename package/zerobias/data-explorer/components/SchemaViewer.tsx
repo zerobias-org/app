@@ -82,7 +82,7 @@ export default function SchemaViewer({ schemaJson }: SchemaViewerProps) {
   const requiredProps = properties.filter(p => p.required);
 
   return (
-    <div className="space-y-4">
+    <div style={{ display: 'flex', flexDirection: 'column', flex: 1, gap: '0.5rem', padding: '0.5rem', overflow: 'auto', minHeight: 0 }}>
       {/* Schema Metadata */}
       {schema.id && (
         <div className="p-3 bg-blue-50 border border-blue-200 rounded">
