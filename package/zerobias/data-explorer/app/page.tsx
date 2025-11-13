@@ -4,6 +4,7 @@ import { useDataExplorer } from "@/context/DataExplorerContext";
 import ConnectionSelector from "@/components/ConnectionSelector";
 import ObjectBrowser from "@/components/ObjectBrowser";
 import ObjectDetails from "@/components/ObjectDetails";
+import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 
 export default function DataExplorerPage() {
   const { user, org, loading: userLoading } = useCurrentUser();
@@ -22,67 +23,66 @@ export default function DataExplorerPage() {
   return (
     <div style={{ minHeight: '100vh', background: '#f9fafb' }}>
       {/* Header with Title and Connection Selector */}
-      <header style={{ background: '#2563eb', color: 'white', padding: '1rem', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
-        <div style={{ margin: '0 16px', display: 'flex', alignItems: 'center', gap: '2rem' }}>
-          <h1 style={{ fontSize: '1.875rem', fontWeight: 'bold', margin: 0, flexShrink: 0 }}>SQL DynamicData Explorer</h1>
-          <p style={{ fontSize: '0.875rem', color: 'rgba(255,255,255,0.8)', margin: 0 }}>Browse and interact with database objects</p>
+      <header style={{ background: '#2563eb', color: 'white', padding: '0.375rem 1rem', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <h1 style={{ fontSize: '1.125rem', fontWeight: '600', margin: 0 }}>ZeroBias Dynamic Data Explorer</h1>
+        <div style={{ flex: 1, maxWidth: '400px', marginLeft: '2rem' }}>
+          <ConnectionSelector />
         </div>
       </header>
 
       {/* Main Content - Resizable Two Column Layout */}
-      <div style={{ display: 'flex', height: 'calc(100vh - 80px)', margin: '16px', gap: 0 }}>
-        {/* Left Panel: Object Browser (40%) */}
-        <div style={{ minWidth: '250px', width: '40%', overflowY: 'auto', paddingRight: '8px' }}>
-          <div style={{ background: 'white', borderRadius: '0.5rem', boxShadow: '0 1px 3px 0 rgba(0,0,0,0.1)', padding: '1.5rem', border: '1px solid #e5e7eb' }}>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '1rem', display: 'flex', alignItems: 'center' }}>
-              <svg style={{ width: '1.5rem', height: '1.5rem', marginRight: '0.5rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
-              </svg>
-              Object Browser
-            </h2>
-            <div style={{ marginBottom: '1rem' }}>
-              <ConnectionSelector />
-            </div>
-            {dataProducerClient ? (
-              <ObjectBrowser />
-            ) : (
-              <div style={{ textAlign: 'center', color: '#9ca3af', padding: '2rem 0', fontSize: '0.875rem' }}>
-                Select a connection above to view objects
+      <div style={{ height: 'calc(100vh - 42px)', padding: '8px' }}>
+        <PanelGroup direction="horizontal">
+          {/* Left Panel: Object Browser */}
+          <Panel defaultSize={35} minSize={20} maxSize={60}>
+            <div style={{ height: '100%', display: 'flex', flexDirection: 'column', paddingRight: '4px' }}>
+              <div style={{ background: 'white', borderRadius: '0.25rem', boxShadow: '0 1px 2px 0 rgba(0,0,0,0.05)', border: '1px solid #e5e7eb', height: '100%', display: 'flex', flexDirection: 'column' }}>
+                <h2 style={{ fontSize: '0.875rem', fontWeight: '600', padding: '0.5rem 0.75rem', display: 'flex', alignItems: 'center', borderBottom: '1px solid #e5e7eb', flexShrink: 0 }}>
+                  <svg style={{ width: '14px', height: '14px', marginRight: '6px', color: '#f59e0b' }} viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M1 4l2-2h4l2 2h5a1 1 0 011 1v8a1 1 0 01-1 1H1a1 1 0 01-1-1V5a1 1 0 011-1z"/>
+                  </svg>
+                  Object Browser
+                </h2>
+                <div style={{ flex: 1, overflowY: 'auto', padding: '0.5rem' }}>
+                  {dataProducerClient ? (
+                    <ObjectBrowser />
+                  ) : (
+                    <div style={{ textAlign: 'center', color: '#9ca3af', padding: '1.5rem 0', fontSize: '0.813rem' }}>
+                      Select a connection to view objects
+                    </div>
+                  )}
+                </div>
               </div>
-            )}
-          </div>
-        </div>
+            </div>
+          </Panel>
 
           {/* Divider */}
-          <div
-            style={{
-              width: '8px',
-              background: '#e5e7eb',
-              cursor: 'col-resize',
-              position: 'relative',
-              flexShrink: 0
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.background = '#d1d5db'}
-            onMouseLeave={(e) => e.currentTarget.style.background = '#e5e7eb'}
-          >
+          <PanelResizeHandle style={{
+            width: '4px',
+            background: '#e5e7eb',
+            cursor: 'col-resize',
+            position: 'relative',
+            flexShrink: 0
+          }}>
             <div style={{
               position: 'absolute',
               top: '50%',
               left: '50%',
               transform: 'translate(-50%, -50%)',
-              width: '2px',
-              height: '40px',
+              width: '1px',
+              height: '32px',
               background: '#9ca3af',
-              borderRadius: '1px'
+              borderRadius: '0.5px'
             }}></div>
-          </div>
+          </PanelResizeHandle>
 
           {/* Right Panel: Object Details */}
-          <div style={{ flex: 1, minWidth: '400px', overflowY: 'auto', paddingLeft: '8px' }}>
-            <div style={{ background: 'white', borderRadius: '0.5rem', boxShadow: '0 1px 3px 0 rgba(0,0,0,0.1)', padding: '1.5rem', border: '1px solid #e5e7eb' }}>
+          <Panel minSize={30}>
+            <div style={{ height: '100%', paddingLeft: '4px' }}>
               <ObjectDetails />
             </div>
-          </div>
+          </Panel>
+        </PanelGroup>
         </div>
     </div>
   );

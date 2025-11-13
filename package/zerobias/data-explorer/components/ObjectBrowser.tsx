@@ -1,7 +1,6 @@
 "use client"
 import { useState, useEffect } from 'react';
 import { useDataExplorer } from '@/context/DataExplorerContext';
-import { ChevronRight, ChevronDown, Folder, Table, Zap, FileText, Paperclip, Box } from 'lucide-react';
 
 // Object node in the tree
 type TreeNode = {
@@ -9,6 +8,7 @@ type TreeNode = {
   name: string;
   objectClass?: string[];
   description?: string;
+  tags?: string[];
   isExpanded: boolean;
   isLoading: boolean;
   children?: TreeNode[];
@@ -32,113 +32,28 @@ export default function ObjectBrowser() {
     setLoading(true);
     setError(null);
     try {
-      console.log('Loading root object...');
       const rootObj = await dataProducerClient!.getObjectsApi().getRootObject();
 
-      console.log('Root object loaded:', {
-        id: rootObj.id,
-        name: rootObj.name,
-        objectClass: rootObj.objectClass,
-        description: rootObj.description
-      });
-
-      // Convert objectClass enum values to strings
       const objectClassStrings = rootObj.objectClass?.map(c => {
         if (typeof c === 'string') return c;
         return (c as any).value?.toString() || c.toString();
       }) || [];
-
-      console.log('Object classes as strings:', objectClassStrings);
 
       const rootNode = {
         id: rootObj.id,
         name: rootObj.name,
         objectClass: objectClassStrings,
         description: rootObj.description,
-        isExpanded: true, // Auto-expand root
+        tags: rootObj.tags || [],
+        isExpanded: true,
         isLoading: false,
         hasLoadedChildren: false
       };
 
       setRootNode(rootNode);
 
-      // Auto-load root children if it's a container
       if (objectClassStrings.includes('container')) {
-        console.log('Root is a container, loading children...');
-        // Load children and ensure the root is set to expanded state
-        const updatedNode = { ...rootNode, isLoading: true };
-        setRootNode(updatedNode);
-
-        try {
-          console.log('Loading children for root node:', rootNode.id, rootNode.name);
-          const childrenResult = await dataProducerClient!.getObjectsApi().getChildren(rootNode.id, 1, 100);
-
-          console.log('getChildren response:', childrenResult);
-          console.log('childrenResult type:', typeof childrenResult);
-          console.log('childrenResult.items:', childrenResult?.items);
-          console.log('childrenResult keys:', childrenResult ? Object.keys(childrenResult) : 'null');
-
-          // Log raw response structure
-          if (childrenResult) {
-            console.log('Full response structure:', JSON.stringify(childrenResult, null, 2));
-          }
-
-          // Validate the response has the expected structure
-          if (!childrenResult || !childrenResult.items) {
-            console.error('Invalid response from getChildren - missing items array:', childrenResult);
-            console.error('Response may have data in a different field. Checking for alternatives...');
-
-            // Check if data is in a different field (common API response patterns)
-            const possibleDataFields = ['data', 'results', 'content', 'records', 'rows'];
-            for (const field of possibleDataFields) {
-              if (childrenResult && (childrenResult as any)[field]) {
-                console.log(`Found data in '${field}' field:`, (childrenResult as any)[field]);
-              }
-            }
-
-            throw new Error('Invalid response format: missing items array');
-          }
-
-          const childNodes: TreeNode[] = childrenResult.items.map(child => {
-            // Convert objectClass enum values to strings
-            const objectClassStrings = child.objectClass?.map(c => {
-              if (typeof c === 'string') return c;
-              return (c as any).value?.toString() || c.toString();
-            }) || [];
-
-            return {
-              id: child.id,
-              name: child.name,
-              objectClass: objectClassStrings,
-              description: child.description,
-              isExpanded: false,
-              isLoading: false,
-              hasLoadedChildren: false
-            };
-          });
-
-          console.log('Loaded', childNodes.length, 'children for root');
-
-          // Update root node with children
-          setRootNode({
-            ...rootNode,
-            children: childNodes,
-            hasLoadedChildren: true,
-            isLoading: false,
-            isExpanded: true
-          });
-        } catch (err: any) {
-          console.error(`Failed to load children for root:`, err);
-          setRootNode({
-            ...rootNode,
-            isLoading: false,
-            hasLoadedChildren: true,
-            children: [],
-            isExpanded: true
-          });
-        }
-      } else {
-        console.log('Root is not a container, skipping children load');
+        await loadChildren(rootNode);
       }
     } catch (err: any) {
       console.error('Failed to load root object:', err);
@@ -149,32 +64,18 @@ export default function ObjectBrowser() {
   };
 
   const loadChildren = async (node: TreeNode) => {
-    if (node.hasLoadedChildren) {
-      return; // Already loaded
-    }
-
-    // Check if this is a container
-    if (!node.objectClass?.includes('container')) {
-      return; // Not a container, no children
-    }
+    if (node.hasLoadedChildren || !node.objectClass?.includes('container')) return;
 
     try {
-      // Mark as loading
       updateNodeState(node.id, { isLoading: true });
 
-      console.log('Loading children for node:', node.id, node.name);
       const childrenResult = await dataProducerClient!.getObjectsApi().getChildren(node.id, 1, 100);
 
-      console.log('getChildren response:', childrenResult);
-
-      // Validate the response has the expected structure
       if (!childrenResult || !childrenResult.items) {
-        console.error('Invalid response from getChildren - missing items array:', childrenResult);
         throw new Error('Invalid response format: missing items array');
       }
 
       const childNodes: TreeNode[] = childrenResult.items.map(child => {
-        // Convert objectClass enum values to strings
         const objectClassStrings = child.objectClass?.map(c => {
           if (typeof c === 'string') return c;
           return (c as any).value?.toString() || c.toString();
@@ -185,13 +86,13 @@ export default function ObjectBrowser() {
           name: child.name,
           objectClass: objectClassStrings,
           description: child.description,
+          tags: child.tags || [],
           isExpanded: false,
           isLoading: false,
           hasLoadedChildren: false
         };
       });
 
-      // Update node with children
       updateNodeState(node.id, {
         children: childNodes,
         hasLoadedChildren: true,
@@ -199,13 +100,6 @@ export default function ObjectBrowser() {
       });
     } catch (err: any) {
       console.error(`Failed to load children for ${node.name}:`, err);
-
-      // Check if this is the known backend issue
-      if (err.message?.includes("Producers must return 'items'")) {
-        console.error('Backend DataProducer Error: The DataProducer implementation is not properly populating the PagedResults.items array. This is a backend bug.');
-        setError('DataProducer Backend Error: The producer is not returning data in the correct format. This needs to be fixed in the backend implementation.');
-      }
-
       updateNodeState(node.id, {
         isLoading: false,
         hasLoadedChildren: true,
@@ -238,11 +132,8 @@ export default function ObjectBrowser() {
 
   const handleToggleExpand = async (node: TreeNode) => {
     const newExpandedState = !node.isExpanded;
-
-    // Update expand state
     updateNodeState(node.id, { isExpanded: newExpandedState });
 
-    // Load children if expanding for the first time
     if (newExpandedState && !node.hasLoadedChildren) {
       await loadChildren(node);
     }
@@ -253,33 +144,50 @@ export default function ObjectBrowser() {
       id: node.id,
       name: node.name,
       objectClass: node.objectClass,
-      description: node.description
+      description: node.description,
+      tags: node.tags
     });
+  };
+
+  const getObjectClassColor = (objectClass: string): { bg: string, text: string } => {
+    switch (objectClass) {
+      case 'container':
+        return { bg: '#dbeafe', text: '#1e40af' };
+      case 'collection':
+        return { bg: '#d1fae5', text: '#065f46' };
+      case 'function':
+        return { bg: '#fef3c7', text: '#92400e' };
+      case 'document':
+        return { bg: '#e0e7ff', text: '#3730a3' };
+      case 'binary':
+        return { bg: '#fce7f3', text: '#831843' };
+      default:
+        return { bg: '#e5e7eb', text: '#374151' };
+    }
   };
 
   const getIcon = (objectClass?: string[]) => {
     if (!objectClass || objectClass.length === 0) {
-      return <Box className="w-4 h-4 text-gray-400" />;
+      return <svg style={{ width: '14px', height: '14px' }} viewBox="0 0 16 16" fill="currentColor"><rect x="2" y="2" width="12" height="12" rx="2"/></svg>;
     }
 
-    // Check for primary class
     if (objectClass.includes('collection')) {
-      return <Table className="w-4 h-4 text-blue-500" />;
+      return <svg style={{ width: '14px', height: '14px', color: '#3b82f6' }} viewBox="0 0 16 16" fill="currentColor"><path d="M0 2h16v2H0zM0 7h16v2H0zM0 12h16v2H0z"/></svg>;
     }
     if (objectClass.includes('function')) {
-      return <Zap className="w-4 h-4 text-yellow-500" />;
+      return <svg style={{ width: '14px', height: '14px', color: '#eab308' }} viewBox="0 0 16 16" fill="currentColor"><path d="M8 2l6 5-6 5-6-5z"/></svg>;
     }
     if (objectClass.includes('document')) {
-      return <FileText className="w-4 h-4 text-green-500" />;
+      return <svg style={{ width: '14px', height: '14px', color: '#22c55e' }} viewBox="0 0 16 16" fill="currentColor"><path d="M3 0h7l3 3v10a1 1 0 01-1 1H3a1 1 0 01-1-1V1a1 1 0 011-1zM10 4V1l3 3h-3z"/></svg>;
     }
     if (objectClass.includes('binary')) {
-      return <Paperclip className="w-4 h-4 text-purple-500" />;
+      return <svg style={{ width: '14px', height: '14px', color: '#a855f7' }} viewBox="0 0 16 16" fill="currentColor"><path d="M4 8l4-4 4 4-4 4z"/></svg>;
     }
     if (objectClass.includes('container')) {
-      return <Folder className="w-4 h-4 text-amber-500" />;
+      return <svg style={{ width: '14px', height: '14px', color: '#f59e0b' }} viewBox="0 0 16 16" fill="currentColor"><path d="M1 4l2-2h4l2 2h5a1 1 0 011 1v8a1 1 0 01-1 1H1a1 1 0 01-1-1V5a1 1 0 011-1z"/></svg>;
     }
 
-    return <Box className="w-4 h-4 text-gray-400" />;
+    return <svg style={{ width: '14px', height: '14px' }} viewBox="0 0 16 16" fill="currentColor"><rect x="2" y="2" width="12" height="12" rx="2"/></svg>;
   };
 
   const renderNode = (node: TreeNode, depth: number = 0) => {
@@ -288,51 +196,108 @@ export default function ObjectBrowser() {
     const canExpand = isContainer;
 
     return (
-      <div key={node.id} className="select-none">
-        {/* Node row */}
+      <div key={node.id} style={{ userSelect: 'none' }}>
         <div
-          className="flex items-center py-1 px-2 hover:bg-gray-100 rounded cursor-pointer group"
-          style={{ paddingLeft: `${depth * 20 + 8}px` }}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            padding: '3px 6px',
+            paddingLeft: `${depth * 16 + 6}px`,
+            cursor: 'pointer',
+            borderRadius: '3px'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
+          onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
         >
-          {/* Expand/collapse icon */}
-          <div className="w-5 h-5 flex items-center justify-center mr-1">
+          {/* Expand/collapse triangle */}
+          <div style={{ width: '16px', height: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: '4px' }}>
             {canExpand ? (
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   handleToggleExpand(node);
                 }}
-                className="hover:bg-gray-200 rounded p-0.5"
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  padding: '2px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
                 disabled={node.isLoading}
               >
                 {node.isLoading ? (
-                  <div className="animate-spin w-3 h-3 border-2 border-gray-400 border-t-transparent rounded-full" />
-                ) : node.isExpanded ? (
-                  <ChevronDown className="w-4 h-4 text-gray-600" />
+                  <div style={{ width: '10px', height: '10px', border: '2px solid #9ca3af', borderTop: '2px solid transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
                 ) : (
-                  <ChevronRight className="w-4 h-4 text-gray-600" />
+                  <svg style={{ width: '10px', height: '10px', transform: node.isExpanded ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.15s', color: '#6b7280' }} viewBox="0 0 10 10" fill="currentColor">
+                    <path d="M2 1l6 4-6 4z"/>
+                  </svg>
                 )}
               </button>
             ) : (
-              <span className="w-4" />
+              <span style={{ width: '10px' }} />
             )}
           </div>
 
-          {/* Icon and name */}
+          {/* Icon, name, and badges */}
           <div
-            className="flex items-center flex-1 min-w-0"
+            style={{ display: 'flex', alignItems: 'center', flex: 1, minWidth: 0, gap: '6px' }}
             onClick={() => handleSelectObject(node)}
           >
-            <span className="mr-2 flex-shrink-0">
+            <span style={{ flexShrink: 0, display: 'flex', alignItems: 'center' }}>
               {getIcon(node.objectClass)}
             </span>
-            <span className="text-sm truncate" title={node.name}>
+            <span style={{ fontSize: '13px', fontFamily: 'var(--font-roboto), Roboto, sans-serif', flexShrink: 0 }} title={node.name}>
               {node.name}
             </span>
+
+            {/* ObjectClass badges */}
             {node.objectClass && node.objectClass.length > 0 && (
-              <span className="ml-2 text-xs text-gray-400 hidden group-hover:inline">
-                ({node.objectClass.join(', ')})
-              </span>
+              <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                {node.objectClass.map((oc, idx) => {
+                  const colors = getObjectClassColor(oc);
+                  return (
+                    <span
+                      key={idx}
+                      style={{
+                        fontSize: '0.688rem',
+                        padding: '2px 6px',
+                        borderRadius: '3px',
+                        backgroundColor: colors.bg,
+                        color: colors.text,
+                        fontWeight: '500',
+                        whiteSpace: 'nowrap'
+                      }}
+                    >
+                      {oc}
+                    </span>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Tag badges */}
+            {node.tags && node.tags.length > 0 && (
+              <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                {node.tags.map((tag, idx) => (
+                  <span
+                    key={idx}
+                    style={{
+                      fontSize: '0.688rem',
+                      padding: '2px 6px',
+                      borderRadius: '3px',
+                      backgroundColor: '#e5e7eb',
+                      color: '#4b5563',
+                      fontWeight: '500',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
             )}
           </div>
         </div>
@@ -347,22 +312,12 @@ export default function ObjectBrowser() {
     );
   };
 
-  if (!dataProducerClient) {
-    return (
-      <div className="p-4 bg-gray-100 rounded-lg">
-        <p className="text-gray-600 text-sm">
-          Please select a connection to begin browsing
-        </p>
-      </div>
-    );
-  }
-
   if (loading && !rootNode) {
     return (
-      <div className="p-4">
-        <div className="flex items-center text-gray-600">
-          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-600 mr-3"></div>
-          <span className="text-sm">Loading data structure...</span>
+      <div style={{ padding: '1rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', color: '#6b7280' }}>
+          <div style={{ width: '16px', height: '16px', border: '2px solid #6b7280', borderTop: '2px solid transparent', borderRadius: '50%', animation: 'spin 1s linear infinite', marginRight: '8px' }} />
+          <span style={{ fontSize: '0.813rem' }}>Loading...</span>
         </div>
       </div>
     );
@@ -370,11 +325,11 @@ export default function ObjectBrowser() {
 
   if (error) {
     return (
-      <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-        <p className="text-sm text-red-700">{error}</p>
+      <div style={{ padding: '1rem', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '0.25rem' }}>
+        <p style={{ fontSize: '0.813rem', color: '#b91c1c' }}>{error}</p>
         <button
           onClick={loadRootObject}
-          className="mt-2 text-sm text-red-600 hover:text-red-800 underline"
+          style={{ marginTop: '0.5rem', fontSize: '0.813rem', color: '#dc2626', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}
         >
           Retry
         </button>
@@ -384,20 +339,15 @@ export default function ObjectBrowser() {
 
   if (!rootNode) {
     return (
-      <div className="p-4 bg-gray-100 rounded-lg">
-        <p className="text-gray-600 text-sm">No data available</p>
+      <div style={{ padding: '1rem', background: '#f3f4f6', borderRadius: '0.25rem' }}>
+        <p style={{ fontSize: '0.813rem', color: '#6b7280' }}>No data available</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200">
-      <div className="p-3 border-b border-gray-200 bg-gray-50">
-        <h3 className="font-semibold text-sm text-gray-700">Object Browser</h3>
-      </div>
-      <div className="p-2 max-h-96 overflow-y-auto">
-        {renderNode(rootNode)}
-      </div>
+    <div>
+      {renderNode(rootNode)}
     </div>
   );
 }

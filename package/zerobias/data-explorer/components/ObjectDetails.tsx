@@ -67,10 +67,10 @@ export default function ObjectDetails() {
 
     return (
       <tr key={key}>
-        <td className="py-2 px-4 border-b border-gray-200 font-medium text-gray-700 bg-gray-50">
+        <td style={{ padding: '0.5rem 1rem', borderBottom: '1px solid #e5e7eb', fontWeight: '500', color: '#374151', background: '#f9fafb' }}>
           {label}
         </td>
-        <td className="py-2 px-4 border-b border-gray-200 text-gray-900">
+        <td style={{ padding: '0.5rem 1rem', borderBottom: '1px solid #e5e7eb', color: '#111827' }}>
           {formatValue(value)}
         </td>
       </tr>
@@ -80,17 +80,17 @@ export default function ObjectDetails() {
   if (!selectedObject) {
     return (
       <div style={{ textAlign: 'center', color: '#9ca3af', padding: '3rem 0' }}>
-        <p style={{ fontSize: '1rem' }}>Select an object from the browser to view details</p>
+        <p style={{ fontSize: '13px', fontFamily: 'var(--font-roboto), Roboto, sans-serif' }}>Select an object from the browser to view details</p>
       </div>
     );
   }
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg border border-gray-200 p-8">
-        <div className="flex items-center justify-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mr-3"></div>
-          <span className="text-gray-600">Loading object details...</span>
+      <div style={{ background: 'white', borderRadius: '0.5rem', border: '1px solid #e5e7eb', padding: '2rem', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div style={{ width: '32px', height: '32px', border: '2px solid #2563eb', borderTop: '2px solid transparent', borderRadius: '50%', animation: 'spin 1s linear infinite', marginRight: '12px' }} />
+          <span style={{ color: '#4b5563', fontSize: '13px', fontFamily: 'var(--font-roboto), Roboto, sans-serif' }}>Loading object details...</span>
         </div>
       </div>
     );
@@ -98,12 +98,12 @@ export default function ObjectDetails() {
 
   if (error) {
     return (
-      <div className="bg-white rounded-lg border border-gray-200 p-8">
-        <div className="bg-red-50 border border-red-200 rounded p-4">
-          <p className="text-sm text-red-700">{error}</p>
+      <div style={{ background: 'white', borderRadius: '0.5rem', border: '1px solid #e5e7eb', padding: '2rem', height: '100%' }}>
+        <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '0.25rem', padding: '1rem' }}>
+          <p style={{ fontSize: '13px', color: '#b91c1c', fontFamily: 'var(--font-roboto), Roboto, sans-serif' }}>{error}</p>
           <button
             onClick={loadObjectDetails}
-            className="mt-2 text-sm text-red-600 hover:text-red-800 underline"
+            style={{ marginTop: '0.5rem', fontSize: '13px', color: '#dc2626', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-roboto), Roboto, sans-serif' }}
           >
             Retry
           </button>
@@ -114,8 +114,8 @@ export default function ObjectDetails() {
 
   if (!fullObject) {
     return (
-      <div className="bg-white rounded-lg border border-gray-200 p-8">
-        <p className="text-gray-500 text-center">No details available</p>
+      <div style={{ background: 'white', borderRadius: '0.5rem', border: '1px solid #e5e7eb', padding: '2rem', height: '100%' }}>
+        <p style={{ color: '#6b7280', textAlign: 'center', fontSize: '13px', fontFamily: 'var(--font-roboto), Roboto, sans-serif' }}>No details available</p>
       </div>
     );
   }
@@ -131,16 +131,16 @@ export default function ObjectDetails() {
   });
 
   return (
-    <div className="object-details-container">
-      <div className="object-header">
-        <h3 className="object-title">{fullObject.name}</h3>
+    <div style={{ background: 'white', borderRadius: '0.5rem', border: '1px solid #e5e7eb', overflow: 'hidden', height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ padding: '0.75rem 1rem', borderBottom: '1px solid #e5e7eb', background: 'linear-gradient(to bottom, #f9fafb, #ffffff)', flexShrink: 0 }}>
+        <h3 style={{ fontSize: '1rem', fontWeight: '600', color: '#1f2937', margin: 0, fontFamily: 'var(--font-roboto), Roboto, sans-serif' }}>{fullObject.name}</h3>
         {fullObject.description && (
-          <p className="object-description">{fullObject.description}</p>
+          <p style={{ fontSize: '13px', color: '#6b7280', marginTop: '0.25rem', marginBottom: 0, fontFamily: 'var(--font-roboto), Roboto, sans-serif' }}>{fullObject.description}</p>
         )}
       </div>
 
-      <Tabs className="custom-tabs">
-        <TabList>
+      <Tabs style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+        <TabList style={{ display: 'flex', gap: 0, margin: 0, padding: '0 1rem', borderBottom: '2px solid #e5e7eb', background: 'linear-gradient(to bottom, #fafbfc, #f9fafb)', listStyle: 'none', flexShrink: 0 }}>
           <Tab>Metadata</Tab>
           {hasCollectionClass && <Tab>Data</Tab>}
           {hasFunctionClass && <Tab>Function</Tab>}
@@ -149,9 +149,9 @@ export default function ObjectDetails() {
         </TabList>
 
         {/* Metadata Tab */}
-        <TabPanel>
-          <div className="p-4">
-            <table className="w-full text-sm">
+        <TabPanel style={{ flex: 1, overflow: 'auto' }}>
+          <div style={{ padding: '1rem' }}>
+            <table style={{ width: '100%', fontSize: '13px', fontFamily: 'var(--font-roboto), Roboto, sans-serif' }}>
               <tbody>
                 {renderMetadataRow('ID', fullObject.id, 'id')}
                 {renderMetadataRow('Name', fullObject.name, 'name')}
@@ -207,8 +207,8 @@ export default function ObjectDetails() {
 
         {/* Data Tab (for collections) */}
         {hasCollectionClass && (
-          <TabPanel>
-            <div className="p-4">
+          <TabPanel style={{ flex: 1, overflow: 'auto' }}>
+            <div style={{ padding: '1rem' }}>
               <CollectionViewer objectId={fullObject.id} />
             </div>
           </TabPanel>
@@ -216,8 +216,8 @@ export default function ObjectDetails() {
 
         {/* Function Tab */}
         {hasFunctionClass && (
-          <TabPanel>
-            <div className="p-4">
+          <TabPanel style={{ flex: 1, overflow: 'auto' }}>
+            <div style={{ padding: '1rem' }}>
               <FunctionInvoker
                 objectId={fullObject.id}
                 inputSchema={fullObject.inputSchema}
@@ -229,8 +229,8 @@ export default function ObjectDetails() {
 
         {/* Schema Tab */}
         {fullObject.collectionSchema && (
-          <TabPanel>
-            <div className="p-4">
+          <TabPanel style={{ flex: 1, overflow: 'auto' }}>
+            <div style={{ padding: '1rem' }}>
               <SchemaViewer schemaJson={fullObject.collectionSchema} />
             </div>
           </TabPanel>
@@ -238,8 +238,8 @@ export default function ObjectDetails() {
 
         {/* ERD Tab */}
         {fullObject.collectionSchema && (
-          <TabPanel>
-            <div className="p-4">
+          <TabPanel style={{ flex: 1, overflow: 'auto' }}>
+            <div style={{ padding: '1rem' }}>
               <ERDiagram objectId={fullObject.id} schemaJson={fullObject.collectionSchema} />
             </div>
           </TabPanel>
@@ -247,53 +247,12 @@ export default function ObjectDetails() {
       </Tabs>
 
       <style jsx global>{`
-        .object-details-container {
-          background: white;
-          border-radius: 0.5rem;
-          border: 1px solid #e5e7eb;
-          overflow: hidden;
-        }
-
-        .object-header {
-          padding: 1.5rem;
-          border-bottom: 1px solid #e5e7eb;
-          background: linear-gradient(to bottom, #f9fafb, #ffffff);
-        }
-
-        .object-title {
-          font-size: 1.25rem;
-          font-weight: 600;
-          color: #1f2937;
-          margin: 0;
-        }
-
-        .object-description {
-          font-size: 0.875rem;
-          color: #6b7280;
-          margin-top: 0.5rem;
-        }
-
-        /* Custom Tabs Styling */
-        .custom-tabs {
-          display: flex;
-          flex-direction: column;
-          height: 100%;
-        }
-
-        .custom-tabs .react-tabs__tab-list {
-          display: flex;
-          gap: 0;
-          margin: 0;
-          padding: 0 1rem;
-          border-bottom: 2px solid #e5e7eb;
-          background: linear-gradient(to bottom, #fafbfc, #f9fafb);
-          list-style: none;
-        }
-
-        .custom-tabs .react-tabs__tab {
-          padding: 0.875rem 1.75rem;
+        /* Custom Tab Styling - react-tabs overrides */
+        .react-tabs__tab {
+          padding: 0.625rem 1.5rem;
           cursor: pointer;
-          font-size: 0.9rem;
+          font-size: 13px;
+          font-family: var(--font-roboto), Roboto, sans-serif;
           font-weight: 500;
           color: #6b7280;
           border: none;
@@ -304,34 +263,43 @@ export default function ObjectDetails() {
           position: relative;
         }
 
-        .custom-tabs .react-tabs__tab:hover {
+        .react-tabs__tab:hover {
           color: #2563eb;
           background: rgba(37, 99, 235, 0.05);
         }
 
-        .custom-tabs .react-tabs__tab--selected {
+        .react-tabs__tab--selected {
           color: #2563eb;
           border-bottom-color: #2563eb;
           background: white;
           font-weight: 600;
         }
 
-        .custom-tabs .react-tabs__tab:focus {
+        .react-tabs__tab:focus {
           outline: none;
           box-shadow: none;
         }
 
-        .custom-tabs .react-tabs__tab:focus-visible {
+        .react-tabs__tab:focus-visible {
           outline: 2px solid #2563eb;
           outline-offset: -2px;
         }
 
-        .custom-tabs .react-tabs__tab-panel {
+        .react-tabs__tab-panel {
           display: none;
         }
 
-        .custom-tabs .react-tabs__tab-panel--selected {
-          display: block;
+        .react-tabs__tab-panel--selected {
+          display: flex;
+          flex-direction: column;
+          flex: 1;
+          overflow: hidden;
+        }
+
+        /* Spinner animation */
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
         }
       `}</style>
     </div>

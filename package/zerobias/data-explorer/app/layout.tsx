@@ -17,7 +17,7 @@ const roboto = Roboto({
 })
 
 export const metadata: Metadata = {
-  title: "Data Explorer - Zerobias",
+  title: "Data Explorer",
   description: "Browse and explore data sources through the DataProducer interface",
 };
 

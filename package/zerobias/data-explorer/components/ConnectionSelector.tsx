@@ -255,21 +255,32 @@ export default function ConnectionSelector() {
   };
 
   if (userLoading) {
-    return <span className="text-sm text-white/80">Loading...</span>;
+    return <span style={{ fontSize: '0.813rem', color: 'rgba(255,255,255,0.8)' }}>Loading...</span>;
   }
 
   if (!org) {
-    return <span className="text-sm text-white/80">Please select an organization</span>;
+    return <span style={{ fontSize: '0.813rem', color: 'rgba(255,255,255,0.8)' }}>Please select an organization</span>;
   }
 
+  const selectStyle: React.CSSProperties = {
+    padding: '0.25rem 0.5rem',
+    border: '1px solid rgba(255,255,255,0.3)',
+    borderRadius: '0.25rem',
+    fontSize: '0.813rem',
+    background: '#dbeafe',
+    color: '#1f2937',
+    minWidth: '200px',
+    height: '28px',
+  };
+
   return (
-    <div className="flex items-center gap-4">
+    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
       {/* Connection Selector */}
       <select
         value={selectedConnection?.id || ''}
         onChange={handleConnectionChange}
         disabled={explorerLoading || connections.length === 0}
-        className="px-3 py-2 border border-white/30 rounded text-sm bg-white/95 text-gray-800 min-w-[200px] focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+        style={selectStyle}
       >
         <option value="">Select a Connection</option>
         {connections.map(conn => {
@@ -280,7 +291,7 @@ export default function ConnectionSelector() {
               key={conn.id.toString()}
               value={conn.id.toString()}
               disabled={!isValid}
-              className={isValid ? 'text-gray-800' : 'text-gray-400'}
+              style={{ color: isValid ? '#1f2937' : '#9ca3af' }}
             >
               {conn.name} ({status})
             </option>
@@ -294,7 +305,7 @@ export default function ConnectionSelector() {
           value={selectedScope?.id || ''}
           onChange={handleScopeChange}
           disabled={explorerLoading}
-          className="px-3 py-2 border border-white/30 rounded text-sm bg-white/95 text-gray-800 min-w-[200px] focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+          style={selectStyle}
         >
           <option value="">Select a Scope</option>
           {scopes.map(scope => {
@@ -305,7 +316,7 @@ export default function ConnectionSelector() {
                 key={scope.id.toString()}
                 value={scope.id.toString()}
                 disabled={!isValid}
-                className={isValid ? 'text-gray-800' : 'text-gray-400'}
+                style={{ color: isValid ? '#1f2937' : '#9ca3af' }}
               >
                 {scope.name} ({status})
               </option>
@@ -316,7 +327,7 @@ export default function ConnectionSelector() {
 
       {/* Show error inline if present */}
       {error && (
-        <span className="text-sm text-red-200 ml-2">{error}</span>
+        <span style={{ fontSize: '0.813rem', color: '#fecaca', marginLeft: '0.5rem' }}>{error}</span>
       )}
     </div>
   );
