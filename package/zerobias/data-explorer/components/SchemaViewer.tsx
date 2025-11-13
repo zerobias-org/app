@@ -10,7 +10,7 @@ type SchemaProperty = {
   primaryKey?: boolean;
   dataType?: string;
   format?: string;
-  references?: string;
+  references?: string | { objectId?: string; property?: string } | any;
 };
 
 type Schema = {
@@ -146,7 +146,11 @@ export default function SchemaViewer({ schemaJson }: SchemaViewerProps) {
                         )}
                         {prop.references && (
                           <div className="text-xs text-gray-500">
-                            → {prop.references}
+                            → {typeof prop.references === 'string'
+                              ? prop.references
+                              : typeof prop.references === 'object' && prop.references !== null
+                                ? `${(prop.references as any).objectId || ''}${(prop.references as any).property ? '.' + (prop.references as any).property : ''}`
+                                : JSON.stringify(prop.references)}
                           </div>
                         )}
                       </div>
