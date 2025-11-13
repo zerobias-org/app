@@ -5,7 +5,7 @@ import mermaid from 'mermaid';
 
 interface ERDiagramProps {
   objectId: string;
-  schemaJson?: string;
+  schemaJson?: string | object;
 }
 
 export default function ERDiagram({ objectId, schemaJson }: ERDiagramProps) {
@@ -37,16 +37,45 @@ export default function ERDiagram({ objectId, schemaJson }: ERDiagramProps) {
 
     try {
       // The SQL module implements ERD as a function at database level: /db:{database}/function:erd
-      // Extract database from objectId (e.g., /db:mydb/schema:public/table:users -> /db:mydb)
-      const parts = objectId.split('/');
-      if (parts.length >= 2 && parts[1].startsWith('db:')) {
-        const dbId = `/${parts[1]}/function:erd`;
+      // Extract database, schema, and table from objectId
+      // e.g., /db:mydb/schema:public/table:users -> db=mydb, schema=public, table=users
+      const parts = objectId.split('/').filter(p => p); // Remove empty strings
+
+      if (parts.length >= 1 && parts[0].startsWith('db:')) {
+        const dbId = `/${parts[0]}/function:erd`;
+
+        // Extract schema and table names if available (for filtering)
+        let schemaName: string | undefined;
+        let tableName: string | undefined;
+
+        parts.forEach(part => {
+          if (part.startsWith('schema:')) {
+            schemaName = part.substring(7); // Remove 'schema:' prefix
+          } else if (part.startsWith('table:') || part.startsWith('view:')) {
+            tableName = part.substring(part.indexOf(':') + 1); // Remove 'table:' or 'view:' prefix
+          }
+        });
 
         try {
-          // Invoke ERD function with empty parameters (will generate for all schemas/tables)
+          // Build ERD function parameters
+          const erdParams: any = {};
+
+          // If we have a specific schema, filter to that schema
+          if (schemaName) {
+            erdParams.schemas = [schemaName];
+          }
+
+          // If we have a specific table, include that table and related tables
+          if (tableName) {
+            // For now, just include the specific table
+            // TODO: Enhance to include tables with FK relationships
+            erdParams.tables = [tableName];
+          }
+
+          // Invoke ERD function with filter parameters
           const functionsApi = (dataProducerClient as any).getFunctionsApi?.();
-          if (functionsApi) {
-            const result = await functionsApi.invoke(dbId, {});
+          if (functionsApi && typeof functionsApi.invokeFunction === 'function') {
+            const result = await functionsApi.invokeFunction(dbId, erdParams);
 
             // The result is a string containing Mermaid ERD syntax
             if (result && typeof result === 'string') {
@@ -77,9 +106,10 @@ export default function ERDiagram({ objectId, schemaJson }: ERDiagramProps) {
     }
   };
 
-  const generateERDFromSchema = (schemaJson: string): string => {
+  const generateERDFromSchema = (schemaJson: string | object): string => {
     try {
-      const schema = JSON.parse(schemaJson);
+      // Handle both string (JSON) and object inputs
+      const schema = typeof schemaJson === 'string' ? JSON.parse(schemaJson) : schemaJson;
 
       // Start with erDiagram syntax
       let mermaidCode = 'erDiagram\n';
