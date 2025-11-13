@@ -807,6 +807,128 @@ function CollectionViewer() {
 4. Use browser DevTools to inspect computed styles on each container
 5. Ensure content has `whiteSpace: 'nowrap'` if it should trigger horizontal scrolling
 
+## Schema Implementation Lessons
+
+### Critical: Always Verify Backend Data Structure
+
+**Problem:** Initial implementation failed because it assumed data structure from API spec without checking actual backend responses.
+
+**Lesson Learned:** The DataProducer API specification (`~/auditlogic/module/package/auditmation/interface/dataproducer/api.yml`) defines the contract, but backend implementations may have variations. Always inspect actual API responses before implementing UI features.
+
+### Schema DataTypes Architecture
+
+**How Schema.dataTypes Works:**
+
+The `Schema` object has a **separate `dataTypes` array** that contains DataType definitions with enum information:
+
+```typescript
+type DataType = {
+  name: string;           // e.g., "string", "\"hydra\".\"principal_type\""
+  jsonType: string;       // e.g., "string", "boolean"
+  isEnum?: boolean;       // true for enum types
+  examples?: any[];       // Array of valid enum values
+  description?: string;
+  htmlInput?: string;
+};
+
+type Schema = {
+  id: string;
+  dataTypes: DataType[];    // Separate array of type definitions
+  properties: Property[];
+};
+```
+
+**Properties Reference DataTypes by Name:**
+
+```typescript
+type Property = {
+  name: string;
+  dataType: string;         // References DataType.name (NOT inline)
+  required?: boolean;
+  primaryKey?: boolean;
+  // ... other fields
+};
+```
+
+**Lookup Pattern:**
+
+```typescript
+// Build lookup map
+const dataTypesMap = new Map<string, DataType>();
+schema.dataTypes.forEach(dt => {
+  dataTypesMap.set(dt.name, dt);
+});
+
+// For each property, look up its DataType
+const dataType = dataTypesMap.get(property.dataType);
+if (dataType && dataType.isEnum && dataType.examples) {
+  // Show enum UI
+}
+```
+
+### Actual vs Spec Field Names
+
+**API Spec Says:**
+- `references.schemaId` and `references.propertyName` (per api.yml lines 803-808)
+
+**Backend Actually Returns:**
+- `references.objectId` and `references.property`
+
+**Lesson:** Backend implementation diverges from spec. Always check actual responses in browser DevTools Network tab.
+
+### Table Row Height and Wrapping
+
+**Problem:** Table rows were wrapping to multiple lines due to references being displayed inline.
+
+**Solution:**
+- Add `whiteSpace: 'nowrap'` to Data Type cell
+- Use horizontal flex layout instead of vertical (column)
+- Keep all badges and buttons inline: dataType badge + format badge + enum button
+- Remove references display from inline view (caused unnecessary wrapping)
+
+**Result:** Clean, compact single-line rows matching ObjectBrowser density.
+
+### Enum Expand/Collapse Implementation
+
+**Requirements:**
+- Show button only when `DataType.isEnum === true` AND `DataType.examples.length > 0`
+- Button shows count: "5 options"
+- Rotating triangle indicator
+- Expanded list: one option per line, max 200px height, scrollbar if needed
+
+**Implementation:**
+```typescript
+// State for tracking expanded enums
+const [expandedEnums, setExpandedEnums] = useState<Set<string>>(new Set());
+
+// Render for each property
+const dataType = getDataType(prop);
+{dataType && dataType.isEnum && dataType.examples && dataType.examples.length > 0 && (
+  <button onClick={() => toggleEnumExpanded(prop.name)}>
+    <svg /* rotating triangle */ />
+    {dataType.examples.length} options
+  </button>
+)}
+
+// Expanded list
+{dataType && dataType.isEnum && expandedEnums.has(prop.name) && (
+  <div style={{ maxHeight: '200px', overflow: 'auto' }}>
+    {dataType.examples.map(example => (
+      <div>{typeof example === 'string' ? example : JSON.stringify(example)}</div>
+    ))}
+  </div>
+)}
+```
+
+### Key Takeaways
+
+1. **Use authoritative sources**: DataProducer `api.yml` is the spec, but verify with actual backend responses
+2. **Inspect real data first**: Use browser DevTools to see actual response structure before coding
+3. **DataTypes are separate**: Enum information lives in `schema.dataTypes[]`, not on properties
+4. **Build lookup maps**: Create `Map<string, DataType>` for efficient property → DataType lookups
+5. **No wrapping in tables**: Use `whiteSpace: 'nowrap'` and horizontal layouts for compact rows
+6. **Backend may diverge from spec**: Field names like `objectId`/`property` vs `schemaId`/`propertyName`
+
 ## Related Documentation
 
 - **Repository overview**: `/CLAUDE.md` (repo root)

@@ -227,7 +227,7 @@ export default function ObjectDetails() {
 
         {/* Schema Tab */}
         {fullObject.collectionSchema && (
-          <TabPanel style={{ height: '100%' }}>
+          <TabPanel style={{ height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
             <SchemaViewer schemaJson={fullObject.collectionSchema} />
           </TabPanel>
         )}
