@@ -36,19 +36,28 @@ export default function ERDiagram({ objectId, schemaJson }: ERDiagramProps) {
     setError(null);
 
     try {
-      // Try to get ERD from DataProducer API if it provides one
-      const diagramApi = (dataProducerClient as any).getDiagramApi?.();
+      // The SQL module implements ERD as a function at database level: /db:{database}/function:erd
+      // Extract database from objectId (e.g., /db:mydb/schema:public/table:users -> /db:mydb)
+      const parts = objectId.split('/');
+      if (parts.length >= 2 && parts[1].startsWith('db:')) {
+        const dbId = `/${parts[1]}/function:erd`;
 
-      if (diagramApi) {
         try {
-          const erdResult = await diagramApi.getERD(objectId);
-          if (erdResult?.diagram) {
-            setDiagram(erdResult.diagram);
-            await renderDiagram(erdResult.diagram);
-            return;
+          // Invoke ERD function with empty parameters (will generate for all schemas/tables)
+          const functionsApi = (dataProducerClient as any).getFunctionsApi?.();
+          if (functionsApi) {
+            const result = await functionsApi.invoke(dbId, {});
+
+            // The result is a string containing Mermaid ERD syntax
+            if (result && typeof result === 'string') {
+              setDiagram(result);
+              await renderDiagram(result);
+              return;
+            }
           }
-        } catch (err) {
-          console.log('No diagram API or ERD available, generating from schema');
+        } catch (err: any) {
+          console.log('ERD function not available or failed:', err.message);
+          // Fall through to schema-based generation
         }
       }
 
