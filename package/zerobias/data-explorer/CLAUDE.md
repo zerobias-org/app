@@ -692,63 +692,100 @@ When contributing to Data Explorer:
 
 ### Flex Layout and Scrolling: Critical Patterns
 
-**Problem:** Getting tab content (especially tables) to fill available vertical space AND show horizontal scrollbars was extremely difficult.
+**Problem:** Getting tab content (especially tables) to fill available vertical space AND show horizontal scrollbars was extremely difficult. Additionally, hidden TabPanels were creating empty space above visible content.
 
 **Root Causes:**
-1. React-tabs library CSS (`display: block`) conflicting with flexbox layouts
-2. Missing `height: 100%` on TabPanel components
-3. Incorrect flex container setup in parent chain
-4. Tab panel padding from global styles (`padding: 0 8%`) consuming too much space
+1. React-tabs uses `display: none` to hide inactive TabPanels
+2. Adding `display: flex` inline on TabPanel overrides the `display: none`, breaking tab hiding
+3. Tab panel padding from global styles (`padding: 0.5rem min(2%, 30px)`) shifting content down
+4. Inconsistent flex setup across different tab components
 
-**Solution - Complete Flex Chain:**
+**Solution - Use Global CSS with :not() Selector:**
 
-For scrollable content inside tabs to work, you need a complete flex container chain from root to scrollable element:
+**CRITICAL**: Inline `display` properties on TabPanel CAN be used, but you must use CSS with `!important` on the `:not(.react-tabs__tab-panel--selected)` selector to hide inactive tabs.
 
 ```tsx
-// 1. TabPanel: Must use height: 100% (not flex) and be a flex container
-<TabPanel style={{
-  height: '100%',           // Critical: provides height constraint
-  overflow: 'hidden',       // Prevents content overflow
-  display: 'flex',          // Makes it a flex container
-  flexDirection: 'column'   // Vertical flex layout
-}}>
+// ✅ CORRECT: TabPanel can have display:flex when needed
+<TabPanel style={{ height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+  {/* Child component that needs flex parent (like CollectionViewer with flex: 1) */}
+  <ChildComponent />
+</TabPanel>
 
-// 2. Child component root: Flex item that fills parent
-<div style={{
-  display: 'flex',
-  flexDirection: 'column',
-  flex: 1,                  // Grows to fill TabPanel
-  height: '100%',           // Uses parent's height
-  overflow: 'hidden'        // Contains its children
-}}>
+// ✅ ALSO CORRECT: TabPanel with only height when child doesn't need flex parent
+<TabPanel style={{ height: '100%' }}>
+  {/* Child component handles its own flex layout */}
+  <ChildComponent />
+</TabPanel>
+```
 
-// 3. Scrollable container: Where scrollbars actually appear
-<div style={{
-  flex: 1,                  // Grows to fill available space
-  overflow: 'auto',         // Shows scrollbars when needed
-  minHeight: 0              // Allows shrinking below content size
-}}>
+**Pattern for Each Tab:**
 
-// 4. Table: Auto-sizes to content, triggers scrollbars
-<table style={{
-  width: 'auto',            // Sizes to content, not container
-  whiteSpace: 'nowrap'      // Prevents cell wrapping
-}}>
+1. **TabPanel**: `height: '100%'` required, optionally add `display: flex` if child needs flex parent
+2. **Child Component**: May use `flex: 1` if parent TabPanel is flex, otherwise uses `height: 100%`
+3. **Global CSS**: Use `:not()` selector with `!important` to hide inactive tabs
+
+**Example - Metadata Tab (Simple Content):**
+```tsx
+// TabPanel: height only
+<TabPanel style={{ height: '100%' }}>
+  {/* Wrapper div creates flex container */}
+  <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+    <div style={{ flex: 1, overflow: 'auto' }}>
+      {/* Content */}
+      <table>...</table>
+    </div>
+  </div>
+</TabPanel>
+```
+
+**Example - Data Tab (Component with flex: 1):**
+```tsx
+// TabPanel: display:flex so child can use flex:1
+<TabPanel style={{ height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+  {/* CollectionViewer uses flex:1 which requires flex parent */}
+  <CollectionViewer objectId={id} />
+</TabPanel>
+
+// Inside CollectionViewer component:
+function CollectionViewer() {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', flex: 1, height: '100%', overflow: 'hidden', minHeight: 0 }}>
+      <div style={{ flex: 1, overflow: 'auto', minHeight: 0 }}>
+        {/* Scrollable content with horizontal scrollbar */}
+        <table style={{ width: 'auto', whiteSpace: 'nowrap' }}>...</table>
+      </div>
+    </div>
+  );
+}
+```
+
+**Global CSS Override (ObjectDetails.tsx):**
+```tsx
+<style jsx global>{`
+  /* Remove padding from styles.scss that causes shifting */
+  .react-tabs__tab-panel {
+    padding: 0 !important;
+  }
+
+  /* Hide non-selected panels with !important to override inline display styles */
+  .react-tabs__tab-panel:not(.react-tabs__tab-panel--selected) {
+    display: none !important;
+  }
+`}</style>
 ```
 
 **Key Principles:**
-1. **TabPanel needs `height: 100%`**, not `flex: 1` - this is specific to react-tabs
-2. **Every container in the chain needs explicit flex settings**
-3. **The scrollable container needs `overflow: 'auto'` and `flex: 1`**
-4. **Content inside scrollable container should size naturally** (`width: 'auto'` for tables)
-5. **Global CSS can interfere** - check for padding/overflow rules on `.react-tabs__tab-panel`
+1. **TabPanel**: Always `height: '100%'`, add `display: flex` ONLY when child needs it (e.g., uses `flex: 1`)
+2. **Child components**: Use `flex: 1` if parent is flex, otherwise `height: 100%`
+3. **Global CSS**: Use `:not(.react-tabs__tab-panel--selected)` with `!important` to hide inactive tabs
+4. **Why this works**: The `:not()` selector with `!important` hides inactive tabs regardless of inline styles, while active tab preserves its inline styles
 
 **Common Mistakes:**
-- ❌ Using `flex: 1` on TabPanel (use `height: 100%` instead)
-- ❌ Missing `overflow: 'hidden'` on intermediate containers
-- ❌ Using `width: '100%'` on tables (prevents horizontal expansion)
-- ❌ Forgetting `minHeight: 0` on flex children
-- ❌ Not checking global styles for conflicting rules
+- ❌ Forgetting `:not()` selector when using global CSS (hides all tabs)
+- ❌ Not using `!important` on the `:not()` rule (inline styles override it)
+- ❌ Forgetting to remove padding from `styles.scss`
+- ❌ Using `flex: 1` in child when TabPanel is not flex (doesn't work)
+- ❌ Adding `display: flex` to TabPanel when child doesn't need it (unnecessary)
 
 ### Development Workflow
 

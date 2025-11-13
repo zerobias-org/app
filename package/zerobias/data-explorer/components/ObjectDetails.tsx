@@ -150,8 +150,10 @@ export default function ObjectDetails() {
 
         {/* Metadata Tab */}
         <TabPanel style={{ height: '100%' }}>
-          <table style={{ width: '100%', fontSize: '13px', fontFamily: 'var(--font-roboto), Roboto, sans-serif' }}>
-            <tbody>
+          <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+            <div style={{ flex: 1, overflow: 'auto' }}>
+              <table style={{ width: '100%', fontSize: '13px', fontFamily: 'var(--font-roboto), Roboto, sans-serif' }}>
+                <tbody>
               {renderMetadataRow('ID', fullObject.id, 'id')}
               {renderMetadataRow('Name', fullObject.name, 'name')}
               {renderMetadataRow('Description', fullObject.description, 'description')}
@@ -199,8 +201,10 @@ export default function ObjectDetails() {
                   {renderMetadataRow('Timeout', fullObject.timeout ? `${fullObject.timeout}ms` : null, 'timeout')}
                 </>
               )}
-            </tbody>
-          </table>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </TabPanel>
 
         {/* Data Tab (for collections) */}
@@ -241,6 +245,16 @@ export default function ObjectDetails() {
         .react-tabs__tab-list {
           flex-grow: 0 !important;
           justify-content: flex-start !important;
+        }
+
+        /* Remove padding from tab panels that causes shifting */
+        .react-tabs__tab-panel {
+          padding: 0 !important;
+        }
+
+        /* Hide non-selected panels with !important to override inline styles */
+        .react-tabs__tab-panel:not(.react-tabs__tab-panel--selected) {
+          display: none !important;
         }
 
         /* Custom Tab Styling - react-tabs overrides */

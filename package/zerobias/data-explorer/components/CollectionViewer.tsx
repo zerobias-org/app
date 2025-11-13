@@ -210,7 +210,7 @@ export default function CollectionViewer({ objectId }: CollectionViewerProps) {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', flex: 1, gap: '0.5rem', padding: 0, minHeight: 0, height: '100%', overflow: 'hidden' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', flex: 1, height: '100%', gap: '0.5rem', padding: 0, overflow: 'hidden', minHeight: 0 }}>
       {/* Filter Bar */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
         <button
