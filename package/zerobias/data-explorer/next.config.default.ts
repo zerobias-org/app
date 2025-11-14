@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   reactStrictMode: false,
   /*   output: "export",
   distDir: "dist",
-  basePath: "/example-nextjs", */
+  basePath: "/data-explorer", */
   skipTrailingSlashRedirect: true,
   trailingSlash: true,
   images: {
