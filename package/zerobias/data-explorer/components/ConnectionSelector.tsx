@@ -25,7 +25,7 @@ const formatStatus = (status: any): string => {
 };
 
 export default function ConnectionSelector() {
-  const { user, org, loading: userLoading } = useCurrentUser();
+  const { user: _user, org, loading: userLoading } = useCurrentUser();
   const {
     selectedConnection,
     selectedScope,

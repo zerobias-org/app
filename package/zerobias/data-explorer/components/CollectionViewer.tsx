@@ -33,7 +33,7 @@ export default function CollectionViewer({ objectId }: CollectionViewerProps) {
   const [nextPageToken, setNextPageToken] = useState<string | undefined>(undefined);
   const [hasMore, setHasMore] = useState(false);
 
-  const [schema, setSchema] = useState<any>(null);
+  const [_schema, _setSchema] = useState<any>(null);
 
   // Load collection data when objectId, page, or filter changes
   useEffect(() => {
@@ -80,7 +80,7 @@ export default function CollectionViewer({ objectId }: CollectionViewerProps) {
       // Load object details to get schema
       const obj = await dataProducerClient!.getObjectsApi()
         .getObject(objectId);
-      setSchema(obj.collectionSchema);
+      _setSchema(obj.collectionSchema);
     } catch (err: any) {
       console.error('Failed to load collection data:', err);
       setError(`Failed to load data: ${err.message}`);

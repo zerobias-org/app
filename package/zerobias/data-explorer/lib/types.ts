@@ -109,10 +109,10 @@ export type ProductProps = {
 }
 
 export enum DemoTabs {
-  PRODUCTS_DEMO = 'products-demo',
-  MODULE_DEMO = 'module-demo',
-  PKV_DEMO = 'pkv-demo'
+  _PRODUCTS_DEMO = 'products-demo',
+  _MODULE_DEMO = 'module-demo',
+  _PKV_DEMO = 'pkv-demo'
 }
 
 export type ActionType = "createApiKey" | "createSharedSessionKey" | null;
-export type DemoTab = DemoTabs.PRODUCTS_DEMO | DemoTabs.MODULE_DEMO | DemoTabs.PKV_DEMO;
+export type DemoTab = DemoTabs._PRODUCTS_DEMO | DemoTabs._MODULE_DEMO | DemoTabs._PKV_DEMO;

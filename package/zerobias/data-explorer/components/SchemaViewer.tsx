@@ -41,7 +41,7 @@ export default function SchemaViewer({ schemaJson }: SchemaViewerProps) {
   const [schema, setSchema] = useState<Schema | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [originalSchemaId, setOriginalSchemaId] = useState<string | null>(null);
+  const [_originalSchemaId, setOriginalSchemaId] = useState<string | null>(null);
   const [expandedEnums, setExpandedEnums] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -68,7 +68,31 @@ export default function SchemaViewer({ schemaJson }: SchemaViewerProps) {
           // Store the original schema ID to display (backend may return mutilated version)
           setOriginalSchemaId(schemaJson);
           const schemaResponse = await dataProducerClient.getSchemasApi().getSchema(schemaJson);
-          setSchema(schemaResponse);
+
+          // Convert API response to local Schema type (handle EnumValue types)
+          const convertedSchema: Schema = {
+            id: schemaResponse.id,
+            dataTypes: schemaResponse.dataTypes?.map((dt: any) => ({
+              name: dt.name,
+              jsonType: dt.jsonType?.toString() || dt.jsonType,
+              isEnum: dt.isEnum,
+              description: dt.description,
+              examples: dt.examples,
+              htmlInput: dt.htmlInput?.toString() || dt.htmlInput,
+            })),
+            properties: schemaResponse.properties?.map((prop: any) => ({
+              name: prop.name,
+              description: prop.description,
+              required: prop.required,
+              multi: prop.multi,
+              primaryKey: prop.primaryKey,
+              dataType: prop.dataType,
+              format: prop.format,
+              references: prop.references,
+            })),
+          };
+
+          setSchema(convertedSchema);
         } else {
           // It's a full schema object or JSON string
           let parsed: any;

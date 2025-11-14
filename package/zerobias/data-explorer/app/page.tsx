@@ -7,7 +7,7 @@ import ObjectDetails from "@/components/ObjectDetails";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 
 export default function DataExplorerPage() {
-  const { user, org, loading: userLoading } = useCurrentUser();
+  const { user: _user, org: _org, loading: userLoading } = useCurrentUser();
   const { dataProducerClient } = useDataExplorer();
 
   if (userLoading) {

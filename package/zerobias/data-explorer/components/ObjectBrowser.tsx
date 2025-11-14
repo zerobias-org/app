@@ -149,7 +149,7 @@ export default function ObjectBrowser() {
     });
   };
 
-  const getObjectClassColor = (objectClass: string): { bg: string, text: string } => {
+  const _getObjectClassColor = (objectClass: string): { bg: string, text: string } => {
     switch (objectClass) {
       case 'container':
         return { bg: '#dbeafe', text: '#1e40af' };

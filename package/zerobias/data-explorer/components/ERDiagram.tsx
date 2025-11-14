@@ -8,7 +8,7 @@ interface ERDiagramProps {
   schemaJson?: string | object;
 }
 
-export default function ERDiagram({ objectId, schemaJson }: ERDiagramProps) {
+export default function ERDiagram({ objectId, schemaJson: _schemaJson }: ERDiagramProps) {
   const { dataProducerClient } = useDataExplorer();
   const [diagram, setDiagram] = useState<string>('');
   const [renderedSvg, setRenderedSvg] = useState<string>('');
@@ -16,12 +16,12 @@ export default function ERDiagram({ objectId, schemaJson }: ERDiagramProps) {
   const [error, setError] = useState<string | null>(null);
   const [showSource, setShowSource] = useState(false);
   const [zoom, setZoom] = useState(100);
-  const [baseZoom, setBaseZoom] = useState(100); // natural/container scale (starting point)
+  const [_baseZoom, setBaseZoom] = useState(100); // natural/container scale (starting point)
   const [minZoom, setMinZoom] = useState(10); // Dynamic min (container/natural for fit-to-width)
   const [maxZoom, setMaxZoom] = useState(200); // Dynamic max (2x baseZoom)
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
-  const [scrollPos, setScrollPos] = useState({ x: 0, y: 0 });
+  const [_scrollPos, _setScrollPos] = useState({ x: 0, y: 0 });
   const diagramRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
