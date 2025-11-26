@@ -1,0 +1,334 @@
+"use client"
+import { useState, useEffect } from 'react';
+import { useDataExplorer } from '@/context/DataExplorerContext';
+import { useCurrentUser } from '@/context/CurrentUserContext';
+import ZerobiasAppService from '@/lib/zerobias';
+import { ConnectionListView, ScopeListView } from '@auditmation/module-auditmation-auditmation-hub';
+import { UUID, PagedResults } from '@auditmation/types-core-js';
+import { ModuleSearch } from '@auditmation/module-auditmation-auditmation-store';
+
+// DataProducer interface product key for discovering compatible connections
+const DATAPRODUCER_PRODUCT_KEY = '@auditlogic/product-auditmation-interface-dataproducer';
+
+// Helper to check if a status is valid for DataProducer operations
+const isValidStatus = (status: any): boolean => {
+  if (!status) return false;
+  const statusValue = typeof status === 'string' ? status : status.value;
+  return statusValue === 'up' || statusValue === 'standby';
+};
+
+// Helper to format status for display
+const formatStatus = (status: any): string => {
+  if (!status) return 'Unknown';
+  const statusValue = typeof status === 'string' ? status : status.value;
+  return statusValue.charAt(0).toUpperCase() + statusValue.slice(1);
+};
+
+export default function ConnectionSelector() {
+  const { user: _user, org, loading: userLoading } = useCurrentUser();
+  const {
+    selectedConnection,
+    selectedScope,
+    setConnection,
+    setScope,
+    initializeDataProducer,
+    loading: explorerLoading,
+    setLoading,
+    dataProducerClient
+  } = useDataExplorer();
+
+  const [connections, setConnections] = useState<ConnectionListView[]>([]);
+  const [scopes, setScopes] = useState<ScopeListView[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isScoped, setIsScoped] = useState(false);
+
+  // Load connections when org is available
+  useEffect(() => {
+    if (org && !userLoading) {
+      loadConnections();
+    }
+  }, [org, userLoading]);
+
+  // Load scopes when connection changes
+  useEffect(() => {
+    if (selectedConnection) {
+      loadScopes();
+    } else {
+      setScopes(null);
+      setIsScoped(false);
+    }
+  }, [selectedConnection]);
+
+  // Initialize DataProducer client when scope is selected (or connection if single-scope)
+  useEffect(() => {
+    console.log('Initialize effect triggered:', {
+      explorerLoading,
+      hasSelectedConnection: !!selectedConnection,
+      isScoped,
+      hasSelectedScope: !!selectedScope,
+      hasDataProducerClient: !!dataProducerClient,
+      scopesLoaded: scopes !== null
+    });
+
+    if (explorerLoading) {
+      console.log('Skipping initialization - explorer is loading');
+      return;
+    }
+
+    if (dataProducerClient) {
+      console.log('Skipping initialization - client already exists');
+      return;
+    }
+
+    if (!selectedConnection) {
+      console.log('Skipping initialization - no connection selected');
+      return;
+    }
+
+    // For scoped connections, wait until we've loaded scopes
+    if (isScoped && scopes === null) {
+      console.log('Skipping initialization - waiting for scopes to load');
+      return;
+    }
+
+    if (selectedConnection && !isScoped) {
+      // Single-scope connection - auto-initialize
+      console.log('Initializing with connection ID (single-scope):', selectedConnection.id);
+      handleInitialize(selectedConnection.id.toString());
+    } else if (selectedConnection && isScoped && selectedScope) {
+      // Multi-scope connection - initialize with selected scope
+      console.log('Initializing with scope ID (multi-scope):', selectedScope.id);
+      handleInitialize(selectedScope.id.toString());
+    } else if (selectedConnection && isScoped && !selectedScope) {
+      console.log('Waiting for scope selection on scoped connection');
+    }
+  }, [selectedConnection?.id, selectedScope?.id, isScoped, scopes !== null, dataProducerClient !== null]);
+
+  const loadConnections = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const zerobiasService = await ZerobiasAppService.getInstance();
+      const clientApi = zerobiasService.zerobiasClientApi;
+
+      // Try to find DataProducer connections via product/module association
+      const dataProducerProducts = await clientApi.portalClient.getProductApi()
+        .search({ packageCode: DATAPRODUCER_PRODUCT_KEY }, 1, 10);
+
+      if (dataProducerProducts.items && dataProducerProducts.items.length > 0) {
+        const dataProducerProduct = dataProducerProducts.items[0];
+        const moduleSearchResults: PagedResults<ModuleSearch> = await clientApi.storeClient.getModuleApi()
+          .search({ products: [dataProducerProduct.id] }, 1, 50, undefined);
+
+        const moduleIds = moduleSearchResults.items.map(m => m.id);
+
+        if (moduleIds.length > 0) {
+          const connectionResults: PagedResults<ConnectionListView> = await clientApi.hubClient.getConnectionApi()
+            .search({ modules: moduleIds }, 1, 50, undefined);
+
+          if (connectionResults.items.length > 0) {
+            setConnections(connectionResults.items);
+            return;
+          }
+        }
+      }
+
+      // Fallback: List all connections (no filtering)
+      const allConnections: PagedResults<ConnectionListView> = await clientApi.hubClient.getConnectionApi()
+        .list(1, 100);
+
+      setConnections(allConnections.items);
+    } catch (err: any) {
+      console.error('Failed to load connections:', err);
+      setError(`Failed to load connections: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadScopes = async () => {
+    if (!selectedConnection) return;
+
+    setLoading(true);
+    setError(null);
+    try {
+      const zerobiasService = await ZerobiasAppService.getInstance();
+      const clientApi = zerobiasService.zerobiasClientApi;
+      const connectionUUID = new UUID(selectedConnection.id);
+
+      const connection = await clientApi.hubClient.getConnectionApi().get(connectionUUID);
+      const isConnectionScoped = connection.scoped || false;
+      setIsScoped(isConnectionScoped);
+
+      if (isConnectionScoped) {
+        const scopeResults: PagedResults<ScopeListView> = await clientApi.hubClient.getScopeApi()
+          .list(connectionUUID, 1, 50);
+
+        setScopes(scopeResults.items);
+
+        // Auto-select if only 1 scope
+        if (scopeResults.items.length === 1) {
+          const scope = scopeResults.items[0];
+          setScope({
+            id: scope.id.toString(),
+            name: scope.name,
+            description: scope.description
+          });
+        }
+      } else {
+        setScopes(null);
+      }
+    } catch (err: any) {
+      console.error('Failed to load scopes:', err);
+      setError(`Failed to load scopes: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleInitialize = async (targetId: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      console.log('ConnectionSelector: Calling initializeDataProducer with targetId:', targetId);
+      await initializeDataProducer(targetId);
+      console.log('ConnectionSelector: initializeDataProducer completed successfully');
+    } catch (err: any) {
+      console.error('ConnectionSelector: Failed to initialize DataProducer client');
+      console.error('ConnectionSelector: Error type:', typeof err);
+      console.error('ConnectionSelector: Error:', err);
+      console.error('ConnectionSelector: Error message:', err?.message);
+      console.error('ConnectionSelector: Error stack:', err?.stack);
+
+      const errorMessage = err?.message || err?.toString() || 'Unknown error occurred';
+      setError(`Failed to initialize: ${errorMessage}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleConnectionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const connId = e.target.value;
+    if (!connId) {
+      setConnection(null);
+      setScope(null);
+      return;
+    }
+
+    const conn = connections.find(c => c.id.toString() === connId);
+    if (!conn) return;
+
+    if (!isValidStatus(conn.status)) {
+      setError(`Cannot select connection "${conn.name}" - status is ${formatStatus(conn.status)}`);
+      return;
+    }
+
+    setConnection({
+      id: connId,
+      name: conn.name,
+      description: conn.description
+    });
+    setError(null);
+  };
+
+  const handleScopeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const scopeId = e.target.value;
+    if (!scopeId) {
+      setScope(null);
+      return;
+    }
+
+    const scope = scopes?.find(s => s.id.toString() === scopeId);
+    if (!scope) return;
+
+    if (!isValidStatus(scope.status)) {
+      setError(`Cannot select scope "${scope.name}" - status is ${formatStatus(scope.status)}`);
+      return;
+    }
+
+    setScope({
+      id: scopeId,
+      name: scope.name,
+      description: scope.description
+    });
+    setError(null);
+  };
+
+  if (userLoading) {
+    return <span style={{ fontSize: '0.813rem', color: 'rgba(255,255,255,0.8)' }}>Loading...</span>;
+  }
+
+  if (!org) {
+    return <span style={{ fontSize: '0.813rem', color: 'rgba(255,255,255,0.8)' }}>Please select an organization</span>;
+  }
+
+  const selectStyle: React.CSSProperties = {
+    padding: '0.25rem 0.5rem',
+    border: '1px solid rgba(255,255,255,0.3)',
+    borderRadius: '0.25rem',
+    fontSize: '0.813rem',
+    background: '#dbeafe',
+    color: '#1f2937',
+    minWidth: '200px',
+    height: '28px',
+  };
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+      {/* Connection Selector */}
+      <select
+        value={selectedConnection?.id || ''}
+        onChange={handleConnectionChange}
+        disabled={explorerLoading || connections.length === 0}
+        style={selectStyle}
+      >
+        <option value="">Select a Connection</option>
+        {connections.map(conn => {
+          const status = formatStatus(conn.status);
+          const isValid = isValidStatus(conn.status);
+          return (
+            <option
+              key={conn.id.toString()}
+              value={conn.id.toString()}
+              disabled={!isValid}
+              style={{ color: isValid ? '#1f2937' : '#9ca3af' }}
+            >
+              {conn.name} ({status})
+            </option>
+          );
+        })}
+      </select>
+
+      {/* Scope Selector - only show if multi-scope with >1 scopes */}
+      {isScoped && scopes && scopes.length > 1 && (
+        <select
+          value={selectedScope?.id || ''}
+          onChange={handleScopeChange}
+          disabled={explorerLoading}
+          style={selectStyle}
+        >
+          <option value="">Select a Scope</option>
+          {scopes.map(scope => {
+            const status = formatStatus(scope.status);
+            const isValid = isValidStatus(scope.status);
+            return (
+              <option
+                key={scope.id.toString()}
+                value={scope.id.toString()}
+                disabled={!isValid}
+                style={{ color: isValid ? '#1f2937' : '#9ca3af' }}
+              >
+                {scope.name} ({status})
+              </option>
+            );
+          })}
+        </select>
+      )}
+
+      {/* Show error inline if present */}
+      {error && (
+        <span style={{ fontSize: '0.813rem', color: '#fecaca', marginLeft: '0.5rem' }}>{error}</span>
+      )}
+    </div>
+  );
+}
