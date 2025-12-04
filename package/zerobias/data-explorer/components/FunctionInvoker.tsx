@@ -1,5 +1,5 @@
 "use client"
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useDataExplorer } from '@/context/DataExplorerContext';
 import { Play, AlertCircle } from 'lucide-react';
 
@@ -16,6 +16,40 @@ export default function FunctionInvoker({ objectId, inputSchema, outputSchema }:
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [inputError, setInputError] = useState<string | null>(null);
+
+  // State for fetched schemas
+  const [fetchedInputSchema, setFetchedInputSchema] = useState<any>(null);
+  const [fetchedOutputSchema, setFetchedOutputSchema] = useState<any>(null);
+  const [schemaLoading, setSchemaLoading] = useState(false);
+  const [schemaError, setSchemaError] = useState<string | null>(null);
+
+  // Fetch schemas when schema IDs change
+  useEffect(() => {
+    const fetchSchemas = async () => {
+      if (!dataProducerClient) return;
+
+      setSchemaLoading(true);
+      setSchemaError(null);
+
+      try {
+        if (inputSchema) {
+          const schema = await dataProducerClient.getSchemasApi().getSchema(inputSchema);
+          setFetchedInputSchema(schema);
+        }
+        if (outputSchema) {
+          const schema = await dataProducerClient.getSchemasApi().getSchema(outputSchema);
+          setFetchedOutputSchema(schema);
+        }
+      } catch (err: any) {
+        console.error('Failed to fetch schemas:', err);
+        setSchemaError(`Failed to load schemas: ${err.message}`);
+      } finally {
+        setSchemaLoading(false);
+      }
+    };
+
+    fetchSchemas();
+  }, [dataProducerClient, inputSchema, outputSchema]);
 
   const validateJson = (value: string): boolean => {
     try {
@@ -59,37 +93,38 @@ export default function FunctionInvoker({ objectId, inputSchema, outputSchema }:
     }
   };
 
-  const renderSchema = (schemaStr?: string, title?: string) => {
-    if (!schemaStr) return null;
+  const renderSchema = (schema: any, title: string) => {
+    if (!schema) return null;
 
-    try {
-      const schema = JSON.parse(schemaStr);
-      return (
-        <div className="mb-4 p-3 bg-gray-50 rounded border border-gray-200">
-          <h4 className="text-sm font-semibold text-gray-700 mb-2">{title}</h4>
-          <pre className="text-xs text-gray-600 overflow-x-auto">
-            {JSON.stringify(schema, null, 2)}
-          </pre>
-        </div>
-      );
-    } catch {
-      return (
-        <div className="mb-4 p-3 bg-yellow-50 rounded border border-yellow-200">
-          <p className="text-xs text-yellow-800">
-            {title}: Invalid schema format
-          </p>
-        </div>
-      );
-    }
+    return (
+      <div className="mb-4 p-3 bg-gray-50 rounded border border-gray-200">
+        <h4 className="text-sm font-semibold text-gray-700 mb-2">{title}</h4>
+        <pre className="text-xs text-gray-600 overflow-auto max-h-48">
+          {JSON.stringify(schema, null, 2)}
+        </pre>
+      </div>
+    );
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 p-4 overflow-auto h-full">
       {/* Schema Information */}
-      {(inputSchema || outputSchema) && (
+      {schemaLoading && (
+        <div className="mb-4 p-3 bg-gray-50 rounded border border-gray-200">
+          <p className="text-xs text-gray-600">Loading schemas...</p>
+        </div>
+      )}
+
+      {schemaError && (
+        <div className="mb-4 p-3 bg-yellow-50 rounded border border-yellow-200">
+          <p className="text-xs text-yellow-800">{schemaError}</p>
+        </div>
+      )}
+
+      {!schemaLoading && !schemaError && (fetchedInputSchema || fetchedOutputSchema) && (
         <div className="space-y-2">
-          {renderSchema(inputSchema, 'Input Schema')}
-          {renderSchema(outputSchema, 'Output Schema')}
+          {renderSchema(fetchedInputSchema, 'Input Schema')}
+          {renderSchema(fetchedOutputSchema, 'Output Schema')}
         </div>
       )}
 
