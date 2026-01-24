@@ -284,7 +284,7 @@ npm run build:prod
 ```yaml
 # .github/workflows/deploy.yml
 - name: Deploy to S3
-  uses: auditmation/devops/actions/static-s3-app-release@main
+  uses: com/devops/actions/static-s3-app-release@main
   with:
     app-name: 'example-angular'
     environment: 'production'
@@ -373,7 +373,7 @@ NEXT_PUBLIC_IS_LOCAL_DEV=true
 - Initialize client with environment config
 - Make API calls to all platform services
 
-**auditmation/ui:**
+**com/ui:**
 - Apps embedded as iframes in portal
 - Share session context
 - Communicate via postMessage
@@ -591,9 +591,9 @@ npm run lint
 - **[Architecture.md](../../Architecture.md)** - Platform architecture
 - **[Concepts.md](../../Concepts.md)** - Domain concepts
 - **[auditmation/zb-client/CLAUDE.md](../../auditmation/zb-client/CLAUDE.md)** - Client library documentation
-- **[auditmation/ui/CLAUDE.md](../../auditmation/ui/CLAUDE.md)** - Portal UI
-- **[auditmation/hub/CLAUDE.md](../../auditmation/hub/CLAUDE.md)** - Hub modules
-- **[auditmation/devops/CLAUDE.md](../../auditmation/devops/CLAUDE.md)** - Deployment workflows
+- **[com/ui/CLAUDE.md](../../com/ui/CLAUDE.md)** - Portal UI
+- **[com/hub/CLAUDE.md](../../com/hub/CLAUDE.md)** - Hub modules
+- **[com/devops/CLAUDE.md](../../com/devops/CLAUDE.md)** - Deployment workflows
 - **[package/zerobias/example-angular/README.md](package/zerobias/example-angular/README.md)** - Angular app docs
 - **[package/zerobias/example-nextjs/README.md](package/zerobias/example-nextjs/README.md)** - Next.js app docs
 
