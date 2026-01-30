@@ -1,4 +1,4 @@
-import { ZerobiasClientOrgId, ZerobiasClientApp, ZerobiasClientApi, ZbEnvironment } from "@zerobias-com/zb-client-lib-js";
+import { ZerobiasClientOrgId, ZerobiasClientApp, ZerobiasClientApi, ZbEnvironment } from "@zerobias-com/zerobias-client";
 
 class ZerobiasAppService {
   static #instance: ZerobiasAppService;
@@ -6,7 +6,7 @@ class ZerobiasAppService {
   public environment: ZbEnvironment = {
     production: process.env.NODE_ENV === 'production',
     isLocalDev: process.env.NEXT_PUBLIC_IS_LOCAL_DEV === 'true',
-    socketUrlPath: '/session',
+    socketUrlPath: process.env.NEXT_PUBLIC_IS_LOCAL_DEV === 'true' ? '' : '/session',
     localPortalOrigin: process.env.NEXT_PUBLIC_LOCAL_PORTAL_ORIGIN
   };
 
@@ -19,8 +19,14 @@ class ZerobiasAppService {
   public async initializeAppFactory() {
     await this.zerobiasClientApp.init(
       (req) => {
-        if (this.environment.isLocalDev && process.env.NEXT_PUBLIC_API_KEY) {
-          req.headers["Authorization"] = `APIKey ${process.env.NEXT_PUBLIC_API_KEY}`;
+        if (process.env.NEXT_PUBLIC_IS_LOCAL_DEV === 'true') {
+          req.headers = req.headers || {};
+          if (process.env.NEXT_PUBLIC_API_KEY) {
+            req.headers['Authorization'] = `APIKey ${process.env.NEXT_PUBLIC_API_KEY}`;
+          }
+          if (!req.headers['dana-org-id'] && process.env.NEXT_PUBLIC_DEFAULT_ORG_ID) {
+            req.headers['dana-org-id'] = process.env.NEXT_PUBLIC_DEFAULT_ORG_ID;
+          }
         }
         return req;
       }

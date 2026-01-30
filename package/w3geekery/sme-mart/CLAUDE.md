@@ -541,10 +541,11 @@ const [request] = await db.insert(schema.workRequests).values({
 ### Build Commands
 
 ```bash
-npm run dev          # Development server
-npm run build:dev    # Build for dev environment
-npm run build:qa     # Build for QA environment
-npm run build:prod   # Build for production
+npm run dev          # Development server (uses .env.local defaults)
+npm run dev:ci       # Dev server → ZeroBias CI environment
+npm run dev:qa       # Dev server → ZeroBias QA environment
+npm run dev:prod     # Dev server → ZeroBias Production environment
+npm run build        # Production build
 npm run lint         # Run ESLint
 ```
 
@@ -557,6 +558,77 @@ npm run lint         # Run ESLint
 
 **Required - Neon:**
 - `DATABASE_URL` - Neon PostgreSQL connection string (pooled)
+
+### Auth Modes (`NEXT_PUBLIC_AUTH_MODE`)
+
+The app supports three authentication modes for local development, configured in `.env.local`:
+
+| Mode | Value | Description |
+|------|-------|-------------|
+| **Mock** | `mock` | Fake user/org data, no ZeroBias connection needed. For rapid UI development. |
+| **Proxy** | `proxy` | Real ZeroBias API calls proxied through Next.js rewrites. Requires valid `NEXT_PUBLIC_API_KEY`. |
+| **Production** | `production` | Direct connection using session cookies. For deployed environments only. |
+
+**Switching modes:** Edit `NEXT_PUBLIC_AUTH_MODE` in `.env.local` and restart the dev server.
+
+**How proxy mode works:**
+
+`next.config.ts` sets up rewrites so local requests get forwarded to the ZeroBias host (`NEXT_PUBLIC_ZEROBIAS_HOST`, defaults to `https://ci.zerobias.com`):
+
+- `/api/:path*` → ZeroBias API
+- `/dana/:path*` → Dana core API
+- `/login/:path*` → Authentication
+- `/session/:path*` → Session socket
+
+The API key (`NEXT_PUBLIC_API_KEY`) is injected as an `Authorization: APIKey ...` header automatically by the ZeroBias service initialization in `src/lib/zerobias.ts`.
+
+**How mock mode works:**
+
+`src/context/ZeroBiasContext.tsx` returns hardcoded fake data:
+- User: "Local Developer" (developer@example.com)
+- Org: "Development Organization"
+- Admin: true
+- No ZeroBias connection required
+
+### ZeroBias Environments
+
+Each ZeroBias environment has its own API host and requires its own API key generated from that environment's ZeroBias app:
+
+| Environment | Host | API Endpoint (path) | API Endpoint (subdomain) |
+|-------------|------|---------------------|--------------------------|
+| **DEV (CI)** | `ci.zerobias.com` | `ci.zerobias.com/api` | `api.ci.zerobias.com` |
+| **QA** | `qa.zerobias.com` | `qa.zerobias.com/api` | `api.qa.zerobias.com` |
+| **Production** | `app.zerobias.com` | `app.zerobias.com/api` | `api.app.zerobias.com` |
+
+**API keys are per-environment.** Generate them from the ZeroBias app in each environment (e.g., log into `ci.zerobias.com` to generate a CI API key).
+
+### Switching ZeroBias Environments
+
+Per-environment config is stored in `.env.dev`, `.env.qa`, and `.env.prod`. Each file contains:
+- `NEXT_PUBLIC_ZEROBIAS_HOST` - The ZeroBias host
+- `NEXT_PUBLIC_API_HOSTNAME` - The API endpoint
+- `NEXT_PUBLIC_API_KEY` - The API key for that environment
+
+**Quick switch via npm scripts:**
+
+```bash
+npm run dev        # Uses defaults from .env.local (mock mode or whatever is configured)
+npm run dev:ci     # Loads .env.dev overrides → points to ci.zerobias.com
+npm run dev:qa     # Loads .env.qa overrides → points to qa.zerobias.com
+npm run dev:prod   # Loads .env.prod overrides → points to app.zerobias.com
+```
+
+The `dev:ci/qa/prod` scripts use `dotenv-cli` to layer `.env.dev`/`.env.qa`/`.env.prod` on top of `.env.local`, so environment-specific values (host, API key) override the defaults while shared values (`DATABASE_URL`, `NEXT_PUBLIC_IS_LOCAL_DEV`, `NEXT_PUBLIC_AUTH_MODE`) come from `.env.local`.
+
+**Setup:** Copy API keys into each env file after generating them:
+
+```bash
+# .env.dev  → set NEXT_PUBLIC_API_KEY to your CI key
+# .env.qa   → set NEXT_PUBLIC_API_KEY to your QA key
+# .env.prod → set NEXT_PUBLIC_API_KEY to your prod key
+```
+
+**Note:** Set `NEXT_PUBLIC_AUTH_MODE=proxy` in `.env.local` when using `dev:ci/qa/prod` scripts, since you're connecting to a real ZeroBias environment.
 
 ## Best Practices
 
@@ -622,6 +694,13 @@ npm run start
 ```
 
 **Note:** The login package requires a valid `ZB_TOKEN` environment variable to install dependencies from the private ZeroBias npm registry.
+
+## Project Reference Files
+
+- **Common Source Paths**: `.claude/docs/SOURCE_PATHS.md` - External repo locations and local directory conventions
+- **Plans (public)**: `.claude/plans/public/` - Shared implementation plans
+- **Plans (local)**: `.claude/plans/local/` - Local/draft plans
+- **Notes**: `.claude/notes/` - Session notes and working docs
 
 ## Related Documentation
 
