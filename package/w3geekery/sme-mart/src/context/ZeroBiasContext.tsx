@@ -56,6 +56,11 @@ interface ZeroBiasContextType {
   // Service instance
   service: ZerobiasAppService | null;
 
+  // Impersonation (dev only)
+  isImpersonating: boolean;
+  impersonateUser: (userId: string, displayName: string, email?: string) => void;
+  stopImpersonating: () => void;
+
   // Actions
   refreshUser: () => Promise<void>;
   selectOrg: (orgId: string) => Promise<void>;
@@ -75,6 +80,8 @@ export function ZeroBiasProvider({ children }: ZeroBiasProviderProps) {
   const [error, setError] = useState<Error | null>(null);
   const [service, setService] = useState<ZerobiasAppService | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isImpersonating, setIsImpersonating] = useState(false);
+  const [realUser, setRealUser] = useState<User | null>(null);
 
   // Initialize service and fetch user
   useEffect(() => {
@@ -99,12 +106,13 @@ export function ZeroBiasProvider({ children }: ZeroBiasProviderProps) {
         // Get current user (cast to any to access user-specific fields)
         const userData = await appService.zerobiasClientApp.whoAmI() as any;
         const userRoles = userData.roles || [];
+        const email = userData.emails?.[0] || userData.email || '';
         setUser({
           id: String(userData.id),
-          email: userData.email || '',
+          email,
           firstName: userData.firstName,
           lastName: userData.lastName,
-          displayName: userData.displayName || userData.email,
+          displayName: userData.name || userData.displayName || email,
           roles: userRoles,
         });
 
@@ -185,6 +193,26 @@ export function ZeroBiasProvider({ children }: ZeroBiasProviderProps) {
     }
   }, [service, orgs]);
 
+  const impersonateUser = useCallback((userId: string, displayName: string, email?: string) => {
+    if (!isImpersonating && user) {
+      setRealUser(user);
+    }
+    setUser({
+      id: userId,
+      email: email || `${userId}@demo.smemart.com`,
+      displayName,
+    });
+    setIsImpersonating(true);
+  }, [user, isImpersonating]);
+
+  const stopImpersonating = useCallback(() => {
+    if (realUser) {
+      setUser(realUser);
+      setRealUser(null);
+    }
+    setIsImpersonating(false);
+  }, [realUser]);
+
   const value: ZeroBiasContextType = {
     user,
     org,
@@ -193,6 +221,9 @@ export function ZeroBiasProvider({ children }: ZeroBiasProviderProps) {
     error,
     isAdmin,
     service,
+    isImpersonating,
+    impersonateUser,
+    stopImpersonating,
     refreshUser,
     selectOrg,
   };

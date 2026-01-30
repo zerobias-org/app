@@ -1,8 +1,10 @@
 'use client';
 
-import { Box, Container, Typography, Button, Card, CardContent, Grid, Chip, CircularProgress, Alert, useTheme, alpha } from '@mui/material';
+import { useEffect, useState } from 'react';
+import { Box, Container, Typography, Button, Card, CardContent, Grid, Chip, CircularProgress, Alert, useTheme, alpha, Avatar } from '@mui/material';
 import { Search, Users, Briefcase, Shield, Cpu, BookOpen } from 'lucide-react';
 import { useZeroBias } from '@/context/ZeroBiasContext';
+import Link from 'next/link';
 
 const categories = [
   { name: 'Assessors', icon: Shield, description: 'Compliance assessors & auditors' },
@@ -12,9 +14,37 @@ const categories = [
   { name: 'Training', icon: BookOpen, description: 'Compliance training & certification' },
 ];
 
+interface Provider {
+  id: string;
+  slug: string;
+  displayName: string;
+  headline: string | null;
+  hourlyRate: string | null;
+  ratingAverage: string | null;
+  availabilityStatus: string;
+  totalJobsCompleted: number;
+  skills: { id: string; skillName: string; proficiencyLevel: string | null }[];
+  serviceOfferings: { id: string; category: string }[];
+}
+
 export default function Home() {
   const { user, org, loading, error } = useZeroBias();
   const theme = useTheme();
+  const [providers, setProviders] = useState<Provider[]>([]);
+  const [providersLoading, setProvidersLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/providers')
+      .then((res) => res.json())
+      .then((data) => {
+        setProviders(data);
+        setProvidersLoading(false);
+      })
+      .catch(() => setProvidersLoading(false));
+  }, []);
+
+  const initials = (name: string) =>
+    name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
 
   return (
     <Box sx={{ minHeight: '100vh' }}>
@@ -136,7 +166,7 @@ export default function Home() {
         </Grid>
       </Container>
 
-      {/* Featured Providers (Placeholder) */}
+      {/* Featured Providers */}
       <Box sx={{ bgcolor: 'grey.100', py: 6 }}>
         <Container maxWidth="lg">
           <Typography variant="h4" gutterBottom fontWeight={600}>
@@ -146,46 +176,89 @@ export default function Home() {
             Top-rated SMEs ready to help with your compliance needs
           </Typography>
 
-          <Grid container spacing={3}>
-            {[1, 2, 3].map((i) => (
-              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={i}>
-                <Card>
-                  <CardContent>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                      <Box
-                        sx={{
-                          width: 48,
-                          height: 48,
-                          borderRadius: '50%',
-                          bgcolor: 'primary.main',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          color: 'white',
-                          fontWeight: 600,
-                        }}
-                      >
-                        {String.fromCharCode(64 + i)}
-                      </Box>
-                      <Box>
-                        <Typography variant="subtitle1" fontWeight={600}>
-                          Expert Provider {i}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          SOC 2 | ISO 27001 | HIPAA
-                        </Typography>
-                      </Box>
-                    </Box>
-                    <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                      <Chip label="Assessor" size="small" color="primary" variant="outlined" />
-                      <Chip label="5.0 Rating" size="small" />
-                      <Chip label="$150/hr" size="small" />
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
+          {providersLoading ? (
+            <Box sx={{ textAlign: 'center', py: 4 }}>
+              <CircularProgress size={32} />
+            </Box>
+          ) : providers.length === 0 ? (
+            <Typography color="text.secondary">No providers found.</Typography>
+          ) : (
+            <Grid container spacing={3}>
+              {providers.map((provider) => {
+                const topSkills = provider.skills.slice(0, 3);
+                const primaryCategory = provider.serviceOfferings[0]?.category;
+                return (
+                  <Grid size={{ xs: 12, sm: 6, md: 4 }} key={provider.id}>
+                    <Link href={`/providers/${provider.slug}`} style={{ textDecoration: 'none' }}>
+                    <Card
+                      sx={{
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        '&:hover': {
+                          transform: 'translateY(-4px)',
+                          boxShadow: 4,
+                        },
+                      }}
+                    >
+                      <CardContent>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                          <Avatar
+                            sx={{
+                              width: 48,
+                              height: 48,
+                              bgcolor: provider.availabilityStatus === 'available' ? 'primary.main' : 'grey.500',
+                              fontWeight: 600,
+                            }}
+                          >
+                            {initials(provider.displayName)}
+                          </Avatar>
+                          <Box sx={{ minWidth: 0 }}>
+                            <Typography variant="subtitle1" fontWeight={600} noWrap>
+                              {provider.displayName}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" noWrap>
+                              {provider.headline || 'Compliance Professional'}
+                            </Typography>
+                          </Box>
+                        </Box>
+
+                        {/* Skills */}
+                        <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mb: 2 }}>
+                          {topSkills.map((skill) => (
+                            <Chip
+                              key={skill.id}
+                              label={skill.skillName}
+                              size="small"
+                              variant={skill.proficiencyLevel === 'expert' ? 'filled' : 'outlined'}
+                              color={skill.proficiencyLevel === 'expert' ? 'primary' : 'default'}
+                              sx={{ fontSize: '0.7rem' }}
+                            />
+                          ))}
+                        </Box>
+
+                        {/* Stats row */}
+                        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                          {primaryCategory && (
+                            <Chip label={primaryCategory} size="small" color="secondary" variant="outlined" />
+                          )}
+                          {provider.ratingAverage && (
+                            <Chip label={`${provider.ratingAverage} Rating`} size="small" />
+                          )}
+                          {provider.hourlyRate && (
+                            <Chip label={`$${provider.hourlyRate}/hr`} size="small" />
+                          )}
+                          {provider.availabilityStatus === 'busy' && (
+                            <Chip label="Busy" size="small" color="warning" />
+                          )}
+                        </Box>
+                      </CardContent>
+                    </Card>
+                    </Link>
+                  </Grid>
+                );
+              })}
+            </Grid>
+          )}
         </Container>
       </Box>
 

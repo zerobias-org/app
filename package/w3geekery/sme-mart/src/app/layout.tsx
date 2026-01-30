@@ -4,7 +4,9 @@ import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
 import Box from '@mui/material/Box';
 import { ThemeContextProvider } from '@/context/ThemeContext';
 import { ZeroBiasProvider } from '@/context/ZeroBiasContext';
+import { QueryProvider } from '@/components/providers/QueryProvider';
 import { AppTopBar } from '@/components/layout';
+import { ImpersonationSwitcher } from '@/components/dev/ImpersonationSwitcher';
 import '@/styles/globals.scss';
 
 const inter = Inter({
@@ -28,6 +30,7 @@ export default function RootLayout({
       <body className={inter.variable}>
         <AppRouterCacheProvider options={{ enableCssLayer: true }}>
           <ZeroBiasProvider>
+            <QueryProvider>
             <ThemeContextProvider>
               <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
                 <AppTopBar />
@@ -42,7 +45,9 @@ export default function RootLayout({
                   {children}
                 </Box>
               </Box>
+              <ImpersonationSwitcher />
             </ThemeContextProvider>
+            </QueryProvider>
           </ZeroBiasProvider>
         </AppRouterCacheProvider>
       </body>

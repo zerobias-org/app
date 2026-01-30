@@ -12,6 +12,7 @@ export const proficiencyLevelEnum = pgEnum('proficiency_level', ['beginner', 'in
 // Provider profiles (extends ZeroBias User)
 export const providerProfiles = pgTable('provider_profiles', {
   id: uuid('id').primaryKey().defaultRandom(),
+  slug: text('slug').notNull().unique(),
   zerobiasUserId: text('zerobias_user_id').notNull().unique(),
   zerobiasOrgId: text('zerobias_org_id'),
   displayName: text('display_name').notNull(),
