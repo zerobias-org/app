@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+CLAUDE.local.md
+# next-agents-md
+.next-docs/
+
+# research screenshots (local only)
+.claude/research/screenshots/

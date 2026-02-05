@@ -1,10 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Box, Container, Typography, Button, Card, CardContent, Grid, Chip, CircularProgress, Alert, useTheme, alpha, Avatar } from '@mui/material';
+import { Box, Container, Typography, Button, Card, CardContent, Grid, CircularProgress, Alert, useTheme, alpha } from '@mui/material';
 import { Search, Users, Briefcase, Shield, Cpu, BookOpen } from 'lucide-react';
 import { useZeroBias } from '@/context/ZeroBiasContext';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { ProviderCard, type ProviderCardData } from '@/components/marketplace/ProviderCard';
 
 const categories = [
   { name: 'Assessors', icon: Shield, description: 'Compliance assessors & auditors' },
@@ -14,24 +16,19 @@ const categories = [
   { name: 'Training', icon: BookOpen, description: 'Compliance training & certification' },
 ];
 
-interface Provider {
-  id: string;
-  slug: string;
-  displayName: string;
-  headline: string | null;
-  hourlyRate: string | null;
-  ratingAverage: string | null;
-  availabilityStatus: string;
-  totalJobsCompleted: number;
-  skills: { id: string; skillName: string; proficiencyLevel: string | null }[];
-  serviceOfferings: { id: string; category: string }[];
-}
-
 export default function Home() {
   const { user, org, loading, error } = useZeroBias();
   const theme = useTheme();
-  const [providers, setProviders] = useState<Provider[]>([]);
+  const router = useRouter();
+  const [providers, setProviders] = useState<ProviderCardData[]>([]);
   const [providersLoading, setProvidersLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const handleSearch = () => {
+    if (searchQuery.trim()) {
+      router.push(`/providers?search=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
 
   useEffect(() => {
     fetch('/api/providers')
@@ -42,9 +39,6 @@ export default function Home() {
       })
       .catch(() => setProvidersLoading(false));
   }, []);
-
-  const initials = (name: string) =>
-    name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
 
   return (
     <Box sx={{ minHeight: '100vh' }}>
@@ -99,6 +93,11 @@ export default function Home() {
             <Box
               component="input"
               placeholder="Search for SMEs, skills, or services..."
+              value={searchQuery}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
+              onKeyDown={(e: React.KeyboardEvent) => {
+                if (e.key === 'Enter') handleSearch();
+              }}
               sx={{
                 flex: 1,
                 border: 'none',
@@ -113,7 +112,7 @@ export default function Home() {
                 },
               }}
             />
-            <Button variant="contained" startIcon={<Search size={20} />}>
+            <Button variant="contained" startIcon={<Search size={20} />} onClick={handleSearch}>
               Search
             </Button>
           </Box>
@@ -130,36 +129,38 @@ export default function Home() {
             const Icon = category.icon;
             return (
               <Grid size={{ xs: 12, sm: 6, md: 4 }} key={category.name}>
-                <Card
-                  sx={{
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                    '&:hover': {
-                      transform: 'translateY(-4px)',
-                      boxShadow: 4,
-                    },
-                  }}
-                >
-                  <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Box
-                      sx={{
-                        p: 1.5,
-                        borderRadius: 2,
-                        bgcolor: 'primary.light',
-                        color: 'white',
-                        display: 'flex',
-                      }}
-                    >
-                      <Icon size={24} />
-                    </Box>
-                    <Box>
-                      <Typography variant="h6">{category.name}</Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {category.description}
-                      </Typography>
-                    </Box>
-                  </CardContent>
-                </Card>
+                <Link href={`/providers?category=${category.name}`} style={{ textDecoration: 'none' }}>
+                  <Card
+                    sx={{
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      '&:hover': {
+                        transform: 'translateY(-4px)',
+                        boxShadow: 4,
+                      },
+                    }}
+                  >
+                    <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <Box
+                        sx={{
+                          p: 1.5,
+                          borderRadius: 2,
+                          bgcolor: 'primary.light',
+                          color: 'white',
+                          display: 'flex',
+                        }}
+                      >
+                        <Icon size={24} />
+                      </Box>
+                      <Box className="text-compact">
+                        <Typography variant="h6">{category.name}</Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {category.description}
+                        </Typography>
+                      </Box>
+                    </CardContent>
+                  </Card>
+                </Link>
               </Grid>
             );
           })}
@@ -183,81 +184,25 @@ export default function Home() {
           ) : providers.length === 0 ? (
             <Typography color="text.secondary">No providers found.</Typography>
           ) : (
-            <Grid container spacing={3}>
-              {providers.map((provider) => {
-                const topSkills = provider.skills.slice(0, 3);
-                const primaryCategory = provider.serviceOfferings[0]?.category;
-                return (
+            <>
+              <Grid container spacing={3}>
+                {providers.map((provider) => (
                   <Grid size={{ xs: 12, sm: 6, md: 4 }} key={provider.id}>
-                    <Link href={`/providers/${provider.slug}`} style={{ textDecoration: 'none' }}>
-                    <Card
-                      sx={{
-                        cursor: 'pointer',
-                        transition: 'all 0.2s',
-                        '&:hover': {
-                          transform: 'translateY(-4px)',
-                          boxShadow: 4,
-                        },
-                      }}
-                    >
-                      <CardContent>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                          <Avatar
-                            sx={{
-                              width: 48,
-                              height: 48,
-                              bgcolor: provider.availabilityStatus === 'available' ? 'primary.main' : 'grey.500',
-                              fontWeight: 600,
-                            }}
-                          >
-                            {initials(provider.displayName)}
-                          </Avatar>
-                          <Box sx={{ minWidth: 0 }}>
-                            <Typography variant="subtitle1" fontWeight={600} noWrap>
-                              {provider.displayName}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary" noWrap>
-                              {provider.headline || 'Compliance Professional'}
-                            </Typography>
-                          </Box>
-                        </Box>
-
-                        {/* Skills */}
-                        <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mb: 2 }}>
-                          {topSkills.map((skill) => (
-                            <Chip
-                              key={skill.id}
-                              label={skill.skillName}
-                              size="small"
-                              variant={skill.proficiencyLevel === 'expert' ? 'filled' : 'outlined'}
-                              color={skill.proficiencyLevel === 'expert' ? 'primary' : 'default'}
-                              sx={{ fontSize: '0.7rem' }}
-                            />
-                          ))}
-                        </Box>
-
-                        {/* Stats row */}
-                        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                          {primaryCategory && (
-                            <Chip label={primaryCategory} size="small" color="secondary" variant="outlined" />
-                          )}
-                          {provider.ratingAverage && (
-                            <Chip label={`${provider.ratingAverage} Rating`} size="small" />
-                          )}
-                          {provider.hourlyRate && (
-                            <Chip label={`$${provider.hourlyRate}/hr`} size="small" />
-                          )}
-                          {provider.availabilityStatus === 'busy' && (
-                            <Chip label="Busy" size="small" color="warning" />
-                          )}
-                        </Box>
-                      </CardContent>
-                    </Card>
-                    </Link>
+                    <ProviderCard provider={provider} />
                   </Grid>
-                );
-              })}
-            </Grid>
+                ))}
+              </Grid>
+              <Box sx={{ textAlign: 'center', mt: 4 }}>
+                <Button
+                  component={Link}
+                  href="/providers"
+                  variant="outlined"
+                  size="large"
+                >
+                  Browse All Providers
+                </Button>
+              </Box>
+            </>
           )}
         </Container>
       </Box>

@@ -1,6 +1,6 @@
 # CLAUDE.md - SME Mart
 
-> **On Startup:** Check `.claude/restart_context.md` for session state and next steps before continuing work.
+> **On Startup:** Read `.claude/plans/public/000-MASTER-PLAN.md` first — this is the source of truth for the entire project. Then check `.claude/restart_context.md` for session state and next steps.
 
 This file provides project-specific guidance for the SME Mart application.
 
@@ -697,10 +697,17 @@ npm run start
 
 ## Project Reference Files
 
+- **Why Hub Module?**: `.claude/docs/WHY_HUB_MODULE.md` - Why SME Mart needs a Hub Module for deployment
+- **Generic SQL Hub Module**: `.claude/docs/GENERIC_SQL_HUB_MODULE.md` - Analysis of generic-sql as alternative/complement to custom Hub Module
 - **Common Source Paths**: `.claude/docs/SOURCE_PATHS.md` - External repo locations and local directory conventions
 - **Plans (public)**: `.claude/plans/public/` - Shared implementation plans
 - **Plans (local)**: `.claude/plans/local/` - Local/draft plans
 - **Notes**: `.claude/notes/` - Session notes and working docs
+- **Hub Module (W3Geekery fork)**: `~/Projects/w3geekery/zerobias-org/module` - SME Mart Hub Module source (forked from `zerobias-org/module`, PRs go to `dev` branch)
+
+## Next.js Documentation
+
+For accurate Next.js 15.5 documentation, see `AGENTS.md` which indexes local docs in `.next-docs/`. When unsure about Next.js APIs or patterns, check these local docs first rather than relying on training data.
 
 ## Related Documentation
 

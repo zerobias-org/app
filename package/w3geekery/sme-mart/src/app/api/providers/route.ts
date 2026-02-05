@@ -5,15 +5,32 @@ import { db } from '@/lib/db';
  * GET /api/providers
  *
  * Returns all provider profiles with skills and service offerings.
- * Optional: ?category=Assessors — filters by service offering category.
+ *
+ * Query params:
+ * - category: Filter by service offering category
+ * - include: 'all' to include full catalog relationships (roles, products, frameworks, segments)
  */
 export async function GET(request: NextRequest) {
   try {
+    const includeAll = request.nextUrl.searchParams.get('include') === 'all';
+
+    // Build the `with` clause based on include param
+    const withClause = includeAll
+      ? {
+          skills: true,
+          roles: true,
+          products: true,
+          frameworks: true,
+          segments: true,
+          serviceOfferings: true,
+        }
+      : {
+          skills: true,
+          serviceOfferings: true,
+        };
+
     const providers = await db.query.providerProfiles.findMany({
-      with: {
-        skills: true,
-        serviceOfferings: true,
-      },
+      with: withClause,
       orderBy: (profiles, { desc }) => [desc(profiles.ratingAverage)],
     });
 
