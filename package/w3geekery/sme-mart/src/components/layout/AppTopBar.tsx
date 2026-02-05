@@ -1,17 +1,18 @@
 'use client';
 
 import React from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import {
   AppBar,
   Toolbar,
   Box,
   Typography,
-  IconButton,
+  Button,
   useTheme,
 } from '@mui/material';
 import { Storefront as StorefrontIcon } from '@mui/icons-material';
 import { UserProfileDropdown } from './UserProfileDropdown';
+import Link from 'next/link';
 
 interface AppTopBarProps {
   // Navigation tabs can be added later
@@ -19,6 +20,7 @@ interface AppTopBarProps {
 
 export function AppTopBar({}: AppTopBarProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const theme = useTheme();
 
   const handleLogoClick = () => {
@@ -99,7 +101,7 @@ export function AppTopBar({}: AppTopBarProps) {
           </Box>
         </Box>
 
-        {/* Center: Navigation tabs (placeholder for future) */}
+        {/* Center: Navigation */}
         <Box
           sx={{
             display: { xs: 'none', md: 'flex' },
@@ -107,7 +109,26 @@ export function AppTopBar({}: AppTopBarProps) {
             gap: 1,
           }}
         >
-          {/* Future: Add navigation tabs here */}
+          {[
+            { href: '/providers', label: 'Providers' },
+            { href: '/services', label: 'Services' },
+            { href: '/requests', label: 'Requests' },
+          ].map((nav) => (
+            <Button
+              key={nav.href}
+              component={Link}
+              href={nav.href}
+              sx={{
+                color: theme.palette.mode === 'dark' ? 'text.primary' : 'primary.contrastText',
+                fontWeight: pathname === nav.href ? 700 : 400,
+                borderBottom: pathname === nav.href ? '2px solid currentColor' : '2px solid transparent',
+                borderRadius: 0,
+                px: 2,
+              }}
+            >
+              {nav.label}
+            </Button>
+          ))}
         </Box>
 
         {/* Right side: User Profile Dropdown */}

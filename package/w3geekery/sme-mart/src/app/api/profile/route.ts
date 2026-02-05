@@ -31,19 +31,28 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'zerobiasUserId required' }, { status: 400 });
   }
 
+  // lookup=true means read-only — return profile if exists, 404 if not (no upsert)
+  const lookupOnly = searchParams.get('lookup') === 'true';
+
   try {
     // Check if profile exists
     const existing = await db.query.providerProfiles.findFirst({
       where: eq(providerProfiles.zerobiasUserId, zerobiasUserId),
       with: {
+        roles: true,
         skills: true,
+        frameworks: true,
+        products: true,
+        segments: true,
+        serviceSegments: true,
         serviceOfferings: true,
       },
     });
 
     if (existing) {
-      // Update identity fields from ZeroBias if they changed
-      if (existing.displayName !== displayName || existing.zerobiasOrgId !== zerobiasOrgId) {
+      // In lookup mode or when displayName param is the default, skip identity sync
+      const hasExplicitDisplayName = searchParams.has('displayName');
+      if (hasExplicitDisplayName && (existing.displayName !== displayName || existing.zerobiasOrgId !== zerobiasOrgId)) {
         await db.update(providerProfiles)
           .set({
             displayName,
@@ -56,6 +65,11 @@ export async function GET(request: NextRequest) {
       }
 
       return NextResponse.json(existing);
+    }
+
+    // In lookup mode, don't create — just return 404
+    if (lookupOnly) {
+      return NextResponse.json(null, { status: 404 });
     }
 
     // Create new profile seeded with ZeroBias identity data
@@ -78,7 +92,7 @@ export async function GET(request: NextRequest) {
       })
       .returning();
 
-    return NextResponse.json({ ...newProfile, skills: [], serviceOfferings: [] });
+    return NextResponse.json({ ...newProfile, roles: [], skills: [], frameworks: [], products: [], segments: [], serviceSegments: [], serviceOfferings: [] });
   } catch (error) {
     console.error('Profile GET error:', error);
     return NextResponse.json({ error: 'Failed to fetch profile' }, { status: 500 });

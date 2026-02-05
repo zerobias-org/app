@@ -20,7 +20,26 @@ import {
   Login as LoginIcon,
   ToggleOn as ToggleOnIcon,
   ToggleOff as ToggleOffIcon,
+  Circle as CircleIcon,
 } from '@mui/icons-material';
+
+// Detect environment from ZeroBias host
+function getEnvironment(): { name: string; color: string } {
+  const host = process.env.NEXT_PUBLIC_ZEROBIAS_HOST || '';
+  if (host.includes('ci.zerobias') || host.includes('dev.zerobias')) {
+    return { name: 'CI', color: '#f59e0b' }; // amber
+  }
+  if (host.includes('qa.zerobias')) {
+    return { name: 'QA', color: '#8b5cf6' }; // purple
+  }
+  if (host.includes('app.zerobias') || host.includes('zerobias.com')) {
+    return { name: 'PROD', color: '#10b981' }; // green
+  }
+  if (process.env.NEXT_PUBLIC_AUTH_MODE === 'mock') {
+    return { name: 'MOCK', color: '#6b7280' }; // gray
+  }
+  return { name: 'DEV', color: '#3b82f6' }; // blue
+}
 import { useZeroBias } from '@/context/ZeroBiasContext';
 import { useTheme } from '@/context/ThemeContext';
 
@@ -82,6 +101,9 @@ export function UserProfileDropdown({}: UserProfileDropdownProps) {
     .toUpperCase()
     .slice(0, 2);
 
+  // Get environment info
+  const env = getEnvironment();
+
   if (loading) {
     return (
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -107,9 +129,26 @@ export function UserProfileDropdown({}: UserProfileDropdownProps) {
         }}
       >
         <Box sx={{ textAlign: 'right', display: { xs: 'none', sm: 'flex' }, flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'center', height: 36 }}>
-          <Typography component="span" variant="body2" fontWeight={500} sx={{ lineHeight: 1.2, fontSize: '0.8rem' }}>
-            {displayName}
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <Typography component="span" variant="body2" fontWeight={500} sx={{ lineHeight: 1.2, fontSize: '0.8rem' }}>
+              {displayName}
+            </Typography>
+            <Box
+              component="span"
+              sx={{
+                px: 0.5,
+                py: 0.1,
+                borderRadius: 0.5,
+                bgcolor: env.color,
+                color: 'white',
+                fontSize: '0.55rem',
+                fontWeight: 700,
+                lineHeight: 1.2,
+              }}
+            >
+              {env.name}
+            </Box>
+          </Box>
           {org && (
             <Typography component="span" variant="caption" color="text.secondary" sx={{ lineHeight: 1.2, fontSize: '0.65rem' }}>
               {org.name}
@@ -157,10 +196,27 @@ export function UserProfileDropdown({}: UserProfileDropdownProps) {
             >
               {initials}
             </Avatar>
-            <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', height: 40 }}>
-              <Typography component="span" variant="body2" fontWeight={500} sx={{ lineHeight: 1.2 }}>
-                {displayName}
-              </Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', height: 40, flex: 1 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                <Typography component="span" variant="body2" fontWeight={500} sx={{ lineHeight: 1.2 }}>
+                  {displayName}
+                </Typography>
+                <Box
+                  component="span"
+                  sx={{
+                    px: 0.5,
+                    py: 0.1,
+                    borderRadius: 0.5,
+                    bgcolor: env.color,
+                    color: 'white',
+                    fontSize: '0.6rem',
+                    fontWeight: 700,
+                    lineHeight: 1.2,
+                  }}
+                >
+                  {env.name}
+                </Box>
+              </Box>
               {user?.email && (
                 <Typography component="span" variant="caption" color="text.secondary" sx={{ lineHeight: 1.2, fontSize: '0.7rem' }}>
                   {user.email}

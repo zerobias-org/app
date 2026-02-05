@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Box,
   Container,
@@ -43,6 +43,8 @@ import {
   ListItemButton,
   Checkbox,
   Tooltip,
+  CircularProgress,
+  Snackbar,
 } from '@mui/material';
 import {
   People as PeopleIcon,
@@ -83,169 +85,108 @@ function TabPanel({ children, value, index }: TabPanelProps) {
   );
 }
 
-// Mock data for admin panels
-const mockUsers = [
-  { id: '1', name: 'John Smith', email: 'john@example.com', role: 'Admin', status: 'Active', lastLogin: '2024-01-15' },
-  { id: '2', name: 'Jane Doe', email: 'jane@example.com', role: 'User', status: 'Active', lastLogin: '2024-01-14' },
-  { id: '3', name: 'Bob Wilson', email: 'bob@example.com', role: 'User', status: 'Inactive', lastLogin: '2024-01-10' },
-  { id: '4', name: 'Alice Brown', email: 'alice@example.com', role: 'Moderator', status: 'Active', lastLogin: '2024-01-15' },
-];
+// --- Types ---
 
+interface AdminStats {
+  totalProviders: number;
+  totalCategories: number;
+  pendingReviews: number;
+}
+
+interface ProviderProfile {
+  id: string;
+  displayName: string;
+  zerobiasUserId: string;
+  slug: string;
+  headline: string | null;
+  hourlyRate: string | null;
+  availabilityStatus: string;
+  ratingAverage: string | null;
+  createdAt: string;
+}
+
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  parentId: string | null;
+  icon: string | null;
+  sortOrder: number;
+}
+
+interface CategoryTree extends Category {
+  children: Category[];
+}
+
+interface ReviewData {
+  id: string;
+  providerId: string;
+  reviewerZerobiasUserId: string;
+  rating: number;
+  reviewText: string | null;
+  approved: boolean;
+  approvedAt: string | null;
+  approvedBy: string | null;
+  createdAt: string;
+  provider: {
+    id: string;
+    displayName: string;
+    slug: string;
+  };
+}
+
+interface AppSetting {
+  key: string;
+  value: unknown;
+  description: string | null;
+  category: string | null;
+  updatedAt: string | null;
+  updatedBy: string | null;
+}
+
+// Mock orgs — ZeroBias org data requires platform SDK (future: org_profiles table)
 const mockOrgs = [
   { id: '1', name: 'Acme Corp', users: 25, plan: 'Enterprise', status: 'Active' },
   { id: '2', name: 'TechStart Inc', users: 10, plan: 'Professional', status: 'Active' },
   { id: '3', name: 'SecureData LLC', users: 5, plan: 'Starter', status: 'Trial' },
 ];
 
-// Mock categories with hierarchy
-interface Category {
-  id: string;
-  name: string;
-  slug: string;
-  description: string;
-  parentId: string | null;
-  icon: string;
-  sortOrder: number;
-  children?: Category[];
+/** Build tree from flat categories list */
+function buildCategoryTree(flat: Category[]): CategoryTree[] {
+  const topLevel = flat.filter(c => !c.parentId);
+  return topLevel.map(parent => ({
+    ...parent,
+    children: flat.filter(c => c.parentId === parent.id),
+  }));
 }
-
-const mockCategories: Category[] = [
-  {
-    id: '1',
-    name: 'Assessors',
-    slug: 'assessors',
-    description: 'Compliance assessment professionals',
-    parentId: null,
-    icon: 'assessment',
-    sortOrder: 1,
-    children: [
-      { id: '1-1', name: 'SOC 2 Assessors', slug: 'soc2-assessors', description: 'SOC 2 audit specialists', parentId: '1', icon: 'verified', sortOrder: 1 },
-      { id: '1-2', name: 'ISO 27001 Auditors', slug: 'iso27001-auditors', description: 'ISO certification auditors', parentId: '1', icon: 'verified', sortOrder: 2 },
-      { id: '1-3', name: 'HITRUST Assessors', slug: 'hitrust-assessors', description: 'HITRUST certification specialists', parentId: '1', icon: 'verified', sortOrder: 3 },
-      { id: '1-4', name: 'PCI-DSS QSAs', slug: 'pci-qsas', description: 'Qualified Security Assessors', parentId: '1', icon: 'verified', sortOrder: 4 },
-    ],
-  },
-  {
-    id: '2',
-    name: 'Advisors',
-    slug: 'advisors',
-    description: 'Compliance consulting and advisory',
-    parentId: null,
-    icon: 'support_agent',
-    sortOrder: 2,
-    children: [
-      { id: '2-1', name: 'GRC Consultants', slug: 'grc-consultants', description: 'Governance, Risk & Compliance experts', parentId: '2', icon: 'policy', sortOrder: 1 },
-      { id: '2-2', name: 'Privacy Advisors', slug: 'privacy-advisors', description: 'Data privacy specialists', parentId: '2', icon: 'privacy_tip', sortOrder: 2 },
-      { id: '2-3', name: 'Risk Analysts', slug: 'risk-analysts', description: 'Risk assessment professionals', parentId: '2', icon: 'analytics', sortOrder: 3 },
-    ],
-  },
-  {
-    id: '3',
-    name: 'Agentic',
-    slug: 'agentic',
-    description: 'AI and automation specialists',
-    parentId: null,
-    icon: 'smart_toy',
-    sortOrder: 3,
-    children: [
-      { id: '3-1', name: 'AI Agent Builders', slug: 'ai-agent-builders', description: 'Custom AI agent development', parentId: '3', icon: 'robot', sortOrder: 1 },
-      { id: '3-2', name: 'Prompt Engineers', slug: 'prompt-engineers', description: 'LLM prompt optimization', parentId: '3', icon: 'code', sortOrder: 2 },
-      { id: '3-3', name: 'Automation Specialists', slug: 'automation-specialists', description: 'Workflow automation experts', parentId: '3', icon: 'settings_automation', sortOrder: 3 },
-    ],
-  },
-  {
-    id: '4',
-    name: 'SecOps',
-    slug: 'secops',
-    description: 'Security operations professionals',
-    parentId: null,
-    icon: 'security',
-    sortOrder: 4,
-    children: [
-      { id: '4-1', name: 'Security Analysts', slug: 'security-analysts', description: 'Security monitoring and analysis', parentId: '4', icon: 'shield', sortOrder: 1 },
-      { id: '4-2', name: 'Incident Responders', slug: 'incident-responders', description: 'Security incident response', parentId: '4', icon: 'emergency', sortOrder: 2 },
-      { id: '4-3', name: 'Threat Hunters', slug: 'threat-hunters', description: 'Proactive threat detection', parentId: '4', icon: 'search', sortOrder: 3 },
-    ],
-  },
-  {
-    id: '5',
-    name: 'DevSecOps',
-    slug: 'devsecops',
-    description: 'Security in development pipeline',
-    parentId: null,
-    icon: 'integration_instructions',
-    sortOrder: 5,
-    children: [
-      { id: '5-1', name: 'Secure SDLC', slug: 'secure-sdlc', description: 'Secure development lifecycle', parentId: '5', icon: 'cycle', sortOrder: 1 },
-      { id: '5-2', name: 'CI/CD Security', slug: 'cicd-security', description: 'Pipeline security specialists', parentId: '5', icon: 'loop', sortOrder: 2 },
-      { id: '5-3', name: 'Container Security', slug: 'container-security', description: 'Docker/K8s security', parentId: '5', icon: 'inventory_2', sortOrder: 3 },
-    ],
-  },
-  {
-    id: '6',
-    name: 'Data Services',
-    slug: 'data-services',
-    description: 'Data collection and documentation',
-    parentId: null,
-    icon: 'storage',
-    sortOrder: 6,
-    children: [
-      { id: '6-1', name: 'Evidence Collection', slug: 'evidence-collection', description: 'Audit evidence gathering', parentId: '6', icon: 'folder', sortOrder: 1 },
-      { id: '6-2', name: 'Data Entry', slug: 'data-entry', description: 'Data input specialists', parentId: '6', icon: 'keyboard', sortOrder: 2 },
-      { id: '6-3', name: 'Documentation', slug: 'documentation', description: 'Policy and procedure documentation', parentId: '6', icon: 'description', sortOrder: 3 },
-    ],
-  },
-  {
-    id: '7',
-    name: 'Training',
-    slug: 'training',
-    description: 'Compliance education and training',
-    parentId: null,
-    icon: 'school',
-    sortOrder: 7,
-    children: [
-      { id: '7-1', name: 'Compliance Training', slug: 'compliance-training', description: 'Regulatory compliance training', parentId: '7', icon: 'cast_for_education', sortOrder: 1 },
-      { id: '7-2', name: 'Certification Prep', slug: 'certification-prep', description: 'Exam preparation courses', parentId: '7', icon: 'workspace_premium', sortOrder: 2 },
-      { id: '7-3', name: 'Awareness Programs', slug: 'awareness-programs', description: 'Security awareness training', parentId: '7', icon: 'campaign', sortOrder: 3 },
-    ],
-  },
-];
-
-// Mock reviews data
-interface Review {
-  id: string;
-  providerId: string;
-  providerName: string;
-  reviewerId: string;
-  reviewerName: string;
-  rating: number;
-  text: string;
-  workRequestId: string;
-  workRequestTitle: string;
-  status: 'pending' | 'approved' | 'rejected';
-  createdAt: string;
-  approvedAt?: string;
-  approvedBy?: string;
-}
-
-const mockReviews: Review[] = [
-  { id: '1', providerId: 'p1', providerName: 'John Smith', reviewerId: 'r1', reviewerName: 'Acme Corp', rating: 5, text: 'Excellent work on our SOC 2 assessment. Very thorough and professional.', workRequestId: 'wr1', workRequestTitle: 'SOC 2 Type II Assessment', status: 'approved', createdAt: '2024-01-10', approvedAt: '2024-01-11', approvedBy: 'admin' },
-  { id: '2', providerId: 'p2', providerName: 'Jane Doe', reviewerId: 'r2', reviewerName: 'TechStart Inc', rating: 4, text: 'Good consultant, helped us improve our security posture significantly.', workRequestId: 'wr2', workRequestTitle: 'Security Gap Analysis', status: 'pending', createdAt: '2024-01-14' },
-  { id: '3', providerId: 'p1', providerName: 'John Smith', reviewerId: 'r3', reviewerName: 'SecureData LLC', rating: 3, text: 'Decent work but took longer than expected.', workRequestId: 'wr3', workRequestTitle: 'ISO 27001 Readiness', status: 'pending', createdAt: '2024-01-15' },
-  { id: '4', providerId: 'p3', providerName: 'Bob Wilson', reviewerId: 'r4', reviewerName: 'FinTech Co', rating: 5, text: 'Amazing prompt engineer! Our AI workflows are 10x better now.', workRequestId: 'wr4', workRequestTitle: 'AI Workflow Optimization', status: 'approved', createdAt: '2024-01-08', approvedAt: '2024-01-09', approvedBy: 'admin' },
-  { id: '5', providerId: 'p2', providerName: 'Jane Doe', reviewerId: 'r5', reviewerName: 'HealthCare Plus', rating: 1, text: 'Very unprofessional. Would not recommend.', workRequestId: 'wr5', workRequestTitle: 'HIPAA Compliance Review', status: 'rejected', createdAt: '2024-01-12' },
-  { id: '6', providerId: 'p4', providerName: 'Alice Brown', reviewerId: 'r6', reviewerName: 'Retail Giant', rating: 4, text: 'Helped us achieve PCI compliance smoothly. Highly knowledgeable.', workRequestId: 'wr6', workRequestTitle: 'PCI-DSS Assessment', status: 'pending', createdAt: '2024-01-16' },
-];
 
 export default function AdminPage() {
   const router = useRouter();
   const { user, isAdmin, loading } = useZeroBias();
   const [tabValue, setTabValue] = useState(0);
+  const [snackbar, setSnackbar] = useState('');
+
+  // Admin auth header for all /api/admin/* calls
+  const adminHeaders = useMemo(() => ({
+    'x-zerobias-user-id': user?.id || '',
+  }), [user?.id]);
+
+  // --- Data state ---
+  const [stats, setStats] = useState<AdminStats | null>(null);
+  const [providers, setProviders] = useState<ProviderProfile[]>([]);
+  const [categoriesFlat, setCategoriesFlat] = useState<Category[]>([]);
+  const [reviewsList, setReviewsList] = useState<ReviewData[]>([]);
+  const [settingsList, setSettingsList] = useState<AppSetting[]>([]);
+  const [loadingData, setLoadingData] = useState(true);
+  const [savingSettings, setSavingSettings] = useState(false);
+
+  // --- Search / filter state ---
   const [searchQuery, setSearchQuery] = useState('');
   const [categorySearchQuery, setCategorySearchQuery] = useState('');
   const [reviewSearchQuery, setReviewSearchQuery] = useState('');
   const [reviewStatusFilter, setReviewStatusFilter] = useState<string>('all');
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['1', '2', '3']));
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const [selectedReviews, setSelectedReviews] = useState<Set<string>>(new Set());
 
   // Category dialog state
@@ -259,11 +200,100 @@ export default function AdminPage() {
     icon: '',
     sortOrder: 0,
   });
+  const [savingCategory, setSavingCategory] = useState(false);
 
   // Review detail dialog state
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
-  const [selectedReview, setSelectedReview] = useState<Review | null>(null);
+  const [selectedReview, setSelectedReview] = useState<ReviewData | null>(null);
+  const [updatingReview, setUpdatingReview] = useState(false);
 
+  // --- Data fetching ---
+  const fetchStats = useCallback(() => {
+    fetch('/api/admin/stats', { headers: adminHeaders })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data) setStats(data); })
+      .catch(() => {});
+  }, [adminHeaders]);
+
+  const fetchProviders = useCallback(() => {
+    fetch('/api/providers')
+      .then(r => r.ok ? r.json() : [])
+      .then(data => setProviders(Array.isArray(data) ? data : []))
+      .catch(() => {});
+  }, []);
+
+  const fetchCategories = useCallback(() => {
+    fetch('/api/admin/categories', { headers: adminHeaders })
+      .then(r => r.ok ? r.json() : [])
+      .then(data => {
+        setCategoriesFlat(Array.isArray(data) ? data : []);
+        // Auto-expand first 3 top-level categories
+        const topLevel = (data as Category[]).filter(c => !c.parentId).slice(0, 3);
+        setExpandedCategories(prev => {
+          if (prev.size === 0) return new Set(topLevel.map(c => c.id));
+          return prev;
+        });
+      })
+      .catch(() => {});
+  }, [adminHeaders]);
+
+  const fetchReviews = useCallback(() => {
+    fetch('/api/admin/reviews', { headers: adminHeaders })
+      .then(r => r.ok ? r.json() : [])
+      .then(data => setReviewsList(Array.isArray(data) ? data : []))
+      .catch(() => {});
+  }, [adminHeaders]);
+
+  const fetchSettings = useCallback(() => {
+    fetch('/api/admin/settings', { headers: adminHeaders })
+      .then(r => r.ok ? r.json() : [])
+      .then(data => setSettingsList(Array.isArray(data) ? data : []))
+      .catch(() => {});
+  }, [adminHeaders]);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    const h = { 'x-zerobias-user-id': user.id };
+    Promise.all([
+      fetch('/api/admin/stats', { headers: h }).then(r => r.ok ? r.json() : null),
+      fetch('/api/providers').then(r => r.ok ? r.json() : []),
+      fetch('/api/admin/categories', { headers: h }).then(r => r.ok ? r.json() : []),
+      fetch('/api/admin/reviews', { headers: h }).then(r => r.ok ? r.json() : []),
+      fetch('/api/admin/settings', { headers: h }).then(r => r.ok ? r.json() : []),
+    ]).then(([statsData, providersData, categoriesData, reviewsData, settingsData]) => {
+      if (statsData) setStats(statsData);
+      setProviders(Array.isArray(providersData) ? providersData : []);
+      const cats = Array.isArray(categoriesData) ? categoriesData : [];
+      setCategoriesFlat(cats);
+      const topLevel = cats.filter((c: Category) => !c.parentId).slice(0, 3);
+      setExpandedCategories(new Set(topLevel.map((c: Category) => c.id)));
+      setReviewsList(Array.isArray(reviewsData) ? reviewsData : []);
+      setSettingsList(Array.isArray(settingsData) ? settingsData : []);
+    }).catch(() => {}).finally(() => setLoadingData(false));
+  }, [user?.id]);
+
+  // --- Derived data ---
+  const categoryTree = buildCategoryTree(categoriesFlat);
+  const topLevelCategories = categoriesFlat.filter(c => !c.parentId);
+
+  const filteredProviders = providers.filter(p =>
+    p.displayName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    p.zerobiasUserId.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const filteredReviews = reviewsList.filter(review => {
+    const providerName = review.provider?.displayName || '';
+    const matchesSearch = providerName.toLowerCase().includes(reviewSearchQuery.toLowerCase()) ||
+      review.reviewerZerobiasUserId.toLowerCase().includes(reviewSearchQuery.toLowerCase()) ||
+      (review.reviewText || '').toLowerCase().includes(reviewSearchQuery.toLowerCase());
+    const status = review.approved ? 'approved' : (review.approvedBy ? 'rejected' : 'pending');
+    const matchesStatus = reviewStatusFilter === 'all' || status === reviewStatusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
+  const pendingReviewsCount = stats?.pendingReviews ?? reviewsList.filter(r => !r.approvedBy).length;
+
+  // --- Loading / Auth guard ---
   if (loading) {
     return (
       <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -293,7 +323,7 @@ export default function AdminPage() {
     setTabValue(newValue);
   };
 
-  // Category handlers
+  // --- Category handlers ---
   const toggleCategoryExpand = (categoryId: string) => {
     setExpandedCategories(prev => {
       const newSet = new Set(prev);
@@ -308,14 +338,7 @@ export default function AdminPage() {
 
   const handleAddCategory = (parentId: string | null = null) => {
     setEditingCategory(null);
-    setCategoryForm({
-      name: '',
-      slug: '',
-      description: '',
-      parentId,
-      icon: '',
-      sortOrder: 0,
-    });
+    setCategoryForm({ name: '', slug: '', description: '', parentId, icon: '', sortOrder: 0 });
     setCategoryDialogOpen(true);
   };
 
@@ -324,42 +347,95 @@ export default function AdminPage() {
     setCategoryForm({
       name: category.name,
       slug: category.slug,
-      description: category.description,
+      description: category.description || '',
       parentId: category.parentId,
-      icon: category.icon,
+      icon: category.icon || '',
       sortOrder: category.sortOrder,
     });
     setCategoryDialogOpen(true);
   };
 
-  const handleSaveCategory = () => {
-    // In real app, this would call the API
-    console.log('Saving category:', categoryForm);
-    setCategoryDialogOpen(false);
+  const handleSaveCategory = async () => {
+    setSavingCategory(true);
+    try {
+      const url = editingCategory
+        ? `/api/admin/categories/${editingCategory.id}`
+        : '/api/admin/categories';
+      const method = editingCategory ? 'PUT' : 'POST';
+
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json', ...adminHeaders },
+        body: JSON.stringify({
+          name: categoryForm.name,
+          slug: categoryForm.slug || undefined,
+          description: categoryForm.description || null,
+          parentId: categoryForm.parentId || null,
+          icon: categoryForm.icon || null,
+          sortOrder: categoryForm.sortOrder,
+        }),
+      });
+
+      if (res.ok) {
+        setCategoryDialogOpen(false);
+        setSnackbar(editingCategory ? 'Category updated' : 'Category created');
+        fetchCategories();
+        fetchStats();
+      } else {
+        const data = await res.json();
+        setSnackbar(data.error || 'Failed to save category');
+      }
+    } catch {
+      setSnackbar('Failed to save category');
+    } finally {
+      setSavingCategory(false);
+    }
   };
 
-  // Review handlers
-  const handleViewReview = (review: Review) => {
+  const handleDeleteCategory = async (categoryId: string) => {
+    if (!confirm('Delete this category and all its subcategories?')) return;
+    try {
+      const res = await fetch(`/api/admin/categories/${categoryId}`, { method: 'DELETE', headers: adminHeaders });
+      if (res.ok) {
+        setSnackbar('Category deleted');
+        fetchCategories();
+        fetchStats();
+      } else {
+        setSnackbar('Failed to delete category');
+      }
+    } catch {
+      setSnackbar('Failed to delete category');
+    }
+  };
+
+  // --- Review handlers ---
+  const handleViewReview = (review: ReviewData) => {
     setSelectedReview(review);
     setReviewDialogOpen(true);
   };
 
-  const handleApproveReview = (reviewId: string) => {
-    console.log('Approving review:', reviewId);
-  };
-
-  const handleRejectReview = (reviewId: string) => {
-    console.log('Rejecting review:', reviewId);
-  };
-
-  const handleBulkApprove = () => {
-    console.log('Bulk approving reviews:', Array.from(selectedReviews));
-    setSelectedReviews(new Set());
-  };
-
-  const handleBulkReject = () => {
-    console.log('Bulk rejecting reviews:', Array.from(selectedReviews));
-    setSelectedReviews(new Set());
+  const handleReviewAction = async (reviewIds: string[], action: 'approve' | 'reject') => {
+    setUpdatingReview(true);
+    try {
+      const res = await fetch('/api/admin/reviews', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', ...adminHeaders },
+        body: JSON.stringify({ reviewIds, action, approvedBy: user!.id }),
+      });
+      if (res.ok) {
+        setSnackbar(`${reviewIds.length} review(s) ${action === 'approve' ? 'approved' : 'rejected'}`);
+        setSelectedReviews(new Set());
+        setReviewDialogOpen(false);
+        fetchReviews();
+        fetchStats();
+      } else {
+        setSnackbar(`Failed to ${action} review(s)`);
+      }
+    } catch {
+      setSnackbar(`Failed to ${action} review(s)`);
+    } finally {
+      setUpdatingReview(false);
+    }
   };
 
   const toggleReviewSelection = (reviewId: string) => {
@@ -374,15 +450,49 @@ export default function AdminPage() {
     });
   };
 
-  const filteredReviews = mockReviews.filter(review => {
-    const matchesSearch = review.providerName.toLowerCase().includes(reviewSearchQuery.toLowerCase()) ||
-      review.reviewerName.toLowerCase().includes(reviewSearchQuery.toLowerCase()) ||
-      review.text.toLowerCase().includes(reviewSearchQuery.toLowerCase());
-    const matchesStatus = reviewStatusFilter === 'all' || review.status === reviewStatusFilter;
-    return matchesSearch && matchesStatus;
-  });
+  const getReviewStatus = (review: ReviewData): 'approved' | 'rejected' | 'pending' => {
+    if (review.approved) return 'approved';
+    if (review.approvedBy) return 'rejected';
+    return 'pending';
+  };
 
-  const pendingReviewsCount = mockReviews.filter(r => r.status === 'pending').length;
+  // --- Settings helpers ---
+  const getSettingValue = <T,>(key: string, defaultValue: T): T => {
+    const setting = settingsList.find(s => s.key === key);
+    if (!setting) return defaultValue;
+    return setting.value as T;
+  };
+
+  const handleSettingChange = (key: string, value: unknown) => {
+    setSettingsList(prev => {
+      const existing = prev.find(s => s.key === key);
+      if (existing) {
+        return prev.map(s => s.key === key ? { ...s, value } : s);
+      }
+      return [...prev, { key, value, description: null, category: null, updatedAt: null, updatedBy: null }];
+    });
+  };
+
+  const handleSaveSettings = async () => {
+    setSavingSettings(true);
+    try {
+      const res = await fetch('/api/admin/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', ...adminHeaders },
+        body: JSON.stringify({ settings: settingsList.map(s => ({ key: s.key, value: s.value })) }),
+      });
+      if (res.ok) {
+        setSnackbar('Settings saved successfully');
+        fetchSettings();
+      } else {
+        setSnackbar('Failed to save settings');
+      }
+    } catch {
+      setSnackbar('Failed to save settings');
+    } finally {
+      setSavingSettings(false);
+    }
+  };
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -413,8 +523,10 @@ export default function AdminPage() {
                   <PeopleIcon fontSize="small" />
                 </Box>
                 <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', height: 32 }}>
-                  <Typography component="span" variant="h6" fontWeight={600} sx={{ lineHeight: 1.2 }}>156</Typography>
-                  <Typography component="span" variant="caption" color="text.secondary" sx={{ lineHeight: 1.2 }}>Total Users</Typography>
+                  <Typography component="span" variant="h6" fontWeight={600} sx={{ lineHeight: 1.2 }}>
+                    {loadingData ? '—' : (stats?.totalProviders ?? providers.length)}
+                  </Typography>
+                  <Typography component="span" variant="caption" color="text.secondary" sx={{ lineHeight: 1.2 }}>Providers</Typography>
                 </Box>
               </Box>
             </CardContent>
@@ -428,7 +540,9 @@ export default function AdminPage() {
                   <CategoryIcon fontSize="small" />
                 </Box>
                 <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', height: 32 }}>
-                  <Typography component="span" variant="h6" fontWeight={600} sx={{ lineHeight: 1.2 }}>{mockCategories.length}</Typography>
+                  <Typography component="span" variant="h6" fontWeight={600} sx={{ lineHeight: 1.2 }}>
+                    {loadingData ? '—' : (stats?.totalCategories ?? categoriesFlat.length)}
+                  </Typography>
                   <Typography component="span" variant="caption" color="text.secondary" sx={{ lineHeight: 1.2 }}>Categories</Typography>
                 </Box>
               </Box>
@@ -443,7 +557,9 @@ export default function AdminPage() {
                   <SecurityIcon fontSize="small" />
                 </Box>
                 <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', height: 32 }}>
-                  <Typography component="span" variant="h6" fontWeight={600} sx={{ lineHeight: 1.2 }}>48</Typography>
+                  <Typography component="span" variant="h6" fontWeight={600} sx={{ lineHeight: 1.2 }}>
+                    {loadingData ? '—' : providers.length}
+                  </Typography>
                   <Typography component="span" variant="caption" color="text.secondary" sx={{ lineHeight: 1.2 }}>SME Providers</Typography>
                 </Box>
               </Box>
@@ -458,7 +574,9 @@ export default function AdminPage() {
                   <ReviewIcon fontSize="small" />
                 </Box>
                 <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', height: 32 }}>
-                  <Typography component="span" variant="h6" fontWeight={600} sx={{ lineHeight: 1.2 }}>{pendingReviewsCount}</Typography>
+                  <Typography component="span" variant="h6" fontWeight={600} sx={{ lineHeight: 1.2 }}>
+                    {loadingData ? '—' : pendingReviewsCount}
+                  </Typography>
                   <Typography component="span" variant="caption" color="text.secondary" sx={{ lineHeight: 1.2 }}>Pending Reviews</Typography>
                 </Box>
               </Box>
@@ -466,6 +584,12 @@ export default function AdminPage() {
           </Card>
         </Grid>
       </Grid>
+
+      {loadingData && (
+        <Box sx={{ textAlign: 'center', py: 4 }}>
+          <CircularProgress size={32} />
+        </Box>
+      )}
 
       {/* Tabs */}
       <Card>
@@ -490,13 +614,13 @@ export default function AdminPage() {
           </Tabs>
         </Box>
 
-        {/* Users Tab */}
+        {/* Users Tab — Real provider data */}
         <TabPanel value={tabValue} index={0}>
           <Box sx={{ px: 3 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
               <TextField
                 size="small"
-                placeholder="Search users..."
+                placeholder="Search providers..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 InputProps={{
@@ -508,14 +632,9 @@ export default function AdminPage() {
                 }}
                 sx={{ width: 300 }}
               />
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                <Button startIcon={<RefreshIcon />} variant="outlined">
-                  Refresh
-                </Button>
-                <Button startIcon={<AddIcon />} variant="contained">
-                  Add User
-                </Button>
-              </Box>
+              <Button startIcon={<RefreshIcon />} variant="outlined" onClick={fetchProviders}>
+                Refresh
+              </Button>
             </Box>
 
             <TableContainer component={Paper} variant="outlined">
@@ -523,58 +642,71 @@ export default function AdminPage() {
                 <TableHead>
                   <TableRow>
                     <TableCell>Name</TableCell>
-                    <TableCell>Email</TableCell>
-                    <TableCell>Role</TableCell>
+                    <TableCell>ZeroBias User ID</TableCell>
+                    <TableCell>Headline</TableCell>
+                    <TableCell>Rate</TableCell>
                     <TableCell>Status</TableCell>
-                    <TableCell>Last Login</TableCell>
+                    <TableCell>Rating</TableCell>
                     <TableCell align="right">Actions</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {mockUsers
-                    .filter(u =>
-                      u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                      u.email.toLowerCase().includes(searchQuery.toLowerCase())
-                    )
-                    .map((row) => (
-                    <TableRow key={row.id}>
-                      <TableCell>{row.name}</TableCell>
-                      <TableCell>{row.email}</TableCell>
-                      <TableCell>
-                        <Chip
-                          label={row.role}
-                          size="small"
-                          color={row.role === 'Admin' ? 'primary' : 'default'}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Chip
-                          label={row.status}
-                          size="small"
-                          color={row.status === 'Active' ? 'success' : 'default'}
-                          variant="outlined"
-                        />
-                      </TableCell>
-                      <TableCell>{row.lastLogin}</TableCell>
-                      <TableCell align="right">
-                        <IconButton size="small">
-                          <EditIcon fontSize="small" />
-                        </IconButton>
-                        <IconButton size="small" color="error">
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
+                  {filteredProviders.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} sx={{ textAlign: 'center', py: 4 }}>
+                        <Typography color="text.secondary">
+                          {loadingData ? 'Loading providers...' : 'No providers found.'}
+                        </Typography>
                       </TableCell>
                     </TableRow>
-                  ))}
+                  ) : (
+                    filteredProviders.map((provider) => (
+                      <TableRow key={provider.id}>
+                        <TableCell>{provider.displayName}</TableCell>
+                        <TableCell>
+                          <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>
+                            {provider.zerobiasUserId}
+                          </Typography>
+                        </TableCell>
+                        <TableCell sx={{ maxWidth: 200 }}>
+                          <Typography variant="body2" noWrap>{provider.headline || '—'}</Typography>
+                        </TableCell>
+                        <TableCell>{provider.hourlyRate ? `$${provider.hourlyRate}/hr` : '—'}</TableCell>
+                        <TableCell>
+                          <Chip
+                            label={provider.availabilityStatus}
+                            size="small"
+                            color={provider.availabilityStatus === 'available' ? 'success' : provider.availabilityStatus === 'busy' ? 'warning' : 'default'}
+                            variant="outlined"
+                          />
+                        </TableCell>
+                        <TableCell>
+                          {provider.ratingAverage ? (
+                            <Rating value={parseFloat(provider.ratingAverage)} readOnly size="small" precision={0.1} />
+                          ) : '—'}
+                        </TableCell>
+                        <TableCell align="right">
+                          <Tooltip title="View profile">
+                            <IconButton size="small" onClick={() => router.push(`/providers/${provider.slug}`)}>
+                              <ViewIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </TableContainer>
           </Box>
         </TabPanel>
 
-        {/* Organizations Tab */}
+        {/* Organizations Tab — Mock data (future: org_profiles table) */}
         <TabPanel value={tabValue} index={1}>
           <Box sx={{ px: 3 }}>
+            <Alert severity="info" sx={{ mb: 3 }}>
+              Organization data comes from the ZeroBias platform. A marketplace-specific org_profiles table will be added in a future phase.
+            </Alert>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
               <TextField
                 size="small"
@@ -588,7 +720,7 @@ export default function AdminPage() {
                 }}
                 sx={{ width: 300 }}
               />
-              <Button startIcon={<AddIcon />} variant="contained">
+              <Button startIcon={<AddIcon />} variant="contained" disabled>
                 Add Organization
               </Button>
             </Box>
@@ -625,11 +757,8 @@ export default function AdminPage() {
                         />
                       </TableCell>
                       <TableCell align="right">
-                        <IconButton size="small">
+                        <IconButton size="small" disabled>
                           <EditIcon fontSize="small" />
-                        </IconButton>
-                        <IconButton size="small" color="error">
-                          <DeleteIcon fontSize="small" />
                         </IconButton>
                       </TableCell>
                     </TableRow>
@@ -640,7 +769,7 @@ export default function AdminPage() {
           </Box>
         </TabPanel>
 
-        {/* Categories Tab */}
+        {/* Categories Tab — Real data */}
         <TabPanel value={tabValue} index={2}>
           <Box sx={{ px: 3 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
@@ -659,7 +788,7 @@ export default function AdminPage() {
                 sx={{ width: 300 }}
               />
               <Box sx={{ display: 'flex', gap: 1 }}>
-                <Button startIcon={<RefreshIcon />} variant="outlined">
+                <Button startIcon={<RefreshIcon />} variant="outlined" onClick={fetchCategories}>
                   Refresh
                 </Button>
                 <Button startIcon={<AddIcon />} variant="contained" onClick={() => handleAddCategory(null)}>
@@ -670,111 +799,123 @@ export default function AdminPage() {
 
             <Paper variant="outlined">
               <List disablePadding>
-                {mockCategories
-                  .filter(cat =>
-                    cat.name.toLowerCase().includes(categorySearchQuery.toLowerCase()) ||
-                    cat.children?.some(child => child.name.toLowerCase().includes(categorySearchQuery.toLowerCase()))
-                  )
-                  .map((category) => (
-                  <Box key={category.id}>
-                    <ListItem
-                      disablePadding
-                      secondaryAction={
-                        <Box sx={{ display: 'flex', gap: 0.5 }}>
-                          <Tooltip title="Add subcategory">
-                            <IconButton size="small" onClick={() => handleAddCategory(category.id)}>
-                              <AddIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                          <Tooltip title="Edit">
-                            <IconButton size="small" onClick={() => handleEditCategory(category)}>
-                              <EditIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                          <Tooltip title="Delete">
-                            <IconButton size="small" color="error">
-                              <DeleteIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                          <Tooltip title="Drag to reorder">
-                            <IconButton size="small" sx={{ cursor: 'grab' }}>
-                              <DragIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                        </Box>
+                {categoryTree.length === 0 ? (
+                  <ListItem>
+                    <ListItemText
+                      primary={
+                        <Typography color="text.secondary" sx={{ textAlign: 'center', py: 2 }}>
+                          {loadingData ? 'Loading categories...' : 'No categories found. Add one to get started.'}
+                        </Typography>
                       }
-                    >
-                      <ListItemButton onClick={() => toggleCategoryExpand(category.id)}>
-                        <ListItemIcon sx={{ minWidth: 36 }}>
-                          {expandedCategories.has(category.id) ? <FolderOpenIcon color="primary" /> : <FolderIcon />}
-                        </ListItemIcon>
-                        <ListItemText
-                          primary={
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <Typography fontWeight={600}>{category.name}</Typography>
-                              <Chip size="small" label={`${category.children?.length || 0} subcategories`} variant="outlined" />
-                            </Box>
-                          }
-                          secondary={category.description}
-                        />
-                        {category.children && category.children.length > 0 && (
-                          expandedCategories.has(category.id) ? <ExpandLessIcon /> : <ExpandMoreIcon />
-                        )}
-                      </ListItemButton>
-                    </ListItem>
+                    />
+                  </ListItem>
+                ) : (
+                  categoryTree
+                    .filter(cat =>
+                      cat.name.toLowerCase().includes(categorySearchQuery.toLowerCase()) ||
+                      cat.children.some(child => child.name.toLowerCase().includes(categorySearchQuery.toLowerCase()))
+                    )
+                    .map((category) => (
+                    <Box key={category.id}>
+                      <ListItem
+                        disablePadding
+                        secondaryAction={
+                          <Box sx={{ display: 'flex', gap: 0.5 }}>
+                            <Tooltip title="Add subcategory">
+                              <IconButton size="small" onClick={() => handleAddCategory(category.id)}>
+                                <AddIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Edit">
+                              <IconButton size="small" onClick={() => handleEditCategory(category)}>
+                                <EditIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Delete">
+                              <IconButton size="small" color="error" onClick={() => handleDeleteCategory(category.id)}>
+                                <DeleteIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Drag to reorder">
+                              <IconButton size="small" sx={{ cursor: 'grab' }}>
+                                <DragIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                          </Box>
+                        }
+                      >
+                        <ListItemButton onClick={() => toggleCategoryExpand(category.id)}>
+                          <ListItemIcon sx={{ minWidth: 36 }}>
+                            {expandedCategories.has(category.id) ? <FolderOpenIcon color="primary" /> : <FolderIcon />}
+                          </ListItemIcon>
+                          <ListItemText
+                            primary={
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <Typography fontWeight={600}>{category.name}</Typography>
+                                <Chip size="small" label={`${category.children.length} subcategories`} variant="outlined" />
+                              </Box>
+                            }
+                            secondary={category.description}
+                          />
+                          {category.children.length > 0 && (
+                            expandedCategories.has(category.id) ? <ExpandLessIcon /> : <ExpandMoreIcon />
+                          )}
+                        </ListItemButton>
+                      </ListItem>
 
-                    {category.children && (
-                      <Collapse in={expandedCategories.has(category.id)}>
-                        <List disablePadding sx={{ pl: 4, bgcolor: 'action.hover' }}>
-                          {category.children
-                            .filter(child =>
-                              categorySearchQuery === '' ||
-                              child.name.toLowerCase().includes(categorySearchQuery.toLowerCase())
-                            )
-                            .map((child) => (
-                            <ListItem
-                              key={child.id}
-                              disablePadding
-                              secondaryAction={
-                                <Box sx={{ display: 'flex', gap: 0.5 }}>
-                                  <Tooltip title="Edit">
-                                    <IconButton size="small" onClick={() => handleEditCategory(child)}>
-                                      <EditIcon fontSize="small" />
-                                    </IconButton>
-                                  </Tooltip>
-                                  <Tooltip title="Delete">
-                                    <IconButton size="small" color="error">
-                                      <DeleteIcon fontSize="small" />
-                                    </IconButton>
-                                  </Tooltip>
-                                  <Tooltip title="Drag to reorder">
-                                    <IconButton size="small" sx={{ cursor: 'grab' }}>
-                                      <DragIcon fontSize="small" />
-                                    </IconButton>
-                                  </Tooltip>
-                                </Box>
-                              }
-                            >
-                              <ListItemButton sx={{ pl: 2 }}>
-                                <ListItemText
-                                  primary={child.name}
-                                  secondary={child.description}
-                                />
-                              </ListItemButton>
-                            </ListItem>
-                          ))}
-                        </List>
-                      </Collapse>
-                    )}
-                    <Divider />
-                  </Box>
-                ))}
+                      {category.children.length > 0 && (
+                        <Collapse in={expandedCategories.has(category.id)}>
+                          <List disablePadding sx={{ pl: 4, bgcolor: 'action.hover' }}>
+                            {category.children
+                              .filter(child =>
+                                categorySearchQuery === '' ||
+                                child.name.toLowerCase().includes(categorySearchQuery.toLowerCase())
+                              )
+                              .map((child) => (
+                              <ListItem
+                                key={child.id}
+                                disablePadding
+                                secondaryAction={
+                                  <Box sx={{ display: 'flex', gap: 0.5 }}>
+                                    <Tooltip title="Edit">
+                                      <IconButton size="small" onClick={() => handleEditCategory(child)}>
+                                        <EditIcon fontSize="small" />
+                                      </IconButton>
+                                    </Tooltip>
+                                    <Tooltip title="Delete">
+                                      <IconButton size="small" color="error" onClick={() => handleDeleteCategory(child.id)}>
+                                        <DeleteIcon fontSize="small" />
+                                      </IconButton>
+                                    </Tooltip>
+                                    <Tooltip title="Drag to reorder">
+                                      <IconButton size="small" sx={{ cursor: 'grab' }}>
+                                        <DragIcon fontSize="small" />
+                                      </IconButton>
+                                    </Tooltip>
+                                  </Box>
+                                }
+                              >
+                                <ListItemButton sx={{ pl: 2 }}>
+                                  <ListItemText
+                                    primary={child.name}
+                                    secondary={child.description}
+                                  />
+                                </ListItemButton>
+                              </ListItem>
+                            ))}
+                          </List>
+                        </Collapse>
+                      )}
+                      <Divider />
+                    </Box>
+                  ))
+                )}
               </List>
             </Paper>
           </Box>
         </TabPanel>
 
-        {/* Reviews Tab */}
+        {/* Reviews Tab — Real data */}
         <TabPanel value={tabValue} index={3}>
           <Box sx={{ px: 3 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
@@ -814,7 +955,8 @@ export default function AdminPage() {
                       startIcon={<ApproveIcon />}
                       variant="contained"
                       color="success"
-                      onClick={handleBulkApprove}
+                      onClick={() => handleReviewAction(Array.from(selectedReviews), 'approve')}
+                      disabled={updatingReview}
                     >
                       Approve ({selectedReviews.size})
                     </Button>
@@ -822,13 +964,14 @@ export default function AdminPage() {
                       startIcon={<RejectIcon />}
                       variant="outlined"
                       color="error"
-                      onClick={handleBulkReject}
+                      onClick={() => handleReviewAction(Array.from(selectedReviews), 'reject')}
+                      disabled={updatingReview}
                     >
                       Reject ({selectedReviews.size})
                     </Button>
                   </>
                 )}
-                <Button startIcon={<RefreshIcon />} variant="outlined">
+                <Button startIcon={<RefreshIcon />} variant="outlined" onClick={fetchReviews}>
                   Refresh
                 </Button>
               </Box>
@@ -861,71 +1004,109 @@ export default function AdminPage() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {filteredReviews.map((review) => (
-                    <TableRow key={review.id} selected={selectedReviews.has(review.id)}>
-                      <TableCell padding="checkbox">
-                        <Checkbox
-                          checked={selectedReviews.has(review.id)}
-                          onChange={() => toggleReviewSelection(review.id)}
-                        />
-                      </TableCell>
-                      <TableCell>{review.providerName}</TableCell>
-                      <TableCell>{review.reviewerName}</TableCell>
-                      <TableCell>
-                        <Rating value={review.rating} readOnly size="small" />
-                      </TableCell>
-                      <TableCell sx={{ maxWidth: 250 }}>
-                        <Typography variant="body2" noWrap title={review.text}>
-                          {review.text}
+                  {filteredReviews.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={8} sx={{ textAlign: 'center', py: 4 }}>
+                        <Typography color="text.secondary">
+                          {loadingData ? 'Loading reviews...' : 'No reviews found.'}
                         </Typography>
                       </TableCell>
-                      <TableCell>
-                        <Chip
-                          label={review.status}
-                          size="small"
-                          color={review.status === 'approved' ? 'success' : review.status === 'rejected' ? 'error' : 'warning'}
-                          variant="outlined"
-                        />
-                      </TableCell>
-                      <TableCell>{review.createdAt}</TableCell>
-                      <TableCell align="right">
-                        <Tooltip title="View details">
-                          <IconButton size="small" onClick={() => handleViewReview(review)}>
-                            <ViewIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                        {review.status === 'pending' && (
-                          <>
-                            <Tooltip title="Approve">
-                              <IconButton size="small" color="success" onClick={() => handleApproveReview(review.id)}>
-                                <ApproveIcon fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
-                            <Tooltip title="Reject">
-                              <IconButton size="small" color="error" onClick={() => handleRejectReview(review.id)}>
-                                <RejectIcon fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
-                          </>
-                        )}
-                      </TableCell>
                     </TableRow>
-                  ))}
+                  ) : (
+                    filteredReviews.map((review) => {
+                      const status = getReviewStatus(review);
+                      return (
+                        <TableRow key={review.id} selected={selectedReviews.has(review.id)}>
+                          <TableCell padding="checkbox">
+                            <Checkbox
+                              checked={selectedReviews.has(review.id)}
+                              onChange={() => toggleReviewSelection(review.id)}
+                            />
+                          </TableCell>
+                          <TableCell>{review.provider?.displayName || '—'}</TableCell>
+                          <TableCell>
+                            <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>
+                              {review.reviewerZerobiasUserId}
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            <Rating value={review.rating} readOnly size="small" />
+                          </TableCell>
+                          <TableCell sx={{ maxWidth: 250 }}>
+                            <Typography variant="body2" noWrap title={review.reviewText || ''}>
+                              {review.reviewText || '—'}
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            <Chip
+                              label={status}
+                              size="small"
+                              color={status === 'approved' ? 'success' : status === 'rejected' ? 'error' : 'warning'}
+                              variant="outlined"
+                            />
+                          </TableCell>
+                          <TableCell>{new Date(review.createdAt).toLocaleDateString()}</TableCell>
+                          <TableCell align="right">
+                            <Tooltip title="View details">
+                              <IconButton size="small" onClick={() => handleViewReview(review)}>
+                                <ViewIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                            {status === 'pending' && (
+                              <>
+                                <Tooltip title="Approve">
+                                  <IconButton
+                                    size="small"
+                                    color="success"
+                                    onClick={() => handleReviewAction([review.id], 'approve')}
+                                    disabled={updatingReview}
+                                  >
+                                    <ApproveIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Reject">
+                                  <IconButton
+                                    size="small"
+                                    color="error"
+                                    onClick={() => handleReviewAction([review.id], 'reject')}
+                                    disabled={updatingReview}
+                                  >
+                                    <RejectIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                              </>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
+                  )}
                 </TableBody>
               </Table>
             </TableContainer>
           </Box>
         </TabPanel>
 
-        {/* Settings Tab */}
+        {/* Settings Tab — Persisted to app_settings table */}
         <TabPanel value={tabValue} index={4}>
           <Box sx={{ px: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Application Settings
-            </Typography>
+            {settingsList.length === 0 && !loadingData && (
+              <Alert severity="info" sx={{ mb: 3 }}>
+                No settings found. Run <code>npm run db:seed</code> to populate default settings.
+              </Alert>
+            )}
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Typography variant="h6">
+                Application Settings
+              </Typography>
+              <Button startIcon={<RefreshIcon />} variant="outlined" size="small" onClick={fetchSettings}>
+                Refresh
+              </Button>
+            </Box>
             <Divider sx={{ mb: 3 }} />
 
             <Grid container spacing={3}>
+              {/* Registration Settings */}
               <Grid size={{ xs: 12, md: 6 }}>
                 <Card variant="outlined">
                   <CardContent>
@@ -933,21 +1114,37 @@ export default function AdminPage() {
                       Registration
                     </Typography>
                     <FormControlLabel
-                      control={<Switch defaultChecked />}
+                      control={
+                        <Switch
+                          checked={getSettingValue('registration.allowNewUsers', true)}
+                          onChange={(e) => handleSettingChange('registration.allowNewUsers', e.target.checked)}
+                        />
+                      }
                       label="Allow new user registration"
                     />
                     <FormControlLabel
-                      control={<Switch defaultChecked />}
+                      control={
+                        <Switch
+                          checked={getSettingValue('registration.requireEmailVerification', true)}
+                          onChange={(e) => handleSettingChange('registration.requireEmailVerification', e.target.checked)}
+                        />
+                      }
                       label="Require email verification"
                     />
                     <FormControlLabel
-                      control={<Switch />}
-                      label="Require admin approval"
+                      control={
+                        <Switch
+                          checked={getSettingValue('registration.requireAdminApproval', false)}
+                          onChange={(e) => handleSettingChange('registration.requireAdminApproval', e.target.checked)}
+                        />
+                      }
+                      label="Require admin approval for providers"
                     />
                   </CardContent>
                 </Card>
               </Grid>
 
+              {/* Notification Settings */}
               <Grid size={{ xs: 12, md: 6 }}>
                 <Card variant="outlined">
                   <CardContent>
@@ -955,43 +1152,80 @@ export default function AdminPage() {
                       Notifications
                     </Typography>
                     <FormControlLabel
-                      control={<Switch defaultChecked />}
+                      control={
+                        <Switch
+                          checked={getSettingValue('notifications.emailEnabled', true)}
+                          onChange={(e) => handleSettingChange('notifications.emailEnabled', e.target.checked)}
+                        />
+                      }
                       label="Send email notifications"
                     />
                     <FormControlLabel
-                      control={<Switch defaultChecked />}
+                      control={
+                        <Switch
+                          checked={getSettingValue('notifications.newUserAlerts', true)}
+                          onChange={(e) => handleSettingChange('notifications.newUserAlerts', e.target.checked)}
+                        />
+                      }
                       label="New user alerts"
                     />
                     <FormControlLabel
-                      control={<Switch />}
+                      control={
+                        <Switch
+                          checked={getSettingValue('notifications.weeklyDigest', false)}
+                          onChange={(e) => handleSettingChange('notifications.weeklyDigest', e.target.checked)}
+                        />
+                      }
                       label="Weekly digest"
                     />
                   </CardContent>
                 </Card>
               </Grid>
 
+              {/* Security Settings */}
               <Grid size={{ xs: 12, md: 6 }}>
                 <Card variant="outlined">
                   <CardContent>
                     <Typography variant="subtitle1" fontWeight={600} gutterBottom>
                       Security
                     </Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+                      These settings are informational — actual enforcement is handled by ZeroBias platform.
+                    </Typography>
                     <FormControlLabel
-                      control={<Switch defaultChecked />}
+                      control={
+                        <Switch
+                          checked={getSettingValue('security.enforce2FAForAdmins', true)}
+                          onChange={(e) => handleSettingChange('security.enforce2FAForAdmins', e.target.checked)}
+                        />
+                      }
                       label="Enforce 2FA for admins"
                     />
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+                      <Typography variant="body2">Session timeout:</Typography>
+                      <TextField
+                        size="small"
+                        type="number"
+                        value={getSettingValue('security.sessionTimeoutMinutes', 30)}
+                        onChange={(e) => handleSettingChange('security.sessionTimeoutMinutes', parseInt(e.target.value) || 30)}
+                        sx={{ width: 80 }}
+                        InputProps={{ endAdornment: <Typography variant="caption">min</Typography> }}
+                      />
+                    </Box>
                     <FormControlLabel
-                      control={<Switch defaultChecked />}
-                      label="Session timeout (30 min)"
-                    />
-                    <FormControlLabel
-                      control={<Switch />}
+                      control={
+                        <Switch
+                          checked={getSettingValue('security.ipAllowlistEnabled', false)}
+                          onChange={(e) => handleSettingChange('security.ipAllowlistEnabled', e.target.checked)}
+                        />
+                      }
                       label="IP allowlisting"
                     />
                   </CardContent>
                 </Card>
               </Grid>
 
+              {/* Marketplace Settings */}
               <Grid size={{ xs: 12, md: 6 }}>
                 <Card variant="outlined">
                   <CardContent>
@@ -999,25 +1233,79 @@ export default function AdminPage() {
                       Marketplace
                     </Typography>
                     <FormControlLabel
-                      control={<Switch defaultChecked />}
-                      label="Enable SME listings"
+                      control={
+                        <Switch
+                          checked={getSettingValue('marketplace.enabled', true)}
+                          onChange={(e) => handleSettingChange('marketplace.enabled', e.target.checked)}
+                        />
+                      }
+                      label="Enable marketplace"
                     />
                     <FormControlLabel
-                      control={<Switch defaultChecked />}
+                      control={
+                        <Switch
+                          checked={getSettingValue('marketplace.allowReviews', true)}
+                          onChange={(e) => handleSettingChange('marketplace.allowReviews', e.target.checked)}
+                        />
+                      }
                       label="Allow reviews"
                     />
                     <FormControlLabel
-                      control={<Switch />}
+                      control={
+                        <Switch
+                          checked={getSettingValue('marketplace.autoApproveReviews', false)}
+                          onChange={(e) => handleSettingChange('marketplace.autoApproveReviews', e.target.checked)}
+                        />
+                      }
+                      label="Auto-approve reviews"
+                    />
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={getSettingValue('marketplace.requireVerificationBadge', false)}
+                          onChange={(e) => handleSettingChange('marketplace.requireVerificationBadge', e.target.checked)}
+                        />
+                      }
                       label="Require verification badge"
                     />
+                    <Divider sx={{ my: 1.5 }} />
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+                      <Typography variant="body2">Max hourly rate:</Typography>
+                      <TextField
+                        size="small"
+                        type="number"
+                        value={getSettingValue('marketplace.maxHourlyRate', 500)}
+                        onChange={(e) => handleSettingChange('marketplace.maxHourlyRate', parseInt(e.target.value) || 500)}
+                        sx={{ width: 100 }}
+                        InputProps={{ startAdornment: <Typography variant="caption">$</Typography> }}
+                      />
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <Typography variant="body2">Max budget:</Typography>
+                      <TextField
+                        size="small"
+                        type="number"
+                        value={getSettingValue('marketplace.maxBudget', 100000)}
+                        onChange={(e) => handleSettingChange('marketplace.maxBudget', parseInt(e.target.value) || 100000)}
+                        sx={{ width: 120 }}
+                        InputProps={{ startAdornment: <Typography variant="caption">$</Typography> }}
+                      />
+                    </Box>
                   </CardContent>
                 </Card>
               </Grid>
             </Grid>
 
-            <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
-              <Button variant="contained">
-                Save Settings
+            <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+              <Button variant="outlined" onClick={fetchSettings} disabled={savingSettings}>
+                Reset
+              </Button>
+              <Button
+                variant="contained"
+                onClick={handleSaveSettings}
+                disabled={savingSettings || settingsList.length === 0}
+              >
+                {savingSettings ? 'Saving...' : 'Save Settings'}
               </Button>
             </Box>
           </Box>
@@ -1040,7 +1328,7 @@ export default function AdminPage() {
               fullWidth
               value={categoryForm.slug}
               onChange={(e) => setCategoryForm({ ...categoryForm, slug: e.target.value })}
-              helperText="URL-friendly identifier (e.g., soc2-assessors)"
+              helperText="URL-friendly identifier (e.g., soc2-assessors). Auto-generated if empty."
             />
             <TextField
               label="Description"
@@ -1058,7 +1346,7 @@ export default function AdminPage() {
                 onChange={(e) => setCategoryForm({ ...categoryForm, parentId: e.target.value || null })}
               >
                 <MenuItem value="">None (Top Level)</MenuItem>
-                {mockCategories.map((cat) => (
+                {topLevelCategories.map((cat) => (
                   <MenuItem key={cat.id} value={cat.id}>{cat.name}</MenuItem>
                 ))}
               </Select>
@@ -1081,8 +1369,8 @@ export default function AdminPage() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setCategoryDialogOpen(false)}>Cancel</Button>
-          <Button onClick={handleSaveCategory} variant="contained">
-            {editingCategory ? 'Save Changes' : 'Add Category'}
+          <Button onClick={handleSaveCategory} variant="contained" disabled={savingCategory || !categoryForm.name}>
+            {savingCategory ? 'Saving...' : (editingCategory ? 'Save Changes' : 'Add Category')}
           </Button>
         </DialogActions>
       </Dialog>
@@ -1095,15 +1383,11 @@ export default function AdminPage() {
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
               <Box>
                 <Typography variant="caption" color="text.secondary">Provider</Typography>
-                <Typography fontWeight={500}>{selectedReview.providerName}</Typography>
+                <Typography fontWeight={500}>{selectedReview.provider?.displayName || '—'}</Typography>
               </Box>
               <Box>
                 <Typography variant="caption" color="text.secondary">Reviewer</Typography>
-                <Typography fontWeight={500}>{selectedReview.reviewerName}</Typography>
-              </Box>
-              <Box>
-                <Typography variant="caption" color="text.secondary">Work Request</Typography>
-                <Typography fontWeight={500}>{selectedReview.workRequestTitle}</Typography>
+                <Typography fontWeight={500}>{selectedReview.reviewerZerobiasUserId}</Typography>
               </Box>
               <Box>
                 <Typography variant="caption" color="text.secondary">Rating</Typography>
@@ -1111,50 +1395,50 @@ export default function AdminPage() {
               </Box>
               <Box>
                 <Typography variant="caption" color="text.secondary">Review Text</Typography>
-                <Typography>{selectedReview.text}</Typography>
+                <Typography>{selectedReview.reviewText || '—'}</Typography>
               </Box>
               <Box>
                 <Typography variant="caption" color="text.secondary">Status</Typography>
                 <Box sx={{ mt: 0.5 }}>
                   <Chip
-                    label={selectedReview.status}
-                    color={selectedReview.status === 'approved' ? 'success' : selectedReview.status === 'rejected' ? 'error' : 'warning'}
+                    label={getReviewStatus(selectedReview)}
+                    color={getReviewStatus(selectedReview) === 'approved' ? 'success' : getReviewStatus(selectedReview) === 'rejected' ? 'error' : 'warning'}
                     variant="outlined"
                   />
                 </Box>
               </Box>
               <Box>
                 <Typography variant="caption" color="text.secondary">Submitted</Typography>
-                <Typography>{selectedReview.createdAt}</Typography>
+                <Typography>{new Date(selectedReview.createdAt).toLocaleDateString()}</Typography>
               </Box>
               {selectedReview.approvedAt && (
                 <Box>
-                  <Typography variant="caption" color="text.secondary">Approved</Typography>
-                  <Typography>{selectedReview.approvedAt} by {selectedReview.approvedBy}</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {selectedReview.approved ? 'Approved' : 'Rejected'}
+                  </Typography>
+                  <Typography>
+                    {new Date(selectedReview.approvedAt).toLocaleDateString()} by {selectedReview.approvedBy}
+                  </Typography>
                 </Box>
               )}
             </Box>
           )}
         </DialogContent>
         <DialogActions>
-          {selectedReview?.status === 'pending' && (
+          {selectedReview && getReviewStatus(selectedReview) === 'pending' && (
             <>
               <Button
-                onClick={() => {
-                  handleRejectReview(selectedReview.id);
-                  setReviewDialogOpen(false);
-                }}
+                onClick={() => handleReviewAction([selectedReview.id], 'reject')}
                 color="error"
+                disabled={updatingReview}
               >
                 Reject
               </Button>
               <Button
-                onClick={() => {
-                  handleApproveReview(selectedReview.id);
-                  setReviewDialogOpen(false);
-                }}
+                onClick={() => handleReviewAction([selectedReview.id], 'approve')}
                 variant="contained"
                 color="success"
+                disabled={updatingReview}
               >
                 Approve
               </Button>
@@ -1163,6 +1447,13 @@ export default function AdminPage() {
           <Button onClick={() => setReviewDialogOpen(false)}>Close</Button>
         </DialogActions>
       </Dialog>
+
+      <Snackbar
+        open={!!snackbar}
+        autoHideDuration={3000}
+        onClose={() => setSnackbar('')}
+        message={snackbar}
+      />
     </Container>
   );
 }

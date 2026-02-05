@@ -116,13 +116,16 @@ export function ZeroBiasProvider({ children }: ZeroBiasProviderProps) {
           roles: userRoles,
         });
 
-        // Check if user is a ZeroBias admin
-        // TODO: Replace with actual admin role check from ZeroBias
-        // For now, check for 'admin' role or zerobias.com email domain
-        const adminCheck = userRoles.includes('admin') ||
-          userRoles.includes('zerobias_admin') ||
-          (userData.email && userData.email.endsWith('@zerobias.com'));
-        setIsAdmin(adminCheck);
+        // Check if user is an org admin via dana SDK
+        try {
+          const orgMember = await appService.zerobiasClientApi.danaClient
+            .getOrgApi()
+            .getRequestOrgMember(userData.id);
+          setIsAdmin(!!orgMember.admin);
+        } catch (err) {
+          console.warn('Failed to check admin status:', err);
+          setIsAdmin(false);
+        }
 
         // Subscribe to orgs
         appService.zerobiasClientApp.getOrgs().subscribe({
