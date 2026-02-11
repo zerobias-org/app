@@ -11,6 +11,9 @@ import {
   ListItemIcon,
   ListItemText,
   Divider,
+  ToggleButtonGroup,
+  ToggleButton,
+  Tooltip,
 } from '@mui/material';
 import {
   Edit as EditIcon,
@@ -20,8 +23,11 @@ import {
   Login as LoginIcon,
   ToggleOn as ToggleOnIcon,
   ToggleOff as ToggleOffIcon,
-  Circle as CircleIcon,
+  ShoppingCart as BuyerIcon,
+  Engineering as ProviderIcon,
+  SwapHoriz as BothIcon,
 } from '@mui/icons-material';
+import { useUserRole, type UserRole } from '@/hooks/useUserRole';
 
 // Detect environment from ZeroBias host
 function getEnvironment(): { name: string; color: string } {
@@ -51,6 +57,11 @@ export function UserProfileDropdown({}: UserProfileDropdownProps) {
   const router = useRouter();
   const { user, org, loading, isAdmin } = useZeroBias();
   const { isDarkMode, toggle: toggleTheme } = useTheme();
+  const { role, setRole } = useUserRole();
+
+  const handleRoleChange = (_: React.MouseEvent<HTMLElement>, newRole: UserRole | null) => {
+    if (newRole) setRole(newRole);
+  };
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -244,6 +255,45 @@ export function UserProfileDropdown({}: UserProfileDropdownProps) {
             </ListItemIcon>
             <ListItemText>App Administration</ListItemText>
           </MenuItem>
+        )}
+
+        {user && <Divider />}
+
+        {/* Role Toggle */}
+        {user && (
+          <Box sx={{ px: 2, py: 1 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>
+              Marketplace Role
+            </Typography>
+            <ToggleButtonGroup
+              value={role}
+              exclusive
+              onChange={handleRoleChange}
+              size="small"
+              fullWidth
+              sx={{
+                '& .MuiToggleButton-root': {
+                  py: 0.5,
+                  px: 1,
+                  fontSize: '0.7rem',
+                  textTransform: 'none',
+                },
+              }}
+            >
+              <ToggleButton value="buyer">
+                <BuyerIcon sx={{ fontSize: 14, mr: 0.5 }} />
+                Buyer
+              </ToggleButton>
+              <ToggleButton value="provider">
+                <ProviderIcon sx={{ fontSize: 14, mr: 0.5 }} />
+                Provider
+              </ToggleButton>
+              <ToggleButton value="both">
+                <BothIcon sx={{ fontSize: 14, mr: 0.5 }} />
+                Both
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
         )}
 
         {user && <Divider />}

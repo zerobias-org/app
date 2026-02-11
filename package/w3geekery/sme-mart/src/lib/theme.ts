@@ -91,6 +91,18 @@ const baseTheme = {
         },
       },
     },
+    MuiTooltip: {
+      styleOverrides: {
+        tooltip: {
+          backgroundColor: 'var(--tooltip-bg)',
+          color: 'var(--tooltip-text)',
+          fontSize: '0.75rem',
+        },
+        arrow: {
+          color: 'var(--tooltip-bg)',
+        },
+      },
+    },
   },
 };
 

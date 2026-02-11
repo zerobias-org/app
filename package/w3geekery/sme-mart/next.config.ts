@@ -1,41 +1,9 @@
 import type { NextConfig } from "next";
-import webpack from 'webpack';
 
 const nextConfig: NextConfig = {
   reactStrictMode: false,
   skipTrailingSlashRedirect: true,
   trailingSlash: true,
-
-  // Webpack config to handle node: protocol imports for browser
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-      // Replace node: protocol imports with polyfills
-      config.plugins.push(
-        new webpack.NormalModuleReplacementPlugin(
-          /^node:buffer$/,
-          require.resolve('buffer/')
-        ),
-        new webpack.NormalModuleReplacementPlugin(
-          /^node:url$/,
-          require.resolve('url/')
-        )
-      );
-
-      // Polyfill fallbacks
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        buffer: require.resolve('buffer/'),
-        url: require.resolve('url/'),
-        fs: false,
-        path: false,
-        os: false,
-        crypto: false,
-        stream: false,
-        util: false,
-      };
-    }
-    return config;
-  },
 
   // API rewrites for local dev - proxy to ZeroBias
   // Using fallback so local Next.js API routes (/api/providers, /api/profile, etc.)

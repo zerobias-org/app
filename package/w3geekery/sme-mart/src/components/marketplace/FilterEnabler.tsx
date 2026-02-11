@@ -15,7 +15,24 @@ import {
   Check as CheckIcon,
   FilterList as FilterIcon,
   Clear as ClearIcon,
+  Category as CategoryIcon,
+  Security as FrameworkIcon,
+  Inventory2 as ProductIcon,
+  Construction as SkillIcon,
+  Badge as RoleIcon,
+  Business as SegmentIcon,
 } from '@mui/icons-material';
+import type { SvgIconComponent } from '@mui/icons-material';
+
+// Export icons for use in filter sections
+export const FILTER_ICONS: Record<FilterType, SvgIconComponent> = {
+  serviceCategories: CategoryIcon,
+  frameworks: FrameworkIcon,
+  products: ProductIcon,
+  skills: SkillIcon,
+  roles: RoleIcon,
+  segments: SegmentIcon,
+};
 
 // Filter type definitions
 export type FilterType =
@@ -36,13 +53,13 @@ export interface EnabledFilters {
 }
 
 // Filter type metadata for display
-const FILTER_TYPES: { key: FilterType; label: string }[] = [
-  { key: 'serviceCategories', label: 'Service Categories' },
-  { key: 'frameworks', label: 'Frameworks' },
-  { key: 'products', label: 'Products' },
-  { key: 'skills', label: 'Skills' },
-  { key: 'roles', label: 'Role Experience' },
-  { key: 'segments', label: 'Industry Segments' },
+const FILTER_TYPES: { key: FilterType; label: string; Icon: SvgIconComponent }[] = [
+  { key: 'serviceCategories', label: 'Service Categories', Icon: CategoryIcon },
+  { key: 'frameworks', label: 'Frameworks', Icon: FrameworkIcon },
+  { key: 'products', label: 'Products', Icon: ProductIcon },
+  { key: 'skills', label: 'Skills', Icon: SkillIcon },
+  { key: 'roles', label: 'Role Experience', Icon: RoleIcon },
+  { key: 'segments', label: 'Industry Segments', Icon: SegmentIcon },
 ];
 
 interface FilterEnablerProps {
@@ -82,7 +99,7 @@ export function FilterEnabler({
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <FilterIcon fontSize="small" color="action" />
-          <Typography variant="subtitle1" fontWeight={600} style={{ margin: 0 }}>
+          <Typography variant="subtitle1" fontWeight={600}>
             Filters
           </Typography>
           {activeFilterCount > 0 && (
@@ -134,12 +151,11 @@ export function FilterEnabler({
           horizontal: 'left',
         }}
         slotProps={{
+          list: {
+            style: { paddingLeft: 0, paddingTop: 4, paddingBottom: 4 },
+          },
           paper: {
             sx: {
-              '& .MuiList-root': {
-                pl: 0,
-                py: 0.5,
-              },
               '& .MuiMenuItem-root': {
                 alignItems: 'flex-start',
               },
@@ -147,18 +163,21 @@ export function FilterEnabler({
           },
         }}
       >
-        {FILTER_TYPES.map(({ key, label }) => (
+        {FILTER_TYPES.map(({ key, label, Icon }) => (
           <MenuItem
             key={key}
             onClick={() => handleToggle(key)}
-            sx={{ minWidth: 180, py: 0.75, px: 1.5 }}
+            sx={{ minWidth: 200, py: 0.75, px: 1.5 }}
+            style={{ gap: '4px' }}
           >
-            {enabledFilters[key] && (
-              <ListItemIcon sx={{ minWidth: 24 }}>
+            <ListItemIcon style={{ minWidth: '26px' }}>
+              {enabledFilters[key] ? (
                 <CheckIcon fontSize="small" color="primary" />
-              </ListItemIcon>
-            )}
-            <Typography variant="body2" style={{ margin: 0 }}>{label}</Typography>
+              ) : (
+                <Icon fontSize="small" color="action" />
+              )}
+            </ListItemIcon>
+            <Typography variant="body2">{label}</Typography>
           </MenuItem>
         ))}
       </Menu>

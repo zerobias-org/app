@@ -8,7 +8,7 @@ import { relations } from 'drizzle-orm';
 export const availabilityStatusEnum = pgEnum('availability_status', ['available', 'busy', 'unavailable']);
 export const pricingTypeEnum = pgEnum('pricing_type', ['fixed', 'hourly', 'subscription', 'custom']);
 export const budgetTypeEnum = pgEnum('budget_type', ['fixed', 'hourly', 'negotiable']);
-export const requestStatusEnum = pgEnum('request_status', ['open', 'in_progress', 'completed', 'cancelled']);
+export const requestStatusEnum = pgEnum('request_status', ['draft', 'open', 'in_progress', 'completed', 'cancelled']);
 export const proposalStatusEnum = pgEnum('proposal_status', ['pending', 'accepted', 'rejected', 'withdrawn']);
 export const proficiencyLevelEnum = pgEnum('proficiency_level', ['beginner', 'intermediate', 'expert']);
 
@@ -222,6 +222,8 @@ export const workRequests = pgTable('work_requests', {
   budgetMax: decimal('budget_max', { precision: 10, scale: 2 }),
   timeline: text('timeline'),
   status: requestStatusEnum('status').default('open'),
+  engagementTag: text('engagement_tag'),         // BIP39-style tag: ENG-word-word
+  zerobiasTagId: text('zerobias_tag_id'),         // ZeroBias Dana tag UUID
   zerobiasBoundaryId: text('zerobias_boundary_id'),
   zerobiasTaskId: text('zerobias_task_id'),
   createdAt: timestamp('created_at').defaultNow()

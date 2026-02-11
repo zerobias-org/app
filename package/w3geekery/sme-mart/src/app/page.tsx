@@ -152,7 +152,7 @@ export default function Home() {
                       >
                         <Icon size={24} />
                       </Box>
-                      <Box className="text-compact">
+                      <Box>
                         <Typography variant="h6">{category.name}</Typography>
                         <Typography variant="body2" color="text.secondary">
                           {category.description}

@@ -2,6 +2,8 @@
 
 > **On Startup:** Read `.claude/plans/public/000-MASTER-PLAN.md` first — this is the source of truth for the entire project. Then check `.claude/restart_context.md` for session state and next steps.
 
+> **Stand-up Prep (Weekdays @ 8:30am Pacific):** When Clark asks for stand-up items, search all `.claude/plans/` files for `<!-- STANDUP -->` flags and list them as discussion topics.
+
 This file provides project-specific guidance for the SME Mart application.
 
 ## Purpose
@@ -15,6 +17,28 @@ A labor and services marketplace where:
 - **Buyers (Demand-side)**: Companies/orgs shop for talent and request compliance-related work
 - **Work is scoped**: All work performed within ZeroBias Boundaries for security
 - **Tracked via Tasks**: Hours, deliverables, and context tracked through ZeroBias Task System
+
+### CEO DIRECTIVE: ZeroBias Tasks & Boundaries Are Foundational
+
+> **Non-negotiable requirement from Brian (CEO).** All SME Mart engagements must flow through ZeroBias Tasks within Boundaries.
+
+**ZeroBias Tasks must carry the complete audit trail:**
+- **All dialog** → Task Comments (negotiations, clarifications, updates)
+- **Requirements** → Task Description + Custom Fields
+- **Transactions** → Task Custom Fields (rates, hours, payments)
+- **LLM prompts/output** → Task Comments with type tagging
+- **Documents** → Task Attachments (SOWs, deliverables, evidence)
+
+**ZeroBias Boundaries provide:**
+- Access control (only invited providers can access buyer's context)
+- Compliance isolation (work scoped to specific frameworks)
+- Audit trail context (all activity logged within boundary)
+
+**Implementation Priority:**
+1. Plan 010: Boundary Integration (prerequisite)
+2. Plan 009: Tasks Integration (depends on boundaries)
+
+See `.claude/plans/local/` for detailed implementation plans.
 
 ### Target Service Categories
 
@@ -209,34 +233,13 @@ export const theme = createTheme({
 });
 ```
 
-### ZeroBias SDK Packages
-
-Use the `@zerobias-com` and `@zerobias-org` SDKs directly (no wrapper):
-
-```json
-{
-  "dependencies": {
-    "@zerobias-com/dana-sdk": "^1.x",
-    "@zerobias-com/platform-sdk": "^1.x",
-    "@zerobias-com/hub-sdk": "^1.x",
-    "@zerobias-com/portal-sdk": "^1.x",
-    "@zerobias-org/types-core-js": "^1.x",
-    "axios": "^1.x",
-    "rxjs": "^7.x"
-  }
-}
-```
-
-**Note:** We use the SDKs directly without the `zb-client-lib-js` wrapper for more control and simpler dependency chain. Each SDK provides typed API clients for its domain.
-
 ### State Management
 
 **Two Context Providers:**
 
 1. **ZeroBiasContext**
    - Manages ZeroBias authentication and organization
-   - Uses `@zerobias-com/dana-sdk` directly for auth
-   - Provides: `user`, `org`, `loading`, `danaClient`, `platformClient`
+   - Provides: `user`, `org`, `loading`, `sdk`
    - Source of truth for identity
 
 2. **MarketplaceContext**
@@ -387,40 +390,7 @@ export const providerSkillsRelations = relations(providerSkills, ({ one }) => ({
 
 ### API Integration Patterns
 
-**ZeroBias SDK Direct Usage:**
-```typescript
-import { DanaClient, MeApi, OrgApi } from '@zerobias-com/dana-sdk';
-import { PlatformClient, TaskApi, BoundaryApi } from '@zerobias-com/platform-sdk';
-import axios from 'axios';
-
-// Create axios instance with interceptors
-const axiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_HOSTNAME,
-  withCredentials: true
-});
-
-// Add auth interceptor for local dev
-axiosInstance.interceptors.request.use((config) => {
-  if (process.env.NEXT_PUBLIC_IS_LOCAL_DEV === 'true' && process.env.NEXT_PUBLIC_API_KEY) {
-    config.headers['Authorization'] = `APIKey ${process.env.NEXT_PUBLIC_API_KEY}`;
-  }
-  return config;
-});
-
-// Initialize SDK clients directly
-const danaClient = new DanaClient(axiosInstance);
-const platformClient = new PlatformClient(axiosInstance);
-
-// Get current user
-const user = await danaClient.getMeApi().whoAmI();
-
-// Get user's orgs
-const orgs = await danaClient.getOrgApi().listOrgs();
-
-// Access platform APIs
-const tasks = await platformClient.getTaskApi().listTasks();
-const boundaries = await platformClient.getBoundaryApi().listBoundaries();
-```
+**ZeroBias SDK:** See `AGENTS.md` for SDK usage patterns and documentation references.
 
 **Neon + Drizzle Usage:**
 ```typescript
@@ -522,7 +492,7 @@ const [request] = await db.insert(schema.workRequests).values({
    # ZeroBias
    NEXT_PUBLIC_API_HOSTNAME=https://your-api-host/api
    NEXT_PUBLIC_IS_LOCAL_DEV=true
-   NEXT_PUBLIC_API_KEY=your-api-key-here
+   ZEROBIAS_API_KEY=your-api-key-here
 
    # Neon Database
    DATABASE_URL=postgresql://user:pass@ep-xxx.us-east-1.aws.neon.tech/sme-mart?sslmode=require
@@ -554,7 +524,7 @@ npm run lint         # Run ESLint
 **Required - ZeroBias:**
 - `NEXT_PUBLIC_API_HOSTNAME` - ZeroBias API endpoint
 - `NEXT_PUBLIC_IS_LOCAL_DEV` - Enable local dev mode
-- `NEXT_PUBLIC_API_KEY` - API key for local dev auth
+- `ZEROBIAS_API_KEY` - API key (server-only, injected by middleware)
 
 **Required - Neon:**
 - `DATABASE_URL` - Neon PostgreSQL connection string (pooled)
@@ -580,7 +550,7 @@ The app supports three authentication modes for local development, configured in
 - `/login/:path*` → Authentication
 - `/session/:path*` → Session socket
 
-The API key (`NEXT_PUBLIC_API_KEY`) is injected as an `Authorization: APIKey ...` header automatically by the ZeroBias service initialization in `src/lib/zerobias.ts`.
+The API key (`ZEROBIAS_API_KEY`) is injected as an `Authorization: APIKey ...` header server-side by Next.js middleware (`src/middleware.ts`), so it never reaches the browser bundle.
 
 **How mock mode works:**
 
@@ -623,9 +593,9 @@ The `dev:ci/qa/prod` scripts use `dotenv-cli` to layer `.env.dev`/`.env.qa`/`.en
 **Setup:** Copy API keys into each env file after generating them:
 
 ```bash
-# .env.dev  → set NEXT_PUBLIC_API_KEY to your CI key
-# .env.qa   → set NEXT_PUBLIC_API_KEY to your QA key
-# .env.prod → set NEXT_PUBLIC_API_KEY to your prod key
+# .env.dev  → set ZEROBIAS_API_KEY to your CI key
+# .env.qa   → set ZEROBIAS_API_KEY to your QA key
+# .env.prod → set ZEROBIAS_API_KEY to your prod key
 ```
 
 **Note:** Set `NEXT_PUBLIC_AUTH_MODE=proxy` in `.env.local` when using `dev:ci/qa/prod` scripts, since you're connecting to a real ZeroBias environment.
@@ -655,7 +625,7 @@ The `dev:ci/qa/prod` scripts use `dotenv-cli` to layer `.env.dev`/`.env.qa`/`.en
 
 SME Mart has a custom branded login page that integrates with ZeroBias authentication.
 
-**Location:** `/Users/cstacer/Projects/ZeroBias/repos/zerobias-org/login/package/w3geekery`
+**Location:** `../../../../login/package/w3geekery` (i.e. `zerobias-org-forks/login/package/w3geekery`)
 
 **Structure:**
 ```
@@ -684,7 +654,7 @@ login/package/w3geekery/
 
 **Commands:**
 ```bash
-cd /Users/cstacer/Projects/ZeroBias/repos/zerobias-org/login/package/w3geekery
+cd ~/Projects/w3geekery/zerobias-org-forks/login/package/w3geekery
 
 # Install (requires valid ZB_TOKEN)
 ZB_TOKEN=<your-token> npm install
@@ -703,17 +673,21 @@ npm run start
 - **Plans (public)**: `.claude/plans/public/` - Shared implementation plans
 - **Plans (local)**: `.claude/plans/local/` - Local/draft plans
 - **Notes**: `.claude/notes/` - Session notes and working docs
-- **Hub Module (W3Geekery fork)**: `~/Projects/w3geekery/zerobias-org/module` - SME Mart Hub Module source (forked from `zerobias-org/module`, PRs go to `dev` branch)
+- **Hub Module (W3Geekery fork)**: `../../../../module` (i.e. `zerobias-org-forks/module`) - SME Mart Hub Module source (forked from `zerobias-org/module`, PRs go to `dev` branch)
 
-## Next.js Documentation
+## AGENTS.md Reference
 
-For accurate Next.js 15.5 documentation, see `AGENTS.md` which indexes local docs in `.next-docs/`. When unsure about Next.js APIs or patterns, check these local docs first rather than relying on training data.
+**IMPORTANT:** `AGENTS.md` contains canonical documentation for:
+- **ZeroBias SDK** - Use `@zerobias-com/zerobias-sdk` as unified entry point, SDK service accessors, USAGE.md locations, and pattern file references
+- **Next.js 15.5** - Local docs index in `.next-docs/`
+
+Prefer retrieval-led reasoning over pre-training for any ZeroBias or Next.js tasks. Read `AGENTS.md` first.
 
 ## Related Documentation
 
 - **Repository CLAUDE.md**: `../../CLAUDE.md`
 - **Data Explorer patterns**: `../../zerobias/data-explorer/CLAUDE.md`
-- **ZeroBias SDKs**: `@zerobias-com/dana-sdk`, `@zerobias-com/platform-sdk`
+- **ZeroBias SDK**: See `AGENTS.md` for SDK documentation and patterns
 - **Custom Login SDK**: `@zerobias-com/dana-login-sdk`
 - **Neon Docs**: https://neon.tech/docs
 - **Drizzle ORM**: https://orm.drizzle.team
@@ -721,9 +695,9 @@ For accurate Next.js 15.5 documentation, see `AGENTS.md` which indexes local doc
 
 ## Research References
 
-- **Marketplace Plan**: `/Users/cstacer/Projects/zerobias-com/repos/ui/.claude/plans/MARKETPLACE_TOOLS_CENTER.md`
-- **Upwork Research**: `/Users/cstacer/Projects/zerobias-com/repos/ui/.claude/plans/history/RESEARCH_UPWORK.md`
-- **Whop Research**: `/Users/cstacer/Projects/zerobias-com/repos/ui/.claude/plans/history/RESEARCH_WHOP.md`
+- **Marketplace Plan**: `~/Projects/zerobias-com/repos/ui/.claude/plans/MARKETPLACE_TOOLS_CENTER.md` (external — zerobias-com repo)
+- **Upwork Research**: `~/Projects/zerobias-com/repos/ui/.claude/plans/history/RESEARCH_UPWORK.md` (external — zerobias-com repo)
+- **Whop Research**: `~/Projects/zerobias-com/repos/ui/.claude/plans/history/RESEARCH_WHOP.md` (external — zerobias-com repo)
 - **VoltAgent**: https://voltagent.dev/ai-agent-marketplace/
 
 ## VoltAgent Marketplace Patterns
@@ -742,5 +716,5 @@ VoltAgent's AI agent marketplace provides useful patterns for SME Mart:
 
 ---
 
-**Last Updated:** 2026-01-26
+**Last Updated:** 2026-02-06
 **Owner:** Clark / w3geekery

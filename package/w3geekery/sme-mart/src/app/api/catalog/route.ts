@@ -1,158 +1,234 @@
 /**
  * ZeroBias Catalog API Proxy
  *
- * Proxies requests to ZeroBias catalog endpoints for:
- * - roles: NICE Work Roles (95)
- * - skills: NICE Skills/Qualifications (556)
- * - frameworks: Compliance Frameworks (12)
- * - segments: Industry Segments (128)
- * - products: Product Catalog (663)
+ * Proxies requests to ZeroBias catalog endpoints using the SDK:
+ * - roles: NICE Work Roles
+ * - skills: NICE Skills/Qualifications
+ * - frameworks: Compliance Frameworks
+ * - segments: Industry Segments
+ * - products: Product Catalog
+ * - serviceSegments: Service category tags
+ * - vendors: Product vendors
  *
  * Usage: GET /api/catalog?type=roles&search=security
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-
-const ZEROBIAS_HOST = process.env.NEXT_PUBLIC_ZEROBIAS_HOST || 'https://ci.zerobias.com';
-const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
-const ORG_ID = process.env.NEXT_PUBLIC_DEFAULT_ORG_ID;
+import { platform, portal } from '@zerobias-com/zerobias-sdk';
+import { getConnectedSdk } from '@/lib/zerobias-sdk';
 
 interface CatalogItem {
   id: string;
   name: string;
   code?: string;
   description?: string;
+  categoryName?: string;
+  vendorName?: string;
   [key: string]: unknown;
 }
 
-interface PagedResponse {
-  items?: CatalogItem[];
-  totalItems?: number;
-  pageNumber?: number;
-  pageSize?: number;
+// Normalize SDK response to consistent format
+function normalizeItems<T extends { id?: unknown; name?: string; code?: string; description?: string }>(
+  items: T[]
+): CatalogItem[] {
+  return items.map(item => ({
+    id: String(item.id || ''),
+    name: item.name || '',
+    code: item.code,
+    description: item.description,
+    ...item,
+  }));
+}
+
+// Client-side search filter (SDK doesn't always support server-side search)
+function filterBySearch(items: CatalogItem[], search: string): CatalogItem[] {
+  if (!search) return items;
+
+  const searchLower = search.toLowerCase();
+  return items.filter(item =>
+    item.name?.toLowerCase().includes(searchLower) ||
+    item.code?.toLowerCase().includes(searchLower) ||
+    item.description?.toLowerCase().includes(searchLower)
+  );
 }
 
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
   const type = searchParams.get('type');
   const search = searchParams.get('search') || '';
-  const pageSize = searchParams.get('pageSize') || '100';
+  const pageSize = parseInt(searchParams.get('pageSize') || '100', 10);
 
   if (!type) {
     return NextResponse.json({ error: 'Missing type parameter' }, { status: 400 });
   }
 
-  if (!API_KEY || !ORG_ID) {
-    return NextResponse.json({ error: 'Missing API configuration' }, { status: 500 });
-  }
-
-  const headers: HeadersInit = {
-    'Authorization': `APIKey ${API_KEY}`,
-    'Content-Type': 'application/json',
-    'Dana-Org-Id': ORG_ID,
-  };
-
   try {
-    let url: string;
-    let method: 'GET' | 'POST' = 'GET';
-    let body: string | undefined;
+    const sdk = await getConnectedSdk();
+    let items: CatalogItem[] = [];
 
     switch (type) {
-      case 'roles':
+      case 'roles': {
         // NICE Work Roles
-        url = `${ZEROBIAS_HOST}/api/platform/catalog/roles?pageSize=${pageSize}`;
+        const result = await sdk.platform.getCatalogRoleApi().list(1, pageSize);
+        // Include category name + code for grouping (e.g., "Cyberspace Effects (CE)")
+        items = (result.items || []).map(item => {
+          const role = item as {
+            id?: unknown;
+            name?: string;
+            description?: string;
+            roleCategory?: {
+              id?: string;
+              name?: string;
+              externalCode?: string;
+            };
+          };
+          const catName = role.roleCategory?.name;
+          const catCode = role.roleCategory?.externalCode;
+          return {
+            id: String(role.id || ''),
+            name: role.name || '',
+            description: role.description,
+            categoryId: role.roleCategory?.id,
+            categoryName: catName && catCode ? `${catName} (${catCode})` : catName,
+          };
+        });
+        // Sort by category name (case-insensitive), then by role name
+        items.sort((a, b) => {
+          const catA = (a.categoryName || '').toLowerCase();
+          const catB = (b.categoryName || '').toLowerCase();
+          if (catA !== catB) return catA.localeCompare(catB);
+          return (a.name || '').toLowerCase().localeCompare((b.name || '').toLowerCase());
+        });
         break;
+      }
 
-      case 'roleCategories':
+      case 'roleCategories': {
         // NICE Role Categories
-        url = `${ZEROBIAS_HOST}/api/platform/catalog/roleCategories?pageSize=${pageSize}`;
+        const result = await sdk.platform.getCatalogRoleApi().listRoleCategories(1, pageSize);
+        items = normalizeItems(result.items || []);
         break;
+      }
 
-      case 'skills':
+      case 'skills': {
         // NICE Skills (roleQualifications with type=skill)
-        url = `${ZEROBIAS_HOST}/api/platform/catalog/roleQualifications?qualificationType=skill&pageSize=${pageSize}`;
+        const skillType = 'skill' as unknown as platform.QualificationTypeDef;
+        const result = await sdk.platform.getCatalogRoleApi().listRoleQualifications(1, pageSize, skillType);
+        // Use description (trimmed) as name, keep code for badge
+        items = (result.items || []).map(item => {
+          const skill = item as { id?: unknown; name?: string; description?: string };
+          // Trim "Skill in " prefix from description
+          let displayName = skill.description || skill.name || '';
+          if (displayName.toLowerCase().startsWith('skill in ')) {
+            displayName = displayName.slice(9); // Remove "Skill in "
+          }
+          // Capitalize first letter
+          displayName = displayName.charAt(0).toUpperCase() + displayName.slice(1);
+          return {
+            id: String(skill.id || ''),
+            name: displayName,
+            code: skill.name, // The code like "s0011"
+            description: skill.description,
+          };
+        });
+        // Sort alphabetically by name (case-insensitive)
+        items.sort((a, b) => (a.name || '').toLowerCase().localeCompare((b.name || '').toLowerCase()));
         break;
+      }
 
-      case 'knowledge':
+      case 'knowledge': {
         // NICE Knowledge (roleQualifications with type=knowledge)
-        url = `${ZEROBIAS_HOST}/api/platform/catalog/roleQualifications?qualificationType=knowledge&pageSize=${pageSize}`;
+        const knowledgeType = 'knowledge' as unknown as platform.QualificationTypeDef;
+        const result = await sdk.platform.getCatalogRoleApi().listRoleQualifications(1, pageSize, knowledgeType);
+        items = normalizeItems(result.items || []);
         break;
+      }
 
-      case 'frameworks':
-        // Compliance Frameworks
-        url = `${ZEROBIAS_HOST}/api/platform/catalog/frameworks?pageSize=${pageSize}`;
+      case 'frameworks': {
+        // Compliance Frameworks - use portal frameworkSearch (same as platform UI)
+        const searchBody: portal.SearchFrameworkBody = {};
+        const result = await sdk.portal.getFrameworkApi().search(searchBody, 1, pageSize);
+        // Don't include code for frameworks (name and code are nearly identical)
+        items = (result.items || []).map(item => {
+          const framework = item as {
+            id?: unknown;
+            name?: string;
+            description?: string;
+          };
+          return {
+            id: String(framework.id || ''),
+            name: framework.name || '',
+            description: framework.description,
+            // No code - don't show badge for frameworks
+          };
+        });
         break;
+      }
 
-      case 'segments':
-        // Industry Segments (all segments - product categories, tools, etc.)
-        url = `${ZEROBIAS_HOST}/api/platform/catalog/segments?pageSize=${pageSize}`;
+      case 'segments': {
+        // Industry Segments
+        const result = await sdk.platform.getSegmentApi().list(1, pageSize);
+        items = normalizeItems(result.items || []);
         break;
+      }
 
-      case 'serviceSegments':
+      case 'serviceSegments': {
         // Service Segments (professional service categories for SME Mart)
-        //
-        // TODO: Once ZeroBias service segments are populated, switch to the segment list
-        // endpoint with isService filter. Check periodically if segments have been updated.
-        // See master plan: .claude/plans/public/000-MASTER-PLAN.md
-        //
-        // FUTURE APPROACH (when service segments are populated):
-        // url = `${ZEROBIAS_HOST}/api/platform/catalog/segments?pageSize=${pageSize}`;
-        // Then filter response where latestVersion.isService === true
-        //
-        // CURRENT APPROACH: Use tags with tagTypes=service-segment
-        url = `${ZEROBIAS_HOST}/api/platform/tags?tagTypes=service-segment&pageSize=${pageSize}`;
+        // Uses tags with tagTypes=service-segment
+        const tagTypes = ['service-segment'] as unknown as import('@zerobias-org/types-core-js').Nmtoken[];
+        const result = await sdk.platform.getTagApi().listTags(1, pageSize, tagTypes);
+        items = normalizeItems(result.items || []);
         break;
+      }
 
-      case 'products':
-        // Products (uses POST to productSearch)
-        url = `${ZEROBIAS_HOST}/api/portal/productSearch?pageSize=${pageSize}`;
-        method = 'POST';
-        body = JSON.stringify({ productServiceFilter: 'product' });
+      case 'products': {
+        // Products (via portal productSearch)
+        const searchBody: portal.SearchProductBody = {
+          productServiceFilter: 'product' as unknown as portal.ProductServiceFilterDef,
+        };
+        const result = await sdk.portal.getProductApi().search(searchBody, 1, pageSize);
+        // Don't include code for products, group by vendor name
+        items = (result.items || []).map(item => {
+          const product = item as {
+            id?: unknown;
+            name?: string;
+            description?: string;
+            vendorName?: string;
+          };
+          return {
+            id: String(product.id || ''),
+            name: product.name || '',
+            description: product.description,
+            vendorName: product.vendorName,
+            // No code - don't show badge for products
+          };
+        });
+        // Sort by vendor name (case-insensitive), then by product name
+        items.sort((a, b) => {
+          const vendorA = (a.vendorName || '').toLowerCase();
+          const vendorB = (b.vendorName || '').toLowerCase();
+          if (vendorA !== vendorB) return vendorA.localeCompare(vendorB);
+          return (a.name || '').toLowerCase().localeCompare((b.name || '').toLowerCase());
+        });
         break;
+      }
 
-      case 'vendors':
+      case 'vendors': {
         // Vendors
-        url = `${ZEROBIAS_HOST}/api/platform/catalog/vendors?pageSize=${pageSize}`;
+        const result = await sdk.platform.getVendorApi().listVendors(1, pageSize);
+        items = normalizeItems(result.items || []);
         break;
+      }
 
       default:
+        await sdk.disconnect();
         return NextResponse.json({ error: `Unknown catalog type: ${type}` }, { status: 400 });
     }
 
-    const response = await fetch(url, {
-      method,
-      headers,
-      body,
-    });
+    // Disconnect SDK after use
+    await sdk.disconnect();
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`ZeroBias API error (${type}):`, response.status, errorText);
-      return NextResponse.json(
-        { error: `ZeroBias API error: ${response.status}` },
-        { status: response.status }
-      );
-    }
-
-    const data: PagedResponse | CatalogItem[] = await response.json();
-
-    // Normalize response (some endpoints return array, some return paged object)
-    let items: CatalogItem[] = [];
-    if (Array.isArray(data)) {
-      items = data;
-    } else if (data.items) {
-      items = data.items;
-    }
-
-    // Client-side search filter (ZeroBias doesn't always support server-side search)
-    if (search) {
-      const searchLower = search.toLowerCase();
-      items = items.filter(item =>
-        item.name?.toLowerCase().includes(searchLower) ||
-        item.code?.toLowerCase().includes(searchLower) ||
-        item.description?.toLowerCase().includes(searchLower)
-      );
-    }
+    // Apply client-side search filter
+    items = filterBySearch(items, search);
 
     return NextResponse.json({
       items,

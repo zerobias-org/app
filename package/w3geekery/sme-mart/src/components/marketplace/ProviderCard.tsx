@@ -13,7 +13,7 @@ export interface ProviderCardData {
   availabilityStatus: string;
   totalJobsCompleted: number;
   skills: { id: string; zerobiasSkillId: string; skillName: string | null; proficiencyLevel: string | null }[];
-  serviceOfferings: { id: string; category: string }[];
+  serviceOfferings: { id: string; category: string; zerobiasServiceSegmentId?: string | null }[];
 }
 
 function initials(name: string) {
@@ -53,7 +53,7 @@ export function ProviderCard({ provider }: ProviderCardProps) {
             >
               {initials(provider.displayName)}
             </Avatar>
-            <Box sx={{ minWidth: 0 }} className="text-compact">
+            <Box sx={{ minWidth: 0 }}>
               <Typography variant="subtitle1" fontWeight={600} noWrap>
                 {provider.displayName}
               </Typography>

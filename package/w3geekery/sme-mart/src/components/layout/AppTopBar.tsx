@@ -112,7 +112,7 @@ export function AppTopBar({}: AppTopBarProps) {
           {[
             { href: '/providers', label: 'Providers' },
             { href: '/services', label: 'Services' },
-            { href: '/requests', label: 'Requests' },
+            { href: '/engagements', label: 'Engagements' },
           ].map((nav) => (
             <Button
               key={nav.href}

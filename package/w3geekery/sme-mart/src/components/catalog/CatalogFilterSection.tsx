@@ -16,6 +16,7 @@ import {
   ExpandMore as ExpandMoreIcon,
   ExpandLess as ExpandLessIcon,
   Close as CloseIcon,
+  Add as AddIcon,
 } from '@mui/icons-material';
 
 export interface CatalogItem {
@@ -30,6 +31,8 @@ export interface CatalogItem {
 interface CatalogFilterSectionProps {
   /** Section title */
   title: string;
+  /** Icon component to display next to title */
+  icon?: React.ReactNode;
   /** All available items from the catalog */
   items: CatalogItem[];
   /** Currently selected item IDs */
@@ -56,6 +59,7 @@ interface CatalogFilterSectionProps {
 
 export function CatalogFilterSection({
   title,
+  icon,
   items,
   selected,
   onChange,
@@ -70,6 +74,7 @@ export function CatalogFilterSection({
 }: CatalogFilterSectionProps) {
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
   const [inputValue, setInputValue] = useState('');
+  const [showAutocomplete, setShowAutocomplete] = useState(false);
 
   // Get selected items as full objects
   const selectedItems = useMemo(() => {
@@ -121,6 +126,7 @@ export function CatalogFilterSection({
       onChange([...selected, item.id]);
     }
     setInputValue('');
+    setShowAutocomplete(false); // Hide autocomplete after selection
   };
 
   const hasSelections = selected.length > 0;
@@ -148,7 +154,12 @@ export function CatalogFilterSection({
         onClick={() => collapsible && setCollapsed(!collapsed)}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Typography variant="subtitle2" fontWeight={600} style={{ margin: 0 }}>
+          {icon && (
+            <Box sx={{ display: 'flex', color: 'action.active' }}>
+              {icon}
+            </Box>
+          )}
+          <Typography variant="subtitle2" fontWeight={600}>
             {title}
           </Typography>
           {hasSelections && (
@@ -168,6 +179,24 @@ export function CatalogFilterSection({
           )}
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          {/* Add button for autocomplete mode (not showAllAsChips) */}
+          {!showAllAsChips && !collapsed && (
+            <Tooltip title="Add filter" arrow placement="top">
+              <IconButton
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowAutocomplete(!showAutocomplete);
+                }}
+                sx={{
+                  mr: 0.5,
+                  color: showAutocomplete ? 'primary.main' : 'action.active',
+                }}
+              >
+                <AddIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          )}
           {onRemove && (
             <IconButton
               size="small"
@@ -224,49 +253,9 @@ export function CatalogFilterSection({
         {/* Autocomplete mode (for larger lists) */}
         {!showAllAsChips && (
           <>
-            <Autocomplete
-              size="small"
-              options={availableItems}
-              getOptionLabel={(option) => option.name}
-              groupBy={(option) => option.group || ''}
-              value={null}
-              inputValue={inputValue}
-              onInputChange={(_, value) => setInputValue(value)}
-              onChange={(_, value) => handleAutocompleteSelect(value)}
-              loading={loading}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  placeholder={placeholder}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      bgcolor: 'background.paper',
-                    },
-                  }}
-                />
-              )}
-              renderOption={(props, option) => {
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                const { key, ...rest } = props;
-                // Use option.id as key instead of MUI's key (which is based on name and can have duplicates)
-                return (
-                  <li key={option.id} {...rest} style={{ padding: '4px 12px' }}>
-                    <Typography variant="body2" style={{ margin: 0 }}>{option.name}</Typography>
-                  </li>
-                );
-              }}
-              noOptionsText="No matches found"
-              clearOnBlur
-              blurOnSelect
-              sx={{ mb: hasSelections ? 1.5 : 0 }}
-            />
-
             {/* Selected items as toggleable chips */}
             {hasSelections && (
-              <Box>
-                <Typography variant="caption" color="text.secondary" style={{ margin: 0, marginBottom: '4px', display: 'block' }}>
-                  Selected (click to toggle):
-                </Typography>
+              <Box sx={{ mb: showAutocomplete ? 1.5 : 0 }}>
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                   {selectedItems.map((item) => {
                     const isDisabled = disabled.includes(item.id);
@@ -295,6 +284,114 @@ export function CatalogFilterSection({
                     );
                   })}
                 </Box>
+              </Box>
+            )}
+
+            {/* Autocomplete - only shown when + Add is clicked */}
+            <Collapse in={showAutocomplete}>
+              <Autocomplete
+                size="small"
+                options={availableItems}
+                getOptionLabel={(option) => option.name}
+                groupBy={(option) => option.group || ''}
+                value={null}
+                inputValue={inputValue}
+                onInputChange={(_, value) => setInputValue(value)}
+                onChange={(_, value) => handleAutocompleteSelect(value)}
+                loading={loading}
+                open={showAutocomplete}
+                onClose={(_, reason) => {
+                  // Only close on blur or escape, not when clicking the input
+                  if (reason === 'blur' || reason === 'escape') {
+                    setShowAutocomplete(false);
+                  }
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    placeholder={placeholder}
+                    autoFocus
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        bgcolor: 'background.paper',
+                      },
+                    }}
+                  />
+                )}
+                renderOption={(props, option) => {
+                  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                  const { key, ...rest } = props;
+                  return (
+                    <Tooltip
+                      key={option.id}
+                      title={option.description || ''}
+                      placement="right"
+                      enterDelay={400}
+                      arrow
+                    >
+                      <li {...rest} style={{ padding: '6px 12px' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: 2 }}>
+                          <Typography variant="body2" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {option.name}
+                          </Typography>
+                          {option.code && (
+                            <Box
+                              component="span"
+                              sx={{
+                                px: 0.75,
+                                py: 0.25,
+                                fontSize: '0.7rem',
+                                fontWeight: 600,
+                                bgcolor: 'action.selected',
+                                borderRadius: 1,
+                                flexShrink: 0,
+                                color: 'text.secondary',
+                                textTransform: 'uppercase',
+                              }}
+                            >
+                              {option.code}
+                            </Box>
+                          )}
+                        </Box>
+                      </li>
+                    </Tooltip>
+                  );
+                }}
+                noOptionsText="No matches found"
+                clearOnBlur
+                blurOnSelect
+              />
+            </Collapse>
+
+            {/* Empty state hint - clickable */}
+            {!hasSelections && !showAutocomplete && (
+              <Box
+                onClick={() => setShowAutocomplete(true)}
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 0.5,
+                  cursor: 'pointer',
+                  color: 'text.secondary',
+                  '&:hover': {
+                    color: 'primary.main',
+                  },
+                }}
+              >
+                <Typography variant="caption">Click</Typography>
+                <IconButton
+                  size="small"
+                  sx={{
+                    width: 24,
+                    height: 24,
+                    color: 'inherit',
+                    bgcolor: 'action.hover',
+                  }}
+                  tabIndex={-1}
+                >
+                  <AddIcon fontSize="small" />
+                </IconButton>
+                <Typography variant="caption">to add filters</Typography>
               </Box>
             )}
           </>

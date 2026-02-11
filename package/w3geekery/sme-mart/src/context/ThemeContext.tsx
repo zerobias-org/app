@@ -39,10 +39,12 @@ export function ThemeContextProvider({ children }: ThemeProviderProps) {
     setMounted(true);
   }, []);
 
-  // Save theme to localStorage when it changes
+  // Save theme to localStorage and update body attribute when it changes
   useEffect(() => {
     if (mounted) {
       localStorage.setItem(THEME_STORAGE_KEY, mode);
+      // Set data attribute on body for CSS variable theming
+      document.body.setAttribute('data-theme', mode);
     }
   }, [mode, mounted]);
 

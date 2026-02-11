@@ -14,6 +14,7 @@ interface SeedProviderSkill {
   // ZeroBias NICE Skill ID (S#### code)
   // See: GET /platform/catalog/roleQualifications?qualificationType=skill
   zerobiasSkillId: string;
+  skillName: string; // Cached display name from ZeroBias catalog
   proficiencyLevel: 'beginner' | 'intermediate' | 'expert';
   yearsExperience: number;
 }
@@ -145,9 +146,9 @@ const providers: SeedProvider[] = [
     totalJobsCompleted: 12,
     ratingAverage: '4.95',
     skills: [
-      { zerobiasSkillId: NICE_SKILLS.AUTOMATION, proficiencyLevel: 'expert', yearsExperience: 10 },
-      { zerobiasSkillId: NICE_SKILLS.PROGRAMMING_LANGUAGES, proficiencyLevel: 'expert', yearsExperience: 20 },
-      { zerobiasSkillId: NICE_SKILLS.CLOUD_SECURITY, proficiencyLevel: 'expert', yearsExperience: 8 },
+      { zerobiasSkillId: NICE_SKILLS.AUTOMATION, skillName: 'Automated solutions', proficiencyLevel: 'expert', yearsExperience: 10 },
+      { zerobiasSkillId: NICE_SKILLS.PROGRAMMING_LANGUAGES, skillName: 'Programming languages', proficiencyLevel: 'expert', yearsExperience: 20 },
+      { zerobiasSkillId: NICE_SKILLS.CLOUD_SECURITY, skillName: 'Cloud security', proficiencyLevel: 'expert', yearsExperience: 8 },
     ],
     services: [
       { title: 'Platform Architecture Review', description: 'Comprehensive review of your ZeroBias platform implementation and recommendations.', category: 'Engineering', pricingType: 'fixed', price: '5000.00', deliveryTime: '2 weeks' },
@@ -169,10 +170,10 @@ const providers: SeedProvider[] = [
     totalJobsCompleted: 18,
     ratingAverage: '4.90',
     skills: [
-      { zerobiasSkillId: NICE_SKILLS.AUTOMATION, proficiencyLevel: 'expert', yearsExperience: 3 },
-      { zerobiasSkillId: NICE_SKILLS.PROGRAMMING_LANGUAGES, proficiencyLevel: 'expert', yearsExperience: 8 },
-      { zerobiasSkillId: NICE_SKILLS.DATA_ANALYSIS, proficiencyLevel: 'expert', yearsExperience: 5 },
-      { zerobiasSkillId: NICE_SKILLS.SCRIPTING, proficiencyLevel: 'expert', yearsExperience: 7 },
+      { zerobiasSkillId: NICE_SKILLS.AUTOMATION, skillName: 'Automated solutions', proficiencyLevel: 'expert', yearsExperience: 3 },
+      { zerobiasSkillId: NICE_SKILLS.PROGRAMMING_LANGUAGES, skillName: 'Programming languages', proficiencyLevel: 'expert', yearsExperience: 8 },
+      { zerobiasSkillId: NICE_SKILLS.DATA_ANALYSIS, skillName: 'Data analysis', proficiencyLevel: 'expert', yearsExperience: 5 },
+      { zerobiasSkillId: NICE_SKILLS.SCRIPTING, skillName: 'Scripting languages', proficiencyLevel: 'expert', yearsExperience: 7 },
     ],
     services: [
       { title: 'Custom Compliance Agent', description: 'Build a custom AI agent for your compliance workflow on the ZeroBias platform.', category: 'Agentic', pricingType: 'fixed', price: '5000.00', deliveryTime: '3 weeks' },
@@ -191,9 +192,9 @@ const providers: SeedProvider[] = [
     totalJobsCompleted: 42,
     ratingAverage: '4.95',
     skills: [
-      { zerobiasSkillId: NICE_SKILLS.RISK_ASSESSMENT, proficiencyLevel: 'expert', yearsExperience: 10 },
-      { zerobiasSkillId: NICE_SKILLS.VULNERABILITY_ASSESSMENT, proficiencyLevel: 'expert', yearsExperience: 8 },
-      { zerobiasSkillId: NICE_SKILLS.POLICY_DEVELOPMENT, proficiencyLevel: 'expert', yearsExperience: 9 },
+      { zerobiasSkillId: NICE_SKILLS.RISK_ASSESSMENT, skillName: 'Risk assessment', proficiencyLevel: 'expert', yearsExperience: 10 },
+      { zerobiasSkillId: NICE_SKILLS.VULNERABILITY_ASSESSMENT, skillName: 'Vulnerability assessment', proficiencyLevel: 'expert', yearsExperience: 8 },
+      { zerobiasSkillId: NICE_SKILLS.POLICY_DEVELOPMENT, skillName: 'Policy development', proficiencyLevel: 'expert', yearsExperience: 9 },
     ],
     frameworks: [
       { zerobiasFrameworkId: FRAMEWORKS.SOC2, proficiencyLevel: 'expert', yearsExperience: 10, assessorCertified: true, auditExperience: true },
@@ -217,9 +218,9 @@ const providers: SeedProvider[] = [
     totalJobsCompleted: 31,
     ratingAverage: '4.85',
     skills: [
-      { zerobiasSkillId: NICE_SKILLS.RISK_ASSESSMENT, proficiencyLevel: 'expert', yearsExperience: 10 },
-      { zerobiasSkillId: NICE_SKILLS.POLICY_DEVELOPMENT, proficiencyLevel: 'expert', yearsExperience: 7 },
-      { zerobiasSkillId: NICE_SKILLS.TECHNICAL_WRITING, proficiencyLevel: 'expert', yearsExperience: 8 },
+      { zerobiasSkillId: NICE_SKILLS.RISK_ASSESSMENT, skillName: 'Risk assessment', proficiencyLevel: 'expert', yearsExperience: 10 },
+      { zerobiasSkillId: NICE_SKILLS.POLICY_DEVELOPMENT, skillName: 'Policy development', proficiencyLevel: 'expert', yearsExperience: 7 },
+      { zerobiasSkillId: NICE_SKILLS.TECHNICAL_WRITING, skillName: 'Technical writing', proficiencyLevel: 'expert', yearsExperience: 8 },
     ],
     frameworks: [
       { zerobiasFrameworkId: FRAMEWORKS.NIST_CSF, proficiencyLevel: 'expert', yearsExperience: 7, implementationExperience: true },
@@ -243,10 +244,10 @@ const providers: SeedProvider[] = [
     totalJobsCompleted: 24,
     ratingAverage: '4.80',
     skills: [
-      { zerobiasSkillId: NICE_SKILLS.SECURITY_MONITORING, proficiencyLevel: 'expert', yearsExperience: 6 },
-      { zerobiasSkillId: NICE_SKILLS.INCIDENT_RESPONSE, proficiencyLevel: 'expert', yearsExperience: 8 },
-      { zerobiasSkillId: NICE_SKILLS.CLOUD_SECURITY, proficiencyLevel: 'expert', yearsExperience: 5 },
-      { zerobiasSkillId: NICE_SKILLS.FORENSIC_ANALYSIS, proficiencyLevel: 'intermediate', yearsExperience: 4 },
+      { zerobiasSkillId: NICE_SKILLS.SECURITY_MONITORING, skillName: 'Security monitoring', proficiencyLevel: 'expert', yearsExperience: 6 },
+      { zerobiasSkillId: NICE_SKILLS.INCIDENT_RESPONSE, skillName: 'Incident response', proficiencyLevel: 'expert', yearsExperience: 8 },
+      { zerobiasSkillId: NICE_SKILLS.CLOUD_SECURITY, skillName: 'Cloud security', proficiencyLevel: 'expert', yearsExperience: 5 },
+      { zerobiasSkillId: NICE_SKILLS.FORENSIC_ANALYSIS, skillName: 'Forensic analysis', proficiencyLevel: 'intermediate', yearsExperience: 4 },
     ],
     services: [
       { title: 'SOC Setup & Optimization', description: 'Design, build, or optimize your Security Operations Center with proper tooling and runbooks.', category: 'SecOps', pricingType: 'fixed', price: '15000.00', deliveryTime: '10 weeks' },
@@ -265,9 +266,9 @@ const providers: SeedProvider[] = [
     totalJobsCompleted: 56,
     ratingAverage: '4.92',
     skills: [
-      { zerobiasSkillId: NICE_SKILLS.TRAINING_DEVELOPMENT, proficiencyLevel: 'expert', yearsExperience: 7 },
-      { zerobiasSkillId: NICE_SKILLS.SECURITY_AWARENESS, proficiencyLevel: 'expert', yearsExperience: 6 },
-      { zerobiasSkillId: NICE_SKILLS.TECHNICAL_WRITING, proficiencyLevel: 'expert', yearsExperience: 5 },
+      { zerobiasSkillId: NICE_SKILLS.TRAINING_DEVELOPMENT, skillName: 'Training development', proficiencyLevel: 'expert', yearsExperience: 7 },
+      { zerobiasSkillId: NICE_SKILLS.SECURITY_AWARENESS, skillName: 'Security awareness', proficiencyLevel: 'expert', yearsExperience: 6 },
+      { zerobiasSkillId: NICE_SKILLS.TECHNICAL_WRITING, skillName: 'Technical writing', proficiencyLevel: 'expert', yearsExperience: 5 },
     ],
     services: [
       { title: 'CISSP Prep Course', description: 'Structured 8-week CISSP exam preparation with practice tests and study materials.', category: 'Training', pricingType: 'fixed', price: '2500.00', deliveryTime: '8 weeks' },
@@ -317,6 +318,7 @@ async function seed() {
       await db.insert(schema.providerSkills).values({
         providerId: profile.id,
         zerobiasSkillId: skill.zerobiasSkillId,
+        skillName: skill.skillName,
         proficiencyLevel: skill.proficiencyLevel,
         yearsExperience: skill.yearsExperience,
       });

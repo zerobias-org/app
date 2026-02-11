@@ -23,7 +23,7 @@ import {
 } from '@mui/material';
 import { Search, SlidersHorizontal, X } from 'lucide-react';
 import { ProviderCard, type ProviderCardData } from '@/components/marketplace/ProviderCard';
-import { ProviderFilters, getActiveFilters } from '@/components/marketplace/ProviderFilters';
+import { CatalogFilters, getActiveFilters } from '@/components/marketplace/ProviderFilters';
 import { FilterEnabler, type FilterType } from '@/components/marketplace/FilterEnabler';
 import { useFilterPreferences } from '@/hooks/useFilterPreferences';
 
@@ -72,7 +72,10 @@ export default function ProvidersPage() {
     removeFilter,
     clearAll,
     setCatalogFilters,
-  } = useFilterPreferences();
+  } = useFilterPreferences({
+    pkvKey: 'sme-mart.provider-filters',
+    localStorageKey: 'sme-mart-provider-filters',
+  });
 
   useEffect(() => {
     // Fetch providers with full catalog relationships
@@ -213,7 +216,7 @@ export default function ProvidersPage() {
         onClearAll={handleClearAll}
         activeFilterCount={activeCatalogFilterCount}
       />
-      <ProviderFilters
+      <CatalogFilters
         filters={catalogFilters}
         onChange={setCatalogFilters}
         enabledFilters={enabledFilters}

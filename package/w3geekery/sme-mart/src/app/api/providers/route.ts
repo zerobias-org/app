@@ -17,16 +17,16 @@ export async function GET(request: NextRequest) {
     // Build the `with` clause based on include param
     const withClause = includeAll
       ? {
-          skills: true,
-          roles: true,
-          products: true,
-          frameworks: true,
-          segments: true,
-          serviceOfferings: true,
+          skills: true as const,
+          roles: true as const,
+          products: true as const,
+          frameworks: true as const,
+          segments: true as const,
+          serviceOfferings: true as const,
         }
       : {
-          skills: true,
-          serviceOfferings: true,
+          skills: true as const,
+          serviceOfferings: true as const,
         };
 
     const providers = await db.query.providerProfiles.findMany({

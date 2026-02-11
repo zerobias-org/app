@@ -3,18 +3,27 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useZeroBias } from '@/context/ZeroBiasContext';
 import { type EnabledFilters, type FilterType } from '@/components/marketplace/FilterEnabler';
-import { type ProviderFiltersState } from '@/components/marketplace/ProviderFilters';
+import { type CatalogFiltersState } from '@/components/marketplace/ProviderFilters';
 
 // Auth mode from environment
 const AUTH_MODE = process.env.NEXT_PUBLIC_AUTH_MODE || 'proxy';
-const PKV_KEY = 'sme-mart.provider-filters';
-const LOCAL_STORAGE_KEY = 'sme-mart-provider-filters';
 const DEBOUNCE_MS = 1000;
+
+// Default keys (can be overridden)
+const DEFAULT_PKV_KEY = 'sme-mart.catalog-filters';
+const DEFAULT_LOCAL_STORAGE_KEY = 'sme-mart-catalog-filters';
+
+export interface UseFilterPreferencesOptions {
+  /** PKV key for storing preferences (default: 'sme-mart.catalog-filters') */
+  pkvKey?: string;
+  /** LocalStorage key for mock mode (default: 'sme-mart-catalog-filters') */
+  localStorageKey?: string;
+}
 
 // Combined preferences shape stored in PKV
 export interface FilterPreferences {
   enabledFilters: EnabledFilters;
-  catalogFilters: ProviderFiltersState;
+  catalogFilters: CatalogFiltersState;
 }
 
 const initialEnabledFilters: EnabledFilters = {
@@ -28,7 +37,7 @@ const initialEnabledFilters: EnabledFilters = {
 
 const emptyCategory = { selected: [], disabled: [] };
 
-const initialCatalogFilters: ProviderFiltersState = {
+const initialCatalogFilters: CatalogFiltersState = {
   frameworks: { ...emptyCategory },
   products: { ...emptyCategory },
   skills: { ...emptyCategory },
@@ -38,7 +47,7 @@ const initialCatalogFilters: ProviderFiltersState = {
 };
 
 // Migrate old format (string[]) to new format (FilterCategoryState)
-function migrateFiltersIfNeeded(filters: unknown): ProviderFiltersState {
+function migrateFiltersIfNeeded(filters: unknown): CatalogFiltersState {
   if (!filters || typeof filters !== 'object') {
     return initialCatalogFilters;
   }
@@ -46,7 +55,7 @@ function migrateFiltersIfNeeded(filters: unknown): ProviderFiltersState {
 
   // Check if it's already in new format (has objects with selected/disabled)
   if (f.frameworks && typeof f.frameworks === 'object' && 'selected' in (f.frameworks as object)) {
-    return filters as ProviderFiltersState;
+    return filters as CatalogFiltersState;
   }
 
   // Migrate from old format (string arrays) to new format
@@ -72,7 +81,11 @@ const initialPreferences: FilterPreferences = {
   catalogFilters: initialCatalogFilters,
 };
 
-export function useFilterPreferences() {
+export function useFilterPreferences(options: UseFilterPreferencesOptions = {}) {
+  const {
+    pkvKey = DEFAULT_PKV_KEY,
+    localStorageKey = DEFAULT_LOCAL_STORAGE_KEY,
+  } = options;
   const { service } = useZeroBias();
   const [preferences, setPreferences] = useState<FilterPreferences>(initialPreferences);
   const [loading, setLoading] = useState(true);
@@ -94,7 +107,7 @@ export function useFilterPreferences() {
       try {
         if (AUTH_MODE === 'mock') {
           // Mock mode: use localStorage
-          const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
+          const stored = localStorage.getItem(localStorageKey);
           if (stored) {
             const parsed = JSON.parse(stored);
             // Migrate old format if needed
@@ -108,7 +121,7 @@ export function useFilterPreferences() {
           // Real mode: use PKV API
           try {
             const pkv = service.zerobiasClientApi.danaClient.getPkvApi();
-            const response = await pkv.getPrincipalKeyValue(PKV_KEY);
+            const response = await pkv.getPrincipalKeyValue(pkvKey);
             if (response?.value) {
               const stored = response.value as Record<string, unknown>;
               // Migrate old format if needed
@@ -139,7 +152,7 @@ export function useFilterPreferences() {
     if (AUTH_MODE === 'mock' || service) {
       loadPreferences();
     }
-  }, [service]);
+  }, [service, pkvKey, localStorageKey]);
 
   // Save preferences (debounced)
   const savePreferences = useCallback(
@@ -154,12 +167,12 @@ export function useFilterPreferences() {
         try {
           if (AUTH_MODE === 'mock') {
             // Mock mode: save to localStorage
-            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(newPreferences));
+            localStorage.setItem(localStorageKey, JSON.stringify(newPreferences));
           } else if (service) {
             // Real mode: save to PKV
             const pkv = service.zerobiasClientApi.danaClient.getPkvApi();
             await pkv.upsertPrincipalKeyValue({
-              key: PKV_KEY,
+              key: pkvKey,
               value: newPreferences as unknown as { [key: string]: object },
             });
           }
@@ -168,7 +181,7 @@ export function useFilterPreferences() {
         }
       }, DEBOUNCE_MS);
     },
-    [service]
+    [service, pkvKey, localStorageKey]
   );
 
   // Update enabled filters
@@ -183,7 +196,7 @@ export function useFilterPreferences() {
 
   // Update catalog filters
   const setCatalogFilters = useCallback(
-    (catalogFilters: ProviderFiltersState) => {
+    (catalogFilters: CatalogFiltersState) => {
       const newPrefs = { ...preferences, catalogFilters };
       setPreferences(newPrefs);
       savePreferences(newPrefs);
@@ -208,7 +221,7 @@ export function useFilterPreferences() {
   // Remove a filter (disable section and clear selections)
   const removeFilter = useCallback(
     (filterType: FilterType) => {
-      const filterKeyMap: Record<FilterType, keyof ProviderFiltersState> = {
+      const filterKeyMap: Record<FilterType, keyof CatalogFiltersState> = {
         serviceCategories: 'serviceSegments',
         frameworks: 'frameworks',
         products: 'products',

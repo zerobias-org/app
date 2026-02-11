@@ -11,7 +11,7 @@ import {
   useSegments,
   useServiceSegments,
 } from '@/hooks/useZeroBiasCatalog';
-import { type EnabledFilters, type FilterType } from './FilterEnabler';
+import { type EnabledFilters, type FilterType, FILTER_ICONS } from './FilterEnabler';
 
 // Each filter category tracks selected items and which are disabled (paused from filtering)
 export interface FilterCategoryState {
@@ -19,7 +19,7 @@ export interface FilterCategoryState {
   disabled: string[];   // Subset of selected that are temporarily paused from filtering
 }
 
-export interface ProviderFiltersState {
+export interface CatalogFiltersState {
   frameworks: FilterCategoryState;
   products: FilterCategoryState;
   skills: FilterCategoryState;
@@ -28,24 +28,27 @@ export interface ProviderFiltersState {
   serviceSegments: FilterCategoryState;
 }
 
+// Backward compatibility alias
+export type ProviderFiltersState = CatalogFiltersState;
+
 // Helper to get only active (non-disabled) filter IDs
 export function getActiveFilters(category: FilterCategoryState): string[] {
   return category.selected.filter(id => !category.disabled.includes(id));
 }
 
-interface ProviderFiltersProps {
-  filters: ProviderFiltersState;
-  onChange: (filters: ProviderFiltersState) => void;
+export interface CatalogFiltersProps {
+  filters: CatalogFiltersState;
+  onChange: (filters: CatalogFiltersState) => void;
   enabledFilters: EnabledFilters;
   onRemoveFilter: (filterType: FilterType) => void;
 }
 
-export function ProviderFilters({
+export function CatalogFilters({
   filters,
   onChange,
   enabledFilters,
   onRemoveFilter,
-}: ProviderFiltersProps) {
+}: CatalogFiltersProps) {
   // Fetch catalog data
   const { data: frameworksData, isLoading: frameworksLoading } = useFrameworks();
   const { data: productsData, isLoading: productsLoading } = useProducts();
@@ -128,7 +131,7 @@ export function ProviderFilters({
   }, [serviceSegmentsData]);
 
   // Update selected items for a filter category
-  const updateSelected = (key: keyof ProviderFiltersState) => (values: string[]) => {
+  const updateSelected = (key: keyof CatalogFiltersState) => (values: string[]) => {
     // When items are removed from selected, also remove from disabled
     const currentDisabled = filters[key].disabled;
     const newDisabled = currentDisabled.filter(id => values.includes(id));
@@ -136,7 +139,7 @@ export function ProviderFilters({
   };
 
   // Update disabled items for a filter category
-  const updateDisabled = (key: keyof ProviderFiltersState) => (values: string[]) => {
+  const updateDisabled = (key: keyof CatalogFiltersState) => (values: string[]) => {
     onChange({ ...filters, [key]: { ...filters[key], disabled: values } });
   };
 
@@ -153,6 +156,7 @@ export function ProviderFilters({
       {enabledFilters.serviceCategories && (
         <CatalogFilterSection
           title="Service Categories"
+          icon={<FILTER_ICONS.serviceCategories fontSize="small" />}
           items={serviceSegmentItems}
           selected={filters.serviceSegments.selected}
           onChange={updateSelected('serviceSegments')}
@@ -165,18 +169,18 @@ export function ProviderFilters({
         />
       )}
 
-      {/* Frameworks - Show all as chips (small list) */}
+      {/* Frameworks - Autocomplete (large list - 266+ items) */}
       {enabledFilters.frameworks && (
         <CatalogFilterSection
           title="Frameworks"
+          icon={<FILTER_ICONS.frameworks fontSize="small" />}
           items={frameworkItems}
           selected={filters.frameworks.selected}
           onChange={updateSelected('frameworks')}
           disabled={filters.frameworks.disabled}
           onDisabledChange={updateDisabled('frameworks')}
-          showAllAsChips
+          placeholder="Search frameworks (SOC 2, ISO 27001, HIPAA...)"
           loading={frameworksLoading}
-          collapsible={false}
           onRemove={() => onRemoveFilter('frameworks')}
         />
       )}
@@ -185,6 +189,7 @@ export function ProviderFilters({
       {enabledFilters.products && (
         <CatalogFilterSection
           title="Products"
+          icon={<FILTER_ICONS.products fontSize="small" />}
           items={productItems}
           selected={filters.products.selected}
           onChange={updateSelected('products')}
@@ -200,6 +205,7 @@ export function ProviderFilters({
       {enabledFilters.skills && (
         <CatalogFilterSection
           title="Skills"
+          icon={<FILTER_ICONS.skills fontSize="small" />}
           items={skillItems}
           selected={filters.skills.selected}
           onChange={updateSelected('skills')}
@@ -215,6 +221,7 @@ export function ProviderFilters({
       {enabledFilters.roles && (
         <CatalogFilterSection
           title="Role Experience"
+          icon={<FILTER_ICONS.roles fontSize="small" />}
           items={roleItems}
           selected={filters.roles.selected}
           onChange={updateSelected('roles')}
@@ -230,6 +237,7 @@ export function ProviderFilters({
       {enabledFilters.segments && (
         <CatalogFilterSection
           title="Industry Segments"
+          icon={<FILTER_ICONS.segments fontSize="small" />}
           items={segmentItems}
           selected={filters.segments.selected}
           onChange={updateSelected('segments')}
@@ -244,4 +252,7 @@ export function ProviderFilters({
   );
 }
 
-export default ProviderFilters;
+// Backward compatibility alias
+export const ProviderFilters = CatalogFilters;
+
+export default CatalogFilters;
