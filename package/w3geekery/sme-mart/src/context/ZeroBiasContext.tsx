@@ -128,7 +128,10 @@ export function ZeroBiasProvider({ children }: ZeroBiasProviderProps) {
           setIsAdmin(false);
         }
 
-        // Subscribe to orgs
+        // Subscribe to orgs and select default org on first data emission
+        let defaultOrgSelected = false;
+        const defaultOrgId = process.env.NEXT_PUBLIC_DEFAULT_ORG_ID;
+
         appService.zerobiasClientApp.getOrgs().subscribe({
           next: (orgsList: any[]) => {
             setOrgs(orgsList.map((o) => ({
@@ -136,6 +139,15 @@ export function ZeroBiasProvider({ children }: ZeroBiasProviderProps) {
               name: o.name,
               displayName: o.displayName,
             })));
+
+            // Select configured default org on first emission with data
+            if (!defaultOrgSelected && defaultOrgId && orgsList.length > 0) {
+              const targetOrg = orgsList.find((o: any) => String(o.id) === defaultOrgId);
+              if (targetOrg) {
+                defaultOrgSelected = true;
+                appService.zerobiasClientApp.selectOrg(targetOrg as any);
+              }
+            }
           },
           error: (err: Error) => console.error('Failed to get orgs:', err),
         });
@@ -153,25 +165,6 @@ export function ZeroBiasProvider({ children }: ZeroBiasProviderProps) {
           },
           error: (err: Error) => console.error('Failed to get current org:', err),
         });
-
-        // If a default org is configured and differs from current, select it
-        const defaultOrgId = process.env.NEXT_PUBLIC_DEFAULT_ORG_ID;
-        if (defaultOrgId) {
-          try {
-            const orgsList = await new Promise<any[]>((resolve) => {
-              appService.zerobiasClientApp.getOrgs().subscribe({
-                next: (list: any[]) => resolve(list),
-                error: () => resolve([]),
-              });
-            });
-            const targetOrg = orgsList.find((o: any) => String(o.id) === defaultOrgId);
-            if (targetOrg) {
-              await appService.zerobiasClientApp.selectOrg(targetOrg as any);
-            }
-          } catch (err) {
-            console.warn('Failed to select default org:', err);
-          }
-        }
 
       } catch (err) {
         console.error('Failed to initialize ZeroBias:', err);
