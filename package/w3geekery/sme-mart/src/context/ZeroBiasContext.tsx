@@ -154,6 +154,25 @@ export function ZeroBiasProvider({ children }: ZeroBiasProviderProps) {
           error: (err: Error) => console.error('Failed to get current org:', err),
         });
 
+        // If a default org is configured and differs from current, select it
+        const defaultOrgId = process.env.NEXT_PUBLIC_DEFAULT_ORG_ID;
+        if (defaultOrgId) {
+          try {
+            const orgsList = await new Promise<any[]>((resolve) => {
+              appService.zerobiasClientApp.getOrgs().subscribe({
+                next: (list: any[]) => resolve(list),
+                error: () => resolve([]),
+              });
+            });
+            const targetOrg = orgsList.find((o: any) => String(o.id) === defaultOrgId);
+            if (targetOrg) {
+              await appService.zerobiasClientApp.selectOrg(targetOrg as any);
+            }
+          } catch (err) {
+            console.warn('Failed to select default org:', err);
+          }
+        }
+
       } catch (err) {
         console.error('Failed to initialize ZeroBias:', err);
         setError(err instanceof Error ? err : new Error('Failed to initialize'));
