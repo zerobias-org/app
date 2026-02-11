@@ -17,20 +17,10 @@ class ZerobiasAppService {
   public enable = false;
 
   public async initializeAppFactory() {
-    await this.zerobiasClientApp.init(
-      (req) => {
-        if (process.env.NEXT_PUBLIC_IS_LOCAL_DEV === 'true') {
-          req.headers = req.headers || {};
-          if (process.env.NEXT_PUBLIC_API_KEY) {
-            req.headers['Authorization'] = `APIKey ${process.env.NEXT_PUBLIC_API_KEY}`;
-          }
-          if (!req.headers['dana-org-id'] && process.env.NEXT_PUBLIC_DEFAULT_ORG_ID) {
-            req.headers['dana-org-id'] = process.env.NEXT_PUBLIC_DEFAULT_ORG_ID;
-          }
-        }
-        return req;
-      }
-    ).then(() => {
+    // Auth headers (Authorization, dana-org-id) are injected server-side
+    // by src/middleware.ts using the ZEROBIAS_API_KEY env var, so the API key
+    // never reaches the browser bundle. No client-side interceptor needed.
+    await this.zerobiasClientApp.init().then(() => {
       this.enable = true;
       console.log("ZerobiasAppSvc initialized");
     });
