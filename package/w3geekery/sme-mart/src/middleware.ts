@@ -34,5 +34,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dana/:path*', '/session/:path*'],
+  matcher: ['/api/:path*', '/dana/:path*', '/session/:path*'],
 };

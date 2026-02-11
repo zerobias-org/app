@@ -7,7 +7,7 @@ class ZerobiasAppService {
     production: process.env.NODE_ENV === 'production',
     isLocalDev: process.env.NEXT_PUBLIC_IS_LOCAL_DEV === 'true',
     socketUrlPath: process.env.NEXT_PUBLIC_IS_LOCAL_DEV === 'true' ? '' : '/session',
-    localPortalOrigin: process.env.NEXT_PUBLIC_LOCAL_PORTAL_ORIGIN
+    localPortalOrigin: process.env.NEXT_PUBLIC_LOCAL_PORTAL_ORIGIN || process.env.NEXT_PUBLIC_ZEROBIAS_HOST || 'https://ci.zerobias.com'
   };
 
   public zerobiasOrgId = new ZerobiasClientOrgId();

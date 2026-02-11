@@ -14,6 +14,12 @@ import {
   ToggleButtonGroup,
   ToggleButton,
   Tooltip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Button,
 } from '@mui/material';
 import {
   Edit as EditIcon,
@@ -89,18 +95,16 @@ export function UserProfileDropdown({}: UserProfileDropdownProps) {
     // Don't close menu - let user see the toggle change
   };
 
+  const [devModeDialogOpen, setDevModeDialogOpen] = useState(false);
+
   const handleLogout = () => {
     handleClose();
-    // Redirect to ZeroBias logout
-    window.location.href = '/dana/api/v2/me/session/logout';
+    setDevModeDialogOpen(true);
   };
 
   const handleLogin = () => {
     handleClose();
-    // Redirect to ZeroBias login page
-    // Pass current URL as 'next' param to return after login
-    const nextUrl = encodeURIComponent(window.location.href);
-    window.location.href = `/login/?next=${nextUrl}`;
+    setDevModeDialogOpen(true);
   };
 
   // Get display name and initials
@@ -330,6 +334,20 @@ export function UserProfileDropdown({}: UserProfileDropdownProps) {
           </MenuItem>
         )}
       </Menu>
+
+      <Dialog open={devModeDialogOpen} onClose={() => setDevModeDialogOpen(false)}>
+        <DialogTitle>Dev Mode</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            This is disabled in dev mode. Authentication is handled via proxy API key.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDevModeDialogOpen(false)} autoFocus>
+            OK
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }
