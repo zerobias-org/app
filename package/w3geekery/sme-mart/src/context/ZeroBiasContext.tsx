@@ -106,7 +106,8 @@ export function ZeroBiasProvider({ children }: ZeroBiasProviderProps) {
         // Get current user (cast to any to access user-specific fields)
         const userData = await appService.zerobiasClientApp.whoAmI() as any;
         const userRoles = userData.roles || [];
-        const email = userData.emails?.[0] || userData.email || '';
+        const rawEmail = userData.emails?.[0] || userData.email || '';
+        const email = typeof rawEmail === 'object' ? (rawEmail.email || rawEmail.value || '') : String(rawEmail);
         setUser({
           id: String(userData.id),
           email,
