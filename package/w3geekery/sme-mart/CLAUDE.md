@@ -388,6 +388,39 @@ export const providerSkillsRelations = relations(providerSkills, ({ one }) => ({
 | **Profiles** | Base user info (name, email) |
 | **Modules** | Agent marketplace (future) |
 
+### Generic SQL Hub Module (Neon via DataProducer)
+
+The SME Mart Neon database is connected to ZeroBias via the **Generic SQL Hub Module**, which exposes it through the DataProducer interface (same pattern as data-explorer).
+
+**Module:** `@auditlogic/module-auditmation-generic-sql` (v0.5.0)
+**KB Article:** `https://cdn.zerobias.com/ct/qa/ctauditmationgenericsql/`
+
+**QA Connection (created 2026-02-11):**
+
+| Property | Value |
+|----------|-------|
+| **Connection Name** | SQL Connector Connection 1 |
+| **Connection ID** | `e3c874f5-5fd8-4fbc-8120-19861e28b19e` |
+| **Boundary** | Test (`a2262699-b182-482c-8fc3-ace298168343`) |
+| **Deployment** | SQL Connector 0.5.0 on SaaS Connection Node |
+| **Node Status** | Up |
+| **Connection Status** | Standby (blocked — see below) |
+
+**JDBC URL format (for Neon):**
+```
+jdbc:postgresql://ep-aged-fog-af9wu771.c-2.us-west-2.aws.neon.tech/neondb?user=neondb_owner&password=<PASSWORD>&sslmode=require
+```
+
+> **Note:** Use the **direct** Neon endpoint (no `-pooler` suffix) for JDBC. The Hub module uses HikariCP for connection pooling internally; double-pooling through Neon's PgBouncer can cause issues with prepared statements.
+
+**Status (2026-02-11):** Connection created but blocked on two issues:
+1. **Hub tags endpoint 503** — `POST /api/hub/resources/{id}/tags` returns 503 on QA, preventing deployment tagging (`envTypeTags INPUT: null` → `Error: no module-deployment tags found`)
+2. **Connection test fails** — `GET /api/hub/targets/{id}/metadata` reaches the SQL Connector container, but the error response isn't in `CoreError` format. The Hub's `ConnectedNode.ts:237` can't deserialize it, hiding the actual JDBC error. Likely cause: SSL/cert or network issue inside the Docker container reaching Neon.
+
+**Next steps:** Kevin is updating Hub error handling for better LLM troubleshooting. Retry connection test after QA Hub updates are deployed. Check `~/zb-repos/hub/` source (pulled latest 2026-02-11) for changes to `ConnectedNode.ts` and `TargetProducerImpl.ts`.
+
+**Hub source:** `~/zb-repos/hub/` (zerobias-com/hub, main branch)
+
 ### API Integration Patterns
 
 **ZeroBias SDK:** See `AGENTS.md` for SDK usage patterns and documentation references.
@@ -674,6 +707,7 @@ npm run start
 - **Plans (local)**: `.claude/plans/local/` - Local/draft plans
 - **Notes**: `.claude/notes/` - Session notes and working docs
 - **Hub Module (W3Geekery fork)**: `../../../../module` (i.e. `zerobias-org-forks/module`) - SME Mart Hub Module source (forked from `zerobias-org/module`, PRs go to `dev` branch)
+- **Hub Source (ZeroBias)**: `~/zb-repos/hub/` - Hub server/node source for debugging connector issues
 
 ## AGENTS.md Reference
 
@@ -716,5 +750,5 @@ VoltAgent's AI agent marketplace provides useful patterns for SME Mart:
 
 ---
 
-**Last Updated:** 2026-02-06
+**Last Updated:** 2026-02-11
 **Owner:** Clark / w3geekery
