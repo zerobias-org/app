@@ -1,20 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import {
   Box,
   Container,
   Typography,
   Card,
   CardContent,
-  TextField,
   Button,
-  Grid,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  InputAdornment,
   Alert,
   CircularProgress,
   Tooltip,
@@ -22,32 +15,20 @@ import {
 import { ArrowBack as ArrowBackIcon } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
 import { useZeroBias } from '@/context/ZeroBiasContext';
-
-const CATEGORIES = [
-  'Assessors',
-  'Advisors',
-  'Agentic',
-  'SecOps',
-  'DevSecOps',
-  'Data Services',
-  'Training',
-  'Engineering',
-];
+import { EngagementForm, isFormValid, type EngagementFormValues } from '@/components/marketplace/EngagementForm';
 
 export default function NewEngagementPage() {
   const router = useRouter();
   const { user, org, loading } = useZeroBias();
 
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [category, setCategory] = useState('');
-  const [budgetType, setBudgetType] = useState('');
-  const [budgetMin, setBudgetMin] = useState('');
-  const [budgetMax, setBudgetMax] = useState('');
-  const [timeline, setTimeline] = useState('');
+  const formValues = useRef<EngagementFormValues>({
+    title: '', description: '', category: '', budgetType: '',
+    budgetMin: '', budgetMax: '', timeline: '',
+  });
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [canSubmit, setCanSubmit] = useState(false);
 
   if (loading) {
     return (
@@ -65,9 +46,13 @@ export default function NewEngagementPage() {
     );
   }
 
-  const canSubmit = title.trim() && category && !submitting;
+  const handleValuesChange = (values: EngagementFormValues) => {
+    formValues.current = values;
+    setCanSubmit(isFormValid(values));
+  };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (status: 'open' | 'draft') => {
+    const v = formValues.current;
     setSubmitting(true);
     setError('');
 
@@ -78,13 +63,14 @@ export default function NewEngagementPage() {
         body: JSON.stringify({
           buyerZerobiasUserId: user.id,
           buyerZerobiasOrgId: org?.id || null,
-          title: title.trim(),
-          description: description.trim() || null,
-          category,
-          budgetType: budgetType || null,
-          budgetMin: budgetMin || null,
-          budgetMax: budgetMax || null,
-          timeline: timeline.trim() || null,
+          title: v.title.trim(),
+          description: v.description.trim() || null,
+          category: v.category,
+          budgetType: v.budgetType || null,
+          budgetMin: v.budgetMin || null,
+          budgetMax: v.budgetMax || null,
+          timeline: v.timeline.trim() || null,
+          status,
         }),
       });
 
@@ -108,7 +94,7 @@ export default function NewEngagementPage() {
         onClick={() => router.push('/engagements')}
         sx={{ mb: 2 }}
       >
-        Back to Engagements
+        Back to RFPs & Engagements
       </Button>
 
       <Tooltip title="Request for Proposal" enterDelay={300} arrow>
@@ -128,123 +114,27 @@ export default function NewEngagementPage() {
 
       <Card>
         <CardContent>
-          <Grid container spacing={3}>
-            {/* Title */}
-            <Grid size={12}>
-              <TextField
-                fullWidth
-                label="Title"
-                placeholder="e.g., SOC 2 Type II Audit Support"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-              />
-            </Grid>
+          <EngagementForm
+            onValuesChange={handleValuesChange}
+            disabled={submitting}
+          />
 
-            {/* Description */}
-            <Grid size={12}>
-              <TextField
-                fullWidth
-                label="Description"
-                multiline
-                rows={4}
-                placeholder="Describe the work you need, requirements, expectations..."
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              />
-            </Grid>
-
-            {/* Category */}
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <FormControl fullWidth required>
-                <InputLabel>Category</InputLabel>
-                <Select
-                  value={category}
-                  label="Category"
-                  onChange={(e) => setCategory(e.target.value)}
-                >
-                  {CATEGORIES.map((cat) => (
-                    <MenuItem key={cat} value={cat}>
-                      {cat}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-
-            {/* Budget Type */}
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <FormControl fullWidth>
-                <InputLabel>Budget Type</InputLabel>
-                <Select
-                  value={budgetType}
-                  label="Budget Type"
-                  onChange={(e) => setBudgetType(e.target.value)}
-                >
-                  <MenuItem value="">Not specified</MenuItem>
-                  <MenuItem value="fixed">Fixed Price</MenuItem>
-                  <MenuItem value="hourly">Hourly</MenuItem>
-                  <MenuItem value="negotiable">Negotiable</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-
-            {/* Budget Range */}
-            {budgetType && (
-              <>
-                <Grid size={{ xs: 12, sm: 6 }}>
-                  <TextField
-                    fullWidth
-                    label="Budget Min"
-                    type="number"
-                    value={budgetMin}
-                    onChange={(e) => setBudgetMin(e.target.value)}
-                    slotProps={{
-                      input: {
-                        startAdornment: <InputAdornment position="start">$</InputAdornment>,
-                      },
-                    }}
-                  />
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6 }}>
-                  <TextField
-                    fullWidth
-                    label="Budget Max"
-                    type="number"
-                    value={budgetMax}
-                    onChange={(e) => setBudgetMax(e.target.value)}
-                    slotProps={{
-                      input: {
-                        startAdornment: <InputAdornment position="start">$</InputAdornment>,
-                      },
-                    }}
-                  />
-                </Grid>
-              </>
-            )}
-
-            {/* Timeline */}
-            <Grid size={12}>
-              <TextField
-                fullWidth
-                label="Timeline"
-                placeholder="e.g., 4 weeks, ASAP, Q2 2026"
-                value={timeline}
-                onChange={(e) => setTimeline(e.target.value)}
-              />
-            </Grid>
-          </Grid>
-
-          {/* Submit */}
           <Box sx={{ mt: 4, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
             <Button variant="outlined" onClick={() => router.push('/engagements')}>
               Cancel
             </Button>
             <Button
+              variant="outlined"
+              onClick={() => handleSubmit('draft')}
+              disabled={!canSubmit || submitting}
+            >
+              {submitting ? 'Saving...' : 'Save as Draft'}
+            </Button>
+            <Button
               variant="contained"
               size="large"
-              onClick={handleSubmit}
-              disabled={!canSubmit}
+              onClick={() => handleSubmit('open')}
+              disabled={!canSubmit || submitting}
             >
               {submitting ? 'Creating RFP...' : 'Post RFP'}
             </Button>

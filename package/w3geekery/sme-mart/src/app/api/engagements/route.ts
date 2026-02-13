@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { workRequests } from '@/lib/db/schema';
+import { workRequests, providerProfiles, marketplaceUsers } from '@/lib/db/schema';
+import { eq } from 'drizzle-orm';
 import { getConnectedSdk } from '@/lib/zerobias-sdk';
 
 // Default "Task" activity in ZeroBias (Software Development Lifecycle workflow)
@@ -59,9 +60,20 @@ function buildTaskDescription(params: {
 /**
  * GET /api/engagements
  *
- * Returns all engagements (RFPs + Engagements), newest first.
+ * Returns engagements visible to the requesting user, newest first.
  * Includes proposals summary (id, providerId, status) for browse page filtering.
- * Optional: ?status=open&category=Assessors
+ *
+ * Query params:
+ *   userId    - ZeroBias user ID for visibility filtering (required for scoped view)
+ *   status    - Filter by engagement status
+ *   category  - Filter by category
+ *
+ * Visibility rules (when userId provided):
+ *   1. All open RFPs (status=open, no engagementTag) — public marketplace
+ *   2. User's own RFPs/engagements (as buyer) — any status, including drafts
+ *   3. Engagements where user is provider (has accepted proposal)
+ *   4. RFPs the user has proposed on (as provider)
+ *   Drafts are only visible to their owner.
  */
 export async function GET(request: NextRequest) {
   try {
@@ -76,11 +88,49 @@ export async function GET(request: NextRequest) {
 
     let result = allEngagements;
 
+    // Visibility filtering by user
+    const userId = request.nextUrl.searchParams.get('userId');
+    if (userId) {
+      // Look up this user's provider profile ID (if they have one)
+      let providerProfileId: string | null = null;
+      try {
+        const mktUser = await db.query.marketplaceUsers.findFirst({
+          where: eq(marketplaceUsers.zerobiasUserId, userId),
+        });
+        if (mktUser) {
+          const profile = await db.query.providerProfiles.findFirst({
+            where: eq(providerProfiles.userId, mktUser.id),
+            columns: { id: true },
+          });
+          if (profile) providerProfileId = profile.id;
+        }
+      } catch {
+        // No provider profile — that's fine
+      }
+
+      result = result.filter((eng) => {
+        // 1. Open RFPs are visible to everyone (public marketplace)
+        if (eng.status === 'open' && !eng.engagementTag) return true;
+
+        // 2. User's own RFPs/engagements (as buyer) — any status
+        if (eng.buyerZerobiasUserId === userId) return true;
+
+        // 3 & 4. User is a provider who has proposed on or is assigned to this engagement
+        if (providerProfileId && eng.proposals?.some((p) => p.providerId === providerProfileId)) {
+          return true;
+        }
+
+        return false;
+      });
+    }
+
+    // Status filter
     const status = request.nextUrl.searchParams.get('status');
     if (status) {
       result = result.filter((r) => r.status === status);
     }
 
+    // Category filter
     const category = request.nextUrl.searchParams.get('category');
     if (category) {
       result = result.filter((r) => r.category === category);
@@ -168,7 +218,7 @@ export async function POST(request: NextRequest) {
       budgetMin: budgetMin || null,
       budgetMax: budgetMax || null,
       timeline: timeline || null,
-      status: 'open',
+      status: body.status === 'draft' ? 'draft' : 'open',
       zerobiasTaskId,
     }).returning();
 

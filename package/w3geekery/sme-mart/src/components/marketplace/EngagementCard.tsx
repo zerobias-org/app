@@ -54,12 +54,25 @@ function formatBudget(engagement: EngagementCardData): string | null {
 
 interface EngagementCardProps {
   engagement: EngagementCardData;
+  currentProviderId?: string | null;
 }
 
-export function EngagementCard({ engagement }: EngagementCardProps) {
+const PROPOSAL_STATUS_COLORS: Record<string, 'default' | 'success' | 'error' | 'warning'> = {
+  pending: 'default',
+  accepted: 'success',
+  rejected: 'error',
+  withdrawn: 'warning',
+};
+
+export function EngagementCard({ engagement, currentProviderId }: EngagementCardProps) {
   const budget = formatBudget(engagement);
   const lifecycleLabel = getLifecycleLabel(engagement.engagementTag);
   const isRfp = lifecycleLabel === 'RFP';
+
+  // Check if current provider has proposed on this engagement
+  const myProposal = currentProviderId
+    ? engagement.proposals?.find((p) => p.providerId === currentProviderId)
+    : null;
 
   return (
     <Link href={`/engagements/${engagement.id}`} style={{ textDecoration: 'none' }}>
@@ -101,6 +114,14 @@ export function EngagementCard({ engagement }: EngagementCardProps) {
               />
             )}
             <Chip label={engagement.category} size="small" color="secondary" variant="outlined" />
+            {myProposal && (
+              <Chip
+                label={myProposal.status === 'accepted' ? 'Accepted' : myProposal.status === 'rejected' ? 'Rejected' : 'Proposed'}
+                size="small"
+                color={PROPOSAL_STATUS_COLORS[myProposal.status || 'pending'] || 'default'}
+                variant="filled"
+              />
+            )}
           </Box>
 
           {/* Title */}

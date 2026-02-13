@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState, useMemo, useCallback } from 'react';
-import { useSearchParams } from 'next/navigation';
 import {
   Box,
   Container,
@@ -35,12 +34,12 @@ import { useZeroBias } from '@/context/ZeroBiasContext';
 import { isRfpPhase, isEngagementPhase } from '@/lib/engagement-lifecycle';
 
 const STATUS_OPTIONS = [
+  { value: 'all', label: 'All Statuses' },
   { value: 'open', label: 'Open' },
   { value: 'in_progress', label: 'In Progress' },
   { value: 'draft', label: 'Draft' },
   { value: 'completed', label: 'Completed' },
   { value: 'cancelled', label: 'Cancelled' },
-  { value: 'all', label: 'All Statuses' },
 ];
 
 type SortOption = 'newest' | 'budget-high';
@@ -53,23 +52,22 @@ const SORT_OPTIONS: { value: SortOption; label: string }[] = [
 
 const PAGE_HEADERS: Record<LifecycleFilter, { title: string; subtitle: string }> = {
   rfp: {
-    title: 'Requests for Proposals',
-    subtitle: 'Browse open RFPs from organizations seeking compliance expertise',
+    title: 'Open RFPs',
+    subtitle: 'Browse RFPs seeking proposals',
   },
   engagement: {
-    title: 'Active Engagements',
-    subtitle: 'Browse engagements with work in progress',
+    title: 'My Engagements',
+    subtitle: 'Active and completed engagements',
   },
   all: {
-    title: 'Engagements',
-    subtitle: 'Browse RFPs and engagements across the marketplace',
+    title: 'All',
+    subtitle: 'All your RFPs and engagements',
   },
 };
 
 const FILTER_DRAWER_WIDTH = 320;
 
 export default function EngagementsPage() {
-  const searchParams = useSearchParams();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const { user } = useZeroBias();
@@ -83,13 +81,11 @@ export default function EngagementsPage() {
 
   // Basic filter state (not persisted)
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState(
-    searchParams.get('status') || 'open'
-  );
+  const [statusFilter, setStatusFilter] = useState('all');
   const [sortBy, setSortBy] = useState<SortOption>('newest');
 
   // Lifecycle filter: RFPs | Engagements | All
-  const [lifecycleFilter, setLifecycleFilter] = useState<LifecycleFilter>('all');
+  const [lifecycleFilter, setLifecycleFilter] = useState<LifecycleFilter>('rfp');
 
   // Provider "My Proposals" filter
   const [currentProviderId, setCurrentProviderId] = useState<string | null>(null);
@@ -111,12 +107,14 @@ export default function EngagementsPage() {
   });
 
   useEffect(() => {
-    fetch('/api/engagements')
+    if (!user) return;
+    const url = `/api/engagements?userId=${encodeURIComponent(user.id)}`;
+    fetch(url)
       .then((res) => res.json())
       .then((data) => setEngagements(data))
       .catch(() => setError(true))
       .finally(() => setLoading(false));
-  }, []);
+  }, [user]);
 
   // Look up current user's provider profile (for "My Proposals" filter)
   useEffect(() => {
@@ -249,7 +247,9 @@ export default function EngagementsPage() {
           <Tooltip title="Request for Proposal" enterDelay={300} arrow>
             <ToggleButton value="rfp">RFPs</ToggleButton>
           </Tooltip>
-          <ToggleButton value="engagement">Engagements</ToggleButton>
+          {engagements.some((e) => !!e.engagementTag) && (
+            <ToggleButton value="engagement">Engagements</ToggleButton>
+          )}
           <ToggleButton value="all">All</ToggleButton>
         </ToggleButtonGroup>
 
@@ -386,7 +386,7 @@ export default function EngagementsPage() {
             <Grid container spacing={3}>
               {filtered.map((engagement) => (
                 <Grid size={{ xs: 12, sm: 6, lg: 4 }} key={engagement.id}>
-                  <EngagementCard engagement={engagement} />
+                  <EngagementCard engagement={engagement} currentProviderId={currentProviderId} />
                 </Grid>
               ))}
             </Grid>

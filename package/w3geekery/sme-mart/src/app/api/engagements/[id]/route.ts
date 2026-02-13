@@ -40,8 +40,11 @@ export async function GET(
 /**
  * PUT /api/engagements/[id]
  *
- * Update an engagement (status change).
- * Body: { status, buyerZerobiasUserId }
+ * Update an engagement. Supports status changes and field edits.
+ * Field edits (title, description, category, budget, timeline) only allowed in draft/open status.
+ *
+ * Body: { buyerZerobiasUserId, status?, title?, description?, category?,
+ *         budgetType?, budgetMin?, budgetMax?, timeline? }
  */
 export async function PUT(
   request: NextRequest,
@@ -50,7 +53,7 @@ export async function PUT(
   try {
     const { id } = await params;
     const body = await request.json();
-    const { status, buyerZerobiasUserId } = body;
+    const { buyerZerobiasUserId } = body;
 
     if (!buyerZerobiasUserId) {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
@@ -69,8 +72,39 @@ export async function PUT(
       return NextResponse.json({ error: 'Not authorized' }, { status: 403 });
     }
 
+    // Build update object
+    const updates: Record<string, unknown> = {};
+
+    // Status change is always allowed (for cancel, publish, etc.)
+    if (body.status !== undefined) {
+      updates.status = body.status;
+    }
+
+    // Field edits only allowed in draft or open status
+    const editableFields = ['title', 'description', 'category', 'budgetType', 'budgetMin', 'budgetMax', 'timeline'];
+    const hasFieldEdits = editableFields.some((f) => body[f] !== undefined);
+
+    if (hasFieldEdits) {
+      if (existing.status !== 'draft' && existing.status !== 'open') {
+        return NextResponse.json(
+          { error: 'Can only edit RFPs in draft or open status' },
+          { status: 400 }
+        );
+      }
+
+      for (const field of editableFields) {
+        if (body[field] !== undefined) {
+          updates[field] = body[field];
+        }
+      }
+    }
+
+    if (Object.keys(updates).length === 0) {
+      return NextResponse.json({ error: 'No updates provided' }, { status: 400 });
+    }
+
     const [updated] = await db.update(workRequests)
-      .set({ status })
+      .set(updates)
       .where(eq(workRequests.id, id))
       .returning();
 

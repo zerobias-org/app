@@ -94,6 +94,9 @@ export function ZeroBiasProvider({ children }: ZeroBiasProviderProps) {
       setLoading(false);
     };
 
+    // Track subscriptions for cleanup
+    const subscriptions: Array<{ unsubscribe: () => void }> = [];
+
     const initRealMode = async () => {
       try {
         setLoading(true);
@@ -128,10 +131,11 @@ export function ZeroBiasProvider({ children }: ZeroBiasProviderProps) {
           setIsAdmin(false);
         }
 
-        // Subscribe to orgs
+        // Subscribe to orgs (with cleanup)
         const defaultOrgId = process.env.NEXT_PUBLIC_DEFAULT_ORG_ID;
+        let defaultOrgSelected = false;
 
-        appService.zerobiasClientApp.getOrgs().subscribe({
+        const orgsSub = appService.zerobiasClientApp.getOrgs().subscribe({
           next: (orgsList: any[]) => {
             const mapped = orgsList.map((o) => ({
               id: String(o.id),
@@ -140,9 +144,11 @@ export function ZeroBiasProvider({ children }: ZeroBiasProviderProps) {
             }));
             setOrgs(mapped);
 
-            // When default org is configured, set it directly from the list
-            // and tell the SDK to select it (bypasses getCurrentOrg race)
-            if (defaultOrgId && orgsList.length > 0) {
+            // When default org is configured, select it ONCE.
+            // selectOrg() triggers SDK to re-emit on getOrgs(), so guard
+            // against re-entry to prevent an infinite loop.
+            if (defaultOrgId && orgsList.length > 0 && !defaultOrgSelected) {
+              defaultOrgSelected = true;
               const targetOrg = orgsList.find((o: any) => String(o.id) === defaultOrgId);
               if (targetOrg) {
                 setOrg({
@@ -156,13 +162,14 @@ export function ZeroBiasProvider({ children }: ZeroBiasProviderProps) {
           },
           error: (err: Error) => console.error('Failed to get orgs:', err),
         });
+        subscriptions.push(orgsSub);
 
         // Subscribe to current org for SDK-driven changes (user switches org).
         // When defaultOrgId is configured, skip — the org is set directly above
         // to avoid the race where getCurrentOrg() emits Roughnecks before
         // selectOrg() completes.
         if (!defaultOrgId) {
-          appService.zerobiasClientApp.getCurrentOrg().subscribe({
+          const currentOrgSub = appService.zerobiasClientApp.getCurrentOrg().subscribe({
             next: (currentOrg: any) => {
               if (currentOrg) {
                 setOrg({
@@ -174,6 +181,7 @@ export function ZeroBiasProvider({ children }: ZeroBiasProviderProps) {
             },
             error: (err: Error) => console.error('Failed to get current org:', err),
           });
+          subscriptions.push(currentOrgSub);
         }
 
       } catch (err) {
@@ -189,6 +197,10 @@ export function ZeroBiasProvider({ children }: ZeroBiasProviderProps) {
     } else {
       initRealMode();
     }
+
+    return () => {
+      subscriptions.forEach((sub) => sub.unsubscribe());
+    };
   }, []);
 
   const refreshUser = useCallback(async () => {

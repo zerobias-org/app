@@ -23,13 +23,16 @@ import {
 } from '@mui/icons-material';
 import { useZeroBias } from '@/context/ZeroBiasContext';
 
-interface ProviderSummary {
+interface UserSummary {
   id: string;
   zerobiasUserId: string;
   displayName: string;
-  headline: string | null;
-  availabilityStatus: string;
+  email: string | null;
+  avatarUrl: string | null;
+  isProvider: boolean;
+  isBuyer: boolean;
   hourlyRate: string | null;
+  headline: string | null;
 }
 
 const IS_LOCAL_DEV = process.env.NEXT_PUBLIC_IS_LOCAL_DEV === 'true';
@@ -37,16 +40,16 @@ const IS_LOCAL_DEV = process.env.NEXT_PUBLIC_IS_LOCAL_DEV === 'true';
 export function ImpersonationSwitcher() {
   const { user, isImpersonating, impersonateUser, stopImpersonating } = useZeroBias();
   const [open, setOpen] = useState(false);
-  const [providers, setProviders] = useState<ProviderSummary[]>([]);
+  const [users, setUsers] = useState<UserSummary[]>([]);
 
   useEffect(() => {
-    if (open && providers.length === 0) {
-      fetch('/api/providers')
+    if (open && users.length === 0) {
+      fetch('/api/users')
         .then((res) => res.json())
-        .then((data) => setProviders(data))
-        .catch((err) => console.error('Failed to fetch providers:', err));
+        .then((data) => setUsers(data))
+        .catch((err) => console.error('Failed to fetch users:', err));
     }
-  }, [open, providers.length]);
+  }, [open, users.length]);
 
   if (!IS_LOCAL_DEV) return null;
 
@@ -93,9 +96,9 @@ export function ImpersonationSwitcher() {
         </Box>
       )}
 
-      {/* Drawer with provider list */}
+      {/* Drawer with user list */}
       <Drawer anchor="right" open={open} onClose={() => setOpen(false)}>
-        <Box sx={{ width: 360, p: 2 }}>
+        <Box sx={{ width: 380, p: 2 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
             <Typography variant="h6" fontWeight={600}>
               Impersonate User
@@ -125,32 +128,43 @@ export function ImpersonationSwitcher() {
           <Divider sx={{ mb: 1 }} />
 
           <List disablePadding>
-            {providers.map((provider) => {
-              const isActive = user?.id === provider.zerobiasUserId;
+            {users.map((u) => {
+              const isActive = user?.id === u.zerobiasUserId;
               return (
                 <ListItemButton
-                  key={provider.id}
+                  key={u.id}
                   selected={isActive}
                   onClick={() => {
-                    impersonateUser(provider.zerobiasUserId, provider.displayName);
+                    impersonateUser(u.zerobiasUserId, u.displayName, u.email || undefined);
                     setOpen(false);
                   }}
                   sx={{ borderRadius: 1, mb: 0.5 }}
                 >
                   <ListItemAvatar>
-                    <Avatar sx={{ bgcolor: isActive ? 'primary.main' : 'grey.400', width: 36, height: 36, fontSize: '0.85rem' }}>
-                      {initials(provider.displayName)}
+                    <Avatar
+                      src={u.avatarUrl || undefined}
+                      sx={{ bgcolor: isActive ? 'primary.main' : u.isProvider ? 'grey.400' : 'info.main', width: 36, height: 36, fontSize: '0.85rem' }}
+                    >
+                      {initials(u.displayName)}
                     </Avatar>
                   </ListItemAvatar>
                   <ListItemText
-                    primary={provider.displayName}
-                    secondary={provider.headline}
+                    primary={u.displayName}
+                    secondary={u.headline || u.email || u.zerobiasUserId}
                     primaryTypographyProps={{ fontWeight: 600, fontSize: '0.9rem' }}
                     secondaryTypographyProps={{ fontSize: '0.75rem', noWrap: true }}
                   />
-                  {provider.hourlyRate && (
-                    <Chip label={`$${provider.hourlyRate}/hr`} size="small" sx={{ ml: 1 }} />
-                  )}
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, ml: 1, alignItems: 'flex-end' }}>
+                    {u.isProvider && (
+                      <Chip label={u.hourlyRate ? `$${u.hourlyRate}/hr` : 'Provider'} size="small" color="default" />
+                    )}
+                    {u.isBuyer && (
+                      <Chip label="Buyer" size="small" color="info" />
+                    )}
+                    {!u.isProvider && !u.isBuyer && (
+                      <Chip label="User" size="small" variant="outlined" />
+                    )}
+                  </Box>
                 </ListItemButton>
               );
             })}

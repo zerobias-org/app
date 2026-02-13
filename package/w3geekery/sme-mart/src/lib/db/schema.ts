@@ -13,15 +13,32 @@ export const proposalStatusEnum = pgEnum('proposal_status', ['pending', 'accepte
 export const proficiencyLevelEnum = pgEnum('proficiency_level', ['beginner', 'intermediate', 'expert']);
 
 // =============================================================================
+// MARKETPLACE USERS — Central identity for all SME Mart account holders
+// Links to ZeroBias Dana user. A user can be a provider, buyer, or both.
+// =============================================================================
+
+export const marketplaceUsers = pgTable('marketplace_users', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  zerobiasUserId: text('zerobias_user_id').notNull().unique(),
+  zerobiasOrgId: text('zerobias_org_id'),
+  displayName: text('display_name').notNull(),
+  email: text('email'),
+  avatarUrl: text('avatar_url'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+// =============================================================================
 // PROVIDER PROFILES
-// Extends ZeroBias User with marketplace-specific data
+// Extends marketplace user with provider-specific data
 // =============================================================================
 
 export const providerProfiles = pgTable('provider_profiles', {
   id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id').references(() => marketplaceUsers.id),
   slug: text('slug').notNull().unique(),
-  zerobiasUserId: text('zerobias_user_id').notNull().unique(),
-  zerobiasOrgId: text('zerobias_org_id'),
+  zerobiasUserId: text('zerobias_user_id').notNull().unique(), // TODO: migrate to userId, then drop
+  zerobiasOrgId: text('zerobias_org_id'), // TODO: migrate to marketplace_users.zerobias_org_id
   displayName: text('display_name').notNull(),
   headline: text('headline'),
   about: text('about'),
@@ -212,8 +229,9 @@ export const serviceOfferings = pgTable('service_offerings', {
 
 export const workRequests = pgTable('work_requests', {
   id: uuid('id').primaryKey().defaultRandom(),
-  buyerZerobiasUserId: text('buyer_zerobias_user_id').notNull(),
-  buyerZerobiasOrgId: text('buyer_zerobias_org_id'),
+  buyerUserId: uuid('buyer_user_id').references(() => marketplaceUsers.id),
+  buyerZerobiasUserId: text('buyer_zerobias_user_id').notNull(), // TODO: migrate to buyerUserId, then drop
+  buyerZerobiasOrgId: text('buyer_zerobias_org_id'), // TODO: migrate to marketplace_users.zerobias_org_id
   title: text('title').notNull(),
   description: text('description'),
   category: text('category').notNull(), // References local categories table (slug)
@@ -296,7 +314,19 @@ export const appSettings = pgTable('app_settings', {
 // RELATIONS
 // =============================================================================
 
-export const providerProfilesRelations = relations(providerProfiles, ({ many }) => ({
+export const marketplaceUsersRelations = relations(marketplaceUsers, ({ one, many }) => ({
+  providerProfile: one(providerProfiles, {
+    fields: [marketplaceUsers.id],
+    references: [providerProfiles.userId],
+  }),
+  workRequests: many(workRequests),
+}));
+
+export const providerProfilesRelations = relations(providerProfiles, ({ one, many }) => ({
+  user: one(marketplaceUsers, {
+    fields: [providerProfiles.userId],
+    references: [marketplaceUsers.id],
+  }),
   skills: many(providerSkills),
   roles: many(providerRoles),
   products: many(providerProducts),
@@ -357,9 +387,13 @@ export const serviceOfferingsRelations = relations(serviceOfferings, ({ one }) =
   })
 }));
 
-export const workRequestsRelations = relations(workRequests, ({ many }) => ({
+export const workRequestsRelations = relations(workRequests, ({ one, many }) => ({
+  buyer: one(marketplaceUsers, {
+    fields: [workRequests.buyerUserId],
+    references: [marketplaceUsers.id],
+  }),
   proposals: many(proposals),
-  reviews: many(reviews)
+  reviews: many(reviews),
 }));
 
 export const proposalsRelations = relations(proposals, ({ one }) => ({

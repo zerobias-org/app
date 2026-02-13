@@ -130,6 +130,36 @@ const REAL_USERS = {
   CI_ROUGHNECK_ADMIN: 'ea998b93-d05a-5743-8fe4-0e8d383f2b0c',
 };
 
+// =============================================================================
+// DEMO BUYER ACCOUNTS
+// These are referenced as buyerZerobiasUserId in work requests.
+// Brian can impersonate these to see the buyer view.
+// =============================================================================
+
+const DEMO_BUYERS = {
+  PINNACLE_CORP: 'demo-buyer-pinnacle',       // "Demo Buyer - Pinnacle Corp"
+  LAKEWOOD_HEALTH: 'demo-buyer-lakewood',      // "Demo Buyer - Lakewood Health"
+  // Legacy buyers from original seed (kept for backward compat)
+  ACME_CORP: 'buyer-acme-001',
+  FINTECH_INC: 'buyer-fintech-002',
+  STARTUP_XYZ: 'buyer-startup-003',
+  HEALTHTECH: 'buyer-health-004',
+  ENTERPRISE_CO: 'buyer-enterprise-005',
+};
+
+// =============================================================================
+// QA ENGAGEMENT TAGS (created in ZeroBias QA via Dana API)
+// These are real tags — use their UUIDs for zerobiasTagId references
+// =============================================================================
+
+const ENGAGEMENT_TAGS = {
+  CRYSTAL_HARBOR:  { name: 'ENG-crystal-harbor-sme-mart-demo',  id: 'd37c2a0b-318c-4028-a3f2-b03148ca327f' },
+  VELVET_THUNDER:  { name: 'ENG-velvet-thunder-sme-mart-demo',  id: '064ee7c2-6188-4bc0-b4bf-f318c9783e9a' },
+  AMBER_FALCON:    { name: 'ENG-amber-falcon-sme-mart-demo',    id: 'b257e392-baf3-4efe-822f-412c9e4d7f0f' },
+  COBALT_SUMMIT:   { name: 'ENG-cobalt-summit-sme-mart-demo',   id: '6ff1482e-0ef7-4b7f-8d39-05df12a6ec46' },
+  CORAL_BREEZE:    { name: 'ENG-coral-breeze-sme-mart-demo',    id: 'cc66ab02-df66-46c2-8a74-b09b5e38fc2c' },
+};
+
 const providers: SeedProvider[] = [
   // -------------------------------------------------------------------------
   // Real user: Clark Stacer (QA)
@@ -275,6 +305,70 @@ const providers: SeedProvider[] = [
       { title: 'Security Awareness Program', description: 'Custom security awareness training program with phishing simulations and metrics.', category: 'Training', pricingType: 'fixed', price: '3500.00', deliveryTime: '4 weeks' },
     ],
   },
+  // -------------------------------------------------------------------------
+  // Demo Provider Alpha — Sarah Chen (DevSecOps)
+  // Brian can impersonate this user to see the provider view
+  // -------------------------------------------------------------------------
+  {
+    zerobiasUserId: 'demo-provider-sarah-chen',
+    slug: 'sarah-chen',
+    displayName: 'Demo Provider - Sarah Chen',
+    headline: 'DevSecOps Lead & Secure SDLC Specialist',
+    about: 'DevSecOps engineer with 12 years of experience embedding security into CI/CD pipelines. Specializes in container security, infrastructure-as-code scanning, and building developer-friendly security guardrails. Previously led DevSecOps at a Fortune 500 fintech.',
+    hourlyRate: '195.00',
+    availabilityStatus: 'available',
+    responseTime: 'Within 8 hours',
+    totalJobsCompleted: 29,
+    ratingAverage: '4.88',
+    skills: [
+      { zerobiasSkillId: NICE_SKILLS.PROGRAMMING_LANGUAGES, skillName: 'Programming languages', proficiencyLevel: 'expert', yearsExperience: 12 },
+      { zerobiasSkillId: NICE_SKILLS.CLOUD_SECURITY, skillName: 'Cloud security', proficiencyLevel: 'expert', yearsExperience: 8 },
+      { zerobiasSkillId: NICE_SKILLS.NETWORK_SECURITY, skillName: 'Network security', proficiencyLevel: 'intermediate', yearsExperience: 6 },
+      { zerobiasSkillId: NICE_SKILLS.VULNERABILITY_ASSESSMENT, skillName: 'Vulnerability assessment', proficiencyLevel: 'expert', yearsExperience: 9 },
+      { zerobiasSkillId: NICE_SKILLS.AUTOMATION, skillName: 'Automated solutions', proficiencyLevel: 'expert', yearsExperience: 10 },
+    ],
+    frameworks: [
+      { zerobiasFrameworkId: FRAMEWORKS.SOC2, proficiencyLevel: 'expert', yearsExperience: 6, implementationExperience: true },
+      { zerobiasFrameworkId: FRAMEWORKS.NIST_CSF, proficiencyLevel: 'intermediate', yearsExperience: 4, implementationExperience: true },
+    ],
+    services: [
+      { title: 'CI/CD Security Audit', description: 'Comprehensive audit of your CI/CD pipeline with SAST, DAST, SCA tooling recommendations and implementation.', category: 'DevSecOps', pricingType: 'fixed', price: '7500.00', deliveryTime: '3 weeks' },
+      { title: 'Container Security Hardening', description: 'Harden your Kubernetes/Docker environment with runtime protection, image scanning, and policy enforcement.', category: 'DevSecOps', pricingType: 'hourly', price: '195.00', deliveryTime: '4 weeks' },
+      { title: 'Secure SDLC Program Setup', description: 'End-to-end secure development lifecycle program with developer training, tooling, and governance.', category: 'DevSecOps', pricingType: 'fixed', price: '15000.00', deliveryTime: '8 weeks' },
+    ],
+  },
+  // -------------------------------------------------------------------------
+  // Demo Provider Beta — Marcus Webb (Evidence & Data Services)
+  // Brian can impersonate this user to see the provider view
+  // -------------------------------------------------------------------------
+  {
+    zerobiasUserId: 'demo-provider-marcus-webb',
+    slug: 'marcus-webb',
+    displayName: 'Demo Provider - Marcus Webb',
+    headline: 'Compliance Evidence Specialist & Data Documentation Expert',
+    about: 'Former Big 4 evidence reviewer turned independent consultant. Specializes in organizing, collecting, and documenting compliance evidence for SOC 2, ISO 27001, and HIPAA audits. Meticulous, detail-oriented, and fast. Clients love the clean evidence packages.',
+    hourlyRate: '110.00',
+    availabilityStatus: 'available',
+    responseTime: 'Within 4 hours',
+    totalJobsCompleted: 67,
+    ratingAverage: '4.93',
+    skills: [
+      { zerobiasSkillId: NICE_SKILLS.TECHNICAL_WRITING, skillName: 'Technical writing', proficiencyLevel: 'expert', yearsExperience: 10 },
+      { zerobiasSkillId: NICE_SKILLS.RISK_ASSESSMENT, skillName: 'Risk assessment', proficiencyLevel: 'intermediate', yearsExperience: 5 },
+      { zerobiasSkillId: NICE_SKILLS.DATA_ANALYSIS, skillName: 'Data analysis', proficiencyLevel: 'expert', yearsExperience: 8 },
+      { zerobiasSkillId: NICE_SKILLS.POLICY_DEVELOPMENT, skillName: 'Policy development', proficiencyLevel: 'expert', yearsExperience: 7 },
+    ],
+    frameworks: [
+      { zerobiasFrameworkId: FRAMEWORKS.SOC2, proficiencyLevel: 'expert', yearsExperience: 8, auditExperience: true },
+      { zerobiasFrameworkId: FRAMEWORKS.ISO27001, proficiencyLevel: 'expert', yearsExperience: 6, auditExperience: true },
+      { zerobiasFrameworkId: FRAMEWORKS.HIPAA, proficiencyLevel: 'intermediate', yearsExperience: 4, auditExperience: true },
+    ],
+    services: [
+      { title: 'Evidence Collection Package', description: 'Systematic evidence collection, organization, and documentation for your upcoming audit. Covers all control domains.', category: 'Data Services', pricingType: 'fixed', price: '4500.00', deliveryTime: '3 weeks' },
+      { title: 'Policy & Procedure Writing', description: 'Draft or update your security policies and procedures to meet framework requirements. Includes review and revision cycles.', category: 'Data Services', pricingType: 'hourly', price: '110.00', deliveryTime: '2 weeks' },
+      { title: 'Audit Readiness Review', description: 'Pre-audit evidence review to identify gaps before your assessor arrives. Includes remediation checklist.', category: 'Data Services', pricingType: 'fixed', price: '3000.00', deliveryTime: '1 week' },
+    ],
+  },
 ];
 
 // =============================================================================
@@ -371,58 +465,71 @@ async function seed() {
     console.log(`    + ${provider.services.length} services`);
   }
 
-  // Seed reviews for A1-Bob-IT
-  console.log('\nSeeding reviews for A1-Bob-IT...');
-  const bobProfile = await db.query.providerProfiles.findFirst({
-    where: eq(schema.providerProfiles.zerobiasUserId, 'a1-bob-it'),
-  });
+  // Seed reviews for multiple providers
+  console.log('\nSeeding reviews...');
 
-  if (bobProfile) {
-    const existingReviews = await db.query.reviews.findMany({
-      where: eq(schema.reviews.providerId, bobProfile.id),
-    });
-
-    if (existingReviews.length > 0) {
-      console.log(`  Skipping reviews — ${existingReviews.length} already exist`);
-    } else {
-      const seedReviews = [
-        {
-          providerId: bobProfile.id,
-          reviewerZerobiasUserId: 'demo-advisor-002',
-          rating: 5,
-          reviewText: 'Bob built us an incredible compliance automation agent. Cut our evidence collection time by 70%. Highly recommend for any AI/compliance work.',
-          approved: false,
-        },
-        {
-          providerId: bobProfile.id,
-          reviewerZerobiasUserId: 'a3-gina-auditor',
-          rating: 4,
-          reviewText: 'Great work on the audit bot integration. Delivered on time and was very responsive to feedback. Minor documentation gaps but overall excellent.',
-          approved: false,
-        },
-        {
-          providerId: bobProfile.id,
-          reviewerZerobiasUserId: 'demo-secops-004',
-          rating: 5,
-          reviewText: 'Fantastic automation specialist. Built a custom SIEM integration that saved our team hours of manual work every week.',
-          approved: false,
-        },
-        {
-          providerId: bobProfile.id,
-          reviewerZerobiasUserId: 'demo-trainer-005',
-          rating: 3,
-          reviewText: 'Decent work but scope crept a bit. Communication could be better during the project. End result was functional.',
-          approved: false,
-        },
-      ];
-
-      for (const review of seedReviews) {
-        await db.insert(schema.reviews).values(review);
-      }
-      console.log(`  Created ${seedReviews.length} reviews (all pending approval)`);
-    }
+  const existingReviews = await db.query.reviews.findMany();
+  if (existingReviews.length > 0) {
+    console.log(`  Skipping reviews — ${existingReviews.length} already exist`);
   } else {
-    console.log('  A1-Bob-IT profile not found — skipping reviews');
+    // Fetch all provider profiles for review seeding
+    const reviewProviders = {
+      bob: await db.query.providerProfiles.findFirst({ where: eq(schema.providerProfiles.slug, 'a1-bob-it') }),
+      gina: await db.query.providerProfiles.findFirst({ where: eq(schema.providerProfiles.slug, 'a3-gina-auditor') }),
+      james: await db.query.providerProfiles.findFirst({ where: eq(schema.providerProfiles.slug, 'james-okafor') }),
+      carlos: await db.query.providerProfiles.findFirst({ where: eq(schema.providerProfiles.slug, 'carlos-rivera') }),
+      alex: await db.query.providerProfiles.findFirst({ where: eq(schema.providerProfiles.slug, 'alex-nguyen') }),
+      sarah: await db.query.providerProfiles.findFirst({ where: eq(schema.providerProfiles.slug, 'sarah-chen') }),
+      marcus: await db.query.providerProfiles.findFirst({ where: eq(schema.providerProfiles.slug, 'marcus-webb') }),
+    };
+
+    const seedReviews = [
+      // --- Bob (A1-Bob-IT) reviews ---
+      ...(reviewProviders.bob ? [
+        { providerId: reviewProviders.bob.id, reviewerZerobiasUserId: DEMO_BUYERS.PINNACLE_CORP, rating: 5, reviewText: 'Bob built us an incredible compliance automation agent. Cut our evidence collection time by 70%. Highly recommend for any AI/compliance work.', approved: false },
+        { providerId: reviewProviders.bob.id, reviewerZerobiasUserId: DEMO_BUYERS.STARTUP_XYZ, rating: 4, reviewText: 'Great work on the audit bot integration. Delivered on time and was very responsive to feedback. Minor documentation gaps but overall excellent.', approved: false },
+        { providerId: reviewProviders.bob.id, reviewerZerobiasUserId: DEMO_BUYERS.LAKEWOOD_HEALTH, rating: 5, reviewText: 'Fantastic automation specialist. Built a custom SIEM integration that saved our team hours of manual work every week.', approved: false },
+        { providerId: reviewProviders.bob.id, reviewerZerobiasUserId: DEMO_BUYERS.ACME_CORP, rating: 3, reviewText: 'Decent work but scope crept a bit. Communication could be better during the project. End result was functional.', approved: false },
+      ] : []),
+      // --- Gina (A3-Gina-Auditor) reviews ---
+      ...(reviewProviders.gina ? [
+        { providerId: reviewProviders.gina.id, reviewerZerobiasUserId: DEMO_BUYERS.HEALTHTECH, rating: 5, reviewText: 'Gina was phenomenal. Her ISO 27001 gap assessment was thorough, well-organized, and delivered ahead of schedule. The remediation roadmap was actionable and prioritized perfectly.', approved: false },
+        { providerId: reviewProviders.gina.id, reviewerZerobiasUserId: DEMO_BUYERS.PINNACLE_CORP, rating: 5, reviewText: 'Fast-tracked our SOC 2 Type I in record time. Gina knew exactly what evidence we needed and helped us close gaps before the formal assessment. Absolute pro.', approved: false },
+        { providerId: reviewProviders.gina.id, reviewerZerobiasUserId: DEMO_BUYERS.ACME_CORP, rating: 4, reviewText: 'Very knowledgeable assessor. Only minor feedback: could provide more context on why certain controls matter. But deliverables were excellent.', approved: false },
+      ] : []),
+      // --- James (Okafor) reviews ---
+      ...(reviewProviders.james ? [
+        { providerId: reviewProviders.james.id, reviewerZerobiasUserId: DEMO_BUYERS.FINTECH_INC, rating: 5, reviewText: 'James helped us build our entire GRC program from scratch. His NIST CSF expertise is unmatched. The phased approach he recommended made a complex project manageable.', approved: false },
+        { providerId: reviewProviders.james.id, reviewerZerobiasUserId: DEMO_BUYERS.LAKEWOOD_HEALTH, rating: 4, reviewText: 'Solid compliance roadmap. James understands healthcare regulations well and gave us practical, budget-conscious recommendations.', approved: false },
+      ] : []),
+      // --- Alex (Nguyen) reviews ---
+      ...(reviewProviders.alex ? [
+        { providerId: reviewProviders.alex.id, reviewerZerobiasUserId: DEMO_BUYERS.LAKEWOOD_HEALTH, rating: 5, reviewText: 'Alex built us a HIPAA training program that our clinical staff actually enjoyed. The phishing simulations using healthcare-specific scenarios were brilliant. Completion rates went from 40% to 95%.', approved: false },
+        { providerId: reviewProviders.alex.id, reviewerZerobiasUserId: DEMO_BUYERS.ENTERPRISE_CO, rating: 5, reviewText: 'Best security awareness trainer we\'ve worked with. Interactive, engaging, and the materials are top-notch. Our team still references the training guide months later.', approved: false },
+        { providerId: reviewProviders.alex.id, reviewerZerobiasUserId: DEMO_BUYERS.ACME_CORP, rating: 4, reviewText: 'Great CISSP prep course. Two of our engineers passed on the first attempt after Alex\'s program. Only wish it had more hands-on lab exercises.', approved: false },
+      ] : []),
+      // --- Carlos (Rivera) reviews ---
+      ...(reviewProviders.carlos ? [
+        { providerId: reviewProviders.carlos.id, reviewerZerobiasUserId: DEMO_BUYERS.ENTERPRISE_CO, rating: 5, reviewText: 'Carlos set up our SOC from the ground up. Alert tuning was especially impressive — went from 500 alerts/day to 30 actionable ones. The runbooks he created are now our team\'s bible.', approved: false },
+        { providerId: reviewProviders.carlos.id, reviewerZerobiasUserId: DEMO_BUYERS.PINNACLE_CORP, rating: 4, reviewText: 'Good incident response planning. Carlos helped us think through scenarios we hadn\'t considered. Response times were reasonable given his workload.', approved: false },
+      ] : []),
+      // --- Sarah (Chen) reviews ---
+      ...(reviewProviders.sarah ? [
+        { providerId: reviewProviders.sarah.id, reviewerZerobiasUserId: DEMO_BUYERS.PINNACLE_CORP, rating: 5, reviewText: 'Sarah transformed our CI/CD security. We went from zero scanning to full SAST/DAST/SCA coverage in 3 weeks. Her developer-friendly approach meant our engineers actually adopted the tools instead of bypassing them.', approved: false },
+        { providerId: reviewProviders.sarah.id, reviewerZerobiasUserId: DEMO_BUYERS.STARTUP_XYZ, rating: 5, reviewText: 'Incredible container security work. Sarah hardened our Kubernetes cluster and set up admission controllers that catch misconfigurations before deployment. Worth every penny.', approved: false },
+      ] : []),
+      // --- Marcus (Webb) reviews ---
+      ...(reviewProviders.marcus ? [
+        { providerId: reviewProviders.marcus.id, reviewerZerobiasUserId: DEMO_BUYERS.PINNACLE_CORP, rating: 5, reviewText: 'Marcus prepared the cleanest evidence binder I\'ve ever seen. Our assessor commented on how well-organized everything was. Saved us weeks of back-and-forth during the audit.', approved: false },
+        { providerId: reviewProviders.marcus.id, reviewerZerobiasUserId: DEMO_BUYERS.HEALTHTECH, rating: 5, reviewText: 'Marcus wrote our entire policy suite — 12 policies and 30+ procedures — in under 3 weeks. They passed our ISO 27001 audit with zero findings. Truly exceptional technical writing.', approved: false },
+        { providerId: reviewProviders.marcus.id, reviewerZerobiasUserId: DEMO_BUYERS.LAKEWOOD_HEALTH, rating: 4, reviewText: 'Thorough evidence collection work. Marcus understood HIPAA requirements well and organized everything by control domain. Small delay on delivery but quality was high.', approved: false },
+      ] : []),
+    ];
+
+    for (const review of seedReviews) {
+      await db.insert(schema.reviews).values(review);
+    }
+    console.log(`  Created ${seedReviews.length} reviews (all pending approval)`);
   }
 
   // --- Seed Categories ---
@@ -506,8 +613,9 @@ async function seed() {
     console.log(`  Skipping work requests — ${existingRequests.length} already exist`);
   } else {
     const workRequestsData = [
+      // --- Original RFPs (open, various statuses) ---
       {
-        buyerZerobiasUserId: 'buyer-acme-001',
+        buyerZerobiasUserId: DEMO_BUYERS.ACME_CORP,
         buyerZerobiasOrgId: 'org-acme-corp',
         title: 'SOC 2 Type II Assessment Support',
         description: 'Need an experienced assessor to guide our team through SOC 2 Type II certification. Looking for someone with Big 4 audit experience who can review our controls and help prepare evidence. We\'re a B2B SaaS company with 50 employees.',
@@ -519,7 +627,7 @@ async function seed() {
         status: 'open' as const,
       },
       {
-        buyerZerobiasUserId: 'buyer-fintech-002',
+        buyerZerobiasUserId: DEMO_BUYERS.FINTECH_INC,
         buyerZerobiasOrgId: 'org-fintech-inc',
         title: 'NIST CSF Implementation Advisor',
         description: 'Seeking GRC consultant to help implement NIST Cybersecurity Framework. We are a mid-size financial services company looking to mature our security program. Need someone who can assess current state and build a roadmap.',
@@ -529,9 +637,11 @@ async function seed() {
         budgetMax: '250',
         timeline: '3 months',
         status: 'in_progress' as const,
+        engagementTag: ENGAGEMENT_TAGS.VELVET_THUNDER.name,
+        zerobiasTagId: ENGAGEMENT_TAGS.VELVET_THUNDER.id,
       },
       {
-        buyerZerobiasUserId: 'buyer-startup-003',
+        buyerZerobiasUserId: DEMO_BUYERS.STARTUP_XYZ,
         buyerZerobiasOrgId: 'org-startup-xyz',
         title: 'AI Agent for Compliance Evidence Collection',
         description: 'Looking for an agentic developer to build a custom AI agent that automatically collects and organizes compliance evidence from our AWS, GitHub, and Jira environments. Should integrate with ZeroBias platform.',
@@ -543,7 +653,7 @@ async function seed() {
         status: 'open' as const,
       },
       {
-        buyerZerobiasUserId: 'buyer-health-004',
+        buyerZerobiasUserId: DEMO_BUYERS.HEALTHTECH,
         buyerZerobiasOrgId: 'org-healthtech',
         title: 'ISO 27001 Gap Assessment',
         description: 'Need ISO 27001 specialist to conduct gap assessment and provide remediation roadmap. Company currently has no formal ISMS. Healthcare tech company with HIPAA requirements as well.',
@@ -553,9 +663,11 @@ async function seed() {
         budgetMax: '7500',
         timeline: '4 weeks',
         status: 'completed' as const,
+        engagementTag: ENGAGEMENT_TAGS.COBALT_SUMMIT.name,
+        zerobiasTagId: ENGAGEMENT_TAGS.COBALT_SUMMIT.id,
       },
       {
-        buyerZerobiasUserId: 'buyer-enterprise-005',
+        buyerZerobiasUserId: DEMO_BUYERS.ENTERPRISE_CO,
         buyerZerobiasOrgId: 'org-enterprise-co',
         title: 'Security Training Program Development',
         description: 'Create custom security awareness training program tailored to healthcare industry (HIPAA focus). Need 8-10 modules with assessments, phishing simulations, and completion tracking.',
@@ -564,6 +676,98 @@ async function seed() {
         budgetMin: '15000',
         budgetMax: '20000',
         timeline: '10 weeks',
+        status: 'open' as const,
+      },
+
+      // --- NEW: Demo Buyer - Pinnacle Corp RFPs ---
+      {
+        buyerZerobiasUserId: DEMO_BUYERS.PINNACLE_CORP,
+        buyerZerobiasOrgId: 'org-pinnacle-corp',
+        title: 'SOC 2 Type I Fast-Track Assessment',
+        description: 'Pinnacle Corp is a Series B startup preparing for enterprise sales. We need a SOC 2 Type I assessment completed ASAP to close a major deal. Already have most controls in place via AWS + Vanta. Need an assessor who can move quickly.',
+        category: 'Assessors',
+        budgetType: 'fixed' as const,
+        budgetMin: '6000',
+        budgetMax: '9000',
+        timeline: '4 weeks',
+        status: 'in_progress' as const,
+        engagementTag: ENGAGEMENT_TAGS.CRYSTAL_HARBOR.name,
+        zerobiasTagId: ENGAGEMENT_TAGS.CRYSTAL_HARBOR.id,
+      },
+      {
+        buyerZerobiasUserId: DEMO_BUYERS.PINNACLE_CORP,
+        buyerZerobiasOrgId: 'org-pinnacle-corp',
+        title: 'DevSecOps Pipeline Hardening',
+        description: 'Our CI/CD pipeline (GitHub Actions → AWS ECS) needs security hardening before SOC 2 audit. Need someone to implement SAST, container scanning, and secrets management. Bonus if you can integrate with ZeroBias for evidence.',
+        category: 'DevSecOps',
+        budgetType: 'hourly' as const,
+        budgetMin: '150',
+        budgetMax: '200',
+        timeline: '6 weeks',
+        status: 'open' as const,
+      },
+      {
+        buyerZerobiasUserId: DEMO_BUYERS.PINNACLE_CORP,
+        buyerZerobiasOrgId: 'org-pinnacle-corp',
+        title: 'Compliance Evidence Package Preparation',
+        description: 'Need someone to organize and document our compliance evidence across AWS CloudTrail, GitHub audit logs, Jira tickets, and HR systems. Should produce a clean evidence binder mapped to SOC 2 Trust Service Criteria.',
+        category: 'Data Services',
+        budgetType: 'fixed' as const,
+        budgetMin: '3500',
+        budgetMax: '5000',
+        timeline: '3 weeks',
+        status: 'open' as const,
+      },
+
+      // --- NEW: Demo Buyer - Lakewood Health RFPs ---
+      {
+        buyerZerobiasUserId: DEMO_BUYERS.LAKEWOOD_HEALTH,
+        buyerZerobiasOrgId: 'org-lakewood-health',
+        title: 'HIPAA Risk Assessment & Remediation Plan',
+        description: 'Lakewood Health is a regional healthcare provider with 200+ employees. We need a comprehensive HIPAA risk assessment covering our EHR system, patient portal, and cloud infrastructure. Deliverable: risk register + remediation roadmap.',
+        category: 'Advisors',
+        budgetType: 'fixed' as const,
+        budgetMin: '10000',
+        budgetMax: '15000',
+        timeline: '6 weeks',
+        status: 'open' as const,
+      },
+      {
+        buyerZerobiasUserId: DEMO_BUYERS.LAKEWOOD_HEALTH,
+        buyerZerobiasOrgId: 'org-lakewood-health',
+        title: 'HIPAA Security Awareness Training for Clinical Staff',
+        description: 'Need customized HIPAA security awareness training for 200+ clinical staff. Must cover PHI handling, phishing awareness, mobile device security, and incident reporting. Need both in-person workshop materials and self-paced online modules.',
+        category: 'Training',
+        budgetType: 'fixed' as const,
+        budgetMin: '8000',
+        budgetMax: '12000',
+        timeline: '6 weeks',
+        status: 'in_progress' as const,
+        engagementTag: ENGAGEMENT_TAGS.CORAL_BREEZE.name,
+        zerobiasTagId: ENGAGEMENT_TAGS.CORAL_BREEZE.id,
+      },
+      {
+        buyerZerobiasUserId: DEMO_BUYERS.LAKEWOOD_HEALTH,
+        buyerZerobiasOrgId: 'org-lakewood-health',
+        title: 'Automated PHI Access Monitoring Agent',
+        description: 'Build an AI agent that monitors EHR access logs for unauthorized PHI access patterns. Should flag anomalies, generate daily reports, and integrate with our incident response workflow via ZeroBias tasks.',
+        category: 'Agentic',
+        budgetType: 'negotiable' as const,
+        budgetMin: '12000',
+        budgetMax: '25000',
+        timeline: '10 weeks',
+        status: 'open' as const,
+      },
+      {
+        buyerZerobiasUserId: DEMO_BUYERS.LAKEWOOD_HEALTH,
+        buyerZerobiasOrgId: 'org-lakewood-health',
+        title: 'SOC Monitoring Setup for Healthcare Cloud',
+        description: 'Need a SecOps professional to set up 24/7 security monitoring for our AWS healthcare workloads. Includes SIEM configuration, alert tuning, runbook development, and integration with ZeroBias for compliance evidence.',
+        category: 'SecOps',
+        budgetType: 'fixed' as const,
+        budgetMin: '18000',
+        budgetMax: '25000',
+        timeline: '8 weeks',
         status: 'open' as const,
       },
     ];
@@ -577,7 +781,7 @@ async function seed() {
     // --- Seed Proposals ---
     console.log('\nSeeding proposals...');
 
-    // Get provider profiles for linking proposals
+    // Get all provider profiles for linking proposals
     const ginaProfile = await db.query.providerProfiles.findFirst({
       where: eq(schema.providerProfiles.slug, 'a3-gina-auditor'),
     });
@@ -593,10 +797,18 @@ async function seed() {
     const carlosProfile = await db.query.providerProfiles.findFirst({
       where: eq(schema.providerProfiles.slug, 'carlos-rivera'),
     });
+    const sarahProfile = await db.query.providerProfiles.findFirst({
+      where: eq(schema.providerProfiles.slug, 'sarah-chen'),
+    });
+    const marcusProfile = await db.query.providerProfiles.findFirst({
+      where: eq(schema.providerProfiles.slug, 'marcus-webb'),
+    });
 
     if (ginaProfile && jamesProfile && bobProfile && alexProfile) {
       const proposalsData = [
-        // Request 1: SOC 2 (open) - 2 proposals
+        // ---------------------------------------------------------------
+        // Request 0: SOC 2 Type II (open) — 2 proposals
+        // ---------------------------------------------------------------
         {
           requestId: insertedRequests[0].id,
           providerId: ginaProfile.id,
@@ -614,7 +826,9 @@ async function seed() {
           status: 'pending' as const,
         },
 
-        // Request 2: NIST CSF (in_progress) - 1 accepted proposal
+        // ---------------------------------------------------------------
+        // Request 1: NIST CSF (in_progress, ENG-velvet-thunder) — 1 accepted
+        // ---------------------------------------------------------------
         {
           requestId: insertedRequests[1].id,
           providerId: jamesProfile.id,
@@ -624,7 +838,9 @@ async function seed() {
           status: 'accepted' as const,
         },
 
-        // Request 3: AI Agent (open) - 3 proposals
+        // ---------------------------------------------------------------
+        // Request 2: AI Agent (open) — 2 proposals
+        // ---------------------------------------------------------------
         {
           requestId: insertedRequests[2].id,
           providerId: bobProfile.id,
@@ -642,7 +858,9 @@ async function seed() {
           status: 'withdrawn' as const,
         },
 
-        // Request 4: ISO 27001 (completed) - 1 accepted proposal
+        // ---------------------------------------------------------------
+        // Request 3: ISO 27001 Gap (completed, ENG-cobalt-summit) — 1 accepted
+        // ---------------------------------------------------------------
         {
           requestId: insertedRequests[3].id,
           providerId: ginaProfile.id,
@@ -652,7 +870,9 @@ async function seed() {
           status: 'accepted' as const,
         },
 
-        // Request 5: Training (open) - 2 proposals
+        // ---------------------------------------------------------------
+        // Request 4: Training Program (open) — 2 proposals
+        // ---------------------------------------------------------------
         {
           requestId: insertedRequests[4].id,
           providerId: alexProfile.id,
@@ -667,6 +887,138 @@ async function seed() {
           coverLetter: 'I can develop the policy and governance framework alongside training content. My GRC background ensures the training aligns with your broader compliance objectives.',
           proposedPrice: '19000',
           proposedTimeline: '12 weeks',
+          status: 'pending' as const,
+        },
+
+        // ---------------------------------------------------------------
+        // Request 5: Pinnacle SOC 2 Type I (in_progress, ENG-crystal-harbor) — 1 accepted, 1 rejected
+        // ---------------------------------------------------------------
+        {
+          requestId: insertedRequests[5].id,
+          providerId: ginaProfile.id,
+          coverLetter: 'I can fast-track your SOC 2 Type I. With Vanta already in place, I\'ll focus on control validation and evidence review. I\'ve done 15+ fast-track assessments for startups in similar situations. Can start Monday.',
+          proposedPrice: '7500',
+          proposedTimeline: '4 weeks',
+          status: 'accepted' as const,
+        },
+        {
+          requestId: insertedRequests[5].id,
+          providerId: marcusProfile?.id || jamesProfile.id,
+          coverLetter: 'I can handle the evidence preparation side while a lead assessor handles the assessment itself. Happy to work as part of a team to meet your tight timeline.',
+          proposedPrice: '4000',
+          proposedTimeline: '3 weeks',
+          status: 'rejected' as const,
+        },
+
+        // ---------------------------------------------------------------
+        // Request 6: Pinnacle DevSecOps (open) — 3 proposals
+        // ---------------------------------------------------------------
+        ...(sarahProfile ? [{
+          requestId: insertedRequests[6].id,
+          providerId: sarahProfile.id,
+          coverLetter: 'DevSecOps pipeline hardening is my bread and butter. I\'ve secured GitHub Actions → ECS pipelines for 10+ startups. My deliverables include SAST/DAST integration, Trivy container scanning, and AWS Secrets Manager setup. Can also set up ZeroBias evidence collection.',
+          proposedPrice: '190',
+          proposedTimeline: '5 weeks',
+          status: 'pending' as const,
+        }] : []),
+        {
+          requestId: insertedRequests[6].id,
+          providerId: bobProfile.id,
+          coverLetter: 'I can build the automation layer — GitHub Actions workflows, scanning pipelines, and ZeroBias integration for automated evidence capture. My agent-building background means the automation will be robust and self-healing.',
+          proposedPrice: '195',
+          proposedTimeline: '6 weeks',
+          status: 'pending' as const,
+        },
+        {
+          requestId: insertedRequests[6].id,
+          providerId: carlosProfile?.id || bobProfile.id,
+          coverLetter: 'From the SecOps side, I can ensure your pipeline security integrates with your broader security monitoring. I\'ll set up alerts for pipeline tampering and secret leaks.',
+          proposedPrice: '185',
+          proposedTimeline: '6 weeks',
+          status: 'pending' as const,
+        },
+
+        // ---------------------------------------------------------------
+        // Request 7: Pinnacle Evidence Package (open) — 2 proposals
+        // ---------------------------------------------------------------
+        ...(marcusProfile ? [{
+          requestId: insertedRequests[7].id,
+          providerId: marcusProfile.id,
+          coverLetter: 'Evidence organization is my specialty. I\'ve prepared SOC 2 evidence binders for 50+ companies. I\'ll map your AWS CloudTrail, GitHub, and Jira artifacts directly to Trust Service Criteria. Clean, assessor-friendly documentation guaranteed.',
+          proposedPrice: '4200',
+          proposedTimeline: '2.5 weeks',
+          status: 'pending' as const,
+        }] : []),
+        {
+          requestId: insertedRequests[7].id,
+          providerId: alexProfile.id,
+          coverLetter: 'I can help document your evidence and create the training materials your team will need to maintain the evidence going forward. Two deliverables for the price of one.',
+          proposedPrice: '4800',
+          proposedTimeline: '3 weeks',
+          status: 'pending' as const,
+        },
+
+        // ---------------------------------------------------------------
+        // Request 8: Lakewood HIPAA Risk Assessment (open) — 2 proposals
+        // ---------------------------------------------------------------
+        {
+          requestId: insertedRequests[8].id,
+          providerId: jamesProfile.id,
+          coverLetter: 'I\'ve conducted HIPAA risk assessments for 8 healthcare organizations including regional providers your size. My deliverable includes a NIST SP 800-66 aligned risk register, heat map, and 90-day remediation roadmap.',
+          proposedPrice: '12000',
+          proposedTimeline: '5 weeks',
+          status: 'pending' as const,
+        },
+        {
+          requestId: insertedRequests[8].id,
+          providerId: ginaProfile.id,
+          coverLetter: 'With my combined ISO 27001 and HIPAA experience, I can deliver a risk assessment that also sets you up for future ISO certification if desired. My healthcare-specific templates save time.',
+          proposedPrice: '13500',
+          proposedTimeline: '6 weeks',
+          status: 'pending' as const,
+        },
+
+        // ---------------------------------------------------------------
+        // Request 9: Lakewood HIPAA Training (in_progress, ENG-coral-breeze) — 1 accepted
+        // ---------------------------------------------------------------
+        {
+          requestId: insertedRequests[9].id,
+          providerId: alexProfile.id,
+          coverLetter: 'I\'ve built HIPAA training programs for 15+ healthcare organizations. My approach combines mandatory compliance content with engaging, scenario-based learning. Includes phishing simulations tailored to healthcare contexts (fake lab results, insurance notices, etc.).',
+          proposedPrice: '10000',
+          proposedTimeline: '6 weeks',
+          status: 'accepted' as const,
+        },
+
+        // ---------------------------------------------------------------
+        // Request 10: Lakewood PHI Monitoring Agent (open) — 2 proposals
+        // ---------------------------------------------------------------
+        {
+          requestId: insertedRequests[10].id,
+          providerId: bobProfile.id,
+          coverLetter: 'I\'ve built similar monitoring agents for healthcare clients. Can integrate with Epic/Cerner EHR audit logs, build anomaly detection using LLM pattern analysis, and create ZeroBias task-based incident workflow. This is a perfect use case for agentic AI.',
+          proposedPrice: '20000',
+          proposedTimeline: '10 weeks',
+          status: 'pending' as const,
+        },
+        ...(sarahProfile ? [{
+          requestId: insertedRequests[10].id,
+          providerId: sarahProfile.id,
+          coverLetter: 'I can handle the infrastructure and security monitoring side of this. My approach would combine CloudWatch log analysis with custom Lambda-based anomaly detection, feeding into ZeroBias for audit trails.',
+          proposedPrice: '18000',
+          proposedTimeline: '8 weeks',
+          status: 'pending' as const,
+        }] : []),
+
+        // ---------------------------------------------------------------
+        // Request 11: Lakewood SOC Monitoring (open) — 1 proposal
+        // ---------------------------------------------------------------
+        {
+          requestId: insertedRequests[11].id,
+          providerId: carlosProfile?.id || bobProfile.id,
+          coverLetter: 'This is my wheelhouse. I\'ve built and run SOCs for 3 healthcare organizations. I\'ll deploy and configure your SIEM (recommend Elastic or Splunk Cloud), build healthcare-specific detection rules, create IR runbooks, and set up ZeroBias evidence pipelines for HIPAA compliance.',
+          proposedPrice: '22000',
+          proposedTimeline: '8 weeks',
           status: 'pending' as const,
         },
       ];
