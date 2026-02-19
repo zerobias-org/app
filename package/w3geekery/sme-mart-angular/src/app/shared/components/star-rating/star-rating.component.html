@@ -1,0 +1,18 @@
+<div
+  class="star-rating"
+  [class.interactive]="interactive"
+  [class.size-sm]="size === 'sm'"
+  [class.size-lg]="size === 'lg'"
+  (mouseleave)="onMouseLeave()"
+>
+  @for (star of stars; track star) {
+    <mat-icon
+      class="star-icon"
+      [class.filled]="displayRating() >= star"
+      (click)="onStarClick(star)"
+      (mouseenter)="onStarHover(star)"
+    >
+      {{ getStarIcon(star) }}
+    </mat-icon>
+  }
+</div>

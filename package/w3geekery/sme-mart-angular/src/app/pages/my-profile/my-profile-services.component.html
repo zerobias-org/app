@@ -1,0 +1,93 @@
+@if (loading()) {
+  <zb-empty-state-container [loading]="true" />
+} @else {
+  <div class="services-header">
+    <h3>My Services ({{ services().length }})</h3>
+    <button mat-flat-button color="primary" (click)="toggleForm()">
+      <mat-icon>{{ showForm() ? 'close' : 'add' }}</mat-icon>
+      {{ showForm() ? 'Cancel' : 'Add Service' }}
+    </button>
+  </div>
+
+  @if (showForm()) {
+    <mat-card appearance="outlined" class="add-form-card">
+      <mat-card-content>
+        <form [formGroup]="form" (ngSubmit)="onSubmit()">
+          <mat-form-field appearance="outline">
+            <mat-label>Service Title</mat-label>
+            <input matInput formControlName="title" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Description</mat-label>
+            <textarea matInput formControlName="description" rows="3"></textarea>
+          </mat-form-field>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Category</mat-label>
+              <input matInput formControlName="category" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Pricing Type</mat-label>
+              <mat-select formControlName="pricing_type">
+                @for (pt of pricingTypes; track pt.value) {
+                  <mat-option [value]="pt.value">{{ pt.label }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Price ($)</mat-label>
+              <input matInput formControlName="price" type="number" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Delivery Time</mat-label>
+              <input matInput formControlName="delivery_time" placeholder="e.g., 2 weeks" />
+            </mat-form-field>
+          </div>
+
+          <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || saving()">
+            {{ saving() ? 'Creating...' : 'Create Service' }}
+          </button>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  @if (services().length) {
+    <div class="services-list">
+      @for (svc of services(); track svc.id) {
+        <mat-card appearance="outlined" class="service-item">
+          <mat-card-header>
+            <mat-card-title>{{ svc.title }}</mat-card-title>
+            <mat-card-subtitle>{{ svc.category }}</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            @if (svc.description) {
+              <p>{{ svc.description }}</p>
+            }
+            <div class="service-meta">
+              @if (svc.price) {
+                <span>${{ svc.price }} / {{ svc.pricing_type }}</span>
+              }
+              @if (svc.delivery_time) {
+                <span>{{ svc.delivery_time }}</span>
+              }
+            </div>
+          </mat-card-content>
+          <mat-card-actions align="end">
+            <button mat-button color="warn" (click)="onDelete(svc)">
+              <mat-icon>delete</mat-icon>
+              Delete
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      }
+    </div>
+  } @else if (!showForm()) {
+    <zb-empty-state-container [loading]="false" emptyText="No services yet. Add your first service offering." />
+  }
+}

@@ -1,0 +1,33 @@
+@if (loading()) {
+  <p>Loading expertise...</p>
+} @else {
+  @for (section of sections(); track section.type) {
+    <div class="expertise-section">
+      <div class="section-header">
+        <h3>{{ section.title }}</h3>
+        <span class="count-badge">{{ section.items.length }}</span>
+      </div>
+
+      <!-- Current items as removable chips -->
+      @if (section.items.length) {
+        <mat-chip-set class="current-items">
+          @for (item of section.items; track item.id) {
+            <mat-chip (removed)="onRemove(section, item)">
+              {{ item.name }}
+              <mat-icon matChipRemove>cancel</mat-icon>
+            </mat-chip>
+          }
+        </mat-chip-set>
+      }
+
+      <!-- Add new via autocomplete -->
+      <zb-simple-autocomplete
+        [label]="'Add ' + section.title"
+        [placeholder]="'Search ' + section.title + '...'"
+        [searchFn]="getSearchFn(section.type)"
+        displayKey="name"
+        (selectionChange)="onAdd(section, $event)"
+      />
+    </div>
+  }
+}

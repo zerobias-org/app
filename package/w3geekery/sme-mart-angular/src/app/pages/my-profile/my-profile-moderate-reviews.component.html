@@ -1,0 +1,44 @@
+<div class="moderate-reviews">
+  <h3>Moderate Reviews</h3>
+  <p class="subtitle">Approve or reject reviews before they become public on your profile.</p>
+
+  @if (loading()) {
+    <p class="loading-message">Loading reviews...</p>
+  } @else if (pendingReviews().length === 0) {
+    <zb-empty-state-container
+      icon="rate_review"
+      title="No pending reviews"
+      description="All reviews have been moderated. New reviews will appear here for your approval.">
+    </zb-empty-state-container>
+  } @else {
+    @for (review of pendingReviews(); track review.id) {
+      <mat-card class="review-card">
+        <mat-card-header>
+          <mat-card-title>
+            <app-star-rating [rating]="review.rating" [size]="'sm'"></app-star-rating>
+          </mat-card-title>
+          <mat-card-subtitle>
+            Reviewer: {{ review.reviewer_zerobias_user_id }} &middot; {{ review.created_at | date:'mediumDate' }}
+          </mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+          @if (review.review_text) {
+            <p class="review-text">{{ review.review_text }}</p>
+          } @else {
+            <p class="no-text">No review text provided.</p>
+          }
+        </mat-card-content>
+
+        <mat-card-actions align="end">
+          <button mat-button color="warn" (click)="rejectReview(review.id)">
+            <mat-icon>close</mat-icon> Reject
+          </button>
+          <button mat-flat-button color="primary" (click)="approveReview(review.id)">
+            <mat-icon>check</mat-icon> Approve
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    }
+  }
+</div>

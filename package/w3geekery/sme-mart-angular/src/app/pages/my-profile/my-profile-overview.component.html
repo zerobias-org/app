@@ -1,0 +1,92 @@
+@if (loading()) {
+  <p>Loading profile...</p>
+} @else if (profile(); as p) {
+  <div class="overview-layout">
+    <!-- Form column -->
+    <div class="form-column">
+      <form [formGroup]="form" (ngSubmit)="onSave()">
+        <mat-form-field appearance="outline">
+          <mat-label>Display Name</mat-label>
+          <input matInput formControlName="display_name" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Headline</mat-label>
+          <input matInput formControlName="headline" placeholder="e.g., Senior SOC 2 Assessor" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>About</mat-label>
+          <textarea matInput formControlName="about" rows="5"></textarea>
+        </mat-form-field>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Hourly Rate ($)</mat-label>
+            <input matInput formControlName="hourly_rate" type="number" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Availability</mat-label>
+            <mat-select formControlName="availability_status">
+              <mat-option value="available">Available</mat-option>
+              <mat-option value="busy">Busy</mat-option>
+              <mat-option value="unavailable">Unavailable</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Response Time</mat-label>
+            <input matInput formControlName="response_time" placeholder="e.g., Within 24 hours" />
+          </mat-form-field>
+        </div>
+
+        <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || saving()">
+          @if (saving()) {
+            Saving...
+          } @else {
+            Save Profile
+          }
+        </button>
+      </form>
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar-column">
+      <mat-card appearance="outlined">
+        <mat-card-content>
+          <div class="avatar-preview">
+            <div class="avatar-circle">
+              @if (p.avatar_url) {
+                <img [src]="p.avatar_url" [alt]="p.display_name" />
+              } @else {
+                <span>{{ initials() }}</span>
+              }
+            </div>
+          </div>
+
+          <div class="sidebar-stats">
+            <div class="stat">
+              <span class="stat-value">{{ p.total_jobs_completed }}</span>
+              <span class="stat-label">Jobs</span>
+            </div>
+            <div class="stat">
+              <span class="stat-value">{{ p.review_count }}</span>
+              <span class="stat-label">Reviews</span>
+            </div>
+            @if (p.rating_average) {
+              <div class="stat">
+                <span class="stat-value">
+                  <app-star-rating [rating]="+(p.rating_average)" size="sm" />
+                </span>
+                <span class="stat-label">Rating</span>
+              </div>
+            }
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </aside>
+  </div>
+} @else {
+  <p>No profile found. Create a provider profile to get started.</p>
+}

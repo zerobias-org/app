@@ -1,0 +1,37 @@
+.catalog-page {
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0 0 1rem;
+  }
+}
+
+.catalog-toolbar {
+  margin-bottom: 1rem;
+
+  .search-input {
+    max-width: 400px;
+  }
+}
+
+.category-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin-bottom: 1.25rem;
+
+  mat-chip {
+    cursor: pointer;
+
+    &.selected {
+      --mat-chip-elevated-container-color: var(--mat-sys-primary-container);
+      --mat-chip-label-text-color: var(--mat-sys-on-primary-container);
+    }
+  }
+}
+
+.service-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+}

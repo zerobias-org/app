@@ -1,0 +1,52 @@
+@use '@angular/material' as mat;
+@use 'theme' as theme;
+@use 'theme-variables' as tv;
+@use 'buttons';
+@use 'chips';
+@use 'checkbox';
+
+// M3 Theme — light default
+html {
+  color-scheme: light;
+  @include mat.theme(theme.$theme);
+}
+
+// CSS custom properties for both themes
+// These mixins internally target html {} and body.dark-theme {} respectively
+// — call at root level, never nested inside a selector
+@include tv.zb-theme-variables-light(theme.$theme);
+@include tv.zb-theme-variables-dark(theme.$altTheme);
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
+  background-color: var(--zb-background);
+  color: var(--zb-text);
+  transition: background-color 0.3s ease, color 0.3s ease;
+
+  // Dark theme toggled via ZbThemeService (adds body.dark-theme class)
+  &.dark-theme {
+    color-scheme: dark;
+    @include mat.theme(theme.$altTheme);
+  }
+}
+
+// Scrollbar styling
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--zb-scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--zb-scrollbar-thumb);
+  border-radius: 4px;
+
+  &:hover {
+    background: var(--zb-scrollbar-thumb-hover);
+  }
+}

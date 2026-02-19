@@ -1,0 +1,22 @@
+<div class="engagement-new-page">
+  <h2>Post an RFP</h2>
+  <p class="subtitle">Describe what you're looking for and let providers submit proposals.</p>
+
+  <mat-card>
+    <mat-card-content>
+      <app-engagement-form (valuesChange)="onValuesChange($event)"></app-engagement-form>
+    </mat-card-content>
+
+    <mat-card-actions align="end">
+      <button mat-button (click)="cancel()" [disabled]="saving()">Cancel</button>
+      <button mat-stroked-button (click)="save(true)" [disabled]="saving()">
+        <mat-icon>save</mat-icon>
+        Save as Draft
+      </button>
+      <button mat-flat-button color="primary" (click)="save(false)" [disabled]="saving()">
+        <mat-icon>send</mat-icon>
+        {{ saving() ? 'Posting...' : 'Post RFP' }}
+      </button>
+    </mat-card-actions>
+  </mat-card>
+</div>

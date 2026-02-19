@@ -1,0 +1,60 @@
+<!-- FAB -->
+<button
+  mat-fab
+  class="impersonation-fab"
+  [class.impersonating]="impersonation.isImpersonating()"
+  (click)="toggleDrawer()"
+  aria-label="Switch user"
+>
+  <mat-icon>switch_account</mat-icon>
+</button>
+
+<!-- Backdrop -->
+@if (drawerOpen()) {
+  <div class="drawer-backdrop" (click)="drawerOpen.set(false)"></div>
+}
+
+<!-- User drawer -->
+<div class="user-drawer" [class.open]="drawerOpen()">
+  <div class="drawer-header">
+    <h3>Switch User</h3>
+    <button mat-icon-button (click)="drawerOpen.set(false)">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  @if (impersonation.loadingUsers()) {
+    <div class="drawer-loading">
+      <mat-spinner diameter="32"></mat-spinner>
+      <span>Loading users…</span>
+    </div>
+  } @else {
+    <div class="user-list">
+      @for (user of impersonation.users(); track user.id) {
+        <button
+          class="user-item"
+          [class.active]="impersonation.impersonatedUser()?.id === user.id"
+          (click)="selectUser(user)"
+        >
+          <div class="user-avatar">{{ getInitials(user.display_name) }}</div>
+          <div class="user-info">
+            <span class="user-name">{{ user.display_name }}</span>
+            <span class="user-detail">{{ user.headline || user.email || '' }}</span>
+          </div>
+          <div class="user-chips">
+            @if (user.is_provider) {
+              <mat-chip-set>
+                <mat-chip class="chip-provider">Provider</mat-chip>
+              </mat-chip-set>
+            }
+            @if (user.is_buyer) {
+              <mat-chip-set>
+                <mat-chip class="chip-buyer">Buyer</mat-chip>
+              </mat-chip-set>
+            }
+          </div>
+        </button>
+      }
+    </div>
+  }
+</div>

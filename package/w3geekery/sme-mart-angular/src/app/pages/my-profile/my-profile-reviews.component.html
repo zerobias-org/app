@@ -1,0 +1,36 @@
+@if (loading()) {
+  <zb-empty-state-container [loading]="true" />
+} @else {
+  <!-- Summary -->
+  @if (averageRating() !== null) {
+    <div class="review-summary">
+      <app-star-rating [rating]="averageRating()!" size="lg" />
+      <span class="avg-rating">{{ averageRating()!.toFixed(1) }}</span>
+      <span class="review-count">({{ reviews().length }} reviews)</span>
+    </div>
+  }
+
+  <!-- Review list -->
+  @if (reviews().length) {
+    <div class="review-list">
+      @for (review of reviews(); track review.id) {
+        <mat-card appearance="outlined" class="review-card">
+          <mat-card-content>
+            <div class="review-header">
+              <app-star-rating [rating]="review.rating" size="sm" />
+              <span class="review-date">{{ review.created_at | date:'mediumDate' }}</span>
+              <mat-chip-set>
+                <mat-chip [highlighted]="review.approved">{{ getStatusLabel(review) }}</mat-chip>
+              </mat-chip-set>
+            </div>
+            @if (review.review_text) {
+              <p class="review-text">{{ review.review_text }}</p>
+            }
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
+  } @else {
+    <zb-empty-state-container [loading]="false" emptyText="No reviews yet" />
+  }
+}

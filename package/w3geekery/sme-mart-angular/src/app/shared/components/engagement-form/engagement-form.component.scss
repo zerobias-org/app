@@ -1,0 +1,15 @@
+.engagement-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  mat-form-field {
+    width: 100%;
+  }
+}
+
+.budget-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}

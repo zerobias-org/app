@@ -1,0 +1,32 @@
+<mat-card appearance="outlined" class="service-card" (click)="onClick()" tabindex="0" role="button">
+  <mat-card-header>
+    <mat-card-title>{{ title() }}</mat-card-title>
+    <mat-chip-set class="category-chip">
+      <mat-chip>{{ category() | titlecase }}</mat-chip>
+    </mat-chip-set>
+  </mat-card-header>
+
+  <mat-card-content>
+    <p class="description">{{ description() }}</p>
+  </mat-card-content>
+
+  <mat-card-footer>
+    <div class="meta-row">
+      @if (price()) {
+        <span class="meta-item">
+          <mat-icon class="meta-icon">payments</mat-icon>
+          {{ price() }}
+          @if (pricingType()) {
+            <span class="pricing-type">/ {{ pricingType() }}</span>
+          }
+        </span>
+      }
+      @if (deliveryTime()) {
+        <span class="meta-item">
+          <mat-icon class="meta-icon">schedule</mat-icon>
+          {{ deliveryTime() }}
+        </span>
+      }
+    </div>
+  </mat-card-footer>
+</mat-card>

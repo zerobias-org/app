@@ -1,0 +1,69 @@
+{
+  "name": "sme-mart-angular",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=18.19.1",
+    "npm": ">=10.2.4"
+  },
+  "scripts": {
+    "ng": "ng",
+    "prestart": "dotenv -e .env.local -- node scripts/gen-neon-env.mjs",
+    "start": "dotenv -e .env.local -- ng serve --proxy-config proxy-dev.conf.js",
+    "prestart:dev": "dotenv -e .env.local -- node scripts/gen-neon-env.mjs",
+    "start:dev": "dotenv -e .env.local -- ng serve --proxy-config proxy-dev.conf.js",
+    "prestart:qa": "dotenv -e .env.local -- node scripts/gen-neon-env.mjs",
+    "start:qa": "dotenv -e .env.local -- ng serve --proxy-config proxy-qa.conf.js",
+    "prestart:prod": "dotenv -e .env.local -- node scripts/gen-neon-env.mjs",
+    "start:prod": "dotenv -e .env.local -- ng serve --proxy-config proxy-prod.conf.js",
+    "build": "ng build",
+    "build:prod": "ng build --configuration production",
+    "watch": "ng build --watch --configuration development",
+    "test": "ng test"
+  },
+  "prettier": {
+    "printWidth": 100,
+    "singleQuote": true,
+    "overrides": [
+      {
+        "files": "*.html",
+        "options": {
+          "parser": "angular"
+        }
+      }
+    ]
+  },
+  "browser": {
+    "fs": false
+  },
+  "packageManager": "npm@10.9.4",
+  "dependencies": {
+    "@angular/cdk": "^21.1.4",
+    "@angular/common": "^21.1.0",
+    "@angular/compiler": "^21.1.0",
+    "@angular/core": "^21.1.0",
+    "@angular/forms": "^21.1.0",
+    "@angular/material": "^21.1.4",
+    "@angular/platform-browser": "^21.1.0",
+    "@angular/router": "^21.1.0",
+    "@neondatabase/serverless": "^1.0.2",
+    "@ngx-translate/core": "^15.0.0",
+    "@ngx-translate/http-loader": "^17.0.0",
+    "@zerobias-com/zerobias-angular-client": "^1.1.21",
+    "@zerobias-org/data-utils": "^1.0.22",
+    "@zerobias-org/ngx-library": "^0.2.4",
+    "ngx-infinite-scroll": "^21.0.0",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0",
+    "yaml": "^2.8.2"
+  },
+  "devDependencies": {
+    "@angular/build": "^21.1.4",
+    "@angular/cli": "^21.1.4",
+    "@angular/compiler-cli": "^21.1.0",
+    "dotenv-cli": "^11.0.0",
+    "jsdom": "^27.1.0",
+    "typescript": "~5.9.2",
+    "vitest": "^4.0.8"
+  }
+}

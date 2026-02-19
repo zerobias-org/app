@@ -1,0 +1,42 @@
+<div class="catalog-page">
+  <h2>Service Catalog</h2>
+
+  <div class="catalog-toolbar">
+    <zb-search-input
+      class="search-input"
+      placeholder="Search services..."
+      (search)="onSearch($event)"
+    />
+  </div>
+
+  @if (categories().length) {
+    <mat-chip-set class="category-chips">
+      <mat-chip
+        [class.selected]="selectedCategory() === null"
+        (click)="onCategorySelect(null)"
+      >
+        All
+      </mat-chip>
+      @for (cat of categories(); track cat.id) {
+        <mat-chip
+          [class.selected]="isCategorySelected(cat.slug)"
+          (click)="onCategorySelect(cat.slug)"
+        >
+          {{ cat.name }}
+        </mat-chip>
+      }
+    </mat-chip-set>
+  }
+
+  @if (loading()) {
+    <zb-empty-state-container [loading]="true" />
+  } @else if (filteredServices().length) {
+    <div class="service-grid">
+      @for (svc of filteredServices(); track svc.id) {
+        <app-service-card [service]="svc" (serviceSelect)="onServiceSelect($event)" />
+      }
+    </div>
+  } @else {
+    <zb-empty-state-container [loading]="false" emptyText="No services found" />
+  }
+</div>

@@ -1,0 +1,58 @@
+<form [formGroup]="form" class="engagement-form">
+  <mat-form-field appearance="outline">
+    <mat-label>Title</mat-label>
+    <input matInput formControlName="title" placeholder="Brief title for your RFP" />
+    @if (form.controls.title.hasError('required') && form.controls.title.touched) {
+      <mat-error>Title is required</mat-error>
+    }
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Description</mat-label>
+    <textarea matInput formControlName="description" rows="4"
+      placeholder="Describe what you're looking for..."></textarea>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Category</mat-label>
+    <mat-select formControlName="category">
+      @for (cat of categories(); track cat.id) {
+        <mat-option [value]="cat.name">{{ cat.name }}</mat-option>
+      }
+    </mat-select>
+    @if (form.controls.category.hasError('required') && form.controls.category.touched) {
+      <mat-error>Category is required</mat-error>
+    }
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Budget Type</mat-label>
+    <mat-select formControlName="budget_type">
+      <mat-option [value]="null">None</mat-option>
+      @for (bt of budgetTypes; track bt.value) {
+        <mat-option [value]="bt.value">{{ bt.label }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  @if (form.controls.budget_type.value) {
+    <div class="budget-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Budget Min ($)</mat-label>
+        <input matInput formControlName="budget_min" type="number" min="0" />
+        <span matTextPrefix>$&nbsp;</span>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Budget Max ($)</mat-label>
+        <input matInput formControlName="budget_max" type="number" min="0" />
+        <span matTextPrefix>$&nbsp;</span>
+      </mat-form-field>
+    </div>
+  }
+
+  <mat-form-field appearance="outline">
+    <mat-label>Timeline</mat-label>
+    <input matInput formControlName="timeline" placeholder="e.g., 2 weeks, 1 month" />
+  </mat-form-field>
+</form>

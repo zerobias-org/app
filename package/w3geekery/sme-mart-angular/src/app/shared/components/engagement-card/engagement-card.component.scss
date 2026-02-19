@@ -1,0 +1,100 @@
+.engagement-card {
+  cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.15s;
+
+  &:hover {
+    box-shadow: var(--zb-card-shadow-hover);
+    transform: translateY(-2px);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--zb-primary);
+    outline-offset: 2px;
+  }
+}
+
+.chip-row {
+  margin-bottom: 0.5rem;
+}
+
+.lifecycle-chip {
+  font-weight: 600;
+}
+
+.tag-chip code {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.85em;
+}
+
+.status-open { --mdc-chip-label-text-color: var(--zb-color-success); }
+.status-draft { --mdc-chip-label-text-color: var(--zb-color-gray); }
+.status-in_progress { --mdc-chip-label-text-color: var(--zb-color-warning); }
+.status-completed { --mdc-chip-label-text-color: var(--zb-color-info); }
+.status-cancelled { --mdc-chip-label-text-color: var(--zb-color-error); }
+
+.title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0.5rem 0 0.25rem;
+  line-height: 1.4;
+}
+
+.description {
+  color: var(--zb-secondary-text);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin: 0 0 0.75rem;
+}
+
+.meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+
+  span {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.875rem;
+    color: var(--zb-secondary-text);
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  .budget-type {
+    font-style: italic;
+  }
+}
+
+.footer-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.8rem;
+  color: var(--zb-secondary-text);
+
+  .proposals {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+
+    mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  .my-proposal-chip {
+    font-size: 0.75rem;
+  }
+}
