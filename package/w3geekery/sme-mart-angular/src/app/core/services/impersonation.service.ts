@@ -1,4 +1,5 @@
 import { Injectable, inject, signal, computed, OnDestroy } from '@angular/core';
+import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ZerobiasClientApp } from '@zerobias-com/zerobias-client';
 import { SmeMartDbService } from './sme-mart-db.service';
@@ -36,6 +37,7 @@ interface StoredImpersonation {
 export class ImpersonationService implements OnDestroy {
   private readonly app = inject(ZerobiasClientApp);
   private readonly db = inject(SmeMartDbService);
+  private readonly router = inject(Router);
   private readonly subs = new Subscription();
 
   /** Whether impersonation feature is available (dev only) */
@@ -53,11 +55,13 @@ export class ImpersonationService implements OnDestroy {
   private realUserId = '';
   private realUserName = '';
   private realUserEmail = '';
+  private realAvatarUrl = '';
 
   /** Effective user identity — use this instead of whoAmI for user-specific queries */
   readonly effectiveUserId = signal('');
   readonly effectiveUserName = signal('');
   readonly effectiveUserEmail = signal('');
+  readonly effectiveAvatarUrl = signal('');
   readonly effectiveInitials = computed(() => this.getInitials(this.effectiveUserName()));
 
   constructor() {
@@ -71,12 +75,14 @@ export class ImpersonationService implements OnDestroy {
           this.realUserId = String(whoAmI.id);
           this.realUserName = whoAmI.name || String(whoAmI.email) || 'User';
           this.realUserEmail = String(whoAmI.email) || '';
+          this.realAvatarUrl = whoAmI.avatarUrl ? String(whoAmI.avatarUrl) : '';
 
           // Only update effective if not impersonating
           if (!this.isImpersonating()) {
             this.effectiveUserId.set(this.realUserId);
             this.effectiveUserName.set(this.realUserName);
             this.effectiveUserEmail.set(this.realUserEmail);
+            this.effectiveAvatarUrl.set(this.realAvatarUrl);
           }
         }
       }),
@@ -121,7 +127,9 @@ export class ImpersonationService implements OnDestroy {
     this.effectiveUserId.set(user.zerobias_user_id);
     this.effectiveUserName.set(user.display_name);
     this.effectiveUserEmail.set(email);
+    this.effectiveAvatarUrl.set(user.avatar_url || '');
     this.saveToStorage({ user, effectiveUserId: user.zerobias_user_id, effectiveUserName: user.display_name, effectiveUserEmail: email });
+    this.reloadCurrentRoute();
   }
 
   stopImpersonating(): void {
@@ -129,7 +137,17 @@ export class ImpersonationService implements OnDestroy {
     this.effectiveUserId.set(this.realUserId);
     this.effectiveUserName.set(this.realUserName);
     this.effectiveUserEmail.set(this.realUserEmail);
+    this.effectiveAvatarUrl.set(this.realAvatarUrl);
     this.clearStorage();
+    this.reloadCurrentRoute();
+  }
+
+  /** Navigate away and back to force component re-initialization */
+  private reloadCurrentRoute(): void {
+    const url = this.router.url;
+    this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+      this.router.navigateByUrl(url);
+    });
   }
 
   private saveToStorage(data: StoredImpersonation): void {

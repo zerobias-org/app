@@ -1,5 +1,6 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { ZerobiasClientApi } from '@zerobias-com/zerobias-client';
+import { ZbThemeService } from '@zerobias-org/ngx-library';
 import { Pkv } from '@zerobias-com/dana-sdk';
 import type { UserRole } from '../models';
 import {
@@ -12,7 +13,10 @@ import {
 
 const ROLE_KEY = 'sme-mart.user-role';
 const FILTERS_KEY = 'sme-mart.catalog-filters';
+const THEME_KEY = 'sme-mart.theme-preference';
 const SAVE_DEBOUNCE_MS = 500;
+
+type ThemePreference = 'light' | 'dark' | 'system';
 
 /**
  * PKV-backed user preferences: role toggle (buyer/provider/both)
@@ -22,8 +26,12 @@ const SAVE_DEBOUNCE_MS = 500;
 @Injectable({ providedIn: 'root' })
 export class UserPreferencesService {
   private readonly clientApi = inject(ZerobiasClientApi);
+  private readonly themeService = inject(ZbThemeService);
 
   readonly userRole = signal<UserRole>('both');
+  readonly themePreference = signal<ThemePreference>(
+    (localStorage.getItem('zb-theme-preference') as ThemePreference) || 'system',
+  );
   readonly enabledFilters = signal<EnabledFilters>({ ...DEFAULT_ENABLED_FILTERS });
   readonly catalogFilters = signal<CatalogFiltersState>({ ...DEFAULT_CATALOG_FILTERS });
   readonly loading = signal(true);
@@ -50,8 +58,15 @@ export class UserPreferencesService {
           if (val?.enabledFilters) this.enabledFilters.set(val.enabledFilters as EnabledFilters);
           if (val?.catalogFilters) this.catalogFilters.set(val.catalogFilters as CatalogFiltersState);
         }),
+        this.loadPkv(THEME_KEY, (val) => {
+          if (val?.theme) {
+            const pref = val.theme as ThemePreference;
+            this.themePreference.set(pref);
+            this.themeService.setPreference(pref);
+          }
+        }),
       ]);
-      console.log(`[Preferences] Loaded — role: ${this.userRole()}, active filters: ${this.activeFilterCount()}`);
+      console.log(`[Preferences] Loaded — role: ${this.userRole()}, theme: ${this.themePreference()}, active filters: ${this.activeFilterCount()}`);
     } catch (err) {
       console.warn('[Preferences] Load error (using defaults):', err);
     } finally {
@@ -66,6 +81,16 @@ export class UserPreferencesService {
   setUserRole(role: UserRole): void {
     this.userRole.set(role);
     this.debouncedSave(ROLE_KEY, { role });
+  }
+
+  // ---------------------------------------------------------------------------
+  // Theme
+  // ---------------------------------------------------------------------------
+
+  setThemePreference(pref: ThemePreference): void {
+    this.themePreference.set(pref);
+    this.themeService.setPreference(pref);
+    this.debouncedSave(THEME_KEY, { theme: pref });
   }
 
   // ---------------------------------------------------------------------------

@@ -1,40 +1,66 @@
-<button
-  mat-icon-button
+<div
   [matMenuTriggerFor]="userMenu"
-  aria-label="User menu"
   class="avatar-trigger"
 >
-  <span class="avatar-circle">{{ initials() }}</span>
-</button>
+  <div class="org-user">
+    <h3 class="username">{{ userName() }}</h3>
+    <h4 class="orgname">{{ orgName() }}</h4>
+  </div>
+  <zb-avatar-label
+    [src]="avatarUrl()"
+    [showLabel]="false"
+    [dense]="true"
+  />
+</div>
 
 <mat-menu #userMenu="matMenu" class="user-profile-menu">
   <div class="menu-header" (click)="$event.stopPropagation()">
-    <span class="avatar-circle avatar-lg">{{ initials() }}</span>
-    <div class="header-text">
-      <div class="user-name">{{ userName() }}</div>
-      <div class="org-name">{{ orgName() }}</div>
-    </div>
+    <zb-avatar-label
+      [src]="avatarUrl()"
+      [label]="userName()"
+      [subText]="orgName()"
+      [bold]="true"
+    />
   </div>
 
-  <mat-divider></mat-divider>
+  <mat-divider />
 
-  <button mat-menu-item (click)="toggleRole()">
-    <mat-icon>swap_horiz</mat-icon>
-    <span>Role: {{ userRole() | titlecase }}</span>
-  </button>
-
-  <button mat-menu-item (click)="cycleTheme($event)">
-    <mat-icon>{{ themeIcon() }}</mat-icon>
-    <span>Theme: {{ themeLabel() }}</span>
-  </button>
-
-  <mat-divider></mat-divider>
-
+  <a mat-menu-item routerLink="/my/engagements">
+    <mat-icon>work</mat-icon>
+    <span>My Engagements</span>
+  </a>
   <a mat-menu-item routerLink="/my-profile">
     <mat-icon>person</mat-icon>
     <span>My Profile</span>
   </a>
+  <a mat-menu-item routerLink="/my-profile/settings">
+    <mat-icon>settings</mat-icon>
+    <span>Settings</span>
+  </a>
 
+  <mat-divider />
+  <div class="menu-section-label">Browse</div>
+  <a mat-menu-item routerLink="/providers">
+    <mat-icon>people</mat-icon>
+    <span>Browse Providers</span>
+  </a>
+  <a mat-menu-item routerLink="/catalog">
+    <mat-icon>category</mat-icon>
+    <span>Browse Catalog</span>
+  </a>
+
+  <mat-divider />
+  <div class="menu-section-label">Help & Feedback</div>
+  <a mat-menu-item routerLink="/request-assistance">
+    <mat-icon>support_agent</mat-icon>
+    <span>Request Assistance</span>
+  </a>
+  <a mat-menu-item routerLink="/feedback">
+    <mat-icon>feedback</mat-icon>
+    <span>Site Feedback</span>
+  </a>
+
+  <mat-divider />
   <a mat-menu-item routerLink="/admin">
     <mat-icon>admin_panel_settings</mat-icon>
     <span>Admin</span>

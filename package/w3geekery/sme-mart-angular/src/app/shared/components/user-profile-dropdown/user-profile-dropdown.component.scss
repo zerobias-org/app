@@ -1,57 +1,46 @@
 .avatar-trigger {
-  margin-left: 0.5rem;
-}
-
-.avatar-circle {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: var(--mat-sys-primary);
-  color: var(--mat-sys-on-primary);
-  font-size: 0.875rem;
-  font-weight: 600;
-  line-height: 1;
+  gap: 0.5rem;
+  cursor: pointer;
+  color: inherit;
+}
 
-  &.avatar-lg {
-    width: 48px;
-    height: 48px;
-    font-size: 1.125rem;
+.org-user {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.2;
+}
+
+.username {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.orgname {
+  font-size: 12px;
+  font-weight: normal;
+  margin: 0;
+  opacity: 0.8;
+  white-space: nowrap;
+}
+
+::ng-deep .user-profile-menu {
+  .menu-header {
+    padding: 0.75rem 1rem;
   }
 }
 
-.user-profile-menu {
-  .menu-header {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.75rem 1rem;
-    min-width: 220px;
-    max-width: 280px;
-  }
-
-  .header-text {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    flex: 1;
-  }
-
-  .user-name {
-    font-weight: 500;
-    color: var(--zb-text);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .org-name {
-    font-size: 0.8125rem;
-    color: var(--zb-secondary-text);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+.menu-section-label {
+  padding: 0.375rem 1rem 0.125rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--zb-secondary-text);
+  opacity: 0.7;
+  cursor: default;
 }
