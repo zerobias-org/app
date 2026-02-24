@@ -5,5 +5,6 @@
 .vercel
 .env*.local
 
-# Local Claude plans (not shared)
+# Local Claude plans and settings (not shared)
 **/.claude/plans/local/
+**/.claude/settings.local.json
