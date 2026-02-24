@@ -4,10 +4,10 @@ import { Home } from './pages/home/home.component';
 import { ProviderList } from './pages/providers/provider-list.component';
 import { ProviderDetail } from './pages/providers/provider-detail.component';
 import { ServiceCatalog } from './pages/services/service-catalog.component';
-import { EngagementList } from './pages/engagements/engagement-list.component';
-import { EngagementNew } from './pages/engagements/engagement-new.component';
+import { RfpList } from './pages/rfps/rfp-list.component';
 import { EngagementDetail } from './pages/engagements/engagement-detail.component';
 import { EngagementEdit } from './pages/engagements/engagement-edit.component';
+import { ComingSoon } from './pages/coming-soon/coming-soon.component';
 
 export const routes: Routes = [
   {
@@ -18,15 +18,24 @@ export const routes: Routes = [
       { path: 'providers', component: ProviderList },
       { path: 'providers/:id', component: ProviderDetail },
       { path: 'services', component: ServiceCatalog },
-      { path: 'engagements', component: EngagementList },
-      { path: 'engagements/new', component: EngagementNew },
-      { path: 'engagements/:id', component: EngagementDetail },
-      { path: 'engagements/:id/edit', component: EngagementEdit },
+      { path: 'rfps', component: RfpList },
+      { path: 'rfps/:id', component: EngagementDetail },
+      // Redirects for old /engagements URLs
+      { path: 'engagements', redirectTo: 'rfps', pathMatch: 'full' },
+      { path: 'engagements/:id', redirectTo: 'rfps/:id' },
+      {
+        path: 'my/engagements',
+        loadChildren: () =>
+          import('./pages/my-engagements/my-engagements.routes').then((m) => m.MY_ENGAGEMENTS_ROUTES),
+      },
       {
         path: 'my-profile',
         loadChildren: () =>
           import('./pages/my-profile/my-profile.routes').then((m) => m.MY_PROFILE_ROUTES),
       },
+      { path: 'catalog', component: ComingSoon, data: { title: 'Browse Catalog' } },
+      { path: 'request-assistance', component: ComingSoon, data: { title: 'Request Assistance' } },
+      { path: 'feedback', component: ComingSoon, data: { title: 'Site Feedback' } },
       {
         path: 'admin',
         loadChildren: () =>

@@ -10,6 +10,17 @@
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
+  <script>
+    (function() {
+      var pref = localStorage.getItem('zb-theme-preference') || 'system';
+      var isDark = pref === 'dark' ||
+        (pref === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      if (isDark) {
+        document.body.classList.add('dark-theme');
+        document.documentElement.style.colorScheme = 'dark';
+      }
+    })();
+  </script>
   <app-root></app-root>
 </body>
 </html>

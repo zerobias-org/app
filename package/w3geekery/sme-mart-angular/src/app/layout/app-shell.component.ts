@@ -47,9 +47,8 @@ export class AppShell implements OnInit, OnDestroy {
   readonly mobileMenuOpen = signal(false);
 
   readonly navItems: NavItem[] = [
-    { label: 'Providers', path: '/providers', icon: 'people' },
     { label: 'Services', path: '/services', icon: 'storefront' },
-    { label: 'RFPs & Engagements', path: '/engagements', icon: 'assignment' },
+    { label: 'RFPs', path: '/rfps', icon: 'assignment' },
   ];
 
   ngOnInit() {

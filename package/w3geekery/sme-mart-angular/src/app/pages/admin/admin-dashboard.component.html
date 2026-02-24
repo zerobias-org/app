@@ -33,7 +33,7 @@
     <mat-tab label="Users">
       <div class="tab-content">
         <div class="tab-toolbar">
-          <zb-search-input placeholder="Search users..." (search)="onUsersSearch($event)"></zb-search-input>
+          <zb-search-input placeholder="Search users..." message="" (search)="onUsersSearch($event)"></zb-search-input>
           <button mat-stroked-button (click)="loadUsers()">
             <mat-icon>refresh</mat-icon> Refresh
           </button>

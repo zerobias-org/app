@@ -43,8 +43,8 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  background: var(--zb-primary);
-  color: var(--zb-primary-contrast-text-color);
+  background: #002d3e;
+  color: #fff;
 }
 
 .app-brand {
@@ -54,6 +54,22 @@
   text-decoration: none;
   color: inherit;
   flex-shrink: 0;
+
+  .brand-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 2.5px solid rgba(255, 255, 255, 0.75);
+    border-radius: 8px;
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
 
   .app-title {
     font-weight: 600;
@@ -69,9 +85,22 @@
   flex-shrink: 0;
 }
 
-.active-link {
-  opacity: 1;
-  font-weight: 500;
+.app-nav a {
+  opacity: 0.8;
+  transition: opacity 0.15s, background-color 0.15s;
+
+  &:hover {
+    opacity: 1;
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  &.active-link {
+    opacity: 1;
+    font-weight: 600;
+    background-color: rgba(255, 255, 255, 0.15);
+    border-bottom: 2px solid currentColor;
+    border-radius: 4px 4px 0 0;
+  }
 }
 
 .spacer {
@@ -104,4 +133,11 @@
   justify-content: flex-start;
   padding: 0.5rem 1.5rem;
   width: 100%;
+
+  &.active-link {
+    font-weight: 600;
+    background-color: var(--mat-sys-primary-container, rgba(0, 0, 0, 0.08));
+    color: var(--mat-sys-on-primary-container, var(--zb-primary));
+    border-left: 3px solid currentColor;
+  }
 }
