@@ -41,6 +41,19 @@ Angular 21 dropped type suffixes from filenames (e.g., `foo.ts` instead of `foo.
 
 **Always include the type suffix.** This applies to all new files going forward.
 
+## Vercel Deployment (Temporary)
+
+**Live URL:** `https://sme-mart-clark-stacers-projects.vercel.app/`
+
+Temporary hosting while the ZeroBias platform publishing path is WIP.
+
+- **API proxy:** Vercel Edge Middleware proxies `/api/*` → `ci.zerobias.com` with CI API key
+- **Database:** Direct Neon HTTP (`dbMode: 'neon'`) — Hub Module connector not active in QA
+- **Auth:** API key-based (same as local dev), no session/login flow
+- **Build config:** `ng build --configuration vercel` → `environment.vercel.ts`
+- **Env vars:** `ZB_API_KEY`, `ZB_ORG_ID`, `ZB_TOKEN`, `GITHUB_TOKEN` (set in Vercel dashboard)
+- **Branch:** `poc/sme-mart` (auto-deploys on push)
+
 ## Key Constraints
 
 - **No Nx** — plain Angular CLI (`ng serve`, `ng build`, `angular.json`)
