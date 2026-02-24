@@ -43,7 +43,7 @@ __screenshots__/
 
 # Environment secrets
 .env.local
-src/environments/environment.neon.ts
+# environment.neon.ts — generated locally by gen-neon-env.mjs, stub committed for CI/Vercel
 
 # System files
 .DS_Store
