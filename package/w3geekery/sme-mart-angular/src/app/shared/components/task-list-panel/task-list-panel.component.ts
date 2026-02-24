@@ -1,5 +1,5 @@
 import {
-  Component, Input, ChangeDetectionStrategy,
+  Component, Input, ChangeDetectionStrategy, OnInit,
   signal, computed, inject,
 } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
@@ -27,7 +27,7 @@ import { EngagementTasksService } from '../../../core/services/engagement-tasks.
   styleUrl: './task-list-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TaskListPanel {
+export class TaskListPanel implements OnInit {
   private readonly tasksService = inject(EngagementTasksService);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
@@ -53,6 +53,11 @@ export class TaskListPanel {
   readonly isOwnerFlag = computed(() => this._isOwner());
   readonly subTaskCount = computed(() => this.subTasks().length);
   readonly loaded = signal(false);
+
+  ngOnInit(): void {
+    // Auto-load when rendered (mat-tab lazy-renders content on first select)
+    this.loadTasks();
+  }
 
   async openCreateDialog(): Promise<void> {
     const master = this.masterTask();

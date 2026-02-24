@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, ChangeDetectionStrategy, OnInit, ViewChild } from '@angular/core';
+import { Component, inject, signal, computed, ChangeDetectionStrategy, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
@@ -65,8 +65,6 @@ export class EngagementDetail implements OnInit {
   private readonly providerProfiles = inject(ProviderProfilesService);
   private readonly lifecycle = inject(EngagementLifecycleService);
   private readonly engagementTimeline = inject(EngagementTimelineService);
-
-  @ViewChild(TaskListPanel) taskListPanel?: TaskListPanel;
 
   private static readonly TAB_NAMES = ['overview', 'details', 'tasks', 'timeline'] as const;
 
@@ -163,9 +161,9 @@ export class EngagementDetail implements OnInit {
         }
       }
       // Trigger lazy-load for restored tab (onTabChange doesn't fire for initial index)
+      // Tasks tab (2) self-loads via ngOnInit, but timeline (3) needs this
       const restoredTab = this.selectedTabIndex();
       if (restoredTab > 0) {
-        // Use setTimeout to ensure ViewChild is available after template renders
         setTimeout(() => this.onTabChange(restoredTab), 0);
       }
     } catch (err: any) {
@@ -284,10 +282,8 @@ export class EngagementDetail implements OnInit {
       replaceUrl: true,
     });
 
-    // Tasks tab is index 2 — lazy-load via TaskListPanel
-    if (tabIndex === 2 && this.taskListPanel) {
-      this.taskListPanel.loadTasks();
-    }
+    // Tasks tab (index 2): TaskListPanel auto-loads via its own ngOnInit
+    // (mat-tab lazy-renders content, so ngOnInit fires on first tab select)
 
     // Timeline tab is index 3 (Overview=0, Details=1, Tasks=2, Timeline=3)
     if (tabIndex === 3 && !this.timelineLoaded() && this.engagement()) {

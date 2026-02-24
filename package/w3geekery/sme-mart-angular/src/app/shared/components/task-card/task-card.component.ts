@@ -7,7 +7,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
-import { DatePipe, TitleCasePipe } from '@angular/common';
+import { DatePipe, NgClass, TitleCasePipe } from '@angular/common';
 import type { TaskExtended, Transition } from '@zerobias-com/platform-sdk';
 import { MarkdownView } from '../markdown-view/markdown-view.component';
 
@@ -17,7 +17,7 @@ import { MarkdownView } from '../markdown-view/markdown-view.component';
   imports: [
     MatCardModule, MatChipsModule, MatIconModule,
     MatButtonModule, MatMenuModule,
-    DatePipe, TitleCasePipe,
+    DatePipe, NgClass, TitleCasePipe,
     MarkdownView,
   ],
   templateUrl: './task-card.component.html',

@@ -24,10 +24,22 @@ mat-card {
 }
 
 // Status trigger button — styled like a chip but clickable
+// Uses .task-status-chip colors from global styles.scss
 .status-trigger {
   border: none;
   cursor: pointer;
   min-height: 28px;
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 0.15px;
+  text-transform: uppercase;
+  border-radius: 4px;
+  padding: 4px 8px;
+  line-height: 1.4;
+
+  // Override Material button background to let .task-status-chip colors show
+  --mdc-text-button-container-color: transparent;
+  --mat-text-button-state-layer-color: currentColor;
 
   mat-icon {
     font-size: 18px;
@@ -102,4 +114,6 @@ mat-card {
   width: 14px;
   height: 14px;
   margin-right: 2px;
+  vertical-align: middle;
+  line-height: 1;
 }

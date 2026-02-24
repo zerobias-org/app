@@ -14,8 +14,8 @@
 
         <!-- Status button / transition trigger -->
         @if (hasTransitions()) {
-          <button mat-flat-button [matMenuTriggerFor]="statusMenu"
-            class="status-trigger" [class]="statusClass()">
+          <button mat-button [matMenuTriggerFor]="statusMenu"
+            class="status-trigger" [ngClass]="statusClass()">
             {{ statusDisplay() }}
             <mat-icon iconPositionEnd>arrow_drop_down</mat-icon>
           </button>
