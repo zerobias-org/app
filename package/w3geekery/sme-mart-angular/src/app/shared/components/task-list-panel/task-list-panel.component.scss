@@ -1,0 +1,34 @@
+:host {
+  display: block;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  gap: 1rem;
+  color: var(--mat-sys-on-surface-variant, rgba(0, 0, 0, 0.6));
+}
+
+.section-title {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--mat-sys-on-surface, rgba(0, 0, 0, 0.87));
+}
+
+.master-section {
+  margin-bottom: 1.5rem;
+}
+
+.subtasks-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.add-task-btn {
+  flex-shrink: 0;
+}

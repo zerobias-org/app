@@ -1,0 +1,47 @@
+@if (loading()) {
+  <div class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Loading tasks…</p>
+  </div>
+} @else if (error()) {
+  <zb-empty-state-container
+    [loading]="false"
+    [emptyText]="'Failed to load tasks: ' + error()!">
+  </zb-empty-state-container>
+} @else if (masterTask()) {
+  <!-- Master Task -->
+  <section class="master-section">
+    <h3 class="section-title">Engagement Task</h3>
+    <app-task-card
+      [task]="masterTask()!"
+      [isMaster]="true"
+      (transitioned)="onTaskTransitioned($event)">
+    </app-task-card>
+  </section>
+
+  <!-- Related Tasks -->
+  <section class="subtasks-section">
+    <div class="subtasks-header">
+      <h3 class="section-title">Related Tasks ({{ subTaskCount() }})</h3>
+      @if (isOwnerFlag()) {
+        <button mat-stroked-button (click)="openCreateDialog()" class="add-task-btn">
+          <mat-icon>add</mat-icon> Add Task
+        </button>
+      }
+    </div>
+
+    @if (subTaskCount() === 0) {
+      <zb-empty-state-container
+        [loading]="false"
+        emptyText="No related tasks yet. Create one to track work items for this engagement.">
+      </zb-empty-state-container>
+    } @else {
+      @for (task of subTasks(); track task.id.toString()) {
+        <app-task-card
+          [task]="task"
+          (transitioned)="onTaskTransitioned($event)">
+        </app-task-card>
+      }
+    }
+  </section>
+}

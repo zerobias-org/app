@@ -1,0 +1,83 @@
+@if (timelineEvent(); as ev) {
+  <mat-card [class]="accentClass()" [class.collapsed]="!isExpanded()">
+
+    <!-- Collapsed: single-line summary -->
+    @if (!isExpanded()) {
+      <div class="collapsed-row" (click)="onToggle()" (keydown.enter)="onToggle()" tabindex="0">
+        <mat-icon class="type-icon">{{ icon() }}</mat-icon>
+        <span class="type-label">{{ typeLabel() }}</span>
+        <span class="actor-name">{{ ev.actor.name }}</span>
+        <span class="preview">{{ previewText() }}</span>
+        <span class="timestamp">{{ ev.timestamp | date:'short' }}</span>
+        <mat-icon class="expand-icon">expand_more</mat-icon>
+      </div>
+    }
+
+    <!-- Expanded: full card -->
+    @if (isExpanded()) {
+      <mat-card-header>
+        <div class="card-header-row">
+          <mat-icon class="type-icon">{{ icon() }}</mat-icon>
+          <span class="type-label">{{ typeLabel() }}</span>
+          <div class="actor">
+            @if (ev.actor.imageUrl) {
+              <img [src]="ev.actor.imageUrl" [alt]="ev.actor.name" class="avatar-img" />
+            } @else {
+              <div class="avatar-circle">{{ actorInitials() }}</div>
+            }
+            <span class="actor-name">{{ ev.actor.name }}</span>
+          </div>
+          <span class="spacer"></span>
+          <span class="timestamp">{{ ev.timestamp | date:'medium' }}</span>
+          <button mat-icon-button (click)="onToggle()" aria-label="Collapse">
+            <mat-icon>expand_less</mat-icon>
+          </button>
+        </div>
+      </mat-card-header>
+
+      <mat-card-content>
+        @switch (payload()?.type) {
+          @case ('comment') {
+            <app-markdown-view [content]="commentMarkdown()" class="comment-body"></app-markdown-view>
+            @if (payload()!.type === 'comment' && $any(payload()).attachments.length > 0) {
+              <div class="attachment-chips">
+                @for (att of $any(payload()).attachments; track att.id.toString()) {
+                  <mat-chip>
+                    <mat-icon matChipAvatar>attach_file</mat-icon>
+                    {{ att.fileMetadata?.name || 'File' }}
+                  </mat-chip>
+                }
+              </div>
+            }
+          }
+          @case ('attachment') {
+            <div class="attachment-detail">
+              <mat-icon>attach_file</mat-icon>
+              <span>{{ $any(payload()).attachment.fileMetadata?.name || 'File' }}</span>
+              @if ($any(payload()).attachment.fileMetadata?.size) {
+                <span class="file-size">({{ $any(payload()).attachment.fileMetadata.size | number }} bytes)</span>
+              }
+            </div>
+          }
+          @case ('proposal_submitted') {
+            <div class="proposal-info">
+              <p><strong>{{ $any(payload()).providerName }}</strong> submitted a proposal</p>
+              @if ($any(payload()).proposedPrice) {
+                <p class="price">{{ $any(payload()).proposedPrice | currency:'USD':'symbol':'1.0-0' }}</p>
+              }
+              @if ($any(payload()).coverLetterPreview) {
+                <p class="preview-text">"{{ $any(payload()).coverLetterPreview }}…"</p>
+              }
+            </div>
+          }
+          @case ('proposal_accepted') {
+            <div class="proposal-accepted">
+              <mat-icon class="success-icon">check_circle</mat-icon>
+              <p>Proposal from <strong>{{ $any(payload()).providerName }}</strong> was accepted</p>
+            </div>
+          }
+        }
+      </mat-card-content>
+    }
+  </mat-card>
+}

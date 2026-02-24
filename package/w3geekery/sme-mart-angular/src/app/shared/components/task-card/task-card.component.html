@@ -1,0 +1,76 @@
+@if (taskData()) {
+  <mat-card [class.master-card]="isMasterTask()">
+    <mat-card-header>
+      <div class="card-header-row">
+        <mat-chip-set>
+          <mat-chip class="code-chip">{{ taskCode() }}</mat-chip>
+          @if (priorityLabel()) {
+            <mat-chip [class]="priorityClass()">
+              <mat-icon class="priority-icon">{{ priorityIcon() }}</mat-icon>
+              {{ priorityLabel() }}
+            </mat-chip>
+          }
+        </mat-chip-set>
+
+        <!-- Status button / transition trigger -->
+        @if (hasTransitions()) {
+          <button mat-flat-button [matMenuTriggerFor]="statusMenu"
+            class="status-trigger" [class]="statusClass()">
+            {{ statusDisplay() }}
+            <mat-icon iconPositionEnd>arrow_drop_down</mat-icon>
+          </button>
+          <mat-menu #statusMenu="matMenu" class="transition-menu" backdropClass="transition-menu-backdrop">
+            @for (t of transitions(); track t.id.toString()) {
+              <button mat-menu-item (click)="onTransition(t)">
+                <div class="transition-row">
+                  <span class="transition-name">{{ t.name }}</span>
+                  <mat-icon class="transition-arrow">arrow_right_alt</mat-icon>
+                  <div class="transition-state">
+                    <span [class]="transitionStatusClass(t)">{{ transitionStatusDisplay(t) }}</span>
+                  </div>
+                </div>
+              </button>
+            }
+          </mat-menu>
+        } @else {
+          <span [class]="statusClass()">{{ statusDisplay() }}</span>
+        }
+      </div>
+    </mat-card-header>
+
+    <mat-card-content>
+      <h3 class="task-name">{{ taskName() }}</h3>
+
+      <div class="task-meta">
+        @if (assignedName() || ownerName()) {
+          <div class="meta-item">
+            <div class="avatar-circle small">{{ assignedInitials() }}</div>
+            <span class="meta-label">{{ assignedName() || ownerName() }}</span>
+          </div>
+        }
+        @if (taskCreated()) {
+          <div class="meta-item">
+            <mat-icon class="meta-icon">calendar_today</mat-icon>
+            <span class="meta-label">{{ taskCreated() | date:'mediumDate' }}</span>
+          </div>
+        }
+        @if (commentCount() > 0) {
+          <div class="meta-item">
+            <mat-icon class="meta-icon">chat_bubble_outline</mat-icon>
+            <span class="meta-label">{{ commentCount() }}</span>
+          </div>
+        }
+        @if (attachmentCount() > 0) {
+          <div class="meta-item">
+            <mat-icon class="meta-icon">attach_file</mat-icon>
+            <span class="meta-label">{{ attachmentCount() }}</span>
+          </div>
+        }
+      </div>
+
+      @if (taskDescription()) {
+        <app-markdown-view [content]="taskDescription()"></app-markdown-view>
+      }
+    </mat-card-content>
+  </mat-card>
+}

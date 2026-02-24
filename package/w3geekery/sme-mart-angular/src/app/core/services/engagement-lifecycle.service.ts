@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { ZerobiasClientApiService } from '@zerobias-com/zerobias-angular-client';
+import { ZerobiasClientApi } from '@zerobias-com/zerobias-client';
 import { SuggestTagBody } from '@zerobias-com/platform-sdk';
 import { Nmtoken } from '@zerobias-org/types-core-js';
 import { ProposalsService } from './proposals.service';
@@ -46,7 +46,7 @@ function randomWord(): string {
 
 @Injectable({ providedIn: 'root' })
 export class EngagementLifecycleService {
-  private readonly clientApi = inject(ZerobiasClientApiService);
+  private readonly clientApi = inject(ZerobiasClientApi);
   private readonly proposals = inject(ProposalsService);
   private readonly workRequests = inject(WorkRequestsService);
 

@@ -32,6 +32,52 @@ body {
   }
 }
 
+// Resizable drawer (used by filter sidebars)
+.resizable-drawer {
+  width: var(--drawer-width, 280px);
+}
+
+.drawer-resize-handle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 8px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s ease;
+
+  &:hover,
+  &:active {
+    background-color: var(--mat-sys-outline-variant, rgba(0, 0, 0, 0.08));
+  }
+
+  .resize-grip {
+    width: 3px;
+    height: 24px;
+    border-radius: 2px;
+    background-color: var(--mat-sys-outline, rgba(0, 0, 0, 0.2));
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+
+  &:hover .resize-grip,
+  &:active .resize-grip {
+    opacity: 1;
+  }
+}
+
+// Snackbar — ensure readable contrast in dark theme
+// Tokens are read from nearest ancestor; CDK overlay lives inside <body>
+body.dark-theme {
+  --mat-snack-bar-container-color: #d9d9d9;
+  --mat-snack-bar-supporting-text-color: #1a1a1a;
+  --mat-snack-bar-button-color: #1a1a1a;
+}
+
 // Scrollbar styling
 ::-webkit-scrollbar {
   width: 8px;
@@ -48,5 +94,68 @@ body {
 
   &:hover {
     background: var(--zb-scrollbar-thumb-hover);
+  }
+}
+
+// ============================================================================
+// Task status chips & transition menus (rendered in CDK overlay, needs global scope)
+// ============================================================================
+
+// Task status chip — ZB platform color palette
+.task-status-chip {
+  display: inline-block;
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 0.15px;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 4px;
+  line-height: 1.4;
+  white-space: nowrap;
+
+  &.backlog,
+  &.todo       { background-color: #e9e9e9; color: #0f0f10; }
+  &.in_progress,
+  &.awaiting_approval { background-color: #d7e0ee; color: #0f0f10; }
+  &.done,
+  &.completed  { background-color: #d8ecba; color: #0f0f10; }
+  &.cancelled  { background-color: #eed5d1; color: #0f0f10; }
+}
+
+// Transition menu — overlay panel
+.transition-menu.mat-mdc-menu-panel {
+  min-width: 350px;
+
+  .mat-mdc-menu-item-text {
+    width: 100%;
+  }
+}
+
+// Transition row inside menu items — "Action Name  →  STATUS"
+.transition-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+
+  .transition-name {
+    font-size: 14px;
+    font-weight: 500;
+    flex-grow: 1;
+    flex-basis: 150px;
+  }
+
+  .transition-arrow {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    color: var(--mat-sys-on-surface-variant, #666);
+    flex-shrink: 0;
+  }
+
+  .transition-state {
+    flex-basis: 120px;
+    flex-shrink: 0;
   }
 }

@@ -149,7 +149,9 @@
         </mat-chip-set>
       </div>
 
-      <mat-tab-group animationDuration="200ms">
+      <mat-tab-group animationDuration="200ms"
+        [selectedIndex]="selectedTabIndex()"
+        (selectedTabChange)="onTabChange($event.index)">
         <!-- Overview Tab -->
         <mat-tab label="Overview">
           <div class="tab-content">
@@ -274,25 +276,39 @@
           </div>
         </mat-tab>
 
-        <!-- Messages Tab -->
-        <mat-tab label="Messages">
+        <!-- Tasks Tab -->
+        <mat-tab label="Tasks">
           <div class="tab-content">
-            <zb-empty-state-container
-              icon="chat"
-              title="Messages Coming Soon"
-              description="Secure messaging between buyers and providers will be available in a future release.">
-            </zb-empty-state-container>
+            @if (engagement()!.zerobias_task_id) {
+              <app-task-list-panel
+                [masterTaskId]="engagement()!.zerobias_task_id!"
+                [boundaryId]="engagement()!.zerobias_boundary_id"
+                [isOwner]="isOwner()">
+              </app-task-list-panel>
+            } @else {
+              <zb-empty-state-container
+                icon="task_alt"
+                title="No ZeroBias Task Linked"
+                description="This engagement does not have a linked ZeroBias Task yet.">
+              </zb-empty-state-container>
+            }
           </div>
         </mat-tab>
 
-        <!-- Files Tab -->
-        <mat-tab label="Files">
+        <!-- Timeline Tab -->
+        <mat-tab label="Timeline">
           <div class="tab-content">
-            <zb-empty-state-container
-              icon="folder"
-              title="Files Coming Soon"
-              description="File sharing and document management will be available in a future release.">
-            </zb-empty-state-container>
+            @if (engagement()!.zerobias_task_id) {
+              <app-timeline-composer
+                [taskId]="engagement()!.zerobias_task_id!"
+                (commentPosted)="onCommentPosted($event)">
+              </app-timeline-composer>
+            }
+            <app-timeline-view
+              [events]="timelineEvents()"
+              [loading]="timelineLoading()"
+              (drillDown)="onTimelineDrillDown($event)">
+            </app-timeline-view>
           </div>
         </mat-tab>
       </mat-tab-group>
