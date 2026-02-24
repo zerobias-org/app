@@ -1,5 +1,5 @@
 ---
-name: sme-mart-angular-architect
+name: sme-mart-architect
 description: SME Mart Angular 21 architect. Standalone components, ngx-library theming, DataProducer/Generic SQL data layer, ZeroBias SDK integration. No Nx.
 tools: Read, Write, Edit, Bash, Glob, Grep
 ---

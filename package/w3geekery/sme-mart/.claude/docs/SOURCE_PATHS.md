@@ -4,8 +4,8 @@
 
 | Name | Path | Notes |
 |------|------|-------|
-| **SME Mart Angular** (this project) | `~/Projects/w3geekery/zerobias-org-forks/app/package/w3geekery/sme-mart-angular` | Angular 21 rebuild |
-| **SME Mart Next.js** (prototype) | `~/Projects/w3geekery/zerobias-org-forks/app/package/w3geekery/sme-mart` | Migration source — full feature reference |
+| **SME Mart** (this project) | `~/Projects/w3geekery/zerobias-org-forks/app/package/w3geekery/sme-mart` | Angular 21 — active |
+| **SME Mart Next.js** (deprecated) | `~/Projects/w3geekery/zerobias-org-forks/app/package/w3geekery/sme-mart-nextjs-deprecated` | Archived, gitignored, on disk for reference |
 | **SME Mart Hub Module** | `~/Projects/w3geekery/zerobias-org-forks/module/package/w3geekery/sme-mart` | Custom Hub Module (may not be needed if Generic SQL suffices) |
 | **SME Mart Login** | `~/Projects/w3geekery/zerobias-org-forks/login/package/w3geekery` | Branded login page |
 

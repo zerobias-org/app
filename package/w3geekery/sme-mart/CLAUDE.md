@@ -1,10 +1,10 @@
-# CLAUDE.md - SME Mart Angular
+# CLAUDE.md - SME Mart
 
 > **On Startup:** Read `.claude/plans/public/PLAN.md` — source of truth for architecture, phases, and decisions.
 
 ## Purpose
 
-SME Mart is a **marketplace for Subject Matter Experts** in compliance/cybersecurity — "Upwork meets Whop" for ZeroBias platform users. This is the **Angular 21 rebuild** of the Next.js prototype.
+SME Mart is a **marketplace for Subject Matter Experts** in compliance/cybersecurity — "Upwork meets Whop" for ZeroBias platform users. Built with **Angular 21**.
 
 ## Quick Reference
 
@@ -13,7 +13,7 @@ SME Mart is a **marketplace for Subject Matter Experts** in compliance/cybersecu
 | **Architecture & Plan** | [`.claude/plans/public/PLAN.md`](.claude/plans/public/PLAN.md) |
 | **Source Paths (SDKs, repos)** | [`.claude/docs/SOURCE_PATHS.md`](.claude/docs/SOURCE_PATHS.md) |
 | **Angular 21 Docs** | [`AGENTS.md`](AGENTS.md) — local docs index in `.angular-docs/` (refresh: `npx angular-agents-md`) |
-| **Next.js prototype** (migration source) | `../sme-mart/` |
+| **Next.js prototype** (archived) | `../sme-mart-nextjs-deprecated/` |
 | **ZeroBias UI** (Angular 21 reference) | `~/Projects/zb/ui` |
 | **SDK source** | `~/Projects/zb/clients/packages/` |
 | **Neon DB reference** | [`.claude/notes/neon-mcp-reference.md`](.claude/notes/neon-mcp-reference.md) — project ID, tables, common SQL queries |
@@ -22,7 +22,7 @@ SME Mart is a **marketplace for Subject Matter Experts** in compliance/cybersecu
 ## Skills
 
 - **`/angular-architect`** — invoke the global skill for general Angular 21 architecture questions
-- **`sme-mart-angular-architect`** — project-level skill (`.claude/skills/`) with SME Mart-specific patterns: ngx-library, DataProducer, standalone components, no Nx. Invoke for implementation work.
+- **`sme-mart-architect`** — project-level skill (`.claude/skills/`) with SME Mart-specific patterns: ngx-library, DataProducer, standalone components, no Nx. Invoke for implementation work.
 
 ## File Naming Convention
 

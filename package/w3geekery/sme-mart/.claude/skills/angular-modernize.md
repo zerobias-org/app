@@ -17,7 +17,7 @@ The user will invoke this skill with a component name or file path:
 
 If given a partial name, search for it:
 ```
-Glob: package/w3geekery/sme-mart-angular/src/app/**/*{name}*.component.ts
+Glob: package/w3geekery/sme-mart/src/app/**/*{name}*.component.ts
 ```
 
 Read the `.component.ts` file and its `.component.html` template.

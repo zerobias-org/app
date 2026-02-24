@@ -61,7 +61,7 @@ This makes SME Mart a first-class ZeroBias platform application with consistent 
 
 ### Skills
 
-Invoke the **`sme-mart-angular-architect`** project skill (`.claude/skills/`) for implementation work — it encodes all SME Mart-specific Angular conventions (standalone components, ngx-library usage, DataProducer patterns, no Nx). Use the global **`/angular-architect`** skill for general Angular 21 architecture questions not specific to this project.
+Invoke the **`sme-mart-architect`** project skill (`.claude/skills/`) for implementation work — it encodes all SME Mart-specific Angular conventions (standalone components, ngx-library usage, DataProducer patterns, no Nx). Use the global **`/angular-architect`** skill for general Angular 21 architecture questions not specific to this project.
 
 ### Portal Integration — Deferred
 
@@ -214,7 +214,7 @@ SME Mart is a **new** Angular app — we use modern Angular 21 defaults, not leg
 ## Project Structure
 
 ```
-sme-mart-angular/
+sme-mart/
 ├── .claude/
 │   └── plans/public/PLAN.md          # This file
 ├── src/
@@ -429,7 +429,7 @@ These should be planned but not prioritized for initial Angular migration:
 
 ```bash
 cd /Users/cstacer/Projects/w3geekery/zerobias-org-forks/app/package/w3geekery
-ng new sme-mart-angular --style=scss --routing --ssr=false
+ng new sme-mart --style=scss --routing --ssr=false
 ```
 
 - Configure `angular.json` with `baseHref: "/sme-mart/"`
