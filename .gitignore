@@ -3,6 +3,7 @@
 .vscode
 
 .vercel
+vercel.env
 .env*.local
 
 # Local Claude plans and settings (not shared)

@@ -48,3 +48,4 @@ src/environments/environment.neon.ts
 # System files
 .DS_Store
 Thumbs.db
+.vercel

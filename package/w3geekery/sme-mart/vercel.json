@@ -1,0 +1,9 @@
+{
+  "buildCommand": "npm run build:vercel",
+  "outputDirectory": "dist/sme-mart/browser",
+  "framework": null,
+  "installCommand": "npm install",
+  "rewrites": [
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ]
+}
