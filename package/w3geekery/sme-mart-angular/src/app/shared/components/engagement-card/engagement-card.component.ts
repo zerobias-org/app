@@ -67,7 +67,8 @@ export class EngagementCard {
   navigate(): void {
     const engagement = this._engagement();
     if (engagement) {
-      this.router.navigate(['/engagements', engagement.id]);
+      const path = this.isRfp() ? '/rfps' : '/my/engagements';
+      this.router.navigate([path, engagement.id]);
     }
   }
 }

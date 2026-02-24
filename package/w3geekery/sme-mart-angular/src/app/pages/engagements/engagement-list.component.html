@@ -10,7 +10,7 @@
       </mat-button-toggle-group>
     </div>
     <div class="header-right">
-      <button mat-flat-button color="primary" (click)="navigateToNew()">
+      <button mat-flat-button color="primary" (click)="openNewRfpDialog()">
         <mat-icon>add</mat-icon>
         Post an RFP
       </button>
@@ -26,6 +26,7 @@
 
     <zb-search-input
       placeholder="Search engagements..."
+      message=""
       [value]="searchTerm()"
       (search)="onSearch($event)">
     </zb-search-input>

@@ -38,7 +38,7 @@ export class EngagementEdit implements OnInit {
       const eng = await this.workRequests.getEngagement(id);
       if (!eng) {
         this.snackBar.open('Engagement not found', 'OK', { duration: 3000 });
-        this.router.navigate(['/engagements']);
+        this.router.navigate(['/rfps']);
         return;
       }
 
@@ -90,7 +90,7 @@ export class EngagementEdit implements OnInit {
         timeline: this.currentValues.timeline,
       } as Partial<WorkRequest>);
       this.snackBar.open('Changes saved', 'OK', { duration: 3000 });
-      this.router.navigate(['/engagements', eng.id]);
+      this.router.navigate(['/rfps', eng.id]);
     } catch (err: any) {
       this.snackBar.open(`Failed: ${err.message}`, 'Dismiss', { duration: 5000 });
     } finally {
@@ -100,6 +100,6 @@ export class EngagementEdit implements OnInit {
 
   cancel(): void {
     const eng = this.engagement();
-    this.router.navigate(eng ? ['/engagements', eng.id] : ['/engagements']);
+    this.router.navigate(eng ? ['/rfps', eng.id] : ['/rfps']);
   }
 }

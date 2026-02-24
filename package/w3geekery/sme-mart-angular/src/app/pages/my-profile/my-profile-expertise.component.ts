@@ -74,7 +74,7 @@ export class MyProfileExpertise implements OnInit {
     }
   }
 
-  async onAdd(section: ExpertiseSection, selected: CatalogItem): Promise<void> {
+  async onAdd(section: ExpertiseSection, selected: CatalogItem, autocomplete?: ZbSimpleAutocompleteComponent): Promise<void> {
     const p = this.profile();
     if (!p || !selected) return;
 
@@ -92,6 +92,7 @@ export class MyProfileExpertise implements OnInit {
         case 'roles':
           await this.providerProfiles.addRole(p.id, {
             zerobias_role_id: selected.id,
+            role_name: selected.name,
             is_primary: false,
             years_in_role: null,
           });
@@ -99,6 +100,7 @@ export class MyProfileExpertise implements OnInit {
         case 'products':
           await this.providerProfiles.addProduct(p.id, {
             zerobias_product_id: selected.id,
+            product_name: selected.name,
             proficiency_level: null,
             years_experience: null,
             certified: false,
@@ -108,6 +110,7 @@ export class MyProfileExpertise implements OnInit {
         case 'frameworks':
           await this.providerProfiles.addFramework(p.id, {
             zerobias_framework_id: selected.id,
+            framework_name: selected.name,
             proficiency_level: null,
             years_experience: null,
             assessor_certified: false,
@@ -118,19 +121,21 @@ export class MyProfileExpertise implements OnInit {
         case 'segments':
           await this.providerProfiles.addSegment(p.id, {
             zerobias_segment_id: selected.id,
+            segment_name: selected.name,
             is_primary: false,
           });
           break;
         case 'serviceSegments':
           await this.providerProfiles.addServiceSegment(p.id, {
             zerobias_service_segment_id: selected.id,
+            service_segment_name: selected.name,
             is_primary: false,
           });
           break;
       }
       section.items.push({ id: crypto.randomUUID(), name: selected.name, zbId: selected.id });
       this.sections.set([...this.sections()]);
-      this.snackBar.open(`Added ${selected.name}`, 'OK', { duration: 2000 });
+      autocomplete?.writeValue(null);
     } catch (err) {
       console.error('[Expertise] Add failed:', err);
       this.snackBar.open('Failed to add', 'OK', { duration: 3000 });
@@ -169,23 +174,38 @@ export class MyProfileExpertise implements OnInit {
       },
       {
         title: 'Roles', type: 'roles',
-        items: parse<any>(detail.roles).map((r: any) => ({ id: r.id, name: r.zerobias_role_id, zbId: r.zerobias_role_id })),
+        items: parse<any>(detail.roles).map((r: any) => ({
+          id: r.id, zbId: r.zerobias_role_id,
+          name: r.role_name || r.zerobias_role_id,
+        })),
       },
       {
         title: 'Products', type: 'products',
-        items: parse<any>(detail.products).map((p: any) => ({ id: p.id, name: p.zerobias_product_id, zbId: p.zerobias_product_id })),
+        items: parse<any>(detail.products).map((p: any) => ({
+          id: p.id, zbId: p.zerobias_product_id,
+          name: p.product_name || p.zerobias_product_id,
+        })),
       },
       {
         title: 'Frameworks', type: 'frameworks',
-        items: parse<any>(detail.frameworks).map((f: any) => ({ id: f.id, name: f.zerobias_framework_id, zbId: f.zerobias_framework_id })),
+        items: parse<any>(detail.frameworks).map((f: any) => ({
+          id: f.id, zbId: f.zerobias_framework_id,
+          name: f.framework_name || f.zerobias_framework_id,
+        })),
       },
       {
         title: 'Segments', type: 'segments',
-        items: parse<any>(detail.segments).map((s: any) => ({ id: s.id, name: s.zerobias_segment_id, zbId: s.zerobias_segment_id })),
+        items: parse<any>(detail.segments).map((s: any) => ({
+          id: s.id, zbId: s.zerobias_segment_id,
+          name: s.segment_name || s.zerobias_segment_id,
+        })),
       },
       {
         title: 'Service Segments', type: 'serviceSegments',
-        items: parse<any>(detail.service_segments).map((s: any) => ({ id: s.id, name: s.zerobias_service_segment_id, zbId: s.zerobias_service_segment_id })),
+        items: parse<any>(detail.service_segments).map((s: any) => ({
+          id: s.id, zbId: s.zerobias_service_segment_id,
+          name: s.service_segment_name || s.zerobias_service_segment_id,
+        })),
       },
     ]);
   }

@@ -14,6 +14,7 @@ import { MatTabsModule } from '@angular/material/tabs';
       <a mat-tab-link routerLink="services" routerLinkActive #rla3="routerLinkActive" [active]="rla3.isActive">Services</a>
       <a mat-tab-link routerLink="reviews" routerLinkActive #rla4="routerLinkActive" [active]="rla4.isActive">Reviews</a>
       <a mat-tab-link routerLink="moderate-reviews" routerLinkActive #rla5="routerLinkActive" [active]="rla5.isActive">Moderate</a>
+      <a mat-tab-link routerLink="settings" routerLinkActive #rla6="routerLinkActive" [active]="rla6.isActive">Settings</a>
     </nav>
     <mat-tab-nav-panel #tabPanel>
       <router-outlet />
@@ -21,6 +22,7 @@ import { MatTabsModule } from '@angular/material/tabs';
   `,
   styles: [`
     h2 { font-size: 1.5rem; font-weight: 600; margin: 0 0 1rem; }
+    .mat-mdc-tab-header { margin-bottom: 16px; }
     mat-tab-nav-panel { padding-top: 1.5rem; }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush,

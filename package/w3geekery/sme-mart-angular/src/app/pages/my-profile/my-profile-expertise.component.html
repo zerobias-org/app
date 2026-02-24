@@ -22,11 +22,13 @@
 
       <!-- Add new via autocomplete -->
       <zb-simple-autocomplete
+        #autocomplete
         [label]="'Add ' + section.title"
         [placeholder]="'Search ' + section.title + '...'"
         [searchFn]="getSearchFn(section.type)"
         displayKey="name"
-        (selectionChange)="onAdd(section, $event)"
+        panelWidth="auto"
+        (selectionChange)="onAdd(section, $event, autocomplete)"
       />
     </div>
   }

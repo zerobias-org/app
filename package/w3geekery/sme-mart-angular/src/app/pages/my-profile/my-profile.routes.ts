@@ -5,6 +5,7 @@ import { MyProfileExpertise } from './my-profile-expertise.component';
 import { MyProfileServices } from './my-profile-services.component';
 import { MyProfileReviews } from './my-profile-reviews.component';
 import { MyProfileModerateReviews } from './my-profile-moderate-reviews.component';
+import { MyProfileSettings } from './my-profile-settings.component';
 
 export const MY_PROFILE_ROUTES: Routes = [
   {
@@ -17,6 +18,7 @@ export const MY_PROFILE_ROUTES: Routes = [
       { path: 'services', component: MyProfileServices },
       { path: 'reviews', component: MyProfileReviews },
       { path: 'moderate-reviews', component: MyProfileModerateReviews },
+      { path: 'settings', component: MyProfileSettings },
     ],
   },
 ];

@@ -1,5 +1,6 @@
 import { Component, inject, signal, computed, ChangeDetectionStrategy, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
@@ -16,6 +17,7 @@ import { WorkRequestsService } from '../../core/services/work-requests.service';
 import { ProviderProfilesService } from '../../core/services/provider-profiles.service';
 import { UserPreferencesService } from '../../core/services/user-preferences.service';
 import { ImpersonationService } from '../../core/services/impersonation.service';
+import { RfpDialog } from '../../shared/components/rfp-dialog/rfp-dialog.component';
 import type {
   EngagementSummaryRow,
   RequestStatus,
@@ -50,6 +52,7 @@ type LifecycleFilter = 'all' | 'rfp' | 'engagement';
 export class EngagementList implements OnInit {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly dialog = inject(MatDialog);
   private readonly impersonation = inject(ImpersonationService);
   private readonly workRequests = inject(WorkRequestsService);
   private readonly providerProfiles = inject(ProviderProfilesService);
@@ -168,7 +171,12 @@ export class EngagementList implements OnInit {
     this.myProposalsOnly.update(v => !v);
   }
 
-  navigateToNew(): void {
-    this.router.navigate(['/engagements/new']);
+  openNewRfpDialog(): void {
+    const ref = this.dialog.open(RfpDialog, { width: '560px' });
+    ref.afterClosed().subscribe((result) => {
+      if (result) {
+        this.router.navigate(['/engagements', result.id]);
+      }
+    });
   }
 }

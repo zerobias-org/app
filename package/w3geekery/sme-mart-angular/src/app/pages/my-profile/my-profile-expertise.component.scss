@@ -42,6 +42,6 @@
   margin-bottom: 0.75rem;
 }
 
-zb-simple-autocomplete {
-  max-width: 400px;
+:host ::ng-deep zb-simple-autocomplete .mat-mdc-form-field {
+  min-width: 400px;
 }
