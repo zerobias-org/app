@@ -16,6 +16,8 @@ SME Mart is a **marketplace for Subject Matter Experts** in compliance/cybersecu
 | **Next.js prototype** (migration source) | `../sme-mart/` |
 | **ZeroBias UI** (Angular 21 reference) | `~/Projects/zb/ui` |
 | **SDK source** | `~/Projects/zb/clients/packages/` |
+| **Neon DB reference** | [`.claude/notes/neon-mcp-reference.md`](.claude/notes/neon-mcp-reference.md) — project ID, tables, common SQL queries |
+| **Demo data guide** | [`.claude/notes/demo-data-guide.md`](.claude/notes/demo-data-guide.md) — buyers, providers, engagements, ZB Tasks, demo scenarios |
 
 ## Skills
 

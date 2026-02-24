@@ -1,10 +1,10 @@
 # Plan: SME Mart Angular Rebuild
 
-**Last updated:** 2026-02-18
+**Last updated:** 2026-02-23
 
 ## Status
 
-**Phases 1–4 complete. Phase 5 next.**
+**Phases 1–4 complete. Phase 5 in progress (Plans 015–019).**
 
 | Phase | Status | Plan File |
 |-------|--------|-----------|
@@ -12,9 +12,19 @@
 | 2 — Database Layer (Generic SQL Hub Module) | **Complete** | (inline below) |
 | 3 — Service Layer | **Complete** | [`.claude/plans/local/phase-3-service-layer.md`](../local/phase-3-service-layer.md) |
 | 4 — Marketplace & Profiles | **Complete** | [`.claude/plans/local/phase-4-marketplace-profiles.md`](../local/phase-4-marketplace-profiles.md) |
-| 5 — Engagements & Admin | **Next** | TBD |
+| 5 — Engagements & Admin | **In Progress** | Plans 015–019 below |
 | 6 — ngx-library Re-skin & Polish | Pending | TBD |
 | 7 — Deployment | Pending | TBD |
+
+### Phase 5 Sub-Plans
+
+| # | Plan | Status | File |
+|---|------|--------|------|
+| 015 | Navigation & Taxonomy Restructuring | **Complete** | [`015-navigation-taxonomy-restructuring.md`](../local/015-navigation-taxonomy-restructuring.md) |
+| 016 | Engagement Messages Tab | Pending | [`016-engagement-messages-tab.md`](../local/016-engagement-messages-tab.md) |
+| 017 | Engagement Tasks Tab | **Complete** | [`017-engagement-tasks-tab.md`](../local/017-engagement-tasks-tab.md) |
+| 018 | Engagement Activity Center (Timeline) | **Complete** | [`018-engagement-activity-center.md`](../local/018-engagement-activity-center.md) |
+| 019 | Markdown Components (Milkdown Crepe + Renderer) | **Complete** | [`019-markdown-components.md`](../local/019-markdown-components.md) |
 
 ### What's built (Phases 1–4)
 
@@ -27,8 +37,15 @@
 **Marketplace & Profiles (P4):**
 - **Pages:** Home (hero + search + categories + featured), ProviderList (card grid + 6-type catalog filters + search + sort + mobile drawer), ProviderDetail, ServiceCatalog, MyProfile (overview/expertise/services/reviews with sidebar nav)
 - **Shared components:** ProviderCard, ServiceCard, StarRating, UserProfileDropdown, CatalogFilters, CatalogFilterSection, FilterEnabler
-- **Routes:** `/`, `/providers`, `/providers/:id`, `/services`, `/my-profile/*` (lazy), `/admin/*` (lazy), `/engagements`
-- **Partially started (P5):** `EngagementList` and `AdminDashboard` components exist but engagement detail/RFP/Transparency Center not yet built
+- **Routes:** `/`, `/services`, `/rfps`, `/rfps/:id`, `/providers` (footer link), `/providers/:id`, `/my/engagements` (lazy, user dropdown), `/my-profile/*` (lazy), `/admin/*` (lazy)
+
+**Engagements & Admin (P5 — in progress):**
+- **Engagement Detail:** 4-tab layout (Overview, Details, Tasks, Timeline) with tab persistence via `?tab=` query param
+- **Tasks Tab:** TaskListPanel + TaskCard with ZB platform status transition menus (Action → Status Chip), CreateSubTaskDialog with Milkdown editor, initial transitions support
+- **Timeline Tab:** TimelineView with color-coded event type icons (28px nodes), month dividers, TimelineEventCard with markdown rendering, TimelineComposer with Milkdown rich editor
+- **Markdown Components:** MarkdownView (read-only, `marked`-based), MarkdownEditor (Milkdown Crepe wrapper with static toolbar — bold, italic, strike, headings, lists, code, links, tables)
+- **Services:** EngagementTasksService, EngagementTimelineService (ZB Tasks + Boundary Events APIs)
+- **Global styles:** `.task-status-chip` with ZB platform color palette, `.transition-row` / `.transition-menu` for CDK overlay menus
 
 ## Context
 
@@ -296,13 +313,14 @@ The Next.js prototype has grown substantially. This is the complete feature set 
 | Route | Feature | Status in Next.js |
 |-------|---------|-------------------|
 | `/` | Landing page — hero, category cards, featured providers, search | Complete |
-| `/providers` | Provider directory — card grid, 6-type catalog filters, search, sort, availability toggle, mobile drawer | Complete |
+| `/services` | Service catalog — primary catalog, provider as facet (context menu), catalog filters | Complete |
+| `/rfps` | RFP list — public RFP browse, status/sort/catalog filters, "Post an RFP" dialog | Complete |
+| `/rfps/[id]` | RFP detail — proposals, accept/reject/withdraw, Transparency Center scaffolded | Complete |
+| `/providers` | Provider directory — card grid, catalog filters, search, sort (footer link, not in nav) | Complete |
 | `/providers/[id]` | Provider detail — skills, services, reviews, contact CTA | Complete |
-| `/services` | Service catalog — browse productized services with catalog filters | Complete |
-| `/engagements` | RFP/Engagement list — lifecycle toggle (RFPs/Engagements/All), "My Proposals" filter, catalog filters, "Post an RFP" CTA | Complete |
-| `/engagements/new` | Create RFP form — title, desc, category, budget, timeline; draft or publish | Complete |
-| `/engagements/[id]` | Engagement detail — **dual view**: RFP (proposals, accept/reject/withdraw) OR Transparency Center (tabs: Overview, Details, Messages*, Files*) | Complete (TC tabs scaffolded) |
-| `/engagements/[id]/edit` | Edit existing RFP | Complete |
+| `/my/engagements` | My Engagements — private, user's engagements only (lazy, user dropdown) | Complete |
+| `/my/engagements/[id]` | Engagement detail — private workspace | Complete |
+| `/my/engagements/[id]/edit` | Edit engagement | Complete |
 | `/my-profile` | Edit provider profile (headline, about, hourly rate, availability) | Complete |
 | `/my-profile/expertise` | Manage catalog-linked expertise (6 autocomplete pickers) | Complete |
 | `/my-profile/services` | Manage service offerings (CRUD) | Complete |
@@ -399,6 +417,7 @@ These should be planned but not prioritized for initial Angular migration:
 - Composite reputation score (SME Score)
 - Provider levels/badges
 - Demo mode mock catalog (Plan 013 — not started)
+- Agentic optimization & self-maintenance — AI execution scoring, drift detection, policy-aware optimization, admin AI health panel (see [`.claude/notes/agentic-optimization-concepts.md`](../../notes/agentic-optimization-concepts.md))
 
 ---
 

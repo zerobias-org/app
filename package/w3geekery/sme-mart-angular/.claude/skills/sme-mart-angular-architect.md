@@ -271,17 +271,19 @@ const hubUrl = getZerobiasClientUrl('hub', true, environment.isLocalDev);
 
 ```
 AppComponent (shell)
-├── AppTopBar (nav, branding, UserProfileDropdown)
+├── AppTopBar (nav: Services | RFPs, branding, UserProfileDropdown)
 ├── <router-outlet />
-│   ├── /              → LandingComponent
-│   ├── /providers     → ProviderListComponent
-│   ├── /providers/:id → ProviderDetailComponent
-│   ├── /services      → ServiceCatalogComponent
-│   ├── /engagements   → EngagementListComponent (lifecycle toggle)
-│   ├── /engagements/:id → EngagementDetailComponent (dual view)
-│   ├── /my-profile/*  → Profile routes (lazy loaded)
-│   └── /admin/*       → Admin routes (lazy loaded)
-└── (no footer in iframe mode)
+│   ├── /                → Home
+│   ├── /services        → ServiceCatalog (primary catalog, provider as facet)
+│   ├── /rfps            → RfpList (public RFP browse)
+│   ├── /rfps/:id        → EngagementDetail (public RFP detail + proposals)
+│   ├── /providers       → ProviderList (footer link, not in nav)
+│   ├── /providers/:id   → ProviderDetail
+│   ├── /my/engagements  → MyEngagementList (lazy, user dropdown)
+│   ├── /my-profile/*    → Profile routes (lazy loaded)
+│   └── /admin/*         → Admin routes (lazy loaded)
+├── Footer ("Browse Providers" link)
+└── ImpersonationSwitcher
 ```
 
 ### Shared Components

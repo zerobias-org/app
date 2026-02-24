@@ -38,7 +38,7 @@ A labor and services marketplace where:
 1. Plan 010: Boundary Integration (prerequisite)
 2. Plan 009: Tasks Integration (depends on boundaries)
 
-See `.claude/plans/local/` for detailed implementation plans.
+See `.claude/plans/` for detailed implementation plans.
 
 ### Target Service Categories
 
@@ -417,9 +417,9 @@ jdbc:postgresql://ep-aged-fog-af9wu771.c-2.us-west-2.aws.neon.tech/neondb?user=n
 1. **Hub tags endpoint 503** — `POST /api/hub/resources/{id}/tags` returns 503 on QA, preventing deployment tagging (`envTypeTags INPUT: null` → `Error: no module-deployment tags found`)
 2. **Connection test fails** — `GET /api/hub/targets/{id}/metadata` reaches the SQL Connector container, but the error response isn't in `CoreError` format. The Hub's `ConnectedNode.ts:237` can't deserialize it, hiding the actual JDBC error. Likely cause: SSL/cert or network issue inside the Docker container reaching Neon.
 
-**Next steps:** Kevin is updating Hub error handling for better LLM troubleshooting. Retry connection test after QA Hub updates are deployed. Check `~/zb-repos/hub/` source (pulled latest 2026-02-11) for changes to `ConnectedNode.ts` and `TargetProducerImpl.ts`.
+**Next steps:** Kevin is updating Hub error handling for better LLM troubleshooting. Retry connection test after QA Hub updates are deployed. Check `~/Projects/zb/hub/` source (pulled latest 2026-02-11) for changes to `ConnectedNode.ts` and `TargetProducerImpl.ts`.
 
-**Hub source:** `~/zb-repos/hub/` (zerobias-com/hub, main branch)
+**Hub source:** `~/Projects/zb/hub/` (zerobias-com/hub, main branch)
 
 ### API Integration Patterns
 
@@ -706,8 +706,11 @@ npm run start
 - **Plans (public)**: `.claude/plans/public/` - Shared implementation plans
 - **Plans (local)**: `.claude/plans/local/` - Local/draft plans
 - **Notes**: `.claude/notes/` - Session notes and working docs
+- **Meeting Summarizer Skill**: `.claude/skills/sme-mart-meeting-summarizer.md` - SME Mart-specific meeting summarizer (participants, terminology, Jira integration)
+- **Meeting Summarizer Template**: `.claude/skills/ms-teams-meeting-transcription-summarizer-template.md` - Generic reusable template — copy and customize `[CUSTOMIZE]` sections for any project/team
+- **Meeting Transcription Research**: `.claude/notes/meeting-transcription-automation.md` - MS Teams Graph API integration research, permissions, automation options
 - **Hub Module (W3Geekery fork)**: `../../../../module` (i.e. `zerobias-org-forks/module`) - SME Mart Hub Module source (forked from `zerobias-org/module`, PRs go to `dev` branch)
-- **Hub Source (ZeroBias)**: `~/zb-repos/hub/` - Hub server/node source for debugging connector issues
+- **Hub Source (ZeroBias)**: `~/Projects/zb/hub/` - Hub server/node source for debugging connector issues
 
 ## AGENTS.md Reference
 
@@ -729,9 +732,9 @@ Prefer retrieval-led reasoning over pre-training for any ZeroBias or Next.js tas
 
 ## Research References
 
-- **Marketplace Plan**: `~/Projects/zerobias-com/repos/ui/.claude/plans/MARKETPLACE_TOOLS_CENTER.md` (external — zerobias-com repo)
-- **Upwork Research**: `~/Projects/zerobias-com/repos/ui/.claude/plans/history/RESEARCH_UPWORK.md` (external — zerobias-com repo)
-- **Whop Research**: `~/Projects/zerobias-com/repos/ui/.claude/plans/history/RESEARCH_WHOP.md` (external — zerobias-com repo)
+- **Marketplace Plan**: `~/Projects/zb/ui/.claude/plans/MARKETPLACE_TOOLS_CENTER.md` (external — zerobias-com repo)
+- **Upwork Research**: `~/Projects/zb/ui/.claude/plans/history/RESEARCH_UPWORK.md` (external — zerobias-com repo)
+- **Whop Research**: `~/Projects/zb/ui/.claude/plans/history/RESEARCH_WHOP.md` (external — zerobias-com repo)
 - **VoltAgent**: https://voltagent.dev/ai-agent-marketplace/
 
 ## VoltAgent Marketplace Patterns

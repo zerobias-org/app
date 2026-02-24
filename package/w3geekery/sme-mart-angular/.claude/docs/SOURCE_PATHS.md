@@ -17,6 +17,7 @@
 | **Portal App** | `~/Projects/zb/ui/projects/portal` | Main shell app (bootstrap, routing, iframe host) |
 | **Catalog App** | `~/Projects/zb/ui/projects/catalog-app` | Good small-app reference for providers/config |
 | **neverfail-lib** | `~/Projects/zb/ui/projects/neverfail-lib` | Shared component library (services, components, base classes) |
+| **ngx-library** (source) | `~/Projects/zb/zerobias-org/ngx-library` | `@zerobias-org/ngx-library` source — check commit log for changes between versions |
 | **Theme** | `~/Projects/zb/ui/projects/theme` | M3 theme SCSS (`$theme`, `$altTheme`, CSS custom props) |
 | **Governance App** | `~/Projects/zb/ui/projects/governance-app` | Boundary/task patterns |
 | **Boundary Manager** | `~/Projects/zb/ui/projects/boundary-manager-app` | Boundary CRUD patterns |
