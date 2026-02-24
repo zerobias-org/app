@@ -6,9 +6,9 @@ export const config = {
 };
 
 export default async function middleware(request: Request) {
-  const target = process.env.ZB_TARGET_HOST || 'https://qa.zerobias.com';
-  const apiKey = process.env.ZEROBIAS_QA_API_KEY;
-  const orgId = process.env.ZEROBIAS_QA_ORG_ID;
+  const target = process.env['ZB_TARGET_HOST'] || 'https://qa.zerobias.com';
+  const apiKey = process.env['ZEROBIAS_QA_API_KEY'];
+  const orgId = process.env['ZEROBIAS_QA_ORG_ID'];
 
   const url = new URL(request.url);
   const targetUrl = `${target}${url.pathname}${url.search}`;
