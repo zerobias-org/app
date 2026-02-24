@@ -3,6 +3,7 @@ import { PricingType } from './enums';
 export interface ServiceOffering {
   id: string;
   provider_id: string | null;
+  provider_display_name?: string;
   title: string;
   description: string | null;
   category: string;

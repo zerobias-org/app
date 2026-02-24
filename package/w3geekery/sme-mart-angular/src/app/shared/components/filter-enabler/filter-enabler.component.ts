@@ -1,7 +1,7 @@
-import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, signal, ViewChild } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatMenuModule } from '@angular/material/menu';
+import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
 import { MatCheckboxModule, MatCheckboxChange } from '@angular/material/checkbox';
 import type { EnabledFilters, FilterType } from '../../../core/models';
 
@@ -28,6 +28,8 @@ const OPTIONS: FilterOption[] = [
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FilterEnabler {
+  @ViewChild(MatMenuTrigger) menuTrigger!: MatMenuTrigger;
+
   private readonly _enabled = signal<EnabledFilters>({
     roles: true, skills: true, products: false,
     frameworks: false, segments: false, serviceSegments: false,

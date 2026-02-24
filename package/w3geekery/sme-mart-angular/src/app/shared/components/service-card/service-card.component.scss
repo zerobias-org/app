@@ -54,3 +54,22 @@
 .pricing-type {
   color: var(--zb-secondary-text);
 }
+
+.provider-section {
+  margin-left: auto;
+}
+
+.provider-menu-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  width: auto;
+  height: auto;
+  padding: 0.25rem;
+  font-size: 0.8125rem;
+  color: var(--zb-secondary-text);
+
+  .provider-name {
+    font-size: 0.8125rem;
+  }
+}

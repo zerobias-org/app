@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, inject, computed, signal } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, inject, computed, signal, ViewChild } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { CatalogFilterSection } from '../catalog-filter-section/catalog-filter-section.component';
@@ -21,8 +21,8 @@ const FILTER_CONFIGS: FilterSectionConfig[] = [
   { type: 'roles', title: 'Roles', showAllAsChips: false },
   { type: 'skills', title: 'Skills', showAllAsChips: false },
   { type: 'products', title: 'Products', showAllAsChips: false },
-  { type: 'frameworks', title: 'Frameworks', showAllAsChips: true },
-  { type: 'segments', title: 'Segments', showAllAsChips: true },
+  { type: 'frameworks', title: 'Frameworks', showAllAsChips: false },
+  { type: 'segments', title: 'Segments', showAllAsChips: false },
   { type: 'serviceSegments', title: 'Service Segments', showAllAsChips: true },
 ];
 
@@ -40,6 +40,7 @@ const FILTER_CONFIGS: FilterSectionConfig[] = [
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CatalogFilters {
+  @ViewChild(FilterEnabler) private filterEnabler!: FilterEnabler;
   private readonly catalog = inject(CatalogService);
 
   private readonly _enabledFilters = signal<EnabledFilters>({
@@ -121,5 +122,10 @@ export class CatalogFilters {
 
   get currentEnabled(): EnabledFilters {
     return this._enabledFilters();
+  }
+
+  /** Programmatically open the filter-enabler menu */
+  openFilterMenu(): void {
+    this.filterEnabler?.menuTrigger?.openMenu();
   }
 }

@@ -1,42 +1,77 @@
 <div class="catalog-page">
-  <h2>Service Catalog</h2>
+  <!-- Toolbar -->
+  <div class="list-toolbar">
+    <button mat-icon-button (click)="toggleDrawer()" aria-label="Toggle filters"
+      [matBadge]="activeFilterCount()" matBadgeColor="primary" matBadgeSize="small" [matBadgeHidden]="activeFilterCount() === 0">
+      <mat-icon>filter_alt</mat-icon>
+    </button>
 
-  <div class="catalog-toolbar">
     <zb-search-input
       class="search-input"
       placeholder="Search services..."
+      message=""
+      [value]="searchTerm()"
       (search)="onSearch($event)"
     />
+
+    <mat-form-field appearance="outline" class="sort-select" subscriptSizing="dynamic">
+      <mat-select [(value)]="sortBy">
+        <mat-option value="title">Title</mat-option>
+        <mat-option value="category">Category</mat-option>
+        <mat-option value="newest">Newest First</mat-option>
+      </mat-select>
+    </mat-form-field>
   </div>
 
-  @if (categories().length) {
-    <mat-chip-set class="category-chips">
-      <mat-chip
-        [class.selected]="selectedCategory() === null"
-        (click)="onCategorySelect(null)"
-      >
-        All
-      </mat-chip>
-      @for (cat of categories(); track cat.id) {
-        <mat-chip
-          [class.selected]="isCategorySelected(cat.slug)"
-          (click)="onCategorySelect(cat.slug)"
-        >
-          {{ cat.name }}
+  <!-- Provider filter chip -->
+  @if (providerFilter()) {
+    <div class="active-filter-bar">
+      <mat-chip-set>
+        <mat-chip [removable]="true" (removed)="clearProviderFilter()">
+          <mat-icon matChipAvatar>person</mat-icon>
+          Services by {{ providerFilterName() || 'Provider' }}
+          <mat-icon matChipRemove>cancel</mat-icon>
         </mat-chip>
-      }
-    </mat-chip-set>
+      </mat-chip-set>
+    </div>
   }
 
-  @if (loading()) {
-    <zb-empty-state-container [loading]="true" />
-  } @else if (filteredServices().length) {
-    <div class="service-grid">
-      @for (svc of filteredServices(); track svc.id) {
-        <app-service-card [service]="svc" (serviceSelect)="onServiceSelect($event)" />
+  <!-- Content with filter drawer -->
+  <mat-sidenav-container class="content-container">
+    <mat-sidenav
+      #filterDrawer
+      appResizableDrawer
+      mode="side"
+      [opened]="drawerOpen()"
+      position="start"
+      class="filter-sidebar"
+    >
+      <app-catalog-filters
+        [enabledFilters]="enabledFilters()"
+        [selectedFilters]="catalogFilters()"
+        (filtersChange)="onFiltersChange($event)"
+        (enabledChange)="onEnabledChange($event)">
+      </app-catalog-filters>
+    </mat-sidenav>
+
+    <mat-sidenav-content class="main-content">
+      @if (loading()) {
+        <zb-empty-state-container [loading]="true" />
+      } @else if (filteredServices().length) {
+        <div class="results-count">{{ filteredServices().length }} services found</div>
+        <div class="service-grid">
+          @for (svc of filteredServices(); track svc.id) {
+            <app-service-card
+              [service]="svc"
+              (serviceSelect)="onServiceSelect($event)"
+              (viewProviderServices)="onViewProviderServices($event)"
+              (viewProviderProfile)="onViewProviderProfile($event)"
+            />
+          }
+        </div>
+      } @else {
+        <zb-empty-state-container [loading]="false" emptyText="No services found" />
       }
-    </div>
-  } @else {
-    <zb-empty-state-container [loading]="false" emptyText="No services found" />
-  }
+    </mat-sidenav-content>
+  </mat-sidenav-container>
 </div>

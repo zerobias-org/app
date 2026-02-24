@@ -27,6 +27,32 @@
           {{ deliveryTime() }}
         </span>
       }
+      @if (providerId()) {
+        <span class="provider-section">
+          <button
+            mat-icon-button
+            [matMenuTriggerFor]="providerMenu"
+            (click)="$event.stopPropagation()"
+            class="provider-menu-trigger"
+            aria-label="Provider options"
+          >
+            <mat-icon class="meta-icon">person</mat-icon>
+            @if (providerName()) {
+              <span class="provider-name">{{ providerName() }}</span>
+            }
+          </button>
+          <mat-menu #providerMenu="matMenu">
+            <button mat-menu-item (click)="onViewProviderServices($event)">
+              <mat-icon>storefront</mat-icon>
+              <span>Services by this Provider</span>
+            </button>
+            <button mat-menu-item (click)="onViewProviderProfile($event)">
+              <mat-icon>person</mat-icon>
+              <span>View Provider Profile</span>
+            </button>
+          </mat-menu>
+        </span>
+      }
     </div>
   </mat-card-footer>
 </mat-card>
