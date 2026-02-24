@@ -35,6 +35,7 @@ export interface ProviderRole {
   id: string;
   provider_id: string | null;
   zerobias_role_id: string;
+  role_name: string | null;
   is_primary: boolean;
   years_in_role: number | null;
   created_at: string;
@@ -44,6 +45,7 @@ export interface ProviderProduct {
   id: string;
   provider_id: string | null;
   zerobias_product_id: string;
+  product_name: string | null;
   proficiency_level: ProficiencyLevel | null;
   years_experience: number | null;
   certified: boolean;
@@ -55,6 +57,7 @@ export interface ProviderFramework {
   id: string;
   provider_id: string | null;
   zerobias_framework_id: string;
+  framework_name: string | null;
   proficiency_level: ProficiencyLevel | null;
   years_experience: number | null;
   assessor_certified: boolean;
@@ -67,6 +70,7 @@ export interface ProviderSegment {
   id: string;
   provider_id: string | null;
   zerobias_segment_id: string;
+  segment_name: string | null;
   is_primary: boolean;
   created_at: string;
 }
@@ -75,6 +79,7 @@ export interface ProviderServiceSegment {
   id: string;
   provider_id: string | null;
   zerobias_service_segment_id: string;
+  service_segment_name: string | null;
   is_primary: boolean;
   created_at: string;
 }

@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, ChangeDetectionStrategy, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, ChangeDetectionStrategy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatButtonModule } from '@angular/material/button';
@@ -10,6 +10,7 @@ import { FormsModule } from '@angular/forms';
 import { ZbSearchInputComponent, ZbEmptyStateContainerComponent } from '@zerobias-org/ngx-library';
 import { ProviderCard } from '../../shared/components/provider-card/provider-card.component';
 import { CatalogFilters } from '../../shared/components/catalog-filters/catalog-filters.component';
+import { ResizableDrawerDirective } from '../../shared/directives/resizable-drawer.directive';
 import { ProviderProfilesService } from '../../core/services/provider-profiles.service';
 import { CatalogService } from '../../core/services/catalog.service';
 import { UserPreferencesService } from '../../core/services/user-preferences.service';
@@ -30,12 +31,14 @@ import type { ProviderDirectoryRow, CatalogFiltersState, EnabledFilters } from '
     ZbEmptyStateContainerComponent,
     ProviderCard,
     CatalogFilters,
+    ResizableDrawerDirective,
   ],
   templateUrl: './provider-list.component.html',
   styleUrl: './provider-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProviderList implements OnInit {
+  @ViewChild(CatalogFilters) private catalogFiltersComp!: CatalogFilters;
   private readonly route = inject(ActivatedRoute);
   private readonly providerProfiles = inject(ProviderProfilesService);
   private readonly catalog = inject(CatalogService);
@@ -122,7 +125,11 @@ export class ProviderList implements OnInit {
   }
 
   toggleDrawer(): void {
-    this.drawerOpen.update((v) => !v);
+    const opening = !this.drawerOpen();
+    this.drawerOpen.set(opening);
+    if (opening && this.activeFilterCount() === 0) {
+      setTimeout(() => this.catalogFiltersComp?.openFilterMenu(), 300);
+    }
   }
 
   private parseJson<T>(json: string | unknown): T[] {

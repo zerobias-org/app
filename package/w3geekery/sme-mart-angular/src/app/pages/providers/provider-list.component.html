@@ -9,6 +9,7 @@
     <zb-search-input
       class="search-input"
       placeholder="Search providers..."
+      message=""
       [value]="searchTerm()"
       (search)="onSearch($event)"
     />
@@ -26,6 +27,7 @@
   <mat-sidenav-container class="provider-list-container">
     <mat-sidenav
       #filterDrawer
+      appResizableDrawer
       mode="side"
       [opened]="drawerOpen()"
       position="start"

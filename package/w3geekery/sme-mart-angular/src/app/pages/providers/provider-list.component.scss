@@ -26,7 +26,7 @@
 }
 
 .filter-sidebar {
-  width: 280px;
+  width: var(--drawer-width, 280px);
   padding: 1rem;
 }
 
