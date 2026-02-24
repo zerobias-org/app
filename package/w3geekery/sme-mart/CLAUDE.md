@@ -1,10 +1,12 @@
-# CLAUDE.md - SME Mart
+# CLAUDE.md - SME Mart (DEPRECATED)
 
-> **On Startup:** Read `.claude/plans/public/000-MASTER-PLAN.md` first — this is the source of truth for the entire project. Then check `.claude/restart_context.md` for session state and next steps.
+> **DEPRECATED** — This is the original Next.js prototype. All active development has moved to **`../sme-mart-angular/`**. This folder is kept as reference only and will be archived soon.
+>
+> **DO NOT** make changes to this package. Work in `sme-mart-angular/` instead.
+>
+> All `.claude/` docs, notes, ideas, plans, and research have been migrated to `../sme-mart-angular/.claude/`.
 
-> **Stand-up Prep (Weekdays @ 8:30am Pacific):** When Clark asks for stand-up items, search all `.claude/plans/` files for `<!-- STANDUP -->` flags and list them as discussion topics.
-
-This file provides project-specific guidance for the SME Mart application.
+This file provides project-specific guidance for the (deprecated) SME Mart Next.js application.
 
 ## Purpose
 
