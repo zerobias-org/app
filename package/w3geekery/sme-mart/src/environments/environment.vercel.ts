@@ -2,7 +2,7 @@
 // Used by `ng build --configuration vercel`
 export const environment = {
   production: true,
-  isLocalDev: false,
+  isLocalDev: true, // API key auth via Edge Middleware (same as local proxy)
   socketUrlPath: '', // Empty = no WebSocket connection (portal-only feature)
   localPortalOrigin: '',
   cdnUrl: '', // Assets served from Vercel, not ZeroBias CDN
