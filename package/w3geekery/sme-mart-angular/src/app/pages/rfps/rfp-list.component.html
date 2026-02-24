@@ -1,0 +1,84 @@
+<div class="rfp-list-page">
+  <!-- Header -->
+  <div class="page-header">
+    <h2>RFPs</h2>
+    <div class="header-right">
+      <button mat-flat-button color="primary" (click)="openNewRfpDialog()">
+        <mat-icon>add</mat-icon>
+        Post an RFP
+      </button>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <button mat-icon-button (click)="toggleDrawer()" aria-label="Toggle filters"
+      [matBadge]="activeFilterCount()" matBadgeColor="primary" matBadgeSize="small" [matBadgeHidden]="activeFilterCount() === 0">
+      <mat-icon>filter_alt</mat-icon>
+    </button>
+
+    <zb-search-input
+      placeholder="Search RFPs..."
+      message=""
+      [value]="searchTerm()"
+      (search)="onSearch($event)">
+    </zb-search-input>
+
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>Status</mat-label>
+      <mat-select [value]="statusFilter()" (selectionChange)="statusFilter.set($event.value)">
+        <mat-option value="all">All Statuses</mat-option>
+        <mat-option value="open">Open</mat-option>
+        <mat-option value="in_progress">In Progress</mat-option>
+        <mat-option value="draft">Draft</mat-option>
+        <mat-option value="completed">Completed</mat-option>
+        <mat-option value="cancelled">Cancelled</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>Sort</mat-label>
+      <mat-select [value]="sortBy()" (selectionChange)="sortBy.set($event.value)">
+        <mat-option value="newest">Newest First</mat-option>
+        <mat-option value="budget_high">Budget: High to Low</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <!-- Content with filter drawer -->
+  <mat-sidenav-container class="content-container">
+    <mat-sidenav
+      #filterDrawer
+      appResizableDrawer
+      mode="side"
+      [opened]="drawerOpen()"
+      position="start"
+      class="filter-sidebar"
+    >
+      <app-catalog-filters
+        [selectedFilters]="catalogFilters()"
+        [enabledFilters]="enabledFilters()"
+        (filtersChange)="onFiltersChange($event)"
+        (enabledChange)="onEnabledChange($event)">
+      </app-catalog-filters>
+    </mat-sidenav>
+
+    <mat-sidenav-content>
+      @if (loading()) {
+        <zb-empty-state-container [loading]="true" />
+      } @else if (filteredRfps().length === 0) {
+        <zb-empty-state-container
+          icon="assignment"
+          title="No RFPs found"
+          description="Try adjusting your filters or post an RFP to get started.">
+        </zb-empty-state-container>
+      } @else {
+        <div class="rfp-grid">
+          @for (rfp of filteredRfps(); track rfp.id) {
+            <app-engagement-card [engagement]="rfp"></app-engagement-card>
+          }
+        </div>
+      }
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+</div>

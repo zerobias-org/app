@@ -1,0 +1,55 @@
+.rfp-list-page {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+  }
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+
+  zb-search-input {
+    flex: 1;
+    min-width: 200px;
+  }
+
+  .filter-field {
+    width: 160px;
+  }
+}
+
+.content-container {
+  flex: 1;
+  min-height: 400px;
+}
+
+.filter-sidebar {
+  width: var(--drawer-width, 280px);
+  padding: 1rem;
+}
+
+.rfp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 1rem;
+  padding: 12px;
+}

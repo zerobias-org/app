@@ -1,0 +1,51 @@
+<div class="my-engagements-page">
+  <div class="page-header">
+    <h2>My Engagements</h2>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <zb-search-input
+      placeholder="Search engagements..."
+      message=""
+      [value]="searchTerm()"
+      (search)="onSearch($event)">
+    </zb-search-input>
+
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>Status</mat-label>
+      <mat-select [value]="statusFilter()" (selectionChange)="statusFilter.set($event.value)">
+        <mat-option value="all">All Statuses</mat-option>
+        <mat-option value="open">Open</mat-option>
+        <mat-option value="in_progress">In Progress</mat-option>
+        <mat-option value="draft">Draft</mat-option>
+        <mat-option value="completed">Completed</mat-option>
+        <mat-option value="cancelled">Cancelled</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>Sort</mat-label>
+      <mat-select [value]="sortBy()" (selectionChange)="sortBy.set($event.value)">
+        <mat-option value="newest">Newest First</mat-option>
+        <mat-option value="status">By Status</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <!-- Content -->
+  @if (loading()) {
+    <zb-empty-state-container [loading]="true" />
+  } @else if (filteredEngagements().length === 0) {
+    <zb-empty-state-container
+      [loading]="false"
+      emptyText="No engagements yet. Engagements are created when an RFP proposal is accepted.">
+    </zb-empty-state-container>
+  } @else {
+    <div class="engagement-grid">
+      @for (e of filteredEngagements(); track e.id) {
+        <app-engagement-card [engagement]="e"></app-engagement-card>
+      }
+    </div>
+  }
+</div>
