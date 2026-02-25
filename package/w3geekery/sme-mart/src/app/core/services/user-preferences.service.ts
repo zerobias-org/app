@@ -6,13 +6,16 @@ import type { UserRole } from '../models';
 import {
   DEFAULT_ENABLED_FILTERS,
   DEFAULT_CATALOG_FILTERS,
+  DEFAULT_TIMELINE_ENABLED_FILTERS,
   type EnabledFilters,
   type CatalogFiltersState,
   type FilterType,
+  type TimelineEnabledFilters,
 } from '../models';
 
 const ROLE_KEY = 'sme-mart.user-role';
 const FILTERS_KEY = 'sme-mart.catalog-filters';
+const TIMELINE_FILTERS_KEY = 'sme-mart.timeline-filters';
 const THEME_KEY = 'sme-mart.theme-preference';
 const SAVE_DEBOUNCE_MS = 500;
 
@@ -34,6 +37,7 @@ export class UserPreferencesService {
   );
   readonly enabledFilters = signal<EnabledFilters>({ ...DEFAULT_ENABLED_FILTERS });
   readonly catalogFilters = signal<CatalogFiltersState>({ ...DEFAULT_CATALOG_FILTERS });
+  readonly timelineEnabledFilters = signal<TimelineEnabledFilters>({ ...DEFAULT_TIMELINE_ENABLED_FILTERS });
   readonly loading = signal(true);
 
   readonly activeFilterCount = computed(() => {
@@ -64,6 +68,9 @@ export class UserPreferencesService {
             this.themePreference.set(pref);
             this.themeService.setPreference(pref);
           }
+        }),
+        this.loadPkv(TIMELINE_FILTERS_KEY, (val) => {
+          if (val?.enabledFilters) this.timelineEnabledFilters.set(val.enabledFilters as TimelineEnabledFilters);
         }),
       ]);
       console.log(`[Preferences] Loaded — role: ${this.userRole()}, theme: ${this.themePreference()}, active filters: ${this.activeFilterCount()}`);
@@ -125,6 +132,15 @@ export class UserPreferencesService {
       [filterType]: current[filterType].filter((id: string) => id !== itemId),
     });
     this.saveFilterState();
+  }
+
+  // ---------------------------------------------------------------------------
+  // Timeline Filters (persists enabled sections only — selections are per-engagement)
+  // ---------------------------------------------------------------------------
+
+  setTimelineEnabledFilters(filters: TimelineEnabledFilters): void {
+    this.timelineEnabledFilters.set(filters);
+    this.debouncedSave(TIMELINE_FILTERS_KEY, { enabledFilters: filters });
   }
 
   // ---------------------------------------------------------------------------

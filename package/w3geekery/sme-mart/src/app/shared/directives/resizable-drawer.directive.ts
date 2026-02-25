@@ -2,6 +2,8 @@ import {
   Directive,
   ElementRef,
   Input,
+  Output,
+  EventEmitter,
   OnInit,
   OnDestroy,
   Renderer2,
@@ -11,6 +13,9 @@ import {
 /**
  * Makes a mat-sidenav resizable by adding a drag handle on its right edge.
  * Matches the ngx-library ZbRemoteTable draggable drawer pattern.
+ *
+ * Dispatches a window resize event on drag end so sibling content
+ * (tables, timelines, charts) recalculates layout.
  *
  * Usage:
  *   <mat-sidenav appResizableDrawer [minWidth]="280" [maxWidthPercent]="50">
@@ -25,6 +30,9 @@ export class ResizableDrawerDirective implements OnInit, OnDestroy {
 
   @Input() minWidth = 280;
   @Input() maxWidthPercent = 50;
+
+  /** Emits the final drawer width (px) when the user finishes dragging. */
+  @Output() resizeEnd = new EventEmitter<number>();
 
   private drawerWidth = 0;
   private isResizing = false;
@@ -106,6 +114,9 @@ export class ResizableDrawerDirective implements OnInit, OnDestroy {
     if (this.isResizing) {
       this.isResizing = false;
       this.cleanupListeners();
+      this.resizeEnd.emit(this.drawerWidth);
+      // Trigger layout recalculation for sibling content (timelines, tables, etc.)
+      window.dispatchEvent(new Event('resize'));
     }
   };
 

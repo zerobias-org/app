@@ -12,8 +12,7 @@ import { DatePipe, TitleCasePipe, CurrencyPipe } from '@angular/common';
 import { ZbEmptyStateContainerComponent } from '@zerobias-org/ngx-library';
 import { ProposalCard, type ProposalCardData } from '../../shared/components/proposal-card/proposal-card.component';
 import { ProposalForm, type ProposalFormData } from '../../shared/components/proposal-form/proposal-form.component';
-import { TimelineView } from '../../shared/components/timeline-view/timeline-view.component';
-import { TimelineComposer } from '../../shared/components/timeline-composer/timeline-composer.component';
+import { TimelinePanel } from '../../shared/components/timeline-panel/timeline-panel.component';
 import { TaskListPanel } from '../../shared/components/task-list-panel/task-list-panel.component';
 import { WorkRequestsService } from '../../core/services/work-requests.service';
 import { ProposalsService } from '../../core/services/proposals.service';
@@ -46,8 +45,7 @@ interface ParsedProposal extends Proposal {
     CurrencyPipe,
     ZbEmptyStateContainerComponent,
     ProposalCard,
-    TimelineView,
-    TimelineComposer,
+    TimelinePanel,
     TaskListPanel,
   ],
   templateUrl: './engagement-detail.component.html',

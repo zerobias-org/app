@@ -298,17 +298,13 @@
         <!-- Timeline Tab -->
         <mat-tab label="Timeline">
           <div class="tab-content">
-            @if (engagement()!.zerobias_task_id) {
-              <app-timeline-composer
-                [taskId]="engagement()!.zerobias_task_id!"
-                (commentPosted)="onCommentPosted($event)">
-              </app-timeline-composer>
-            }
-            <app-timeline-view
+            <app-timeline-panel
               [events]="timelineEvents()"
               [loading]="timelineLoading()"
-              (drillDown)="onTimelineDrillDown($event)">
-            </app-timeline-view>
+              [taskId]="engagement()!.zerobias_task_id || ''"
+              (drillDown)="onTimelineDrillDown($event)"
+              (commentPosted)="onCommentPosted($event)">
+            </app-timeline-panel>
           </div>
         </mat-tab>
       </mat-tab-group>

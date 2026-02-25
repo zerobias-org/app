@@ -1,0 +1,52 @@
+<!-- Composer (only if engagement has a linked task) -->
+@if (hasTaskId()) {
+  <app-timeline-composer
+    [taskId]="currentTaskId()!"
+    (commentPosted)="onCommentPosted($event)">
+  </app-timeline-composer>
+}
+
+<!-- Toolbar: filter toggle (left) + search (right) -->
+<div class="timeline-toolbar">
+  <button mat-icon-button (click)="toggleDrawer()" aria-label="Toggle timeline filters"
+    [matTooltip]="filterTooltip()" [matTooltipShowDelay]="300"
+    [matBadge]="activeFilterCount()" matBadgeColor="primary" matBadgeSize="small"
+    [matBadgeHidden]="activeFilterCount() === 0">
+    <mat-icon>filter_alt</mat-icon>
+  </button>
+
+  <zb-search-input
+    placeholder="Search timeline..."
+    message=""
+    [value]="filterState().searchTerm"
+    (search)="onSearch($event)">
+  </zb-search-input>
+</div>
+
+<!-- Content with filter drawer -->
+<mat-sidenav-container class="timeline-content-container">
+  <mat-sidenav
+    appResizableDrawer
+    mode="side"
+    [opened]="drawerOpen()"
+    position="start"
+    class="filter-sidebar">
+    <app-timeline-filters
+      [enabledFilters]="enabledFilters()"
+      [filterState]="filterState()"
+      [eventTypeItems]="eventTypeItems()"
+      [actorItems]="actorItems()"
+      [tagItems]="tagItems()"
+      (filterStateChange)="onFilterStateChange($event)"
+      (enabledChange)="onEnabledChange($event)">
+    </app-timeline-filters>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <app-timeline-view
+      [events]="filteredEvents()"
+      [loading]="isLoading()"
+      (drillDown)="drillDown.emit($event)">
+    </app-timeline-view>
+  </mat-sidenav-content>
+</mat-sidenav-container>
