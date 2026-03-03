@@ -1,0 +1,115 @@
+@if (note(); as n) {
+  <div class="note-panel">
+    <!-- Header: title + access badge + actions menu -->
+    <div class="panel-header">
+      @if (editingTitle()) {
+        <mat-form-field appearance="outline" class="title-field" subscriptSizing="dynamic">
+          <input matInput #titleInput
+                 [formControl]="form.controls.title"
+                 placeholder="Note title"
+                 (blur)="onTitleBlur()"
+                 (keyup.enter)="titleInput.blur()">
+        </mat-form-field>
+      } @else {
+        <h1 class="note-title" (click)="enterTitleEdit()" matTooltip="Click to edit title">
+          {{ n.title }}
+        </h1>
+      }
+
+      <!-- Access level: readonly text or dropdown -->
+      @if (editingAccess()) {
+        <mat-form-field appearance="outline" class="access-field" subscriptSizing="dynamic">
+          <mat-select #accessSelect
+                      [formControl]="form.controls.access_level"
+                      (selectionChange)="onAccessLevelChange($event.value)"
+                      (closed)="onAccessClosed()">
+            @for (opt of accessLevelOptions; track opt.value) {
+              <mat-option [value]="opt.value">
+                <mat-icon class="option-icon">{{ opt.icon }}</mat-icon>
+                {{ opt.label }}
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      } @else {
+        <span class="access-badge access-{{ n.access_level }}"
+              (click)="openAccessDropdown()"
+              matTooltip="Click to change visibility">
+          <mat-icon class="access-icon">{{ currentAccessOption().icon }}</mat-icon>
+          {{ currentAccessOption().label }}
+        </span>
+      }
+
+      <span class="header-spacer"></span>
+
+      <!-- Actions menu -->
+      <button mat-icon-button [matMenuTriggerFor]="actionsMenu" matTooltip="Actions">
+        <mat-icon>more_vert</mat-icon>
+      </button>
+      <mat-menu #actionsMenu="matMenu">
+        <button mat-menu-item (click)="onArchive()" [disabled]="submitting()">
+          <mat-icon>archive</mat-icon> Archive
+        </button>
+      </mat-menu>
+    </div>
+
+    <!-- Meta row -->
+    <div class="panel-meta">
+      <span class="meta-date">{{ n.created_at | date:'MMM d, y · h:mm a' }}</span>
+      @if (n.updated_at && n.updated_at !== n.created_at) {
+        <span class="meta-sep">·</span>
+        <span class="meta-date">Updated {{ n.updated_at | date:'MMM d, y · h:mm a' }}</span>
+      }
+      @if (n.folder_name) {
+        <span class="meta-sep">·</span>
+        <span class="meta-folder">
+          @if (n.folder_color) {
+            <span class="folder-dot" [style.background]="n.folder_color"></span>
+          }
+          {{ n.folder_name }}
+        </span>
+      }
+    </div>
+
+    <!-- Tags -->
+    <app-note-tag-editor
+      [noteId]="n.id"
+      [engagementId]="n.engagement_id"
+      [tags]="n.tags"
+      (tagsChanged)="onTagsChanged($event)">
+    </app-note-tag-editor>
+
+    <!-- Body: view mode (markdown rendered) or edit mode (markdown editor) -->
+    @if (editing()) {
+      <div class="body-editor" (keydown.escape)="discardChanges()">
+        <app-markdown-editor
+          [content]="form.get('body')!.value || ''"
+          (contentChange)="onBodyChange($event)"
+          height="100%"
+          placeholder="Write your note (Markdown supported)">
+        </app-markdown-editor>
+      </div>
+
+      <!-- Save / Discard bar -->
+      <div class="editor-actions">
+        <button mat-stroked-button type="button" (click)="discardChanges()" [disabled]="submitting()">
+          Discard
+        </button>
+        <button mat-flat-button color="primary" type="button"
+                (click)="saveNote()"
+                [disabled]="form.invalid || submitting()">
+          @if (submitting()) { Saving… } @else { Save }
+        </button>
+      </div>
+    } @else {
+      <div class="body-view" (click)="enterEditMode()">
+        <app-markdown-view [content]="n.body"></app-markdown-view>
+      </div>
+    }
+  </div>
+} @else {
+  <div class="empty-state">
+    <mat-icon>article</mat-icon>
+    <p>Select a note to view</p>
+  </div>
+}

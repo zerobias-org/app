@@ -30,6 +30,7 @@ export class ResizableDrawerDirective implements OnInit, OnDestroy {
 
   @Input() minWidth = 280;
   @Input() maxWidthPercent = 50;
+  @Input() defaultWidth = 0;
 
   /** Emits the final drawer width (px) when the user finishes dragging. */
   @Output() resizeEnd = new EventEmitter<number>();
@@ -41,7 +42,7 @@ export class ResizableDrawerDirective implements OnInit, OnDestroy {
   private handle!: HTMLElement;
 
   ngOnInit(): void {
-    this.drawerWidth = this.minWidth;
+    this.drawerWidth = this.defaultWidth > 0 ? this.defaultWidth : this.minWidth;
     const nativeEl: HTMLElement = this.el.nativeElement;
 
     // Set initial width via CSS custom property
@@ -93,8 +94,9 @@ export class ResizableDrawerDirective implements OnInit, OnDestroy {
     this.isResizing = true;
     this.resizeStartX = event.clientX;
     this.resizeStartWidth = this.drawerWidth;
-    document.addEventListener('mousemove', this.onResizeMove);
-    document.addEventListener('mouseup', this.onResizeEnd);
+    document.addEventListener('mousemove', this.onResizeMove, true);
+    document.addEventListener('mouseup', this.onResizeEnd, true);
+    document.addEventListener('mouseleave', this.onResizeEnd, true);
   }
 
   private onResizeMove = (event: MouseEvent): void => {
@@ -121,7 +123,8 @@ export class ResizableDrawerDirective implements OnInit, OnDestroy {
   };
 
   private cleanupListeners(): void {
-    document.removeEventListener('mousemove', this.onResizeMove);
-    document.removeEventListener('mouseup', this.onResizeEnd);
+    document.removeEventListener('mousemove', this.onResizeMove, true);
+    document.removeEventListener('mouseup', this.onResizeEnd, true);
+    document.removeEventListener('mouseleave', this.onResizeEnd, true);
   }
 }

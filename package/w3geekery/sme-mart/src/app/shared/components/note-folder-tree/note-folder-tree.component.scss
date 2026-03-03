@@ -1,0 +1,223 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+// ── Column header ──
+
+.col-header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 6px;
+  min-height: 30px;
+  box-sizing: border-box;
+  border-bottom: 1px solid var(--mat-sys-outline-variant, rgba(255, 255, 255, 0.12));
+  flex-shrink: 0;
+}
+
+:host-context(.folder-col.collapsed) .col-header {
+  justify-content: center;
+  padding: 4px 0;
+}
+
+.col-header-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.col-header-toggle {
+  cursor: pointer;
+
+  &.collapsed {
+    color: var(--mat-sys-primary);
+  }
+}
+
+.col-header-title {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--mat-sys-on-surface-variant);
+  flex: 1;
+}
+
+.col-header-add {
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: pointer;
+  border-radius: 3px;
+  color: var(--mat-sys-on-surface-variant);
+
+  &:hover {
+    background: var(--mat-sys-surface-variant, rgba(255, 255, 255, 0.08));
+    color: var(--mat-sys-on-surface);
+  }
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+}
+
+// ── Collapsed icon strip ──
+
+.icon-strip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2px 0;
+  gap: 1px;
+}
+
+.icon-strip-item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background: var(--mat-sys-surface-variant, rgba(0, 0, 0, 0.04));
+  }
+
+  &.selected {
+    background: color-mix(in srgb, var(--mat-sys-primary) 12%, transparent);
+
+    .folder-icon {
+      color: var(--mat-sys-primary);
+    }
+  }
+
+  .folder-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+}
+
+// ── Tree ──
+
+.folder-tree {
+  padding: 2px 0 2px 4px;
+  overflow: hidden;
+  flex: 1;
+}
+
+.folder-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 3px 2px 4px;
+  border-radius: 3px;
+  cursor: pointer;
+  min-height: 24px;
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background: var(--mat-sys-surface-variant, rgba(0, 0, 0, 0.04));
+
+    .menu-btn {
+      opacity: 1;
+    }
+  }
+
+  &.selected {
+    background: color-mix(in srgb, var(--mat-sys-primary) 12%, transparent);
+
+    .folder-name {
+      font-weight: 500;
+      color: var(--mat-sys-primary);
+    }
+
+    .folder-icon {
+      color: var(--mat-sys-primary);
+    }
+  }
+
+  &.drop-target {
+    background: color-mix(in srgb, var(--mat-sys-primary) 20%, transparent);
+    outline: 1px dashed var(--mat-sys-primary);
+    outline-offset: -1px;
+    border-radius: 4px;
+  }
+
+  &.dragging {
+    opacity: 0.4;
+  }
+}
+
+.expand-btn {
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: pointer;
+  border-radius: 3px;
+
+  mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+  }
+}
+
+.expand-spacer {
+  width: 18px;
+  flex-shrink: 0;
+}
+
+.folder-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  color: var(--mat-sys-on-surface-variant);
+  flex-shrink: 0;
+}
+
+.folder-name {
+  flex: 1;
+  font-size: 0.75rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.folder-count {
+  font-size: 0.65rem;
+  color: var(--mat-sys-on-surface-variant);
+  min-width: 14px;
+  text-align: right;
+}
+
+.menu-btn {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: pointer;
+  border-radius: 3px;
+
+  mat-icon {
+    font-size: 12px;
+    width: 12px;
+    height: 12px;
+  }
+}

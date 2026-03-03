@@ -17,7 +17,11 @@ const ROLE_KEY = 'sme-mart.user-role';
 const FILTERS_KEY = 'sme-mart.catalog-filters';
 const TIMELINE_FILTERS_KEY = 'sme-mart.timeline-filters';
 const THEME_KEY = 'sme-mart.theme-preference';
+const FOLDER_COLORS_KEY = 'sme-mart.folder-colors';
 const SAVE_DEBOUNCE_MS = 500;
+
+/** Personal folder color map: folderId → hex color */
+export type FolderColorMap = Record<string, string>;
 
 type ThemePreference = 'light' | 'dark' | 'system';
 
@@ -38,6 +42,7 @@ export class UserPreferencesService {
   readonly enabledFilters = signal<EnabledFilters>({ ...DEFAULT_ENABLED_FILTERS });
   readonly catalogFilters = signal<CatalogFiltersState>({ ...DEFAULT_CATALOG_FILTERS });
   readonly timelineEnabledFilters = signal<TimelineEnabledFilters>({ ...DEFAULT_TIMELINE_ENABLED_FILTERS });
+  readonly folderColors = signal<FolderColorMap>({});
   readonly loading = signal(true);
 
   readonly activeFilterCount = computed(() => {
@@ -71,6 +76,9 @@ export class UserPreferencesService {
         }),
         this.loadPkv(TIMELINE_FILTERS_KEY, (val) => {
           if (val?.enabledFilters) this.timelineEnabledFilters.set(val.enabledFilters as TimelineEnabledFilters);
+        }),
+        this.loadPkv(FOLDER_COLORS_KEY, (val) => {
+          if (val?.colors) this.folderColors.set(val.colors as FolderColorMap);
         }),
       ]);
       console.log(`[Preferences] Loaded — role: ${this.userRole()}, theme: ${this.themePreference()}, active filters: ${this.activeFilterCount()}`);
@@ -141,6 +149,25 @@ export class UserPreferencesService {
   setTimelineEnabledFilters(filters: TimelineEnabledFilters): void {
     this.timelineEnabledFilters.set(filters);
     this.debouncedSave(TIMELINE_FILTERS_KEY, { enabledFilters: filters });
+  }
+
+  // ---------------------------------------------------------------------------
+  // Folder Colors (personal)
+  // ---------------------------------------------------------------------------
+
+  setFolderColor(folderId: string, color: string): void {
+    this.folderColors.set({ ...this.folderColors(), [folderId]: color });
+    this.debouncedSave(FOLDER_COLORS_KEY, { colors: this.folderColors() });
+  }
+
+  removeFolderColor(folderId: string): void {
+    const { [folderId]: _, ...rest } = this.folderColors();
+    this.folderColors.set(rest);
+    this.debouncedSave(FOLDER_COLORS_KEY, { colors: rest });
+  }
+
+  getFolderColor(folderId: string): string | null {
+    return this.folderColors()[folderId] ?? null;
   }
 
   // ---------------------------------------------------------------------------

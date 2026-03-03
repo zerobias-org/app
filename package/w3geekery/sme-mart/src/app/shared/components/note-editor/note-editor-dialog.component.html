@@ -1,0 +1,46 @@
+<h2 mat-dialog-title>{{ isEdit ? 'Edit Note' : 'New Note' }}</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Title</mat-label>
+      <input matInput formControlName="title" placeholder="e.g. Board Meeting Minutes — Feb 26">
+    </mat-form-field>
+
+    <label class="editor-label">Content</label>
+    <app-markdown-editor
+      [content]="form.get('body')!.value || ''"
+      (contentChange)="form.get('body')!.setValue($event)"
+      height="350px"
+      placeholder="Write your note (Markdown supported)">
+    </app-markdown-editor>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="half-width">
+        <mat-label>Visibility</mat-label>
+        <mat-select formControlName="access_level">
+          @for (opt of accessLevelOptions; track opt.value) {
+            <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-checkbox formControlName="is_meeting_minutes" class="meeting-check">
+        Meeting minutes
+      </mat-checkbox>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()" [disabled]="submitting()">Cancel</button>
+  <button mat-flat-button color="primary"
+    [disabled]="form.invalid || submitting()"
+    (click)="onSubmit()">
+    @if (submitting()) {
+      Saving…
+    } @else {
+      {{ isEdit ? 'Save' : 'Create' }}
+    }
+  </button>
+</mat-dialog-actions>

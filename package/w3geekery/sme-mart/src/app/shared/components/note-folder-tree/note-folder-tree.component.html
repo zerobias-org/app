@@ -1,0 +1,115 @@
+<!-- Column header -->
+<div class="col-header">
+  @if (isCollapsed()) {
+    <mat-icon class="col-header-icon col-header-toggle collapsed"
+              (click)="toggleCollapse.emit()"
+              matTooltip="Show folders" [matTooltipShowDelay]="300">folder</mat-icon>
+  } @else {
+    <mat-icon class="col-header-icon col-header-toggle"
+              (click)="toggleCollapse.emit()"
+              matTooltip="Hide folders" [matTooltipShowDelay]="300">folder</mat-icon>
+    <span class="col-header-title col-header-toggle"
+          (click)="toggleCollapse.emit()">Folders</span>
+    <span class="col-header-add"
+          (click)="openCreateDialog(defaultParentId()); $event.stopPropagation()"
+          matTooltip="New Folder" [matTooltipShowDelay]="300"
+          aria-label="Create folder">
+      <mat-icon>add</mat-icon>
+    </span>
+  }
+</div>
+
+@if (isCollapsed()) {
+  <!-- Collapsed: icon strip -->
+  <div class="icon-strip">
+    @for (node of tree(); track node.folder.id) {
+      @let fc = folderColors()[node.folder.id];
+      <span class="icon-strip-item"
+            [class.selected]="selectedId() === node.folder.id"
+            (click)="selectFolder(node.folder.id)"
+            [matTooltip]="node.folder.name" [matTooltipShowDelay]="300">
+        <mat-icon class="folder-icon" [style.color]="fc">folder</mat-icon>
+      </span>
+    }
+  </div>
+} @else {
+  <div class="folder-tree">
+    <!-- Recursive folder tree -->
+    <ng-container *ngTemplateOutlet="folderList; context: { $implicit: tree() }"></ng-container>
+  </div>
+}
+
+<ng-template #folderList let-nodes>
+  @for (node of nodes; track node.folder.id) {
+    @let fc = folderColors()[node.folder.id];
+    <div class="folder-row"
+         [class.selected]="selectedId() === node.folder.id"
+         [class.drop-target]="dropTargetId() === node.folder.id"
+         [class.dragging]="draggedNode()?.folder?.id === node.folder.id"
+         [style.padding-left.px]="node.level > 1 ? (node.level - 1) * 12 : 0"
+         draggable="true"
+         (dragstart)="onDragStart($event, node)"
+         (dragover)="onDragOver($event, node)"
+         (dragleave)="onDragLeave($event)"
+         (drop)="onDrop($event, node)"
+         (dragend)="onDragEnd()"
+         (click)="selectFolder(node.folder.id)">
+
+      <!-- Expand toggle -->
+      @if (node.children.length > 0) {
+        <span class="expand-btn" (click)="toggleExpand(node, $event)">
+          <mat-icon>{{ node.expanded ? 'expand_more' : 'chevron_right' }}</mat-icon>
+        </span>
+      }
+
+      <mat-icon class="folder-icon" [style.color]="fc">
+        {{ node.expanded && node.children.length > 0 ? 'folder_open' : 'folder' }}
+      </mat-icon>
+      <span class="folder-name" [matTooltip]="node.folder.name" [matTooltipShowDelay]="300">{{ node.folder.name }}</span>
+      <span class="folder-count">{{ node.folder.note_count }}</span>
+
+      <!-- Context menu -->
+      <span class="menu-btn" [matMenuTriggerFor]="folderMenu"
+            (click)="$event.stopPropagation()" aria-label="Folder actions">
+        <mat-icon>more_vert</mat-icon>
+      </span>
+      <mat-menu #folderMenu="matMenu">
+        <button mat-menu-item (click)="openCreateDialog(node.folder.id)">
+          <mat-icon>create_new_folder</mat-icon> New Subfolder
+        </button>
+        <button mat-menu-item (click)="openRenameDialog(node, $event)">
+          <mat-icon>edit</mat-icon> Rename
+        </button>
+        <button mat-menu-item [matMenuTriggerFor]="folderColorMenu">
+          <mat-icon>palette</mat-icon> Color
+        </button>
+        <button mat-menu-item (click)="onDeleteFolder(node, $event)">
+          <mat-icon>delete</mat-icon> Delete
+        </button>
+      </mat-menu>
+      <mat-menu #folderColorMenu="matMenu" class="color-swatch-menu">
+        <div class="swatch-grid" (click)="$event.stopPropagation()">
+          <button class="swatch swatch-none"
+                  [class.active]="!fc"
+                  (click)="onColorChange(node, null)">
+            @if (!fc) { <span class="check">✓</span> }
+          </button>
+          @for (c of colors; track c.value) {
+            <button class="swatch"
+                    [style.background]="c.value"
+                    [class.active]="fc === c.value"
+                    [matTooltip]="c.label" [matTooltipShowDelay]="200"
+                    (click)="onColorChange(node, c.value)">
+              @if (fc === c.value) { <span class="check">✓</span> }
+            </button>
+          }
+        </div>
+      </mat-menu>
+    </div>
+
+    <!-- Render children if expanded -->
+    @if (node.expanded && node.children.length > 0) {
+      <ng-container *ngTemplateOutlet="folderList; context: { $implicit: node.children }"></ng-container>
+    }
+  }
+</ng-template>

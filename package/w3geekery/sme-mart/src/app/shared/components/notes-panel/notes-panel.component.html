@@ -1,0 +1,115 @@
+<!-- Top bar: above drawer, spans full width -->
+<div class="top-bar">
+  <button mat-icon-button (click)="toggleDrawer()"
+          [matTooltip]="drawerOpen() ? 'Hide navigation' : 'Show navigation'"
+          aria-label="Toggle notes navigation">
+    <mat-icon>{{ drawerOpen() ? 'menu_open' : 'menu' }}</mat-icon>
+  </button>
+
+  <mat-form-field appearance="outline" class="search-field" subscriptSizing="dynamic">
+    <mat-icon matPrefix>search</mat-icon>
+    <input matInput
+           placeholder="Search notes…"
+           [(ngModel)]="searchQuery"
+           (keyup.enter)="onSearch()">
+  </mat-form-field>
+
+</div>
+
+<!-- Drawer + main content: fills remaining height -->
+<mat-sidenav-container class="notes-container">
+  <!-- Drawer: folder tree + notes list -->
+  <mat-sidenav
+    appResizableDrawer [minWidth]="280" [maxWidthPercent]="45" [defaultWidth]="500"
+    mode="side"
+    [opened]="drawerOpen()"
+    position="start"
+    class="notes-nav-drawer">
+
+    <div class="nav-columns">
+      <!-- Notebooks column (collapsible to icon) -->
+      <app-notes-notebooks-column
+        [engagementId]="engId()"
+        [selectedFolderId]="selectedNotebookId()"
+        [collapsed]="!showNotebooks()"
+        (folderSelected)="onNotebookSelected($event)"
+        (treeChanged)="onFolderTreeChanged()"
+        (toggleCollapse)="toggleNotebooks()">
+      </app-notes-notebooks-column>
+
+      <!-- Folder tree (collapsible to icon, scoped to selected notebook) -->
+      <aside class="folder-col" [class.collapsed]="!showFolders()">
+        <app-note-folder-tree
+          [engagementId]="engId()"
+          [notebookId]="selectedNotebookId()"
+          [selectedFolderId]="selectedFolderId()"
+          [collapsed]="!showFolders()"
+          (folderSelected)="onFolderSelected($event)"
+          (treeChanged)="onFolderTreeChanged()"
+          (toggleCollapse)="toggleFolders()"
+          (noteMovedToFolder)="onNoteMovedToFolder($event)">
+        </app-note-folder-tree>
+      </aside>
+
+      <!-- Notes list (always visible) -->
+      <div class="notes-list-col">
+        <div class="col-header">
+          <mat-icon class="col-header-icon">description</mat-icon>
+          <span class="col-header-title">Notes</span>
+          <span class="list-count">{{ noteCount() }}</span>
+          <span class="col-header-add" (click)="createNewNote()" matTooltip="New Note" [matTooltipShowDelay]="300"
+                aria-label="Create new note">
+            <mat-icon>add</mat-icon>
+          </span>
+        </div>
+
+        @if (loading()) {
+          <div class="list-loading">
+            <mat-spinner diameter="28"></mat-spinner>
+          </div>
+        } @else if (noteCount() === 0) {
+          <div class="list-empty">
+            <mat-icon>note_add</mat-icon>
+            <span>No notes yet</span>
+          </div>
+        } @else {
+          <div class="list-items">
+            @for (note of notes(); track note.id) {
+              @let nc = note.folder_id ? folderColors()[note.folder_id] : null;
+              <div class="list-item"
+                   [class.selected]="selectedNoteId() === note.id"
+                   [class.dragging]="draggedNoteId() === note.id"
+                   draggable="true"
+                   (dragstart)="onNoteDragStart($event, note)"
+                   (dragend)="onNoteDragEnd()"
+                   (click)="selectNote(note)"
+                   [matTooltip]="note.title" [matTooltipShowDelay]="300">
+                <div class="item-title-row">
+                  @if (nc) {
+                    <span class="item-color-dot" [style.background]="nc"></span>
+                  }
+                  @if (note.is_meeting_minutes) {
+                    <mat-icon class="item-icon">groups</mat-icon>
+                  }
+                  <span class="item-title">{{ note.title }}</span>
+                </div>
+                <div class="item-meta">
+                  {{ note.created_at | date:'MMM d' }}
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </mat-sidenav>
+
+  <!-- Main content: inline note editor -->
+  <mat-sidenav-content>
+    <app-note-editor-panel
+      [noteData]="selectedNote()"
+      (noteSaved)="onNoteSaved($event)"
+      (noteDeleted)="onNoteDeleted($event)">
+    </app-note-editor-panel>
+  </mat-sidenav-content>
+</mat-sidenav-container>

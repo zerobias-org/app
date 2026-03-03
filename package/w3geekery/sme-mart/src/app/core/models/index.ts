@@ -11,3 +11,4 @@ export * from './catalog.model';
 export * from './filter-preferences.model';
 export * from './timeline-event.model';
 export * from './timeline-filter.model';
+export * from './note.model';

@@ -1,0 +1,60 @@
+@if (noteData(); as note) {
+  <mat-card class="note-card" [class.expanded]="expanded()"
+            [style.border-left-color]="note.folder_color || 'transparent'"
+            [class.has-folder-color]="!!note.folder_color"
+            (click)="toggleExpand()">
+    <mat-card-header>
+      <mat-icon matCardAvatar class="note-icon">
+        {{ note.is_meeting_minutes ? 'groups' : 'note' }}
+      </mat-icon>
+      <mat-card-title>{{ note.title }}</mat-card-title>
+      <mat-card-subtitle>
+        {{ note.created_at | date:'MMM d, y · h:mm a' }}
+        @if (note.is_meeting_minutes && note.meeting_date) {
+          · Meeting: {{ note.meeting_date | date:'MMM d, y' }}
+        }
+        <span class="access-badge access-{{ note.access_level }}"
+              [matTooltip]="accessTooltip(note.access_level)">
+          <mat-icon class="access-icon">{{ accessIcon(note.access_level) }}</mat-icon>
+          {{ accessLabel(note.access_level) }}
+        </span>
+      </mat-card-subtitle>
+
+      <button mat-icon-button [matMenuTriggerFor]="noteMenu" (click)="$event.stopPropagation()"
+              class="card-menu-trigger" aria-label="Note actions">
+        <mat-icon>more_vert</mat-icon>
+      </button>
+      <mat-menu #noteMenu="matMenu">
+        <button mat-menu-item (click)="onEdit()">
+          <mat-icon>edit</mat-icon> Edit
+        </button>
+        <button mat-menu-item (click)="onMove()">
+          <mat-icon>drive_file_move</mat-icon> Move to Folder
+        </button>
+        <button mat-menu-item (click)="onDelete()" class="delete-action">
+          <mat-icon>delete</mat-icon> Delete
+        </button>
+      </mat-menu>
+    </mat-card-header>
+
+    @if (tagList.length > 0) {
+      <div class="tag-row">
+        <mat-chip-set>
+          @for (tag of tagList; track tag) {
+            <mat-chip class="note-tag">{{ tag }}</mat-chip>
+          }
+        </mat-chip-set>
+      </div>
+    }
+
+    @if (expanded()) {
+      <mat-card-content>
+        <app-markdown-view [content]="note.body"></app-markdown-view>
+      </mat-card-content>
+    } @else {
+      <mat-card-content>
+        <p class="body-preview">{{ note.body | slice:0:160 }}{{ note.body.length > 160 ? '…' : '' }}</p>
+      </mat-card-content>
+    }
+  </mat-card>
+}

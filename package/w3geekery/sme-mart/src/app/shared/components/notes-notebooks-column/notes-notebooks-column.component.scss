@@ -1,0 +1,218 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.notebooks-column {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  flex: 1;
+  min-width: 100px;
+  overflow: hidden;
+  border-right: 1px solid var(--mat-sys-outline-variant, rgba(255, 255, 255, 0.12));
+
+  &.collapsed {
+    flex: 0 0 auto;
+    min-width: 0;
+    width: 28px;
+  }
+}
+
+.col-header-toggle {
+  cursor: pointer;
+
+  &.collapsed {
+    color: var(--mat-sys-primary);
+  }
+}
+
+// ── Column header ──
+
+.col-header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 6px;
+  min-height: 30px;
+  box-sizing: border-box;
+  border-bottom: 1px solid var(--mat-sys-outline-variant, rgba(255, 255, 255, 0.12));
+  flex-shrink: 0;
+
+  .collapsed & {
+    justify-content: center;
+    padding: 4px 0;
+  }
+}
+
+.col-header-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.col-header-title {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--mat-sys-on-surface-variant);
+  flex: 1;
+}
+
+.col-header-add {
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: pointer;
+  border-radius: 3px;
+  color: var(--mat-sys-on-surface-variant);
+
+  &:hover {
+    background: var(--mat-sys-surface-variant, rgba(255, 255, 255, 0.08));
+    color: var(--mat-sys-on-surface);
+  }
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+}
+
+// ── Notebook tabs ──
+
+.notebook-tab {
+  cursor: pointer;
+  padding: 2px 4px 2px 4px;
+  border-radius: 4px;
+  margin: 1px 2px;
+  transition: background-color 0.15s ease;
+  min-width: 0;
+
+  &:hover {
+    background: var(--mat-sys-surface-variant, rgba(255, 255, 255, 0.05));
+  }
+
+  &.selected {
+    background: color-mix(in srgb, var(--mat-sys-primary) 14%, transparent);
+  }
+}
+
+.sub-tab {
+  margin-left: 12px;
+}
+
+// ── Tab content ──
+
+.tab-row {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  min-width: 0;
+  min-height: 22px;
+}
+
+.tab-title {
+  flex: 1;
+  font-size: 0.78rem;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tab-count {
+  font-size: 0.65rem;
+  color: var(--mat-sys-on-surface-variant);
+  flex-shrink: 0;
+}
+
+.tab-details {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-left: 14px;
+}
+
+.tab-access,
+.tab-sub-count {
+  font-size: 0.65rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.menu-btn {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: pointer;
+  border-radius: 3px;
+
+  mat-icon {
+    font-size: 12px;
+    width: 12px;
+    height: 12px;
+  }
+}
+
+.notebook-tab:hover .menu-btn {
+  opacity: 1;
+}
+
+// ── Collapsed icon strip ──
+
+.icon-strip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2px 0;
+  gap: 1px;
+}
+
+.icon-strip-item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background: var(--mat-sys-surface-variant, rgba(255, 255, 255, 0.05));
+  }
+
+  &.selected {
+    background: color-mix(in srgb, var(--mat-sys-primary) 14%, transparent);
+
+    .tab-icon {
+      color: var(--mat-sys-primary);
+    }
+  }
+
+  .tab-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+}
+
+// ── Tab content ──
+
+.tab-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  color: var(--mat-sys-on-surface-variant);
+  flex-shrink: 0;
+}
