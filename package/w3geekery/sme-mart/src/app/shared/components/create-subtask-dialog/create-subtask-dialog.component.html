@@ -32,7 +32,7 @@
                 <span class="transition-option">
                   <span>{{ t.name }}</span>
                   <mat-icon class="transition-arrow">arrow_right_alt</mat-icon>
-                  <span [class]="transitionStatusClass(t)">{{ transitionStatusDisplay(t) }}</span>
+                  <zb-resource-status [label]="t.status" [pill]="true" [showDot]="false" size="small"></zb-resource-status>
                 </span>
               </mat-option>
             }

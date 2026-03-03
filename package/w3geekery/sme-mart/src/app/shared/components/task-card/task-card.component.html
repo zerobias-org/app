@@ -1,8 +1,17 @@
 @if (taskData()) {
-  <mat-card [class.master-card]="isMasterTask()">
+  <mat-card [class.master-card]="isMasterTask()"
+            [class.sub-card]="!isMasterTask()"
+            [class.expanded]="isExpandedTask()"
+            (click)="onCardClick()">
     <mat-card-header>
       <div class="card-header-row">
         <mat-chip-set>
+          @if (isMasterTask()) {
+            <mat-chip class="master-indicator-chip" matTooltip="Master engagement task">
+              <mat-icon class="master-chip-icon">star</mat-icon>
+              Master
+            </mat-chip>
+          }
           <mat-chip class="code-chip">{{ taskCode() }}</mat-chip>
           @if (priorityLabel()) {
             <mat-chip [class]="priorityClass()">
@@ -10,67 +19,109 @@
               {{ priorityLabel() }}
             </mat-chip>
           }
+          @if (parentCode()) {
+            <mat-chip class="parent-chip" [matTooltip]="'Sub-task of ' + parentCode()">
+              <mat-icon class="parent-chip-icon">subdirectory_arrow_right</mat-icon>
+              {{ parentCode() }}
+            </mat-chip>
+          }
         </mat-chip-set>
 
-        <!-- Status button / transition trigger -->
-        @if (hasTransitions()) {
-          <button mat-button [matMenuTriggerFor]="statusMenu"
-            class="status-trigger" [ngClass]="statusClass()">
-            {{ statusDisplay() }}
-            <mat-icon iconPositionEnd>arrow_drop_down</mat-icon>
-          </button>
-          <mat-menu #statusMenu="matMenu" class="transition-menu" backdropClass="transition-menu-backdrop">
-            @for (t of transitions(); track t.id.toString()) {
-              <button mat-menu-item (click)="onTransition(t)">
-                <div class="transition-row">
-                  <span class="transition-name">{{ t.name }}</span>
-                  <mat-icon class="transition-arrow">arrow_right_alt</mat-icon>
-                  <div class="transition-state">
-                    <span [class]="transitionStatusClass(t)">{{ transitionStatusDisplay(t) }}</span>
+        <div class="header-right">
+          <!-- Status button / transition trigger -->
+          @if (hasTransitions()) {
+            <button mat-flat-button [matMenuTriggerFor]="statusMenu"
+              class="status-trigger zb-chip square task-status {{ taskStatusClass() }}"
+              (click)="$event.stopPropagation()">
+              {{ taskStatus() | snakeToSpaces:'everyFirst' }}
+              <mat-icon iconPositionEnd>arrow_drop_down</mat-icon>
+            </button>
+            <mat-menu #statusMenu="matMenu" class="transition-menu" backdropClass="transition-menu-backdrop">
+              @for (t of transitions(); track t.id.toString()) {
+                <button mat-menu-item (click)="onTransition(t)">
+                  <div class="transition-row">
+                    <span class="transition-name">{{ t.name }}</span>
+                    <mat-icon class="transition-arrow">arrow_right_alt</mat-icon>
+                    <span class="zb-chip square task-status {{ normalizeStatus(t.status).toLowerCase() }}">
+                      {{ normalizeStatus(t.status) | snakeToSpaces:'everyFirst' }}
+                    </span>
                   </div>
-                </div>
-              </button>
-            }
-          </mat-menu>
-        } @else {
-          <span [class]="statusClass()">{{ statusDisplay() }}</span>
-        }
+                </button>
+              }
+            </mat-menu>
+          } @else {
+            <span class="zb-chip square task-status {{ taskStatusClass() }}">
+              {{ taskStatus() | snakeToSpaces:'everyFirst' }}
+            </span>
+          }
+
+          @if (!isMasterTask()) {
+            <mat-icon class="expand-icon">
+              {{ isExpandedTask() ? 'expand_less' : 'expand_more' }}
+            </mat-icon>
+          }
+        </div>
       </div>
     </mat-card-header>
 
-    <mat-card-content>
-      <h3 class="task-name">{{ taskName() }}</h3>
+    <!-- Collapsible content for sub-tasks (always visible for master) -->
+    @if (isMasterTask() || isExpandedTask()) {
+      <mat-card-content>
+        <h3 class="task-name">{{ taskName() }}</h3>
 
-      <div class="task-meta">
-        @if (assignedName() || ownerName()) {
-          <div class="meta-item">
-            <div class="avatar-circle small">{{ assignedInitials() }}</div>
-            <span class="meta-label">{{ assignedName() || ownerName() }}</span>
-          </div>
-        }
-        @if (taskCreated()) {
-          <div class="meta-item">
-            <mat-icon class="meta-icon">calendar_today</mat-icon>
-            <span class="meta-label">{{ taskCreated() | date:'mediumDate' }}</span>
-          </div>
-        }
-        @if (commentCount() > 0) {
-          <div class="meta-item">
-            <mat-icon class="meta-icon">chat_bubble_outline</mat-icon>
-            <span class="meta-label">{{ commentCount() }}</span>
-          </div>
-        }
-        @if (attachmentCount() > 0) {
-          <div class="meta-item">
-            <mat-icon class="meta-icon">attach_file</mat-icon>
-            <span class="meta-label">{{ attachmentCount() }}</span>
-          </div>
-        }
-      </div>
+        <div class="task-meta">
+          @if (assignedName() || ownerName()) {
+            <div class="meta-item">
+              <div class="avatar-circle small">{{ assignedInitials() }}</div>
+              <span class="meta-label">{{ assignedName() || ownerName() }}</span>
+            </div>
+          }
+          @if (taskCreated()) {
+            <div class="meta-item">
+              <mat-icon class="meta-icon">calendar_today</mat-icon>
+              <span class="meta-label">{{ taskCreated() | date:'mediumDate' }}</span>
+            </div>
+          }
+          @if (commentCount() > 0) {
+            <div class="meta-item">
+              <mat-icon class="meta-icon">chat_bubble_outline</mat-icon>
+              <span class="meta-label">{{ commentCount() }}</span>
+            </div>
+          }
+          @if (attachmentCount() > 0) {
+            <div class="meta-item">
+              <mat-icon class="meta-icon">attach_file</mat-icon>
+              <span class="meta-label">{{ attachmentCount() }}</span>
+            </div>
+          }
+        </div>
 
-      @if (taskDescription()) {
-        <app-markdown-view [content]="taskDescription()"></app-markdown-view>
-      }
-    </mat-card-content>
+        @if (taskDescription()) {
+          <app-markdown-view [content]="taskDescription()"></app-markdown-view>
+        }
+
+        @if (taskTags().length > 0) {
+          <div class="card-tags">
+            <mat-chip-set>
+              @for (tag of taskTags(); track $index) {
+                <mat-chip class="tag-chip" zbChipColors [zbChipColor]="tag.color || ''">{{ tag.name }}</mat-chip>
+              }
+            </mat-chip-set>
+          </div>
+        }
+      </mat-card-content>
+    } @else {
+      <!-- Collapsed sub-task: show just the name inline -->
+      <mat-card-content class="collapsed-content">
+        <span class="task-name-inline">{{ taskName() }}</span>
+        @if (taskTags().length > 0) {
+          <mat-chip-set class="inline-tags">
+            @for (tag of taskTags(); track $index) {
+              <mat-chip class="tag-chip small" zbChipColors [zbChipColor]="tag.color || ''">{{ tag.name }}</mat-chip>
+            }
+          </mat-chip-set>
+        }
+      </mat-card-content>
+    }
   </mat-card>
 }

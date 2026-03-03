@@ -22,13 +22,13 @@
   margin-bottom: 1.5rem;
 }
 
-.subtasks-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 0.75rem;
+
+.tags-section {
+  margin-top: 1.5rem;
 }
 
-.add-task-btn {
-  flex-shrink: 0;
+.no-tags {
+  color: var(--mat-sys-on-surface-variant, rgba(0, 0, 0, 0.6));
+  font-size: 0.875rem;
+  margin: 0;
 }

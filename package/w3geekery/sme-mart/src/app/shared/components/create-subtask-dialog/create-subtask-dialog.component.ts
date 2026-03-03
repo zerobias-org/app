@@ -8,6 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import type { Transition } from '@zerobias-com/platform-sdk';
+import { ZbResourceStatusComponent } from '@zerobias-org/ngx-library';
 import { EngagementTasksService } from '../../../core/services/engagement-tasks.service';
 import { MarkdownEditor } from '../markdown-editor/markdown-editor.component';
 
@@ -32,6 +33,7 @@ export interface CreateSubTaskDialogData {
     MatIconModule,
     MatSnackBarModule,
     MarkdownEditor,
+    ZbResourceStatusComponent,
   ],
   templateUrl: './create-subtask-dialog.component.html',
   styleUrl: './create-subtask-dialog.component.scss',
@@ -65,15 +67,6 @@ export class CreateSubTaskDialog {
 
   /** Selected transition for initial status (optional) */
   readonly selectedTransition = signal<Transition | null>(null);
-
-  /** Format transition target status for display */
-  transitionStatusClass(transition: Transition): string {
-    return `task-status-chip ${transition.status.toLowerCase().replace(/\s+/g, '_')}`;
-  }
-
-  transitionStatusDisplay(transition: Transition): string {
-    return transition.status.replace(/_/g, ' ').toUpperCase();
-  }
 
   selectTransition(transition: Transition | null): void {
     this.selectedTransition.set(transition);

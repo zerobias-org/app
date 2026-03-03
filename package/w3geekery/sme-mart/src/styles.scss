@@ -98,46 +98,8 @@ body.dark-theme {
 }
 
 // ============================================================================
-// Task status chips & transition menus (rendered in CDK overlay, needs global scope)
+// Transition menus (rendered in CDK overlay, needs global scope)
 // ============================================================================
-
-// Task status chip — colored text on subtle background
-// Text color = the ZB platform palette color (darkened for readability)
-// Background = light tint derived from the text color
-.task-status-chip {
-  display: inline-block;
-  font-weight: 600;
-  font-size: 11px;
-  letter-spacing: 0.15px;
-  text-transform: uppercase;
-  padding: 2px 8px;
-  border-radius: 4px;
-  line-height: 1.4;
-  white-space: nowrap;
-
-  // Default — gray (backlog, todo)
-  &.backlog,
-  &.todo       { color: #5f6368; background-color: #f1f3f4; }
-  // Blue (in_progress, awaiting_approval)
-  &.in_progress,
-  &.awaiting_approval { color: #1a56db; background-color: #e8f0fe; }
-  // Green (done, completed)
-  &.done,
-  &.completed  { color: #137333; background-color: #e6f4ea; }
-  // Red/salmon (cancelled)
-  &.cancelled  { color: #a93226; background-color: #fce8e6; }
-}
-
-// Dark theme overrides — lighter text, darker tint backgrounds
-body.dark-theme .task-status-chip {
-  &.backlog,
-  &.todo       { color: #bdc1c6; background-color: #3c4043; }
-  &.in_progress,
-  &.awaiting_approval { color: #8ab4f8; background-color: #1e3a5f; }
-  &.done,
-  &.completed  { color: #81c995; background-color: #1e3a2f; }
-  &.cancelled  { color: #f28b82; background-color: #5a2320; }
-}
 
 // Transition menu — overlay panel
 .transition-menu.mat-mdc-menu-panel {
@@ -146,6 +108,57 @@ body.dark-theme .task-status-chip {
   .mat-mdc-menu-item-text {
     width: 100%;
   }
+}
+
+// ── Color swatch submenu (rendered in CDK overlay, needs global scope) ──
+
+.color-swatch-menu .mat-mdc-menu-content {
+  padding: 0;
+}
+
+.swatch-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 12px;
+  max-width: 180px;
+}
+
+.swatch {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+
+  &:hover {
+    transform: scale(1.15);
+  }
+
+  &.active {
+    border-color: var(--mat-sys-on-surface);
+  }
+}
+
+.swatch-none {
+  background: var(--mat-sys-surface-variant);
+  border-style: dashed;
+}
+
+.check {
+  font-size: 12px;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.swatch-none .check {
+  color: var(--mat-sys-on-surface-variant);
+  text-shadow: none;
 }
 
 // Transition row inside menu items — "Action Name  →  STATUS"

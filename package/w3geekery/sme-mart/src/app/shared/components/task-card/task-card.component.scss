@@ -8,6 +8,21 @@ mat-card {
 
 .master-card {
   border-left: 4px solid var(--mat-sys-primary, #6750a4);
+  background: color-mix(in srgb, var(--mat-sys-primary, #6750a4) 4%, var(--mat-sys-surface, #fff));
+}
+
+.sub-card {
+  cursor: pointer;
+  transition: box-shadow 0.2s ease, border-left-color 0.2s ease;
+  border-left: 3px solid transparent;
+
+  &:hover {
+    box-shadow: var(--mat-sys-level2, 0 1px 3px rgba(0, 0, 0, 0.12));
+  }
+
+  &.expanded {
+    border-left-color: var(--mat-sys-tertiary, #7d5260);
+  }
 }
 
 .card-header-row {
@@ -18,28 +33,59 @@ mat-card {
   gap: 0.5rem;
 }
 
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+
+.expand-icon {
+  color: var(--mat-sys-on-surface-variant, rgba(0, 0, 0, 0.6));
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
 .code-chip {
   font-family: monospace;
   font-size: 0.8rem;
 }
 
-// Status trigger button — styled like a chip but clickable
-// Uses .task-status-chip colors from global styles.scss
-.status-trigger {
-  border: none;
-  cursor: pointer;
-  min-height: 28px;
-  font-weight: 500;
-  font-size: 11px;
-  letter-spacing: 0.15px;
-  text-transform: uppercase;
-  border-radius: 4px;
-  padding: 4px 8px;
-  line-height: 1.4;
+.master-indicator-chip {
+  --mat-chip-label-text-color: var(--mat-sys-primary, #6750a4);
+  font-weight: 600;
+  font-size: 0.75rem;
+}
 
-  // Override Material button background to let .task-status-chip colors show
-  --mdc-text-button-container-color: transparent;
-  --mat-text-button-state-layer-color: currentColor;
+.master-chip-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  margin-right: 2px;
+}
+
+.parent-chip {
+  --mat-chip-label-text-color: var(--mat-sys-on-surface-variant, #49454f);
+  font-size: 0.75rem;
+}
+
+.parent-chip-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  margin-right: 2px;
+}
+
+// Status trigger button — uses .zb-chip.square.task-status classes for colors
+.status-trigger {
+  min-height: 28px;
+  cursor: pointer;
+
+  // Override mat-flat-button defaults so zb-chip colors come through
+  --mdc-filled-button-container-color: inherit;
+  --mdc-filled-button-label-text-color: inherit;
+  --mdc-filled-button-container-shape: 4px;
 
   mat-icon {
     font-size: 18px;
@@ -52,6 +98,24 @@ mat-card {
   margin: 0.5rem 0;
   font-size: 1rem;
   font-weight: 500;
+}
+
+.task-name-inline {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--mat-sys-on-surface, rgba(0, 0, 0, 0.87));
+}
+
+.collapsed-content {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding-top: 0;
+}
+
+.inline-tags {
+  display: inline-flex;
 }
 
 .task-meta {
@@ -116,4 +180,20 @@ mat-card {
   margin-right: 2px;
   vertical-align: middle;
   line-height: 1;
+}
+
+// Tags section inside expanded card
+.card-tags {
+  margin-top: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--mat-sys-outline-variant, rgba(0, 0, 0, 0.08));
+}
+
+.tag-chip {
+  font-size: 0.75rem;
+
+  &.small {
+    --mdc-chip-container-height: 24px;
+    font-size: 0.7rem;
+  }
 }

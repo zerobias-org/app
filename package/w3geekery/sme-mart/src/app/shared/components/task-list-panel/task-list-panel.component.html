@@ -15,20 +15,18 @@
     <app-task-card
       [task]="masterTask()!"
       [isMaster]="true"
+      [tags]="tags()"
       (transitioned)="onTaskTransitioned($event)">
     </app-task-card>
   </section>
 
   <!-- Related Tasks -->
-  <section class="subtasks-section">
-    <div class="subtasks-header">
-      <h3 class="section-title">Related Tasks ({{ subTaskCount() }})</h3>
-      @if (isOwnerFlag()) {
-        <button mat-stroked-button (click)="openCreateDialog()" class="add-task-btn">
-          <mat-icon>add</mat-icon> Add Task
-        </button>
-      }
-    </div>
+  <zb-simple-panel [title]="'Related Tasks (' + subTaskCount() + ')'" [subPanel]="true">
+    @if (isOwnerFlag()) {
+      <button headerAction mat-stroked-button (click)="openCreateDialog()">
+        <mat-icon>add</mat-icon> Add Task
+      </button>
+    }
 
     @if (subTaskCount() === 0) {
       <zb-empty-state-container
@@ -39,9 +37,28 @@
       @for (task of subTasks(); track task.id.toString()) {
         <app-task-card
           [task]="task"
+          [parentTaskCode]="masterTaskCode()"
+          [isExpanded]="expandedSubTaskId() === task.id.toString()"
+          [tags]="getSubTaskTags(task.id.toString())"
+          (expanded)="onSubTaskClick($event)"
           (transitioned)="onTaskTransitioned($event)">
         </app-task-card>
       }
     }
+  </zb-simple-panel>
+
+  <!-- Tags -->
+  <section class="tags-section">
+    <zb-simple-panel title="Tags" [subPanel]="true">
+      @if (tags().length === 0) {
+        <p class="no-tags">No tags on this task.</p>
+      } @else {
+        <mat-chip-set>
+          @for (tag of tags(); track $index) {
+            <mat-chip zbChipColors [zbChipColor]="tag.color || ''">{{ tag.name }}</mat-chip>
+          }
+        </mat-chip-set>
+      }
+    </zb-simple-panel>
   </section>
 }
