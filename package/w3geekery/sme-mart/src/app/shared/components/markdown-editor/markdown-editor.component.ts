@@ -51,7 +51,7 @@ export class MarkdownEditor implements AfterViewInit, OnDestroy {
     [CrepeFeature.CodeMirror]: true,
     [CrepeFeature.ListItem]: true,
     [CrepeFeature.LinkTooltip]: false,
-    [CrepeFeature.Cursor]: true,
+    [CrepeFeature.Cursor]: false,
     [CrepeFeature.ImageBlock]: false,
     [CrepeFeature.BlockEdit]: false,
     [CrepeFeature.Toolbar]: false,
@@ -125,7 +125,36 @@ export class MarkdownEditor implements AfterViewInit, OnDestroy {
   insertCodeBlock(): void { this.runCommand(callCommand(createCodeBlockCommand.key)); }
 
   toggleTaskList(): void {
-    this.insertTextAtCursor('- [ ] ');
+    if (!this.crepe) return;
+    try {
+      // First ensure cursor is inside a bullet list item
+      this.crepe.editor.action((ctx) => {
+        callCommand(wrapInBulletListCommand.key)(ctx);
+      });
+      // Toggle checked attr on list_item: null → false (task), non-null → null (normal)
+      this.crepe.editor.action((ctx) => {
+        const view = ctx.get(editorViewCtx);
+        const { state, dispatch } = view;
+        const { $from } = state.selection;
+        for (let depth = $from.depth; depth > 0; depth--) {
+          const node = $from.node(depth);
+          if (node.type.name === 'list_item') {
+            const isTask = node.attrs['checked'] != null;
+            const pos = $from.before(depth);
+            dispatch(
+              state.tr.setNodeMarkup(pos, undefined, {
+                ...node.attrs,
+                checked: isTask ? null : false,
+              }),
+            );
+            break;
+          }
+        }
+        view.focus();
+      });
+    } catch (err) {
+      console.error('[MarkdownEditor] Error toggling task list:', err);
+    }
   }
 
   insertLink(): void {
