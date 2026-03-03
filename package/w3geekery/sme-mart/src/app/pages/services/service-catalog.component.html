@@ -1,31 +1,17 @@
-<div class="catalog-page">
-  <!-- Toolbar -->
-  <div class="list-toolbar">
-    <button mat-icon-button (click)="toggleDrawer()" aria-label="Toggle filters"
-      [matBadge]="activeFilterCount()" matBadgeColor="primary" matBadgeSize="small" [matBadgeHidden]="activeFilterCount() === 0">
-      <mat-icon>filter_alt</mat-icon>
-    </button>
-
-    <zb-search-input
-      class="search-input"
-      placeholder="Search services..."
-      message=""
-      [value]="searchTerm()"
-      (search)="onSearch($event)"
-    />
-
-    <mat-form-field appearance="outline" class="sort-select" subscriptSizing="dynamic">
-      <mat-select [(value)]="sortBy">
-        <mat-option value="title">Title</mat-option>
-        <mat-option value="category">Category</mat-option>
-        <mat-option value="newest">Newest First</mat-option>
-      </mat-select>
-    </mat-form-field>
-  </div>
-
+<app-list-page
+  title="Services"
+  description="Browse services offered by subject matter experts — filter by category, specialty, or provider."
+  searchPlaceholder="Search services..."
+  [(searchValue)]="searchTerm"
+  [sortOptions]="sortOptions"
+  [(sortValue)]="sortBy"
+  [items]="filteredServices()"
+  [loading]="loading()"
+  emptyText="No services found. Try adjusting your search or filters."
+>
   <!-- Provider filter chip -->
   @if (providerFilter()) {
-    <div class="active-filter-bar">
+    <div listPageFilterBar class="active-filter-bar">
       <mat-chip-set>
         <mat-chip [removable]="true" (removed)="clearProviderFilter()">
           <mat-icon matChipAvatar>person</mat-icon>
@@ -36,42 +22,18 @@
     </div>
   }
 
-  <!-- Content with filter drawer -->
-  <mat-sidenav-container class="content-container">
-    <mat-sidenav
-      #filterDrawer
-      appResizableDrawer
-      mode="side"
-      [opened]="drawerOpen()"
-      position="start"
-      class="filter-sidebar"
-    >
-      <app-catalog-filters
-        [enabledFilters]="enabledFilters()"
-        [selectedFilters]="catalogFilters()"
-        (filtersChange)="onFiltersChange($event)"
-        (enabledChange)="onEnabledChange($event)">
-      </app-catalog-filters>
-    </mat-sidenav>
-
-    <mat-sidenav-content class="main-content">
-      @if (loading()) {
-        <zb-empty-state-container [loading]="true" />
-      } @else if (filteredServices().length) {
-        <div class="results-count">{{ filteredServices().length }} services found</div>
-        <div class="service-grid">
-          @for (svc of filteredServices(); track svc.id) {
-            <app-service-card
-              [service]="svc"
-              (serviceSelect)="onServiceSelect($event)"
-              (viewProviderServices)="onViewProviderServices($event)"
-              (viewProviderProfile)="onViewProviderProfile($event)"
-            />
-          }
-        </div>
-      } @else {
-        <zb-empty-state-container [loading]="false" emptyText="No services found" />
+  <!-- Results -->
+  <div listPageResults>
+    <div class="results-count">{{ filteredServices().length }} services found</div>
+    <div class="service-grid">
+      @for (svc of filteredServices(); track svc.id) {
+        <app-service-card
+          [service]="svc"
+          (serviceSelect)="onServiceSelect($event)"
+          (viewProviderServices)="onViewProviderServices($event)"
+          (viewProviderProfile)="onViewProviderProfile($event)"
+        />
       }
-    </mat-sidenav-content>
-  </mat-sidenav-container>
-</div>
+    </div>
+  </div>
+</app-list-page>

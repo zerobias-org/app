@@ -1,44 +1,24 @@
-import { Component, inject, signal, computed, ChangeDetectionStrategy, OnInit, ViewChild } from '@angular/core';
+import { Component, inject, signal, computed, ChangeDetectionStrategy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatSelectModule } from '@angular/material/select';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatBadgeModule } from '@angular/material/badge';
-import { FormsModule } from '@angular/forms';
-import { ZbSearchInputComponent, ZbEmptyStateContainerComponent } from '@zerobias-org/ngx-library';
 import { ProviderCard } from '../../shared/components/provider-card/provider-card.component';
-import { CatalogFilters } from '../../shared/components/catalog-filters/catalog-filters.component';
-import { ResizableDrawerDirective } from '../../shared/directives/resizable-drawer.directive';
+import { ListPage, SortOption } from '../../shared/components/list-page/list-page.component';
 import { ProviderProfilesService } from '../../core/services/provider-profiles.service';
 import { CatalogService } from '../../core/services/catalog.service';
 import { UserPreferencesService } from '../../core/services/user-preferences.service';
-import type { ProviderDirectoryRow, CatalogFiltersState, EnabledFilters } from '../../core/models';
+import type { ProviderDirectoryRow } from '../../core/models';
 
 @Component({
   selector: 'app-provider-list',
   standalone: true,
   imports: [
-    MatSidenavModule,
-    MatButtonModule,
-    MatIconModule,
-    MatSelectModule,
-    MatFormFieldModule,
-    MatBadgeModule,
-    FormsModule,
-    ZbSearchInputComponent,
-    ZbEmptyStateContainerComponent,
     ProviderCard,
-    CatalogFilters,
-    ResizableDrawerDirective,
+    ListPage,
   ],
   templateUrl: './provider-list.component.html',
   styleUrl: './provider-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProviderList implements OnInit {
-  @ViewChild(CatalogFilters) private catalogFiltersComp!: CatalogFilters;
   private readonly route = inject(ActivatedRoute);
   private readonly providerProfiles = inject(ProviderProfilesService);
   private readonly catalog = inject(CatalogService);
@@ -48,16 +28,17 @@ export class ProviderList implements OnInit {
   readonly providers = signal<ProviderDirectoryRow[]>([]);
   readonly searchTerm = signal('');
   readonly sortBy = signal('name');
-  readonly drawerOpen = signal(false);
 
-  readonly enabledFilters = this.prefs.enabledFilters;
-  readonly catalogFilters = this.prefs.catalogFilters;
-  readonly activeFilterCount = this.prefs.activeFilterCount;
+  readonly sortOptions: SortOption[] = [
+    { value: 'name', label: 'Name' },
+    { value: 'rating', label: 'Rating' },
+    { value: 'jobs', label: 'Jobs Completed' },
+  ];
 
   readonly filteredProviders = computed(() => {
     let items = this.providers();
     const term = this.searchTerm().toLowerCase();
-    const filters = this.catalogFilters();
+    const filters = this.prefs.catalogFilters();
 
     // Text search
     if (term) {
@@ -96,7 +77,6 @@ export class ProviderList implements OnInit {
   });
 
   async ngOnInit() {
-    // Initial search from query params
     const q = this.route.snapshot.queryParams['q'];
     if (q) this.searchTerm.set(q);
 
@@ -109,26 +89,6 @@ export class ProviderList implements OnInit {
       this.providers.set(result.items || []);
     } catch (err) {
       console.warn('[ProviderList] Failed to load:', err);
-    }
-  }
-
-  onSearch(term: string | null): void {
-    this.searchTerm.set(term || '');
-  }
-
-  onFiltersChange(filters: CatalogFiltersState): void {
-    this.prefs.setCatalogFilters(filters);
-  }
-
-  onEnabledChange(enabled: EnabledFilters): void {
-    this.prefs.setEnabledFilters(enabled);
-  }
-
-  toggleDrawer(): void {
-    const opening = !this.drawerOpen();
-    this.drawerOpen.set(opening);
-    if (opening && this.activeFilterCount() === 0) {
-      setTimeout(() => this.catalogFiltersComp?.openFilterMenu(), 300);
     }
   }
 

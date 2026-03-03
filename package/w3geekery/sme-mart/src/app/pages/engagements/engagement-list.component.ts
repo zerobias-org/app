@@ -1,29 +1,19 @@
 import { Component, inject, signal, computed, ChangeDetectionStrategy, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatBadgeModule } from '@angular/material/badge';
 import { MatChipsModule } from '@angular/material/chips';
-import { FormsModule } from '@angular/forms';
-import { ZbSearchInputComponent, ZbEmptyStateContainerComponent } from '@zerobias-org/ngx-library';
 import { EngagementCard } from '../../shared/components/engagement-card/engagement-card.component';
-import { CatalogFilters } from '../../shared/components/catalog-filters/catalog-filters.component';
+import { ListPage, SortOption } from '../../shared/components/list-page/list-page.component';
 import { WorkRequestsService } from '../../core/services/work-requests.service';
 import { ProviderProfilesService } from '../../core/services/provider-profiles.service';
-import { UserPreferencesService } from '../../core/services/user-preferences.service';
 import { ImpersonationService } from '../../core/services/impersonation.service';
 import { RfpDialog } from '../../shared/components/rfp-dialog/rfp-dialog.component';
-import type {
-  EngagementSummaryRow,
-  RequestStatus,
-  CatalogFiltersState,
-  EnabledFilters,
-} from '../../core/models';
+import type { EngagementSummaryRow, RequestStatus } from '../../core/models';
 
 type LifecycleFilter = 'all' | 'rfp' | 'engagement';
 
@@ -31,19 +21,14 @@ type LifecycleFilter = 'all' | 'rfp' | 'engagement';
   selector: 'app-engagement-list',
   standalone: true,
   imports: [
-    MatSidenavModule,
     MatButtonModule,
     MatButtonToggleModule,
     MatIconModule,
     MatSelectModule,
     MatFormFieldModule,
-    MatBadgeModule,
     MatChipsModule,
-    FormsModule,
-    ZbSearchInputComponent,
-    ZbEmptyStateContainerComponent,
     EngagementCard,
-    CatalogFilters,
+    ListPage,
   ],
   templateUrl: './engagement-list.component.html',
   styleUrl: './engagement-list.component.scss',
@@ -56,21 +41,20 @@ export class EngagementList implements OnInit {
   private readonly impersonation = inject(ImpersonationService);
   private readonly workRequests = inject(WorkRequestsService);
   private readonly providerProfiles = inject(ProviderProfilesService);
-  private readonly prefs = inject(UserPreferencesService);
 
   readonly loading = this.workRequests.loading;
   readonly engagements = signal<EngagementSummaryRow[]>([]);
   readonly searchTerm = signal('');
   readonly lifecycleFilter = signal<LifecycleFilter>('all');
   readonly statusFilter = signal<RequestStatus | 'all'>('all');
-  readonly sortBy = signal<'newest' | 'budget_high'>('newest');
+  readonly sortBy = signal<string>('newest');
   readonly myProposalsOnly = signal(false);
-  readonly drawerOpen = signal(false);
   readonly currentProviderId = signal<string | null>(null);
 
-  readonly enabledFilters = this.prefs.enabledFilters;
-  readonly catalogFilters = this.prefs.catalogFilters;
-  readonly activeFilterCount = this.prefs.activeFilterCount;
+  readonly sortOptions: SortOption[] = [
+    { value: 'newest', label: 'Newest First' },
+    { value: 'budget_high', label: 'Budget: High to Low' },
+  ];
 
   readonly filteredEngagements = computed(() => {
     let items = this.engagements();
@@ -149,22 +133,6 @@ export class EngagementList implements OnInit {
     } catch {
       // Not a provider — fine
     }
-  }
-
-  onSearch(term: string | null): void {
-    this.searchTerm.set(term || '');
-  }
-
-  onFiltersChange(filters: CatalogFiltersState): void {
-    this.prefs.setCatalogFilters(filters);
-  }
-
-  onEnabledChange(enabled: EnabledFilters): void {
-    this.prefs.setEnabledFilters(enabled);
-  }
-
-  toggleDrawer(): void {
-    this.drawerOpen.update(v => !v);
   }
 
   toggleMyProposals(): void {
