@@ -1,10 +1,10 @@
 # Plan: SME Mart Angular Rebuild
 
-**Last updated:** 2026-02-23
+**Last updated:** 2026-02-25
 
 ## Status
 
-**Phases 1–4 complete. Phase 5 in progress (Plans 015–019).**
+**Phases 1–4 complete. Phase 5 in progress (Plans 015–025).**
 
 | Phase | Status | Plan File |
 |-------|--------|-----------|
@@ -12,7 +12,7 @@
 | 2 — Database Layer (Generic SQL Hub Module) | **Complete** | (inline below) |
 | 3 — Service Layer | **Complete** | [`.claude/plans/local/phase-3-service-layer.md`](../local/phase-3-service-layer.md) |
 | 4 — Marketplace & Profiles | **Complete** | [`.claude/plans/local/phase-4-marketplace-profiles.md`](../local/phase-4-marketplace-profiles.md) |
-| 5 — Engagements & Admin | **In Progress** | Plans 015–019 below |
+| 5 — Engagements & Admin | **In Progress** | Plans 015–025 below |
 | 6 — ngx-library Re-skin & Polish | Pending | TBD |
 | 7 — Deployment | Pending | TBD |
 
@@ -21,10 +21,18 @@
 | # | Plan | Status | File |
 |---|------|--------|------|
 | 015 | Navigation & Taxonomy Restructuring | **Complete** | [`015-navigation-taxonomy-restructuring.md`](../local/015-navigation-taxonomy-restructuring.md) |
-| 016 | Engagement Messages Tab | Pending | [`016-engagement-messages-tab.md`](../local/016-engagement-messages-tab.md) |
+| 016 | ~~Engagement Messages Tab~~ | **Deprecated** (superseded by Timeline) | [`016-engagement-messages-tab.md`](../local/016-engagement-messages-tab.md) |
 | 017 | Engagement Tasks Tab | **Complete** | [`017-engagement-tasks-tab.md`](../local/017-engagement-tasks-tab.md) |
 | 018 | Engagement Activity Center (Timeline) | **Complete** | [`018-engagement-activity-center.md`](../local/018-engagement-activity-center.md) |
 | 019 | Markdown Components (Milkdown Crepe + Renderer) | **Complete** | [`019-markdown-components.md`](../local/019-markdown-components.md) |
+| 020 | ~~Adaptive Assessments (Provider Vetting)~~ | **Cancelled** — ZB platform feature per Joe's clarification (2026-02-25) | [`020-adaptive-assessments.md`](../local/020-adaptive-assessments.md) |
+| 021 | ~~Credential Verification (Credly)~~ | **Cancelled** — ZB platform feature per Joe's clarification (2026-02-25) | [`021-credential-verification.md`](../local/021-credential-verification.md) |
+| 022 | Project Layer (Engagement → Project → Task) | **Stub** — needs ZB platform Project entity | [`022-project-layer.md`](../local/022-project-layer.md) |
+| 023 | Transparency Center (3-View Architecture) | **Stub** — needs project layer + subtask types | [`023-transparency-center.md`](../local/023-transparency-center.md) |
+| 024 | Readiness & Scoring | **Stub** — depends on 023, ZB extended user profile | [`024-readiness-scoring.md`](../local/024-readiness-scoring.md) |
+| 025 | ZB Platform Feature Requests | **Living doc** — track requests for Kevin/Chris | [`025-zb-platform-feature-requests.md`](../local/025-zb-platform-feature-requests.md) |
+| — | Engagement Tab Routes Refactor | **Complete** — child routes replace query params | [`engagement-tab-routes.md`](../local/engagement-tab-routes.md) |
+| 026 | Notes Feature | **In Progress** | [`026-notes-feature.md`](../local/026-notes-feature.md) |
 
 ### What's built (Phases 1–4)
 
@@ -40,7 +48,7 @@
 - **Routes:** `/`, `/services`, `/rfps`, `/rfps/:id`, `/providers` (footer link), `/providers/:id`, `/my/engagements` (lazy, user dropdown), `/my-profile/*` (lazy), `/admin/*` (lazy)
 
 **Engagements & Admin (P5 — in progress):**
-- **Engagement Detail:** 4-tab layout (Overview, Details, Tasks, Timeline) with tab persistence via `?tab=` query param
+- **Engagement Detail:** Layout shell with child routes (`/rfps/:id/overview|details|tasks|timeline`) using `mat-tab-nav-bar` + `<router-outlet>`. `EngagementContextService` shares engagement data between parent and tab components. RFP view (no engagement_tag) remains inline, no tabs.
 - **Tasks Tab:** TaskListPanel + TaskCard with ZB platform status transition menus (Action → Status Chip), CreateSubTaskDialog with Milkdown editor, initial transitions support
 - **Timeline Tab:** TimelineView with color-coded event type icons (28px nodes), month dividers, TimelineEventCard with markdown rendering, TimelineComposer with Milkdown rich editor
 - **Markdown Components:** MarkdownView (read-only, `marked`-based), MarkdownEditor (Milkdown Crepe wrapper with static toolbar — bold, italic, strike, headings, lists, code, links, tables)
@@ -416,6 +424,11 @@ These should be planned but not prioritized for initial Angular migration:
 - Service packages (3-tier pricing)
 - Composite reputation score (SME Score)
 - Provider levels/badges
+- ~~Adaptive assessments for provider vetting~~ → ~~**Plan 020**~~ Cancelled — ZB platform feature
+- ~~Credly credential verification~~ → ~~**Plan 021**~~ Cancelled — ZB platform feature
+- ~~Project layer (Engagement → Project → Task hierarchy)~~ → **Plan 022**
+- ~~Transparency Center (3-view buyer/supplier/shared)~~ → **Plan 023**
+- ~~Readiness & Scoring (provider performance)~~ → **Plan 024**
 - Demo mode mock catalog (Plan 013 — not started)
 - Agentic optimization & self-maintenance — AI execution scoring, drift detection, policy-aware optimization, admin AI health panel (see [`.claude/notes/agentic-optimization-concepts.md`](../../notes/agentic-optimization-concepts.md))
 

@@ -276,10 +276,18 @@ AppComponent (shell)
 │   ├── /                → Home
 │   ├── /services        → ServiceCatalog (primary catalog, provider as facet)
 │   ├── /rfps            → RfpList (public RFP browse)
-│   ├── /rfps/:id        → EngagementDetail (public RFP detail + proposals)
+│   ├── /rfps/:id        → RfpDetail (proposals, actions, no tabs)
+│   ├── /rfps/:id/edit   → EngagementEdit
+│   ├── /engagements/:id → EngagementDetail (layout shell — child routes below)
+│   │   ├── /overview    → OverviewTab
+│   │   ├── /details     → DetailsTab
+│   │   ├── /tasks       → TasksTab
+│   │   ├── /timeline    → TimelineTab
+│   │   └── /notes       → NotesTab (planned)
 │   ├── /providers       → ProviderList (footer link, not in nav)
 │   ├── /providers/:id   → ProviderDetail
 │   ├── /my/engagements  → MyEngagementList (lazy, user dropdown)
+│   ├── /my/engagements/:id → EngagementDetail (same shell, child routes)
 │   ├── /my-profile/*    → Profile routes (lazy loaded)
 │   └── /admin/*         → Admin routes (lazy loaded)
 ├── Footer ("Browse Providers" link)
