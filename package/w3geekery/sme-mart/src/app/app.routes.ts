@@ -5,8 +5,10 @@ import { ProviderList } from './pages/providers/provider-list.component';
 import { ProviderDetail } from './pages/providers/provider-detail.component';
 import { ServiceCatalog } from './pages/services/service-catalog.component';
 import { RfpList } from './pages/rfps/rfp-list.component';
+import { RfpDetail } from './pages/rfps/rfp-detail.component';
 import { EngagementDetail } from './pages/engagements/engagement-detail.component';
 import { EngagementEdit } from './pages/engagements/engagement-edit.component';
+import { ENGAGEMENT_TAB_ROUTES } from './pages/engagements/engagement.routes';
 import { ComingSoon } from './pages/coming-soon/coming-soon.component';
 
 export const routes: Routes = [
@@ -19,10 +21,11 @@ export const routes: Routes = [
       { path: 'providers/:id', component: ProviderDetail },
       { path: 'services', component: ServiceCatalog },
       { path: 'rfps', component: RfpList },
-      { path: 'rfps/:id', component: EngagementDetail },
-      // Redirects for old /engagements URLs
+      { path: 'rfps/:id', component: RfpDetail },
+      { path: 'rfps/:id/edit', component: EngagementEdit },
+      { path: 'engagements/:id', component: EngagementDetail, children: ENGAGEMENT_TAB_ROUTES },
+      // Legacy redirects
       { path: 'engagements', redirectTo: 'rfps', pathMatch: 'full' },
-      { path: 'engagements/:id', redirectTo: 'rfps/:id' },
       {
         path: 'my/engagements',
         loadChildren: () =>

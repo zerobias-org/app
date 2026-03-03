@@ -1,0 +1,135 @@
+<div class="rfp-detail-page">
+  @if (loading()) {
+    <p class="loading-message">Loading RFP...</p>
+  } @else if (!rfp()) {
+    <p>RFP not found.</p>
+  } @else {
+    <button mat-button (click)="goBack()" class="back-btn">
+      <mat-icon>arrow_back</mat-icon> Back to RFPs
+    </button>
+
+    <div class="rfp-layout">
+      <div class="rfp-main">
+        <mat-card>
+          <mat-card-header>
+            <div class="chip-row">
+              <mat-chip-set>
+                <mat-chip highlighted>RFP</mat-chip>
+                <mat-chip [class]="'status-' + status()">{{ status() | titlecase }}</mat-chip>
+                @if (rfp()!.category) {
+                  <mat-chip>{{ rfp()!.category }}</mat-chip>
+                }
+              </mat-chip-set>
+            </div>
+          </mat-card-header>
+
+          <mat-card-content>
+            <h2>{{ rfp()!.title }}</h2>
+            @if (rfp()!.description) {
+              <p class="description">{{ rfp()!.description }}</p>
+            }
+
+            <div class="detail-grid">
+              @if (rfp()!.budget_min || rfp()!.budget_max) {
+                <div class="detail-item">
+                  <span class="label">Budget</span>
+                  <span class="value">
+                    @if (rfp()!.budget_min && rfp()!.budget_max) {
+                      {{ rfp()!.budget_min | currency:'USD':'symbol':'1.0-0' }} – {{ rfp()!.budget_max | currency:'USD':'symbol':'1.0-0' }}
+                    } @else if (rfp()!.budget_max) {
+                      Up to {{ rfp()!.budget_max | currency:'USD':'symbol':'1.0-0' }}
+                    } @else {
+                      From {{ rfp()!.budget_min | currency:'USD':'symbol':'1.0-0' }}
+                    }
+                  </span>
+                </div>
+              }
+              @if (rfp()!.budget_type) {
+                <div class="detail-item">
+                  <span class="label">Budget Type</span>
+                  <span class="value">{{ rfp()!.budget_type | titlecase }}</span>
+                </div>
+              }
+              @if (rfp()!.timeline) {
+                <div class="detail-item">
+                  <span class="label">Timeline</span>
+                  <span class="value">{{ rfp()!.timeline }}</span>
+                </div>
+              }
+              <div class="detail-item">
+                <span class="label">Posted</span>
+                <span class="value">{{ rfp()!.created_at | date:'mediumDate' }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">By</span>
+                <span class="value">{{ rfp()!.buyer_display_name || 'Unknown' }}</span>
+              </div>
+            </div>
+
+            <!-- Proposals Section -->
+            <mat-divider></mat-divider>
+            <h3>Proposals ({{ parsedProposals().length }})</h3>
+
+            @if (parsedProposals().length === 0) {
+              <p class="no-proposals">No proposals yet.</p>
+            } @else {
+              @for (p of parsedProposals(); track p.id) {
+                <app-proposal-card
+                  [proposal]="p"
+                  [isBuyer]="isOwner()"
+                  [isOwnProposal]="p.provider_id === currentProviderId()"
+                  (accept)="acceptProposal($event)"
+                  (reject)="rejectProposal($event)"
+                  (withdraw)="withdrawProposal($event)">
+                </app-proposal-card>
+              }
+            }
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- Actions sidebar -->
+      <div class="rfp-sidebar">
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Actions</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            @if (isOwner()) {
+              @if (status() === 'draft') {
+                <button mat-flat-button color="primary" (click)="publishRfp()" class="action-btn">
+                  <mat-icon>publish</mat-icon> Publish RFP
+                </button>
+                <button mat-stroked-button (click)="editRfp()" class="action-btn">
+                  <mat-icon>edit</mat-icon> Edit
+                </button>
+              }
+              @if (status() === 'open') {
+                <button mat-stroked-button (click)="editRfp()" class="action-btn">
+                  <mat-icon>edit</mat-icon> Edit
+                </button>
+                <button mat-button color="warn" (click)="closeRfp()" class="action-btn">
+                  <mat-icon>close</mat-icon> Close RFP
+                </button>
+              }
+            } @else if (currentProviderId()) {
+              @if (hasAlreadyProposed()) {
+                <p class="status-msg">
+                  <mat-icon>check_circle</mat-icon> You've submitted a proposal
+                </p>
+              } @else if (status() === 'open') {
+                <button mat-flat-button color="primary" (click)="openProposalDialog()" class="action-btn">
+                  <mat-icon>rate_review</mat-icon> Submit Proposal
+                </button>
+              } @else {
+                <p class="status-msg">This RFP is no longer accepting proposals.</p>
+              }
+            } @else {
+              <p class="status-msg">Create a provider profile to submit proposals.</p>
+            }
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  }
+</div>
