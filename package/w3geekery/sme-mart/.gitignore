@@ -43,7 +43,14 @@ __screenshots__/
 
 # Environment secrets
 .env.local
-# environment.neon.ts — generated locally by gen-neon-env.mjs, stub committed for CI/Vercel
+# environment.neon.ts — stub committed for CI; run `git update-index --assume-unchanged
+#   src/environments/environment.neon.ts` locally to prevent gen-neon-env.mjs overwrites from showing in git
+
+# Claude project files (local-only)
+.claude/.obsidian/
+.claude/diagrams/
+.claude/proposals/
+.claude/notes/meetings/*.docx
 
 # System files
 .DS_Store
