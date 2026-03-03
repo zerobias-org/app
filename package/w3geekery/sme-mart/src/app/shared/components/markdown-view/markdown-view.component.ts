@@ -1,9 +1,9 @@
 import {
   Component, Input, ChangeDetectionStrategy,
-  signal, computed, inject,
+  signal, computed,
 } from '@angular/core';
-import { DomSanitizer, type SafeHtml } from '@angular/platform-browser';
 import { marked } from 'marked';
+import DOMPurify from 'dompurify';
 
 @Component({
   selector: 'app-markdown-view',
@@ -13,16 +13,18 @@ import { marked } from 'marked';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MarkdownView {
-  private readonly sanitizer = inject(DomSanitizer);
   private readonly _content = signal('');
 
   @Input({ required: true })
   set content(value: string) { this._content.set(value || ''); }
 
-  readonly renderedHtml = computed<SafeHtml>(() => {
+  readonly renderedHtml = computed(() => {
     const md = this._content();
     if (!md) return '';
     const html = marked.parse(md, { async: false }) as string;
-    return this.sanitizer.bypassSecurityTrustHtml(html);
+    return DOMPurify.sanitize(html, {
+      ADD_TAGS: ['input'],
+      ADD_ATTR: ['type', 'checked', 'disabled'],
+    });
   });
 }
