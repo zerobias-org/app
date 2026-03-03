@@ -1,0 +1,49 @@
+@if (ctx.engagement(); as eng) {
+  <div class="tab-content">
+    <mat-card>
+      <mat-card-content>
+        @if (eng.description) {
+          <p class="description">{{ eng.description }}</p>
+        }
+        <div class="detail-grid">
+          @if (eng.budget_min || eng.budget_max) {
+            <div class="detail-item">
+              <span class="label">Budget</span>
+              <span class="value">
+                @if (eng.budget_min && eng.budget_max) {
+                  {{ eng.budget_min | currency:'USD':'symbol':'1.0-0' }} – {{ eng.budget_max | currency:'USD':'symbol':'1.0-0' }}
+                } @else if (eng.budget_max) {
+                  Up to {{ eng.budget_max | currency:'USD':'symbol':'1.0-0' }}
+                } @else {
+                  From {{ eng.budget_min | currency:'USD':'symbol':'1.0-0' }}
+                }
+              </span>
+            </div>
+          }
+          @if (eng.budget_type) {
+            <div class="detail-item">
+              <span class="label">Budget Type</span>
+              <span class="value">{{ eng.budget_type | titlecase }}</span>
+            </div>
+          }
+          @if (eng.timeline) {
+            <div class="detail-item">
+              <span class="label">Timeline</span>
+              <span class="value">{{ eng.timeline }}</span>
+            </div>
+          }
+        </div>
+
+        <mat-divider></mat-divider>
+        <h3>All Proposals ({{ ctx.parsedProposals().length }})</h3>
+        @for (p of ctx.parsedProposals(); track p.id) {
+          <app-proposal-card
+            [proposal]="p"
+            [isBuyer]="false"
+            [isOwnProposal]="false">
+          </app-proposal-card>
+        }
+      </mat-card-content>
+    </mat-card>
+  </div>
+}

@@ -1,313 +1,42 @@
 <div class="engagement-detail-page">
   @if (loading()) {
     <p class="loading-message">Loading engagement...</p>
-  } @else if (!engagement()) {
+  } @else if (!ctx.engagement()) {
     <p>Engagement not found.</p>
   } @else {
     <button mat-button (click)="goBack()" class="back-btn">
       <mat-icon>arrow_back</mat-icon> Back to Engagements
     </button>
 
-    <!-- ================================================================= -->
-    <!-- RFP VIEW (no engagement_tag)                                      -->
-    <!-- ================================================================= -->
-    @if (isRfp()) {
-      <div class="rfp-layout">
-        <div class="rfp-main">
-          <mat-card>
-            <mat-card-header>
-              <div class="chip-row">
-                <mat-chip-set>
-                  <mat-chip highlighted>RFP</mat-chip>
-                  <mat-chip [class]="'status-' + status()">{{ status() | titlecase }}</mat-chip>
-                  @if (engagement()!.category) {
-                    <mat-chip>{{ engagement()!.category }}</mat-chip>
-                  }
-                </mat-chip-set>
-              </div>
-            </mat-card-header>
-
-            <mat-card-content>
-              <h2>{{ engagement()!.title }}</h2>
-              @if (engagement()!.description) {
-                <p class="description">{{ engagement()!.description }}</p>
-              }
-
-              <div class="detail-grid">
-                @if (engagement()!.budget_min || engagement()!.budget_max) {
-                  <div class="detail-item">
-                    <span class="label">Budget</span>
-                    <span class="value">
-                      @if (engagement()!.budget_min && engagement()!.budget_max) {
-                        {{ engagement()!.budget_min | currency:'USD':'symbol':'1.0-0' }} – {{ engagement()!.budget_max | currency:'USD':'symbol':'1.0-0' }}
-                      } @else if (engagement()!.budget_max) {
-                        Up to {{ engagement()!.budget_max | currency:'USD':'symbol':'1.0-0' }}
-                      } @else {
-                        From {{ engagement()!.budget_min | currency:'USD':'symbol':'1.0-0' }}
-                      }
-                    </span>
-                  </div>
-                }
-                @if (engagement()!.budget_type) {
-                  <div class="detail-item">
-                    <span class="label">Budget Type</span>
-                    <span class="value">{{ engagement()!.budget_type | titlecase }}</span>
-                  </div>
-                }
-                @if (engagement()!.timeline) {
-                  <div class="detail-item">
-                    <span class="label">Timeline</span>
-                    <span class="value">{{ engagement()!.timeline }}</span>
-                  </div>
-                }
-                <div class="detail-item">
-                  <span class="label">Posted</span>
-                  <span class="value">{{ engagement()!.created_at | date:'mediumDate' }}</span>
-                </div>
-                <div class="detail-item">
-                  <span class="label">By</span>
-                  <span class="value">{{ engagement()!.buyer_display_name || 'Unknown' }}</span>
-                </div>
-              </div>
-
-              <!-- Proposals Section -->
-              <mat-divider></mat-divider>
-              <h3>Proposals ({{ parsedProposals().length }})</h3>
-
-              @if (parsedProposals().length === 0) {
-                <p class="no-proposals">No proposals yet.</p>
-              } @else {
-                @for (p of parsedProposals(); track p.id) {
-                  <app-proposal-card
-                    [proposal]="p"
-                    [isBuyer]="isOwner()"
-                    [isOwnProposal]="p.provider_id === currentProviderId()"
-                    (accept)="acceptProposal($event)"
-                    (reject)="rejectProposal($event)"
-                    (withdraw)="withdrawProposal($event)">
-                  </app-proposal-card>
-                }
-              }
-            </mat-card-content>
-          </mat-card>
-        </div>
-
-        <!-- Actions sidebar -->
-        <div class="rfp-sidebar">
-          <mat-card>
-            <mat-card-header>
-              <mat-card-title>Actions</mat-card-title>
-            </mat-card-header>
-            <mat-card-content>
-              @if (isOwner()) {
-                @if (status() === 'draft') {
-                  <button mat-flat-button color="primary" (click)="publishRfp()" class="action-btn">
-                    <mat-icon>publish</mat-icon> Publish RFP
-                  </button>
-                  <button mat-stroked-button (click)="editRfp()" class="action-btn">
-                    <mat-icon>edit</mat-icon> Edit
-                  </button>
-                }
-                @if (status() === 'open') {
-                  <button mat-stroked-button (click)="editRfp()" class="action-btn">
-                    <mat-icon>edit</mat-icon> Edit
-                  </button>
-                  <button mat-button color="warn" (click)="closeRfp()" class="action-btn">
-                    <mat-icon>close</mat-icon> Close RFP
-                  </button>
-                }
-              } @else if (currentProviderId()) {
-                @if (hasAlreadyProposed()) {
-                  <p class="status-msg">
-                    <mat-icon>check_circle</mat-icon> You've submitted a proposal
-                  </p>
-                } @else if (status() === 'open') {
-                  <button mat-flat-button color="primary" (click)="openProposalDialog()" class="action-btn">
-                    <mat-icon>rate_review</mat-icon> Submit Proposal
-                  </button>
-                } @else {
-                  <p class="status-msg">This RFP is no longer accepting proposals.</p>
-                }
-              } @else {
-                <p class="status-msg">Create a provider profile to submit proposals.</p>
-              }
-            </mat-card-content>
-          </mat-card>
-        </div>
-      </div>
+    @if (breadcrumbs().length > 0) {
+      <app-hierarchy-breadcrumbs
+        [crumbs]="breadcrumbs()"
+        (navigate)="onBreadcrumbNavigate($event)">
+      </app-hierarchy-breadcrumbs>
     }
 
-    <!-- ================================================================= -->
-    <!-- TRANSPARENCY CENTER VIEW (has engagement_tag)                     -->
-    <!-- ================================================================= -->
-    @if (!isRfp()) {
-      <div class="tc-header">
-        <h2>{{ engagement()!.title }}</h2>
-        <mat-chip-set>
-          <mat-chip class="tag-chip"><code>{{ engagementTag() }}</code></mat-chip>
-          <mat-chip [class]="'status-' + status()">{{ status() | titlecase }}</mat-chip>
-        </mat-chip-set>
-      </div>
+    <div class="tc-header">
+      <h2>{{ ctx.engagement()!.title }}</h2>
+      <mat-chip-set>
+        <mat-chip class="tag-chip"><code>{{ ctx.engagementTag() }}</code></mat-chip>
+        <mat-chip [class]="'status-' + ctx.status()">{{ ctx.status() | titlecase }}</mat-chip>
+      </mat-chip-set>
+    </div>
 
-      <mat-tab-group animationDuration="200ms"
-        [selectedIndex]="selectedTabIndex()"
-        (selectedTabChange)="onTabChange($event.index)">
-        <!-- Overview Tab -->
-        <mat-tab label="Overview">
-          <div class="tab-content">
-            <mat-card>
-              <mat-card-header>
-                <mat-card-title>Engagement Summary</mat-card-title>
-              </mat-card-header>
-              <mat-card-content>
-                @if (engagement()!.description) {
-                  <p>{{ engagement()!.description }}</p>
-                }
-                <div class="detail-grid">
-                  <div class="detail-item">
-                    <span class="label">Category</span>
-                    <span class="value">{{ engagement()!.category }}</span>
-                  </div>
-                  <div class="detail-item">
-                    <span class="label">Status</span>
-                    <span class="value">{{ status() | titlecase }}</span>
-                  </div>
-                  <div class="detail-item">
-                    <span class="label">Created</span>
-                    <span class="value">{{ engagement()!.created_at | date:'mediumDate' }}</span>
-                  </div>
-                  <div class="detail-item">
-                    <span class="label">Buyer</span>
-                    <span class="value">{{ engagement()!.buyer_display_name || 'Unknown' }}</span>
-                  </div>
-                </div>
-              </mat-card-content>
-            </mat-card>
+    <nav mat-tab-nav-bar [tabPanel]="tabPanel" animationDuration="200ms">
+      @for (tab of tabs; track tab.path) {
+        <a mat-tab-link
+          [routerLink]="tab.path"
+          routerLinkActive
+          #rla="routerLinkActive"
+          [active]="rla.isActive">
+          {{ tab.label }}
+        </a>
+      }
+    </nav>
 
-            @if (acceptedProposal()) {
-              <h3>Accepted Provider</h3>
-              <app-proposal-card
-                [proposal]="acceptedProposal()!"
-                [isBuyer]="false"
-                [isOwnProposal]="false">
-              </app-proposal-card>
-            }
-
-            @if (engagement()!.zerobias_tag_id) {
-              <mat-card>
-                <mat-card-header>
-                  <mat-card-title>ZeroBias Integration</mat-card-title>
-                </mat-card-header>
-                <mat-card-content>
-                  <div class="detail-grid">
-                    <div class="detail-item">
-                      <span class="label">Tag ID</span>
-                      <span class="value"><code>{{ engagement()!.zerobias_tag_id }}</code></span>
-                    </div>
-                    @if (engagement()!.zerobias_task_id) {
-                      <div class="detail-item">
-                        <span class="label">Task ID</span>
-                        <span class="value"><code>{{ engagement()!.zerobias_task_id }}</code></span>
-                      </div>
-                    }
-                  </div>
-                </mat-card-content>
-              </mat-card>
-            }
-
-            @if (isOwner() && status() === 'in_progress') {
-              <div class="tc-actions">
-                <button mat-button color="warn" (click)="cancelEngagement()">
-                  <mat-icon>cancel</mat-icon> Cancel Engagement
-                </button>
-              </div>
-            }
-          </div>
-        </mat-tab>
-
-        <!-- Details Tab -->
-        <mat-tab label="Details">
-          <div class="tab-content">
-            <mat-card>
-              <mat-card-content>
-                @if (engagement()!.description) {
-                  <p class="description">{{ engagement()!.description }}</p>
-                }
-                <div class="detail-grid">
-                  @if (engagement()!.budget_min || engagement()!.budget_max) {
-                    <div class="detail-item">
-                      <span class="label">Budget</span>
-                      <span class="value">
-                        @if (engagement()!.budget_min && engagement()!.budget_max) {
-                          {{ engagement()!.budget_min | currency:'USD':'symbol':'1.0-0' }} – {{ engagement()!.budget_max | currency:'USD':'symbol':'1.0-0' }}
-                        } @else if (engagement()!.budget_max) {
-                          Up to {{ engagement()!.budget_max | currency:'USD':'symbol':'1.0-0' }}
-                        } @else {
-                          From {{ engagement()!.budget_min | currency:'USD':'symbol':'1.0-0' }}
-                        }
-                      </span>
-                    </div>
-                  }
-                  @if (engagement()!.budget_type) {
-                    <div class="detail-item">
-                      <span class="label">Budget Type</span>
-                      <span class="value">{{ engagement()!.budget_type | titlecase }}</span>
-                    </div>
-                  }
-                  @if (engagement()!.timeline) {
-                    <div class="detail-item">
-                      <span class="label">Timeline</span>
-                      <span class="value">{{ engagement()!.timeline }}</span>
-                    </div>
-                  }
-                </div>
-
-                <mat-divider></mat-divider>
-                <h3>All Proposals ({{ parsedProposals().length }})</h3>
-                @for (p of parsedProposals(); track p.id) {
-                  <app-proposal-card
-                    [proposal]="p"
-                    [isBuyer]="false"
-                    [isOwnProposal]="false">
-                  </app-proposal-card>
-                }
-              </mat-card-content>
-            </mat-card>
-          </div>
-        </mat-tab>
-
-        <!-- Tasks Tab -->
-        <mat-tab label="Tasks">
-          <div class="tab-content">
-            @if (engagement()!.zerobias_task_id) {
-              <app-task-list-panel
-                [masterTaskId]="engagement()!.zerobias_task_id!"
-                [boundaryId]="engagement()!.zerobias_boundary_id"
-                [isOwner]="isOwner()">
-              </app-task-list-panel>
-            } @else {
-              <zb-empty-state-container
-                icon="task_alt"
-                title="No ZeroBias Task Linked"
-                description="This engagement does not have a linked ZeroBias Task yet.">
-              </zb-empty-state-container>
-            }
-          </div>
-        </mat-tab>
-
-        <!-- Timeline Tab -->
-        <mat-tab label="Timeline">
-          <div class="tab-content">
-            <app-timeline-panel
-              [events]="timelineEvents()"
-              [loading]="timelineLoading()"
-              [taskId]="engagement()!.zerobias_task_id || ''"
-              (drillDown)="onTimelineDrillDown($event)"
-              (commentPosted)="onCommentPosted($event)">
-            </app-timeline-panel>
-          </div>
-        </mat-tab>
-      </mat-tab-group>
-    }
+    <mat-tab-nav-panel #tabPanel>
+      <router-outlet />
+    </mat-tab-nav-panel>
   }
 </div>
