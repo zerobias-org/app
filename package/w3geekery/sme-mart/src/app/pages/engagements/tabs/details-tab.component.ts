@@ -2,7 +2,7 @@ import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
 import { CurrencyPipe, TitleCasePipe } from '@angular/common';
-import { ProposalCard } from '../../../shared/components/proposal-card/proposal-card.component';
+import { BidCard } from '../../../shared/components/bid-card/bid-card.component';
 import { EngagementContextService } from '../../../core/services/engagement-context.service';
 
 @Component({
@@ -13,7 +13,7 @@ import { EngagementContextService } from '../../../core/services/engagement-cont
     MatDividerModule,
     CurrencyPipe,
     TitleCasePipe,
-    ProposalCard,
+    BidCard,
   ],
   templateUrl: './details-tab.component.html',
   styleUrl: './_tab-shared.scss',

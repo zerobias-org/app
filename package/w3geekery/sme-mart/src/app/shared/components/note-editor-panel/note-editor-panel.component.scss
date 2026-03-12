@@ -149,7 +149,7 @@
 
 // ── Tag editor ──
 
-app-note-tag-editor {
+app-sme-resource-tag-editor {
   flex-shrink: 0;
   padding: 0 4px;
 }
@@ -184,10 +184,14 @@ app-note-tag-editor {
 
 .editor-actions {
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
   gap: 8px;
   flex-shrink: 0;
   padding-top: 4px;
+}
+
+.actions-spacer {
+  flex: 1;
 }
 
 // ── Empty state ──

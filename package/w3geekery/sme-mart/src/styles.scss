@@ -98,6 +98,25 @@ body.dark-theme {
 }
 
 // ============================================================================
+// Master task card — two-tone panel styling
+// zb-simple-panel uses ViewEncapsulation.None so these selectors are global
+// ============================================================================
+
+.master-card {
+  zb-simple-panel.header-only .simple-panel-body {
+    background-color: var(--zb-background-card, var(--mat-sys-surface));
+  }
+}
+
+// Tags panel — flatten the zb-remote-table empty state so it matches Links/Sub-tasks
+app-resource-tags-panel zb-empty-state-container .fill {
+  border: none;
+  background-color: transparent;
+  border-radius: 0;
+  margin: 0;
+}
+
+// ============================================================================
 // Transition menus (rendered in CDK overlay, needs global scope)
 // ============================================================================
 

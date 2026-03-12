@@ -3,16 +3,16 @@
   @if (isCollapsed()) {
     <mat-icon class="col-header-icon col-header-toggle collapsed"
               (click)="toggleCollapse.emit()"
-              matTooltip="Show folders" [matTooltipShowDelay]="300">folder</mat-icon>
+              matTooltip="Show folders" [matTooltipShowDelay]="300" [matTooltipDisabled]="!!draggedNode()">folder</mat-icon>
   } @else {
     <mat-icon class="col-header-icon col-header-toggle"
               (click)="toggleCollapse.emit()"
-              matTooltip="Hide folders" [matTooltipShowDelay]="300">folder</mat-icon>
+              matTooltip="Hide folders" [matTooltipShowDelay]="300" [matTooltipDisabled]="!!draggedNode()">folder</mat-icon>
     <span class="col-header-title col-header-toggle"
           (click)="toggleCollapse.emit()">Folders</span>
     <span class="col-header-add"
           (click)="openCreateDialog(defaultParentId()); $event.stopPropagation()"
-          matTooltip="New Folder" [matTooltipShowDelay]="300"
+          matTooltip="New Folder" [matTooltipShowDelay]="300" [matTooltipDisabled]="!!draggedNode()"
           aria-label="Create folder">
       <mat-icon>add</mat-icon>
     </span>
@@ -27,7 +27,7 @@
       <span class="icon-strip-item"
             [class.selected]="selectedId() === node.folder.id"
             (click)="selectFolder(node.folder.id)"
-            [matTooltip]="node.folder.name" [matTooltipShowDelay]="300">
+            [matTooltip]="node.folder.name" [matTooltipShowDelay]="300" matTooltipPosition="above" [matTooltipDisabled]="!!draggedNode()">
         <mat-icon class="folder-icon" [style.color]="fc">folder</mat-icon>
       </span>
     }
@@ -65,7 +65,9 @@
       <mat-icon class="folder-icon" [style.color]="fc">
         {{ node.expanded && node.children.length > 0 ? 'folder_open' : 'folder' }}
       </mat-icon>
-      <span class="folder-name" [matTooltip]="node.folder.name" [matTooltipShowDelay]="300">{{ node.folder.name }}</span>
+      <span class="folder-name" #folderNameEl
+            [matTooltip]="node.folder.name" [matTooltipShowDelay]="300" matTooltipPosition="above"
+            [matTooltipDisabled]="!!draggedNode() || folderNameEl.scrollWidth <= folderNameEl.clientWidth">{{ node.folder.name }}</span>
       <span class="folder-count">{{ node.folder.note_count }}</span>
 
       <!-- Context menu -->
@@ -82,6 +84,9 @@
         </button>
         <button mat-menu-item [matMenuTriggerFor]="folderColorMenu">
           <mat-icon>palette</mat-icon> Color
+        </button>
+        <button mat-menu-item (click)="openMoveToNotebook(node, $event)">
+          <mat-icon>drive_file_move</mat-icon> Move to Notebook…
         </button>
         <button mat-menu-item (click)="onDeleteFolder(node, $event)">
           <mat-icon>delete</mat-icon> Delete

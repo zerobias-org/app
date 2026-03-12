@@ -42,6 +42,11 @@ export class WorkRequestsService {
     return this.db.getRow<EngagementDetailRow>('v_engagement_detail', id);
   }
 
+  /** Fetch raw work_requests row (includes rfp_wizard_data/step). */
+  async getWorkRequest(id: string): Promise<WorkRequest | null> {
+    return this.db.getRow<WorkRequest>('work_requests', id);
+  }
+
   async createRfp(data: {
     buyer_zerobias_user_id: string;
     buyer_zerobias_org_id?: string;

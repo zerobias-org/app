@@ -5,24 +5,22 @@ import {
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { ZbChipColorsDirective, ZbEmptyStateContainerComponent, ZbSimplePanelComponent } from '@zerobias-org/ngx-library';
-import type { TaskExtended, TagView } from '@zerobias-com/platform-sdk';
+import { ZbEmptyStateContainerComponent } from '@zerobias-org/ngx-library';
+import type { TaskExtended } from '@zerobias-com/platform-sdk';
 import { TaskCard } from '../task-card/task-card.component';
 import { CreateSubTaskDialog, type CreateSubTaskDialogData } from '../create-subtask-dialog/create-subtask-dialog.component';
 import { EngagementTasksService } from '../../../core/services/engagement-tasks.service';
-import { EngagementHierarchyService } from '../../../core/services/engagement-hierarchy.service';
 
 @Component({
   selector: 'app-task-list-panel',
   standalone: true,
   imports: [
-    MatCardModule, MatButtonModule, MatIconModule, MatChipsModule,
+    MatCardModule, MatButtonModule, MatIconModule,
     MatProgressSpinnerModule, MatDialogModule, MatSnackBarModule,
-    ZbChipColorsDirective, ZbEmptyStateContainerComponent, ZbSimplePanelComponent,
+    ZbEmptyStateContainerComponent,
     TaskCard,
   ],
   templateUrl: './task-list-panel.component.html',
@@ -31,14 +29,12 @@ import { EngagementHierarchyService } from '../../../core/services/engagement-hi
 })
 export class TaskListPanel implements OnInit {
   private readonly tasksService = inject(EngagementTasksService);
-  private readonly hierarchy = inject(EngagementHierarchyService);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
 
   private readonly _masterTaskId = signal('');
   private readonly _boundaryId = signal<string | null>(null);
   private readonly _isOwner = signal(false);
-
   @Input({ required: true })
   set masterTaskId(value: string) { this._masterTaskId.set(value); }
 
@@ -50,34 +46,15 @@ export class TaskListPanel implements OnInit {
 
   readonly masterTask = signal<TaskExtended | null>(null);
   readonly subTasks = signal<TaskExtended[]>([]);
-  readonly tags = signal<TagView[]>([]);
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
 
   readonly isOwnerFlag = computed(() => this._isOwner());
-  readonly subTaskCount = computed(() => this.subTasks().length);
   readonly loaded = signal(false);
-  readonly expandedSubTaskId = signal<string | null>(null);
-
-  /** Tags keyed by task ID */
-  readonly subTaskTags = signal<Map<string, TagView[]>>(new Map());
-
-  /** Master task code for parent-indicator chips on sub-tasks */
-  readonly masterTaskCode = computed(() => this.masterTask()?.code || null);
 
   ngOnInit(): void {
     // Auto-load when rendered (mat-tab lazy-renders content on first select)
     this.loadTasks();
-  }
-
-  /** Accordion toggle — clicking an already-expanded sub-task collapses it */
-  onSubTaskClick(taskId: string): void {
-    this.expandedSubTaskId.update(current => current === taskId ? null : taskId);
-  }
-
-  /** Get tags for a specific sub-task */
-  getSubTaskTags(taskId: string): TagView[] {
-    return this.subTaskTags().get(taskId) || [];
   }
 
   async openCreateDialog(): Promise<void> {
@@ -131,18 +108,13 @@ export class TaskListPanel implements OnInit {
     this.error.set(null);
 
     try {
-      const [master, related, resourceTags] = await Promise.all([
+      const [master, children] = await Promise.all([
         this.tasksService.getTask(taskId),
-        this.tasksService.listRelatedTasks(taskId),
-        this.hierarchy.getResourceTags(taskId).catch(() => [] as TagView[]),
+        this.tasksService.listChildTasks(taskId),
       ]);
       this.masterTask.set(master);
-      this.subTasks.set(related);
-      this.tags.set(resourceTags);
+      this.subTasks.set(children);
       this.loaded.set(true);
-
-      // Fetch tags for each sub-task in background (non-blocking)
-      this.loadSubTaskTags(related);
     } catch (err: any) {
       console.error('[TaskListPanel] Failed to load tasks:', err);
       const msg = err.message || 'Failed to load tasks';
@@ -158,17 +130,4 @@ export class TaskListPanel implements OnInit {
     }
   }
 
-  private async loadSubTaskTags(tasks: TaskExtended[]): Promise<void> {
-    const tagMap = new Map<string, TagView[]>();
-    await Promise.all(
-      tasks.map(async (task) => {
-        const id = task.id.toString();
-        const tags = await this.hierarchy.getResourceTags(id).catch(() => [] as TagView[]);
-        if (tags.length > 0) {
-          tagMap.set(id, tags);
-        }
-      }),
-    );
-    this.subTaskTags.set(tagMap);
-  }
 }

@@ -10,6 +10,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { FolderDialog, FOLDER_COLORS, type FolderDialogData } from '../folder-dialog/folder-dialog.component';
+import { MoveItemDialog, type MoveItemDialogData, type MoveItemDialogResult } from '../move-note-dialog/move-note-dialog.component';
 import { NoteHierarchyService, type FolderTreeNode } from '../../../core/services/note-hierarchy.service';
 import { UserPreferencesService } from '../../../core/services/user-preferences.service';
 
@@ -220,6 +221,48 @@ export class NoteFolderTree implements OnInit {
   onDragEnd(): void {
     this.draggedNode.set(null);
     this.dropTargetId.set(null);
+  }
+
+  // ── Cross-notebook move (context menu) ──
+
+  openMoveToNotebook(node: FolderTreeNode, event: Event): void {
+    event.stopPropagation();
+    const engId = this._engagementId();
+    const dialogRef = this.dialog.open(MoveItemDialog, {
+      data: {
+        engagementId: engId,
+        itemType: 'folder',
+        currentFolderId: node.folder.parent_id,
+        currentNotebookId: this._notebookId(),
+        itemName: node.folder.name,
+      } as MoveItemDialogData,
+      width: '420px',
+    });
+
+    dialogRef.afterClosed().subscribe(async (result?: MoveItemDialogResult) => {
+      if (!result) return;
+      try {
+        if (result.recreateStructure && result.targetFolderId) {
+          // Recreate subfolder structure then move notes into new folders
+          const idMap = await this.hierarchy.recreateFolderStructure(
+            engId, node.folder.id, result.targetFolderId,
+          );
+          // Move notes from each old folder to corresponding new folder
+          for (const [oldId, newId] of idMap) {
+            await this.hierarchy.moveAllNotes(oldId, newId, engId);
+          }
+          this.snackBar.open(`Recreated "${node.folder.name}" structure and moved notes`, 'OK', { duration: 4000 });
+        } else if (result.targetFolderId) {
+          // Simple move — reparent folder under target
+          await this.hierarchy.moveFolder(node.folder.id, result.targetFolderId);
+          this.snackBar.open(`Moved "${node.folder.name}" to new location`, 'OK', { duration: 3000 });
+        }
+        this.loadTree();
+        this.treeChanged.emit();
+      } catch (err: any) {
+        this.snackBar.open(`Failed to move folder: ${err.message}`, 'Dismiss', { duration: 5000 });
+      }
+    });
   }
 
   openCreateDialog(parentId?: string | null): void {

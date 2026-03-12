@@ -1,9 +1,9 @@
 import { Injectable, signal, computed } from '@angular/core';
 import { Subject } from 'rxjs';
-import type { EngagementDetailRow, Proposal, RequestStatus } from '../models';
-import type { ProposalCardData } from '../../shared/components/proposal-card/proposal-card.component';
+import type { EngagementDetailRow, Bid, RequestStatus } from '../models';
+import type { BidCardData } from '../../shared/components/bid-card/bid-card.component';
 
-interface ParsedProposal extends Proposal {
+interface ParsedBid extends Bid {
   provider_display_name?: string;
   provider_headline?: string;
   provider_rating?: number;
@@ -37,13 +37,13 @@ export class EngagementContextService {
     return uid && eng ? eng.buyer_zerobias_user_id === uid : false;
   });
 
-  readonly parsedProposals = computed<ProposalCardData[]>(() => {
+  readonly parsedBids = computed<BidCardData[]>(() => {
     const eng = this.engagement();
-    if (!eng?.proposals) return [];
+    if (!eng?.bids) return [];
     try {
-      const raw: ParsedProposal[] = typeof eng.proposals === 'string'
-        ? JSON.parse(eng.proposals)
-        : eng.proposals as any;
+      const raw: ParsedBid[] = typeof eng.bids === 'string'
+        ? JSON.parse(eng.bids)
+        : eng.bids as any;
       return raw.map(p => ({
         id: p.id,
         provider_id: p.provider_id,
@@ -61,14 +61,14 @@ export class EngagementContextService {
     }
   });
 
-  readonly hasAlreadyProposed = computed(() => {
+  readonly hasAlreadyBid = computed(() => {
     const pid = this.currentProviderId();
     if (!pid) return false;
-    return this.parsedProposals().some(p => p.provider_id === pid);
+    return this.parsedBids().some(p => p.provider_id === pid);
   });
 
-  readonly acceptedProposal = computed(() =>
-    this.parsedProposals().find(p => p.status === 'accepted') || null,
+  readonly acceptedBid = computed(() =>
+    this.parsedBids().find(p => p.status === 'accepted') || null,
   );
 
   readonly statusColor = computed(() => {

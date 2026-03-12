@@ -1,0 +1,287 @@
+<div class="bid-wizard">
+  <button mat-button (click)="goBack()" class="back-btn">
+    <mat-icon>arrow_back</mat-icon> Back to RFP
+  </button>
+
+  <div class="wizard-header">
+    <h1>Submit Bid</h1>
+    <p class="subtitle">{{ rfpTitle() }}</p>
+  </div>
+
+  @if (loading()) {
+    <div class="wizard-loading">
+      <p>Loading...</p>
+    </div>
+  } @else {
+    <mat-stepper #stepper [linear]="false" [animationDuration]="'300'">
+
+      <!-- Step 1: Approach -->
+      <mat-step [editable]="true" label="Approach">
+        <div class="step-content">
+          <h3>Executive Summary</h3>
+          <p class="field-hint">Summarize your approach to this RFP at a high level.</p>
+          <app-markdown-editor
+            [content]="executiveSummary()"
+            height="200px"
+            placeholder="Describe your approach..."
+            (contentChange)="executiveSummary.set($event)" />
+
+          <h3>Cover Letter</h3>
+          <p class="field-hint">A brief introduction and why you're a good fit.</p>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Cover Letter</mat-label>
+            <textarea matInput
+              rows="5"
+              [value]="coverLetter()"
+              (input)="coverLetter.set($any($event.target).value)"
+              placeholder="Write your cover letter..."></textarea>
+          </mat-form-field>
+
+          <div class="step-actions">
+            <button mat-flat-button color="primary" (click)="saveAndNext(0)">
+              Next <mat-icon>arrow_forward</mat-icon>
+            </button>
+          </div>
+        </div>
+      </mat-step>
+
+      <!-- Step 2: Team -->
+      <mat-step [editable]="true" label="Team">
+        <div class="step-content">
+          <h3>Team & Qualifications</h3>
+          <p class="field-hint">Who will work on this project? Include relevant experience and certifications.</p>
+          <app-markdown-editor
+            [content]="teamDescription()"
+            height="250px"
+            placeholder="Describe your team..."
+            (contentChange)="teamDescription.set($event)" />
+
+          <div class="step-actions">
+            <button mat-button matStepperPrevious>
+              <mat-icon>arrow_back</mat-icon> Back
+            </button>
+            <button mat-flat-button color="primary" (click)="saveAndNext(1)">
+              Next <mat-icon>arrow_forward</mat-icon>
+            </button>
+          </div>
+        </div>
+      </mat-step>
+
+      <!-- Step 3: Requirements Response -->
+      <mat-step [editable]="true" label="Requirements">
+        <div class="step-content">
+          <h3>Requirement Responses</h3>
+          <p class="field-hint">Review each requirement and provide your compliance response, estimated effort, and relevant certifications.</p>
+
+          @if (taskGroups().length > 0) {
+            <app-requirement-response
+              [taskGroups]="taskGroups()"
+              [savedResponses]="savedBidResponses()"
+              (responseChanged)="onResponseChanged($event)"
+              (allResponsesChanged)="onAllResponsesChanged($event)" />
+          } @else {
+            <div class="empty-requirements">
+              <p>This RFP does not have structured requirements. You can skip this step.</p>
+            </div>
+          }
+
+          <div class="step-actions">
+            <button mat-button matStepperPrevious>
+              <mat-icon>arrow_back</mat-icon> Back
+            </button>
+            <button mat-flat-button color="primary" (click)="saveRequirementsAndNext()">
+              Next <mat-icon>arrow_forward</mat-icon>
+            </button>
+          </div>
+        </div>
+      </mat-step>
+
+      <!-- Step 4: Pricing -->
+      <mat-step [editable]="true" label="Pricing">
+        <div class="step-content">
+          <h3>Pricing & Timeline</h3>
+
+          <div class="pricing-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Total Proposed Price</mat-label>
+              <span matPrefix>$&nbsp;</span>
+              <input matInput
+                type="text"
+                [value]="proposedPrice()"
+                (input)="proposedPrice.set($any($event.target).value)">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Proposed Timeline</mat-label>
+              <input matInput
+                type="text"
+                [value]="proposedTimeline()"
+                (input)="proposedTimeline.set($any($event.target).value)"
+                placeholder="e.g., 12 weeks">
+            </mat-form-field>
+          </div>
+
+          <h4>Pricing Breakdown (optional)</h4>
+          <p class="field-hint">Break down your estimate by task type.</p>
+
+          @if (pricingBreakdown().length > 0) {
+            <div class="breakdown-table">
+              <div class="breakdown-header">
+                <span>Task Type</span>
+                <span>Hours</span>
+                <span>Cost</span>
+                <span>Notes</span>
+                <span></span>
+              </div>
+              @for (row of pricingBreakdown(); track $index) {
+                <div class="breakdown-row">
+                  <mat-form-field appearance="outline" class="compact">
+                    <mat-label>Type</mat-label>
+                    <input matInput
+                      [value]="row.taskType"
+                      (input)="updatePricingRow($index, 'taskType', $any($event.target).value)">
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="compact narrow">
+                    <mat-label>Hours</mat-label>
+                    <input matInput type="number"
+                      [value]="row.estimatedHours"
+                      (input)="updatePricingRow($index, 'estimatedHours', +$any($event.target).value)">
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="compact narrow">
+                    <mat-label>Cost</mat-label>
+                    <span matPrefix>$&nbsp;</span>
+                    <input matInput type="number"
+                      [value]="row.estimatedCost"
+                      (input)="updatePricingRow($index, 'estimatedCost', +$any($event.target).value)">
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="compact">
+                    <mat-label>Notes</mat-label>
+                    <input matInput
+                      [value]="row.notes || ''"
+                      (input)="updatePricingRow($index, 'notes', $any($event.target).value)">
+                  </mat-form-field>
+                  <button mat-icon-button color="warn" (click)="removePricingRow($index)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              }
+              <div class="breakdown-totals">
+                <span>Totals</span>
+                <span>{{ totalEstimatedHours() | number:'1.0-1' }} hrs</span>
+                <span>{{ totalEstimatedCost() | currency:'USD':'symbol':'1.0-0' }}</span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+          }
+
+          <button mat-stroked-button (click)="addPricingRow()" class="add-row-btn">
+            <mat-icon>add</mat-icon> Add Category
+          </button>
+
+          <div class="step-actions">
+            <button mat-button matStepperPrevious>
+              <mat-icon>arrow_back</mat-icon> Back
+            </button>
+            <button mat-flat-button color="primary" (click)="saveAndNext(3)">
+              Next <mat-icon>arrow_forward</mat-icon>
+            </button>
+          </div>
+        </div>
+      </mat-step>
+
+      <!-- Step 5: Review & Submit -->
+      <mat-step [editable]="true" label="Review">
+        <div class="step-content">
+          <h3>Review Your Bid</h3>
+
+          <mat-card appearance="outlined" class="review-section">
+            <mat-card-header>
+              <mat-card-title>Approach</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              @if (executiveSummary()) {
+                <h4>Executive Summary</h4>
+                <app-markdown-view [content]="executiveSummary()" />
+              }
+              @if (coverLetter()) {
+                <h4>Cover Letter</h4>
+                <p class="review-text">{{ coverLetter() }}</p>
+              }
+              @if (!executiveSummary() && !coverLetter()) {
+                <p class="empty-hint">No approach information provided.</p>
+              }
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card appearance="outlined" class="review-section">
+            <mat-card-header>
+              <mat-card-title>Team & Qualifications</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              @if (teamDescription()) {
+                <app-markdown-view [content]="teamDescription()" />
+              } @else {
+                <p class="empty-hint">No team information provided.</p>
+              }
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card appearance="outlined" class="review-section">
+            <mat-card-header>
+              <mat-card-title>Pricing & Timeline</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="review-meta">
+                @if (proposedPrice()) {
+                  <span><strong>Price:</strong> ${{ proposedPrice() }}</span>
+                }
+                @if (proposedTimeline()) {
+                  <span><strong>Timeline:</strong> {{ proposedTimeline() }}</span>
+                }
+              </div>
+              @if (pricingBreakdown().length > 0) {
+                <h4>Breakdown</h4>
+                <div class="breakdown-table review-breakdown">
+                  <div class="breakdown-header">
+                    <span>Task Type</span>
+                    <span>Hours</span>
+                    <span>Cost</span>
+                    <span>Notes</span>
+                  </div>
+                  @for (row of pricingBreakdown(); track $index) {
+                    <div class="breakdown-row readonly">
+                      <span>{{ row.taskType }}</span>
+                      <span>{{ row.estimatedHours | number:'1.0-1' }}</span>
+                      <span>{{ row.estimatedCost | currency:'USD':'symbol':'1.0-0' }}</span>
+                      <span>{{ row.notes || '' }}</span>
+                    </div>
+                  }
+                  <div class="breakdown-totals">
+                    <span>Totals</span>
+                    <span>{{ totalEstimatedHours() | number:'1.0-1' }} hrs</span>
+                    <span>{{ totalEstimatedCost() | currency:'USD':'symbol':'1.0-0' }}</span>
+                    <span></span>
+                  </div>
+                </div>
+              }
+            </mat-card-content>
+          </mat-card>
+
+          <div class="step-actions">
+            <button mat-button matStepperPrevious>
+              <mat-icon>arrow_back</mat-icon> Back
+            </button>
+            <button mat-stroked-button (click)="saveDraftAndExit()">
+              Save Draft
+            </button>
+            <button mat-flat-button color="primary" (click)="submitBid()">
+              <mat-icon>send</mat-icon> Submit Bid
+            </button>
+          </div>
+        </div>
+      </mat-step>
+
+    </mat-stepper>
+  }
+</div>

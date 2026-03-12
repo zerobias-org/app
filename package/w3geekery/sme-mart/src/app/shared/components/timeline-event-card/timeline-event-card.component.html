@@ -59,9 +59,9 @@
               }
             </div>
           }
-          @case ('proposal_submitted') {
-            <div class="proposal-info">
-              <p><strong>{{ $any(payload()).providerName }}</strong> submitted a proposal</p>
+          @case ('bid_submitted') {
+            <div class="bid-info">
+              <p><strong>{{ $any(payload()).providerName }}</strong> submitted a bid</p>
               @if ($any(payload()).proposedPrice) {
                 <p class="price">{{ $any(payload()).proposedPrice | currency:'USD':'symbol':'1.0-0' }}</p>
               }
@@ -70,10 +70,10 @@
               }
             </div>
           }
-          @case ('proposal_accepted') {
-            <div class="proposal-accepted">
+          @case ('bid_accepted') {
+            <div class="bid-accepted">
               <mat-icon class="success-icon">check_circle</mat-icon>
-              <p>Proposal from <strong>{{ $any(payload()).providerName }}</strong> was accepted</p>
+              <p>Bid from <strong>{{ $any(payload()).providerName }}</strong> was accepted</p>
             </div>
           }
         }

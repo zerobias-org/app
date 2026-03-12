@@ -1,0 +1,202 @@
+.requirement-response-panel {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 1.5rem;
+  min-height: 400px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Left panel — category list
+.category-list {
+  h4 {
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--mat-sys-on-surface-variant, #666);
+    margin: 0 0 0.75rem;
+  }
+}
+
+.category-item {
+  display: block;
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--mat-sys-outline-variant, #ddd);
+  border-radius: 8px;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  margin-bottom: 0.5rem;
+  transition: background 0.15s, border-color 0.15s;
+
+  &:hover {
+    background: var(--mat-sys-surface-variant, #f5f5f5);
+  }
+
+  &.selected {
+    border-color: var(--mat-sys-primary, #1976d2);
+    background: color-mix(in srgb, var(--mat-sys-primary, #1976d2) 8%, transparent);
+  }
+
+  .category-name {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .category-progress {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--mat-sys-on-surface-variant, #666);
+    margin-top: 0.25rem;
+  }
+}
+
+.progress-bar {
+  height: 4px;
+  background: var(--mat-sys-surface-variant, #e0e0e0);
+  border-radius: 2px;
+  margin-top: 0.5rem;
+  overflow: hidden;
+
+  &.large {
+    height: 6px;
+    border-radius: 3px;
+  }
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--mat-sys-primary, #1976d2);
+  border-radius: inherit;
+  transition: width 0.3s ease;
+}
+
+.overall-progress {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--mat-sys-outline-variant, #ddd);
+
+  .overall-label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--mat-sys-on-surface-variant, #666);
+  }
+
+  .overall-count {
+    display: block;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0.25rem 0;
+  }
+}
+
+// Right panel — requirements
+.requirement-list {
+  h4 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin: 0 0 1rem;
+  }
+}
+
+.req-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.compact-chip {
+  font-size: 0.7rem;
+  --mdc-chip-container-height: 24px;
+}
+
+.buyer-requirement {
+  background: var(--mat-sys-surface-variant, #f5f5f5);
+  border-radius: 8px;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+
+  .field-label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--mat-sys-on-surface-variant, #666);
+    margin-bottom: 0.25rem;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.6;
+  }
+}
+
+.standard-ref {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--mat-sys-on-surface-variant, #666);
+  margin-bottom: 1rem;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+}
+
+// Response form
+.response-form {
+  border-top: 1px solid var(--mat-sys-outline-variant, #ddd);
+  padding-top: 0.75rem;
+}
+
+.status-field {
+  max-width: 200px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.estimate-row {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+
+  .narrow-field {
+    max-width: 140px;
+  }
+}
+
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  color: var(--mat-sys-on-surface-variant, #999);
+  font-style: italic;
+}
+
+// Compliance status chip colors
+.status-met { --mdc-chip-label-text-color: #4caf50; }
+.status-partially_met { --mdc-chip-label-text-color: #ff9800; }
+.status-not_met { --mdc-chip-label-text-color: #f44336; }
+.status-not_applicable { --mdc-chip-label-text-color: #9e9e9e; }
+.status-planned { --mdc-chip-label-text-color: #2196f3; }
+
+// Priority chip colors
+.priority-critical { --mdc-chip-label-text-color: #f44336; }
+.priority-high { --mdc-chip-label-text-color: #ff9800; }
+.priority-normal { --mdc-chip-label-text-color: #666; }
+.priority-low { --mdc-chip-label-text-color: #9e9e9e; }

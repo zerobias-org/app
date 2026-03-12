@@ -101,6 +101,12 @@
   &.selected {
     background: color-mix(in srgb, var(--mat-sys-primary) 14%, transparent);
   }
+
+  &.drop-target {
+    outline: 2px dashed var(--mat-sys-primary);
+    outline-offset: -2px;
+    background: color-mix(in srgb, var(--mat-sys-primary) 8%, transparent);
+  }
 }
 
 .sub-tab {
@@ -198,6 +204,11 @@
     .tab-icon {
       color: var(--mat-sys-primary);
     }
+  }
+
+  &.drop-target {
+    outline: 2px dashed var(--mat-sys-primary);
+    outline-offset: -2px;
   }
 
   .tab-icon {

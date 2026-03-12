@@ -18,14 +18,15 @@ export interface WorkRequest {
   zerobias_boundary_id: string | null;
   zerobias_task_id: string | null;
   created_at: string;
+  updated_at: string;
 }
 
 // VIEW model — v_engagement_summary
 export interface EngagementSummaryRow extends WorkRequest {
   buyer_display_name: string | null;
   buyer_avatar_url: string | null;
-  proposal_count: number;
-  pending_proposal_count: number;
+  bid_count: number;
+  pending_bid_count: number;
   accepted_provider_name: string | null;
   accepted_provider_id: string | null;
 }
@@ -34,6 +35,6 @@ export interface EngagementSummaryRow extends WorkRequest {
 export interface EngagementDetailRow extends WorkRequest {
   buyer_display_name: string | null;
   buyer_email: string | null;
-  proposals: string; // JSON array string
-  proposal_count: number;
+  bids: string; // JSON array string
+  bid_count: number;
 }

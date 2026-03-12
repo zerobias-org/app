@@ -9,6 +9,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { FolderDialog, FOLDER_COLORS, type FolderDialogData } from '../folder-dialog/folder-dialog.component';
+import { MoveItemDialog, type MoveItemDialogData, type MoveItemDialogResult } from '../move-note-dialog/move-note-dialog.component';
 import { NoteHierarchyService, type FolderTreeNode } from '../../../core/services/note-hierarchy.service';
 import { UserPreferencesService } from '../../../core/services/user-preferences.service';
 
@@ -46,6 +47,10 @@ export class NotesNotebooksColumn implements OnInit {
   @Output() folderSelected = new EventEmitter<string | null>();
   @Output() treeChanged = new EventEmitter<void>();
   @Output() toggleCollapse = new EventEmitter<void>();
+  /** Emitted when a note is dropped onto a notebook. Parent handles the move. */
+  @Output() noteDroppedOnNotebook = new EventEmitter<{ noteId: string; notebookId: string }>();
+  /** Emitted when a folder is dropped onto a notebook. Parent handles the dialog. */
+  @Output() folderDroppedOnNotebook = new EventEmitter<{ folderId: string; notebookId: string }>();
 
   readonly isCollapsed = this._collapsed;
 
@@ -54,6 +59,9 @@ export class NotesNotebooksColumn implements OnInit {
   readonly selectedId = this._selectedFolderId;
   readonly colors = FOLDER_COLORS;
   readonly folderColors = this.prefs.folderColors;
+  readonly dropTargetId = signal<string | null>(null);
+  /** True when something is being dragged over this column. */
+  readonly isDragging = signal(false);
 
   readonly topLevelFolders = computed(() => this.tree());
 
@@ -158,6 +166,51 @@ export class NotesNotebooksColumn implements OnInit {
       this.prefs.setFolderColor(node.folder.id, color);
     } else {
       this.prefs.removeFolderColor(node.folder.id);
+    }
+  }
+
+  // ── Drop targets for cross-notebook DnD ──
+
+  onDragOver(event: DragEvent, node: FolderTreeNode): void {
+    const types = event.dataTransfer?.types || [];
+    // Accept folder drags (text/plain) or note drags (application/x-sme-note)
+    const hasFolder = types.includes('text/plain');
+    const hasNote = types.includes('application/x-sme-note');
+    if (!hasFolder && !hasNote) return;
+
+    // Don't accept drops on the currently selected notebook (same-notebook)
+    if (node.folder.id === this._selectedFolderId()) return;
+
+    event.preventDefault();
+    event.dataTransfer!.dropEffect = 'move';
+    this.dropTargetId.set(node.folder.id);
+    this.isDragging.set(true);
+  }
+
+  onDragLeave(event: DragEvent): void {
+    const related = event.relatedTarget as HTMLElement | null;
+    const target = event.currentTarget as HTMLElement;
+    if (related && target.contains(related)) return;
+    this.dropTargetId.set(null);
+    this.isDragging.set(false);
+  }
+
+  onDrop(event: DragEvent, node: FolderTreeNode): void {
+    event.preventDefault();
+    this.dropTargetId.set(null);
+    this.isDragging.set(false);
+
+    // Note drop
+    const noteId = event.dataTransfer?.getData('application/x-sme-note');
+    if (noteId) {
+      this.noteDroppedOnNotebook.emit({ noteId, notebookId: node.folder.id });
+      return;
+    }
+
+    // Folder drop
+    const folderId = event.dataTransfer?.getData('text/plain');
+    if (folderId) {
+      this.folderDroppedOnNotebook.emit({ folderId, notebookId: node.folder.id });
     }
   }
 

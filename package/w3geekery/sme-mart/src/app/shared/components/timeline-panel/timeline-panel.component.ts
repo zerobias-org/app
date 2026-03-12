@@ -25,8 +25,8 @@ import { DEFAULT_TIMELINE_FILTER_STATE } from '../../../core/models';
 const EVENT_TYPE_LABELS: Record<TimelineEventType, string> = {
   comment: 'Comment',
   attachment: 'Attachment',
-  proposal_submitted: 'Proposal Submitted',
-  proposal_accepted: 'Proposal Accepted',
+  bid_submitted: 'Bid Submitted',
+  bid_accepted: 'Bid Accepted',
 };
 
 @Component({
@@ -197,11 +197,11 @@ export class TimelinePanel {
       case 'attachment':
         if (p.attachment.fileMetadata?.name?.toLowerCase().includes(term)) return true;
         break;
-      case 'proposal_submitted':
+      case 'bid_submitted':
         if (p.providerName.toLowerCase().includes(term)) return true;
         if (p.coverLetterPreview?.toLowerCase().includes(term)) return true;
         break;
-      case 'proposal_accepted':
+      case 'bid_accepted':
         if (p.providerName.toLowerCase().includes(term)) return true;
         break;
     }

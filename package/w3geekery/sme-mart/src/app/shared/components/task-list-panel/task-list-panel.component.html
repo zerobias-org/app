@@ -9,56 +9,16 @@
     [emptyText]="'Failed to load tasks: ' + error()!">
   </zb-empty-state-container>
 } @else if (masterTask()) {
-  <!-- Master Task -->
+  <!-- Master Task (contains tags, links, and sub-tasks panels) -->
   <section class="master-section">
     <h3 class="section-title">Engagement Task</h3>
     <app-task-card
       [task]="masterTask()!"
       [isMaster]="true"
-      [tags]="tags()"
-      (transitioned)="onTaskTransitioned($event)">
+      [isOwner]="isOwnerFlag()"
+      [masterSubTasks]="subTasks()"
+      (transitioned)="onTaskTransitioned($event)"
+      (createSubTask)="openCreateDialog()">
     </app-task-card>
-  </section>
-
-  <!-- Related Tasks -->
-  <zb-simple-panel [title]="'Related Tasks (' + subTaskCount() + ')'" [subPanel]="true">
-    @if (isOwnerFlag()) {
-      <button headerAction mat-stroked-button (click)="openCreateDialog()">
-        <mat-icon>add</mat-icon> Add Task
-      </button>
-    }
-
-    @if (subTaskCount() === 0) {
-      <zb-empty-state-container
-        [loading]="false"
-        emptyText="No related tasks yet. Create one to track work items for this engagement.">
-      </zb-empty-state-container>
-    } @else {
-      @for (task of subTasks(); track task.id.toString()) {
-        <app-task-card
-          [task]="task"
-          [parentTaskCode]="masterTaskCode()"
-          [isExpanded]="expandedSubTaskId() === task.id.toString()"
-          [tags]="getSubTaskTags(task.id.toString())"
-          (expanded)="onSubTaskClick($event)"
-          (transitioned)="onTaskTransitioned($event)">
-        </app-task-card>
-      }
-    }
-  </zb-simple-panel>
-
-  <!-- Tags -->
-  <section class="tags-section">
-    <zb-simple-panel title="Tags" [subPanel]="true">
-      @if (tags().length === 0) {
-        <p class="no-tags">No tags on this task.</p>
-      } @else {
-        <mat-chip-set>
-          @for (tag of tags(); track $index) {
-            <mat-chip zbChipColors [zbChipColor]="tag.color || ''">{{ tag.name }}</mat-chip>
-          }
-        </mat-chip-set>
-      }
-    </zb-simple-panel>
   </section>
 }

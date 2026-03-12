@@ -1,13 +1,18 @@
-import { Component, inject, signal, computed, ChangeDetectionStrategy, OnInit } from '@angular/core';
+import {
+  Component, inject, signal, computed, ChangeDetectionStrategy,
+  OnInit, ViewChild, ElementRef, AfterViewChecked,
+} from '@angular/core';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
 import { MatListModule } from '@angular/material/list';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { NoteHierarchyService, type FolderTreeNode } from '../../../core/services/note-hierarchy.service';
 
 export interface MoveItemDialogData {
@@ -35,92 +40,22 @@ export interface MoveItemDialogResult {
   selector: 'app-move-item-dialog',
   standalone: true,
   imports: [
-    MatDialogModule, MatButtonModule, MatIconModule,
+    MatDialogModule, MatButtonModule, MatIconModule, MatInputModule,
     MatListModule, MatSelectModule, MatFormFieldModule,
     MatCheckboxModule, MatProgressSpinnerModule, MatTooltipModule,
+    MatSnackBarModule,
   ],
-  template: `
-    <h2 mat-dialog-title>{{ title() }}</h2>
-    <mat-dialog-content>
-      @if (loading()) {
-        <div class="loading-container">
-          <mat-spinner diameter="32"></mat-spinner>
-        </div>
-      } @else {
-        <!-- Notebook selector -->
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Notebook</mat-label>
-          <mat-select [value]="selectedNotebookId()"
-                      (selectionChange)="onNotebookChange($event.value)">
-            @for (nb of notebooks(); track nb.folder.id) {
-              <mat-option [value]="nb.folder.id">{{ nb.folder.name }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-
-        <!-- Folder tree for selected notebook -->
-        @if (visibleFolders().length > 0) {
-          <div class="folder-label">Select destination folder:</div>
-          <mat-selection-list [multiple]="false" (selectionChange)="onFolderSelect($event)">
-            @for (node of visibleFolders(); track node.folder.id) {
-              <mat-list-option [value]="node.folder.id"
-                               [selected]="selectedFolderId() === node.folder.id"
-                               [disabled]="node.folder.id === data.currentFolderId && !isCrossNotebook()">
-                <mat-icon matListItemIcon [style.color]="node.folder.color">folder</mat-icon>
-                <span matListItemTitle [style.padding-left.px]="(node.level - 1) * 16">
-                  {{ node.folder.name }}
-                </span>
-              </mat-list-option>
-            }
-          </mat-selection-list>
-        } @else {
-          <div class="empty-message">No folders in this notebook.</div>
-        }
-
-        <!-- "Same folder structure" checkbox — only for folders moving cross-notebook -->
-        @if (data.itemType === 'folder' && isCrossNotebook()) {
-          <mat-checkbox [checked]="recreateStructure()"
-                        (change)="recreateStructure.set($event.checked)"
-                        class="structure-checkbox">
-            Recreate subfolder structure in destination
-          </mat-checkbox>
-        }
-      }
-    </mat-dialog-content>
-    <mat-dialog-actions align="end">
-      <button mat-button (click)="onCancel()">Cancel</button>
-      <button mat-flat-button color="primary" (click)="onConfirm()"
-              [disabled]="loading() || (!selectedFolderId() && !recreateStructure())">
-        Move
-      </button>
-    </mat-dialog-actions>
-  `,
-  styles: [`
-    mat-dialog-content { min-width: 350px; max-height: 450px; overflow-y: auto; }
-    .full-width { width: 100%; }
-    .loading-container { text-align: center; padding: 1rem; }
-    .folder-label {
-      font-size: 0.8rem;
-      color: var(--mat-sys-on-surface-variant);
-      margin-bottom: 4px;
-    }
-    .empty-message {
-      text-align: center;
-      padding: 1rem;
-      color: var(--mat-sys-on-surface-variant);
-      font-size: 0.85rem;
-    }
-    .structure-checkbox {
-      display: block;
-      margin-top: 12px;
-    }
-  `],
+  templateUrl: './move-note-dialog.component.html',
+  styleUrl: './move-note-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MoveItemDialog implements OnInit {
+export class MoveItemDialog implements OnInit, AfterViewChecked {
   private readonly dialogRef = inject(MatDialogRef<MoveItemDialog>);
   readonly data = inject<MoveItemDialogData>(MAT_DIALOG_DATA);
   private readonly hierarchy = inject(NoteHierarchyService);
+  private readonly snackBar = inject(MatSnackBar);
+
+  @ViewChild('folderInput') folderInputRef?: ElementRef<HTMLInputElement>;
 
   readonly loading = signal(true);
   private readonly fullTree = signal<FolderTreeNode[]>([]);
@@ -128,14 +63,23 @@ export class MoveItemDialog implements OnInit {
   readonly selectedFolderId = signal<string | null>(null);
   readonly recreateStructure = signal(false);
 
+  // ── Inline folder creation state ──
+  /** Parent folder ID in which we're creating (null = not creating). */
+  readonly creatingInParentId = signal<string | null>(null);
+  readonly newFolderName = signal('');
+  readonly creatingFolder = signal(false);
+  private pendingFocus = false;
+
+  // ── Computed ──
+
   /** Top-level folders (notebooks). */
   readonly notebooks = computed(() =>
-    this.fullTree().filter(n => n.folder.parent_id === null)
+    this.fullTree().filter(n => n.folder.parent_id === null),
   );
 
   /** Whether the user is moving to a different notebook. */
   readonly isCrossNotebook = computed(() =>
-    this.selectedNotebookId() !== this.data.currentNotebookId
+    this.selectedNotebookId() !== this.data.currentNotebookId,
   );
 
   /** Flattened folders under the selected notebook. */
@@ -155,33 +99,108 @@ export class MoveItemDialog implements OnInit {
       : `Move Note${name}`;
   });
 
+  /** Breadcrumb: Notebook › Folder › Subfolder */
+  readonly breadcrumbPath = computed(() => {
+    const nbId = this.selectedNotebookId();
+    if (!nbId) return '';
+    const notebook = this.notebooks().find(n => n.folder.id === nbId);
+    if (!notebook) return '';
+
+    const folderId = this.selectedFolderId();
+    if (!folderId) return notebook.folder.name;
+
+    const segments = this.buildPathSegments(notebook.children, folderId);
+    return [notebook.folder.name, ...segments].join(' › ');
+  });
+
+  // ── Lifecycle ──
+
   async ngOnInit(): Promise<void> {
     try {
       const tree = await this.hierarchy.getFolderTree(this.data.engagementId);
       this.fullTree.set(tree);
 
-      // Default to current notebook, or first available
       const currentNb = this.data.currentNotebookId;
       const notebooks = tree.filter(n => n.folder.parent_id === null);
       this.selectedNotebookId.set(
         currentNb && notebooks.some(n => n.folder.id === currentNb)
           ? currentNb
-          : notebooks[0]?.folder.id ?? null
+          : notebooks[0]?.folder.id ?? null,
       );
     } finally {
       this.loading.set(false);
     }
   }
 
+  ngAfterViewChecked(): void {
+    if (this.pendingFocus && this.folderInputRef) {
+      this.folderInputRef.nativeElement.focus();
+      this.pendingFocus = false;
+    }
+  }
+
+  // ── Notebook / folder selection ──
+
   onNotebookChange(notebookId: string): void {
     this.selectedNotebookId.set(notebookId);
-    this.selectedFolderId.set(null); // Reset folder selection on notebook change
+    this.selectedFolderId.set(null);
+    this.cancelCreate();
   }
 
   onFolderSelect(event: any): void {
     const selected = event.options?.[0]?.value ?? null;
     this.selectedFolderId.set(selected);
   }
+
+  // ── Inline folder creation ──
+
+  startCreate(): void {
+    // Create inside the currently selected folder, or directly under the notebook
+    const parentId = this.selectedFolderId() ?? this.selectedNotebookId();
+    this.creatingInParentId.set(parentId);
+    this.newFolderName.set('');
+    this.pendingFocus = true;
+  }
+
+  cancelCreate(): void {
+    this.creatingInParentId.set(null);
+    this.newFolderName.set('');
+    this.creatingFolder.set(false);
+  }
+
+  async confirmCreate(): Promise<void> {
+    const name = this.newFolderName().trim();
+    const parentId = this.creatingInParentId();
+    if (!name || this.creatingFolder()) return;
+
+    // Validate: no duplicate name in same parent
+    const siblings = this.visibleFolders().filter(f => f.folder.parent_id === parentId);
+    if (siblings.some(f => f.folder.name.toLowerCase() === name.toLowerCase())) {
+      this.snackBar.open('A folder with this name already exists here', 'OK', { duration: 3000 });
+      return;
+    }
+
+    this.creatingFolder.set(true);
+    try {
+      const created = await this.hierarchy.createFolder(
+        this.data.engagementId, name, parentId,
+      );
+
+      // Refresh tree so the new folder appears
+      const tree = await this.hierarchy.getFolderTree(this.data.engagementId);
+      this.fullTree.set(tree);
+
+      // Auto-select the new folder
+      this.selectedFolderId.set(created.id);
+      this.cancelCreate();
+    } catch (err: any) {
+      this.snackBar.open(`Failed to create folder: ${err.message}`, 'Dismiss', { duration: 5000 });
+    } finally {
+      this.creatingFolder.set(false);
+    }
+  }
+
+  // ── Dialog actions ──
 
   onConfirm(): void {
     const result: MoveItemDialogResult = {
@@ -196,6 +215,8 @@ export class MoveItemDialog implements OnInit {
     this.dialogRef.close(undefined);
   }
 
+  // ── Helpers ──
+
   private flatten(nodes: FolderTreeNode[]): FolderTreeNode[] {
     const result: FolderTreeNode[] = [];
     const walk = (list: FolderTreeNode[]) => {
@@ -206,5 +227,17 @@ export class MoveItemDialog implements OnInit {
     };
     walk(nodes);
     return result;
+  }
+
+  /** Walk the tree to build path segments from root to target folder. */
+  private buildPathSegments(nodes: FolderTreeNode[], targetId: string): string[] {
+    for (const node of nodes) {
+      if (node.folder.id === targetId) return [node.folder.name];
+      if (node.children.length > 0) {
+        const child = this.buildPathSegments(node.children, targetId);
+        if (child.length > 0) return [node.folder.name, ...child];
+      }
+    }
+    return [];
   }
 }

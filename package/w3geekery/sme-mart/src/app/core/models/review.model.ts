@@ -9,6 +9,7 @@ export interface Review {
   approved_at: string | null;
   approved_by: string | null;
   created_at: string;
+  updated_at: string;
 }
 
 // VIEW model — v_admin_reviews

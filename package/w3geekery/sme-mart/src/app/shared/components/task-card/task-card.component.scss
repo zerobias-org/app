@@ -7,8 +7,20 @@ mat-card {
 }
 
 .master-card {
-  border-left: 4px solid var(--mat-sys-primary, #6750a4);
-  background: color-mix(in srgb, var(--mat-sys-primary, #6750a4) 4%, var(--mat-sys-surface, #fff));
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  background-color: var(--zb-background, var(--mat-sys-surface-container-low));
+  margin-bottom: 0;
+  padding: 16px;
+
+  // Description area gets the lighter card background
+  app-markdown-view {
+    display: block;
+    background-color: var(--zb-background-card, var(--mat-sys-surface));
+    border-radius: 4px;
+    padding: 12px 16px;
+  }
 }
 
 .sub-card {
@@ -182,11 +194,11 @@ mat-card {
   line-height: 1;
 }
 
-// Tags section inside expanded card
-.card-tags {
-  margin-top: 0.75rem;
-  padding-top: 0.5rem;
-  border-top: 1px solid var(--mat-sys-outline-variant, rgba(0, 0, 0, 0.08));
+// Panel sections — consistent vertical spacing, no dividers
+.card-tags,
+.card-links,
+.subtasks-section {
+  margin-top: 12px;
 }
 
 .tag-chip {
@@ -196,4 +208,48 @@ mat-card {
     --mdc-chip-container-height: 24px;
     font-size: 0.7rem;
   }
+}
+
+.subtasks-loading {
+  display: flex;
+  justify-content: center;
+  padding: 0.75rem 0;
+}
+
+.sub-subtask-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+
+  & + & {
+    border-top: 1px solid var(--mat-sys-outline-variant, rgba(0, 0, 0, 0.06));
+  }
+}
+
+.sub-subtask-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.sub-subtask-code {
+  font-family: monospace;
+  font-size: 0.8rem;
+  color: var(--mat-sys-on-surface-variant, rgba(0, 0, 0, 0.6));
+  flex-shrink: 0;
+}
+
+.sub-subtask-name {
+  font-size: 0.875rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sub-subtask-actions {
+  flex-shrink: 0;
 }

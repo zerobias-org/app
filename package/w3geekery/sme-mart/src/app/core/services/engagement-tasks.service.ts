@@ -2,35 +2,60 @@ import { Injectable, inject } from '@angular/core';
 import { ZerobiasClientApi } from '@zerobias-com/zerobias-client';
 import {
   NewTask, NewTaskLink, UpdateTask,
-  type TaskExtended, type ResourceLink, type SchemasLinkType,
+  type TaskExtended,
 } from '@zerobias-com/platform-sdk';
+import type { ResourceLink, LinkType } from '@zerobias-com/hydra-sdk';
 import { UUID } from '@zerobias-org/types-core-js';
+
+// ---------------------------------------------------------------------------
+// Task→Task link types discovered from ZeroBias platform (CI environment)
+// ---------------------------------------------------------------------------
+// child_of / parent_to:   cf72be7c-1403-11f1-845f-dff3645d0fe7
+//   - fromLinkInherit: true — child tasks inherit parent's resource links
+//     (boundary membership, tags, etc.), eliminating manual tagging
+// blocked_by / blocks:    cf73b304-1403-11f1-845f-8b0a517a3fa6
+//   - Task dependency tracking
+// relates_to:             2694788c-721e-11ef-a886-5357e9e8bc3b
+//   - Generic association (still available but not used for parent/child)
+// ---------------------------------------------------------------------------
 
 @Injectable({ providedIn: 'root' })
 export class EngagementTasksService {
   private readonly clientApi = inject(ZerobiasClientApi);
 
-  /** Cached relates_to link type ID — discovered once per session */
-  private relatesToLinkTypeId: UUID | null = null;
+  /** Cached child_of link type ID — discovered once per session */
+  private childOfLinkTypeId: UUID | null = null;
+
+  /** Cached blocked_by link type ID — discovered once per session */
+  private blockedByLinkTypeId: UUID | null = null;
+
+  /** All link types — cached after first discovery */
+  private linkTypesCache: LinkType[] | null = null;
 
   /** Fetch the master task with full details (links, transitions, etc.) */
   async getTask(taskId: string): Promise<TaskExtended> {
-    const taskApi = this.clientApi.auditmationPlatform.getTaskApi();
+    const taskApi = this.clientApi.platformClient.getTaskApi();
     return taskApi.get(new UUID(taskId));
   }
 
   /**
-   * List tasks linked to the master task via `relates_to`.
-   * 1. Query resource links on the master task filtered to type=task
-   * 2. Fetch each linked task by ID
+   * List child tasks linked to the parent task via `child_of`.
+   * 1. Discover the child_of link type
+   * 2. Query resource links on the parent task filtered to type=task
+   * 3. Filter to only child_of / parent_to links
+   * 4. Fetch each linked task by ID
    */
-  async listRelatedTasks(masterTaskId: string): Promise<TaskExtended[]> {
-    const resourceApi = this.clientApi.auditmationPlatform.getResourceApi();
-    const taskApi = this.clientApi.auditmationPlatform.getTaskApi();
-    const masterUUID = new UUID(masterTaskId);
+  async listChildTasks(parentTaskId: string): Promise<TaskExtended[]> {
+    const resourceApi = this.clientApi.hydraClient.getResourceApi();
+    const taskApi = this.clientApi.platformClient.getTaskApi();
+    const parentUUID = new UUID(parentTaskId);
+
+    // Ensure link types are discovered so we can filter
+    await this.discoverLinkTypes(parentTaskId);
+    const childOfId = this.childOfLinkTypeId?.toString();
 
     const linksResult = await resourceApi.listResourceLinks(
-      masterUUID,
+      parentUUID,
       1,      // pageNumber
       100,    // pageSize
       true,   // inflate
@@ -42,17 +67,23 @@ export class EngagementTasksService {
     const links: ResourceLink[] = linksResult.items || [];
     if (links.length === 0) return [];
 
-    // Collect unique linked task IDs (could be fromResource or toResource)
+    // Filter to child_of / parent_to links only
+    const childLinks = childOfId
+      ? links.filter(link => link.linkType?.toString() === childOfId)
+      : links; // fallback: show all task links if link type not found
+
+    if (childLinks.length === 0) return [];
+
+    // Collect unique child task IDs — only where this task is the parent (fromResource)
+    // child_of links: fromResource=parent, toResource=child
     const taskIds = new Set<string>();
-    for (const link of links) {
+    for (const link of childLinks) {
       const fromId = link.fromResource.toString();
       const toId = link.toResource.toString();
-      // The "other" end of the link is the related task
-      if (fromId === masterTaskId) {
+      if (fromId === parentTaskId) {
         taskIds.add(toId);
-      } else {
-        taskIds.add(fromId);
       }
+      // Skip links where this task is the child (toResource) — that's the parent, not a child
     }
 
     // Fetch each task in parallel
@@ -75,26 +106,28 @@ export class EngagementTasksService {
   }
 
   /**
-   * Create a sub-task and link it to the master task via `relates_to`.
+   * Create a sub-task and link it to the parent task via `child_of`.
+   * The child_of link has fromLinkInherit: true, so the subtask automatically
+   * inherits the parent's resource links (boundary, tags, etc.).
    */
-  async createSubTask(masterTaskId: string, opts: {
+  async createSubTask(parentTaskId: string, opts: {
     name: string;
     description?: string;
     activityId: string;
     boundaryId?: string;
     priority?: number;
   }): Promise<TaskExtended> {
-    const taskApi = this.clientApi.auditmationPlatform.getTaskApi();
-    const masterUUID = new UUID(masterTaskId);
+    const taskApi = this.clientApi.platformClient.getTaskApi();
+    const parentUUID = new UUID(parentTaskId);
 
-    // Discover the relates_to link type ID
-    const linkTypeId = await this.getRelatesToLinkTypeId(masterTaskId);
+    // Discover the child_of link type ID
+    const linkTypeId = await this.getChildOfLinkTypeId(parentTaskId);
 
     const newTask = new NewTask(
       new UUID(opts.activityId),  // activityId (required)
       [],                          // approvers
       [],                          // notified
-      [new NewTaskLink(masterUUID, linkTypeId)], // links — relate to master
+      [new NewTaskLink(parentUUID, linkTypeId)], // links — child_of parent
       undefined,                   // ownerId
       opts.name,                   // name
       opts.description,            // description
@@ -107,7 +140,7 @@ export class EngagementTasksService {
 
   /** Transition a task to a new status via its workflow */
   async transitionTask(taskId: string, transitionId: string): Promise<TaskExtended> {
-    const taskApi = this.clientApi.auditmationPlatform.getTaskApi();
+    const taskApi = this.clientApi.platformClient.getTaskApi();
     const updateTask = new UpdateTask(
       undefined,              // name
       undefined,              // description
@@ -116,37 +149,68 @@ export class EngagementTasksService {
     return taskApi.update(new UUID(taskId), updateTask);
   }
 
+  // ---------------------------------------------------------------------------
+  // Link type discovery
+  // ---------------------------------------------------------------------------
+
   /**
-   * Discover the `relates_to` link type ID for task→task resources.
-   * Caches after first call.
+   * Discover and cache all task→task link types.
+   * Called once per session; subsequent calls are no-ops.
    */
-  private async getRelatesToLinkTypeId(taskId: string): Promise<UUID> {
-    if (this.relatesToLinkTypeId) return this.relatesToLinkTypeId;
+  private async discoverLinkTypes(taskId: string): Promise<void> {
+    if (this.linkTypesCache) return;
 
-    const resourceApi = this.clientApi.auditmationPlatform.getResourceApi();
+    const resourceApi = this.clientApi.hydraClient.getResourceApi();
     const result = await resourceApi.listResourceLinkTypes(new UUID(taskId), 1, 50);
-    const linkTypes: SchemasLinkType[] = result.items || [];
+    this.linkTypesCache = result.items || [];
 
-    // Find relates_to link type where both sides are 'task'
-    const relatesToType = linkTypes.find(lt =>
+    // Cache child_of link type
+    const childOf = this.linkTypesCache.find(lt =>
+      lt.fromLinkType?.toString() === 'child_of' &&
+      lt.fromType?.toString() === 'task' &&
+      lt.toType?.toString() === 'task',
+    );
+    if (childOf) this.childOfLinkTypeId = childOf.id;
+
+    // Cache blocked_by link type
+    const blockedBy = this.linkTypesCache.find(lt =>
+      lt.fromLinkType?.toString() === 'blocked_by' &&
+      lt.fromType?.toString() === 'task' &&
+      lt.toType?.toString() === 'task',
+    );
+    if (blockedBy) this.blockedByLinkTypeId = blockedBy.id;
+  }
+
+  /**
+   * Get the `child_of` link type ID for task→task resources.
+   * Falls back to `relates_to` if child_of is not available.
+   */
+  private async getChildOfLinkTypeId(taskId: string): Promise<UUID> {
+    await this.discoverLinkTypes(taskId);
+
+    if (this.childOfLinkTypeId) return this.childOfLinkTypeId;
+
+    // Fallback: try relates_to (older platform versions)
+    const relatesToType = this.linkTypesCache?.find(lt =>
       lt.fromLinkType?.toString() === 'relates_to' &&
       lt.fromType?.toString() === 'task' &&
       lt.toType?.toString() === 'task',
     );
 
-    if (!relatesToType) {
-      // Fallback: find any relates_to link type
-      const fallback = linkTypes.find(lt =>
-        lt.fromLinkType?.toString() === 'relates_to',
-      );
-      if (fallback) {
-        this.relatesToLinkTypeId = fallback.id;
-        return fallback.id;
-      }
-      throw new Error('No relates_to link type found for tasks. Contact platform admin.');
+    if (relatesToType) {
+      console.warn('[EngagementTasks] child_of link type not found, falling back to relates_to');
+      return relatesToType.id;
     }
 
-    this.relatesToLinkTypeId = relatesToType.id;
-    return relatesToType.id;
+    throw new Error('No child_of or relates_to link type found for tasks. Contact platform admin.');
+  }
+
+  /**
+   * Get the `blocked_by` link type ID for task→task resources.
+   * Returns null if not available on this platform version.
+   */
+  async getBlockedByLinkTypeId(taskId: string): Promise<UUID | null> {
+    await this.discoverLinkTypes(taskId);
+    return this.blockedByLinkTypeId;
   }
 }

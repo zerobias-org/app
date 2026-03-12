@@ -1,0 +1,115 @@
+:host {
+  display: block;
+}
+
+.doc-count {
+  font-size: 0.85rem;
+  color: var(--mat-sys-on-surface-variant);
+  margin-right: 0.25rem;
+}
+
+.loading-state {
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.document-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+}
+
+.document-row {
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color 0.3s, background-color 0.3s;
+
+  &.highlighted {
+    border-color: var(--mat-sys-primary);
+    background-color: color-mix(in srgb, var(--mat-sys-primary) 8%, transparent);
+  }
+}
+
+.doc-main {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+
+  .doc-icon {
+    color: var(--mat-sys-outline);
+    flex-shrink: 0;
+  }
+
+  .doc-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+
+    .doc-name {
+      font-weight: 500;
+      font-size: 0.9rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .doc-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.8rem;
+      color: var(--mat-sys-on-surface-variant);
+    }
+  }
+
+  .doc-actions {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+}
+
+.type-chip {
+  font-size: 0.7rem;
+  min-height: 20px;
+  padding: 0 8px;
+}
+
+// Preview panel
+.preview-panel {
+  border-top: 1px solid var(--mat-sys-outline-variant);
+  position: relative;
+
+  .preview-iframe {
+    width: 100%;
+    border: none;
+    display: block;
+  }
+
+  .resize-handle {
+    height: 8px;
+    cursor: ns-resize;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--mat-sys-surface-container);
+    border-top: 1px solid var(--mat-sys-outline-variant);
+
+    &:hover {
+      background: var(--mat-sys-surface-container-high);
+    }
+
+    .resize-grip {
+      width: 32px;
+      height: 3px;
+      border-radius: 2px;
+      background: var(--mat-sys-outline);
+    }
+  }
+}

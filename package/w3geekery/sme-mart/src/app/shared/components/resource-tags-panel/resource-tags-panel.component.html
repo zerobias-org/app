@@ -1,0 +1,62 @@
+<zb-simple-panel title="Tags" mode="header-only">
+  @if (!readonly) {
+    <button headerAction mat-icon-button color="primary" (click)="onAdd()" matTooltip="Add Tag">
+      <mat-icon>add</mat-icon>
+    </button>
+  }
+
+  <zb-customizable-table
+    [columns]="columns"
+    [columnLabels]="columnLabels"
+    [data]="tags()"
+    [templateRefs]="templateRefs"
+    [loading]="loading()"
+    [selectRowOnClick]="false"
+    [sortDisabled]="true"
+    [translateHeaders]="false"
+    [hoverable]="false"
+    [dense]="true">
+  </zb-customizable-table>
+
+  <!-- Type column -->
+  <ng-template #typesRef let-tag>
+    @if (tagType(tag)) {
+      <span class="tag-type-chip" zbChipColors [zbChipColor]="tagColor(tag)">
+        {{ tagType(tag) }}
+      </span>
+    }
+  </ng-template>
+
+  <!-- Name column -->
+  <ng-template #nameRef let-tag>
+    <span [matTooltip]="tag.name?.toString() || ''" [matTooltipShowDelay]="2000">
+      {{ tag.name }}
+    </span>
+  </ng-template>
+
+  <!-- Description column -->
+  <ng-template #descriptionRef let-tag>
+    <span class="description-cell">{{ tagDescription(tag) }}</span>
+  </ng-template>
+
+  <!-- Scope column -->
+  <ng-template #scopeRef let-tag>
+    @if (tagScope(tag)) {
+      <span class="scope-chip">
+        {{ tagScope(tag) | snakeToSpaces }}
+      </span>
+    }
+  </ng-template>
+
+  <!-- Actions column -->
+  <ng-template #actionsRef let-tag>
+    @if (!isTagProtected(tag)) {
+      <button mat-icon-button color="warn" (click)="onRemoveTag(tag); $event.stopPropagation()"
+              matTooltip="Remove tag">
+        <mat-icon>remove_circle_outline</mat-icon>
+      </button>
+    } @else {
+      <mat-icon class="protected-icon" matTooltip="System tag — cannot be removed">lock</mat-icon>
+    }
+  </ng-template>
+</zb-simple-panel>

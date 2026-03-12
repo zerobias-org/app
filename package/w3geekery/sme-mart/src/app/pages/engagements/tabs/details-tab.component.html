@@ -35,13 +35,13 @@
         </div>
 
         <mat-divider></mat-divider>
-        <h3>All Proposals ({{ ctx.parsedProposals().length }})</h3>
-        @for (p of ctx.parsedProposals(); track p.id) {
-          <app-proposal-card
-            [proposal]="p"
+        <h3>All Bids ({{ ctx.parsedBids().length }})</h3>
+        @for (p of ctx.parsedBids(); track p.id) {
+          <app-bid-card
+            [bid]="p"
             [isBuyer]="false"
-            [isOwnProposal]="false">
-          </app-proposal-card>
+            [isOwnBid]="false">
+          </app-bid-card>
         }
       </mat-card-content>
     </mat-card>

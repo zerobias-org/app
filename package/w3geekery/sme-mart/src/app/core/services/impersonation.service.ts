@@ -64,6 +64,11 @@ export class ImpersonationService implements OnDestroy {
   readonly effectiveAvatarUrl = signal('');
   readonly effectiveInitials = computed(() => this.getInitials(this.effectiveUserName()));
 
+  /** Effective org ID — delegates to ZerobiasClientApp.getCurrentOrgId() */
+  effectiveOrgId(): string {
+    return this.app.getCurrentOrgId() || '';
+  }
+
   constructor() {
     // Restore impersonation from localStorage
     this.restoreFromStorage();

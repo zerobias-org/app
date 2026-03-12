@@ -1,33 +1,31 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { ZerobiasClientApi } from '@zerobias-com/zerobias-client';
-import { SuggestTagBody, TagSearchBody } from '@zerobias-com/platform-sdk';
-import type { TagView, TaskExtended } from '@zerobias-com/platform-sdk';
-import { UUID, Nmtoken } from '@zerobias-org/types-core-js';
+import type { TagView } from '@zerobias-com/hydra-sdk';
+import type { TaskExtended } from '@zerobias-com/platform-sdk';
+import { UUID } from '@zerobias-org/types-core-js';
+import { SmeMartTagService } from './sme-mart-tag.service';
+import {
+  isProtectedTag,
+  parseHierarchyLevel,
+  stripPrefix,
+} from '../utils/tag-prefix.util';
 
 // ---------------------------------------------------------------------------
 // Tag naming conventions for the Project → Boundary → Task hierarchy
 // ---------------------------------------------------------------------------
 //
-// Kevin's platform model:
-//   Project → Boundary → Task → SubTask
+// New convention (Plan 029/039):
+//   sme-mart.eng.{word}-{word}    = Engagement tag (maps to Boundary)
+//   sme-mart.proj.{word}-{word}   = Project wrapper (groups boundaries)
+//   sme-mart.task.{word}-{word}   = Task-level grouping tag
 //
-// SME Mart tag encoding:
-//   ENG-{word}-{word}          = Engagement tag (already exists — maps to Boundary)
-//   PROJ-{word}-{word}         = Project wrapper (groups boundaries)
-//   TASK-{word}-{word}         = Task-level grouping tag (optional, for categorization)
+// Old convention (deprecated):
+//   ENG-{word}-{word}             = Engagement tag
+//   PROJ-{word}-{word}            = Project wrapper
+//   TASK-{word}-{word}            = Task-level grouping tag
 //
-// Tag type: 'service-segment' (existing Nmtoken on the platform)
-//
-// Hierarchy is encoded by tagging ZB resources:
-//   - A Project tag is attached to one or more Tasks (boundaries)
-//   - An Engagement tag (ENG-*) identifies the boundary-level relationship
-//   - Task/SubTask hierarchy uses relates_to links (existing mechanism)
-//
-// This service provides:
-//   1. Tag CRUD for hierarchy levels
-//   2. Tag-to-hierarchy parsing
-//   3. Resource tagging operations
-//   4. Hierarchy breadcrumb computation
+// Both conventions are recognized for parsing. Only new convention is used
+// for creation (via SmeMartTagService / danaOld.Tag.createTag).
 // ---------------------------------------------------------------------------
 
 /** Hierarchy level in the Project → Boundary → Task model */
@@ -38,6 +36,7 @@ export interface HierarchyTag {
   id: string;
   name: string;
   level: HierarchyLevel;
+  displayName: string;
   description?: string;
 }
 
@@ -51,54 +50,21 @@ export interface HierarchyBreadcrumb {
   active?: boolean;
 }
 
-/** Tag prefix → hierarchy level mapping */
-const TAG_PREFIX_MAP: Record<string, HierarchyLevel> = {
-  'PROJ-': 'project',
-  'ENG-': 'boundary',
-  'TASK-': 'task',
-};
-
-/** BIP39-style word list (shared with engagement-lifecycle.service.ts) */
-const WORDS = [
-  'tiger', 'falcon', 'otter', 'raven', 'cobra', 'panda', 'eagle', 'shark',
-  'bison', 'crane', 'viper', 'finch', 'moose', 'gecko', 'heron', 'manta',
-  'amber', 'azure', 'coral', 'ivory', 'onyx', 'ruby', 'slate', 'jade',
-  'ocean', 'ridge', 'delta', 'maple', 'storm', 'grove', 'cliff', 'brook',
-  'prism', 'vault', 'forge', 'latch', 'nexus', 'relay', 'shard', 'spark',
-  'bold', 'keen', 'calm', 'true', 'brave', 'clear', 'prime',
-  'pixel', 'sigma', 'theta', 'omega', 'gamma', 'alpha', 'kappa',
-  'mesa', 'fjord', 'basin', 'ledge', 'summit', 'strait', 'harbor', 'glade',
-  'atlas', 'tempo', 'chord', 'grain', 'lotus', 'plume', 'relic', 'scope',
-];
-
-function randomWord(): string {
-  return WORDS[Math.floor(Math.random() * WORDS.length)];
-}
-
-function generateTag(prefix: string): string {
-  const w1 = randomWord();
-  let w2 = randomWord();
-  while (w2 === w1) w2 = randomWord();
-  return `${prefix}${w1}-${w2}`;
-}
-
 @Injectable({ providedIn: 'root' })
 export class EngagementHierarchyService {
   private readonly clientApi = inject(ZerobiasClientApi);
+  private readonly tagService = inject(SmeMartTagService);
 
   /** Cache of known tags by ID */
   private readonly tagCache = new Map<string, TagView>();
 
   // ---------------------------------------------------------------------------
-  // Tag name parsing
+  // Tag name parsing (supports both old and new conventions)
   // ---------------------------------------------------------------------------
 
   /** Determine hierarchy level from a tag name */
   parseLevel(tagName: string): HierarchyLevel | null {
-    for (const [prefix, level] of Object.entries(TAG_PREFIX_MAP)) {
-      if (tagName.startsWith(prefix)) return level;
-    }
-    return null;
+    return parseHierarchyLevel(tagName) as HierarchyLevel | null;
   }
 
   /** Parse a tag into a HierarchyTag (or null if not a recognized hierarchy tag) */
@@ -110,100 +76,85 @@ export class EngagementHierarchyService {
       id: tag.id?.toString() || '',
       name,
       level,
+      displayName: stripPrefix(name),
       description: tag.description?.toString(),
     };
   }
 
   /** Check if a tag name is a project-level tag */
   isProjectTag(name: string): boolean {
-    return name.startsWith('PROJ-');
+    return name.toLowerCase().startsWith('sme-mart.proj.') || name.startsWith('PROJ-');
   }
 
   /** Check if a tag name is a boundary/engagement tag */
   isBoundaryTag(name: string): boolean {
-    return name.startsWith('ENG-');
+    return name.toLowerCase().startsWith('sme-mart.eng.') || name.startsWith('ENG-');
   }
 
   // ---------------------------------------------------------------------------
-  // Tag generation
+  // Tag generation (new convention only)
   // ---------------------------------------------------------------------------
 
-  /** Generate a project tag name: PROJ-word-word */
+  /** Generate a project tag name: sme-mart.proj.word-word */
   generateProjectTag(): string {
-    return generateTag('PROJ-');
+    return this.tagService.generateProjectTag();
   }
 
-  /** Generate a task-level tag name: TASK-word-word */
+  /** Generate a task-level tag name: sme-mart.task.word-word */
   generateTaskTag(): string {
-    return generateTag('TASK-');
+    return this.tagService.generateTaskTag();
   }
 
   // ---------------------------------------------------------------------------
-  // Tag CRUD via ZB Platform
+  // Tag CRUD via SmeMartTagService (danaOld.Tag.createTag — direct creation)
   // ---------------------------------------------------------------------------
 
   /** Create a new hierarchy tag on the platform */
   async createTag(name: string, description: string, resourceId?: string): Promise<TagView | null> {
-    try {
-      const tagBody = new SuggestTagBody(
-        name,
-        description,
-        new Nmtoken('service-segment'),
-        resourceId ? new UUID(resourceId) : undefined,
-      );
-      const result = await this.clientApi.auditmationPlatform
-        .getTagApi()
-        .suggestTag(tagBody);
-      // suggestTag returns a Task (async operation). The tag is created inline.
-      // We need to look it up by name after creation.
-      return this.findTagByName(name);
-    } catch (err) {
-      console.warn(`[Hierarchy] Failed to create tag "${name}":`, err);
-      return null;
+    const tag = await this.tagService.createTag(name, description);
+    if (!tag) return null;
+
+    // Tag the resource if provided
+    if (resourceId && tag.id) {
+      try {
+        await this.tagResource(resourceId, [tag.id.toString()]);
+      } catch (err) {
+        console.warn(`[Hierarchy] Created tag but failed to assign to resource:`, err);
+      }
     }
+
+    return tag;
   }
 
   /** Create a project tag and optionally tag a resource with it */
   async createProjectTag(title: string, resourceId?: string): Promise<TagView | null> {
     const tagName = this.generateProjectTag();
-    return this.createTag(
-      tagName,
-      `SME Mart project: ${title}`,
-      resourceId,
-    );
+    return this.createTag(tagName, `SME Mart project: ${title}`, resourceId);
+  }
+
+  /** Search tags by partial name (for autocomplete). Uses searchTags POST for better filtering. */
+  async searchTagsByName(search: string, limit = 20): Promise<TagView[]> {
+    const results = await this.tagService.searchTags(search, limit);
+    return results as unknown as TagView[];
   }
 
   /** Find a tag by exact name */
   async findTagByName(name: string): Promise<TagView | null> {
-    try {
-      const result = await this.clientApi.auditmationPlatform
-        .getTagApi()
-        .listTags(1, 10, [new Nmtoken('service-segment')] as any, name);
-      const tags = result.items || [];
-      const match = tags.find((t: any) => t.name === name);
-      if (match) {
-        this.tagCache.set(match.id?.toString() || '', match);
-      }
-      return match || null;
-    } catch (err) {
-      console.warn(`[Hierarchy] Failed to find tag "${name}":`, err);
-      return null;
-    }
+    const tag = await this.tagService.findTagByName(name);
+    if (tag) this.tagCache.set(tag.id?.toString() || '', tag);
+    return tag;
   }
 
-  /** Get a tag by ID (cached). Uses searchTags since TagApi has no getById. */
+  /** Get a tag by ID (cached). Uses hydra.Tag.getTag for direct lookup. */
   async getTag(tagId: string): Promise<TagView | null> {
     const cached = this.tagCache.get(tagId);
     if (cached) return cached;
     try {
-      const body = new TagSearchBody();
-      (body as any).ids = [new UUID(tagId)];
-      const result = await this.clientApi.auditmationPlatform
+      const tag = await this.clientApi.hydraClient
         .getTagApi()
-        .searchTags(1, 1, undefined, body);
-      const tag = result.items?.[0] || null;
-      if (tag) this.tagCache.set(tagId, tag as any);
-      return tag as any;
+        .getTag(new UUID(tagId));
+      if (tag) this.tagCache.set(tagId, tag as TagView);
+      return tag as TagView || null;
     } catch (err) {
       console.warn(`[Hierarchy] Failed to get tag ${tagId}:`, err);
       return null;
@@ -211,47 +162,22 @@ export class EngagementHierarchyService {
   }
 
   // ---------------------------------------------------------------------------
-  // Resource tagging
+  // Resource tagging (delegates to SmeMartTagService)
   // ---------------------------------------------------------------------------
 
   /** Tag a ZB resource (task, boundary, etc.) with one or more tags */
   async tagResource(resourceId: string, tagIds: string[]): Promise<void> {
-    if (tagIds.length === 0) return;
-    try {
-      await this.clientApi.auditmationPlatform
-        .getResourceApi()
-        .tagResource(
-          new UUID(resourceId),
-          tagIds.map(id => new UUID(id)),
-        );
-    } catch (err) {
-      console.warn(`[Hierarchy] Failed to tag resource ${resourceId}:`, err);
-      throw err;
-    }
+    await this.tagService.assignTag(resourceId, tagIds);
   }
 
   /** Remove a tag from a ZB resource */
   async untagResource(resourceId: string, tagId: string): Promise<void> {
-    try {
-      await this.clientApi.auditmationPlatform
-        .getResourceApi()
-        .untagResource(new UUID(resourceId), new UUID(tagId));
-    } catch (err) {
-      console.warn(`[Hierarchy] Failed to untag resource ${resourceId}:`, err);
-      throw err;
-    }
+    await this.tagService.removeTag(resourceId, tagId);
   }
 
   /** Get all tags on a ZB resource */
   async getResourceTags(resourceId: string): Promise<TagView[]> {
-    try {
-      return await this.clientApi.auditmationPlatform
-        .getResourceApi()
-        .getTagsForResource(new UUID(resourceId));
-    } catch (err) {
-      console.warn(`[Hierarchy] Failed to get tags for resource ${resourceId}:`, err);
-      return [];
-    }
+    return this.tagService.getResourceTags(resourceId);
   }
 
   /** Get hierarchy tags on a resource (filtered to recognized hierarchy prefixes) */
@@ -288,7 +214,7 @@ export class EngagementHierarchyService {
       const projectTag = hierarchyTags.find(ht => ht.level === 'project');
       if (projectTag) {
         crumbs.push({
-          label: projectTag.name,
+          label: projectTag.displayName,
           level: 'project',
           tagId: projectTag.id,
         });
@@ -298,7 +224,7 @@ export class EngagementHierarchyService {
     // Boundary level = the engagement itself
     if (opts.engagementTag) {
       crumbs.push({
-        label: opts.engagementTag,
+        label: stripPrefix(opts.engagementTag),
         level: 'boundary',
         tagId: opts.zerobiasTagId || undefined,
         active: !opts.zerobiasTaskId, // Active if no task drill-down

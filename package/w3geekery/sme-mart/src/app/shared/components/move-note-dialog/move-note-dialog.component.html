@@ -1,0 +1,95 @@
+<h2 mat-dialog-title>{{ title() }}</h2>
+<mat-dialog-content>
+  @if (loading()) {
+    <div class="loading-container">
+      <mat-spinner diameter="32"></mat-spinner>
+    </div>
+  } @else {
+    <!-- Notebook selector -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Notebook</mat-label>
+      <mat-select [value]="selectedNotebookId()"
+                  (selectionChange)="onNotebookChange($event.value)">
+        @for (nb of notebooks(); track nb.folder.id) {
+          <mat-option [value]="nb.folder.id">{{ nb.folder.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <!-- Breadcrumb path preview -->
+    @if (breadcrumbPath()) {
+      <div class="breadcrumb-bar">
+        <mat-icon class="breadcrumb-icon">subdirectory_arrow_right</mat-icon>
+        <span class="breadcrumb-path">{{ breadcrumbPath() }}</span>
+      </div>
+    }
+
+    <!-- Folder tree for selected notebook -->
+    @if (visibleFolders().length > 0) {
+      <div class="folder-label">Select destination folder:</div>
+      <mat-selection-list [multiple]="false" (selectionChange)="onFolderSelect($event)">
+        @for (node of visibleFolders(); track node.folder.id) {
+          <mat-list-option [value]="node.folder.id"
+                           [selected]="selectedFolderId() === node.folder.id"
+                           [disabled]="node.folder.id === data.currentFolderId && !isCrossNotebook()">
+            <mat-icon matListItemIcon [style.color]="node.folder.color">folder</mat-icon>
+            <span matListItemTitle [style.padding-left.px]="(node.level - 1) * 16">
+              {{ node.folder.name }}
+            </span>
+          </mat-list-option>
+        }
+      </mat-selection-list>
+    } @else {
+      <div class="empty-message">No folders in this notebook.</div>
+    }
+
+    <!-- Inline folder creation form -->
+    @if (creatingInParentId() !== null) {
+      <div class="create-folder-form">
+        <mat-form-field appearance="outline" class="folder-name-input" subscriptSizing="dynamic">
+          <mat-label>New folder name</mat-label>
+          <input matInput
+                 [value]="newFolderName()"
+                 (input)="newFolderName.set(folderInput.value)"
+                 (keyup.enter)="confirmCreate()"
+                 (keyup.escape)="cancelCreate()"
+                 #folderInput>
+        </mat-form-field>
+        <button mat-icon-button (click)="confirmCreate()"
+                [disabled]="!newFolderName().trim() || creatingFolder()"
+                matTooltip="Create" [matTooltipShowDelay]="300">
+          <mat-icon>check</mat-icon>
+        </button>
+        <button mat-icon-button (click)="cancelCreate()"
+                matTooltip="Cancel" [matTooltipShowDelay]="300">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    }
+
+    <!-- New Folder button -->
+    @if (selectedNotebookId() && creatingInParentId() === null) {
+      <button mat-stroked-button class="new-folder-btn"
+              (click)="startCreate()">
+        <mat-icon>create_new_folder</mat-icon>
+        New Folder
+      </button>
+    }
+
+    <!-- "Same folder structure" checkbox — only for folders moving cross-notebook -->
+    @if (data.itemType === 'folder' && isCrossNotebook()) {
+      <mat-checkbox [checked]="recreateStructure()"
+                    (change)="recreateStructure.set($event.checked)"
+                    class="structure-checkbox">
+        Recreate subfolder structure in destination
+      </mat-checkbox>
+    }
+  }
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Cancel</button>
+  <button mat-flat-button color="primary" (click)="onConfirm()"
+          [disabled]="loading() || (!selectedFolderId() && !recreateStructure())">
+    Move
+  </button>
+</mat-dialog-actions>

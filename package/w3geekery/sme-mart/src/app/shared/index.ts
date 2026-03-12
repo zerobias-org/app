@@ -7,5 +7,10 @@ export { CatalogFilters } from './components/catalog-filters/catalog-filters.com
 export { FilterEnabler } from './components/filter-enabler/filter-enabler.component';
 export { EngagementCard } from './components/engagement-card/engagement-card.component';
 export { EngagementForm, type EngagementFormValues } from './components/engagement-form/engagement-form.component';
-export { ProposalForm, type ProposalFormData } from './components/proposal-form/proposal-form.component';
-export { ProposalCard, type ProposalCardData } from './components/proposal-card/proposal-card.component';
+export { BidForm, type BidFormData } from './components/bid-form/bid-form.component';
+export { BidCard, type BidCardData } from './components/bid-card/bid-card.component';
+export { DocumentShareDialog, type DocumentShareDialogData, type DocumentShareDialogResult } from './components/document-share-dialog/document-share-dialog.component';
+export { OrgDocumentChooser, type OrgDocumentChooserData, type OrgDocumentChooserResult, type ChooserScope } from './components/org-document-chooser/org-document-chooser.component';
+export { BidComparison, type ComparisonBid, type CategoryCompliance } from './components/bid-comparison/bid-comparison.component';
+export { BidReview, type RequirementGroup, type RequirementWithResponse } from './components/bid-review/bid-review.component';
+export { AcceptBidDialog, type AcceptBidDialogData, type AcceptBidDialogResult } from './components/accept-bid-dialog/accept-bid-dialog.component';

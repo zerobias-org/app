@@ -13,15 +13,15 @@ import { MarkdownView } from '../markdown-view/markdown-view.component';
 const ICON_MAP: Record<TimelineEventType, string> = {
   comment: 'chat_bubble',
   attachment: 'attach_file',
-  proposal_submitted: 'rate_review',
-  proposal_accepted: 'check_circle',
+  bid_submitted: 'rate_review',
+  bid_accepted: 'check_circle',
 };
 
 const LABEL_MAP: Record<TimelineEventType, string> = {
   comment: 'Comment',
   attachment: 'Attachment',
-  proposal_submitted: 'Proposal Submitted',
-  proposal_accepted: 'Proposal Accepted',
+  bid_submitted: 'Bid Submitted',
+  bid_accepted: 'Bid Accepted',
 };
 
 @Component({
@@ -79,10 +79,10 @@ export class TimelineEventCard {
         return (p.plainText || p.markdown || '').slice(0, 80);
       case 'attachment':
         return p.attachment.fileMetadata?.name || 'File';
-      case 'proposal_submitted':
-        return `${p.providerName} submitted a proposal`;
-      case 'proposal_accepted':
-        return `${p.providerName}'s proposal accepted`;
+      case 'bid_submitted':
+        return `${p.providerName} submitted a bid`;
+      case 'bid_accepted':
+        return `${p.providerName}'s bid accepted`;
     }
   });
 

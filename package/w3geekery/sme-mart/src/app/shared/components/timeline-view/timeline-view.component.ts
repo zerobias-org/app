@@ -12,8 +12,8 @@ import type { TimelineEvent, TimelineEventType } from '../../../core/models';
 const NODE_ICON_MAP: Record<TimelineEventType, string> = {
   comment: 'chat_bubble',
   attachment: 'attach_file',
-  proposal_submitted: 'rate_review',
-  proposal_accepted: 'check_circle',
+  bid_submitted: 'rate_review',
+  bid_accepted: 'check_circle',
 };
 
 @Component({

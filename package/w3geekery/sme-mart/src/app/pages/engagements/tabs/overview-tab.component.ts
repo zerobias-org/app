@@ -6,7 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { DatePipe, TitleCasePipe } from '@angular/common';
-import { ProposalCard } from '../../../shared/components/proposal-card/proposal-card.component';
+import { BidCard } from '../../../shared/components/bid-card/bid-card.component';
 import { EngagementContextService } from '../../../core/services/engagement-context.service';
 import { WorkRequestsService } from '../../../core/services/work-requests.service';
 
@@ -21,7 +21,7 @@ import { WorkRequestsService } from '../../../core/services/work-requests.servic
     MatSnackBarModule,
     DatePipe,
     TitleCasePipe,
-    ProposalCard,
+    BidCard,
   ],
   templateUrl: './overview-tab.component.html',
   styleUrl: './_tab-shared.scss',

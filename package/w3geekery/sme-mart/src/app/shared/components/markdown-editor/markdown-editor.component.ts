@@ -189,6 +189,27 @@ export class MarkdownEditor implements AfterViewInit, OnDestroy {
     this.insertTextAtCursor(table);
   }
 
+  /** Insert a document cross-link as a markdown link with sme-doc:// scheme */
+  insertDocLink(filename: string, docId: string): void {
+    if (!this.crepe) return;
+    const linkText = `📄 ${filename}`;
+    const href = `sme-doc://${docId}`;
+    try {
+      this.crepe.editor.action((ctx) => {
+        const view = ctx.get(editorViewCtx);
+        const { state, dispatch } = view;
+        const { from } = state.selection;
+        const linkMark = state.schema.marks['link'].create({ href });
+        const textNode = state.schema.text(linkText, [linkMark]);
+        dispatch(state.tr.insert(from, textNode));
+        view.focus();
+      });
+    } catch (err) {
+      // Fallback: insert as raw markdown
+      this.insertTextAtCursor(`[${linkText}](${href})`);
+    }
+  }
+
   // ---- Public methods ----
 
   getMarkdown(): string {

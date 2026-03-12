@@ -9,6 +9,9 @@ import { RfpDetail } from './pages/rfps/rfp-detail.component';
 import { EngagementDetail } from './pages/engagements/engagement-detail.component';
 import { EngagementEdit } from './pages/engagements/engagement-edit.component';
 import { ENGAGEMENT_TAB_ROUTES } from './pages/engagements/engagement.routes';
+import { RfpWizard } from './pages/rfps/rfp-wizard/rfp-wizard.component';
+import { BidWizard } from './pages/rfps/bid-wizard/bid-wizard.component';
+import { BidComparisonPage } from './pages/rfps/bid-comparison-page.component';
 import { ComingSoon } from './pages/coming-soon/coming-soon.component';
 
 export const routes: Routes = [
@@ -21,11 +24,20 @@ export const routes: Routes = [
       { path: 'providers/:id', component: ProviderDetail },
       { path: 'services', component: ServiceCatalog },
       { path: 'rfps', component: RfpList },
+      { path: 'rfps/new', component: RfpWizard },
       { path: 'rfps/:id', component: RfpDetail },
-      { path: 'rfps/:id/edit', component: EngagementEdit },
+      { path: 'rfps/:id/edit', component: RfpWizard },
+      { path: 'rfps/:id/compare', component: BidComparisonPage },
+      { path: 'rfps/:id/bid', component: BidWizard },
+      { path: 'rfps/:id/bid/:bidId', component: BidWizard },
       { path: 'engagements/:id', component: EngagementDetail, children: ENGAGEMENT_TAB_ROUTES },
       // Legacy redirects
       { path: 'engagements', redirectTo: 'rfps', pathMatch: 'full' },
+      {
+        path: 'org',
+        loadChildren: () =>
+          import('./pages/org/org.routes').then((m) => m.ORG_ROUTES),
+      },
       {
         path: 'my/engagements',
         loadChildren: () =>

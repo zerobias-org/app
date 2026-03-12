@@ -8,8 +8,8 @@ mat-card {
 
   &.accent-comment            { border-left-color: var(--mat-sys-primary, #03aff0); }
   &.accent-attachment          { border-left-color: var(--mat-sys-secondary, #6c757d); }
-  &.accent-proposal_submitted  { border-left-color: var(--mat-sys-tertiary, #6aa84f); }
-  &.accent-proposal_accepted   { border-left-color: var(--zb-color-success, #4caf50); }
+  &.accent-bid_submitted  { border-left-color: var(--mat-sys-tertiary, #6aa84f); }
+  &.accent-bid_accepted   { border-left-color: var(--zb-color-success, #4caf50); }
 
   &.collapsed {
     background: transparent;
@@ -201,8 +201,8 @@ mat-card {
   }
 }
 
-// Proposal info
-.proposal-info {
+// Bid info
+.bid-info {
   .price {
     font-weight: 600;
     font-size: 1.125rem;
@@ -216,8 +216,8 @@ mat-card {
   }
 }
 
-// Proposal accepted
-.proposal-accepted {
+// Bid accepted
+.bid-accepted {
   display: flex;
   align-items: center;
   gap: 0.75rem;

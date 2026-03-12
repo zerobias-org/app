@@ -8,7 +8,7 @@ export type BudgetType = 'fixed' | 'hourly' | 'negotiable';
 
 export type RequestStatus = 'draft' | 'open' | 'in_progress' | 'completed' | 'cancelled';
 
-export type ProposalStatus = 'pending' | 'accepted' | 'rejected' | 'withdrawn';
+export type BidStatus = 'draft' | 'pending' | 'accepted' | 'rejected' | 'withdrawn';
 
 export type ProficiencyLevel = 'beginner' | 'intermediate' | 'expert';
 

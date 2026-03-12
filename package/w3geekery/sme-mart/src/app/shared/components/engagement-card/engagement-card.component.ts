@@ -34,7 +34,7 @@ export class EngagementCard {
   readonly status = computed(() => this._engagement()?.status || 'draft');
   readonly engagementTag = computed(() => this._engagement()?.engagement_tag || null);
   readonly createdAt = computed(() => this._engagement()?.created_at || '');
-  readonly proposalCount = computed(() => this._engagement()?.proposal_count || 0);
+  readonly bidCount = computed(() => this._engagement()?.bid_count || 0);
   readonly budgetMin = computed(() => this._engagement()?.budget_min);
   readonly budgetMax = computed(() => this._engagement()?.budget_max);
   readonly budgetType = computed(() => this._engagement()?.budget_type);
@@ -56,7 +56,7 @@ export class EngagementCard {
     return colorMap[this.status()] || 'default';
   });
 
-  readonly hasMyProposal = computed(() => {
+  readonly hasMyBid = computed(() => {
     const providerId = this._currentProviderId();
     const accepted = this._engagement()?.accepted_provider_id;
     return providerId ? accepted === providerId : false;

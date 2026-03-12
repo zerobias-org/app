@@ -295,9 +295,9 @@
                 Auto-approve reviews
               </mat-slide-toggle>
               <mat-slide-toggle
-                [checked]="!!getSettingValue('marketplace.allow_proposals')"
-                (change)="saveSetting('marketplace.allow_proposals', $event.checked)">
-                Allow proposal submissions
+                [checked]="!!getSettingValue('marketplace.allow_bids')"
+                (change)="saveSetting('marketplace.allow_bids', $event.checked)">
+                Allow bid submissions
               </mat-slide-toggle>
               <mat-slide-toggle
                 [checked]="!!getSettingValue('marketplace.show_pricing')"

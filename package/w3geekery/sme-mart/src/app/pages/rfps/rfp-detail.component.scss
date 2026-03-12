@@ -38,6 +38,18 @@ h3 {
   margin: 1.25rem 0 0.75rem;
 }
 
+.bids-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+
+  h3 {
+    margin: 0;
+  }
+}
+
 .description {
   color: var(--zb-secondary-text);
   line-height: 1.7;
@@ -68,7 +80,7 @@ h3 {
   }
 }
 
-.no-proposals {
+.no-bids {
   color: var(--zb-secondary-text);
   font-style: italic;
 }

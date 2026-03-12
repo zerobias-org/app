@@ -103,11 +103,11 @@
     background: var(--mat-sys-secondary, #6c757d);
   }
 
-  &.node-proposal_submitted {
+  &.node-bid_submitted {
     background: var(--mat-sys-tertiary, #6aa84f);
   }
 
-  &.node-proposal_accepted {
+  &.node-bid_accepted {
     background: #4caf50;
 
     .node-icon { color: #fff; }

@@ -73,7 +73,7 @@ export class CatalogService {
   // ---------------------------------------------------------------------------
 
   async loadRoles(): Promise<CatalogRole[]> {
-    const result = await this.clientApi.auditmationPlatform
+    const result = await this.clientApi.platformClient
       .getCatalogRoleApi()
       .list(1, 1000);
     const items: CatalogRole[] = (result.items || []).map((item: any) => {
@@ -99,7 +99,7 @@ export class CatalogService {
   }
 
   async loadRoleCategories(): Promise<CatalogRoleCategory[]> {
-    const result = await this.clientApi.auditmationPlatform
+    const result = await this.clientApi.platformClient
       .getCatalogRoleApi()
       .listRoleCategories(1, 100);
     const items: CatalogRoleCategory[] = (result.items || []).map((item: any) => ({
@@ -114,7 +114,7 @@ export class CatalogService {
 
   async loadSkills(): Promise<CatalogSkill[]> {
     const skillType = 'skill' as any;
-    const result = await this.clientApi.auditmationPlatform
+    const result = await this.clientApi.platformClient
       .getCatalogRoleApi()
       .listRoleQualifications(1, 1000, skillType);
     const items: CatalogSkill[] = (result.items || []).map((item: any) => {
@@ -150,7 +150,7 @@ export class CatalogService {
   }
 
   async loadSegments(): Promise<CatalogSegment[]> {
-    const result = await this.clientApi.auditmationPlatform
+    const result = await this.clientApi.platformClient
       .getSegmentApi()
       .list(1, 1000);
     const items: CatalogSegment[] = (result.items || []).map((item: any) => ({
@@ -165,7 +165,7 @@ export class CatalogService {
 
   async loadServiceSegments(): Promise<ServiceSegment[]> {
     const tagTypes = ['service-segment'] as any;
-    const result = await this.clientApi.auditmationPlatform
+    const result = await this.clientApi.hydraClient
       .getTagApi()
       .listTags(1, 100, tagTypes);
     const items: ServiceSegment[] = (result.items || []).map((item: any) => ({

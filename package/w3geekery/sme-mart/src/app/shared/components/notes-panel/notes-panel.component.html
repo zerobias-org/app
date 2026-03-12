@@ -1,3 +1,14 @@
+<!-- Document filter banner -->
+@if (_docFilter()) {
+  <div class="doc-filter-banner">
+    <mat-icon>find_in_page</mat-icon>
+    <span>Showing notes linked to document</span>
+    <button mat-icon-button (click)="clearDocFilter()" matTooltip="Clear filter" class="clear-filter-btn">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+}
+
 <!-- Top bar: above drawer, spans full width -->
 <div class="top-bar">
   <button mat-icon-button (click)="toggleDrawer()"
@@ -34,7 +45,9 @@
         [collapsed]="!showNotebooks()"
         (folderSelected)="onNotebookSelected($event)"
         (treeChanged)="onFolderTreeChanged()"
-        (toggleCollapse)="toggleNotebooks()">
+        (toggleCollapse)="toggleNotebooks()"
+        (noteDroppedOnNotebook)="onNoteDroppedOnNotebook($event)"
+        (folderDroppedOnNotebook)="onFolderDroppedOnNotebook($event)">
       </app-notes-notebooks-column>
 
       <!-- Folder tree (collapsible to icon, scoped to selected notebook) -->
@@ -57,7 +70,7 @@
           <mat-icon class="col-header-icon">description</mat-icon>
           <span class="col-header-title">Notes</span>
           <span class="list-count">{{ noteCount() }}</span>
-          <span class="col-header-add" (click)="createNewNote()" matTooltip="New Note" [matTooltipShowDelay]="300"
+          <span class="col-header-add" (click)="createNewNote()" matTooltip="New Note" [matTooltipShowDelay]="300" [matTooltipDisabled]="!!draggedNoteId()"
                 aria-label="Create new note">
             <mat-icon>add</mat-icon>
           </span>
@@ -83,7 +96,7 @@
                    (dragstart)="onNoteDragStart($event, note)"
                    (dragend)="onNoteDragEnd()"
                    (click)="selectNote(note)"
-                   [matTooltip]="note.title" [matTooltipShowDelay]="300">
+                   [matTooltip]="note.title" [matTooltipShowDelay]="300" [matTooltipDisabled]="!!draggedNoteId()">
                 <div class="item-title-row">
                   @if (nc) {
                     <span class="item-color-dot" [style.background]="nc"></span>
@@ -95,7 +108,16 @@
                 </div>
                 <div class="item-meta">
                   {{ note.created_at | date:'MMM d' }}
+                  <span class="item-menu-btn" [matMenuTriggerFor]="noteMenu"
+                        (click)="$event.stopPropagation()" aria-label="Note actions">
+                    <mat-icon>more_vert</mat-icon>
+                  </span>
                 </div>
+                <mat-menu #noteMenu="matMenu">
+                  <button mat-menu-item (click)="openMoveNoteTo(note, $event)">
+                    <mat-icon>drive_file_move</mat-icon> Move to…
+                  </button>
+                </mat-menu>
               </div>
             }
           </div>
@@ -108,8 +130,10 @@
   <mat-sidenav-content>
     <app-note-editor-panel
       [noteData]="selectedNote()"
+      [engagementId]="engId()"
       (noteSaved)="onNoteSaved($event)"
-      (noteDeleted)="onNoteDeleted($event)">
+      (noteDeleted)="onNoteDeleted($event)"
+      (docLinkClick)="onDocLinkClick($event)">
     </app-note-editor-panel>
   </mat-sidenav-content>
 </mat-sidenav-container>

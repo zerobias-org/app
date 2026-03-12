@@ -48,7 +48,7 @@ export class EngagementList implements OnInit {
   readonly lifecycleFilter = signal<LifecycleFilter>('all');
   readonly statusFilter = signal<RequestStatus | 'all'>('all');
   readonly sortBy = signal<string>('newest');
-  readonly myProposalsOnly = signal(false);
+  readonly myBidsOnly = signal(false);
   readonly currentProviderId = signal<string | null>(null);
 
   readonly sortOptions: SortOption[] = [
@@ -67,8 +67,8 @@ export class EngagementList implements OnInit {
       items = items.filter(e => !!e.engagement_tag);
     }
 
-    // My proposals filter
-    if (this.myProposalsOnly()) {
+    // My bids filter
+    if (this.myBidsOnly()) {
       const pid = this.currentProviderId();
       if (pid) {
         items = items.filter(e => e.accepted_provider_id === pid);
@@ -135,8 +135,8 @@ export class EngagementList implements OnInit {
     }
   }
 
-  toggleMyProposals(): void {
-    this.myProposalsOnly.update(v => !v);
+  toggleMyBids(): void {
+    this.myBidsOnly.update(v => !v);
   }
 
   openNewRfpDialog(): void {

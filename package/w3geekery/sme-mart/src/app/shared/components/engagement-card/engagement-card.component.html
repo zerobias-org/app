@@ -53,12 +53,12 @@
 
     <div class="footer-row">
       <span class="posted">Posted {{ createdAt() | date:'mediumDate' }}</span>
-      <span class="proposals">
+      <span class="bids">
         <mat-icon>rate_review</mat-icon>
-        {{ proposalCount() }} proposal{{ proposalCount() !== 1 ? 's' : '' }}
+        {{ bidCount() }} bid{{ bidCount() !== 1 ? 's' : '' }}
       </span>
-      @if (hasMyProposal()) {
-        <mat-chip class="my-proposal-chip">My Proposal</mat-chip>
+      @if (hasMyBid()) {
+        <mat-chip class="my-bid-chip">My Bid</mat-chip>
       }
     </div>
   </mat-card-content>

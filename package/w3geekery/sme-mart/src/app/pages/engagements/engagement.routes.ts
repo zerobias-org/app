@@ -4,6 +4,7 @@ import { DetailsTab } from './tabs/details-tab.component';
 import { TasksTab } from './tabs/tasks-tab.component';
 import { TimelineTab } from './tabs/timeline-tab.component';
 import { NotesTab } from './tabs/notes-tab.component';
+import { DocumentsTab } from './tabs/documents-tab.component';
 
 /**
  * Child routes for engagement detail tabs.
@@ -12,6 +13,7 @@ import { NotesTab } from './tabs/notes-tab.component';
 export const ENGAGEMENT_TAB_ROUTES: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'overview' },
   { path: 'overview', component: OverviewTab },
+  { path: 'documents', component: DocumentsTab },
   { path: 'details', component: DetailsTab },
   { path: 'tasks', component: TasksTab },
   { path: 'timeline', component: TimelineTab },

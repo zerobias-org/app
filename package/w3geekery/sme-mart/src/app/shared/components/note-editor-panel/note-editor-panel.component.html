@@ -72,12 +72,11 @@
     </div>
 
     <!-- Tags -->
-    <app-note-tag-editor
-      [noteId]="n.id"
-      [engagementId]="n.engagement_id"
-      [tags]="n.tags"
+    <app-sme-resource-tag-editor
+      [resourceId]="n.id"
+      [resourceType]="'sme-mart:note'"
       (tagsChanged)="onTagsChanged($event)">
-    </app-note-tag-editor>
+    </app-sme-resource-tag-editor>
 
     <!-- Body: view mode (markdown rendered) or edit mode (markdown editor) -->
     @if (editing()) {
@@ -90,8 +89,17 @@
         </app-markdown-editor>
       </div>
 
-      <!-- Save / Discard bar -->
+      <!-- Editor toolbar + Save / Discard bar -->
       <div class="editor-actions">
+        @if (engagementId) {
+          <button mat-icon-button type="button"
+                  (click)="openDocumentChooser()"
+                  matTooltip="Link a document"
+                  [disabled]="submitting()">
+            <mat-icon>attach_file</mat-icon>
+          </button>
+        }
+        <span class="actions-spacer"></span>
         <button mat-stroked-button type="button" (click)="discardChanges()" [disabled]="submitting()">
           Discard
         </button>
@@ -103,7 +111,7 @@
       </div>
     } @else {
       <div class="body-view" (click)="enterEditMode()">
-        <app-markdown-view [content]="n.body"></app-markdown-view>
+        <app-markdown-view [content]="n.body" (docLinkClick)="docLinkClick.emit($event)"></app-markdown-view>
       </div>
     }
   </div>

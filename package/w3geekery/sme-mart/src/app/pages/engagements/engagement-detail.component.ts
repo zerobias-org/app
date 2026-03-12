@@ -21,6 +21,7 @@ interface TabDef {
 
 const TABS: readonly TabDef[] = [
   { path: 'overview', label: 'Overview' },
+  { path: 'documents', label: 'Documents' },
   { path: 'details', label: 'Details' },
   { path: 'tasks', label: 'Tasks' },
   { path: 'timeline', label: 'Timeline' },

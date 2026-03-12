@@ -24,9 +24,9 @@
 
     @if (currentProviderId()) {
       <mat-chip-set>
-        <mat-chip [highlighted]="myProposalsOnly()" (click)="toggleMyProposals()">
+        <mat-chip [highlighted]="myBidsOnly()" (click)="toggleMyBids()">
           <mat-icon matChipAvatar>person</mat-icon>
-          My Proposals
+          My Bids
         </mat-chip>
       </mat-chip-set>
     }

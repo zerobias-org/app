@@ -12,11 +12,13 @@ import { MatSelect, MatSelectModule } from '@angular/material/select';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MarkdownView } from '../markdown-view/markdown-view.component';
 import { MarkdownEditor } from '../markdown-editor/markdown-editor.component';
-import { NoteTagEditor } from '../note-tag-editor/note-tag-editor.component';
+import { SmeResourceTagEditor } from '../sme-resource-tag-editor/sme-resource-tag-editor.component';
+import { DocumentChooserDialog, type DocumentChooserDialogData, type DocumentChooserDialogResult } from '../document-chooser-dialog/document-chooser-dialog.component';
 import { NotesService } from '../../../core/services/notes.service';
-import type { NoteWithTags, NoteAccessLevel } from '../../../core/models';
+import type { NoteWithTags, NoteAccessLevel, SmeMartResourceTag } from '../../../core/models';
 
 @Component({
   selector: 'app-note-editor-panel',
@@ -24,8 +26,8 @@ import type { NoteWithTags, NoteAccessLevel } from '../../../core/models';
   imports: [
     DatePipe, ReactiveFormsModule,
     MatButtonModule, MatIconModule, MatFormFieldModule, MatInputModule,
-    MatSelectModule, MatMenuModule, MatTooltipModule, MatSnackBarModule,
-    MarkdownView, MarkdownEditor, NoteTagEditor,
+    MatSelectModule, MatMenuModule, MatTooltipModule, MatSnackBarModule, MatDialogModule,
+    MarkdownView, MarkdownEditor, SmeResourceTagEditor,
   ],
   templateUrl: './note-editor-panel.component.html',
   styleUrl: './note-editor-panel.component.scss',
@@ -35,6 +37,7 @@ export class NoteEditorPanel {
   private readonly fb = inject(FormBuilder);
   private readonly notesService = inject(NotesService);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly dialog = inject(MatDialog);
 
   @ViewChild(MarkdownEditor) editor?: MarkdownEditor;
   @ViewChild('titleInput') titleInput?: ElementRef<HTMLInputElement>;
@@ -48,8 +51,13 @@ export class NoteEditorPanel {
     this.note.set(value);
   }
 
+  /** Engagement ID — needed to scope document chooser dialog. */
+  @Input() engagementId: string = '';
+
   @Output() noteSaved = new EventEmitter<NoteWithTags>();
   @Output() noteDeleted = new EventEmitter<string>();
+  /** Emitted when user clicks an sme-doc:// link in the note body. */
+  @Output() docLinkClick = new EventEmitter<string>();
 
   readonly submitting = signal(false);
 
@@ -226,16 +234,32 @@ export class NoteEditorPanel {
     }
   }
 
-  onTagsChanged(tagString: string | null): void {
+  onTagsChanged(tags: SmeMartResourceTag[]): void {
     const n = this.note();
     if (!n) return;
+    const tagString = tags.length > 0 ? tags.map(t => t.displayName).join(', ') : null;
     const updated: NoteWithTags = {
       ...n,
       tags: tagString,
-      tag_count: tagString ? tagString.split(', ').length : 0,
+      tag_count: tags.length,
     };
     this.note.set(updated);
     this.noteSaved.emit(updated);
+  }
+
+  openDocumentChooser(): void {
+    if (!this.engagementId) return;
+    const dialogRef = this.dialog.open(DocumentChooserDialog, {
+      data: { engagementId: this.engagementId } as DocumentChooserDialogData,
+      width: '480px',
+    });
+
+    dialogRef.afterClosed().subscribe((result: DocumentChooserDialogResult) => {
+      if (!result) return;
+      const displayName = result.display_name || result.filename;
+      this.editor?.insertDocLink(displayName, result.id);
+      this.form.get('body')!.markAsDirty();
+    });
   }
 
   discardChanges(): void {

@@ -29,13 +29,13 @@
       </mat-card-content>
     </mat-card>
 
-    @if (ctx.acceptedProposal(); as accepted) {
+    @if (ctx.acceptedBid(); as accepted) {
       <h3>Accepted Provider</h3>
-      <app-proposal-card
-        [proposal]="accepted"
+      <app-bid-card
+        [bid]="accepted"
         [isBuyer]="false"
-        [isOwnProposal]="false">
-      </app-proposal-card>
+        [isOwnBid]="false">
+      </app-bid-card>
     }
 
     @if (eng.zerobias_tag_id) {

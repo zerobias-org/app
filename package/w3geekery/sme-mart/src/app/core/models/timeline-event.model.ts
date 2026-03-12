@@ -4,8 +4,8 @@ import type { TaskAttachment } from '@zerobias-com/platform-sdk';
 export type TimelineEventType =
   | 'comment'
   | 'attachment'
-  | 'proposal_submitted'
-  | 'proposal_accepted';
+  | 'bid_submitted'
+  | 'bid_accepted';
 
 export interface TimelineActor {
   name: string;
@@ -32,25 +32,25 @@ export interface AttachmentPayload {
   attachment: TaskAttachment;
 }
 
-export interface ProposalSubmittedPayload {
-  type: 'proposal_submitted';
-  proposalId: string;
+export interface BidSubmittedPayload {
+  type: 'bid_submitted';
+  bidId: string;
   providerName: string;
   proposedPrice?: string;
   coverLetterPreview?: string;
 }
 
-export interface ProposalAcceptedPayload {
-  type: 'proposal_accepted';
-  proposalId: string;
+export interface BidAcceptedPayload {
+  type: 'bid_accepted';
+  bidId: string;
   providerName: string;
 }
 
 export type TimelinePayload =
   | CommentPayload
   | AttachmentPayload
-  | ProposalSubmittedPayload
-  | ProposalAcceptedPayload;
+  | BidSubmittedPayload
+  | BidAcceptedPayload;
 
 export interface TimelineEvent {
   id: string;

@@ -86,6 +86,10 @@ export class RfpList implements OnInit {
     }
   }
 
+  openWizard(): void {
+    this.router.navigate(['/rfps/new']);
+  }
+
   openNewRfpDialog(): void {
     const ref = this.dialog.open(RfpDialog, { width: '560px' });
     ref.afterClosed().subscribe((result) => {

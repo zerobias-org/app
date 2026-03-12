@@ -15,7 +15,7 @@ export interface AdminStats {
   total_requests: number;
   open_requests: number;
   total_engagements: number;
-  total_proposals: number;
+  total_bids: number;
   total_reviews: number;
   pending_reviews: number;
   active_services: number;

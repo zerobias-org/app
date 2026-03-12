@@ -14,7 +14,7 @@ import { ImpersonationService } from '../../../core/services/impersonation.servi
   template: `
     <zb-dialog
       title="Post an RFP"
-      subTitle="Describe what you're looking for and let providers submit proposals."
+      subTitle="Describe what you're looking for and let providers submit bids."
       actionLabel="Post RFP"
       [actionDisabled]="!formValid()"
       [actionProcessing]="saving()"

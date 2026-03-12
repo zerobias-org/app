@@ -1,0 +1,58 @@
+@if (readonly) {
+  <!-- Read-only: just show chips -->
+  @if (assignedTags().length > 0) {
+    <mat-chip-set>
+      @for (tag of assignedTags(); track tag.id?.toString()) {
+        <mat-chip class="tag-chip" zbChipColors [zbChipColor]="tagColor(tag)">
+          {{ tag.name }}
+        </mat-chip>
+      }
+    </mat-chip-set>
+  }
+} @else {
+  <!-- Editable: chips + autocomplete input -->
+  <mat-form-field appearance="outline" class="tag-field" subscriptSizing="dynamic">
+    <mat-chip-grid #chipGrid>
+      @for (tag of assignedTags(); track tag.id?.toString()) {
+        @if (isTagProtected(tag)) {
+          <mat-chip-row zbChipColors [zbChipColor]="tagColor(tag)" [disableRipple]="true">
+            <mat-icon class="protected-icon" matChipTrailingIcon matTooltip="System tag — cannot be removed">lock</mat-icon>
+            {{ tag.name }}
+          </mat-chip-row>
+        } @else {
+          <mat-chip-row zbChipColors [zbChipColor]="tagColor(tag)" (removed)="onChipRemoved(tag)">
+            {{ tag.name }}
+            <button matChipRemove>
+              <mat-icon>cancel</mat-icon>
+            </button>
+          </mat-chip-row>
+        }
+      }
+    </mat-chip-grid>
+
+    <input #tagInput
+           [id]="instanceId + '-input'"
+           placeholder="Add tag…"
+           [formControl]="tagCtrl"
+           [matChipInputFor]="chipGrid"
+           [matChipInputSeparatorKeyCodes]="separatorKeyCodes"
+           (matChipInputTokenEnd)="onChipInput($event)"
+           [matAutocomplete]="auto">
+
+    <mat-autocomplete #auto="matAutocomplete"
+                      [id]="instanceId + '-autocomplete'"
+                      (optionSelected)="onSelected($event)"
+                      [displayWith]="displayFn">
+      @for (tag of filteredSuggestions(); track tag.id?.toString()) {
+        <mat-option [value]="tag">
+          <span class="autocomplete-option">
+            @if (tagColor(tag)) {
+              <span class="color-dot" [style.background-color]="tagColor(tag)"></span>
+            }
+            {{ tag.name }}
+          </span>
+        </mat-option>
+      }
+    </mat-autocomplete>
+  </mat-form-field>
+}

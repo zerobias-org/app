@@ -66,22 +66,29 @@
               </div>
             </div>
 
-            <!-- Proposals Section -->
+            <!-- Bids Section -->
             <mat-divider></mat-divider>
-            <h3>Proposals ({{ parsedProposals().length }})</h3>
+            <div class="bids-header">
+              <h3>Bids ({{ parsedBids().length }})</h3>
+              @if (isOwner() && parsedBids().length >= 2) {
+                <button mat-stroked-button (click)="navigateToComparison()">
+                  <mat-icon>compare_arrows</mat-icon> Compare Bids
+                </button>
+              }
+            </div>
 
-            @if (parsedProposals().length === 0) {
-              <p class="no-proposals">No proposals yet.</p>
+            @if (parsedBids().length === 0) {
+              <p class="no-bids">No bids yet.</p>
             } @else {
-              @for (p of parsedProposals(); track p.id) {
-                <app-proposal-card
-                  [proposal]="p"
+              @for (p of parsedBids(); track p.id) {
+                <app-bid-card
+                  [bid]="p"
                   [isBuyer]="isOwner()"
-                  [isOwnProposal]="p.provider_id === currentProviderId()"
-                  (accept)="acceptProposal($event)"
-                  (reject)="rejectProposal($event)"
-                  (withdraw)="withdrawProposal($event)">
-                </app-proposal-card>
+                  [isOwnBid]="p.provider_id === currentProviderId()"
+                  (accept)="acceptBid($event)"
+                  (reject)="rejectBid($event)"
+                  (withdraw)="withdrawBid($event)">
+                </app-bid-card>
               }
             }
           </mat-card-content>
@@ -113,19 +120,19 @@
                 </button>
               }
             } @else if (currentProviderId()) {
-              @if (hasAlreadyProposed()) {
+              @if (hasAlreadyBid()) {
                 <p class="status-msg">
-                  <mat-icon>check_circle</mat-icon> You've submitted a proposal
+                  <mat-icon>check_circle</mat-icon> You've submitted a bid
                 </p>
               } @else if (status() === 'open') {
-                <button mat-flat-button color="primary" (click)="openProposalDialog()" class="action-btn">
-                  <mat-icon>rate_review</mat-icon> Submit Proposal
+                <button mat-flat-button color="primary" (click)="startBidWizard()" class="action-btn">
+                  <mat-icon>rate_review</mat-icon> Start Bid
                 </button>
               } @else {
-                <p class="status-msg">This RFP is no longer accepting proposals.</p>
+                <p class="status-msg">This RFP is no longer accepting bids.</p>
               }
             } @else {
-              <p class="status-msg">Create a provider profile to submit proposals.</p>
+              <p class="status-msg">Create a provider profile to submit bids.</p>
             }
           </mat-card-content>
         </mat-card>
