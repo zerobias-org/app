@@ -1,10 +1,12 @@
 # Plan: SME Mart Angular Rebuild
 
-**Last updated:** 2026-02-25
+**Last updated:** 2026-03-11 (033 Phase 4 complete, platformClient rename)
+
+> **Reference:** [Hierarchy Model](hierarchy-model.md) — Org → Engagement → Project → Boundary mapping, Notes scoping, permissions model, CEO/CIO directive reconciliation.
 
 ## Status
 
-**Phases 1–4 complete. Phase 5 in progress (Plans 015–025).**
+**Phases 1–4 complete. Phase 5 in progress (Plans 015–039).**
 
 | Phase | Status | Plan File |
 |-------|--------|-----------|
@@ -12,7 +14,7 @@
 | 2 — Database Layer (Generic SQL Hub Module) | **Complete** | (inline below) |
 | 3 — Service Layer | **Complete** | [`.claude/plans/local/phase-3-service-layer.md`](../local/phase-3-service-layer.md) |
 | 4 — Marketplace & Profiles | **Complete** | [`.claude/plans/local/phase-4-marketplace-profiles.md`](../local/phase-4-marketplace-profiles.md) |
-| 5 — Engagements & Admin | **In Progress** | Plans 015–025 below |
+| 5 — Engagements & Admin | **In Progress** | Plans 015–039 below |
 | 6 — ngx-library Re-skin & Polish | Pending | TBD |
 | 7 — Deployment | Pending | TBD |
 
@@ -27,12 +29,34 @@
 | 019 | Markdown Components (Milkdown Crepe + Renderer) | **Complete** | [`019-markdown-components.md`](../local/019-markdown-components.md) |
 | 020 | ~~Adaptive Assessments (Provider Vetting)~~ | **Cancelled** — ZB platform feature per Joe's clarification (2026-02-25) | [`020-adaptive-assessments.md`](../local/020-adaptive-assessments.md) |
 | 021 | ~~Credential Verification (Credly)~~ | **Cancelled** — ZB platform feature per Joe's clarification (2026-02-25) | [`021-credential-verification.md`](../local/021-credential-verification.md) |
-| 022 | Project Layer (Engagement → Project → Task) | **Stub** — needs ZB platform Project entity | [`022-project-layer.md`](../local/022-project-layer.md) |
+| 022 | Project Layer (Engagement → Project → Task hierarchy) | **Stub** — Engagement=corp-to-corp wrapper, Project=scoped work. Needs ZB platform Project entity. | [`022-project-layer.md`](../local/022-project-layer.md) |
 | 023 | Transparency Center (3-View Architecture) | **Stub** — needs project layer + subtask types | [`023-transparency-center.md`](../local/023-transparency-center.md) |
-| 024 | Readiness & Scoring | **Stub** — depends on 023, ZB extended user profile | [`024-readiness-scoring.md`](../local/024-readiness-scoring.md) |
+| 024 | Readiness & Scoring | **Stub** — Dan is building the Readiness Center; depends on 023, ZB extended user profile | [`024-readiness-scoring.md`](../local/024-readiness-scoring.md) |
 | 025 | ZB Platform Feature Requests | **Living doc** — track requests for Kevin/Chris | [`025-zb-platform-feature-requests.md`](../local/025-zb-platform-feature-requests.md) |
-| — | Engagement Tab Routes Refactor | **Complete** — child routes replace query params | [`engagement-tab-routes.md`](../local/engagement-tab-routes.md) |
-| 026 | Notes Feature | **In Progress** | [`026-notes-feature.md`](../local/026-notes-feature.md) |
+| 026 | Notes Feature | **Complete** | [`026-notes-feature.md`](../local/026-notes-feature.md) |
+| 027 | OneNote-Style Togglable Column Layout | **Complete** — notes column toggles (child of 026) | [`027-onenote-style-notes-layout.md`](../local/027-onenote-style-notes-layout.md) |
+| 028 | Drag-and-Drop for Folders & Notes | **Complete** — HTML5 drag-drop (child of 026) | [`028-dnd-folders-notes.md`](../local/028-dnd-folders-notes.md) |
+| 029 | Hierarchical Tag Naming Convention | **Complete** — `sme-mart.` prefix convention in SmeMartResourceService | [`029-hierarchical-tag-naming.md`](../local/029-hierarchical-tag-naming.md) |
+| 030 | SmeMartResource Abstraction Layer | **Complete** — service, mappers, unified interface | [`030-sme-mart-resource-abstraction.md`](../local/030-sme-mart-resource-abstraction.md) |
+| 031 | Document Upload to Engagement | **Complete** — upload UI, Neon catalog, graceful FileService degradation | [`031-document-upload-to-project.md`](../local/031-document-upload-to-project.md) |
+| 032 | RFP Creation Wizard | **Complete** — wizard scaffold, all 5 steps, requirements editor, JSON import, tag + publish flow, LLM prompt templates, method chooser, integration tests (16 passing). | [`032-rfp-creation-wizard.md`](../local/032-rfp-creation-wizard.md) |
+| 033 | Vendor Bid Response Flow | **Phases 1–4 complete** — extended bid model, per-requirement responses, compliance progress, buyer-side comparison + review. Phase 5 (LLM-assisted bid generation) pending. | [`033-vendor-bid-response.md`](../local/033-vendor-bid-response.md) |
+| 034 | GQL Schema Migration (AuditgraphDB) | **Phases 1–3 done** — PR #3 open on zerobias-org/schema, awaiting review by Daniel Rojas | [`034-gql-schema-migration.md`](../local/034-gql-schema-migration.md) |
+| 035 | Engagement Tab Routes Refactor | **Complete** — child routes replace query params | [`035-engagement-tab-routes.md`](../local/035-engagement-tab-routes.md) |
+| 036 | RFP / Engagement Route Split | **Complete** — separate RFP detail from engagement detail | [`036-rfp-engagement-split.md`](../local/036-rfp-engagement-split.md) |
+| 037 | ZB Resource Tag Editor Component | **Complete** — sme-resource-tag-editor + resource-tags-panel + autocomplete | [`037-zb-resource-tag-editor.md`](../local/037-zb-resource-tag-editor.md) |
+| 038 | Document-Notes Cross-Linking | **Complete** — all 5 phases done. sme-doc:// links, chooser dialog, marked renderer, toolbar button, notes search by doc link with filter banner. | [`038-document-notes-cross-linking.md`](../local/038-document-notes-cross-linking.md) |
+| 039 | Tag Prefix Migration (ENG- → sme-mart.) | **Complete** — utils, service, pipe, tests (79 passing) | [`039-tag-prefix-migration.md`](../local/039-tag-prefix-migration.md) |
+| 040 | Project Bloom (AI Document Decomposition) | **Draft** — accepted Bid → Engagement (corp-to-corp) + Project created → AI decomposes uploaded docs into typed task/subtask tree (~39 tasks, ~200 subtasks). Transparency Center activates. | TBD |
+| 041 | Supply-Side Vendor Profile (One-Time Load) | **Concept** — vendors load corporate docs, D&B, banking, background checks once. Pre-fills engagement requirements for every bid. "Programmatic buy, sell." | TBD |
+| 042 | Project Plugin (MCP + Templates + Parsers) | **Concept** — bundled plugin: MCP skills, document parsers, task type templates, questionnaire flow. AI generates structured projects. Dual-path: legacy doc ingestion + native creation. | TBD |
+| 043 | Proposal-to-Bid Rename Migration | **Complete** — all 8 phases done: models, services, mappers, components, routes, database (table+VIEWs+enum), plans, GQL schema. | [`043-proposal-to-bid-rename.md`](../local/043-proposal-to-bid-rename.md) |
+| 044 | Playwright E2E Smoke Tests | **Backlog** — convert Chrome DevTools MCP smoke tests (`.claude/smoke-tests/`) to Playwright specs for unattended CI-capable regression testing. ~1-2 hrs for first spec (RFP wizard). | TBD |
+| 045 | ~~RFP Document Chooser~~ | **Superseded** by Plan 046 Phase 4 (OrgDocumentChooser with scope filtering) | — |
+| 046 | Org-Level Document Management | **Phases 1–5 complete, 7 complete** — OrgDocumentService, file manager UI, sharing + visibility, OrgDocumentChooser, org tabs, tests. Phase 6 (org switcher) deferred. Phase 8 (external storage imports) deferred. Phase 9 roadmap: folders, colors, tagging UI, archive browser, versioning, PDF conversion, preview, bulk ops, templates. | [`046-org-document-management.md`](../local/046-org-document-management.md) |
+| 047 | Shared Notes & Versioning | **Draft** — per-user sharing, note versioning (with version browser/search/copy), Shared Notebook, timeline integration (share/pin events), pinned notes, task-linked checkboxes (read-only status reflection). 32–40 hrs across 8 phases. | [`047-shared-notes-and-versioning.md`](../local/047-shared-notes-and-versioning.md) |
+| 048 | Notification Center | **Backlog** — in-app notification system (bell icon, unread badge, dropdown panel). Event types: note_shared, bid_received, task_assigned, document_shared. Designed for migration into ZB platform events. 8–12 hrs. | TBD |
+| 049 | Unit Testing Strategy | **In Progress** — Vitest + Angular TestBed. Baseline: 14 specs / 209 tests. Phases: mappers+pipes → presentational components → dialog/form components → services → page components. Target: 80% coverage, ~358 tests. | [`049-unit-testing-strategy.md`](../local/049-unit-testing-strategy.md) |
 
 ### What's built (Phases 1–4)
 
@@ -40,7 +64,7 @@
 
 **Data layer (P2):** `SmeMartDbService` — DataProducer client connection to Neon via Generic SQL Hub Module, CRUD operations, 6 Neon VIEWs for consolidated reads.
 
-**Service layer (P3):** 10 services (catalog, user-preferences, provider-profiles, service-offerings, work-requests, proposals, engagement-lifecycle, reviews, categories, admin) + 8 model files.
+**Service layer (P3):** 10 services (catalog, user-preferences, provider-profiles, service-offerings, work-requests, bids (was proposals), engagement-lifecycle, reviews, categories, admin) + 8 model files.
 
 **Marketplace & Profiles (P4):**
 - **Pages:** Home (hero + search + categories + featured), ProviderList (card grid + 6-type catalog filters + search + sort + mobile drawer), ProviderDetail, ServiceCatalog, MyProfile (overview/expertise/services/reviews with sidebar nav)
@@ -54,6 +78,127 @@
 - **Markdown Components:** MarkdownView (read-only, `marked`-based), MarkdownEditor (Milkdown Crepe wrapper with static toolbar — bold, italic, strike, headings, lists, code, links, tables)
 - **Services:** EngagementTasksService, EngagementTimelineService (ZB Tasks + Boundary Events APIs)
 - **Global styles:** `.task-status-chip` with ZB platform color palette, `.transition-row` / `.transition-menu` for CDK overlay menus
+
+## Marketplace Roadmap (Brian, 2026-03-03; updated 2026-03-06 taxonomy + project plugin)
+
+Brian defined a 3-phase marketplace build-out. Updated 2026-03-06 with:
+- **Taxonomy overhaul:** "Proposal" removed from vocabulary. Vendor response = **Bid**. RFP = Request for **Project**.
+- **Engagement/Project hierarchy:** Engagement = corp-to-corp wrapper (D&B, banking, officer checks, MSA). Project = scoped work under an Engagement. One Engagement → many Projects.
+- **Project plugin concept:** Bundled MCP + templates + parsers for AI-driven project creation.
+- **CDPH RFP validation:** Real 17-document government RFP confirmed the architecture (see [`.claude/notes/cdph-rfp-analysis.md`](../../notes/cdph-rfp-analysis.md)).
+
+**Key insight:** The RFP is a lightweight storefront listing. The full task/subtask decomposition "blooms" only AFTER a Bid is accepted and the Project is created under an Engagement.
+
+```
+Engagement (corp-to-corp) ← set up once per vendor/buyer relationship
+  |-- D&B, banking, officer background checks, MSA (optional umbrella)
+  |-- Bidirectional: buyer AND vendor have requirements at this level
+  |
+  |-- Project (scoped work) ← created when Bid is accepted
+      |-- Tasks / SubTasks (AI-decomposed from RFP documents)
+      |-- MSA (optional, project-scoped)
+      |-- Deliverables, milestones
+
+Lifecycle:
+  RFP (storefront)     →    Bid (vendor response)    →    Engagement + Project (bloom)
+  ---                        ---                           ---
+  Upload documents           Approach narrative             Engagement: corp vetting (if new)
+  AI suggests domain tags    Price + timeline               Project: AI decomposes docs →
+  Buyer description          Team qualifications              ~39 tasks, ~200 subtasks
+  Budget range               <- no subtasks exist ->       Both parties refine
+  Post to marketplace                                      Transparency Center activates
+```
+
+### Phase 1 — RFP + Bid + Engagement/Project Creation (Plans 031–033, 039–042)
+
+- **Document upload** — buyers upload procurement docs (exhibits, SOWs, budgets) to RFP (Plan 031 — complete)
+- **RFP creation wizard** — lightweight: upload docs, AI suggests domain-level summary (6 typed categories: Functional, Security, Compliance, Legal, Financial, Evaluation), buyer writes description + budget range. NO subtask decomposition at this stage. (Plan 032)
+- **Vendor bid flow** — vendor reads RFP description + browses uploaded documents, submits Bid: approach narrative, pricing, timeline, team qualifications. NOT responding to subtasks (they don't exist yet). (Plan 033)
+- **Bid negotiation** — demand-side accept/reject/request changes loop (Plan 033)
+- **Engagement creation** — accepted Bid triggers Engagement (corp-to-corp vetting: D&B, banking, officer checks). May already exist if corps have worked together before. (Plan 022)
+- **Project bloom** — Project created under Engagement → AI decomposes uploaded documents into full typed task/subtask tree (~39 tasks, ~200 subtasks for a complex RFP). Both parties review and refine. Transparency Center activates. (Plan 040)
+- **Supply-side vendor profile** — vendors pre-load corporate docs, D&B, banking, background checks once. Auto-fills engagement requirements for every bid. (Plan 041)
+- **Project plugin** — bundled MCP + templates + parsers. Dual-path: ingest legacy docs OR AI-driven questionnaire for native project creation. (Plan 042)
+
+### Phase 2 — Engagement Execution (future plans)
+
+- **Demand/supply view filtering** — role-based visibility of task data (buyer sees requirements, provider sees obligations, shared = transparency)
+- **Task status state machine** — pending -> in_progress -> awaiting_approval -> completed
+- **Task approval workflow** — vendor completes -> demand reviews -> approve/reject per subtask
+- **Evidence/artifact linking** — provider attaches certs, audit reports, policies to specific subtasks
+- **Invoice generation** — auto-generate on approval with line items per task/subtask
+- **Progress indicators** — domain-level rollups (e.g., "Security: 78%, Compliance: 92%") + on-track/behind/ahead
+- **Scope adjustment** — formal change request process with audit trail
+- **~~Compliance standard references~~** — ZB platform strength; framework mapping + evidence collection handled natively. SME Mart just connects engagements to boundaries.
+
+### Phase 3 — Observability + Audit (Plans 023, future)
+
+- **Transparency center** — shared audit trail visible to both parties + 3rd-party assessors/insurers (Plan 023, blocked by ZB-1/ZB-2/ZB-3)
+- **Readiness scoring** — subtask completion rolls up to domain-level readiness (depends on ZB Scoring App)
+- **C-Traces** — cognitive traces for agent decisioning context
+- **Compliance tracking** — data classification (PII/CUI/HIPAA) with access logging
+- **Living documentation** — meetings surface tasks, engagement docs evolve
+
+### CDPH RFP Reference (2026-03-06)
+
+The CDPH HBEDS RFP (`.claude/references/CA Department of Public Health RFP/`) is the gold-standard reference for demand-side architecture. Key metrics from full decomposition:
+
+| Metric | Value |
+|--------|-------|
+| Documents in RFP | 17 (7 exhibits + 4 attachments + master RFP + datasets) |
+| Domain types needed | 6 (Functional, Security, Compliance, Legal, Financial, Evaluation) |
+| Top-level tasks | ~39 |
+| Total subtasks | ~200 |
+| Data elements (Exhibit A2) | 78 CDC/NHSN fields |
+| Compliance standards referenced | NIST SP800-53, OWASP ASVS, FIPS-140, HIPAA, PCI DSS, FIDO2 |
+
+Full analysis: [`.claude/notes/cdph-rfp-analysis.md`](../../notes/cdph-rfp-analysis.md)
+
+### Gaps Identified from CDPH RFP Analysis (2026-03-06)
+
+| Gap | Priority | Affects Plan | Notes |
+|-----|----------|-------------|-------|
+| **Structured pricing model** | High | 033, 040 | Bids need recurring + one-time + tiered pricing fields (e.g., quarterly per-facility subscription + onboarding fee + 5-year projections). Current bid model is free-text only. |
+| **Bidder qualification profiles** | Medium | 033 | Exhibit G requires past performance references, key personnel bios, org charts, similar project experience. Provider profile needs structured quals beyond free-text. Individual certs deferred to ZB platform (Plan 021 cancelled). |
+| **Timeline/milestone tracking** | Medium | 040 | RFPs have hard dates (implementation deadlines, go-live milestones). Engagements need milestone entities with date tracking + status. |
+| **Exhibit overlap detection** | Low | 040 | ~30% overlap between CDPH Privacy (Exhibit E) and Security (Exhibit F) requirements. AI decomposition should cross-reference and deduplicate during bloom. |
+| **Multi-facility/scope support** | Low | 032 | CDPH covers 105 hospitals across 27 counties. RFP scope may span multiple facilities — engagement model currently assumes one-to-one buyer/provider. |
+| **Supply-side vendor profile (one-time load)** | High | 041 | Vendors need to load corporate docs, D&B, banking, background checks once and pre-fill for every engagement. Currently no vendor profile entity beyond provider_profiles. (2026-03-06) |
+| **Bidirectional requirements model** | Medium | 022, 041 | Both buyer and vendor have requirements at Engagement and Project levels. Need a generic "requirements" concept that flows in both directions, not just demand→supply. (2026-03-06) |
+| **Engagement-level corp vetting** | High | 022 | D&B rating, banking info, officer background checks, C Corp/LLC verification, financial statements. Currently no engagement-level requirements model — all requirements are at task level. (2026-03-06) |
+| **~~Compliance standard linking~~** | ~~Low~~ | N/A | ZB platform strength — framework mapping + evidence collection handled natively. Not an SME Mart concern. |
+
+### Platform Alignment Roadmap
+
+Items to align SME Mart with the ZeroBias platform for eventual migration:
+
+| Item | Priority | Status | Notes |
+|------|----------|--------|-------|
+| **GQL Schema Package** | High | **PR #3 open** (Phases 1–3 done, awaiting Daniel Rojas review) | 7 classes, 21 fields, 5 enums in `zerobias-org/schema` — Plan 034. Entities: Engagement, Bid, ServiceOffering, Review, Note, NoteFolder, SmeMartDocument. **Note:** Bid entity replaces Proposal; Engagement/Project hierarchy may require schema restructure. See [howto](.claude/notes/zb-graphql-custom-schema-howto.md), [internals](.claude/notes/zb-graphql-schema-extension-guide.md) |
+| **Task-backed Reviews** | Medium | Planned | Reviews use ZB Task approval workflow instead of custom status field |
+| **`@zerobias-org/types-core-js` — PagedResults\<T\>** | Low | Evaluate | Replace custom pagination wrappers with `PagedResults<T>` from `@zerobias-org/types-core-js`. Also evaluate error classes (`NotFoundError`, `ConflictError`, etc.) for service layer. Note: requires Node 22+ ESM — verify Angular 21 build compat first. No `Decimal` type available (blocker for financial amounts). Full comparison: [`.claude/notes/zerobias-org-types-comparison.md`](.claude/notes/zerobias-org-types-comparison.md) |
+| **~~`zerobias-org/tag` audit~~** | ~~Low~~ | **N/A** | Repo is empty (no commits, no files). No canonical tag taxonomies exist yet. |
+| **Document / Service Offering** | Pending | Blocked on Kevin | Kevin says "covered" by platform — need clarification on whether these are existing ZB types or defined via GQL schema extension |
+
+### Key Architecture Decisions (2026-03-03; updated 2026-03-06)
+
+| Decision | Detail |
+|----------|--------|
+| **Engagement/Project hierarchy** | Engagement = corp-to-corp wrapper (D&B, banking, officer checks, entity verification, optional umbrella MSA). Project = scoped work under Engagement. One Engagement → many Projects. Analogues: Fed gov "Facility", Deel "Contract". (2026-03-06) |
+| **Terminology** | RFP = Request for Project. Vendor response = Bid (NOT Proposal). "Proposal" removed from vocabulary. (2026-03-06) |
+| **Bidirectional requirements** | Both buyer AND vendor have requirements at Engagement and Project levels. Vendor needs: tech lead, AP contact, support contacts. Not a one-way street. (2026-03-06) |
+| **MSA flexibility** | MSA can attach at Engagement level (umbrella) OR Project level (scoped). Not hardcoded to one. (2026-03-06) |
+| **RFP → Bid → Project (phased bloom)** | RFP is lightweight storefront (docs + description + budget). Accepted Bid triggers Engagement (if new corp relationship) + Project creation. AI then decomposes uploaded docs into full typed task/subtask tree. Both parties refine before execution begins. |
+| **Project plugin** | Bundled MCP skills + document parsers + task type templates + questionnaire. Dual-path: legacy doc ingestion AND native AI-driven creation. "Build for the new world, support the old world." (2026-03-06) |
+| **Supply-side one-time profile** | Vendors load corporate docs/D&B/banking/background checks once. Pre-fills for every engagement. "Programmatic buy, sell." (2026-03-06) |
+| **Task status lifecycle** | pending → in_progress → awaiting_approval → completed |
+| **Approval gates billing** | Demand-side must approve before invoice generation |
+| **Three-sided visibility** | Demand (requirements + status), Supply (execution + internal notes), Shared (audit trail) |
+| **Scope adjustment** | Formal change request with audit trail (original → proposed → agreed) |
+| **Data classification** | PII/CUI/HIPAA/confidential — affects access control + audit logging |
+| **Platform realization** | Vendor → Org. Service offering → Boundary. Owner → Principal (org or user). Per Kevin. (2026-03-06) |
+
+---
 
 ## Context
 
@@ -107,9 +252,9 @@ SME Mart Angular is being built as an **"Outside Vendor" app** — as if a ZeroB
 
 - **Neon PostgreSQL** — same database, same schema (15 tables, 6 enums)
 - **ZeroBias SDK** — same platform APIs for auth, orgs, catalog, boundaries, tasks, tags
-- **Marketplace concept** — providers, buyers, work requests, proposals, engagements
+- **Marketplace concept** — providers, buyers, work requests, bids, engagements
 - **NICE Framework** integration — roles, skills, knowledge for provider expertise
-- **Engagement lifecycle** — RFP → Proposal Accept → Engagement with `ENG-` tags
+- **Engagement lifecycle** — RFP (storefront) → Bid Accept → Engagement Bloom (AI decomposition) with `sme-mart.` tags
 - **BIP39-style tag generation** — `ENG-word-word` human-readable identifiers
 - **PKV-backed preferences** — role toggle, filter persistence
 
@@ -173,7 +318,7 @@ The Generic SQL Hub Module solves the **credential security problem**: Neon Post
 | Reason | Severity | Workaround with Generic SQL |
 |--------|----------|----------------------------|
 | Server-side JOINs (provider + skills + frameworks) | Medium | Multiple queries + client-side join, or Neon VIEWs |
-| Business logic validation (e.g., proposal acceptance rules) | Medium | Client-side validation (less secure but functional) |
+| Business logic validation (e.g., bid acceptance rules) | Medium | Client-side validation (less secure but functional) |
 | Computed fields (SME Score, response time averages) | Low | Neon VIEWs or computed columns |
 | Rate limiting / abuse prevention | Low | Platform-level rate limiting |
 | Custom API semantics (typed endpoints vs generic CRUD) | Low | Service layer provides typed abstraction |
@@ -236,7 +381,7 @@ sme-mart/
 │   │   │   └── service-catalog/          # Service offerings browse
 │   │   ├── engagements/                  # RFP & Engagement lifecycle
 │   │   │   ├── engagement-list/          # Browse RFPs/Engagements with lifecycle toggle
-│   │   │   ├── engagement-detail/        # Dual view: RFP proposals OR Transparency Center
+│   │   │   ├── engagement-detail/        # Dual view: RFP bids OR Transparency Center
 │   │   │   ├── engagement-form/          # Create/edit RFP
 │   │   │   └── transparency-center/      # Overview, Details, Messages*, Files*
 │   │   ├── profile/                      # Provider self-management
@@ -252,7 +397,7 @@ sme-mart/
 │   │   │   └── settings/                 # Registration, notifications, security toggles
 │   │   ├── landing/                      # Landing page (hero, categories, featured)
 │   │   ├── shared/                       # Shared components
-│   │   │   ├── components/               # ProviderCard, EngagementCard, ProposalCard, etc.
+│   │   │   ├── components/               # ProviderCard, EngagementCard, BidCard, etc.
 │   │   │   ├── catalog/                  # CatalogAutocomplete, filter components (6 types)
 │   │   │   ├── layout/                   # AppTopBar, UserProfileDropdown, ProfileSidebar
 │   │   │   └── pipes/                    # Custom pipes
@@ -261,7 +406,7 @@ sme-mart/
 │   │       │   ├── sme-mart-db.service.ts        # Generic SQL DataProducer
 │   │       │   ├── provider-profiles.service.ts   # Provider CRUD (7 related tables)
 │   │       │   ├── work-requests.service.ts       # RFP/engagement CRUD + lifecycle
-│   │       │   ├── proposals.service.ts           # Proposal CRUD + acceptance workflow
+│   │       │   ├── bids.service.ts              # Bid CRUD + acceptance workflow
 │   │       │   ├── reviews.service.ts             # Reviews + moderation workflow
 │   │       │   ├── categories.service.ts          # Hierarchical category CRUD
 │   │       │   ├── catalog.service.ts             # ZB catalog (roles, skills, etc.)
@@ -271,7 +416,7 @@ sme-mart/
 │   │       └── models/
 │   │           ├── provider.model.ts
 │   │           ├── work-request.model.ts
-│   │           ├── proposal.model.ts
+│   │           ├── bid.model.ts
 │   │           ├── review.model.ts
 │   │           ├── category.model.ts
 │   │           └── enums.ts                       # 6 enums from schema
@@ -323,7 +468,7 @@ The Next.js prototype has grown substantially. This is the complete feature set 
 | `/` | Landing page — hero, category cards, featured providers, search | Complete |
 | `/services` | Service catalog — primary catalog, provider as facet (context menu), catalog filters | Complete |
 | `/rfps` | RFP list — public RFP browse, status/sort/catalog filters, "Post an RFP" dialog | Complete |
-| `/rfps/[id]` | RFP detail — proposals, accept/reject/withdraw, Transparency Center scaffolded | Complete |
+| `/rfps/[id]` | RFP detail — bids, accept/reject/withdraw, Transparency Center scaffolded | Complete |
 | `/providers` | Provider directory — card grid, catalog filters, search, sort (footer link, not in nav) | Complete |
 | `/providers/[id]` | Provider detail — skills, services, reviews, contact CTA | Complete |
 | `/my/engagements` | My Engagements — private, user's engagements only (lazy, user dropdown) | Complete |
@@ -344,9 +489,9 @@ The Next.js prototype has grown substantially. This is the complete feature set 
 | `UserProfileDropdown` | Avatar, role toggle (Buyer/Provider/Both), edit profile, admin, theme toggle, logout |
 | `ProviderCard` | Provider card for grid listings |
 | `ServiceCard` | Service offering card |
-| `EngagementCard` | RFP/Engagement card with lifecycle label, proposal summary |
-| `ProposalForm` | Dialog for submitting proposals |
-| `ProposalCard` | Proposal display with accept/reject/withdraw actions |
+| `EngagementCard` | RFP/Engagement card with lifecycle label, bid summary |
+| `BidForm` | Dialog for submitting bids |
+| `BidCard` | Bid display with accept/reject/withdraw actions |
 | `EngagementForm` | RFP creation/edit form |
 | `CatalogFilters` / `ProviderFilters` | Catalog filter sidebar (6 filter types) |
 | `FilterEnabler` | Toggle which filter categories are visible |
@@ -374,7 +519,7 @@ The Next.js prototype has grown substantially. This is the complete feature set 
 
 ### Database Schema (15 Tables, 6 Enums)
 
-**Enums:** `availability_status`, `pricing_type`, `budget_type`, `request_status`, `proposal_status`, `proficiency_level`
+**Enums:** `availability_status`, `pricing_type`, `budget_type`, `request_status`, `bid_status`, `proficiency_level`
 
 **Tables:**
 - `marketplace_users` — Central identity linking to ZeroBias Dana user
@@ -387,7 +532,7 @@ The Next.js prototype has grown substantially. This is the complete feature set 
 - `provider_service_segments` — Links to professional service categories
 - `service_offerings` — Productized service listings (pricing, delivery time, includes)
 - `work_requests` — RFPs/engagements (engagementTag presence = engagement phase)
-- `proposals` — Provider bids on RFPs (cover letter, price, timeline, status)
+- `bids` — Provider bids on RFPs (cover letter, price, timeline, status)
 - `reviews` — Reviews with approval workflow (approved, approvedAt, approvedBy)
 - `categories` — Hierarchical marketplace taxonomy (self-referencing parent/child)
 - `app_settings` — Admin-configurable key-value settings
@@ -548,7 +693,7 @@ export class SmeMartDbService {
 ```
 /db:neondb/schema:public/table:provider_profiles
 /db:neondb/schema:public/table:work_requests
-/db:neondb/schema:public/table:proposals
+/db:neondb/schema:public/table:bids
 ```
 
 ### 2.3 RFC4515 Filter Builder
@@ -736,7 +881,7 @@ FROM work_requests wr
 LEFT JOIN marketplace_users mu ON wr.buyer_user_id = mu.id;
 ```
 
-#### `v_engagement_detail` — Engagement detail page (engagement + all proposals with provider info)
+#### `v_engagement_detail` — Engagement detail page (engagement + all bids with provider info)
 
 ```sql
 CREATE VIEW v_engagement_detail AS
@@ -788,7 +933,7 @@ SELECT
   (SELECT count(*) FROM work_requests) AS total_requests,
   (SELECT count(*) FROM work_requests WHERE status = 'open') AS open_requests,
   (SELECT count(*) FROM work_requests WHERE engagement_tag IS NOT NULL) AS total_engagements,
-  (SELECT count(*) FROM proposals) AS total_proposals,
+  (SELECT count(*) FROM bids) AS total_bids,
   (SELECT count(*) FROM reviews) AS total_reviews,
   (SELECT count(*) FROM reviews WHERE approved = false AND approved_at IS NULL) AS pending_reviews,
   (SELECT count(*) FROM service_offerings WHERE is_active = true) AS active_services;
@@ -801,7 +946,7 @@ READ (via VIEWs — 1 query):                WRITE (via tables — 1 query each)
 ─────────────────────────────               ────────────────────────────────────
 v_provider_directory → provider list        provider_profiles → update profile
 v_provider_detail → provider profile        provider_skills → add/remove skill
-v_engagement_summary → engagement list      proposals → submit proposal
+v_engagement_summary → engagement list      bids → submit bid
 v_engagement_detail → engagement detail     work_requests → create RFP
 v_admin_reviews → review moderation         reviews → approve/reject
 v_admin_stats → admin dashboard             categories → CRUD
@@ -832,7 +977,7 @@ These use `@zerobias-com/zerobias-angular-client` directly:
 | `ProviderProfilesService` | `provider_profiles` + 6 relation tables | List/filter providers, CRUD profile, manage expertise |
 | `ServiceOfferingsService` | `service_offerings` | CRUD productized services |
 | `WorkRequestsService` | `work_requests` | Create RFP, list/filter, lifecycle management |
-| `ProposalsService` | `proposals` | Submit/accept/reject/withdraw, acceptance triggers engagement |
+| `BidsService` | `bids` | Submit/accept/reject/withdraw, acceptance triggers engagement |
 | `ReviewsService` | `reviews` | CRUD + moderation workflow (approve/reject) |
 | `CategoriesService` | `categories` | Hierarchical category CRUD |
 | `AdminService` | `app_settings`, cross-table stats | Admin dashboard data, bulk operations |
@@ -905,10 +1050,10 @@ Components consume via `async` pipe or `toSignal()`.
 
 ### 5.1 Engagement Browse Page
 - Lifecycle toggle: RFPs | Engagements | All
-- "My Proposals" chip filter for providers
+- "My Bids" chip filter for providers
 - Catalog filters (same 6-type system)
 - "Post an RFP" CTA
-- `EngagementCard` with lifecycle label chip (RFP vs Engagement), proposal count
+- `EngagementCard` with lifecycle label chip (RFP vs Engagement), bid count
 
 ### 5.2 Create/Edit RFP
 - Form: title, description, category, budget type/range, timeline
@@ -917,7 +1062,7 @@ Components consume via `async` pipe or `toSignal()`.
 
 ### 5.3 Engagement Detail — Dual View
 - **RFP view** (when `engagementTag` is null):
-  - Proposal list with accept/reject/withdraw actions
+  - Bid list with accept/reject/withdraw actions
   - `ProposalForm` dialog for submitting proposals
   - `ProposalCard` display
 - **Transparency Center view** (when `engagementTag` is present):

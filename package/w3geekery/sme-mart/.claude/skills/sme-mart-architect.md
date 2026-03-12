@@ -299,7 +299,7 @@ AppComponent (shell)
 Build these as standalone, reusable across routes:
 - `ProviderCardComponent` — card for grid listings
 - `EngagementCardComponent` — RFP/Engagement card with lifecycle chip
-- `ProposalCardComponent` — proposal display with actions
+- `BidCardComponent` — bid display with actions
 - `CatalogFilterPanelComponent` — 6-type filter sidebar
 - `CatalogAutocompleteComponent` — base autocomplete for catalog items
 - `ProfileSidebarComponent` — my-profile navigation

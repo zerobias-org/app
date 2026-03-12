@@ -8,6 +8,7 @@
 | **SME Mart Next.js** (deprecated) | `~/Projects/w3geekery/zerobias-org-forks/app/package/w3geekery/sme-mart-nextjs-deprecated` | Archived, gitignored, on disk for reference |
 | **SME Mart Hub Module** | `~/Projects/w3geekery/zerobias-org-forks/module/package/w3geekery/sme-mart` | Custom Hub Module (may not be needed if Generic SQL suffices) |
 | **SME Mart Login** | `~/Projects/w3geekery/zerobias-org-forks/login/package/w3geekery` | Branded login page |
+| **SME Mart GQL Schema** | `~/Projects/w3geekery/zerobias-org-forks/schema/package/w3geekery/sme-mart` | AuditgraphDB schema (PR #3 on `zerobias-org/schema`) |
 
 ## ZeroBias Platform UI
 

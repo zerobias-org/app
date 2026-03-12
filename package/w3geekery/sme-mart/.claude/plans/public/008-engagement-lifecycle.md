@@ -51,7 +51,7 @@ Based on competitor research from Upwork and Fiverr official documentation (see 
 |-----|--------|--------|------------------|--------|
 | **Messaging System** | Messages workspace + Direct Messages | Inbox with file sharing, Zoom | ❌ None | Buyers/providers can't communicate pre-engagement |
 | **Escrow/Payment Protection** | Project Funds with 14-day review | Funds held until complete + 14-day clearance | ❌ Off-platform only | No buyer protection, no trust |
-| **Contract/Agreement** | Formal contracts with milestones | Gig package = implicit contract | ❌ Proposal acceptance only | No formal terms, scope disputes likely |
+| **Contract/Agreement** | Formal contracts with milestones | Gig package = implicit contract | ❌ Bid acceptance only | No formal terms, scope disputes likely |
 | **Time/Work Tracking** | Desktop app + Work Diary | Milestone-based + hourly work | ❌ Manual only | No visibility into work progress |
 | **Dispute Resolution** | 7-day → mediation → arbitration | Resolution Center (48hr response) | ❌ None defined | No recourse when things go wrong |
 | **Auto-Complete Timer** | 14 days no response = approved | 3 days (8 for milestones) | ❌ None | Engagements can stall indefinitely |
@@ -115,8 +115,8 @@ Based on competitor research from Upwork and Fiverr official documentation (see 
 
 **Implemented:**
 - Work Request creation (title, description, category, budget, timeline)
-- Proposal submission (cover letter, price, timeline)
-- Proposal accept/reject workflow
+- Bid submission (cover letter, price, timeline)
+- Bid accept/reject workflow
 - Status progression: `open` → `in_progress` → `completed` / `cancelled`
 - Reviews and ratings (with approval workflow)
 - Provider profiles with skills, services, stats
@@ -149,16 +149,16 @@ BUYER                                    PROVIDER
   │                                 Requests │
   │                                          │
   │                           3. Submit  ◀───┤
-  │                              Proposal    │
+  │                              Bid         │
   │   ┌──────────────────────────────────────┤
   │   │  (cover letter, price, timeline)     │
   │   ▼                                      │
-  ├─▶ 4. Review Proposals                    │
+  ├─▶ 4. Review Bids                         │
   │                                          │
   │   ┌─── 5. Clarifying Questions? ─────────┤  [GAP: No messaging]
   │   │                                      │
   │   ▼                                      │
-  ├─▶ 6. Accept Proposal                     │
+  ├─▶ 6. Accept Bid                          │
   │                                          │
   │   ════════ ENGAGEMENT BEGINS ════════    │
   │                                          │
@@ -275,7 +275,7 @@ How do buyers and providers communicate during the engagement lifecycle?
 - Both track response times and it affects search ranking
 
 **SME Mart Approach:**
-1. Phase 1: Proposal comments only (already have this structure)
+1. Phase 1: Bid comments only (already have this structure)
 2. Phase 1.5: Add simple inbox for pre-engagement inquiries (track response time)
 3. Phase 2+: All work communication via ZB Tasks (full audit trail)
 
@@ -305,7 +305,7 @@ What formalizes the engagement agreement?
 
 **SME Mart Approach:**
 1. For Service Catalog purchases: Service package defines the "contract" (Fiverr model)
-2. For Work Requests: Accepted proposal terms become the contract (Upwork model)
+2. For Work Requests: Accepted bid terms become the contract (Upwork model)
 3. Auto-generate summary document with: parties, scope, deliverables, price, timeline, revision count, payment terms
 
 ---
@@ -515,7 +515,7 @@ Buyer has 7 days to:
 
 **Revision Limits:**
 - For Service Catalog: Defined in package (e.g., Basic: 1 revision, Premium: 3)
-- For Work Requests: Specified in proposal terms
+- For Work Requests: Specified in bid terms
 - Unlimited revisions = scope creep risk, discourage
 
 **File Handling:**
@@ -583,21 +583,21 @@ How do we handle conflicts between buyers and providers?
 
 **Changes (Original):**
 1. Add "Hire" button on provider profiles → Creates targeted Work Request
-2. Add engagement summary generation on proposal acceptance
+2. Add engagement summary generation on bid acceptance
 3. Add payment status field (pending/paid) - manually updated
 4. Auto-update provider stats (jobs completed, earnings) on completion
 5. Add basic engagement history view on My Profile
 
 **Additional Changes (from Research):**
 6. Add response time tracking and display on provider profiles
-7. Add revision count field to proposals and service packages
+7. Add revision count field to bids and service packages
 8. Add delivery/completion workflow with timer (7-day auto-complete)
 9. Add 3-tier pricing structure to service offerings (Basic/Standard/Premium)
 10. Calculate and display provider "SME Score" (composite metric)
 
 **User Experience:**
 ```
-Work Request → Proposal → Accept → Summary Generated → Work (external) →
+Work Request → Bid → Accept → Summary Generated → Work (external) →
 Submit Deliverable → 7-day Review Window → Accept/Revise → Complete →
 Update Payment Status → Review Prompt → Stats Updated
 ```
@@ -607,7 +607,7 @@ Update Payment Status → Review Prompt → Stats Updated
 - New field: `work_requests.engagement_summary` (generated text/JSON)
 - New field: `work_requests.deliverable_submitted_at` timestamp
 - New field: `work_requests.revision_count` integer (used vs allowed)
-- New field: `proposals.revisions_included` integer
+- New field: `bids.revisions_included` integer
 - New fields for service_offerings: `basic_price`, `standard_price`, `premium_price`, `basic_includes`, etc.
 - New field: `provider_profiles.response_time_avg` decimal (calculated)
 - New field: `provider_profiles.sme_score` decimal (0-100, calculated)
@@ -634,7 +634,7 @@ Update Payment Status → Review Prompt → Stats Updated
 
 **User Experience:**
 ```
-... Accept Proposal → Boundary Created → Provider Invited →
+... Accept Bid → Boundary Created → Provider Invited →
 Task Created → Work in Boundary → Task Updates →
 Task Complete → Engagement Complete → ...
 ```
@@ -663,7 +663,7 @@ Task Complete → Engagement Complete → ...
 
 **User Experience:**
 ```
-... Accept Proposal → Payment/Escrow Setup → Funds Held →
+... Accept Bid → Payment/Escrow Setup → Funds Held →
 Work Complete → Buyer Approves → Funds Released (minus fee) →
 Provider Receives Payout
 ```
@@ -860,7 +860,7 @@ Clicking "Hire Jane" → Opens Work Request form pre-filled:
 
 ### Phase 1
 - [ ] 5+ engagements completed through platform
-- [ ] Engagement summary generated for all accepted proposals
+- [ ] Engagement summary generated for all accepted bids
 - [ ] Provider stats auto-updating correctly
 - [ ] Users can view engagement history
 
@@ -907,7 +907,7 @@ Clicking "Hire Jane" → Opens Work Request form pre-filled:
 5. ⚠️ **On-Time Delivery Tracking** - Missing performance metric
 
 ### Future Enhancements (Nice to Have)
-1. Connects/credit system for proposal quality
+1. Connects/credit system for bid quality
 2. Boosted/featured listings
 3. Video call integration
 4. Milestone-based payments

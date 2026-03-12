@@ -25,9 +25,11 @@ Quick reference for common Neon MCP queries against the SME Mart database.
 | `provider_skills` | Provider skills/competencies |
 | `service_offerings` | Packaged services a provider offers |
 | `work_requests` | RFPs (open) and Engagements (in_progress) |
-| `proposals` | Provider proposals on work_requests |
+| `bids` | Provider bids on work_requests |
 | `reviews` | Buyer reviews of providers |
 | `categories` | Service category tree (parent/child) |
+| `org_documents` | Org-level file metadata (single source of truth) |
+| `org_document_shares` | Polymorphic join: doc ↔ engagement/project/task/note |
 | `app_settings` | Application configuration |
 
 ## Views
@@ -39,6 +41,7 @@ Quick reference for common Neon MCP queries against the SME Mart database.
 | `v_engagement_detail` | Full engagement info (work_request + buyer + provider) |
 | `v_engagement_summary` | Engagement list with key fields |
 | `v_provider_detail` | Provider profile with aggregated skills/frameworks |
+| `v_org_document_detail` | Org documents with share counts per target type |
 | `v_provider_directory` | Provider listing for Browse Providers page |
 
 ## Common Queries
@@ -77,13 +80,13 @@ FROM work_requests
 WHERE engagement_tag IS NULL ORDER BY created_at;
 ```
 
-### Proposals for a specific RFP
+### Bids for a specific RFP
 ```sql
-SELECT p.id, pp.display_name AS provider, p.proposed_price, p.proposed_timeline, p.status
-FROM proposals p
-JOIN provider_profiles pp ON pp.id = p.provider_id
-WHERE p.request_id = '<work_request_id>'
-ORDER BY p.created_at;
+SELECT b.id, pp.display_name AS provider, b.proposed_price, b.proposed_timeline, b.status
+FROM bids b
+JOIN provider_profiles pp ON pp.id = b.provider_id
+WHERE b.request_id = '<work_request_id>'
+ORDER BY b.created_at;
 ```
 
 ### All providers with ratings
@@ -125,6 +128,33 @@ SELECT * FROM v_engagement_summary;
 ### Provider directory view
 ```sql
 SELECT * FROM v_provider_directory;
+```
+
+### Org documents (all, non-archived)
+```sql
+SELECT id, filename, display_name, document_type, mime_type, file_size_bytes, archived
+FROM org_documents WHERE archived = false ORDER BY created_at DESC;
+```
+
+### Org document shares for a document
+```sql
+SELECT ods.id, ods.shared_with_type, ods.shared_with_id, ods.visibility, ods.granted_at
+FROM org_document_shares ods WHERE ods.document_id = '<doc_id>';
+```
+
+### Documents shared with an engagement
+```sql
+SELECT od.id, od.filename, od.display_name, od.document_type, ods.visibility
+FROM org_documents od
+JOIN org_document_shares ods ON od.id = ods.document_id
+WHERE ods.shared_with_type = 'engagement' AND ods.shared_with_id = '<engagement_id>'
+  AND od.archived = false
+ORDER BY od.created_at DESC;
+```
+
+### Org document detail view (with share counts)
+```sql
+SELECT * FROM v_org_document_detail WHERE org_id = '<org_id>' AND archived = false;
 ```
 
 ### Admin stats

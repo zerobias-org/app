@@ -46,7 +46,7 @@ This doc maps every demo entity to show which data demonstrates each aspect of t
 These 5 work_requests have been converted from RFPs to active engagements. Each has a ZeroBias Task on CI (`ci-auditmation-dev` profile), boundary "W3Geekery Dev".
 
 ### 1. SOC 2 Type I Fast-Track Assessment
-**What it demonstrates:** Assessor engagement, fixed-price, fast timeline, accepted proposal with rejected alternative
+**What it demonstrates:** Assessor engagement, fixed-price, fast timeline, accepted bid with rejected alternative
 
 | Field | Value |
 |-------|-------|
@@ -59,13 +59,13 @@ These 5 work_requests have been converted from RFPs to active engagements. Each 
 | **ZB Task Code** | `aha1-4` |
 | **ZB Tag ID** | `518acc1c-acc5-4831-b4db-5648cd5f9558` |
 
-**Proposals:**
+**Bids:**
 | Provider | Price | Timeline | Status |
 |----------|-------|----------|--------|
 | A3-Gina-Auditor | $7,500 | 4 weeks | **Accepted** |
 | Marcus Webb | $4,000 | 3 weeks | **Rejected** |
 
-**Demo value:** Shows full RFP → proposal → accepted/rejected → engagement → ZB Task lifecycle. Gina's accepted proposal vs. Marcus's rejected one shows the selection process.
+**Demo value:** Shows full RFP → bid → accepted/rejected → engagement → ZB Task lifecycle. Gina's accepted bid vs. Marcus's rejected one shows the selection process.
 
 ---
 
@@ -83,17 +83,17 @@ These 5 work_requests have been converted from RFPs to active engagements. Each 
 | **ZB Task Code** | `aha1-5` |
 | **ZB Tag ID** | `e07c3ee5-4bfc-42bf-b61d-33c08750d20a` |
 
-**Proposals:**
+**Bids:**
 | Provider | Price | Timeline | Status |
 |----------|-------|----------|--------|
 | James Okafor | $200/hr | 3 months | **Accepted** |
 
-**Demo value:** Hourly-rate engagement (vs. fixed-price). Single proposal accepted. Financial services buyer with GRC consultant provider.
+**Demo value:** Hourly-rate engagement (vs. fixed-price). Single bid accepted. Financial services buyer with GRC consultant provider.
 
 ---
 
 ### 3. AI Agent for Compliance Evidence Collection
-**What it demonstrates:** Agentic category, negotiable budget, proposal with withdrawal
+**What it demonstrates:** Agentic category, negotiable budget, bid with withdrawal
 
 | Field | Value |
 |-------|-------|
@@ -106,13 +106,13 @@ These 5 work_requests have been converted from RFPs to active engagements. Each 
 | **ZB Task Code** | `aha1-6` |
 | **ZB Tag ID** | `aacd35bd-ca10-4032-9603-00d19e018194` |
 
-**Proposals:**
+**Bids:**
 | Provider | Price | Timeline | Status |
 |----------|-------|----------|--------|
 | A1-Bob-IT | $15,000 | 10 weeks | Pending |
 | Carlos Rivera | $18,000 | 12 weeks | **Withdrawn** |
 
-**Demo value:** Shows the "negotiable" budget type. Carlos Rivera's withdrawn proposal demonstrates a provider pulling out. Note: no proposal is explicitly "accepted" yet — engagement may have been created by buyer directly.
+**Demo value:** Shows the "negotiable" budget type. Carlos Rivera's withdrawn bid demonstrates a provider pulling out. Note: no bid is explicitly "accepted" yet — engagement may have been created by buyer directly.
 
 ---
 
@@ -130,7 +130,7 @@ These 5 work_requests have been converted from RFPs to active engagements. Each 
 | **ZB Task Code** | `aha1-7` |
 | **ZB Tag ID** | `b3b590d8-3140-4866-b344-ca79ef1cc2a8` |
 
-**Proposals:**
+**Bids:**
 | Provider | Price | Timeline | Status |
 |----------|-------|----------|--------|
 | Alex Nguyen | $10,000 | 6 weeks | **Accepted** |
@@ -153,7 +153,7 @@ These 5 work_requests have been converted from RFPs to active engagements. Each 
 | **ZB Task Code** | `aha1-8` |
 | **ZB Tag ID** | `49cbb0b8-ccd3-4d92-88e5-16e63ef81662` |
 
-**Proposals:**
+**Bids:**
 | Provider | Price | Timeline | Status |
 |----------|-------|----------|--------|
 | A3-Gina-Auditor | $6,500 | 4 weeks | **Accepted** |
@@ -164,53 +164,53 @@ These 5 work_requests have been converted from RFPs to active engagements. Each 
 
 ## Open RFPs (status: `open`, no engagement_tag)
 
-These demonstrate the "marketplace browsing" and "proposal submission" stages.
+These demonstrate the "marketplace browsing" and "bid submission" stages.
 
 ### 1. SOC 2 Type II Assessment Support
-| Buyer | Category | Budget | Proposals |
-|-------|----------|--------|-----------|
+| Buyer | Category | Budget | Bids |
+|-------|----------|--------|------|
 | Acme Corp | Assessors | $8K–$12K fixed | 2 pending (Gina $10K, James $11.5K) |
 
-**Demo value:** Multiple competing proposals, neither accepted yet. Good for showing proposal comparison UI.
+**Demo value:** Multiple competing bids, neither accepted yet. Good for showing bid comparison UI.
 
 ### 2. HIPAA Risk Assessment & Remediation Plan
-| Buyer | Category | Budget | Proposals |
-|-------|----------|--------|-----------|
+| Buyer | Category | Budget | Bids |
+|-------|----------|--------|------|
 | Lakewood Health | Advisors | $10K–$15K fixed | 2 pending (James $12K, Gina $13.5K) |
 
 **Demo value:** Same buyer (Lakewood) with another RFP. Shows buyer with multiple requests across categories.
 
 ### 3. Automated PHI Access Monitoring Agent
-| Buyer | Category | Budget | Proposals |
-|-------|----------|--------|-----------|
+| Buyer | Category | Budget | Bids |
+|-------|----------|--------|------|
 | Lakewood Health | Agentic | $12K–$25K negotiable | 2 pending (Bob $20K, Sarah $18K) |
 
 **Demo value:** Agentic category, wide negotiable budget range. Healthcare AI use case.
 
 ### 4. SOC Monitoring Setup for Healthcare Cloud
-| Buyer | Category | Budget | Proposals |
-|-------|----------|--------|-----------|
+| Buyer | Category | Budget | Bids |
+|-------|----------|--------|------|
 | Lakewood Health | SecOps | $18K–$25K fixed | 1 pending (Carlos $22K) |
 
-**Demo value:** SecOps category. Carlos (busy status) still submitting proposals.
+**Demo value:** SecOps category. Carlos (busy status) still submitting bids.
 
 ### 5. Security Training Program Development
-| Buyer | Category | Budget | Proposals |
-|-------|----------|--------|-----------|
+| Buyer | Category | Budget | Bids |
+|-------|----------|--------|------|
 | Enterprise Co | Training | $15K–$20K fixed | 2 pending (Alex $17.5K, James $19K) |
 
-**Demo value:** Training category from a different buyer. Cross-discipline proposals (trainer + GRC consultant).
+**Demo value:** Training category from a different buyer. Cross-discipline bids (trainer + GRC consultant).
 
 ### 6. DevSecOps Pipeline Hardening
-| Buyer | Category | Budget | Proposals |
-|-------|----------|--------|-----------|
+| Buyer | Category | Budget | Bids |
+|-------|----------|--------|------|
 | Pinnacle Corp | DevSecOps | $150–$200/hr hourly | 3 pending (Sarah $190/hr, Bob $195/hr, Carlos $185/hr) |
 
-**Demo value:** Hourly RFP with 3 competing proposals — most proposals of any RFP. DevSecOps category. Good for showing competitive bidding.
+**Demo value:** Hourly RFP with 3 competing bids — most bids of any RFP. DevSecOps category. Good for showing competitive bidding.
 
 ### 7. Compliance Evidence Package Preparation
-| Buyer | Category | Budget | Proposals |
-|-------|----------|--------|-----------|
+| Buyer | Category | Budget | Bids |
+|-------|----------|--------|------|
 | Pinnacle Corp | Data Services | $3.5K–$5K fixed | 2 pending (Marcus $4.2K, Alex $4.8K) |
 
 **Demo value:** Data Services category. Lowest budget RFP. Marcus (evidence specialist) vs. Alex (trainer offering to cross-sell).
@@ -251,7 +251,7 @@ All engagements share boundary **"W3Geekery Dev"**: `b1e4b97e-6ef2-4e7e-8dbc-c37
 ### Scenario A: Complete RFP-to-Engagement Flow
 **Use:** `crystal-harbor` (SOC 2 Fast-Track)
 - Buyer (Pinnacle Corp) posts RFP
-- 2 providers submit proposals (Gina + Marcus)
+- 2 providers submit bids (Gina + Marcus)
 - Buyer accepts Gina, rejects Marcus
 - Engagement created with ZB Task + Tag
 - Task tracked in ZeroBias platform
@@ -271,15 +271,15 @@ All engagements share boundary **"W3Geekery Dev"**: `b1e4b97e-6ef2-4e7e-8dbc-c37
 - Demonstrates "My Engagements" view for a power buyer
 - Multiple categories: Advisors, Agentic, SecOps, Training
 
-### Scenario E: Withdrawn Proposal
-**Use:** `amber-circuit` — Carlos Rivera withdrew his proposal
-- Shows proposal withdrawal state
-- Only Bob's pending proposal remains
+### Scenario E: Withdrawn Bid
+**Use:** `amber-circuit` — Carlos Rivera withdrew his bid
+- Shows bid withdrawal state
+- Only Bob's pending bid remains
 
-### Scenario F: Competitive Bidding (Most Proposals)
+### Scenario F: Competitive Bidding (Most Bids)
 **Use:** DevSecOps Pipeline Hardening (open RFP) — 3 providers bidding
 - Sarah, Bob, Carlos all competing at ~$185–195/hr
-- Good for showing proposal comparison/ranking
+- Good for showing bid comparison/ranking
 
 ### Scenario G: Provider Reviews
 **Use:** Any provider detail page — all 8 providers have 2–4 reviews each
