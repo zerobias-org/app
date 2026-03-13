@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { BidsService } from './bids.service';
 import { WorkRequestsService } from './work-requests.service';
 import { SmeMartTagService } from './sme-mart-tag.service';
+import { NotificationService } from './notification.service';
 import type { Bid, WorkRequest } from '../models';
 
 @Injectable({ providedIn: 'root' })
@@ -9,6 +10,7 @@ export class EngagementLifecycleService {
   private readonly tagService = inject(SmeMartTagService);
   private readonly bids = inject(BidsService);
   private readonly workRequests = inject(WorkRequestsService);
+  private readonly notifications = inject(NotificationService);
 
   /**
    * Generate a BIP39-style engagement tag: sme-mart.eng.word-word
@@ -66,6 +68,30 @@ export class EngagementLifecycleService {
       this.bids.acceptBid(bidId),
       this.workRequests.graduateToEngagement(requestId, engagementTag, zerobiasTagId),
     ]);
+
+    // Fire-and-forget notifications for the provider
+    if (!bid.provider_id) return { bid, workRequest, engagementTag, zerobiasTagId };
+
+    this.notifications.create({
+      recipient_id: bid.provider_id,
+      type: 'bid_accepted',
+      severity: 'high',
+      title: 'Your bid was accepted',
+      description: `Your bid on "${workRequest.title}" has been accepted. An engagement has been created.`,
+      resource_id: requestId,
+      resource_type: 'engagement',
+      payload: { parent_id: requestId },
+    }).catch(() => {});
+
+    this.notifications.create({
+      recipient_id: bid.provider_id,
+      type: 'engagement_created',
+      severity: 'high',
+      title: 'New engagement created',
+      description: `Engagement "${engagementTag}" is now active.`,
+      resource_id: requestId,
+      resource_type: 'engagement',
+    }).catch(() => {});
 
     return { bid, workRequest, engagementTag, zerobiasTagId };
   }

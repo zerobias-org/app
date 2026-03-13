@@ -1,5 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { SmeMartDbService } from './sme-mart-db.service';
+import { NotificationService } from './notification.service';
 import type { QueryOptions } from '@zerobias-org/data-utils';
 import type { PagedResults } from '@zerobias-org/types-core-js';
 import type {
@@ -12,6 +13,7 @@ import type {
 @Injectable({ providedIn: 'root' })
 export class WorkRequestsService {
   private readonly db = inject(SmeMartDbService);
+  private readonly notifications = inject(NotificationService);
 
   readonly engagements = signal<EngagementSummaryRow[]>([]);
   readonly loading = signal(false);
@@ -59,10 +61,25 @@ export class WorkRequestsService {
     timeline?: string;
     status?: 'draft' | 'open';
   }): Promise<WorkRequest> {
-    return this.db.createRow<WorkRequest>('work_requests', {
+    const wr = await this.db.createRow<WorkRequest>('work_requests', {
       ...data,
       status: data.status || 'open',
     });
+
+    // Fire-and-forget: notify marketplace (no specific recipient — self-notification for confirmation)
+    if (wr.status === 'open') {
+      this.notifications.create({
+        recipient_id: data.buyer_zerobias_user_id,
+        type: 'rfp_published',
+        severity: 'info',
+        title: 'RFP published',
+        description: `Your RFP "${data.title}" is now live on the marketplace.`,
+        resource_id: wr.id,
+        resource_type: 'rfp',
+      }).catch(() => {});
+    }
+
+    return wr;
   }
 
   async updateRfp(id: string, data: Partial<WorkRequest>): Promise<WorkRequest> {

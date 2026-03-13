@@ -29,6 +29,9 @@ export const TEST_DOC_ID = '9125a8dc-52ee-365b-a5aa-81b0b3681cf6';
 // Notes
 export const TEST_NOTE_ID = 'note-001';
 
+// Notifications
+export const TEST_NOTIFICATION_ID = 'notif-001';
+
 // Timestamps
 export const TEST_CREATED_AT = '2026-02-01T00:00:00Z';
 export const TEST_UPDATED_AT = '2026-02-01T00:00:00Z';

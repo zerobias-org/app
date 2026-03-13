@@ -4,8 +4,9 @@ import { EngagementLifecycleService } from './engagement-lifecycle.service';
 import { SmeMartTagService } from './sme-mart-tag.service';
 import { BidsService } from './bids.service';
 import { WorkRequestsService } from './work-requests.service';
+import { NotificationService } from './notification.service';
 import type { Bid, WorkRequest } from '../models';
-import { fakeSmeMartTagService } from '../../test-helpers/angular';
+import { fakeSmeMartTagService, fakeNotificationService } from '../../test-helpers/angular';
 
 describe('EngagementLifecycleService', () => {
   let service: EngagementLifecycleService;
@@ -31,6 +32,7 @@ describe('EngagementLifecycleService', () => {
         { provide: SmeMartTagService, useValue: mockTagService },
         { provide: BidsService, useValue: mockBids },
         { provide: WorkRequestsService, useValue: mockWorkRequests },
+        { provide: NotificationService, useValue: fakeNotificationService() },
       ],
     });
 

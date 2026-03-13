@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { Subscription } from 'rxjs';
 import { UserProfileDropdown } from '../shared/components/user-profile-dropdown/user-profile-dropdown.component';
+import { NotificationPanel } from '../shared/components/notification-panel/notification-panel.component';
 import { ImpersonationSwitcher } from '../shared/components/impersonation-switcher/impersonation-switcher.component';
 import { ImpersonationService } from '../core/services/impersonation.service';
 import { UserPreferencesService } from '../core/services/user-preferences.service';
@@ -30,6 +31,7 @@ interface NavItem {
     MatIconModule,
     MatSidenavModule,
     UserProfileDropdown,
+    NotificationPanel,
     ImpersonationSwitcher,
   ],
   templateUrl: './app-shell.component.html',

@@ -17,3 +17,4 @@ export * from './document.model';
 export * from './rfp.model';
 export * from './org-document.model';
 export * from './bid-response.model';
+export * from './notification.model';

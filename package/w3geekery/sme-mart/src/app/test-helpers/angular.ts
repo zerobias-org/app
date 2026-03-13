@@ -91,6 +91,25 @@ export function fakeEngagementHierarchy() {
   };
 }
 
+/** Mock NotificationService */
+export function fakeNotificationService() {
+  return {
+    notifications: vi.fn().mockReturnValue([]),
+    loading: vi.fn().mockReturnValue(false),
+    unreadCount: vi.fn().mockReturnValue(0),
+    events: { next: vi.fn(), subscribe: vi.fn().mockReturnValue({ unsubscribe: vi.fn() }) },
+    startPolling: vi.fn(),
+    stopPolling: vi.fn(),
+    loadNotifications: vi.fn().mockResolvedValue(undefined),
+    loadByType: vi.fn().mockResolvedValue([]),
+    create: vi.fn().mockResolvedValue({}),
+    markAsRead: vi.fn().mockResolvedValue(undefined),
+    markAllAsRead: vi.fn().mockResolvedValue(undefined),
+    dismiss: vi.fn().mockResolvedValue(undefined),
+    dismissAll: vi.fn().mockResolvedValue(undefined),
+  };
+}
+
 /** Mock DocumentService */
 export function fakeDocumentService() {
   return {

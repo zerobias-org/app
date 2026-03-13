@@ -1,0 +1,78 @@
+<!-- Bell icon trigger -->
+<button
+  mat-icon-button
+  [matMenuTriggerFor]="notificationMenu"
+  aria-label="Notifications"
+  class="bell-trigger"
+>
+  <mat-icon
+    [matBadge]="unreadCount()"
+    matBadgeColor="warn"
+    matBadgeSize="small"
+    [matBadgeHidden]="badgeHidden()"
+  >notifications</mat-icon>
+</button>
+
+<!-- Notification dropdown panel -->
+<mat-menu #notificationMenu="matMenu" class="notification-panel-menu">
+  <!-- Header -->
+  <div class="panel-header" (click)="$event.stopPropagation()">
+    <span class="panel-title">Notifications</span>
+    @if (unreadCount() > 0) {
+      <span class="unread-badge">{{ unreadCount() }} new</span>
+    }
+  </div>
+
+  <mat-divider />
+
+  <!-- Type filter -->
+  <div class="panel-filter" (click)="$event.stopPropagation()">
+    <mat-select
+      [value]="selectedFilter()"
+      (selectionChange)="onFilterChange($event.value)"
+      panelClass="notification-filter-select"
+    >
+      @for (filter of typeFilters; track filter.value) {
+        <mat-option [value]="filter.value">{{ filter.label }}</mat-option>
+      }
+    </mat-select>
+  </div>
+
+  <mat-divider />
+
+  <!-- Notification list -->
+  <div class="panel-list" (click)="$event.stopPropagation()">
+    @if (loading()) {
+      <div class="panel-empty">Loading...</div>
+    } @else if (!hasNotifications()) {
+      <div class="panel-empty">
+        <mat-icon>notifications_none</mat-icon>
+        <span>No notifications</span>
+      </div>
+    } @else {
+      @for (n of filteredNotifications(); track n.id) {
+        <app-notification-card
+          [notification]="n"
+          (dismiss)="onDismiss($event)"
+          (navigate)="onNavigate($event)"
+          (markRead)="onMarkRead($event)"
+        />
+      }
+    }
+  </div>
+
+  <!-- Footer -->
+  @if (hasNotifications()) {
+    <mat-divider />
+    <div class="panel-footer" (click)="$event.stopPropagation()">
+      <button mat-button (click)="markAllRead()">
+        <mat-icon>done_all</mat-icon>
+        Mark All Read
+      </button>
+      <button mat-button color="warn" (click)="dismissAll()">
+        <mat-icon>clear_all</mat-icon>
+        Dismiss All
+      </button>
+    </div>
+  }
+</mat-menu>

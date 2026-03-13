@@ -1,6 +1,6 @@
 # Plan: SME Mart Angular Rebuild
 
-**Last updated:** 2026-03-11 (033 Phase 4 complete, platformClient rename)
+**Last updated:** 2026-03-12 (049 complete, 048 complete)
 
 > **Reference:** [Hierarchy Model](hierarchy-model.md) — Org → Engagement → Project → Boundary mapping, Notes scoping, permissions model, CEO/CIO directive reconciliation.
 
@@ -55,8 +55,8 @@
 | 045 | ~~RFP Document Chooser~~ | **Superseded** by Plan 046 Phase 4 (OrgDocumentChooser with scope filtering) | — |
 | 046 | Org-Level Document Management | **Phases 1–5 complete, 7 complete** — OrgDocumentService, file manager UI, sharing + visibility, OrgDocumentChooser, org tabs, tests. Phase 6 (org switcher) deferred. Phase 8 (external storage imports) deferred. Phase 9 roadmap: folders, colors, tagging UI, archive browser, versioning, PDF conversion, preview, bulk ops, templates. | [`046-org-document-management.md`](../local/046-org-document-management.md) |
 | 047 | Shared Notes & Versioning | **Draft** — per-user sharing, note versioning (with version browser/search/copy), Shared Notebook, timeline integration (share/pin events), pinned notes, task-linked checkboxes (read-only status reflection). 32–40 hrs across 8 phases. | [`047-shared-notes-and-versioning.md`](../local/047-shared-notes-and-versioning.md) |
-| 048 | Notification Center | **Backlog** — in-app notification system (bell icon, unread badge, dropdown panel). Event types: note_shared, bid_received, task_assigned, document_shared. Designed for migration into ZB platform events. 8–12 hrs. | TBD |
-| 049 | Unit Testing Strategy | **In Progress** — Vitest + Angular TestBed. Baseline: 14 specs / 209 tests. Phases: mappers+pipes → presentational components → dialog/form components → services → page components. Target: 80% coverage, ~358 tests. | [`049-unit-testing-strategy.md`](../local/049-unit-testing-strategy.md) |
+| 048 | Notification Center | **Complete** — in-app notification system modeled on ZB UI `CardsService` / `zb-cards` pattern. Bell icon, unread badge, MatMenu dropdown panel, card types, severity, dismiss/read. Fire-and-forget triggers on bid/engagement/rfp actions. 94 tests. Neon-backed initially, designed for seamless migration to ZB platform CardService. | [`048-notification-center.md`](../local/048-notification-center.md) |
+| 049 | Unit Testing Strategy | **Complete** — 33 spec files, 456 tests passing. Shared test-helpers (factories, mocks, constants). All specs refactored to use shared infrastructure. | [`049-unit-testing-strategy.md`](../local/049-unit-testing-strategy.md) |
 
 ### What's built (Phases 1–4)
 

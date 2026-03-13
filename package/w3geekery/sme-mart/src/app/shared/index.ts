@@ -14,3 +14,5 @@ export { OrgDocumentChooser, type OrgDocumentChooserData, type OrgDocumentChoose
 export { BidComparison, type ComparisonBid, type CategoryCompliance } from './components/bid-comparison/bid-comparison.component';
 export { BidReview, type RequirementGroup, type RequirementWithResponse } from './components/bid-review/bid-review.component';
 export { AcceptBidDialog, type AcceptBidDialogData, type AcceptBidDialogResult } from './components/accept-bid-dialog/accept-bid-dialog.component';
+export { NotificationPanel } from './components/notification-panel/notification-panel.component';
+export { NotificationCard } from './components/notification-card/notification-card.component';

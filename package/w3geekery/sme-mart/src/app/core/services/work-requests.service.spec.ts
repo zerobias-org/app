@@ -2,8 +2,9 @@ import { TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
 import { WorkRequestsService } from './work-requests.service';
 import { SmeMartDbService } from './sme-mart-db.service';
+import { NotificationService } from './notification.service';
 import { makeEngagementSummaryRow, makeWorkRequest } from '../../test-helpers/factories';
-import { fakeSmeMartDb } from '../../test-helpers/angular';
+import { fakeSmeMartDb, fakeNotificationService } from '../../test-helpers/angular';
 
 describe('WorkRequestsService', () => {
   let service: WorkRequestsService;
@@ -21,6 +22,7 @@ describe('WorkRequestsService', () => {
       providers: [
         WorkRequestsService,
         { provide: SmeMartDbService, useValue: mockDb },
+        { provide: NotificationService, useValue: fakeNotificationService() },
       ],
     });
 

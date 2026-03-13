@@ -1,10 +1,12 @@
 import { Injectable, inject } from '@angular/core';
 import { SmeMartDbService } from './sme-mart-db.service';
+import { NotificationService } from './notification.service';
 import type { Bid, BidSummaryRow, BidWizardData } from '../models';
 
 @Injectable({ providedIn: 'root' })
 export class BidsService {
   private readonly db = inject(SmeMartDbService);
+  private readonly notifications = inject(NotificationService);
 
   async listBidsByRequest(requestId: string): Promise<Bid[]> {
     const result = await this.db.searchRows<Bid>(
@@ -97,11 +99,24 @@ export class BidsService {
   }
 
   /** Submit a draft bid (finalize) */
-  async submitDraft(id: string): Promise<Bid> {
-    return this.db.updateRow<Bid>('bids', id, {
+  async submitDraft(id: string, context?: { buyerId: string; rfpTitle: string }): Promise<Bid> {
+    const bid = await this.db.updateRow<Bid>('bids', id, {
       status: 'pending',
       wizard_data: null,
     });
+    if (context) {
+      this.notifications.create({
+        recipient_id: context.buyerId,
+        type: 'bid_received',
+        severity: 'medium',
+        title: 'New bid received',
+        description: `A new bid was submitted on "${context.rfpTitle}".`,
+        resource_id: bid.request_id ?? undefined,
+        resource_type: 'rfp',
+        payload: { parent_id: bid.request_id },
+      }).catch(() => {});
+    }
+    return bid;
   }
 
   /** Find an existing draft bid for a provider on a request */
@@ -118,8 +133,21 @@ export class BidsService {
     return this.db.updateRow<Bid>('bids', id, { status: 'accepted' });
   }
 
-  async rejectBid(id: string): Promise<Bid> {
-    return this.db.updateRow<Bid>('bids', id, { status: 'rejected' });
+  async rejectBid(id: string, context?: { providerId: string; rfpTitle: string }): Promise<Bid> {
+    const bid = await this.db.updateRow<Bid>('bids', id, { status: 'rejected' });
+    if (context) {
+      this.notifications.create({
+        recipient_id: context.providerId,
+        type: 'bid_rejected',
+        severity: 'info',
+        title: 'Your bid was not selected',
+        description: `Your bid on "${context.rfpTitle}" was not selected.`,
+        resource_id: bid.request_id ?? undefined,
+        resource_type: 'rfp',
+        payload: { parent_id: bid.request_id },
+      }).catch(() => {});
+    }
+    return bid;
   }
 
   async withdrawBid(id: string): Promise<Bid> {

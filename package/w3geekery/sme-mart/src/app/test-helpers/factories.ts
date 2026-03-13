@@ -13,6 +13,7 @@ import type {
   EngagementDetailRow,
   Note,
   NoteWithTags,
+  Notification,
   RfpTaskGroup,
 } from '../core/models';
 import type { OrgDocument, OrgDocumentDetail, OrgDocumentShare } from '../core/models/org-document.model';
@@ -34,6 +35,7 @@ import {
   TEST_ENG_ID,
   TEST_CREATED_AT,
   TEST_UPDATED_AT,
+  TEST_NOTIFICATION_ID,
 } from './constants';
 
 // ---------------------------------------------------------------------------
@@ -326,6 +328,32 @@ export function makeTaskGroups(): RfpTaskGroup[] {
       ],
     },
   ];
+}
+
+// ---------------------------------------------------------------------------
+// Notifications
+// ---------------------------------------------------------------------------
+
+export function makeNotification(overrides: Partial<Notification> = {}): Notification {
+  return {
+    id: TEST_NOTIFICATION_ID,
+    recipient_id: TEST_USER_ID,
+    type: 'bid_received',
+    card_type: 'notification',
+    severity: 'info',
+    title: 'New bid received',
+    description: 'Jane Smith submitted a bid on HIPAA Assessment',
+    image_url: null,
+    resource_id: TEST_BID_ID,
+    resource_type: 'bid',
+    source: [],
+    payload: {},
+    read_at: null,
+    dismissed_at: null,
+    created_at: TEST_CREATED_AT,
+    updated_at: TEST_UPDATED_AT,
+    ...overrides,
+  };
 }
 
 // ---------------------------------------------------------------------------

@@ -2,9 +2,10 @@ import { TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
 import { BidsService } from './bids.service';
 import { SmeMartDbService } from './sme-mart-db.service';
+import { NotificationService } from './notification.service';
 import type { BidWizardData } from '../models';
 import { makeBid } from '../../test-helpers/factories';
-import { fakeSmeMartDb } from '../../test-helpers/angular';
+import { fakeSmeMartDb, fakeNotificationService } from '../../test-helpers/angular';
 
 describe('BidsService', () => {
   let service: BidsService;
@@ -21,6 +22,7 @@ describe('BidsService', () => {
       providers: [
         BidsService,
         { provide: SmeMartDbService, useValue: mockDb },
+        { provide: NotificationService, useValue: fakeNotificationService() },
       ],
     });
 
