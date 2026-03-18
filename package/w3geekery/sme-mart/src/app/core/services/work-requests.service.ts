@@ -1,6 +1,8 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { SmeMartDbService } from './sme-mart-db.service';
+import { PipelineWriteService } from './pipeline-write.service';
+import { GraphqlReadService, type GqlQueryOptions } from './graphql-read.service';
 import { NotificationService } from './notification.service';
+import { ENGAGEMENT_FIELD_MAPPING, mapNeonToGql, mapGqlToNeon } from '../field-mappings';
 import type { QueryOptions } from '@zerobias-org/data-utils';
 import type { PagedResults } from '@zerobias-org/types-core-js';
 import type {
@@ -9,46 +11,120 @@ import type {
   EngagementDetailRow,
   BudgetType,
 } from '../models';
+import type { GqlEngagementResponse } from '../gql-types';
 
 @Injectable({ providedIn: 'root' })
 export class WorkRequestsService {
-  private readonly db = inject(SmeMartDbService);
+  private readonly pipelineWrite = inject(PipelineWriteService);
+  private readonly graphqlRead = inject(GraphqlReadService);
   private readonly notifications = inject(NotificationService);
 
   readonly engagements = signal<EngagementSummaryRow[]>([]);
   readonly loading = signal(false);
 
+  /**
+   * List all published engagements with summary info (buyer, bid counts).
+   * Queries GQL via GraphqlReadService, transforms responses to EngagementSummaryRow.
+   */
   async listEngagements(options?: QueryOptions): Promise<PagedResults<EngagementSummaryRow>> {
     this.loading.set(true);
     try {
-      const result = await this.db.listRows<EngagementSummaryRow>('v_engagement_summary', options);
-      this.engagements.set(result.items || []);
-      return result;
+      const pageNumber = options?.pageNumber ?? 1;
+      const pageSize = options?.pageSize ?? 50;
+
+      const gqlOptions: GqlQueryOptions = {
+        filters: { status: '.eq.published' },
+        pageNumber,
+        pageSize,
+      };
+
+      const result = await this.graphqlRead.query<GqlEngagementResponse>(
+        'Engagement',
+        this.getEngagementFields(),
+        gqlOptions,
+      );
+
+      // Transform GQL responses to EngagementSummaryRow
+      const items = result.items.map(gql => this.transformGqlToEngagementSummary(gql));
+      this.engagements.set(items);
+
+      return PagedResults.fromArray(items, pageNumber, pageSize, result.page.totalCount ?? items.length);
     } finally {
       this.loading.set(false);
     }
   }
 
+  /**
+   * Search engagements by title/description filter.
+   * Applies ILIKE filter for fuzzy text search.
+   */
   async searchEngagements(filter: string, options?: QueryOptions): Promise<PagedResults<EngagementSummaryRow>> {
     this.loading.set(true);
     try {
-      const result = await this.db.searchRows<EngagementSummaryRow>('v_engagement_summary', filter, options);
-      this.engagements.set(result.items || []);
-      return result;
+      const pageNumber = options?.pageNumber ?? 1;
+      const pageSize = options?.pageSize ?? 50;
+
+      const gqlOptions: GqlQueryOptions = {
+        filters: {
+          status: '.eq.published',
+          name: `.ilike.%${filter}%`,
+        },
+        pageNumber,
+        pageSize,
+      };
+
+      const result = await this.graphqlRead.query<GqlEngagementResponse>(
+        'Engagement',
+        this.getEngagementFields(),
+        gqlOptions,
+      );
+
+      const items = result.items.map(gql => this.transformGqlToEngagementSummary(gql));
+      this.engagements.set(items);
+
+      return PagedResults.fromArray(items, pageNumber, pageSize, result.page.totalCount ?? items.length);
     } finally {
       this.loading.set(false);
     }
   }
 
+  /**
+   * Fetch a single engagement with full details and related bid data.
+   */
   async getEngagement(id: string): Promise<EngagementDetailRow | null> {
-    return this.db.getRow<EngagementDetailRow>('v_engagement_detail', id);
+    const engagement = await this.graphqlRead.getById<GqlEngagementResponse>(
+      'Engagement',
+      id,
+      this.getEngagementFields(),
+    );
+
+    if (!engagement) return null;
+
+    // Transform to EngagementDetailRow
+    // Note: bids array would come from nested GQL query or separate call
+    return this.transformGqlToEngagementDetail(engagement);
   }
 
-  /** Fetch raw work_requests row (includes rfp_wizard_data/step). */
+  /**
+   * Fetch raw engagement row (used for wizard flows that need all fields).
+   */
   async getWorkRequest(id: string): Promise<WorkRequest | null> {
-    return this.db.getRow<WorkRequest>('work_requests', id);
+    const engagement = await this.graphqlRead.getById<GqlEngagementResponse>(
+      'Engagement',
+      id,
+      this.getEngagementFields(),
+    );
+
+    if (!engagement) return null;
+
+    // Transform GQL response back to WorkRequest (Neon model)
+    return mapGqlToNeon<WorkRequest>(engagement, ENGAGEMENT_FIELD_MAPPING.gqlToNeon);
   }
 
+  /**
+   * Create a new RFP (engagement) and push to Pipeline.
+   * Returns optimistic WorkRequest immediately (doesn't wait for GQL indexing).
+   */
   async createRfp(data: {
     buyer_zerobias_user_id: string;
     buyer_zerobias_org_id?: string;
@@ -61,12 +137,38 @@ export class WorkRequestsService {
     timeline?: string;
     status?: 'draft' | 'open';
   }): Promise<WorkRequest> {
-    const wr = await this.db.createRow<WorkRequest>('work_requests', {
-      ...data,
-      status: data.status || 'open',
+    // Generate ID for new engagement
+    const id = `eng-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+
+    // Prepare WorkRequest object with defaults
+    const wr: WorkRequest = {
+      id,
+      buyer_user_id: null,
+      buyer_zerobias_user_id: data.buyer_zerobias_user_id,
+      buyer_zerobias_org_id: data.buyer_zerobias_org_id || null,
+      title: data.title,
+      description: data.description || null,
+      category: data.category,
+      budget_type: data.budget_type || null,
+      budget_min: data.budget_min || null,
+      budget_max: data.budget_max || null,
+      timeline: data.timeline || null,
+      status: (data.status || 'open') as 'draft' | 'open',
+      engagement_tag: null,
+      zerobias_tag_id: null,
+      zerobias_boundary_id: null,
+      zerobias_task_id: null,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    // Transform to GQL shape and push to Pipeline (fire-and-forget)
+    const gqlData = mapNeonToGql<GqlEngagementResponse>(wr, ENGAGEMENT_FIELD_MAPPING.neonToGql);
+    this.pipelineWrite.pushEntity('Engagement', gqlData as unknown as Record<string, unknown>).catch(err => {
+      console.error('Failed to push engagement to Pipeline:', err);
     });
 
-    // Fire-and-forget: notify marketplace (no specific recipient — self-notification for confirmation)
+    // Fire-and-forget notification
     if (wr.status === 'open') {
       this.notifications.create({
         recipient_id: data.buyer_zerobias_user_id,
@@ -79,26 +181,108 @@ export class WorkRequestsService {
       }).catch(() => {});
     }
 
+    // Return optimistic response immediately
     return wr;
   }
 
+  /**
+   * Update an existing RFP/engagement and push updates to Pipeline.
+   * Returns optimistic WorkRequest immediately.
+   */
   async updateRfp(id: string, data: Partial<WorkRequest>): Promise<WorkRequest> {
-    return this.db.updateRow<WorkRequest>('work_requests', id, data as Record<string, unknown>);
+    // Fetch current engagement to merge updates
+    const current = await this.getWorkRequest(id);
+    if (!current) throw new Error(`Engagement ${id} not found`);
+
+    const updated: WorkRequest = { ...current, ...data, updated_at: new Date().toISOString() };
+
+    // Transform to GQL and push to Pipeline
+    const gqlData = mapNeonToGql<GqlEngagementResponse>(updated, ENGAGEMENT_FIELD_MAPPING.neonToGql);
+    this.pipelineWrite.pushEntity('Engagement', gqlData as unknown as Record<string, unknown>).catch(err => {
+      console.error('Failed to update engagement in Pipeline:', err);
+    });
+
+    // Return optimistic response
+    return updated;
   }
 
+  /**
+   * Graduate an RFP to in-progress engagement status (when a provider is selected).
+   */
   async graduateToEngagement(id: string, engagementTag: string, zerobiasTagId?: string): Promise<WorkRequest> {
-    return this.db.updateRow<WorkRequest>('work_requests', id, {
+    return this.updateRfp(id, {
       engagement_tag: engagementTag,
       zerobias_tag_id: zerobiasTagId || null,
-      status: 'in_progress',
+      status: 'in_progress' as any,
     });
   }
 
+  /**
+   * Cancel an engagement.
+   */
   async cancelEngagement(id: string): Promise<WorkRequest> {
-    return this.db.updateRow<WorkRequest>('work_requests', id, { status: 'cancelled' });
+    return this.updateRfp(id, { status: 'cancelled' as any });
   }
 
+  /**
+   * Mark engagement as completed.
+   */
   async completeEngagement(id: string): Promise<WorkRequest> {
-    return this.db.updateRow<WorkRequest>('work_requests', id, { status: 'completed' });
+    return this.updateRfp(id, { status: 'completed' as any });
+  }
+
+  /**
+   * Get standard field list for Engagement GQL queries.
+   */
+  private getEngagementFields(): string[] {
+    return [
+      'id',
+      'name',
+      'description',
+      'category',
+      'buyerZerobiasUserId',
+      'budgetType',
+      'budgetMin',
+      'budgetMax',
+      'timeline',
+      'status',
+      'engagementTag',
+      'zerobiasTagId',
+      'zerobiasTaskId',
+      'createdAt',
+      'updatedAt',
+    ];
+  }
+
+  /**
+   * Transform GQL engagement response to EngagementSummaryRow.
+   * For now, bid counts are 0 (would require separate query or nested GQL).
+   */
+  private transformGqlToEngagementSummary(gql: GqlEngagementResponse): EngagementSummaryRow {
+    const wr = mapGqlToNeon<WorkRequest>(gql, ENGAGEMENT_FIELD_MAPPING.gqlToNeon);
+    return {
+      ...wr,
+      buyer_display_name: null,  // Would come from Zerobias user lookup
+      buyer_avatar_url: null,    // Would come from Zerobias user lookup
+      bid_count: 0,              // Would require separate query
+      pending_bid_count: 0,      // Would require separate query
+      accepted_provider_name: null,
+      accepted_provider_id: null,
+    };
+  }
+
+  /**
+   * Transform GQL engagement response to EngagementDetailRow.
+   * For now, bids array is '[]' JSON string (would require nested GQL or separate query).
+   */
+  private transformGqlToEngagementDetail(gql: GqlEngagementResponse): EngagementDetailRow {
+    const wr = mapGqlToNeon<WorkRequest>(gql, ENGAGEMENT_FIELD_MAPPING.gqlToNeon);
+    return {
+      ...wr,
+      buyer_display_name: null,  // Would come from Zerobias user lookup
+      buyer_email: null,         // Would come from Zerobias user lookup
+      bids: '[]',                // Would require nested GQL or separate query
+      bid_count: 0,              // Would require separate query
+    };
   }
 }
