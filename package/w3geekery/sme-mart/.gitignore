@@ -52,6 +52,9 @@ __screenshots__/
 .claude/proposals/
 .claude/notes/meetings/*.docx
 
+# GSD planning (local-only)
+.planning/
+
 # System files
 .DS_Store
 Thumbs.db
