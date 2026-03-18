@@ -2,10 +2,13 @@ import { Injectable, inject } from '@angular/core';
 import { ZerobiasClientApi } from '@zerobias-com/zerobias-client';
 import { Nmtoken } from '@zerobias-org/types-core-js';
 import { Md5 } from 'ts-md5';
-import { SmeMartDbService } from './sme-mart-db.service';
+import { PipelineWriteService } from './pipeline-write.service';
+import { GraphqlReadService, type GqlQueryOptions } from './graphql-read.service';
 import { DocumentService } from './document.service';
 import { ImpersonationService } from './impersonation.service';
 import { SmeMartTagService } from './sme-mart-tag.service';
+import { DOCUMENT_FIELD_MAPPING, mapGqlToNeon } from '../field-mappings';
+import type { GqlDocumentResponse } from '../gql-types/document.types';
 import type {
   OrgDocument,
   OrgDocumentDetail,
@@ -40,7 +43,8 @@ export interface ShareDocumentOptions {
 @Injectable({ providedIn: 'root' })
 export class OrgDocumentService {
   private readonly clientApi = inject(ZerobiasClientApi);
-  private readonly db = inject(SmeMartDbService);
+  private readonly pipelineWrite = inject(PipelineWriteService);
+  private readonly graphqlRead = inject(GraphqlReadService);
   private readonly docService = inject(DocumentService);
   private readonly impersonation = inject(ImpersonationService);
   private readonly tagService = inject(SmeMartTagService);
@@ -51,7 +55,7 @@ export class OrgDocumentService {
 
   /**
    * Upload a file to the org document library.
-   * Uses DocumentService for FileService upload, then inserts org_documents row.
+   * Uses DocumentService for FileService upload, then pushes metadata to Pipeline.
    */
   async uploadDocument(
     orgId: string,
@@ -94,49 +98,87 @@ export class OrgDocumentService {
       this.docService.uploadProgress$.next({ filename, percent: 50, done: false });
     }
 
-    // Insert Neon catalog row
+    // Build GQL data with camelCase field names and push to Pipeline (fire-and-forget)
     const userId = this.impersonation.effectiveUserId();
-    const doc = await this.db.createRow<OrgDocument>('org_documents', {
-      org_id: orgId,
-      zb_file_id: zbFileId || null,
-      zb_file_version_id: fileVersionId || null,
+    const gqlData: Record<string, unknown> = {
+      id: crypto.randomUUID(),
+      engagementId: orgId, // Use orgId as engagement context for now
+      zbFileId: zbFileId || null,
+      zbFileVersionId: fileVersionId || null,
       filename,
-      mime_type: file.type || null,
-      file_size_bytes: file.size,
-      document_type: opts.documentType,
-      display_name: opts.displayName || filename,
+      mimeType: file.type || null,
+      fileSizeBytes: file.size,
+      documentType: opts.documentType,
+      displayName: opts.displayName || filename,
       description: opts.description || null,
-      uploaded_by_zerobias_user_id: userId,
+      uploadedByZerobiasUserId: userId,
+      archived: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    // Fire-and-forget Pipeline push
+    this.pipelineWrite.pushEntity('SmeMartDocument', gqlData).catch(err => {
+      console.error('Failed to push document metadata to Pipeline:', err);
     });
 
+    // Return optimistically (transform GQL to Neon shape for OrgDocument)
+    const neonData = mapGqlToNeon<OrgDocument>(gqlData, DOCUMENT_FIELD_MAPPING.gqlToNeon);
+    neonData.org_id = orgId; // Add org context field
+
     this.docService.uploadProgress$.next({ filename, percent: 100, done: true });
-    return doc;
+    return neonData;
   }
 
   // ---------------------------------------------------------------------------
   // List / Get
   // ---------------------------------------------------------------------------
 
-  /** List org documents from v_org_document_detail view (includes share counts). */
+  /** List org documents via GraphQL (includes filtering by engagement context). */
   async listDocuments(orgId: string, opts?: OrgDocListOptions): Promise<OrgDocumentDetail[]> {
     const archived = opts?.archived ?? false;
-    const page = opts?.pageNumber ?? 1;
-    const size = opts?.pageSize ?? 50;
+    const pageNumber = opts?.pageNumber ?? 1;
+    const pageSize = opts?.pageSize ?? 50;
 
-    let filter = `(&(org_id=${orgId})(archived=${archived}))`;
+    const filters: Record<string, string> = {
+      engagementId: `.eq.${orgId}`,
+      archived: `.eq.${archived}`,
+    };
+
     if (opts?.documentType) {
-      filter = `(&(org_id=${orgId})(document_type=${opts.documentType})(archived=${archived}))`;
+      filters['documentType'] = `.eq.${opts.documentType}`;
     }
 
-    const result = await this.db.searchRows<OrgDocumentDetail>(
-      'v_org_document_detail', filter, { pageNumber: page, pageSize: size },
+    const gqlOptions: GqlQueryOptions = {
+      filters,
+      pageNumber,
+      pageSize,
+    };
+
+    const result = await this.graphqlRead.query<GqlDocumentResponse>(
+      'SmeMartDocument',
+      this.getDocumentFields(),
+      gqlOptions,
     );
-    return result.items || [];
+
+    // Transform GQL responses to OrgDocumentDetail
+    return result.items.map(gql => {
+      const neonData = mapGqlToNeon<OrgDocumentDetail>(gql, DOCUMENT_FIELD_MAPPING.gqlToNeon);
+      neonData.org_id = orgId;
+      return neonData;
+    });
   }
 
-  /** Get a single document by ID. */
+  /** Get a single document by ID via GraphQL. */
   async getDocument(id: string): Promise<OrgDocument | null> {
-    return this.db.getRow<OrgDocument>('org_documents', id);
+    const doc = await this.graphqlRead.getById<GqlDocumentResponse>(
+      'SmeMartDocument',
+      id,
+      this.getDocumentFields(),
+    );
+    if (!doc) return null;
+
+    return mapGqlToNeon<OrgDocument>(doc, DOCUMENT_FIELD_MAPPING.gqlToNeon);
   }
 
   /** List documents shared with a specific engagement or project. */
@@ -286,5 +328,29 @@ export class OrgDocumentService {
 
   private escapeValue(value: string): string {
     return value.replace(/'/g, "''");
+  }
+
+  /**
+   * Get standard field list for SmeMartDocument GQL queries.
+   */
+  private getDocumentFields(): string[] {
+    return [
+      'id',
+      'engagementId',
+      'zbFileId',
+      'zbFileVersionId',
+      'filename',
+      'mimeType',
+      'fileSizeBytes',
+      'documentType',
+      'displayName',
+      'description',
+      'zbTaskId',
+      'zbTaskAttachmentId',
+      'uploadedByZerobiasUserId',
+      'archived',
+      'createdAt',
+      'updatedAt',
+    ];
   }
 }
