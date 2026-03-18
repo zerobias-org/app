@@ -1,7 +1,7 @@
 export * from './enums';
 export * from './marketplace-user.model';
 export * from './provider.model';
-export * from './work-request.model';
+export * from './engagement.model';
 export * from './bid.model';
 export * from './review.model';
 export * from './category.model';
@@ -17,4 +17,5 @@ export * from './document.model';
 export * from './rfp.model';
 export * from './org-document.model';
 export * from './bid-response.model';
+export * from './bid-ai.model';
 export * from './notification.model';
