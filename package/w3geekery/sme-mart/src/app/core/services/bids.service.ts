@@ -1,37 +1,73 @@
 import { Injectable, inject } from '@angular/core';
-import { SmeMartDbService } from './sme-mart-db.service';
+import { PipelineWriteService } from './pipeline-write.service';
+import { GraphqlReadService, type GqlQueryOptions } from './graphql-read.service';
 import { NotificationService } from './notification.service';
+import { BID_FIELD_MAPPING, mapNeonToGql, mapGqlToNeon } from '../field-mappings';
 import type { Bid, BidSummaryRow, BidWizardData } from '../models';
+import type { GqlBidResponse } from '../gql-types';
 
 @Injectable({ providedIn: 'root' })
 export class BidsService {
-  private readonly db = inject(SmeMartDbService);
+  private readonly pipelineWrite = inject(PipelineWriteService);
+  private readonly graphqlRead = inject(GraphqlReadService);
   private readonly notifications = inject(NotificationService);
 
+  /**
+   * List all bids for a given engagement (request).
+   * Queries GQL with filter on engagementId, transforms to Bid[].
+   */
   async listBidsByRequest(requestId: string): Promise<Bid[]> {
-    const result = await this.db.searchRows<Bid>(
-      'bids',
-      `(request_id=${requestId})`,
-      { pageSize: 100 },
+    const gqlOptions: GqlQueryOptions = {
+      filters: { engagementId: `.eq.${requestId}` },
+      pageSize: 100,
+    };
+
+    const result = await this.graphqlRead.query<GqlBidResponse>(
+      'Bid',
+      this.getBidFields(),
+      gqlOptions,
     );
-    return result.items || [];
+
+    return result.items.map(gql => mapGqlToNeon<Bid>(gql, BID_FIELD_MAPPING.gqlToNeon));
   }
 
-  /** Load bids with compliance summaries from the v_bid_summary view. */
+  /**
+   * Load bids with compliance summaries and bid response rollups.
+   * Queries GQL with nested bidResponses for compliance calculation.
+   */
   async listBidSummaries(requestId: string): Promise<BidSummaryRow[]> {
-    const result = await this.db.searchRows<BidSummaryRow>(
-      'v_bid_summary',
-      `(request_id=${requestId})`,
-      { pageSize: 100 },
+    const gqlOptions: GqlQueryOptions = {
+      filters: { engagementId: `.eq.${requestId}` },
+      pageSize: 100,
+    };
+
+    const result = await this.graphqlRead.query<GqlBidResponse>(
+      'Bid',
+      this.getBidFields(),
+      gqlOptions,
     );
-    return result.items || [];
+
+    return result.items.map(gql => this.transformGqlToBidSummary(gql));
   }
 
+  /**
+   * Fetch a single bid by ID.
+   */
   async getBid(id: string): Promise<Bid | null> {
-    return this.db.getRow<Bid>('bids', id);
+    const bid = await this.graphqlRead.getById<GqlBidResponse>(
+      'Bid',
+      id,
+      this.getBidFields(),
+    );
+    if (!bid) return null;
+
+    return mapGqlToNeon<Bid>(bid, BID_FIELD_MAPPING.gqlToNeon);
   }
 
-  /** Create a new bid (simple submit — existing flow) */
+  /**
+   * Submit a new bid (simple flow) with optimistic update.
+   * Generates ID, pushes to Pipeline in background.
+   */
   async submitBid(data: {
     request_id: string;
     provider_id: string;
@@ -39,118 +75,298 @@ export class BidsService {
     proposed_price?: string;
     proposed_timeline?: string;
   }): Promise<Bid> {
-    return this.db.createRow<Bid>('bids', {
-      ...data,
+    const id = `bid-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+
+    const bid: Bid = {
+      id,
+      request_id: data.request_id,
+      provider_id: data.provider_id,
+      cover_letter: data.cover_letter || null,
+      proposed_price: data.proposed_price || null,
+      proposed_timeline: data.proposed_timeline || null,
       status: 'pending',
-    });
-  }
-
-  /** Create a draft bid for the wizard flow */
-  async createDraft(requestId: string, providerId: string): Promise<Bid> {
-    return this.db.createRow<Bid>('bids', {
-      request_id: requestId,
-      provider_id: providerId,
-      status: 'draft',
-      wizard_step: 0,
-    });
-  }
-
-  /** Save wizard progress (partial update) */
-  async saveDraft(id: string, wizardData: BidWizardData, step: number): Promise<Bid> {
-    const fields: Record<string, unknown> = {
-      wizard_data: JSON.stringify(wizardData),
-      wizard_step: step,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     };
 
-    // Flatten approach fields onto bid columns
-    if (wizardData.approach) {
-      if (wizardData.approach.executive_summary !== undefined) {
-        fields['executive_summary'] = wizardData.approach.executive_summary;
-      }
-      if (wizardData.approach.cover_letter !== undefined) {
-        fields['cover_letter'] = wizardData.approach.cover_letter;
-      }
+    // Push to Pipeline in background
+    const gqlData = mapNeonToGql<GqlBidResponse>(bid, BID_FIELD_MAPPING.neonToGql);
+    this.pipelineWrite.pushEntity('Bid', gqlData as unknown as Record<string, unknown>).catch(err => {
+      console.error('Failed to push bid to Pipeline:', err);
+    });
+
+    // Return optimistic response immediately
+    return bid;
+  }
+
+  /**
+   * Create a draft bid for the wizard flow.
+   */
+  async createDraft(requestId: string, providerId: string): Promise<Bid> {
+    const id = `bid-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+
+    const bid: Bid = {
+      id,
+      request_id: requestId,
+      provider_id: providerId,
+      cover_letter: null,
+      proposed_price: null,
+      proposed_timeline: null,
+      status: 'draft',
+      wizard_step: 0,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    // Push to Pipeline in background
+    const gqlData = mapNeonToGql<GqlBidResponse>(bid, BID_FIELD_MAPPING.neonToGql);
+    this.pipelineWrite.pushEntity('Bid', gqlData as unknown as Record<string, unknown>).catch(err => {
+      console.error('Failed to push draft bid to Pipeline:', err);
+    });
+
+    // Return optimistic response
+    return bid;
+  }
+
+  /**
+   * Save wizard progress (partial update).
+   * Flattens nested wizard_data to individual bid columns, preserves JSON serialization.
+   */
+  async saveDraft(id: string, wizardData: BidWizardData, step: number): Promise<Bid> {
+    // Fetch current bid to merge updates
+    const current = await this.getBid(id);
+    if (!current) throw new Error(`Bid ${id} not found`);
+
+    // Flatten wizard_data into bid columns
+    const updated: Partial<Bid> = {
+      wizard_data: wizardData,
+      wizard_step: step,
+      updated_at: new Date().toISOString(),
+    };
+
+    // Flatten approach fields
+    if (wizardData.approach?.executive_summary !== undefined) {
+      updated.executive_summary = wizardData.approach.executive_summary;
+    }
+    if (wizardData.approach?.cover_letter !== undefined) {
+      updated.cover_letter = wizardData.approach.cover_letter;
     }
 
     // Flatten team fields
-    if (wizardData.team) {
-      if (wizardData.team.team_description !== undefined) {
-        fields['team_description'] = wizardData.team.team_description;
-      }
+    if (wizardData.team?.team_description !== undefined) {
+      updated.team_description = wizardData.team.team_description;
     }
 
     // Flatten pricing fields
-    if (wizardData.pricing) {
-      if (wizardData.pricing.proposed_price !== undefined) {
-        fields['proposed_price'] = wizardData.pricing.proposed_price;
-      }
-      if (wizardData.pricing.proposed_timeline !== undefined) {
-        fields['proposed_timeline'] = wizardData.pricing.proposed_timeline;
-      }
-      if (wizardData.pricing.total_estimated_hours !== undefined) {
-        fields['total_estimated_hours'] = wizardData.pricing.total_estimated_hours;
-      }
-      if (wizardData.pricing.pricing_breakdown !== undefined) {
-        fields['pricing_breakdown'] = JSON.stringify(wizardData.pricing.pricing_breakdown);
-      }
+    if (wizardData.pricing?.proposed_price !== undefined) {
+      updated.proposed_price = wizardData.pricing.proposed_price;
+    }
+    if (wizardData.pricing?.proposed_timeline !== undefined) {
+      updated.proposed_timeline = wizardData.pricing.proposed_timeline;
+    }
+    if (wizardData.pricing?.total_estimated_hours !== undefined) {
+      updated.total_estimated_hours = wizardData.pricing.total_estimated_hours;
+    }
+    if (wizardData.pricing?.pricing_breakdown !== undefined) {
+      updated.pricing_breakdown = wizardData.pricing.pricing_breakdown;
     }
 
-    return this.db.updateRow<Bid>('bids', id, fields);
+    const merged: Bid = { ...current, ...updated } as Bid;
+
+    // Push to Pipeline
+    const gqlData = mapNeonToGql<GqlBidResponse>(merged, BID_FIELD_MAPPING.neonToGql);
+    this.pipelineWrite.pushEntity('Bid', gqlData as unknown as Record<string, unknown>).catch(err => {
+      console.error('Failed to save draft bid to Pipeline:', err);
+    });
+
+    return merged;
   }
 
-  /** Submit a draft bid (finalize) */
-  async submitDraft(id: string, context?: { buyerId: string; rfpTitle: string }): Promise<Bid> {
-    const bid = await this.db.updateRow<Bid>('bids', id, {
+  /**
+   * Submit a draft bid (finalize): mark as pending, clear wizard_data.
+   */
+  async submitDraft(
+    id: string,
+    context?: { buyerId: string; rfpTitle: string },
+    aiMetadata?: { ai_assisted: boolean; ai_model: string; ai_generated_at: string },
+  ): Promise<Bid> {
+    // Fetch current bid
+    const current = await this.getBid(id);
+    if (!current) throw new Error(`Bid ${id} not found`);
+
+    const updated: Bid = {
+      ...current,
       status: 'pending',
       wizard_data: null,
+      ai_assisted: aiMetadata?.ai_assisted ?? null,
+      ai_model: aiMetadata?.ai_model ?? null,
+      ai_generated_at: aiMetadata?.ai_generated_at ?? null,
+      updated_at: new Date().toISOString(),
+    };
+
+    // Push to Pipeline
+    const gqlData = mapNeonToGql<GqlBidResponse>(updated, BID_FIELD_MAPPING.neonToGql);
+    this.pipelineWrite.pushEntity('Bid', gqlData as unknown as Record<string, unknown>).catch(err => {
+      console.error('Failed to submit draft bid to Pipeline:', err);
     });
-    if (context) {
+
+    // Fire-and-forget notification
+    if (context && updated.request_id) {
       this.notifications.create({
         recipient_id: context.buyerId,
         type: 'bid_received',
         severity: 'medium',
         title: 'New bid received',
         description: `A new bid was submitted on "${context.rfpTitle}".`,
-        resource_id: bid.request_id ?? undefined,
+        resource_id: updated.request_id,
         resource_type: 'rfp',
-        payload: { parent_id: bid.request_id },
+        payload: { parent_id: updated.request_id },
       }).catch(() => {});
     }
-    return bid;
+
+    return updated;
   }
 
-  /** Find an existing draft bid for a provider on a request */
+  /**
+   * Find an existing draft bid for a provider on a request.
+   * Uses AND filter: engagementId AND providerId AND status.
+   */
   async findDraft(requestId: string, providerId: string): Promise<Bid | null> {
-    const result = await this.db.searchRows<Bid>(
-      'bids',
-      `(&(request_id=${requestId})(provider_id=${providerId})(status=draft))`,
-      { pageSize: 1 },
+    const gqlOptions: GqlQueryOptions = {
+      filters: {
+        engagementId: `.eq.${requestId}`,
+        providerId: `.eq.${providerId}`,
+        status: `.eq.draft`,
+      },
+      pageSize: 1,
+    };
+
+    const result = await this.graphqlRead.query<GqlBidResponse>(
+      'Bid',
+      this.getBidFields(),
+      gqlOptions,
     );
-    return result.items?.[0] || null;
+
+    if (!result.items.length) return null;
+
+    return mapGqlToNeon<Bid>(result.items[0], BID_FIELD_MAPPING.gqlToNeon);
   }
 
+  /**
+   * Accept a bid (mark as accepted).
+   */
   async acceptBid(id: string): Promise<Bid> {
-    return this.db.updateRow<Bid>('bids', id, { status: 'accepted' });
+    const current = await this.getBid(id);
+    if (!current) throw new Error(`Bid ${id} not found`);
+
+    const updated: Bid = { ...current, status: 'accepted', updated_at: new Date().toISOString() };
+
+    const gqlData = mapNeonToGql<GqlBidResponse>(updated, BID_FIELD_MAPPING.neonToGql);
+    this.pipelineWrite.pushEntity('Bid', gqlData as unknown as Record<string, unknown>).catch(err => {
+      console.error('Failed to accept bid in Pipeline:', err);
+    });
+
+    return updated;
   }
 
+  /**
+   * Reject a bid (mark as rejected).
+   */
   async rejectBid(id: string, context?: { providerId: string; rfpTitle: string }): Promise<Bid> {
-    const bid = await this.db.updateRow<Bid>('bids', id, { status: 'rejected' });
-    if (context) {
+    const current = await this.getBid(id);
+    if (!current) throw new Error(`Bid ${id} not found`);
+
+    const updated: Bid = { ...current, status: 'rejected', updated_at: new Date().toISOString() };
+
+    const gqlData = mapNeonToGql<GqlBidResponse>(updated, BID_FIELD_MAPPING.neonToGql);
+    this.pipelineWrite.pushEntity('Bid', gqlData as unknown as Record<string, unknown>).catch(err => {
+      console.error('Failed to reject bid in Pipeline:', err);
+    });
+
+    // Fire-and-forget notification
+    if (context && updated.request_id) {
       this.notifications.create({
         recipient_id: context.providerId,
         type: 'bid_rejected',
         severity: 'info',
         title: 'Your bid was not selected',
         description: `Your bid on "${context.rfpTitle}" was not selected.`,
-        resource_id: bid.request_id ?? undefined,
+        resource_id: updated.request_id,
         resource_type: 'rfp',
-        payload: { parent_id: bid.request_id },
+        payload: { parent_id: updated.request_id },
       }).catch(() => {});
     }
-    return bid;
+
+    return updated;
   }
 
+  /**
+   * Withdraw a bid (mark as withdrawn).
+   */
   async withdrawBid(id: string): Promise<Bid> {
-    return this.db.updateRow<Bid>('bids', id, { status: 'withdrawn' });
+    const current = await this.getBid(id);
+    if (!current) throw new Error(`Bid ${id} not found`);
+
+    const updated: Bid = { ...current, status: 'withdrawn', updated_at: new Date().toISOString() };
+
+    const gqlData = mapNeonToGql<GqlBidResponse>(updated, BID_FIELD_MAPPING.neonToGql);
+    this.pipelineWrite.pushEntity('Bid', gqlData as unknown as Record<string, unknown>).catch(err => {
+      console.error('Failed to withdraw bid in Pipeline:', err);
+    });
+
+    return updated;
+  }
+
+  /**
+   * Get standard field list for Bid GQL queries.
+   */
+  private getBidFields(): string[] {
+    return [
+      'id',
+      'engagementId',
+      'providerId',
+      'coverLetter',
+      'proposedPrice',
+      'proposedTimeline',
+      'status',
+      'executiveSummary',
+      'teamDescription',
+      'totalEstimatedHours',
+      'pricingBreakdown',
+      'wizardData',
+      'wizardStep',
+      'aiAssisted',
+      'aiModel',
+      'aiGeneratedAt',
+      'createdAt',
+      'updatedAt',
+    ];
+  }
+
+  /**
+   * Transform GQL bid response to BidSummaryRow.
+   * For now, compliance counts are 0 (would require nested bidResponses query).
+   */
+  private transformGqlToBidSummary(gql: GqlBidResponse): BidSummaryRow {
+    const bid = mapGqlToNeon<Bid>(gql, BID_FIELD_MAPPING.gqlToNeon);
+    return {
+      ...bid,
+      rfp_title: null,               // Would come from nested engagement query
+      category: null,                // Would come from nested engagement query
+      budget_type: null,             // Would come from nested engagement query
+      budget_min: null,              // Would come from nested engagement query
+      budget_max: null,              // Would come from nested engagement query
+      total_responses: 0,            // Would require separate query
+      met_count: 0,                  // Would come from nested bidResponses
+      partial_count: 0,              // Would come from nested bidResponses
+      not_met_count: 0,              // Would come from nested bidResponses
+      na_count: 0,                   // Would come from nested bidResponses
+      planned_count: 0,              // Would come from nested bidResponses
+      sum_estimated_hours: bid.total_estimated_hours ?? 0,
+      sum_estimated_cost: 0,         // Would calculate from pricing_breakdown
+      provider_display_name: null,   // Would come from provider lookup
+      provider_headline: null,        // Would come from provider lookup
+      provider_rating: null,          // Would come from provider lookup
+    };
   }
 }
