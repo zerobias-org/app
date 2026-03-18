@@ -168,3 +168,50 @@ export function fakeClientApi() {
     UUIDtoString: vi.fn((id: any) => id?.toString?.() ?? id),
   };
 }
+
+// ---------------------------------------------------------------------------
+// AuditgraphDB Migration mocks (Pipeline + GraphQL services)
+// ---------------------------------------------------------------------------
+
+/**
+ * Mock PipelineWriteService for testing entity pushes to AuditgraphDB.
+ *
+ * All methods return Promises that resolve successfully by default.
+ * Override specific methods in tests to simulate failures or verify calls.
+ *
+ * Usage:
+ *   const mockPipeline = fakePipelineWriteService();
+ *   mockPipeline.pushEntity.mockResolvedValue(undefined);
+ *   mockPipeline.pushEntities.mockResolvedValue(undefined);
+ */
+export function fakePipelineWriteService() {
+  return {
+    pushEntity: vi.fn().mockResolvedValue(undefined),
+    pushEntities: vi.fn().mockResolvedValue(undefined),
+    deleteEntity: vi.fn().mockResolvedValue(undefined),
+    deleteEntities: vi.fn().mockResolvedValue(undefined),
+  };
+}
+
+/**
+ * Mock GraphqlReadService for testing GQL queries against AuditgraphDB.
+ *
+ * Provides default empty results. Override in tests to return realistic fixtures.
+ *
+ * Usage:
+ *   const mockGql = fakeGraphqlReadService();
+ *   mockGql.query.mockResolvedValue({
+ *     items: [ENGAGEMENT_GQL_FIXTURE],
+ *     page: { pageNumber: 1, pageSize: 50, totalCount: 1 }
+ *   });
+ */
+export function fakeGraphqlReadService() {
+  return {
+    query: vi.fn().mockResolvedValue({
+      items: [],
+      page: { pageNumber: 1, pageSize: 50, totalCount: 0 },
+    }),
+    getById: vi.fn().mockResolvedValue(null),
+    rawQuery: vi.fn().mockResolvedValue({}),
+  };
+}
