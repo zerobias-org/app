@@ -38,3 +38,9 @@ export interface EngagementDetailRow extends Engagement {
   bids: string; // JSON array string
   bid_count: number;
 }
+
+/**
+ * @deprecated Use Engagement instead
+ * Backward compatibility alias for code that still imports WorkRequest type
+ */
+export type WorkRequest = Engagement;
