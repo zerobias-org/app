@@ -7,7 +7,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { CategoriesService } from '../../../core/services/categories.service';
-import type { WorkRequest, BudgetType, Category } from '../../../core/models';
+import type { Engagement, BudgetType, Category } from '../../../core/models';
 
 export interface EngagementFormValues {
   title: string;
@@ -49,7 +49,7 @@ export class EngagementForm implements OnInit {
   });
 
   @Input()
-  set initialValues(values: Partial<WorkRequest> | undefined) {
+  set initialValues(values: Partial<Engagement> | undefined) {
     if (values) {
       this.form.patchValue({
         title: values.title || '',

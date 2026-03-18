@@ -8,7 +8,7 @@
 import type {
   Bid,
   BidSummaryRow,
-  WorkRequest,
+  Engagement,
   EngagementSummaryRow,
   EngagementDetailRow,
   Note,
@@ -42,7 +42,7 @@ import {
 // Work Requests & Engagements
 // ---------------------------------------------------------------------------
 
-export function makeWorkRequest(overrides: Partial<WorkRequest> = {}): WorkRequest {
+export function makeEngagement(overrides: Partial<Engagement> = {}): Engagement {
   return {
     id: TEST_WR_ID,
     title: 'HIPAA Assessment',
@@ -51,7 +51,7 @@ export function makeWorkRequest(overrides: Partial<WorkRequest> = {}): WorkReque
     buyer_zerobias_user_id: TEST_USER_ID,
     created_at: TEST_CREATED_AT,
     ...overrides,
-  } as WorkRequest;
+  } as Engagement;
 }
 
 export function makeEngagementSummaryRow(overrides: Partial<EngagementSummaryRow> = {}): EngagementSummaryRow {

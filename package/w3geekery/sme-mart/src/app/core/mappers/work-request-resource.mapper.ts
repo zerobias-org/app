@@ -1,19 +1,22 @@
-import type { WorkRequest, SmeMartResource } from '../models';
+import type { Engagement, SmeMartResource } from '../models';
 
-/** Map a WorkRequest to SmeMartResource */
-export function workRequestToResource(wr: WorkRequest): SmeMartResource {
+/** Map an Engagement to SmeMartResource */
+export function engagementToResource(engagement: Engagement): SmeMartResource {
   return {
-    id: wr.id,
-    name: wr.title,
-    type: 'sme-mart:work-request',
-    ownerId: wr.buyer_zerobias_user_id,
-    created: wr.created_at,
-    updated: wr.updated_at ?? wr.created_at,
-    description: wr.description,
+    id: engagement.id,
+    name: engagement.title,
+    type: 'sme-mart:engagement',
+    ownerId: engagement.buyer_zerobias_user_id,
+    created: engagement.created_at,
+    updated: engagement.updated_at ?? engagement.created_at,
+    description: engagement.description,
     parentId: null,
     deleted: null,
-    boundaryId: wr.zerobias_boundary_id,
-    engagementId: wr.id, // WorkRequest IS the engagement
+    boundaryId: engagement.zerobias_boundary_id,
+    engagementId: engagement.id, // Engagement IS the engagement
     projectId: null,
   };
 }
+
+/** Backwards compatibility alias (deprecated) */
+export const workRequestToResource = engagementToResource;

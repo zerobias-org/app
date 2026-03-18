@@ -43,7 +43,7 @@ export class EngagementList implements OnInit {
   private readonly providerProfiles = inject(ProviderProfilesService);
 
   readonly loading = this.engagements.loading;
-  readonly engagements = signal<EngagementSummaryRow[]>([]);
+  readonly items = signal<EngagementSummaryRow[]>([]);
   readonly searchTerm = signal('');
   readonly lifecycleFilter = signal<LifecycleFilter>('all');
   readonly statusFilter = signal<RequestStatus | 'all'>('all');
@@ -57,7 +57,7 @@ export class EngagementList implements OnInit {
   ];
 
   readonly filteredEngagements = computed(() => {
-    let items = this.engagements();
+    let items = this.items();
 
     // Lifecycle filter
     const lf = this.lifecycleFilter();
@@ -115,7 +115,7 @@ export class EngagementList implements OnInit {
         this.engagements.listEngagements({ pageSize: 200 }),
         this.loadCurrentProvider(),
       ]);
-      this.engagements.set(engagementResult.items || []);
+      this.items.set(engagementResult.items || []);
     } catch (err) {
       console.warn('[EngagementList] Failed to load:', err);
     }
