@@ -2,9 +2,9 @@ import { Injectable, inject } from '@angular/core';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService, type GqlQueryOptions } from './graphql-read.service';
 import { NotificationService } from './notification.service';
-import { BID_FIELD_MAPPING, mapNeonToGql, mapGqlToNeon } from '../field-mappings';
-import type { Bid, BidSummaryRow, BidWizardData } from '../models';
-import type { GqlBidResponse } from '../gql-types';
+import { BID_FIELD_MAPPING, BID_RESPONSE_FIELD_MAPPING, mapNeonToGql, mapGqlToNeon } from '../field-mappings';
+import type { Bid, BidSummaryRow, BidWizardData, BidResponse } from '../models';
+import type { GqlBidResponse, GqlBidResponseResponse } from '../gql-types';
 
 @Injectable({ providedIn: 'root' })
 export class BidsService {
@@ -319,6 +319,7 @@ export class BidsService {
 
   /**
    * Get standard field list for Bid GQL queries.
+   * Includes nested bidResponses for compliance calculation.
    */
   private getBidFields(): string[] {
     return [
@@ -340,6 +341,8 @@ export class BidsService {
       'aiGeneratedAt',
       'createdAt',
       'updatedAt',
+      // Nested bidResponses for compliance
+      'bidResponses(id,bidId,requirementId,complianceStatus,responseText,estimatedHours,estimatedCost,certificationRef,readyDate,respondedAt,updatedAt)',
     ];
   }
 
