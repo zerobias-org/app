@@ -3,7 +3,7 @@ import { vi } from 'vitest';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideRouter, Router, ActivatedRoute } from '@angular/router';
 import { EngagementDetail } from './engagement-detail.component';
-import { WorkRequestsService } from '../../core/services/work-requests.service';
+import { EngagementsService } from '../../core/services/engagements.service';
 import { ProviderProfilesService } from '../../core/services/provider-profiles.service';
 import { EngagementContextService } from '../../core/services/engagement-context.service';
 import { EngagementHierarchyService } from '../../core/services/engagement-hierarchy.service';
@@ -59,7 +59,7 @@ describe('EngagementDetail', () => {
       providers: [
         provideNoopAnimations(),
         provideRouter([]),
-        { provide: WorkRequestsService, useValue: mockWorkRequests },
+        { provide: EngagementsService, useValue: mockWorkRequests },
         { provide: ProviderProfilesService, useValue: mockProviderProfiles },
         { provide: EngagementContextService, useValue: mockCtx },
         { provide: EngagementHierarchyService, useValue: mockHierarchy },

@@ -211,3 +211,34 @@
   color: var(--mat-sys-on-surface-variant, #999);
   font-style: italic;
 }
+
+// AI-assisted bid generation
+.regen-btn {
+  margin-left: 4px;
+  vertical-align: middle;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.ai-notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  background: var(--mat-sys-primary-container, #e3f2fd);
+  color: var(--mat-sys-on-primary-container, #1565c0);
+  font-size: 0.875rem;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+}

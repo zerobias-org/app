@@ -7,7 +7,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { EngagementCard } from '../../shared/components/engagement-card/engagement-card.component';
 import { ListPage, SortOption } from '../../shared/components/list-page/list-page.component';
-import { WorkRequestsService } from '../../core/services/work-requests.service';
+import { EngagementsService } from '../../core/services/engagements.service';
 import { RfpDialog } from '../../shared/components/rfp-dialog/rfp-dialog.component';
 import type { EngagementSummaryRow, RequestStatus } from '../../core/models';
 
@@ -30,9 +30,9 @@ export class RfpList implements OnInit {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly dialog = inject(MatDialog);
-  private readonly workRequests = inject(WorkRequestsService);
+  private readonly engagements = inject(EngagementsService);
 
-  readonly loading = this.workRequests.loading;
+  readonly loading = this.engagements.loading;
   readonly rfps = signal<EngagementSummaryRow[]>([]);
   readonly searchTerm = signal('');
   readonly statusFilter = signal<RequestStatus | 'all'>('all');
@@ -78,7 +78,7 @@ export class RfpList implements OnInit {
 
   async loadData(): Promise<void> {
     try {
-      const result = await this.workRequests.listEngagements({ pageSize: 200 });
+      const result = await this.engagements.listEngagements({ pageSize: 200 });
       const rfpsOnly = (result.items || []).filter(e => !e.engagement_tag);
       this.rfps.set(rfpsOnly);
     } catch (err) {

@@ -4,7 +4,7 @@ import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideRouter, Router, ActivatedRoute } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { RfpList } from './rfp-list.component';
-import { WorkRequestsService } from '../../core/services/work-requests.service';
+import { EngagementsService } from '../../core/services/engagements.service';
 import { ZerobiasClientApi } from '@zerobias-com/zerobias-client';
 import { makeEngagementSummaryRow } from '../../test-helpers/factories';
 
@@ -38,7 +38,7 @@ describe('RfpList', () => {
       providers: [
         provideNoopAnimations(),
         provideRouter([]),
-        { provide: WorkRequestsService, useValue: mockWorkRequests },
+        { provide: EngagementsService, useValue: mockWorkRequests },
         { provide: Router, useValue: mockRouter },
         { provide: MatDialog, useValue: mockDialog },
         { provide: ZerobiasClientApi, useValue: {} },
@@ -131,7 +131,7 @@ describe('RfpList', () => {
         providers: [
           provideNoopAnimations(),
           provideRouter([]),
-          { provide: WorkRequestsService, useValue: mockWorkRequests },
+          { provide: EngagementsService, useValue: mockWorkRequests },
           { provide: Router, useValue: mockRouter },
           { provide: MatDialog, useValue: mockDialog },
           { provide: ZerobiasClientApi, useValue: {} },

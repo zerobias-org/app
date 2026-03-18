@@ -6,7 +6,7 @@
  */
 
 import { TestBed } from '@angular/core/testing';
-import { WorkRequestsService } from './work-requests.service';
+import { EngagementsService } from '../../core/services/engagements.service';
 import { BidsService } from './bids.service';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
@@ -16,7 +16,7 @@ import { fakePipelineWriteService, fakeGraphqlReadService } from '../test-helper
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 describe('Wave 1 Integration: Engagement → Bid Flow', () => {
-  let workRequestsService: WorkRequestsService;
+  let workRequestsService: EngagementsService;
   let bidsService: BidsService;
   let pipelineWrite: ReturnType<typeof fakePipelineWriteService>;
   let graphqlRead: ReturnType<typeof fakeGraphqlReadService>;
@@ -29,7 +29,7 @@ describe('Wave 1 Integration: Engagement → Bid Flow', () => {
 
     TestBed.configureTestingModule({
       providers: [
-        WorkRequestsService,
+        EngagementsService,
         BidsService,
         { provide: PipelineWriteService, useValue: pipelineWrite },
         { provide: GraphqlReadService, useValue: graphqlRead },
@@ -37,7 +37,7 @@ describe('Wave 1 Integration: Engagement → Bid Flow', () => {
       ],
     });
 
-    workRequestsService = TestBed.inject(WorkRequestsService);
+    workRequestsService = TestBed.inject(EngagementsService);
     bidsService = TestBed.inject(BidsService);
   });
 

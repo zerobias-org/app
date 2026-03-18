@@ -539,8 +539,9 @@ export class DocumentsTab implements OnInit {
 
     try {
       const org = await new Promise<any>((resolve) => {
-        const sub = this.app.getCurrentOrg().subscribe(o => {
-          if (o) { resolve(o); sub.unsubscribe(); }
+        let sub: any;
+        sub = this.app.getCurrentOrg().subscribe(o => {
+          if (o) { resolve(o); sub?.unsubscribe(); }
         });
       });
       this.orgId = org.id?.toString() || '';

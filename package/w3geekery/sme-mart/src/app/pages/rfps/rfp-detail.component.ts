@@ -9,7 +9,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { DatePipe, TitleCasePipe, CurrencyPipe } from '@angular/common';
 import { BidCard, type BidCardData } from '../../shared/components/bid-card/bid-card.component';
-import { WorkRequestsService } from '../../core/services/work-requests.service';
+import { EngagementsService } from '../../core/services/engagements.service';
 import { BidsService } from '../../core/services/bids.service';
 import { ProviderProfilesService } from '../../core/services/provider-profiles.service';
 import { EngagementLifecycleService } from '../../core/services/engagement-lifecycle.service';
@@ -41,7 +41,7 @@ export class RfpDetail implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly snackBar = inject(MatSnackBar);
   private readonly impersonation = inject(ImpersonationService);
-  private readonly workRequests = inject(WorkRequestsService);
+  private readonly engagements = inject(EngagementsService);
   private readonly bids = inject(BidsService);
   private readonly providerProfiles = inject(ProviderProfilesService);
   private readonly lifecycle = inject(EngagementLifecycleService);
@@ -115,7 +115,7 @@ export class RfpDetail implements OnInit {
   async ngOnInit(): Promise<void> {
     const id = this.route.snapshot.params['id'];
     try {
-      const eng = await this.workRequests.getEngagement(id);
+      const eng = await this.engagements.getEngagement(id);
 
       if (!eng) {
         this.snackBar.open('RFP not found', 'OK', { duration: 3000 });
@@ -203,7 +203,7 @@ export class RfpDetail implements OnInit {
     const eng = this.rfp();
     if (!eng) return;
     try {
-      await this.workRequests.updateRfp(eng.id, { status: 'open' });
+      await this.engagements.updateRfp(eng.id, { status: 'open' });
       this.snackBar.open('RFP published', 'OK', { duration: 3000 });
       this.refresh();
     } catch (err: any) {
@@ -215,7 +215,7 @@ export class RfpDetail implements OnInit {
     const eng = this.rfp();
     if (!eng) return;
     try {
-      await this.workRequests.cancelEngagement(eng.id);
+      await this.engagements.cancelEngagement(eng.id);
       this.snackBar.open('RFP closed', 'OK', { duration: 3000 });
       this.refresh();
     } catch (err: any) {
@@ -244,7 +244,7 @@ export class RfpDetail implements OnInit {
   private async refresh(): Promise<void> {
     const id = this.route.snapshot.params['id'];
     const [eng, summaries] = await Promise.all([
-      this.workRequests.getEngagement(id),
+      this.engagements.getEngagement(id),
       this.bids.listBidSummaries(id).catch(() => [] as BidSummaryRow[]),
     ]);
     if (eng) this.rfp.set(eng);

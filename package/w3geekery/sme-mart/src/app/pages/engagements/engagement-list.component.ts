@@ -9,7 +9,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatChipsModule } from '@angular/material/chips';
 import { EngagementCard } from '../../shared/components/engagement-card/engagement-card.component';
 import { ListPage, SortOption } from '../../shared/components/list-page/list-page.component';
-import { WorkRequestsService } from '../../core/services/work-requests.service';
+import { EngagementsService } from '../../core/services/engagements.service';
 import { ProviderProfilesService } from '../../core/services/provider-profiles.service';
 import { ImpersonationService } from '../../core/services/impersonation.service';
 import { RfpDialog } from '../../shared/components/rfp-dialog/rfp-dialog.component';
@@ -39,10 +39,10 @@ export class EngagementList implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly dialog = inject(MatDialog);
   private readonly impersonation = inject(ImpersonationService);
-  private readonly workRequests = inject(WorkRequestsService);
+  private readonly engagements = inject(EngagementsService);
   private readonly providerProfiles = inject(ProviderProfilesService);
 
-  readonly loading = this.workRequests.loading;
+  readonly loading = this.engagements.loading;
   readonly engagements = signal<EngagementSummaryRow[]>([]);
   readonly searchTerm = signal('');
   readonly lifecycleFilter = signal<LifecycleFilter>('all');
@@ -112,7 +112,7 @@ export class EngagementList implements OnInit {
   async loadData(): Promise<void> {
     try {
       const [engagementResult] = await Promise.all([
-        this.workRequests.listEngagements({ pageSize: 200 }),
+        this.engagements.listEngagements({ pageSize: 200 }),
         this.loadCurrentProvider(),
       ]);
       this.engagements.set(engagementResult.items || []);

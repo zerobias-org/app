@@ -5,7 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { EngagementForm, type EngagementFormValues } from '../../shared/components/engagement-form/engagement-form.component';
-import { WorkRequestsService } from '../../core/services/work-requests.service';
+import { EngagementsService } from '../../core/services/engagements.service';
 import { ImpersonationService } from '../../core/services/impersonation.service';
 import type { EngagementDetailRow, WorkRequest } from '../../core/models';
 
@@ -21,7 +21,7 @@ export class EngagementEdit implements OnInit {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly impersonation = inject(ImpersonationService);
-  private readonly workRequests = inject(WorkRequestsService);
+  private readonly engagements = inject(EngagementsService);
   private readonly snackBar = inject(MatSnackBar);
 
   @ViewChild(EngagementForm) formComponent!: EngagementForm;
@@ -35,7 +35,7 @@ export class EngagementEdit implements OnInit {
   async ngOnInit(): Promise<void> {
     const id = this.route.snapshot.params['id'];
     try {
-      const eng = await this.workRequests.getEngagement(id);
+      const eng = await this.engagements.getEngagement(id);
       if (!eng) {
         this.snackBar.open('Engagement not found', 'OK', { duration: 3000 });
         this.router.navigate(['/rfps']);
@@ -80,7 +80,7 @@ export class EngagementEdit implements OnInit {
 
     this.saving.set(true);
     try {
-      await this.workRequests.updateRfp(eng.id, {
+      await this.engagements.updateRfp(eng.id, {
         title: this.currentValues.title,
         description: this.currentValues.description || null,
         category: this.currentValues.category,

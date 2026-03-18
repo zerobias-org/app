@@ -3,7 +3,7 @@ import { vi } from 'vitest';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideRouter, Router, ActivatedRoute } from '@angular/router';
 import { RfpDetail } from './rfp-detail.component';
-import { WorkRequestsService } from '../../core/services/work-requests.service';
+import { EngagementsService } from '../../core/services/engagements.service';
 import { BidsService } from '../../core/services/bids.service';
 import { ProviderProfilesService } from '../../core/services/provider-profiles.service';
 import { EngagementLifecycleService } from '../../core/services/engagement-lifecycle.service';
@@ -60,7 +60,7 @@ describe('RfpDetail', () => {
       providers: [
         provideNoopAnimations(),
         provideRouter([]),
-        { provide: WorkRequestsService, useValue: mockWorkRequests },
+        { provide: EngagementsService, useValue: mockWorkRequests },
         { provide: BidsService, useValue: mockBids },
         { provide: ProviderProfilesService, useValue: mockProviderProfiles },
         { provide: EngagementLifecycleService, useValue: mockLifecycle },

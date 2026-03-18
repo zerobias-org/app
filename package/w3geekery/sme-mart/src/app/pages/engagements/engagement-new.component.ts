@@ -5,7 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { EngagementForm, type EngagementFormValues } from '../../shared/components/engagement-form/engagement-form.component';
-import { WorkRequestsService } from '../../core/services/work-requests.service';
+import { EngagementsService } from '../../core/services/engagements.service';
 import { ImpersonationService } from '../../core/services/impersonation.service';
 
 @Component({
@@ -19,7 +19,7 @@ import { ImpersonationService } from '../../core/services/impersonation.service'
 export class EngagementNew {
   private readonly router = inject(Router);
   private readonly impersonation = inject(ImpersonationService);
-  private readonly workRequests = inject(WorkRequestsService);
+  private readonly engagements = inject(EngagementsService);
   private readonly snackBar = inject(MatSnackBar);
 
   @ViewChild(EngagementForm) formComponent!: EngagementForm;
@@ -40,7 +40,7 @@ export class EngagementNew {
 
     this.saving.set(true);
     try {
-      const rfp = await this.workRequests.createRfp({
+      const rfp = await this.engagements.createRfp({
         buyer_zerobias_user_id: this.impersonation.effectiveUserId(),
         title: this.currentValues.title,
         description: this.currentValues.description || undefined,

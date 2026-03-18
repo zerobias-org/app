@@ -8,7 +8,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { DatePipe, TitleCasePipe } from '@angular/common';
 import { BidCard } from '../../../shared/components/bid-card/bid-card.component';
 import { EngagementContextService } from '../../../core/services/engagement-context.service';
-import { WorkRequestsService } from '../../../core/services/work-requests.service';
+import { EngagementsService } from '../../core/services/engagements.service';
 
 @Component({
   selector: 'app-overview-tab',
@@ -31,13 +31,13 @@ export class OverviewTab {
   readonly ctx = inject(EngagementContextService);
   private readonly router = inject(Router);
   private readonly snackBar = inject(MatSnackBar);
-  private readonly workRequests = inject(WorkRequestsService);
+  private readonly engagements = inject(EngagementsService);
 
   async cancelEngagement(): Promise<void> {
     const eng = this.ctx.engagement();
     if (!eng) return;
     try {
-      await this.workRequests.cancelEngagement(eng.id);
+      await this.engagements.cancelEngagement(eng.id);
       this.snackBar.open('Engagement cancelled', 'OK', { duration: 3000 });
       this.ctx.requestRefresh();
     } catch (err: any) {

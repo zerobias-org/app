@@ -7,7 +7,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { TitleCasePipe } from '@angular/common';
 import { Subscription } from 'rxjs';
-import { WorkRequestsService } from '../../core/services/work-requests.service';
+import { EngagementsService } from '../../core/services/engagements.service';
 import { ProviderProfilesService } from '../../core/services/provider-profiles.service';
 import { EngagementContextService } from '../../core/services/engagement-context.service';
 import { EngagementHierarchyService, type HierarchyBreadcrumb } from '../../core/services/engagement-hierarchy.service';
@@ -52,7 +52,7 @@ export class EngagementDetail implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly snackBar = inject(MatSnackBar);
   private readonly impersonation = inject(ImpersonationService);
-  private readonly workRequests = inject(WorkRequestsService);
+  private readonly engagements = inject(EngagementsService);
   private readonly providerProfiles = inject(ProviderProfilesService);
   private readonly hierarchy = inject(EngagementHierarchyService);
   readonly ctx = inject(EngagementContextService);
@@ -68,7 +68,7 @@ export class EngagementDetail implements OnInit, OnDestroy {
 
     const id = this.route.snapshot.params['id'];
     try {
-      const eng = await this.workRequests.getEngagement(id);
+      const eng = await this.engagements.getEngagement(id);
 
       if (!eng) {
         this.snackBar.open('Engagement not found', 'OK', { duration: 3000 });
@@ -144,7 +144,7 @@ export class EngagementDetail implements OnInit, OnDestroy {
 
   private async refresh(): Promise<void> {
     const id = this.route.snapshot.params['id'];
-    const eng = await this.workRequests.getEngagement(id);
+    const eng = await this.engagements.getEngagement(id);
     if (eng) this.ctx.setEngagement(eng);
   }
 }

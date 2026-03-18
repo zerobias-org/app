@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { BidsService } from './bids.service';
-import { WorkRequestsService } from './work-requests.service';
+import { EngagementsService } from '../../core/services/engagements.service';
 import { SmeMartTagService } from './sme-mart-tag.service';
 import { NotificationService } from './notification.service';
 import type { Bid, WorkRequest } from '../models';
@@ -9,7 +9,7 @@ import type { Bid, WorkRequest } from '../models';
 export class EngagementLifecycleService {
   private readonly tagService = inject(SmeMartTagService);
   private readonly bids = inject(BidsService);
-  private readonly workRequests = inject(WorkRequestsService);
+  private readonly engagements = inject(EngagementsService);
   private readonly notifications = inject(NotificationService);
 
   /**
@@ -66,7 +66,7 @@ export class EngagementLifecycleService {
     // Accept bid and graduate work request in parallel
     const [bid, workRequest] = await Promise.all([
       this.bids.acceptBid(bidId),
-      this.workRequests.graduateToEngagement(requestId, engagementTag, zerobiasTagId),
+      this.engagements.graduateToEngagement(requestId, engagementTag, zerobiasTagId),
     ]);
 
     // Fire-and-forget notifications for the provider

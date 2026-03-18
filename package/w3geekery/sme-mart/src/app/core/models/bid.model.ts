@@ -18,6 +18,11 @@ export interface Bid {
   pricing_breakdown?: TaskTypePricing[] | null;
   wizard_data?: Record<string, unknown> | null;
   wizard_step?: number | null;
+
+  // AI-assisted bid generation (Plan 033 Phase 5)
+  ai_assisted?: boolean | null;
+  ai_model?: string | null;
+  ai_generated_at?: string | null;
 }
 
 export interface TaskTypePricing {

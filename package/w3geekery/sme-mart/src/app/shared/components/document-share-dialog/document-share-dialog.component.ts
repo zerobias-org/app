@@ -17,7 +17,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { TitleCasePipe } from '@angular/common';
 import { ZbDialogComponent } from '@zerobias-org/ngx-library';
 import { OrgDocumentService } from '../../../core/services/org-document.service';
-import { WorkRequestsService } from '../../../core/services/work-requests.service';
+import { EngagementsService } from '../../core/services/engagements.service';
 import { SmeMartTagService } from '../../../core/services/sme-mart-tag.service';
 import type { OrgDocument, OrgDocumentShare, ShareTargetType, ShareVisibility } from '../../../core/models/org-document.model';
 import type { EngagementSummaryRow } from '../../../core/models';
@@ -255,7 +255,7 @@ export class DocumentShareDialog implements OnInit {
   readonly data = inject<DocumentShareDialogData>(MAT_DIALOG_DATA);
   private readonly dialogRef = inject(MatDialogRef<DocumentShareDialog>);
   private readonly orgDocService = inject(OrgDocumentService);
-  private readonly workRequests = inject(WorkRequestsService);
+  private readonly engagements = inject(EngagementsService);
   private readonly tagService = inject(SmeMartTagService);
   private readonly snackBar = inject(MatSnackBar);
 
@@ -289,7 +289,7 @@ export class DocumentShareDialog implements OnInit {
     try {
       // Load engagements and existing shares in parallel
       const [engResult, existingShares] = await Promise.all([
-        this.workRequests.listEngagements({ pageNumber: 1, pageSize: 200 }),
+        this.engagements.listEngagements({ pageNumber: 1, pageSize: 200 }),
         this.orgDocService.listShares(this.data.document.id),
       ]);
 
@@ -371,7 +371,7 @@ export class DocumentShareDialog implements OnInit {
 
     try {
       // Look up the engagement's tag name by searching work_requests
-      const engResult = await this.workRequests.searchEngagements(
+      const engResult = await this.engagements.searchEngagements(
         `(id=${target.id})`, { pageNumber: 1, pageSize: 1 },
       );
       const eng = engResult.items?.[0];

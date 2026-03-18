@@ -7,7 +7,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormsModule } from '@angular/forms';
 import { ZbSearchInputComponent, ZbEmptyStateContainerComponent } from '@zerobias-org/ngx-library';
 import { EngagementCard } from '../../shared/components/engagement-card/engagement-card.component';
-import { WorkRequestsService } from '../../core/services/work-requests.service';
+import { EngagementsService } from '../../core/services/engagements.service';
 import { ImpersonationService } from '../../core/services/impersonation.service';
 import type { EngagementSummaryRow, RequestStatus } from '../../core/models';
 
@@ -30,7 +30,7 @@ import type { EngagementSummaryRow, RequestStatus } from '../../core/models';
 })
 export class MyEngagementList implements OnInit {
   private readonly router = inject(Router);
-  private readonly workRequests = inject(WorkRequestsService);
+  private readonly engagements = inject(EngagementsService);
   private readonly impersonation = inject(ImpersonationService);
 
   readonly loading = signal(true);
@@ -81,7 +81,7 @@ export class MyEngagementList implements OnInit {
   async loadData(): Promise<void> {
     try {
       const userId = this.impersonation.effectiveUserId();
-      const result = await this.workRequests.listEngagements({ pageSize: 200 });
+      const result = await this.engagements.listEngagements({ pageSize: 200 });
       // Filter to engagements where user is buyer or accepted provider
       const myItems = (result.items || []).filter(e =>
         e.buyer_zerobias_user_id === userId ||

@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
 import { RfpWizardService } from './rfp-wizard.service';
-import { WorkRequestsService } from './work-requests.service';
+import { EngagementsService } from '../../core/services/engagements.service';
 import { DocumentService } from './document.service';
 import { ImpersonationService } from './impersonation.service';
 import { SmeMartTagService } from './sme-mart-tag.service';
@@ -65,7 +65,7 @@ describe('RfpWizardService', () => {
     TestBed.configureTestingModule({
       providers: [
         RfpWizardService,
-        { provide: WorkRequestsService, useValue: mockWorkRequests },
+        { provide: EngagementsService, useValue: mockWorkRequests },
         { provide: DocumentService, useValue: mockDocService },
         { provide: ImpersonationService, useValue: mockImpersonation },
         { provide: SmeMartTagService, useValue: mockTagService },

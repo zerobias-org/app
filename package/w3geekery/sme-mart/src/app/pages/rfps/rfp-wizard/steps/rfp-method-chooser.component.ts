@@ -307,13 +307,14 @@ import type { RfpCreationMethod } from '../rfp-wizard.component';
 
     .mcp-steps p:first-child { margin-top: 0; }
 
-    .mcp-coming-soon {
+    .instruction-section p.mcp-coming-soon {
       display: flex;
       align-items: flex-start;
       gap: 8px;
       margin-top: 12px;
       padding: 12px;
       background: var(--mat-sys-tertiary-container, #fff3e0);
+      color: #1b1b1b;
       border-radius: 8px;
       font-size: 13px;
 
@@ -321,9 +322,13 @@ import type { RfpCreationMethod } from '../rfp-wizard.component';
         font-size: 18px;
         width: 18px;
         height: 18px;
-        color: var(--mat-sys-tertiary, #e65100);
+        color: #2e7d32;
         flex-shrink: 0;
         margin-top: 2px;
+      }
+
+      strong {
+        color: #1b1b1b;
       }
     }
 

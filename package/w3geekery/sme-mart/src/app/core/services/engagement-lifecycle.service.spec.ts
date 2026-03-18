@@ -3,7 +3,7 @@ import { vi } from 'vitest';
 import { EngagementLifecycleService } from './engagement-lifecycle.service';
 import { SmeMartTagService } from './sme-mart-tag.service';
 import { BidsService } from './bids.service';
-import { WorkRequestsService } from './work-requests.service';
+import { EngagementsService } from '../../core/services/engagements.service';
 import { NotificationService } from './notification.service';
 import type { Bid, WorkRequest } from '../models';
 import { fakeSmeMartTagService, fakeNotificationService } from '../../test-helpers/angular';
@@ -31,7 +31,7 @@ describe('EngagementLifecycleService', () => {
         EngagementLifecycleService,
         { provide: SmeMartTagService, useValue: mockTagService },
         { provide: BidsService, useValue: mockBids },
-        { provide: WorkRequestsService, useValue: mockWorkRequests },
+        { provide: EngagementsService, useValue: mockWorkRequests },
         { provide: NotificationService, useValue: fakeNotificationService() },
       ],
     });

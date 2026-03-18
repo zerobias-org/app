@@ -1,5 +1,5 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
-import { WorkRequestsService } from './work-requests.service';
+import { EngagementsService } from '../../core/services/engagements.service';
 import { DocumentService } from './document.service';
 import { ImpersonationService } from './impersonation.service';
 import { SmeMartTagService } from './sme-mart-tag.service';
@@ -14,7 +14,7 @@ import type { EngagementFormValues } from '../../shared/components/engagement-fo
 
 @Injectable({ providedIn: 'root' })
 export class RfpWizardService {
-  private readonly workRequests = inject(WorkRequestsService);
+  private readonly engagements = inject(EngagementsService);
   private readonly docService = inject(DocumentService);
   private readonly impersonation = inject(ImpersonationService);
   private readonly tagService = inject(SmeMartTagService);
@@ -46,7 +46,7 @@ export class RfpWizardService {
 
   /** Load an existing draft for resuming the wizard. */
   async loadDraft(id: string): Promise<void> {
-    const row = await this.workRequests.getWorkRequest(id);
+    const row = await this.engagements.getWorkRequest(id);
     if (!row) throw new Error(`Draft ${id} not found`);
 
     this.draft.set(row);
@@ -98,7 +98,7 @@ export class RfpWizardService {
       let id = this.draftId();
       if (!id) {
         // Create new draft row
-        const row = await this.workRequests.createRfp({
+        const row = await this.engagements.createRfp({
           buyer_zerobias_user_id: this.impersonation.effectiveUserId(),
           title: values.title,
           description: values.description || undefined,
@@ -113,7 +113,7 @@ export class RfpWizardService {
         id = row.id;
       } else {
         // Update existing draft
-        await this.workRequests.updateRfp(id, {
+        await this.engagements.updateRfp(id, {
           title: values.title,
           description: values.description || null,
           category: values.category,
@@ -222,7 +222,7 @@ export class RfpWizardService {
       const tag = await this.tagService.createTag(rfpTagName, `RFP: ${data.title}`);
 
       // Update work_request with tag info and status
-      await this.workRequests.updateRfp(id, {
+      await this.engagements.updateRfp(id, {
         engagement_tag: rfpTagName,
         zerobias_tag_id: tag?.id?.toString() || null,
         status: 'open',
@@ -253,7 +253,7 @@ export class RfpWizardService {
 
   private async persistWizardState(draftId: string, step: number): Promise<void> {
     this.currentStep.set(step);
-    await this.workRequests.updateRfp(draftId, {
+    await this.engagements.updateRfp(draftId, {
       rfp_wizard_data: this.rfpData() as any,
       rfp_wizard_step: step,
     } as any);

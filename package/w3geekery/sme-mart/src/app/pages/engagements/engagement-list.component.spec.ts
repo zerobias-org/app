@@ -4,7 +4,7 @@ import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideRouter, Router, ActivatedRoute } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { EngagementList } from './engagement-list.component';
-import { WorkRequestsService } from '../../core/services/work-requests.service';
+import { EngagementsService } from '../../core/services/engagements.service';
 import { ProviderProfilesService } from '../../core/services/provider-profiles.service';
 import { ImpersonationService } from '../../core/services/impersonation.service';
 import { ZerobiasClientApi } from '@zerobias-com/zerobias-client';
@@ -60,7 +60,7 @@ describe('EngagementList', () => {
       providers: [
         provideNoopAnimations(),
         provideRouter([]),
-        { provide: WorkRequestsService, useValue: mockWorkRequests },
+        { provide: EngagementsService, useValue: mockWorkRequests },
         { provide: ProviderProfilesService, useValue: mockProviderProfiles },
         { provide: ImpersonationService, useValue: mockImpersonation },
         { provide: Router, useValue: mockRouter },

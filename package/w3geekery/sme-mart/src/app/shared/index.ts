@@ -16,3 +16,5 @@ export { BidReview, type RequirementGroup, type RequirementWithResponse } from '
 export { AcceptBidDialog, type AcceptBidDialogData, type AcceptBidDialogResult } from './components/accept-bid-dialog/accept-bid-dialog.component';
 export { NotificationPanel } from './components/notification-panel/notification-panel.component';
 export { NotificationCard } from './components/notification-card/notification-card.component';
+export { AiDraftBadge } from './components/ai-draft-badge/ai-draft-badge.component';
+export { AiLoadingPanel } from './components/ai-loading-panel/ai-loading-panel.component';

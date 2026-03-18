@@ -6,7 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { BidsService } from '../../core/services/bids.service';
 import { BidResponseService } from '../../core/services/bid-response.service';
-import { WorkRequestsService } from '../../core/services/work-requests.service';
+import { EngagementsService } from '../../core/services/engagements.service';
 import { EngagementLifecycleService } from '../../core/services/engagement-lifecycle.service';
 import {
   BidComparison, type ComparisonBid, type CategoryCompliance,
@@ -86,7 +86,7 @@ export class BidComparisonPage implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly bids = inject(BidsService);
   private readonly bidResponses = inject(BidResponseService);
-  private readonly workRequests = inject(WorkRequestsService);
+  private readonly engagements = inject(EngagementsService);
   private readonly lifecycle = inject(EngagementLifecycleService);
 
   readonly loading = signal(true);
@@ -145,7 +145,7 @@ export class BidComparisonPage implements OnInit {
 
     try {
       // Load RFP
-      const rfp = await this.workRequests.getEngagement(this.rfpId);
+      const rfp = await this.engagements.getEngagement(this.rfpId);
       if (!rfp) {
         this.snackBar.open('RFP not found', 'Dismiss', { duration: 3000 });
         this.router.navigate(['/rfps']);
@@ -154,7 +154,7 @@ export class BidComparisonPage implements OnInit {
       this.rfpTitle.set(rfp.title || '');
 
       // Load requirements from wizard data
-      const rawWr = await this.workRequests.getWorkRequest(this.rfpId);
+      const rawWr = await this.engagements.getWorkRequest(this.rfpId);
       const rfpData = (rawWr as any)?.rfp_wizard_data as RfpData | undefined;
       if (rfpData?.taskGroups) {
         this.taskGroups.set(rfpData.taskGroups);

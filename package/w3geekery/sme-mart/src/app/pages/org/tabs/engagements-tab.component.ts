@@ -10,7 +10,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ZerobiasClientApp } from '@zerobias-com/zerobias-client';
 import { ZbChipColorsDirective, ZbCustomizableTableComponent, ZbResourceStatusComponent } from '@zerobias-org/ngx-library';
-import { WorkRequestsService } from '../../../core/services/work-requests.service';
+import { EngagementsService } from '../../core/services/engagements.service';
 import type { EngagementSummaryRow } from '../../../core/models';
 
 @Component({
@@ -117,7 +117,7 @@ import type { EngagementSummaryRow } from '../../../core/models';
 export class EngagementsTab implements OnInit {
   private readonly router = inject(Router);
   private readonly app = inject(ZerobiasClientApp);
-  private readonly workRequests = inject(WorkRequestsService);
+  private readonly engagements = inject(EngagementsService);
   private readonly snackBar = inject(MatSnackBar);
 
   @ViewChild('categoryTpl', { static: true }) categoryTpl!: TemplateRef<any>;
@@ -146,7 +146,7 @@ export class EngagementsTab implements OnInit {
     };
 
     try {
-      const result = await this.workRequests.listEngagements({ pageNumber: 1, pageSize: 100 });
+      const result = await this.engagements.listEngagements({ pageNumber: 1, pageSize: 100 });
       this.engagements.set(result.items || []);
     } catch (err: any) {
       this.snackBar.open(`Failed to load engagements: ${err.message}`, 'Dismiss', { duration: 5000 });

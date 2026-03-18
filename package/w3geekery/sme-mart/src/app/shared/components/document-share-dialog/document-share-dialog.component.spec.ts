@@ -7,7 +7,7 @@ import {
   type DocumentShareDialogData,
 } from './document-share-dialog.component';
 import { OrgDocumentService } from '../../../core/services/org-document.service';
-import { WorkRequestsService } from '../../../core/services/work-requests.service';
+import { EngagementsService } from '../../core/services/engagements.service';
 import { SmeMartTagService } from '../../../core/services/sme-mart-tag.service';
 import { makeOrgDocument } from '../../../test-helpers/factories';
 import { TEST_DOC_ID, TEST_ORG_ID } from '../../../test-helpers/constants';
@@ -79,7 +79,7 @@ describe('DocumentShareDialog', () => {
         { provide: MAT_DIALOG_DATA, useValue: dialogData },
         { provide: MatDialogRef, useValue: mockDialogRef },
         { provide: OrgDocumentService, useValue: mockOrgDocService },
-        { provide: WorkRequestsService, useValue: mockWorkRequests },
+        { provide: EngagementsService, useValue: mockWorkRequests },
         { provide: SmeMartTagService, useValue: mockTagService },
       ],
     });

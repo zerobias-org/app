@@ -14,7 +14,7 @@ import { environment } from '../../../environments/environment';
  *   - 'neon' — Direct Neon HTTP queries via @neondatabase/serverless (dev fallback)
  *
  * The public API is identical in both modes. All domain services
- * (ProviderProfilesService, WorkRequestsService, etc.) are unaware of the mode.
+ * (ProviderProfilesService, EngagementsService, etc.) are unaware of the mode.
  */
 @Injectable({ providedIn: 'root' })
 export class SmeMartDbService {
@@ -373,6 +373,11 @@ export class SmeMartDbService {
     // Boolean
     if (value === 'true' || value === 'false') {
       return `${this.quoteIdent(key)} = ${value}`;
+    }
+
+    // Empty value = IS NULL (e.g., dismissed_at= means "not dismissed")
+    if (value === '') {
+      return `${this.quoteIdent(key)} IS NULL`;
     }
 
     return `${this.quoteIdent(key)} = '${this.escapeValue(value)}'`;
