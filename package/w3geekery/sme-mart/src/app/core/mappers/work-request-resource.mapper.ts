@@ -5,7 +5,7 @@ export function engagementToResource(engagement: Engagement): SmeMartResource {
   return {
     id: engagement.id,
     name: engagement.title,
-    type: 'sme-mart:engagement',
+    type: 'sme-mart:work-request',
     ownerId: engagement.buyer_zerobias_user_id,
     created: engagement.created_at,
     updated: engagement.updated_at ?? engagement.created_at,

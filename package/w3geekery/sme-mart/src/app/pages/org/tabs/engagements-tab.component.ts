@@ -127,7 +127,7 @@ export class EngagementsTab implements OnInit {
   @ViewChild('dateTpl', { static: true }) dateTpl!: TemplateRef<any>;
 
   readonly loading = signal(true);
-  readonly engagements = signal<EngagementSummaryRow[]>([]);
+  readonly items = signal<EngagementSummaryRow[]>([]);
 
   readonly page: Record<string, any> = {};
   readonly columns = ['title', 'category', 'status', 'bid_count', 'accepted_provider_name', 'created_at'];
@@ -147,7 +147,7 @@ export class EngagementsTab implements OnInit {
 
     try {
       const result = await this.engagements.listEngagements({ pageNumber: 1, pageSize: 100 });
-      this.engagements.set(result.items || []);
+      this.items.set(result.items || []);
     } catch (err: any) {
       this.snackBar.open(`Failed to load engagements: ${err.message}`, 'Dismiss', { duration: 5000 });
     } finally {

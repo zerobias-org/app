@@ -46,7 +46,7 @@ export class RfpWizardService {
 
   /** Load an existing draft for resuming the wizard. */
   async loadDraft(id: string): Promise<void> {
-    const row = await this.engagements.getWorkRequest(id);
+    const row = await this.engagements.getEngagementRaw(id);
     if (!row) throw new Error(`Draft ${id} not found`);
 
     this.draft.set(row);

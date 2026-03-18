@@ -34,13 +34,13 @@ export class MyEngagementList implements OnInit {
   private readonly impersonation = inject(ImpersonationService);
 
   readonly loading = signal(true);
-  readonly engagements = signal<EngagementSummaryRow[]>([]);
+  readonly items = signal<EngagementSummaryRow[]>([]);
   readonly searchTerm = signal('');
   readonly statusFilter = signal<RequestStatus | 'all'>('all');
   readonly sortBy = signal<'newest' | 'status'>('newest');
 
   readonly filteredEngagements = computed(() => {
-    let items = this.engagements();
+    let items = this.items();
 
     // Text search
     const term = this.searchTerm().toLowerCase();
@@ -87,7 +87,7 @@ export class MyEngagementList implements OnInit {
         e.buyer_zerobias_user_id === userId ||
         e.accepted_provider_id === userId,
       );
-      this.engagements.set(myItems);
+      this.items.set(myItems);
     } catch (err) {
       console.warn('[MyEngagementList] Failed to load:', err);
     } finally {
