@@ -1,18 +1,22 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { SmeMartDbService } from './sme-mart-db.service';
+import { PipelineWriteService } from './pipeline-write.service';
+import { GraphqlReadService, type GqlQueryOptions } from './graphql-read.service';
 import { ImpersonationService } from './impersonation.service';
+import { NOTE_FIELD_MAPPING, mapGqlToNeon } from '../field-mappings';
+import { PagedResults } from '@zerobias-org/types-core-js';
 import type { QueryOptions } from '@zerobias-org/data-utils';
-import type { PagedResults } from '@zerobias-org/types-core-js';
 import type {
   Note,
   NoteWithTags,
   CreateNoteRequest,
   UpdateNoteRequest,
 } from '../models';
+import type { GqlNoteResponse } from '../gql-types/note.types';
 
 @Injectable({ providedIn: 'root' })
 export class NotesService {
-  private readonly db = inject(SmeMartDbService);
+  private readonly pipelineWrite = inject(PipelineWriteService);
+  private readonly graphqlRead = inject(GraphqlReadService);
   private readonly impersonation = inject(ImpersonationService);
 
   readonly notes = signal<NoteWithTags[]>([]);
@@ -22,37 +26,107 @@ export class NotesService {
 
   async createNote(engagementId: string, data: CreateNoteRequest): Promise<Note> {
     const userId = this.impersonation.effectiveUserId();
-    return this.db.createRow<Note>('notes', {
-      engagement_id: engagementId,
-      author_zerobias_user_id: userId,
+
+    // Build GQL data with camelCase field names
+    const gqlData: Record<string, unknown> = {
+      id: crypto.randomUUID(),
+      engagementId,
       title: data.title,
       body: data.body,
-      folder_id: data.folder_id ?? null,
-      access_level: data.access_level ?? 'boundary',
-      is_meeting_minutes: data.is_meeting_minutes ?? false,
-      meeting_date: data.meeting_date ?? null,
-      meeting_duration_minutes: data.meeting_duration_minutes ?? null,
-      boundary_id: data.boundary_id ?? null,
-      project_id: data.project_id ?? null,
+      folderId: data.folder_id ?? null,
+      accessLevel: data.access_level ?? 'boundary',
+      isMeetingMinutes: data.is_meeting_minutes ?? false,
+      meetingDate: data.meeting_date ?? null,
+      meetingDurationMinutes: data.meeting_duration_minutes ?? null,
+      boundaryId: data.boundary_id ?? null,
+      projectId: data.project_id ?? null,
+      authorZerobiasUserId: userId,
+      archived: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    // Fire-and-forget Pipeline push
+    this.pipelineWrite.pushEntity('Note', gqlData).catch(err => {
+      console.error('Failed to push note to Pipeline:', err);
     });
+
+    // Return optimistically (transform GQL to Neon shape)
+    const neonData = mapGqlToNeon<Note>(gqlData, NOTE_FIELD_MAPPING.gqlToNeon);
+    return neonData;
   }
 
   async updateNote(noteId: string, data: UpdateNoteRequest): Promise<Note> {
     const userId = this.impersonation.effectiveUserId();
-    const updateData: Record<string, unknown> = {
-      ...data,
-      updated_at: new Date().toISOString(),
-      updated_by_zerobias_user_id: userId,
+
+    // Fetch current note to merge updates
+    const current = await this.graphqlRead.getById<GqlNoteResponse>(
+      'Note',
+      noteId,
+      this.getNoteFields(),
+    );
+    if (!current) throw new Error(`Note ${noteId} not found`);
+
+    // Build updated GQL data
+    const gqlData: Record<string, unknown> = {
+      ...current,
+      ...Object.entries(data).reduce((acc, [key, val]) => {
+        const gqlKey = NOTE_FIELD_MAPPING.neonToGql[key as keyof typeof NOTE_FIELD_MAPPING.neonToGql];
+        if (gqlKey) acc[gqlKey] = val;
+        return acc;
+      }, {} as Record<string, unknown>),
+      updatedAt: new Date().toISOString(),
+      updatedByZerobiasUserId: userId,
     };
-    return this.db.updateRow<Note>('notes', noteId, updateData);
+
+    // Fire-and-forget Pipeline push
+    this.pipelineWrite.pushEntity('Note', gqlData).catch(err => {
+      console.error('Failed to update note in Pipeline:', err);
+    });
+
+    // Return optimistically
+    const neonData = mapGqlToNeon<Note>(gqlData, NOTE_FIELD_MAPPING.gqlToNeon);
+    return neonData;
   }
 
   async deleteNote(noteId: string): Promise<Note> {
-    return this.db.updateRow<Note>('notes', noteId, { archived: true });
+    // Fetch current note to update archived flag
+    const current = await this.graphqlRead.getById<GqlNoteResponse>(
+      'Note',
+      noteId,
+      this.getNoteFields(),
+    );
+    if (!current) throw new Error(`Note ${noteId} not found`);
+
+    // Build updated GQL data with archived: true
+    const gqlData: Record<string, unknown> = {
+      ...current,
+      archived: true,
+      updatedAt: new Date().toISOString(),
+    };
+
+    // Fire-and-forget Pipeline push
+    this.pipelineWrite.pushEntity('Note', gqlData).catch(err => {
+      console.error('Failed to archive note in Pipeline:', err);
+    });
+
+    // Return optimistically
+    const neonData = mapGqlToNeon<Note>(gqlData, NOTE_FIELD_MAPPING.gqlToNeon);
+    return neonData;
   }
 
   async getNoteById(noteId: string): Promise<NoteWithTags | null> {
-    return this.db.getRow<NoteWithTags>('v_notes_with_tags', noteId);
+    const note = await this.graphqlRead.getById<GqlNoteResponse>(
+      'Note',
+      noteId,
+      this.getNoteFields(),
+    );
+    if (!note) return null;
+
+    // Transform GQL response to Note, then add tag support
+    const neonData = mapGqlToNeon<NoteWithTags>(note, NOTE_FIELD_MAPPING.gqlToNeon);
+    // Note: tags would come from hydra.TagApi if implemented separately
+    return neonData;
   }
 
   // ── List & Search ──
@@ -60,10 +134,29 @@ export class NotesService {
   async listNotes(engagementId: string, options?: QueryOptions): Promise<PagedResults<NoteWithTags>> {
     this.loading.set(true);
     try {
-      const filter = `(engagement_id=${engagementId})`;
-      const result = await this.db.searchRows<NoteWithTags>('v_notes_with_tags', filter, options);
-      this.notes.set(result.items || []);
-      return result;
+      const pageNumber = options?.pageNumber ?? 1;
+      const pageSize = options?.pageSize ?? 50;
+
+      const gqlOptions: GqlQueryOptions = {
+        filters: {
+          engagementId: `.eq.${engagementId}`,
+          archived: '.eq.false',
+        },
+        pageNumber,
+        pageSize,
+      };
+
+      const result = await this.graphqlRead.query<GqlNoteResponse>(
+        'Note',
+        this.getNoteFields(),
+        gqlOptions,
+      );
+
+      // Transform GQL responses to Note/NoteWithTags
+      const items = result.items.map(gql => mapGqlToNeon<NoteWithTags>(gql, NOTE_FIELD_MAPPING.gqlToNeon));
+      this.notes.set(items);
+
+      return PagedResults.fromArray(items, pageNumber, pageSize, result.page.totalCount ?? items.length);
     } finally {
       this.loading.set(false);
     }
@@ -72,10 +165,29 @@ export class NotesService {
   async searchNotes(engagementId: string, query: string, options?: QueryOptions): Promise<PagedResults<NoteWithTags>> {
     this.loading.set(true);
     try {
-      const filter = `(&(engagement_id=${engagementId})(|(title=*${query}*)(body=*${query}*)))`;
-      const result = await this.db.searchRows<NoteWithTags>('v_notes_with_tags', filter, options);
-      this.notes.set(result.items || []);
-      return result;
+      const pageNumber = options?.pageNumber ?? 1;
+      const pageSize = options?.pageSize ?? 50;
+
+      const gqlOptions: GqlQueryOptions = {
+        filters: {
+          engagementId: `.eq.${engagementId}`,
+          archived: '.eq.false',
+          title: `.ilike.%${query}%`,
+        },
+        pageNumber,
+        pageSize,
+      };
+
+      const result = await this.graphqlRead.query<GqlNoteResponse>(
+        'Note',
+        this.getNoteFields(),
+        gqlOptions,
+      );
+
+      const items = result.items.map(gql => mapGqlToNeon<NoteWithTags>(gql, NOTE_FIELD_MAPPING.gqlToNeon));
+      this.notes.set(items);
+
+      return PagedResults.fromArray(items, pageNumber, pageSize, result.page.totalCount ?? items.length);
     } finally {
       this.loading.set(false);
     }
@@ -84,12 +196,36 @@ export class NotesService {
   async listNotesByFolder(engagementId: string, folderId: string | null, options?: QueryOptions): Promise<PagedResults<NoteWithTags>> {
     this.loading.set(true);
     try {
-      const filter = folderId
-        ? `(&(engagement_id=${engagementId})(folder_id=${folderId}))`
-        : `(&(engagement_id=${engagementId})(folder_id=))`;
-      const result = await this.db.searchRows<NoteWithTags>('v_notes_with_tags', filter, options);
-      this.notes.set(result.items || []);
-      return result;
+      const pageNumber = options?.pageNumber ?? 1;
+      const pageSize = options?.pageSize ?? 50;
+
+      const filters: Record<string, string> = {
+        engagementId: `.eq.${engagementId}`,
+        archived: '.eq.false',
+      };
+
+      if (folderId) {
+        filters['folderId'] = `.eq.${folderId}`;
+      } else {
+        filters['folderId'] = '.is.null';
+      }
+
+      const gqlOptions: GqlQueryOptions = {
+        filters,
+        pageNumber,
+        pageSize,
+      };
+
+      const result = await this.graphqlRead.query<GqlNoteResponse>(
+        'Note',
+        this.getNoteFields(),
+        gqlOptions,
+      );
+
+      const items = result.items.map(gql => mapGqlToNeon<NoteWithTags>(gql, NOTE_FIELD_MAPPING.gqlToNeon));
+      this.notes.set(items);
+
+      return PagedResults.fromArray(items, pageNumber, pageSize, result.page.totalCount ?? items.length);
     } finally {
       this.loading.set(false);
     }
@@ -100,10 +236,29 @@ export class NotesService {
   async searchNotesByDocumentLink(engagementId: string, docId: string, options?: QueryOptions): Promise<PagedResults<NoteWithTags>> {
     this.loading.set(true);
     try {
-      const filter = `(&(engagement_id=${engagementId})(body=*sme-doc://${docId}*))`;
-      const result = await this.db.searchRows<NoteWithTags>('v_notes_with_tags', filter, options);
-      this.notes.set(result.items || []);
-      return result;
+      const pageNumber = options?.pageNumber ?? 1;
+      const pageSize = options?.pageSize ?? 50;
+
+      const gqlOptions: GqlQueryOptions = {
+        filters: {
+          engagementId: `.eq.${engagementId}`,
+          archived: '.eq.false',
+          body: `.ilike.%sme-doc://${docId}%`,
+        },
+        pageNumber,
+        pageSize,
+      };
+
+      const result = await this.graphqlRead.query<GqlNoteResponse>(
+        'Note',
+        this.getNoteFields(),
+        gqlOptions,
+      );
+
+      const items = result.items.map(gql => mapGqlToNeon<NoteWithTags>(gql, NOTE_FIELD_MAPPING.gqlToNeon));
+      this.notes.set(items);
+
+      return PagedResults.fromArray(items, pageNumber, pageSize, result.page.totalCount ?? items.length);
     } finally {
       this.loading.set(false);
     }
@@ -112,4 +267,32 @@ export class NotesService {
   // ── Tags ──
   // Tag operations moved to SmeMartResourceService (sme_resource_tags table).
   // Use SmeResourceTagEditor or ResourceTagAutocomplete component for tag UI.
+
+  /**
+   * Get standard field list for Note GQL queries.
+   */
+  private getNoteFields(): string[] {
+    return [
+      'id',
+      'title',
+      'body',
+      'engagementId',
+      'folderId',
+      'authorZerobiasUserId',
+      'updatedByZerobiasUserId',
+      'archived',
+      'accessLevel',
+      'isMeetingMinutes',
+      'meetingDate',
+      'meetingDurationMinutes',
+      'backingTaskId',
+      'injectedToTaskId',
+      'injectedCommentId',
+      'injectedAt',
+      'boundaryId',
+      'projectId',
+      'createdAt',
+      'updatedAt',
+    ];
+  }
 }
