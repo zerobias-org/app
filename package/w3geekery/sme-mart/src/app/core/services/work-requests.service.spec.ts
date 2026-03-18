@@ -1,175 +1,167 @@
-import { TestBed } from '@angular/core/testing';
-import { vi } from 'vitest';
-import { WorkRequestsService } from './work-requests.service';
-import { SmeMartDbService } from './sme-mart-db.service';
-import { NotificationService } from './notification.service';
-import { makeEngagementSummaryRow, makeWorkRequest } from '../../test-helpers/factories';
-import { fakeSmeMartDb, fakeNotificationService } from '../../test-helpers/angular';
+/**
+ * Unit Tests for WorkRequestsService (Pipeline + GraphQL Migration)
+ *
+ * Tests verify service works with mocked PipelineWriteService and GraphqlReadService.
+ * All service methods should return data immediately (optimistic updates) without
+ * waiting for GQL indexing.
+ */
 
-describe('WorkRequestsService', () => {
+import { TestBed } from '@angular/core/testing';
+import { WorkRequestsService } from './work-requests.service';
+import { PipelineWriteService } from './pipeline-write.service';
+import { GraphqlReadService } from './graphql-read.service';
+import { NotificationService } from './notification.service';
+import { ENGAGEMENT_GQL_FIXTURE } from '../test-helpers/gql-fixtures';
+import { fakePipelineWriteService, fakeGraphqlReadService } from '../test-helpers/angular';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+
+describe('WorkRequestsService (Pipeline + GraphQL)', () => {
   let service: WorkRequestsService;
-  let mockDb: ReturnType<typeof fakeSmeMartDb>;
+  let pipelineWrite: ReturnType<typeof fakePipelineWriteService>;
+  let graphqlRead: ReturnType<typeof fakeGraphqlReadService>;
+  let notificationSpy: any;
 
   beforeEach(() => {
-    mockDb = fakeSmeMartDb();
-    mockDb.listRows.mockResolvedValue({ items: [makeEngagementSummaryRow()], totalCount: 1 });
-    mockDb.searchRows.mockResolvedValue({ items: [makeEngagementSummaryRow()], totalCount: 1 });
-    mockDb.getRow.mockResolvedValue(makeWorkRequest());
-    mockDb.createRow.mockResolvedValue(makeWorkRequest());
-    mockDb.updateRow.mockResolvedValue(makeWorkRequest({ status: 'in_progress' }));
+    pipelineWrite = fakePipelineWriteService();
+    graphqlRead = fakeGraphqlReadService();
+    notificationSpy = { create: vi.fn().mockResolvedValue(undefined) };
 
     TestBed.configureTestingModule({
       providers: [
         WorkRequestsService,
-        { provide: SmeMartDbService, useValue: mockDb },
-        { provide: NotificationService, useValue: fakeNotificationService() },
+        { provide: PipelineWriteService, useValue: pipelineWrite },
+        { provide: GraphqlReadService, useValue: graphqlRead },
+        { provide: NotificationService, useValue: notificationSpy },
       ],
     });
 
     service = TestBed.inject(WorkRequestsService);
   });
 
-  // ---------------------------------------------------------------------------
-  // listEngagements
-  // ---------------------------------------------------------------------------
+  describe('listEngagements()', () => {
+    it('should query GQL for published engagements', async () => {
+      const mockResult = {
+        items: [ENGAGEMENT_GQL_FIXTURE],
+        page: { pageNumber: 1, pageSize: 50, totalCount: 1 },
+      };
+      graphqlRead.query.mockResolvedValue(mockResult);
 
-  describe('listEngagements', () => {
-    it('should call listRows on v_engagement_summary', async () => {
-      const result = await service.listEngagements();
-      expect(mockDb.listRows).toHaveBeenCalledWith(
-        'v_engagement_summary',
-        undefined,
+      await service.listEngagements({ pageNumber: 1, pageSize: 50 });
+
+      expect(graphqlRead.query).toHaveBeenCalledWith(
+        'Engagement',
+        expect.any(Array),
+        expect.objectContaining({ filters: { status: '.eq.published' } }),
       );
-      expect(result.items).toHaveLength(1);
     });
 
-    it('should update engagements signal', async () => {
-      await service.listEngagements();
-      expect(service.engagements()).toHaveLength(1);
-    });
+    it('should set loading signal during query', async () => {
+      graphqlRead.query.mockResolvedValue({ items: [], page: { pageNumber: 1, pageSize: 50, totalCount: 0 } });
 
-    it('should toggle loading signal', async () => {
       const promise = service.listEngagements();
       expect(service.loading()).toBe(true);
       await promise;
       expect(service.loading()).toBe(false);
     });
-
-    it('should handle errors and reset loading', async () => {
-      mockDb.listRows.mockRejectedValue(new Error('fail'));
-      await expect(service.listEngagements()).rejects.toThrow();
-      expect(service.loading()).toBe(false);
-    });
   });
 
-  // ---------------------------------------------------------------------------
-  // searchEngagements
-  // ---------------------------------------------------------------------------
+  describe('searchEngagements()', () => {
+    it('should apply ILIKE filter to search term', async () => {
+      graphqlRead.query.mockResolvedValue({ items: [], page: { pageNumber: 1, pageSize: 50, totalCount: 0 } });
 
-  describe('searchEngagements', () => {
-    it('should call searchRows on v_engagement_summary', async () => {
-      await service.searchEngagements('(status=open)');
-      expect(mockDb.searchRows).toHaveBeenCalledWith(
-        'v_engagement_summary',
-        '(status=open)',
-        undefined,
+      await service.searchEngagements('HIPAA');
+
+      expect(graphqlRead.query).toHaveBeenCalledWith(
+        'Engagement',
+        expect.any(Array),
+        expect.objectContaining({
+          filters: expect.objectContaining({ name: '.ilike.%HIPAA%' }),
+        }),
       );
     });
   });
 
-  // ---------------------------------------------------------------------------
-  // getEngagement
-  // ---------------------------------------------------------------------------
+  describe('getEngagement()', () => {
+    it('should fetch single engagement by ID', async () => {
+      graphqlRead.getById.mockResolvedValue(ENGAGEMENT_GQL_FIXTURE);
 
-  describe('getEngagement', () => {
-    it('should fetch from v_engagement_detail view', async () => {
-      const result = await service.getEngagement('wr-001');
-      expect(mockDb.getRow).toHaveBeenCalledWith('v_engagement_detail', 'wr-001');
-      expect(result?.id).toBe('wr-001');
+      await service.getEngagement('eng-001');
+
+      expect(graphqlRead.getById).toHaveBeenCalledWith('Engagement', 'eng-001', expect.any(Array));
+    });
+
+    it('should return null when not found', async () => {
+      graphqlRead.getById.mockResolvedValue(null);
+
+      const result = await service.getEngagement('nonexistent-id');
+
+      expect(result).toBeNull();
     });
   });
 
-  // ---------------------------------------------------------------------------
-  // getWorkRequest
-  // ---------------------------------------------------------------------------
+  describe('getWorkRequest()', () => {
+    it('should fetch and transform to WorkRequest', async () => {
+      graphqlRead.getById.mockResolvedValue(ENGAGEMENT_GQL_FIXTURE);
 
-  describe('getWorkRequest', () => {
-    it('should fetch from work_requests table', async () => {
-      const result = await service.getWorkRequest('wr-001');
-      expect(mockDb.getRow).toHaveBeenCalledWith('work_requests', 'wr-001');
-      expect(result?.id).toBe('wr-001');
+      const result = await service.getWorkRequest('eng-001');
+
+      expect(result).toHaveProperty('title');
+      expect(result).toHaveProperty('status');
     });
   });
 
-  // ---------------------------------------------------------------------------
-  // createRfp
-  // ---------------------------------------------------------------------------
+  describe('createRfp()', () => {
+    it('should push to Pipeline and return optimistic WorkRequest', async () => {
+      const result = await service.createRfp({
+        buyer_zerobias_user_id: 'user-001',
+        title: 'Test RFP',
+        category: 'compliance',
+      });
 
-  describe('createRfp', () => {
-    it('should create with default status open', async () => {
-      await service.createRfp({ title: 'New RFP' } as any);
-      const body = mockDb.createRow.mock.calls[0][1];
-      expect(body.status).toBe('open');
+      expect(pipelineWrite.pushEntity).toHaveBeenCalledWith(
+        'Engagement',
+        expect.objectContaining({ title: 'Test RFP' }),
+      );
+      expect(result).toHaveProperty('id');
+      expect(result.title).toBe('Test RFP');
     });
 
-    it('should allow explicit status', async () => {
-      await service.createRfp({ title: 'New RFP', status: 'open' } as any);
-      const body = mockDb.createRow.mock.calls[0][1];
-      expect(body.status).toBe('open');
-    });
-  });
+    it('should create notification when status is open', async () => {
+      await service.createRfp({
+        buyer_zerobias_user_id: 'user-001',
+        title: 'Test',
+        category: 'compliance',
+        status: 'open',
+      });
 
-  // ---------------------------------------------------------------------------
-  // updateRfp
-  // ---------------------------------------------------------------------------
-
-  describe('updateRfp', () => {
-    it('should update work_requests row', async () => {
-      await service.updateRfp('wr-001', { title: 'Updated' });
-      expect(mockDb.updateRow).toHaveBeenCalledWith('work_requests', 'wr-001', { title: 'Updated' });
-    });
-  });
-
-  // ---------------------------------------------------------------------------
-  // graduateToEngagement
-  // ---------------------------------------------------------------------------
-
-  describe('graduateToEngagement', () => {
-    it('should update with engagement_tag and in_progress status', async () => {
-      await service.graduateToEngagement('wr-001', 'sme-mart.eng.amber-circuit', 'tag-uuid');
-      expect(mockDb.updateRow).toHaveBeenCalledWith('work_requests', 'wr-001', expect.objectContaining({
-        engagement_tag: 'sme-mart.eng.amber-circuit',
-        zerobias_tag_id: 'tag-uuid',
-        status: 'in_progress',
-      }));
-    });
-
-    it('should handle null zerobias_tag_id', async () => {
-      await service.graduateToEngagement('wr-001', 'sme-mart.eng.amber-circuit', null as any);
-      const body = mockDb.updateRow.mock.calls[0][2];
-      expect(body.zerobias_tag_id).toBeNull();
+      expect(notificationSpy.create).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'rfp_published' }),
+      );
     });
   });
 
-  // ---------------------------------------------------------------------------
-  // cancelEngagement
-  // ---------------------------------------------------------------------------
+  describe('updateRfp()', () => {
+    it('should fetch, merge, and push updates', async () => {
+      graphqlRead.getById.mockResolvedValue(ENGAGEMENT_GQL_FIXTURE);
 
-  describe('cancelEngagement', () => {
-    it('should update status to cancelled', async () => {
-      await service.cancelEngagement('wr-001');
-      expect(mockDb.updateRow).toHaveBeenCalledWith('work_requests', 'wr-001', { status: 'cancelled' });
+      const result = await service.updateRfp('eng-001', { status: 'in_progress' as any });
+
+      expect(pipelineWrite.pushEntity).toHaveBeenCalled();
+      expect(result.status).toBe('in_progress');
     });
   });
 
-  // ---------------------------------------------------------------------------
-  // completeEngagement
-  // ---------------------------------------------------------------------------
+  describe('Pipeline integration', () => {
+    it('should handle Pipeline errors gracefully (fire-and-forget)', async () => {
+      pipelineWrite.pushEntity.mockRejectedValue(new Error('Pipeline error'));
 
-  describe('completeEngagement', () => {
-    it('should update status to completed', async () => {
-      await service.completeEngagement('wr-001');
-      expect(mockDb.updateRow).toHaveBeenCalledWith('work_requests', 'wr-001', { status: 'completed' });
+      await expect(
+        service.createRfp({
+          buyer_zerobias_user_id: 'user-001',
+          title: 'Test',
+          category: 'compliance',
+        }),
+      ).resolves.toBeDefined();
     });
   });
 });

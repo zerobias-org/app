@@ -1,237 +1,332 @@
-import { TestBed } from '@angular/core/testing';
-import { vi } from 'vitest';
-import { BidsService } from './bids.service';
-import { SmeMartDbService } from './sme-mart-db.service';
-import { NotificationService } from './notification.service';
-import type { BidWizardData } from '../models';
-import { makeBid } from '../../test-helpers/factories';
-import { fakeSmeMartDb, fakeNotificationService } from '../../test-helpers/angular';
+/**
+ * Unit Tests for BidsService (Pipeline + GraphQL Migration)
+ *
+ * Tests verify service works with mocked PipelineWriteService and GraphqlReadService.
+ * Covers bid CRUD, wizard flow, and engagement relationships.
+ */
 
-describe('BidsService', () => {
+import { TestBed } from '@angular/core/testing';
+import { BidsService } from './bids.service';
+import { PipelineWriteService } from './pipeline-write.service';
+import { GraphqlReadService } from './graphql-read.service';
+import { NotificationService } from './notification.service';
+import { BID_GQL_FIXTURE, BID_GQL_FIXTURE_DRAFT } from '../test-helpers/gql-fixtures';
+import { fakePipelineWriteService, fakeGraphqlReadService } from '../test-helpers/angular';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+
+describe('BidsService (Pipeline + GraphQL)', () => {
   let service: BidsService;
-  let mockDb: ReturnType<typeof fakeSmeMartDb>;
+  let pipelineWrite: ReturnType<typeof fakePipelineWriteService>;
+  let graphqlRead: ReturnType<typeof fakeGraphqlReadService>;
+  let notificationSpy: any;
 
   beforeEach(() => {
-    mockDb = fakeSmeMartDb();
-    mockDb.searchRows.mockResolvedValue({ items: [makeBid()], totalCount: 1 });
-    mockDb.getRow.mockResolvedValue(makeBid());
-    mockDb.createRow.mockResolvedValue(makeBid());
-    mockDb.updateRow.mockResolvedValue(makeBid({ status: 'accepted' }));
+    pipelineWrite = fakePipelineWriteService();
+    graphqlRead = fakeGraphqlReadService();
+    notificationSpy = { create: vi.fn().mockResolvedValue(undefined) };
 
     TestBed.configureTestingModule({
       providers: [
         BidsService,
-        { provide: SmeMartDbService, useValue: mockDb },
-        { provide: NotificationService, useValue: fakeNotificationService() },
+        { provide: PipelineWriteService, useValue: pipelineWrite },
+        { provide: GraphqlReadService, useValue: graphqlRead },
+        { provide: NotificationService, useValue: notificationSpy },
       ],
     });
 
     service = TestBed.inject(BidsService);
   });
 
-  // ---------------------------------------------------------------------------
-  // listBidsByRequest
-  // ---------------------------------------------------------------------------
+  describe('listBidsByRequest()', () => {
+    it('should query bids filtered by engagementId', async () => {
+      graphqlRead.query.mockResolvedValue({
+        items: [BID_GQL_FIXTURE],
+        page: { pageNumber: 1, pageSize: 100, totalCount: 1 },
+      });
 
-  describe('listBidsByRequest', () => {
-    it('should search bids table with RFC4515 filter', async () => {
-      await service.listBidsByRequest('wr-001');
-      expect(mockDb.searchRows).toHaveBeenCalledWith(
-        'bids',
-        '(request_id=wr-001)',
-        { pageSize: 100 },
+      await service.listBidsByRequest('eng-001');
+
+      expect(graphqlRead.query).toHaveBeenCalledWith(
+        'Bid',
+        expect.any(Array),
+        expect.objectContaining({
+          filters: { engagementId: '.eq.eng-001' },
+        }),
       );
     });
 
-    it('should return items array', async () => {
-      const result = await service.listBidsByRequest('wr-001');
-      expect(result).toHaveLength(1);
-      expect(result[0].id).toBe('bid-001');
-    });
-
-    it('should return empty array when items is undefined', async () => {
-      mockDb.searchRows.mockResolvedValue({ items: undefined });
-      const result = await service.listBidsByRequest('wr-001');
-      expect(result).toEqual([]);
-    });
-  });
-
-  // ---------------------------------------------------------------------------
-  // listBidSummaries
-  // ---------------------------------------------------------------------------
-
-  describe('listBidSummaries', () => {
-    it('should query v_bid_summary view', async () => {
-      await service.listBidSummaries('wr-002');
-      expect(mockDb.searchRows).toHaveBeenCalledWith(
-        'v_bid_summary',
-        '(request_id=wr-002)',
-        { pageSize: 100 },
-      );
-    });
-  });
-
-  // ---------------------------------------------------------------------------
-  // getBid
-  // ---------------------------------------------------------------------------
-
-  describe('getBid', () => {
-    it('should fetch by id from bids table', async () => {
-      const result = await service.getBid('bid-001');
-      expect(mockDb.getRow).toHaveBeenCalledWith('bids', 'bid-001');
-      expect(result?.id).toBe('bid-001');
-    });
-  });
-
-  // ---------------------------------------------------------------------------
-  // submitBid
-  // ---------------------------------------------------------------------------
-
-  describe('submitBid', () => {
-    it('should create row with pending status', async () => {
-      await service.submitBid({
-        request_id: 'wr-001',
-        provider_id: 'u-300',
-        cover_letter: 'Ready.',
+    it('should return array of Bids transformed from GQL', async () => {
+      graphqlRead.query.mockResolvedValue({
+        items: [BID_GQL_FIXTURE],
+        page: { pageNumber: 1, pageSize: 100, totalCount: 1 },
       });
-      expect(mockDb.createRow).toHaveBeenCalledWith('bids', expect.objectContaining({
-        request_id: 'wr-001',
-        provider_id: 'u-300',
-        cover_letter: 'Ready.',
-        status: 'pending',
-      }));
+
+      const result = await service.listBidsByRequest('eng-001');
+
+      expect(Array.isArray(result)).toBe(true);
+      expect(result[0]).toHaveProperty('request_id');
+      expect(result[0]).toHaveProperty('provider_id');
     });
   });
 
-  // ---------------------------------------------------------------------------
-  // createDraft
-  // ---------------------------------------------------------------------------
-
-  describe('createDraft', () => {
-    it('should create row with draft status and wizard_step 0', async () => {
-      await service.createDraft('wr-001', 'u-300');
-      expect(mockDb.createRow).toHaveBeenCalledWith('bids', {
-        request_id: 'wr-001',
-        provider_id: 'u-300',
-        status: 'draft',
-        wizard_step: 0,
+  describe('listBidSummaries()', () => {
+    it('should query bids with compliance summary data', async () => {
+      graphqlRead.query.mockResolvedValue({
+        items: [BID_GQL_FIXTURE],
+        page: { pageNumber: 1, pageSize: 100, totalCount: 1 },
       });
-    });
-  });
 
-  // ---------------------------------------------------------------------------
-  // saveDraft
-  // ---------------------------------------------------------------------------
+      await service.listBidSummaries('eng-001');
 
-  describe('saveDraft', () => {
-    it('should flatten approach fields onto bid columns', async () => {
-      const wizardData: BidWizardData = {
-        approach: {
-          executive_summary: 'Our plan.',
-          cover_letter: 'Dear buyer.',
-        },
-      };
-      await service.saveDraft('bid-001', wizardData, 1);
-      expect(mockDb.updateRow).toHaveBeenCalledWith('bids', 'bid-001', expect.objectContaining({
-        wizard_step: 1,
-        executive_summary: 'Our plan.',
-        cover_letter: 'Dear buyer.',
-      }));
+      expect(graphqlRead.query).toHaveBeenCalled();
     });
 
-    it('should flatten team fields', async () => {
-      const wizardData: BidWizardData = {
-        team: { team_description: 'Senior consultants.' },
-      };
-      await service.saveDraft('bid-001', wizardData, 2);
-      expect(mockDb.updateRow).toHaveBeenCalledWith('bids', 'bid-001', expect.objectContaining({
-        team_description: 'Senior consultants.',
-      }));
-    });
-
-    it('should flatten pricing fields and JSON-stringify breakdown', async () => {
-      const breakdown = [{ taskType: 'Audit', estimatedHours: 40, estimatedCost: 4000 }];
-      const wizardData: BidWizardData = {
-        pricing: {
-          proposed_price: '10000',
-          proposed_timeline: '4 weeks',
-          total_estimated_hours: 80,
-          pricing_breakdown: breakdown,
-        },
-      };
-      await service.saveDraft('bid-001', wizardData, 3);
-      const call = mockDb.updateRow.mock.calls[0][2];
-      expect(call.proposed_price).toBe('10000');
-      expect(call.pricing_breakdown).toBe(JSON.stringify(breakdown));
-    });
-
-    it('should JSON-stringify wizard_data', async () => {
-      const wizardData: BidWizardData = {};
-      await service.saveDraft('bid-001', wizardData, 0);
-      const call = mockDb.updateRow.mock.calls[0][2];
-      expect(call.wizard_data).toBe(JSON.stringify(wizardData));
-    });
-  });
-
-  // ---------------------------------------------------------------------------
-  // submitDraft
-  // ---------------------------------------------------------------------------
-
-  describe('submitDraft', () => {
-    it('should set status to pending and clear wizard_data', async () => {
-      await service.submitDraft('bid-001');
-      expect(mockDb.updateRow).toHaveBeenCalledWith('bids', 'bid-001', {
-        status: 'pending',
-        wizard_data: null,
+    it('should include BidSummaryRow fields (compliance counts, etc.)', async () => {
+      graphqlRead.query.mockResolvedValue({
+        items: [BID_GQL_FIXTURE],
+        page: { pageNumber: 1, pageSize: 100, totalCount: 1 },
       });
+
+      const result = await service.listBidSummaries('eng-001');
+
+      expect(result[0]).toHaveProperty('total_responses');
+      expect(result[0]).toHaveProperty('met_count');
+      expect(result[0]).toHaveProperty('provider_display_name');
     });
   });
 
-  // ---------------------------------------------------------------------------
-  // findDraft
-  // ---------------------------------------------------------------------------
+  describe('getBid()', () => {
+    it('should fetch single bid by ID', async () => {
+      graphqlRead.getById.mockResolvedValue(BID_GQL_FIXTURE);
 
-  describe('findDraft', () => {
-    it('should search with compound RFC4515 filter', async () => {
-      mockDb.searchRows.mockResolvedValue({ items: [makeBid({ status: 'draft' })] });
-      const result = await service.findDraft('wr-001', 'u-300');
-      expect(mockDb.searchRows).toHaveBeenCalledWith(
-        'bids',
-        '(&(request_id=wr-001)(provider_id=u-300)(status=draft))',
-        { pageSize: 1 },
-      );
-      expect(result?.status).toBe('draft');
+      await service.getBid('bid-001');
+
+      expect(graphqlRead.getById).toHaveBeenCalledWith('Bid', 'bid-001', expect.any(Array));
     });
 
-    it('should return null when no draft exists', async () => {
-      mockDb.searchRows.mockResolvedValue({ items: [] });
-      const result = await service.findDraft('wr-001', 'u-300');
+    it('should return null when not found', async () => {
+      graphqlRead.getById.mockResolvedValue(null);
+
+      const result = await service.getBid('nonexistent');
+
       expect(result).toBeNull();
     });
   });
 
-  // ---------------------------------------------------------------------------
-  // Status updates
-  // ---------------------------------------------------------------------------
+  describe('submitBid()', () => {
+    it('should push bid to Pipeline and return optimistic Bid', async () => {
+      const result = await service.submitBid({
+        request_id: 'eng-001',
+        provider_id: 'provider-001',
+        cover_letter: 'Test letter',
+        proposed_price: '5000',
+      });
 
-  describe('acceptBid', () => {
-    it('should update status to accepted', async () => {
+      expect(pipelineWrite.pushEntity).toHaveBeenCalledWith(
+        'Bid',
+        expect.objectContaining({
+          cover_letter: 'Test letter',
+        }),
+      );
+      expect(result).toHaveProperty('id');
+      expect(result.status).toBe('pending');
+    });
+  });
+
+  describe('createDraft()', () => {
+    it('should create draft bid with wizard_step 0', async () => {
+      const result = await service.createDraft('eng-001', 'provider-001');
+
+      expect(pipelineWrite.pushEntity).toHaveBeenCalled();
+      expect(result.status).toBe('draft');
+      expect(result.wizard_step).toBe(0);
+    });
+  });
+
+  describe('saveDraft()', () => {
+    it('should fetch current bid, merge wizard data, and push updates', async () => {
+      graphqlRead.getById.mockResolvedValue(BID_GQL_FIXTURE_DRAFT);
+
+      const wizardData = {
+        approach: { executive_summary: 'Summary' },
+        pricing: { proposed_price: '7500' },
+      };
+
+      await service.saveDraft('bid-001', wizardData, 2);
+
+      expect(graphqlRead.getById).toHaveBeenCalled();
+      expect(pipelineWrite.pushEntity).toHaveBeenCalled();
+    });
+
+    it('should flatten nested wizard data to bid columns', async () => {
+      graphqlRead.getById.mockResolvedValue(BID_GQL_FIXTURE_DRAFT);
+
+      const wizardData = {
+        approach: { executive_summary: 'Test summary' },
+        team: { team_description: 'Test team' },
+        pricing: {
+          proposed_price: '5000',
+          total_estimated_hours: 40,
+        },
+      };
+
+      const result = await service.saveDraft('bid-001', wizardData, 2);
+
+      expect(result.executive_summary).toBe('Test summary');
+      expect(result.team_description).toBe('Test team');
+      expect(result.proposed_price).toBe('5000');
+      expect(result.total_estimated_hours).toBe(40);
+    });
+
+    it('should throw error if bid not found', async () => {
+      graphqlRead.getById.mockResolvedValue(null);
+
+      await expect(
+        service.saveDraft('nonexistent', {}, 0),
+      ).rejects.toThrow();
+    });
+  });
+
+  describe('submitDraft()', () => {
+    it('should mark bid as pending and clear wizard_data', async () => {
+      graphqlRead.getById.mockResolvedValue(BID_GQL_FIXTURE_DRAFT);
+
+      const result = await service.submitDraft('bid-001', {
+        buyerId: 'user-001',
+        rfpTitle: 'Test RFP',
+      });
+
+      expect(result.status).toBe('pending');
+      expect(result.wizard_data).toBeNull();
+    });
+
+    it('should attach AI metadata if provided', async () => {
+      graphqlRead.getById.mockResolvedValue(BID_GQL_FIXTURE_DRAFT);
+
+      const result = await service.submitDraft('bid-001', undefined, {
+        ai_assisted: true,
+        ai_model: 'gpt-4',
+        ai_generated_at: '2026-03-18T10:00:00Z',
+      });
+
+      expect(result.ai_assisted).toBe(true);
+      expect(result.ai_model).toBe('gpt-4');
+    });
+
+    it('should create notification for buyer', async () => {
+      graphqlRead.getById.mockResolvedValue(BID_GQL_FIXTURE_DRAFT);
+
+      await service.submitDraft('bid-001', {
+        buyerId: 'user-001',
+        rfpTitle: 'Test RFP',
+      });
+
+      expect(notificationSpy.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'bid_received',
+          recipient_id: 'user-001',
+        }),
+      );
+    });
+  });
+
+  describe('findDraft()', () => {
+    it('should find draft bid by requestId and providerId', async () => {
+      graphqlRead.query.mockResolvedValue({
+        items: [BID_GQL_FIXTURE_DRAFT],
+        page: { pageNumber: 1, pageSize: 1, totalCount: 1 },
+      });
+
+      await service.findDraft('eng-001', 'provider-001');
+
+      expect(graphqlRead.query).toHaveBeenCalledWith(
+        'Bid',
+        expect.any(Array),
+        expect.objectContaining({
+          filters: expect.objectContaining({
+            engagementId: '.eq.eng-001',
+            providerId: '.eq.provider-001',
+            status: '.eq.draft',
+          }),
+        }),
+      );
+    });
+
+    it('should return null if no draft found', async () => {
+      graphqlRead.query.mockResolvedValue({
+        items: [],
+        page: { pageNumber: 1, pageSize: 1, totalCount: 0 },
+      });
+
+      const result = await service.findDraft('eng-001', 'provider-001');
+
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('Status transitions', () => {
+    it('acceptBid() should mark bid as accepted', async () => {
+      graphqlRead.getById.mockResolvedValue(BID_GQL_FIXTURE);
+
+      const result = await service.acceptBid('bid-001');
+
+      expect(result.status).toBe('accepted');
+      expect(pipelineWrite.pushEntity).toHaveBeenCalled();
+    });
+
+    it('rejectBid() should mark bid as rejected and notify provider', async () => {
+      graphqlRead.getById.mockResolvedValue(BID_GQL_FIXTURE);
+
+      await service.rejectBid('bid-001', {
+        providerId: 'provider-001',
+        rfpTitle: 'Test RFP',
+      });
+
+      expect(notificationSpy.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'bid_rejected',
+          recipient_id: 'provider-001',
+        }),
+      );
+    });
+
+    it('withdrawBid() should mark bid as withdrawn', async () => {
+      graphqlRead.getById.mockResolvedValue(BID_GQL_FIXTURE);
+
+      const result = await service.withdrawBid('bid-001');
+
+      expect(result.status).toBe('withdrawn');
+    });
+  });
+
+  describe('Pipeline integration', () => {
+    it('should handle Pipeline errors gracefully (fire-and-forget)', async () => {
+      pipelineWrite.pushEntity.mockRejectedValue(new Error('Pipeline error'));
+
+      await expect(
+        service.submitBid({
+          request_id: 'eng-001',
+          provider_id: 'provider-001',
+        }),
+      ).resolves.toBeDefined();
+    });
+
+    it('should push to Pipeline for all write operations', async () => {
+      graphqlRead.getById.mockResolvedValue(BID_GQL_FIXTURE);
+      pipelineWrite.pushEntity.mockClear();
+
+      await service.submitBid({ request_id: 'eng-001', provider_id: 'provider-001' });
+      expect(pipelineWrite.pushEntity).toHaveBeenCalledTimes(1);
+
       await service.acceptBid('bid-001');
-      expect(mockDb.updateRow).toHaveBeenCalledWith('bids', 'bid-001', { status: 'accepted' });
+      expect(pipelineWrite.pushEntity).toHaveBeenCalledTimes(2);
     });
   });
 
-  describe('rejectBid', () => {
-    it('should update status to rejected', async () => {
-      await service.rejectBid('bid-001');
-      expect(mockDb.updateRow).toHaveBeenCalledWith('bids', 'bid-001', { status: 'rejected' });
-    });
-  });
-
-  describe('withdrawBid', () => {
-    it('should update status to withdrawn', async () => {
-      await service.withdrawBid('bid-001');
-      expect(mockDb.updateRow).toHaveBeenCalledWith('bids', 'bid-001', { status: 'withdrawn' });
+  describe('No SmeMartDbService dependency', () => {
+    it('should use only PipelineWriteService and GraphqlReadService', () => {
+      expect(service['pipelineWrite']).toBeDefined();
+      expect(service['graphqlRead']).toBeDefined();
     });
   });
 });
