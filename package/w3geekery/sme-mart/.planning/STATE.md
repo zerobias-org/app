@@ -3,19 +3,19 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-03-18T22:45:00.000Z"
+last_updated: "2026-03-18T22:51:47.039Z"
 progress:
   total_phases: 6
   completed_phases: 2
-  total_plans: 3
-  completed_plans: 3
+  total_plans: 5
+  completed_plans: 4
 ---
 
 # STATE.md — Session Context
 
 **Session Name:** `poc/sme-mart` (SME Mart AuditgraphDB Migration Roadmap)
 **Date Created:** 2026-03-18
-**Current Focus:** Phase 02 — wave-1-migrations (GAP CLOSURE COMPLETE)
+**Current Focus:** Phase 03 — wave-2-attachments
 
 ---
 
@@ -31,9 +31,8 @@ progress:
 
 ## Current Position
 
-Phase: 02 (wave-1-migrations) — COMPLETED
-Plan: 2 of 2 — COMPLETED (02-02-gap-closure)
-Next: Phase 03 (wave-1-tests)
+Phase: 03 (wave-2-attachments) — EXECUTING
+Plan: 2 of 2 (03-02 COMPLETE)
 
 ## Key Decisions
 
@@ -137,7 +136,9 @@ claude --resume poc/sme-mart
 
 ---
 
-**Last Updated:** 2026-03-18T22:45:00Z
+**Last Updated:** 2026-03-18T23:05:00Z
 **Phase 02-01 Completed:** 2026-03-18T21:40:43Z (Plan executed: 5 tasks, 5 commits, SUMMARY.md created)
 **Phase 02-02 Completed:** 2026-03-18T22:45:00Z (Gap closure: 3 blockers fixed, 2 commits, SUMMARY.md created)
-**Next Phase:** 03-wave-1-tests (test execution with ≥80% coverage on Pipeline+GraphQL paths)
+**Phase 03-01 Completed:** 2026-03-18T23:00:00Z (Wave 1 tests: 5 tasks, field mapping verification, test infrastructure)
+**Phase 03-02 Completed:** 2026-03-18T23:05:00Z (NoteFolderService: 3 tasks, flat-fetch tree rebuild, 8 unit tests, 2 commits)
+**Next Phase:** 03-03 (Notes Service migration)
