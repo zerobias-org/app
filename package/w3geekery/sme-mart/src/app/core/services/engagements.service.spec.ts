@@ -11,8 +11,8 @@ import { EngagementsService } from '../../core/services/engagements.service';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
 import { NotificationService } from './notification.service';
-import { ENGAGEMENT_GQL_FIXTURE } from '../test-helpers/gql-fixtures';
-import { fakePipelineWriteService, fakeGraphqlReadService } from '../test-helpers/angular';
+import { ENGAGEMENT_GQL_FIXTURE } from '../../test-helpers/gql-fixtures';
+import { fakePipelineWriteService, fakeGraphqlReadService } from '../../test-helpers/angular';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 describe('EngagementsService (Pipeline + GraphQL)', () => {
@@ -99,11 +99,11 @@ describe('EngagementsService (Pipeline + GraphQL)', () => {
     });
   });
 
-  describe('getWorkRequest()', () => {
-    it('should fetch and transform to WorkRequest', async () => {
+  describe('getEngagement()', () => {
+    it('should fetch and transform to EngagementDetailRow', async () => {
       graphqlRead.getById.mockResolvedValue(ENGAGEMENT_GQL_FIXTURE);
 
-      const result = await service.getWorkRequest('eng-001');
+      const result = await service.getEngagement('eng-001');
 
       expect(result).toHaveProperty('title');
       expect(result).toHaveProperty('status');

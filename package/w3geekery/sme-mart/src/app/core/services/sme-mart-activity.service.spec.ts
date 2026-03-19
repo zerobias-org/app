@@ -1,35 +1,81 @@
 import { TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { SmeMartActivityService } from './sme-mart-activity.service';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
 import type { GqlSmeMartActivityResponse, GqlSmeMartWorkflowResponse } from '../gql-types';
 
+type MockFn = ReturnType<typeof vi.fn>;
+
+interface MockPipelineWrite {
+  pushEntity: MockFn;
+  pushEntities: MockFn;
+  deleteEntity: MockFn;
+  deleteEntities: MockFn;
+}
+
+interface MockGraphqlRead {
+  query: MockFn;
+  getById: MockFn;
+  rawQuery: MockFn;
+}
+
 describe('SmeMartActivityService', () => {
   let service: SmeMartActivityService;
-  let pipelineWrite: jasmine.SpyObj<PipelineWriteService>;
-  let graphqlRead: jasmine.SpyObj<GraphqlReadService>;
+  let mockPipelineWrite: MockPipelineWrite;
+  let mockGraphqlRead: MockGraphqlRead;
 
   beforeEach(() => {
-    const pipelineWriteSpy = jasmine.createSpyObj<PipelineWriteService>(
-      'PipelineWriteService',
-      ['pushEntity', 'pushEntities', 'deleteEntity', 'deleteEntities'],
-    );
-    const graphqlReadSpy = jasmine.createSpyObj<GraphqlReadService>(
-      'GraphqlReadService',
-      ['query', 'getById', 'rawQuery'],
-    );
+    mockPipelineWrite = {
+      pushEntity: vi.fn().mockResolvedValue(undefined),
+      pushEntities: vi.fn().mockResolvedValue(undefined),
+      deleteEntity: vi.fn().mockResolvedValue(undefined),
+      deleteEntities: vi.fn().mockResolvedValue(undefined),
+    };
+    mockGraphqlRead = {
+      query: vi.fn().mockResolvedValue({ items: [] }),
+      getById: vi.fn().mockResolvedValue(null),
+      rawQuery: vi.fn().mockResolvedValue(null),
+    };
 
     TestBed.configureTestingModule({
       providers: [
         SmeMartActivityService,
-        { provide: PipelineWriteService, useValue: pipelineWriteSpy },
-        { provide: GraphqlReadService, useValue: graphqlReadSpy },
+        { provide: PipelineWriteService, useValue: mockPipelineWrite },
+        { provide: GraphqlReadService, useValue: mockGraphqlRead },
       ],
     });
 
     service = TestBed.inject(SmeMartActivityService);
-    pipelineWrite = TestBed.inject(PipelineWriteService) as jasmine.SpyObj<PipelineWriteService>;
-    graphqlRead = TestBed.inject(GraphqlReadService) as jasmine.SpyObj<GraphqlReadService>;
+  });
+
+describe('SmeMartActivityService', () => {
+  let service: SmeMartActivityService;
+  let mockPipelineWrite: MockPipelineWrite;
+  let mockGraphqlRead: MockGraphqlRead;
+
+  beforeEach(() => {
+    mockPipelineWrite = {
+      pushEntity: vi.fn().mockResolvedValue(undefined),
+      pushEntities: vi.fn().mockResolvedValue(undefined),
+      deleteEntity: vi.fn().mockResolvedValue(undefined),
+      deleteEntities: vi.fn().mockResolvedValue(undefined),
+    };
+    mockGraphqlRead = {
+      query: vi.fn().mockResolvedValue({ items: [] }),
+      getById: vi.fn().mockResolvedValue(null),
+      rawQuery: vi.fn().mockResolvedValue(null),
+    };
+
+    TestBed.configureTestingModule({
+      providers: [
+        SmeMartActivityService,
+        { provide: PipelineWriteService, useValue: mockPipelineWrite },
+        { provide: GraphqlReadService, useValue: mockGraphqlRead },
+      ],
+    });
+
+    service = TestBed.inject(SmeMartActivityService);
   });
 
   it('should be created', () => {
@@ -49,9 +95,9 @@ describe('SmeMartActivityService', () => {
       expect(result.type).toBe('task');
       expect(result.workflowId).toBe('workflow-123');
       expect(result.id).toBeTruthy();
-      expect(pipelineWrite.pushEntity).toHaveBeenCalledWith(
+      expect(mockPipelineWrite.pushEntity).toHaveBeenCalledWith(
         'SmeMartActivity',
-        jasmine.objectContaining({ name: 'Feature Development' }),
+        expect.objectContaining({ name: 'Feature Development' }),
       );
     });
 
@@ -90,21 +136,21 @@ describe('SmeMartActivityService', () => {
         updatedAt: '2026-03-19T00:00:00Z',
       };
 
-      graphqlRead.getById.and.returnValue(Promise.resolve(mockResponse));
+      mockGraphqlRead.getById.mockResolvedValue(mockResponse);
 
       const result = await service.getActivity('activity-123');
 
       expect(result?.name).toBe('Test Activity');
       expect(result?.type).toBe('task');
-      expect(graphqlRead.getById).toHaveBeenCalledWith(
+      expect(mockGraphqlRead.getById).toHaveBeenCalledWith(
         'SmeMartActivity',
         'activity-123',
-        jasmine.any(Array),
+        expect.any(Array),
       );
     });
 
     it('should return null if activity not found', async () => {
-      graphqlRead.getById.and.returnValue(Promise.resolve(null));
+      mockGraphqlRead.getById.mockResolvedValue(null);
 
       const result = await service.getActivity('nonexistent');
 
@@ -128,7 +174,7 @@ describe('SmeMartActivityService', () => {
         page: { pageNumber: 1, pageSize: 50, totalCount: 1 },
       };
 
-      graphqlRead.query.and.returnValue(Promise.resolve(mockResponse as any));
+      mockGraphqlRead.query.mockResolvedValue(mockResponse as any);
 
       const result = await service.listActivities();
 
@@ -148,24 +194,24 @@ describe('SmeMartActivityService', () => {
         updatedAt: '2026-03-19T00:00:00Z',
       };
 
-      graphqlRead.getById.and.returnValue(Promise.resolve(existing));
+      mockGraphqlRead.getById.mockResolvedValue(existing);
 
       const result = await service.updateActivity('activity-123', { name: 'Updated Name' });
 
       expect(result.name).toBe('Updated Name');
       expect(result.type).toBe('task');
-      expect(pipelineWrite.pushEntity).toHaveBeenCalledWith(
+      expect(mockPipelineWrite.pushEntity).toHaveBeenCalledWith(
         'SmeMartActivity',
-        jasmine.objectContaining({ name: 'Updated Name' }),
+        expect.objectContaining({ name: 'Updated Name' }),
       );
     });
 
     it('should throw if activity not found', async () => {
-      graphqlRead.getById.and.returnValue(Promise.resolve(null));
+      mockGraphqlRead.getById.mockResolvedValue(null);
 
-      await expectAsync(
+      await expect(
         service.updateActivity('nonexistent', { name: 'Test' }),
-      ).toBeRejectedWithError(/not found/);
+      ).rejects.toThrow(/not found/);
     });
   });
 
@@ -173,7 +219,7 @@ describe('SmeMartActivityService', () => {
     it('should call deleteEntity on pipeline write', async () => {
       await service.deleteActivity('activity-123');
 
-      expect(pipelineWrite.deleteEntity).toHaveBeenCalledWith('SmeMartActivity', 'activity-123');
+      expect(mockPipelineWrite.deleteEntity).toHaveBeenCalledWith('SmeMartActivity', 'activity-123');
     });
   });
 
@@ -196,13 +242,11 @@ describe('SmeMartActivityService', () => {
         updatedAt: '2026-03-19T00:00:00Z',
       };
 
-      graphqlRead.getById
-        .withArgs('SmeMartActivity', 'activity-123', jasmine.any(Array))
-        .and.returnValue(Promise.resolve(activity));
-
-      graphqlRead.getById
-        .withArgs('SmeMartWorkflow', 'workflow-456', jasmine.any(Array))
-        .and.returnValue(Promise.resolve(workflow));
+      mockGraphqlRead.getById.mockImplementation((className: string) => {
+        if (className === 'SmeMartActivity') return Promise.resolve(activity);
+        if (className === 'SmeMartWorkflow') return Promise.resolve(workflow);
+        return Promise.resolve(null);
+      });
 
       const result = await service.getActivityWorkflow('activity-123');
 
@@ -220,7 +264,7 @@ describe('SmeMartActivityService', () => {
         updatedAt: '2026-03-19T00:00:00Z',
       };
 
-      graphqlRead.getById.and.returnValue(Promise.resolve(activity));
+      mockGraphqlRead.getById.mockResolvedValue(activity);
 
       const result = await service.getActivityWorkflow('activity-123');
 

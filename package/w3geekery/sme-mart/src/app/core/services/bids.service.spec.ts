@@ -10,8 +10,8 @@ import { BidsService } from './bids.service';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
 import { NotificationService } from './notification.service';
-import { BID_GQL_FIXTURE, BID_GQL_FIXTURE_DRAFT } from '../test-helpers/gql-fixtures';
-import { fakePipelineWriteService, fakeGraphqlReadService } from '../test-helpers/angular';
+import { BID_GQL_FIXTURE, BID_GQL_FIXTURE_DRAFT } from '../../test-helpers/gql-fixtures';
+import { fakePipelineWriteService, fakeGraphqlReadService } from '../../test-helpers/angular';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 describe('BidsService (Pipeline + GraphQL)', () => {

@@ -1,35 +1,81 @@
 import { TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { SmeMartBoardService } from './sme-mart-board.service';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
 import type { GqlSmeMartBoardResponse } from '../gql-types';
 
+type MockFn = ReturnType<typeof vi.fn>;
+
+interface MockPipelineWrite {
+  pushEntity: MockFn;
+  pushEntities: MockFn;
+  deleteEntity: MockFn;
+  deleteEntities: MockFn;
+}
+
+interface MockGraphqlRead {
+  query: MockFn;
+  getById: MockFn;
+  rawQuery: MockFn;
+}
+
 describe('SmeMartBoardService', () => {
   let service: SmeMartBoardService;
-  let pipelineWrite: jasmine.SpyObj<PipelineWriteService>;
-  let graphqlRead: jasmine.SpyObj<GraphqlReadService>;
+  let mockPipelineWrite: MockPipelineWrite;
+  let mockGraphqlRead: MockGraphqlRead;
 
   beforeEach(() => {
-    const pipelineWriteSpy = jasmine.createSpyObj<PipelineWriteService>(
-      'PipelineWriteService',
-      ['pushEntity', 'pushEntities', 'deleteEntity', 'deleteEntities'],
-    );
-    const graphqlReadSpy = jasmine.createSpyObj<GraphqlReadService>(
-      'GraphqlReadService',
-      ['query', 'getById', 'rawQuery'],
-    );
+    mockPipelineWrite = {
+      pushEntity: vi.fn().mockResolvedValue(undefined),
+      pushEntities: vi.fn().mockResolvedValue(undefined),
+      deleteEntity: vi.fn().mockResolvedValue(undefined),
+      deleteEntities: vi.fn().mockResolvedValue(undefined),
+    };
+    mockGraphqlRead = {
+      query: vi.fn().mockResolvedValue({ items: [] }),
+      getById: vi.fn().mockResolvedValue(null),
+      rawQuery: vi.fn().mockResolvedValue(null),
+    };
 
     TestBed.configureTestingModule({
       providers: [
         SmeMartBoardService,
-        { provide: PipelineWriteService, useValue: pipelineWriteSpy },
-        { provide: GraphqlReadService, useValue: graphqlReadSpy },
+        { provide: PipelineWriteService, useValue: mockPipelineWrite },
+        { provide: GraphqlReadService, useValue: mockGraphqlRead },
       ],
     });
 
     service = TestBed.inject(SmeMartBoardService);
-    pipelineWrite = TestBed.inject(PipelineWriteService) as jasmine.SpyObj<PipelineWriteService>;
-    graphqlRead = TestBed.inject(GraphqlReadService) as jasmine.SpyObj<GraphqlReadService>;
+  });
+
+describe('SmeMartBoardService', () => {
+  let service: SmeMartBoardService;
+  let mockPipelineWrite: MockPipelineWrite;
+  let mockGraphqlRead: MockGraphqlRead;
+
+  beforeEach(() => {
+    mockPipelineWrite = {
+      pushEntity: vi.fn().mockResolvedValue(undefined),
+      pushEntities: vi.fn().mockResolvedValue(undefined),
+      deleteEntity: vi.fn().mockResolvedValue(undefined),
+      deleteEntities: vi.fn().mockResolvedValue(undefined),
+    };
+    mockGraphqlRead = {
+      query: vi.fn().mockResolvedValue({ items: [] }),
+      getById: vi.fn().mockResolvedValue(null),
+      rawQuery: vi.fn().mockResolvedValue(null),
+    };
+
+    TestBed.configureTestingModule({
+      providers: [
+        SmeMartBoardService,
+        { provide: PipelineWriteService, useValue: mockPipelineWrite },
+        { provide: GraphqlReadService, useValue: mockGraphqlRead },
+      ],
+    });
+
+    service = TestBed.inject(SmeMartBoardService);
   });
 
   it('should be created', () => {
@@ -51,9 +97,9 @@ describe('SmeMartBoardService', () => {
       expect(result.code).toBe('B1');
       expect(result.parentId).toBe('proj-123');
       expect(result.id).toBeTruthy();
-      expect(pipelineWrite.pushEntity).toHaveBeenCalledWith(
+      expect(mockPipelineWrite.pushEntity).toHaveBeenCalledWith(
         'SmeMartBoard',
-        jasmine.objectContaining({ code: 'B1' }),
+        expect.objectContaining({ code: 'B1' }),
       );
     });
   });
@@ -72,21 +118,21 @@ describe('SmeMartBoardService', () => {
         updatedAt: '2026-03-19T00:00:00Z',
       };
 
-      graphqlRead.getById.and.returnValue(Promise.resolve(mockResponse));
+      mockGraphqlRead.getById.mockResolvedValue(mockResponse);
 
       const result = await service.getBoard('board-123');
 
       expect(result?.name).toBe('Test Board');
       expect(result?.code).toBe('B1');
-      expect(graphqlRead.getById).toHaveBeenCalledWith(
+      expect(mockGraphqlRead.getById).toHaveBeenCalledWith(
         'SmeMartBoard',
         'board-123',
-        jasmine.any(Array),
+        expect.any(Array),
       );
     });
 
     it('should return null if board not found', async () => {
-      graphqlRead.getById.and.returnValue(Promise.resolve(null));
+      mockGraphqlRead.getById.mockResolvedValue(null);
 
       const result = await service.getBoard('nonexistent');
 
@@ -112,7 +158,7 @@ describe('SmeMartBoardService', () => {
         page: { pageNumber: 1, pageSize: 50, totalCount: 1 },
       };
 
-      graphqlRead.query.and.returnValue(Promise.resolve(mockResponse as any));
+      mockGraphqlRead.query.mockResolvedValue(mockResponse as any);
 
       const result = await service.listBoards();
 
@@ -134,24 +180,24 @@ describe('SmeMartBoardService', () => {
         updatedAt: '2026-03-19T00:00:00Z',
       };
 
-      graphqlRead.getById.and.returnValue(Promise.resolve(existing));
+      mockGraphqlRead.getById.mockResolvedValue(existing);
 
       const result = await service.updateBoard('board-123', { name: 'Updated Name' });
 
       expect(result.name).toBe('Updated Name');
       expect(result.code).toBe('B1');
-      expect(pipelineWrite.pushEntity).toHaveBeenCalledWith(
+      expect(mockPipelineWrite.pushEntity).toHaveBeenCalledWith(
         'SmeMartBoard',
-        jasmine.objectContaining({ name: 'Updated Name' }),
+        expect.objectContaining({ name: 'Updated Name' }),
       );
     });
 
     it('should throw if board not found', async () => {
-      graphqlRead.getById.and.returnValue(Promise.resolve(null));
+      mockGraphqlRead.getById.mockResolvedValue(null);
 
-      await expectAsync(
+      await expect(
         service.updateBoard('nonexistent', { name: 'Test' }),
-      ).toBeRejectedWithError(/not found/);
+      ).rejects.toThrow(/not found/);
     });
   });
 
@@ -159,7 +205,7 @@ describe('SmeMartBoardService', () => {
     it('should call deleteEntity on pipeline write', async () => {
       await service.deleteBoard('board-123');
 
-      expect(pipelineWrite.deleteEntity).toHaveBeenCalledWith('SmeMartBoard', 'board-123');
+      expect(mockPipelineWrite.deleteEntity).toHaveBeenCalledWith('SmeMartBoard', 'board-123');
     });
   });
 
@@ -179,15 +225,15 @@ describe('SmeMartBoardService', () => {
         page: { pageNumber: 1, pageSize: 1000, totalCount: 1 },
       };
 
-      graphqlRead.query.and.returnValue(Promise.resolve(mockResponse));
+      mockGraphqlRead.query.mockResolvedValue(mockResponse);
 
       const result = await service.getBoardActivities('board-123');
 
       expect(result).toHaveLength(1);
-      expect(graphqlRead.query).toHaveBeenCalledWith(
+      expect(mockGraphqlRead.query).toHaveBeenCalledWith(
         'SmeMartActivity',
-        jasmine.any(Array),
-        jasmine.objectContaining({
+        expect.any(Array),
+        expect.objectContaining({
           filters: { boardId: '.eq.board-123' },
         }),
       );

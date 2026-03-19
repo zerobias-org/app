@@ -1,35 +1,52 @@
 import { TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { SmeMartWorkflowService } from './sme-mart-workflow.service';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
 import type { GqlSmeMartWorkflowResponse } from '../gql-types';
 
+type MockFn = ReturnType<typeof vi.fn>;
+
+interface MockPipelineWrite {
+  pushEntity: MockFn;
+  pushEntities: MockFn;
+  deleteEntity: MockFn;
+  deleteEntities: MockFn;
+}
+
+interface MockGraphqlRead {
+  query: MockFn;
+  getById: MockFn;
+  rawQuery: MockFn;
+}
+
 describe('SmeMartWorkflowService', () => {
   let service: SmeMartWorkflowService;
-  let pipelineWrite: jasmine.SpyObj<PipelineWriteService>;
-  let graphqlRead: jasmine.SpyObj<GraphqlReadService>;
+  let mockPipelineWrite: MockPipelineWrite;
+  let mockGraphqlRead: MockGraphqlRead;
 
   beforeEach(() => {
-    const pipelineWriteSpy = jasmine.createSpyObj<PipelineWriteService>(
-      'PipelineWriteService',
-      ['pushEntity', 'pushEntities', 'deleteEntity', 'deleteEntities'],
-    );
-    const graphqlReadSpy = jasmine.createSpyObj<GraphqlReadService>(
-      'GraphqlReadService',
-      ['query', 'getById', 'rawQuery'],
-    );
+    mockPipelineWrite = {
+      pushEntity: vi.fn().mockResolvedValue(undefined),
+      pushEntities: vi.fn().mockResolvedValue(undefined),
+      deleteEntity: vi.fn().mockResolvedValue(undefined),
+      deleteEntities: vi.fn().mockResolvedValue(undefined),
+    };
+    mockGraphqlRead = {
+      query: vi.fn().mockResolvedValue({ items: [] }),
+      getById: vi.fn().mockResolvedValue(null),
+      rawQuery: vi.fn().mockResolvedValue(null),
+    };
 
     TestBed.configureTestingModule({
       providers: [
         SmeMartWorkflowService,
-        { provide: PipelineWriteService, useValue: pipelineWriteSpy },
-        { provide: GraphqlReadService, useValue: graphqlReadSpy },
+        { provide: PipelineWriteService, useValue: mockPipelineWrite },
+        { provide: GraphqlReadService, useValue: mockGraphqlRead },
       ],
     });
 
     service = TestBed.inject(SmeMartWorkflowService);
-    pipelineWrite = TestBed.inject(PipelineWriteService) as jasmine.SpyObj<PipelineWriteService>;
-    graphqlRead = TestBed.inject(GraphqlReadService) as jasmine.SpyObj<GraphqlReadService>;
   });
 
   it('should be created', () => {
@@ -47,9 +64,9 @@ describe('SmeMartWorkflowService', () => {
       expect(result.name).toBe('Standard Workflow');
       expect(result.statuses).toHaveLength(3);
       expect(result.id).toBeTruthy();
-      expect(pipelineWrite.pushEntity).toHaveBeenCalledWith(
+      expect(mockPipelineWrite.pushEntity).toHaveBeenCalledWith(
         'SmeMartWorkflow',
-        jasmine.objectContaining({ name: 'Standard Workflow' }),
+        expect.objectContaining({ name: 'Standard Workflow' }),
       );
     });
 
@@ -85,21 +102,21 @@ describe('SmeMartWorkflowService', () => {
         updatedAt: '2026-03-19T00:00:00Z',
       };
 
-      graphqlRead.getById.and.returnValue(Promise.resolve(mockResponse));
+      mockGraphqlRead.getById.mockResolvedValue(mockResponse);
 
       const result = await service.getWorkflow('workflow-123');
 
       expect(result?.name).toBe('Test Workflow');
       expect(result?.statuses).toHaveLength(2);
-      expect(graphqlRead.getById).toHaveBeenCalledWith(
+      expect(mockGraphqlRead.getById).toHaveBeenCalledWith(
         'SmeMartWorkflow',
         'workflow-123',
-        jasmine.any(Array),
+        expect.any(Array),
       );
     });
 
     it('should return null if workflow not found', async () => {
-      graphqlRead.getById.and.returnValue(Promise.resolve(null));
+      mockGraphqlRead.getById.mockResolvedValue(null);
 
       const result = await service.getWorkflow('nonexistent');
 
@@ -122,7 +139,7 @@ describe('SmeMartWorkflowService', () => {
         page: { pageNumber: 1, pageSize: 50, totalCount: 1 },
       };
 
-      graphqlRead.query.and.returnValue(Promise.resolve(mockResponse as any));
+      mockGraphqlRead.query.mockResolvedValue(mockResponse as any);
 
       const result = await service.listWorkflows();
 
@@ -141,7 +158,7 @@ describe('SmeMartWorkflowService', () => {
         updatedAt: '2026-03-19T00:00:00Z',
       };
 
-      graphqlRead.getById.and.returnValue(Promise.resolve(existing));
+      mockGraphqlRead.getById.mockResolvedValue(existing);
 
       const result = await service.updateWorkflow('workflow-123', {
         name: 'Updated Name',
@@ -150,18 +167,18 @@ describe('SmeMartWorkflowService', () => {
 
       expect(result.name).toBe('Updated Name');
       expect(result.statuses).toHaveLength(2);
-      expect(pipelineWrite.pushEntity).toHaveBeenCalledWith(
+      expect(mockPipelineWrite.pushEntity).toHaveBeenCalledWith(
         'SmeMartWorkflow',
-        jasmine.objectContaining({ name: 'Updated Name' }),
+        expect.objectContaining({ name: 'Updated Name' }),
       );
     });
 
     it('should throw if workflow not found', async () => {
-      graphqlRead.getById.and.returnValue(Promise.resolve(null));
+      mockGraphqlRead.getById.mockResolvedValue(null);
 
-      await expectAsync(
+      await expect(
         service.updateWorkflow('nonexistent', { name: 'Test' }),
-      ).toBeRejectedWithError(/not found/);
+      ).rejects.toThrow(/not found/);
     });
   });
 
@@ -169,7 +186,7 @@ describe('SmeMartWorkflowService', () => {
     it('should call deleteEntity on pipeline write', async () => {
       await service.deleteWorkflow('workflow-123');
 
-      expect(pipelineWrite.deleteEntity).toHaveBeenCalledWith('SmeMartWorkflow', 'workflow-123');
+      expect(mockPipelineWrite.deleteEntity).toHaveBeenCalledWith('SmeMartWorkflow', 'workflow-123');
     });
   });
 });

@@ -5,7 +5,7 @@
  */
 
 import { TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ProjectPlanService } from './project-plan.service';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
@@ -14,47 +14,43 @@ import type { GqlProjectPlanResponse, GqlPlanMilestoneResponse } from '../gql-ty
 
 describe('ProjectPlanService', () => {
   let service: ProjectPlanService;
-  let pipelineWrite: jasmine.SpyObj<PipelineWriteService>;
-  let graphqlRead: jasmine.SpyObj<GraphqlReadService>;
-  let impersonation: jasmine.SpyObj<ImpersonationService>;
+  let mockPipelineWrite: { pushEntity: ReturnType<typeof vi.fn>; pushEntities: ReturnType<typeof vi.fn>; deleteEntity: ReturnType<typeof vi.fn>; deleteEntities: ReturnType<typeof vi.fn> };
+  let mockGraphqlRead: { query: ReturnType<typeof vi.fn>; getById: ReturnType<typeof vi.fn> };
+  let mockImpersonation: { effectiveUserId: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
-    const pipelineWriteSpy = jasmine.createSpyObj(
-      'PipelineWriteService',
-      ['pushEntity', 'pushEntities', 'deleteEntity', 'deleteEntities'],
-    );
-    const graphqlReadSpy = jasmine.createSpyObj(
-      'GraphqlReadService',
-      ['query', 'getById'],
-    );
-    const impersonationSpy = jasmine.createSpyObj(
-      'ImpersonationService',
-      ['effectiveUserId'],
-    );
-
-    impersonationSpy.effectiveUserId.and.returnValue('user-123');
+    mockPipelineWrite = {
+      pushEntity: vi.fn().mockResolvedValue(undefined),
+      pushEntities: vi.fn().mockResolvedValue(undefined),
+      deleteEntity: vi.fn().mockResolvedValue(undefined),
+      deleteEntities: vi.fn().mockResolvedValue(undefined),
+    };
+    mockGraphqlRead = {
+      query: vi.fn().mockResolvedValue({ items: [] }),
+      getById: vi.fn().mockResolvedValue(null),
+    };
+    mockImpersonation = {
+      effectiveUserId: vi.fn().mockReturnValue('user-123'),
+    };
 
     TestBed.configureTestingModule({
       providers: [
         ProjectPlanService,
-        { provide: PipelineWriteService, useValue: pipelineWriteSpy },
-        { provide: GraphqlReadService, useValue: graphqlReadSpy },
-        { provide: ImpersonationService, useValue: impersonationSpy },
+        { provide: PipelineWriteService, useValue: mockPipelineWrite },
+        { provide: GraphqlReadService, useValue: mockGraphqlRead },
+        { provide: ImpersonationService, useValue: mockImpersonation },
       ],
     });
 
     service = TestBed.inject(ProjectPlanService);
-    pipelineWrite = TestBed.inject(PipelineWriteService) as jasmine.SpyObj<PipelineWriteService>;
-    graphqlRead = TestBed.inject(GraphqlReadService) as jasmine.SpyObj<GraphqlReadService>;
-    impersonation = TestBed.inject(ImpersonationService) as jasmine.SpyObj<ImpersonationService>;
-  });
+  }
 
   // ────────────────────────────────────────────────────────────────────────────
   // ProjectPlan CRUD
   // ────────────────────────────────────────────────────────────────────────────
 
   it('should create a plan and push to pipeline', async () => {
-    pipelineWrite.pushEntity.and.returnValue(Promise.resolve());
+    mockPipelineWrite.pushEntity.mockResolvedValue(undefined);
 
     const result = await service.createPlan({
       parentId: 'project-1',
@@ -65,9 +61,9 @@ describe('ProjectPlanService', () => {
     expect(result).toBeDefined();
     expect(result.parentId).toBe('project-1');
     expect(result.title).toBe('Project Execution Plan');
-    expect(pipelineWrite.pushEntity).toHaveBeenCalledWith(
+    expect(mockPipelineWrite.pushEntity).toHaveBeenCalledWith(
       'ProjectPlan',
-      jasmine.objectContaining({ parentId: 'project-1', title: 'Project Execution Plan' }),
+      expect.objectContaining({ parentId: 'project-1', title: 'Project Execution Plan' }),
     );
   });
 
@@ -82,18 +78,18 @@ describe('ProjectPlanService', () => {
       updatedAt: '2026-03-19T00:00:00Z',
     };
 
-    graphqlRead.getById.and.returnValue(Promise.resolve(gqlPlan));
+    mockGraphqlRead.getById.mockResolvedValue(gqlPlan);
 
     const result = await service.getPlan('plan-1');
 
     expect(result).toBeDefined();
     expect(result?.id).toBe('plan-1');
     expect(result?.title).toBe('Project Execution Plan');
-    expect(graphqlRead.getById).toHaveBeenCalledWith('ProjectPlan', 'plan-1', jasmine.any(Array));
+    expect(mockGraphqlRead.getById).toHaveBeenCalledWith('ProjectPlan', 'plan-1', expect.any(Array));
   });
 
   it('should return null if plan not found', async () => {
-    graphqlRead.getById.and.returnValue(Promise.resolve(null));
+    mockGraphqlRead.getById.mockResolvedValue(null);
 
     const result = await service.getPlan('nonexistent');
 
@@ -112,22 +108,22 @@ describe('ProjectPlanService', () => {
       },
     ];
 
-    graphqlRead.query.and.returnValue(Promise.resolve({
+    mockGraphqlRead.query.mockResolvedValue({
       items: gqlPlans,
       page: { pageNumber: 1, pageSize: 50, totalCount: 1 },
-    }));
+    });
 
     const result = await service.listPlans('project-1');
 
     expect(result.items).toHaveLength(1);
     expect(result.items[0].title).toBe('Project Execution Plan');
-    expect(graphqlRead.query).toHaveBeenCalledWith('ProjectPlan', jasmine.any(Array), jasmine.objectContaining({
+    expect(mockGraphqlRead.query).toHaveBeenCalledWith('ProjectPlan', expect.any(Array), expect.objectContaining({
       filters: { parentId: '.eq.project-1' },
     }));
   });
 
   it('should update a plan and push to pipeline', async () => {
-    pipelineWrite.pushEntity.and.returnValue(Promise.resolve());
+    mockPipelineWrite.pushEntity.mockResolvedValue(undefined);
 
     const result = await service.updatePlan('plan-1', {
       title: 'Updated Plan',
@@ -136,18 +132,18 @@ describe('ProjectPlanService', () => {
 
     expect(result.title).toBe('Updated Plan');
     expect(result.estimatedDuration).toBe('8 months');
-    expect(pipelineWrite.pushEntity).toHaveBeenCalledWith(
+    expect(mockPipelineWrite.pushEntity).toHaveBeenCalledWith(
       'ProjectPlan',
-      jasmine.objectContaining({ id: 'plan-1', title: 'Updated Plan' }),
+      expect.objectContaining({ id: 'plan-1', title: 'Updated Plan' }),
     );
   });
 
   it('should delete a plan via pipeline', async () => {
-    pipelineWrite.deleteEntity.and.returnValue(Promise.resolve());
+    mockPipelineWrite.deleteEntity.mockResolvedValue(undefined);
 
     await service.deletePlan('plan-1');
 
-    expect(pipelineWrite.deleteEntity).toHaveBeenCalledWith('ProjectPlan', 'plan-1');
+    expect(mockPipelineWrite.deleteEntity).toHaveBeenCalledWith('ProjectPlan', 'plan-1');
   });
 
   // ────────────────────────────────────────────────────────────────────────────
@@ -155,7 +151,7 @@ describe('ProjectPlanService', () => {
   // ────────────────────────────────────────────────────────────────────────────
 
   it('should create a milestone with correct parentId', async () => {
-    pipelineWrite.pushEntity.and.returnValue(Promise.resolve());
+    mockPipelineWrite.pushEntity.mockResolvedValue(undefined);
 
     const result = await service.createMilestone('plan-1', {
       parentId: 'plan-1',
@@ -166,9 +162,9 @@ describe('ProjectPlanService', () => {
     expect(result).toBeDefined();
     expect(result.parentId).toBe('plan-1');
     expect(result.name).toBe('Phase 1 Complete');
-    expect(pipelineWrite.pushEntity).toHaveBeenCalledWith(
+    expect(mockPipelineWrite.pushEntity).toHaveBeenCalledWith(
       'PlanMilestone',
-      jasmine.objectContaining({ parentId: 'plan-1', name: 'Phase 1 Complete' }),
+      expect.objectContaining({ parentId: 'plan-1', name: 'Phase 1 Complete' }),
     );
   });
 
@@ -196,23 +192,23 @@ describe('ProjectPlanService', () => {
       },
     ];
 
-    graphqlRead.query.and.returnValue(Promise.resolve({
+    mockGraphqlRead.query.mockResolvedValue({
       items: gqlMilestones,
       page: { pageNumber: 1, pageSize: 1000, totalCount: 2 },
-    }));
+    });
 
     const result = await service.getMilestones('plan-1');
 
     expect(result).toHaveLength(2);
     expect(result[0].name).toBe('Phase 1 Complete');
     expect(result[1].name).toBe('Phase 2 Complete');
-    expect(graphqlRead.query).toHaveBeenCalledWith('PlanMilestone', jasmine.any(Array), jasmine.objectContaining({
+    expect(mockGraphqlRead.query).toHaveBeenCalledWith('PlanMilestone', expect.any(Array), expect.objectContaining({
       filters: { parentId: '.eq.plan-1' },
     }));
   });
 
   it('should update a milestone and push to pipeline', async () => {
-    pipelineWrite.pushEntity.and.returnValue(Promise.resolve());
+    mockPipelineWrite.pushEntity.mockResolvedValue(undefined);
 
     const result = await service.updateMilestone('milestone-1', {
       status: 'done',
@@ -221,17 +217,17 @@ describe('ProjectPlanService', () => {
 
     expect(result.status).toBe('done');
     expect(result.targetDate).toBe('2026-07-15');
-    expect(pipelineWrite.pushEntity).toHaveBeenCalledWith(
+    expect(mockPipelineWrite.pushEntity).toHaveBeenCalledWith(
       'PlanMilestone',
-      jasmine.objectContaining({ id: 'milestone-1', status: 'done' }),
+      expect.objectContaining({ id: 'milestone-1', status: 'done' }),
     );
   });
 
   it('should delete a milestone via pipeline', async () => {
-    pipelineWrite.deleteEntity.and.returnValue(Promise.resolve());
+    mockPipelineWrite.deleteEntity.mockResolvedValue(undefined);
 
     await service.deleteMilestone('milestone-1');
 
-    expect(pipelineWrite.deleteEntity).toHaveBeenCalledWith('PlanMilestone', 'milestone-1');
+    expect(mockPipelineWrite.deleteEntity).toHaveBeenCalledWith('PlanMilestone', 'milestone-1');
   });
 });

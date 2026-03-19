@@ -13,41 +13,55 @@ import { ImpersonationService } from './impersonation.service';
 import type { GqlSmeMartTaskResponse } from '../gql-types/sme-mart-task.types';
 import type { SmeMartTask } from '../models/sme-mart-task.model';
 
+type MockFn = ReturnType<typeof vi.fn>;
+
+interface MockPipelineWrite {
+  pushEntity: MockFn;
+  pushEntities: MockFn;
+  deleteEntity: MockFn;
+  deleteEntities: MockFn;
+}
+
+interface MockGraphqlRead {
+  query: MockFn;
+  getById: MockFn;
+}
+
+interface MockImpersonation {
+  effectiveUserId: MockFn;
+}
+
 describe('SmeMartTaskService', () => {
   let service: SmeMartTaskService;
-  let pipelineWrite: jasmine.SpyObj<PipelineWriteService>;
-  let graphqlRead: jasmine.SpyObj<GraphqlReadService>;
-  let impersonation: jasmine.SpyObj<ImpersonationService>;
+  let mockPipelineWrite: MockPipelineWrite;
+  let mockGraphqlRead: MockGraphqlRead;
+  let mockImpersonation: MockImpersonation;
 
   beforeEach(() => {
-    const pipelineWriteSpy = jasmine.createSpyObj(
-      'PipelineWriteService',
-      ['pushEntity', 'pushEntities', 'deleteEntity', 'deleteEntities'],
-    );
-    const graphqlReadSpy = jasmine.createSpyObj(
-      'GraphqlReadService',
-      ['query', 'getById'],
-    );
-    const impersonationSpy = jasmine.createSpyObj(
-      'ImpersonationService',
-      ['effectiveUserId'],
-    );
-
-    impersonationSpy.effectiveUserId.and.returnValue('user-123');
+    mockPipelineWrite = {
+      pushEntity: vi.fn().mockResolvedValue(undefined),
+      pushEntities: vi.fn().mockResolvedValue(undefined),
+      deleteEntity: vi.fn().mockResolvedValue(undefined),
+      deleteEntities: vi.fn().mockResolvedValue(undefined),
+    };
+    mockGraphqlRead = {
+      query: vi.fn().mockResolvedValue({ items: [] }),
+      getById: vi.fn().mockResolvedValue(null),
+    };
+    mockImpersonation = {
+      effectiveUserId: vi.fn().mockReturnValue('user-123'),
+    };
 
     TestBed.configureTestingModule({
       providers: [
         SmeMartTaskService,
-        { provide: PipelineWriteService, useValue: pipelineWriteSpy },
-        { provide: GraphqlReadService, useValue: graphqlReadSpy },
-        { provide: ImpersonationService, useValue: impersonationSpy },
+        { provide: PipelineWriteService, useValue: mockPipelineWrite },
+        { provide: GraphqlReadService, useValue: mockGraphqlRead },
+        { provide: ImpersonationService, useValue: mockImpersonation },
       ],
     });
 
     service = TestBed.inject(SmeMartTaskService);
-    pipelineWrite = TestBed.inject(PipelineWriteService) as jasmine.SpyObj<PipelineWriteService>;
-    graphqlRead = TestBed.inject(GraphqlReadService) as jasmine.SpyObj<GraphqlReadService>;
-    impersonation = TestBed.inject(ImpersonationService) as jasmine.SpyObj<ImpersonationService>;
   });
 
   // ────────────────────────────────────────────────────────────────────────────
@@ -55,7 +69,7 @@ describe('SmeMartTaskService', () => {
   // ────────────────────────────────────────────────────────────────────────────
 
   it('should create a task and push to pipeline fire-and-forget', async () => {
-    pipelineWrite.pushEntity.and.returnValue(Promise.resolve());
+    mockPipelineWrite.pushEntity.mockResolvedValue(undefined);
 
     const result = await service.createTask({
       boardId: 'board-1',
@@ -67,14 +81,14 @@ describe('SmeMartTaskService', () => {
     expect(result).toBeDefined();
     expect(result.boardId).toBe('board-1');
     expect(result.name).toBe('Task 1');
-    expect(pipelineWrite.pushEntity).toHaveBeenCalledWith(
+    expect(mockPipelineWrite.pushEntity).toHaveBeenCalledWith(
       'SmeMartTask',
-      jasmine.objectContaining({ boardId: 'board-1', name: 'Task 1', code: 'T1' }),
+      expect.objectContaining({ boardId: 'board-1', name: 'Task 1', code: 'T1' }),
     );
   });
 
   it('should return task optimistically before pipeline completes', async () => {
-    pipelineWrite.pushEntity.and.returnValue(new Promise(() => {})); // Never completes
+    mockPipelineWrite.pushEntity.mockImplementation(() => new Promise(() => {})); // Never completes
 
     const taskPromise = service.createTask({
       boardId: 'board-1',
@@ -103,18 +117,18 @@ describe('SmeMartTaskService', () => {
       updatedAt: '2026-03-19T00:00:00Z',
     };
 
-    graphqlRead.getById.and.returnValue(Promise.resolve(gqlTask));
+    mockGraphqlRead.getById.mockResolvedValue(gqlTask);
 
     const result = await service.getTask('task-1');
 
     expect(result).toBeDefined();
     expect(result?.id).toBe('task-1');
     expect(result?.name).toBe('Task 1');
-    expect(graphqlRead.getById).toHaveBeenCalledWith('SmeMartTask', 'task-1', jasmine.any(Array));
+    expect(mockGraphqlRead.getById).toHaveBeenCalledWith('SmeMartTask', 'task-1', expect.any(Array));
   });
 
   it('should return null if task not found', async () => {
-    graphqlRead.getById.and.returnValue(Promise.resolve(null));
+    mockGraphqlRead.getById.mockResolvedValue(null);
 
     const result = await service.getTask('nonexistent');
 
@@ -149,17 +163,17 @@ describe('SmeMartTaskService', () => {
       },
     ];
 
-    graphqlRead.query.and.returnValue(Promise.resolve({
+    mockGraphqlRead.query.mockResolvedValue({
       items: gqlTasks,
       page: { pageNumber: 1, pageSize: 50, totalCount: 2 },
-    }));
+    });
 
     const result = await service.listTasks('board-1');
 
     expect(result.items).toHaveLength(2);
     expect(result.items[0].name).toBe('Task 1');
     expect(result.items[1].name).toBe('Task 2');
-    expect(graphqlRead.query).toHaveBeenCalledWith('SmeMartTask', jasmine.any(Array), jasmine.objectContaining({
+    expect(mockGraphqlRead.query).toHaveBeenCalledWith('SmeMartTask', expect.any(Array), expect.objectContaining({
       filters: { boardId: '.eq.board-1' },
     }));
   });
@@ -216,10 +230,10 @@ describe('SmeMartTaskService', () => {
       },
     ];
 
-    graphqlRead.query.and.returnValue(Promise.resolve({
+    mockGraphqlRead.query.mockResolvedValue({
       items: flatTasks,
       page: { pageNumber: 1, pageSize: 1000, totalCount: 4 },
-    }));
+    });
 
     const tree = await service.getTaskTree('board-1');
 
@@ -270,10 +284,10 @@ describe('SmeMartTaskService', () => {
       },
     ];
 
-    graphqlRead.query.and.returnValue(Promise.resolve({
+    mockGraphqlRead.query.mockResolvedValue({
       items: flatTasks,
       page: { pageNumber: 1, pageSize: 1000, totalCount: 3 },
-    }));
+    });
 
     const tree = await service.getTaskTree('board-1');
 
@@ -282,7 +296,7 @@ describe('SmeMartTaskService', () => {
   });
 
   it('should detect cycles and prevent infinite recursion', async () => {
-    const consoleWarnSpy = spyOn(console, 'warn');
+    const consoleWarnSpy = vi.spyOn(console, 'warn');
 
     // Create a cycle: task 1 → 2 → 1
     const flatTasks: GqlSmeMartTaskResponse[] = [
@@ -310,16 +324,16 @@ describe('SmeMartTaskService', () => {
       },
     ];
 
-    graphqlRead.query.and.returnValue(Promise.resolve({
+    mockGraphqlRead.query.mockResolvedValue({
       items: flatTasks,
       page: { pageNumber: 1, pageSize: 1000, totalCount: 2 },
-    }));
+    });
 
     const tree = await service.getTaskTree('board-1');
 
     // Should detect cycle and warn
     expect(consoleWarnSpy).toHaveBeenCalledWith(
-      jasmine.stringMatching('Cycle detected'),
+      expect.stringMatching('Cycle detected'),
     );
   });
 
@@ -328,7 +342,7 @@ describe('SmeMartTaskService', () => {
   // ────────────────────────────────────────────────────────────────────────────
 
   it('should update a task and push to pipeline', async () => {
-    pipelineWrite.pushEntity.and.returnValue(Promise.resolve());
+    mockPipelineWrite.pushEntity.mockResolvedValue(undefined);
 
     const result = await service.updateTask('task-1', {
       name: 'Updated Task',
@@ -337,9 +351,9 @@ describe('SmeMartTaskService', () => {
 
     expect(result.name).toBe('Updated Task');
     expect(result.status).toBe('in_progress');
-    expect(pipelineWrite.pushEntity).toHaveBeenCalledWith(
+    expect(mockPipelineWrite.pushEntity).toHaveBeenCalledWith(
       'SmeMartTask',
-      jasmine.objectContaining({ id: 'task-1', name: 'Updated Task' }),
+      expect.objectContaining({ id: 'task-1', name: 'Updated Task' }),
     );
   });
 
@@ -348,10 +362,10 @@ describe('SmeMartTaskService', () => {
   // ────────────────────────────────────────────────────────────────────────────
 
   it('should delete a task via pipeline', async () => {
-    pipelineWrite.deleteEntity.and.returnValue(Promise.resolve());
+    mockPipelineWrite.deleteEntity.mockResolvedValue(undefined);
 
     await service.deleteTask('task-1');
 
-    expect(pipelineWrite.deleteEntity).toHaveBeenCalledWith('SmeMartTask', 'task-1');
+    expect(mockPipelineWrite.deleteEntity).toHaveBeenCalledWith('SmeMartTask', 'task-1');
   });
 });

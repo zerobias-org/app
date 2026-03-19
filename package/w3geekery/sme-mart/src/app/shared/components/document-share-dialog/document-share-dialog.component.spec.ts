@@ -6,11 +6,11 @@ import {
   DocumentShareDialog,
   type DocumentShareDialogData,
 } from './document-share-dialog.component';
-import { OrgDocumentService } from '../../../core/services/org-document.service';
-import { EngagementsService } from '../../core/services/engagements.service';
-import { SmeMartTagService } from '../../../core/services/sme-mart-tag.service';
-import { makeOrgDocument } from '../../../test-helpers/factories';
-import { TEST_DOC_ID, TEST_ORG_ID } from '../../../test-helpers/constants';
+import { OrgDocumentService } from '@/core/services/org-document.service';
+import { EngagementsService } from '@/core/services/engagements.service';
+import { SmeMartTagService } from '@/core/services/sme-mart-tag.service';
+import { makeOrgDocument } from '@/test-helpers/factories';
+import { TEST_DOC_ID, TEST_ORG_ID } from '@/test-helpers/constants';
 
 type MockFn = ReturnType<typeof vi.fn>;
 

@@ -5,16 +5,16 @@ import { EngagementsService } from '../../core/services/engagements.service';
 import { DocumentService } from './document.service';
 import { ImpersonationService } from './impersonation.service';
 import { SmeMartTagService } from './sme-mart-tag.service';
-import type { WorkRequest, RfpTaskGroup } from '../models';
-import { makeWorkRequest, makeTaskGroups } from '../../test-helpers/factories';
+import type { Engagement, RfpTaskGroup } from '../models';
+import { makeEngagement, makeTaskGroups } from '../../test-helpers/factories';
 import { TEST_ENG_ID, TEST_TAG_ID, TEST_USER_ID } from '../../test-helpers/constants';
 
 type MockFn = ReturnType<typeof vi.fn>;
 
-interface MockWorkRequests {
+interface MockEngagements {
   createRfp: MockFn;
   updateRfp: MockFn;
-  getWorkRequest: MockFn;
+  getEngagement: MockFn;
 }
 
 interface MockDocService {
@@ -33,19 +33,19 @@ interface MockTagService {
 
 describe('RfpWizardService', () => {
   let service: RfpWizardService;
-  let mockWorkRequests: MockWorkRequests;
+  let mockWorkRequests: MockEngagements;
   let mockDocService: MockDocService;
   let mockImpersonation: MockImpersonation;
   let mockTagService: MockTagService;
 
-  const makeDraft = (overrides: Partial<WorkRequest> = {}) =>
-    makeWorkRequest({ id: TEST_ENG_ID, status: 'draft', buyer_zerobias_user_id: TEST_USER_ID, ...overrides });
+  const makeDraft = (overrides: Partial<Engagement> = {}) =>
+    makeEngagement({ id: TEST_ENG_ID, status: 'draft', buyer_zerobias_user_id: TEST_USER_ID, ...overrides });
 
   beforeEach(() => {
     mockWorkRequests = {
       createRfp: vi.fn().mockResolvedValue(makeDraft()),
       updateRfp: vi.fn().mockResolvedValue(makeDraft()),
-      getWorkRequest: vi.fn().mockResolvedValue(makeDraft()),
+      getEngagement: vi.fn().mockResolvedValue(makeDraft()),
     };
 
     mockDocService = {

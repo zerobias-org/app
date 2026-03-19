@@ -16,9 +16,9 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTabsModule } from '@angular/material/tabs';
 import { TitleCasePipe } from '@angular/common';
 import { ZbDialogComponent } from '@zerobias-org/ngx-library';
-import { OrgDocumentService } from '../../../core/services/org-document.service';
-import { EngagementsService } from '../../core/services/engagements.service';
-import { SmeMartTagService } from '../../../core/services/sme-mart-tag.service';
+import { OrgDocumentService } from '@/core/services/org-document.service';
+import { EngagementsService } from '@/core/services/engagements.service';
+import { SmeMartTagService } from '@/core/services/sme-mart-tag.service';
 import type { OrgDocument, OrgDocumentShare, ShareTargetType, ShareVisibility } from '../../../core/models/org-document.model';
 import type { EngagementSummaryRow } from '../../../core/models';
 

@@ -4,8 +4,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ZbDialogComponent } from '@zerobias-org/ngx-library';
 import { EngagementForm, type EngagementFormValues } from '../engagement-form/engagement-form.component';
-import { EngagementsService } from '../../core/services/engagements.service';
-import { ImpersonationService } from '../../../core/services/impersonation.service';
+import { EngagementsService } from '@/core/services/engagements.service';
+import { ImpersonationService } from '@/core/services/impersonation.service';
 
 @Component({
   selector: 'app-rfp-dialog',

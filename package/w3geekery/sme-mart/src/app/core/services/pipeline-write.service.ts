@@ -23,6 +23,11 @@ const SME_MART_CLASS_IDS = {
   SmeMartBoard:     'TODO-uuid-placeholder-sme-mart-board',
   SmeMartActivity:  'TODO-uuid-placeholder-sme-mart-activity',
   SmeMartWorkflow:  'TODO-uuid-placeholder-sme-mart-workflow',
+  SmeMartTask:      'TODO-uuid-placeholder-sme-mart-task',
+  ProjectPrd:       'TODO-uuid-placeholder-project-prd',
+  PrdSection:       'TODO-uuid-placeholder-prd-section',
+  ProjectPlan:      'TODO-uuid-placeholder-project-plan',
+  PlanMilestone:    'TODO-uuid-placeholder-plan-milestone',
 } as const;
 
 export type SmeMartClassName = keyof typeof SME_MART_CLASS_IDS;

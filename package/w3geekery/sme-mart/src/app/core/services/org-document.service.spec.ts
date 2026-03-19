@@ -47,6 +47,7 @@ describe('OrgDocumentService', () => {
     // Default GQL fixtures
     const documentFixture: GqlDocumentResponse = {
       id: TEST_DOC_ID,
+      name: 'Test Document', // File inherited field
       engagementId: TEST_ENG_ID,
       zbFileId: 'file-001',
       zbFileVersionId: 'ver-001',
