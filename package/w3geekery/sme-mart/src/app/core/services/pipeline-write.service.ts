@@ -6,6 +6,7 @@ import { UUID } from '@zerobias-org/types-core-js';
 // ---------------------------------------------------------------------------
 // SME Mart AuditgraphDB class IDs (prod)
 // ---------------------------------------------------------------------------
+// Phase 1-5 migrated entities (original 8 from Neon)
 const SME_MART_CLASS_IDS = {
   Engagement:     '7711aa41-e55b-5cda-9b7a-35844a2006a1',
   Bid:            'ccddd2e5-e455-585e-9bb7-902903228b0d',
@@ -15,6 +16,13 @@ const SME_MART_CLASS_IDS = {
   NoteFolder:     '4d50975e-d4dc-5654-8e43-f3c5da01f49d',
   Review:         'ef5d821a-46f5-5f44-8e59-0854777d803c',
   SmeMartDocument:'e1497ca8-a621-57f6-9263-f9a19fea3c34',
+
+  // Phase 6 Bloom entities (greenfield, no Neon)
+  // TODO: Replace placeholders with actual class IDs from platform after PR #8 merge
+  SmeMartProject:   'TODO-uuid-placeholder-sme-mart-project',
+  SmeMartBoard:     'TODO-uuid-placeholder-sme-mart-board',
+  SmeMartActivity:  'TODO-uuid-placeholder-sme-mart-activity',
+  SmeMartWorkflow:  'TODO-uuid-placeholder-sme-mart-workflow',
 } as const;
 
 export type SmeMartClassName = keyof typeof SME_MART_CLASS_IDS;

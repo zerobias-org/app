@@ -443,6 +443,138 @@ export function mapGqlToNeon<T = Record<string, unknown>>(
 }
 
 /**
+ * SmeMartProject field mapping (greenfield — no Neon table)
+ *
+ * GQL entity: SmeMartProject (container entity for Project Bloom)
+ * Model type: SmeMartProject (fields in camelCase)
+ *
+ * No Neon table → no actual translation needed.
+ * Mapping exists for consistency and roundtrip testing.
+ */
+export const SME_MART_PROJECT_FIELD_MAPPING = {
+  neonToGql: {
+    id: 'id',
+    name: 'name',
+    description: 'description',
+    status: 'status',
+    startDate: 'startDate',
+    targetEndDate: 'targetEndDate',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+  },
+  gqlToNeon: {
+    id: 'id',
+    name: 'name',
+    description: 'description',
+    status: 'status',
+    startDate: 'startDate',
+    targetEndDate: 'targetEndDate',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+  },
+  sourceSchema: 'zerobias-org/schema PR #8 (Bloom)',
+  lastVerified: '2026-03-19',
+} as const;
+
+/**
+ * SmeMartBoard field mapping (greenfield — no Neon table)
+ *
+ * GQL entity: SmeMartBoard (structural container within Project)
+ * Model type: SmeMartBoard (fields in camelCase)
+ *
+ * No Neon table → no actual translation needed.
+ * Mapping exists for consistency and roundtrip testing.
+ */
+export const SME_MART_BOARD_FIELD_MAPPING = {
+  neonToGql: {
+    id: 'id',
+    code: 'code',
+    name: 'name',
+    scope: 'scope',
+    partition: 'partition',
+    parentId: 'parentId',
+    description: 'description',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+  },
+  gqlToNeon: {
+    id: 'id',
+    code: 'code',
+    name: 'name',
+    scope: 'scope',
+    partition: 'partition',
+    parentId: 'parentId',
+    description: 'description',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+  },
+  sourceSchema: 'zerobias-org/schema PR #8 (Bloom)',
+  lastVerified: '2026-03-19',
+} as const;
+
+/**
+ * SmeMartActivity field mapping (greenfield — no Neon table)
+ *
+ * GQL entity: SmeMartActivity (work type blueprint within Board)
+ * Model type: SmeMartActivity (fields in camelCase)
+ *
+ * No Neon table → no actual translation needed.
+ * Mapping exists for consistency and roundtrip testing.
+ */
+export const SME_MART_ACTIVITY_FIELD_MAPPING = {
+  neonToGql: {
+    id: 'id',
+    name: 'name',
+    type: 'type',
+    workflowId: 'workflowId',
+    customFields: 'customFields',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+  },
+  gqlToNeon: {
+    id: 'id',
+    name: 'name',
+    type: 'type',
+    workflowId: 'workflowId',
+    customFields: 'customFields',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+  },
+  sourceSchema: 'zerobias-org/schema PR #8 (Bloom)',
+  lastVerified: '2026-03-19',
+} as const;
+
+/**
+ * SmeMartWorkflow field mapping (greenfield — no Neon table)
+ *
+ * GQL entity: SmeMartWorkflow (statuses and transitions template)
+ * Model type: SmeMartWorkflow (fields in camelCase)
+ *
+ * No Neon table → no actual translation needed.
+ * Mapping exists for consistency and roundtrip testing.
+ */
+export const SME_MART_WORKFLOW_FIELD_MAPPING = {
+  neonToGql: {
+    id: 'id',
+    name: 'name',
+    statuses: 'statuses',
+    transitions: 'transitions',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+  },
+  gqlToNeon: {
+    id: 'id',
+    name: 'name',
+    statuses: 'statuses',
+    transitions: 'transitions',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+  },
+  sourceSchema: 'zerobias-org/schema PR #8 (Bloom)',
+  lastVerified: '2026-03-19',
+} as const;
+
+/**
  * All field mapping constants exported as a single object for easier iteration.
  */
 export const ALL_FIELD_MAPPINGS = {
@@ -454,4 +586,8 @@ export const ALL_FIELD_MAPPINGS = {
   ServiceOffering: SERVICE_OFFERING_FIELD_MAPPING,
   Review: REVIEW_FIELD_MAPPING,
   SmeMartDocument: DOCUMENT_FIELD_MAPPING,
+  SmeMartProject: SME_MART_PROJECT_FIELD_MAPPING,
+  SmeMartBoard: SME_MART_BOARD_FIELD_MAPPING,
+  SmeMartActivity: SME_MART_ACTIVITY_FIELD_MAPPING,
+  SmeMartWorkflow: SME_MART_WORKFLOW_FIELD_MAPPING,
 } as const;
