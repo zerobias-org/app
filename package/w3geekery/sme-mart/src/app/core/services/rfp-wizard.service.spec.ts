@@ -188,7 +188,7 @@ describe('RfpWizardService', () => {
         evaluationCriteria: [],
       };
 
-      mockWorkRequests.getWorkRequest.mockResolvedValue({
+      mockWorkRequests.getEngagement.mockResolvedValue({
         ...makeDraft(),
         rfp_wizard_data: savedData,
         rfp_wizard_step: 3,
@@ -203,12 +203,12 @@ describe('RfpWizardService', () => {
     });
 
     it('should throw when draft not found', async () => {
-      mockWorkRequests.getWorkRequest.mockResolvedValue(null);
+      mockWorkRequests.getEngagement.mockResolvedValue(null);
       await expect(service.loadDraft('nonexistent')).rejects.toThrow('not found');
     });
 
     it('should use empty defaults when no wizard data saved', async () => {
-      mockWorkRequests.getWorkRequest.mockResolvedValue({
+      mockWorkRequests.getEngagement.mockResolvedValue({
         ...makeDraft(),
         rfp_wizard_data: null,
         rfp_wizard_step: null,

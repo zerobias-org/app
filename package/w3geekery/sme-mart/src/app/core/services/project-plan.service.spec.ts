@@ -43,7 +43,7 @@ describe('ProjectPlanService', () => {
     });
 
     service = TestBed.inject(ProjectPlanService);
-  }
+  });
 
   // ────────────────────────────────────────────────────────────────────────────
   // ProjectPlan CRUD

@@ -414,7 +414,7 @@ describe('Field Mapping Roundtrip Tests - Bloom Entities', () => {
       status: 'todo',
       description: null,
       dueDate: null,
-      priority: null,
+      priority: undefined,
       createdAt: '2026-03-19T00:00:00Z',
       updatedAt: '2026-03-19T00:00:00Z',
     };

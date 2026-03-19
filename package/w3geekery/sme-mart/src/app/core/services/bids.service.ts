@@ -148,7 +148,7 @@ export class BidsService {
 
     // Flatten wizard_data into bid columns
     const updated: Partial<Bid> = {
-      wizard_data: wizardData,
+      wizard_data: wizardData as unknown as Record<string, unknown>,
       wizard_step: step,
       updated_at: new Date().toISOString(),
     };

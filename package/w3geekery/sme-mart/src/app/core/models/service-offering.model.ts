@@ -1,4 +1,5 @@
-import { PricingType } from './enums';
+import type { PricingType } from './enums';
+export type { PricingType } from './enums';
 
 export interface ServiceOffering {
   id: string;

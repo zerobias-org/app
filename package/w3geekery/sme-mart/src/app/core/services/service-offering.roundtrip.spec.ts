@@ -44,7 +44,7 @@ describe('INFRA-04: ServiceOffering Roundtrip Field Validation', () => {
       );
 
       expect(gqlData.id).toBe('svc-001');
-      expect(gqlData.title).toBe('HIPAA Compliance Audit');
+      expect(gqlData.name).toBe('HIPAA Compliance Audit');
       expect(gqlData.description).toBe('Complete HIPAA compliance audit with gap analysis');
       expect(gqlData.providerId).toBe('provider-001');
       expect(gqlData.category).toBe('compliance');
@@ -71,14 +71,14 @@ describe('INFRA-04: ServiceOffering Roundtrip Field Validation', () => {
       expect(gqlKeys.length).toBe(expectedFieldCount);
 
       expect(gqlData.id).toBeDefined();
-      expect(gqlData.title).toBeDefined();
+      expect(gqlData.name).toBeDefined();
       expect(gqlData.category).toBeDefined();
       expect(gqlData.pricingType).toBeDefined();
       expect(gqlData.isActive).toBeDefined();
     });
 
     it('should handle different pricing types', () => {
-      const pricingTypes: PricingType[] = ['fixed', 'hourly', 'retainer', 'variable'];
+      const pricingTypes: PricingType[] = ['fixed', 'hourly', 'subscription', 'custom'];
 
       for (const type of pricingTypes) {
         const neonModel = makeServiceOffering({ pricing_type: type });

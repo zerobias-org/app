@@ -49,35 +49,6 @@ describe('SmeMartActivityService', () => {
     service = TestBed.inject(SmeMartActivityService);
   });
 
-describe('SmeMartActivityService', () => {
-  let service: SmeMartActivityService;
-  let mockPipelineWrite: MockPipelineWrite;
-  let mockGraphqlRead: MockGraphqlRead;
-
-  beforeEach(() => {
-    mockPipelineWrite = {
-      pushEntity: vi.fn().mockResolvedValue(undefined),
-      pushEntities: vi.fn().mockResolvedValue(undefined),
-      deleteEntity: vi.fn().mockResolvedValue(undefined),
-      deleteEntities: vi.fn().mockResolvedValue(undefined),
-    };
-    mockGraphqlRead = {
-      query: vi.fn().mockResolvedValue({ items: [] }),
-      getById: vi.fn().mockResolvedValue(null),
-      rawQuery: vi.fn().mockResolvedValue(null),
-    };
-
-    TestBed.configureTestingModule({
-      providers: [
-        SmeMartActivityService,
-        { provide: PipelineWriteService, useValue: mockPipelineWrite },
-        { provide: GraphqlReadService, useValue: mockGraphqlRead },
-      ],
-    });
-
-    service = TestBed.inject(SmeMartActivityService);
-  });
-
   it('should be created', () => {
     expect(service).toBeTruthy();
   });

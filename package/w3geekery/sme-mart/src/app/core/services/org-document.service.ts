@@ -303,20 +303,15 @@ export class OrgDocumentService {
     return doc || {
       id: documentId,
       org_id: '',
-      engagement_id: '',
-      zb_file_id: '',
-      zb_file_version_id: '',
+      zb_file_id: null,
+      zb_file_version_id: null,
       filename: '',
-      mime_type: '',
-      file_size_bytes: 0,
-      document_type: updates.document_type || 'compliance',
-      display_name: updates.display_name || '',
-      description: updates.description || undefined,
+      document_type: (updates as Record<string, unknown>)['document_type'] as DocumentType || 'other',
       uploaded_by_zerobias_user_id: '',
       archived: false,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
-    };
+    } as OrgDocument;
   }
 
   // ---------------------------------------------------------------------------

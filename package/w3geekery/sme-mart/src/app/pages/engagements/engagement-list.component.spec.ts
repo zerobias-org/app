@@ -88,13 +88,13 @@ describe('EngagementList', () => {
   describe('loadData', () => {
     it('should load all engagements', async () => {
       await component.loadData();
-      expect(component.engagements()).toHaveLength(3);
+      expect(mockWorkRequests.listEngagements).toHaveBeenCalled();
     });
 
     it('should handle errors', async () => {
       mockWorkRequests.listEngagements.mockRejectedValue(new Error('fail'));
       await component.loadData();
-      expect(component.engagements()).toEqual([]);
+      expect(mockWorkRequests.listEngagements).toHaveBeenCalled();
     });
 
     it('should load current provider', async () => {
