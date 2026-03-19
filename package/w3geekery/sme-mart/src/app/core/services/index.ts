@@ -37,3 +37,6 @@ export { SmeMartProjectService } from './sme-mart-project.service';
 export { SmeMartBoardService } from './sme-mart-board.service';
 export { SmeMartActivityService } from './sme-mart-activity.service';
 export { SmeMartWorkflowService } from './sme-mart-workflow.service';
+export { SmeMartTaskService } from './sme-mart-task.service';
+export { ProjectPrdService } from './project-prd.service';
+export { ProjectPlanService } from './project-plan.service';
