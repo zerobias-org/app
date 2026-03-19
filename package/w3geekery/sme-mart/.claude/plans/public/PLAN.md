@@ -1,6 +1,6 @@
 # Plan: SME Mart Angular Rebuild
 
-**Last updated:** 2026-03-12 (049 complete, 048 complete)
+**Last updated:** 2026-03-16 (054-056 new plans from RFP super-summary gap analysis; 040/041/046/029 expanded)
 
 > **Reference:** [Hierarchy Model](hierarchy-model.md) — Org → Engagement → Project → Boundary mapping, Notes scoping, permissions model, CEO/CIO directive reconciliation.
 
@@ -40,23 +40,34 @@
 | 030 | SmeMartResource Abstraction Layer | **Complete** — service, mappers, unified interface | [`030-sme-mart-resource-abstraction.md`](../local/030-sme-mart-resource-abstraction.md) |
 | 031 | Document Upload to Engagement | **Complete** — upload UI, Neon catalog, graceful FileService degradation | [`031-document-upload-to-project.md`](../local/031-document-upload-to-project.md) |
 | 032 | RFP Creation Wizard | **Complete** — wizard scaffold, all 5 steps, requirements editor, JSON import, tag + publish flow, LLM prompt templates, method chooser, integration tests (16 passing). | [`032-rfp-creation-wizard.md`](../local/032-rfp-creation-wizard.md) |
-| 033 | Vendor Bid Response Flow | **Phases 1–4 complete** — extended bid model, per-requirement responses, compliance progress, buyer-side comparison + review. Phase 5 (LLM-assisted bid generation) pending. | [`033-vendor-bid-response.md`](../local/033-vendor-bid-response.md) |
-| 034 | GQL Schema Migration (AuditgraphDB) | **Phases 1–3 done** — PR #3 open on zerobias-org/schema, awaiting review by Daniel Rojas | [`034-gql-schema-migration.md`](../local/034-gql-schema-migration.md) |
+| 033 | Vendor Bid Response Flow | **Phases 1–4 complete** — extended bid model, per-requirement responses, compliance progress, buyer-side comparison + review. Phase 5 (LLM-assisted bid generation) pending. Phase 5 expanded: Claude Agent SDK packaging, bundled ZB MCP tools, cost model (~$0.56/interaction). | [`033-vendor-bid-response.md`](../local/033-vendor-bid-response.md) |
+| 034 | GQL Schema Migration (AuditgraphDB) | **Phases 1–4 done** — Schema live in prod (8 classes), receiver pipeline created + test Engagement pushed to AuditgraphDB. GQL read path pending schema regeneration. Next: Phase 5 (service layer). | [`034-gql-schema-migration.md`](../local/034-gql-schema-migration.md) |
 | 035 | Engagement Tab Routes Refactor | **Complete** — child routes replace query params | [`035-engagement-tab-routes.md`](../local/035-engagement-tab-routes.md) |
 | 036 | RFP / Engagement Route Split | **Complete** — separate RFP detail from engagement detail | [`036-rfp-engagement-split.md`](../local/036-rfp-engagement-split.md) |
 | 037 | ZB Resource Tag Editor Component | **Complete** — sme-resource-tag-editor + resource-tags-panel + autocomplete | [`037-zb-resource-tag-editor.md`](../local/037-zb-resource-tag-editor.md) |
 | 038 | Document-Notes Cross-Linking | **Complete** — all 5 phases done. sme-doc:// links, chooser dialog, marked renderer, toolbar button, notes search by doc link with filter banner. | [`038-document-notes-cross-linking.md`](../local/038-document-notes-cross-linking.md) |
 | 039 | Tag Prefix Migration (ENG- → sme-mart.) | **Complete** — utils, service, pipe, tests (79 passing) | [`039-tag-prefix-migration.md`](../local/039-tag-prefix-migration.md) |
-| 040 | Project Bloom (AI Document Decomposition) | **Draft** — accepted Bid → Engagement (corp-to-corp) + Project created → AI decomposes uploaded docs into typed task/subtask tree (~39 tasks, ~200 subtasks). Transparency Center activates. | TBD |
-| 041 | Supply-Side Vendor Profile (One-Time Load) | **Concept** — vendors load corporate docs, D&B, banking, background checks once. Pre-fills engagement requirements for every bid. "Programmatic buy, sell." | TBD |
+| 040 | Project Bloom (AI Document Decomposition) | **Draft** — accepted Bid → Engagement (corp-to-corp) + Project created → AI decomposes uploaded docs into typed task/subtask tree (~39 tasks, ~200 subtasks). Transparency Center activates. **Expand:** assessment task templates (E2), deliverable templates (E4) from gap analysis. | TBD |
+| 041 | Supply-Side Vendor Profile (One-Time Load) | **Concept** — vendors load corporate docs, D&B, banking, background checks once. Pre-fills engagement requirements for every bid. **Expand:** corporate vetting docs/D&B/financials (S1), named contact roles (S5), staff resumes/qualifications (S7) from gap analysis. | TBD |
 | 042 | Project Plugin (MCP + Templates + Parsers) | **Concept** — bundled plugin: MCP skills, document parsers, task type templates, questionnaire flow. AI generates structured projects. Dual-path: legacy doc ingestion + native creation. | TBD |
+| — | **Proposal: AI Agent RFP Assistant** | **Idea** — Claude Agent SDK-powered conversational RFP creation + bid evaluation for non-technical buyers. Builds on SM-18/SM-19/SM-20. Phase 2+ feature. | [Proposal 003](../../proposals/003-ai-agent-rfp-assistant.md) |
 | 043 | Proposal-to-Bid Rename Migration | **Complete** — all 8 phases done: models, services, mappers, components, routes, database (table+VIEWs+enum), plans, GQL schema. | [`043-proposal-to-bid-rename.md`](../local/043-proposal-to-bid-rename.md) |
-| 044 | Playwright E2E Smoke Tests | **Backlog** — convert Chrome DevTools MCP smoke tests (`.claude/smoke-tests/`) to Playwright specs for unattended CI-capable regression testing. ~1-2 hrs for first spec (RFP wizard). | TBD |
+| 044 | ~~Playwright E2E Smoke Tests~~ | **Superseded** by Plan 052 (expanded scope with buyer/seller flows, UAT validation) | — |
 | 045 | ~~RFP Document Chooser~~ | **Superseded** by Plan 046 Phase 4 (OrgDocumentChooser with scope filtering) | — |
-| 046 | Org-Level Document Management | **Phases 1–5 complete, 7 complete** — OrgDocumentService, file manager UI, sharing + visibility, OrgDocumentChooser, org tabs, tests. Phase 6 (org switcher) deferred. Phase 8 (external storage imports) deferred. Phase 9 roadmap: folders, colors, tagging UI, archive browser, versioning, PDF conversion, preview, bulk ops, templates. | [`046-org-document-management.md`](../local/046-org-document-management.md) |
+| 046 | Org-Level Document Management | **Phases 1–5 complete, 7 complete** — OrgDocumentService, file manager UI, sharing + visibility, OrgDocumentChooser, org tabs, tests. Phase 6 (org switcher) deferred. Phase 8 (external storage imports) deferred. Phase 9 roadmap: folders, colors, tagging UI, archive browser, versioning, PDF conversion, preview, bulk ops, templates. **Expand:** 19 new document types from gap analysis (E1) — procurement, client docs, deliverable categories. | [`046-org-document-management.md`](../local/046-org-document-management.md) |
 | 047 | Shared Notes & Versioning | **Draft** — per-user sharing, note versioning (with version browser/search/copy), Shared Notebook, timeline integration (share/pin events), pinned notes, task-linked checkboxes (read-only status reflection). 32–40 hrs across 8 phases. | [`047-shared-notes-and-versioning.md`](../local/047-shared-notes-and-versioning.md) |
 | 048 | Notification Center | **Complete** — in-app notification system modeled on ZB UI `CardsService` / `zb-cards` pattern. Bell icon, unread badge, MatMenu dropdown panel, card types, severity, dismiss/read. Fire-and-forget triggers on bid/engagement/rfp actions. 94 tests. Neon-backed initially, designed for seamless migration to ZB platform CardService. | [`048-notification-center.md`](../local/048-notification-center.md) |
 | 049 | Unit Testing Strategy | **Complete** — 33 spec files, 456 tests passing. Shared test-helpers (factories, mocks, constants). All specs refactored to use shared infrastructure. | [`049-unit-testing-strategy.md`](../local/049-unit-testing-strategy.md) |
+| 050 | Internal Marketplace (BU-to-BU) | **Stub** — intra-company marketplace using same supply/demand constructs. Internal teams propose/bid on projects within same org. Source: meeting 2026-03-13. | [`050-internal-marketplace.md`](../local/050-internal-marketplace.md) |
+| 051 | Reverse Bid Flow (Supply-Originated Proposals) | **Stub** — suppliers propose projects to demand side within existing engagements. Inverse of standard RFP flow. Source: meeting 2026-03-13. | [`051-reverse-bid-flow.md`](../local/051-reverse-bid-flow.md) |
+| 052 | Playwright E2E Smoke Tests | **Stub** — full buyer/seller Playwright smoke tests, supersedes Plan 044. UAT validation, CI-capable. Source: meeting 2026-03-13. | [`052-e2e-smoke-tests.md`](../local/052-e2e-smoke-tests.md) |
+| 053 | QA Skills & Cookie Import | **Draft** — Generic Claude Code skills (`/qa`, `/setup-cookies`) using Chrome DevTools MCP. Cookie decryption from real browsers, systematic QA crawl with health scoring, regression tracking. Generic skills in `~/.claude/skills/`, per-project config. Inspired by gstack. 16–21 hrs. | [`053-qa-skills-and-cookie-import.md`](../local/053-qa-skills-and-cookie-import.md) |
+| 054 | RFP Package Builder & Access Controls | **Stub** — Closed/invitation-only RFPs (D1), multi-document packages with templates/exhibits/forms (D2), form builder for structured submission requirements (D3), intent-to-bid/withdraw workflow with deadlines and destruction attestation (S2). Covers gaps D1, D2, D3, S2. Source: RFP super-summary gap analysis. 30–40 hrs. | TBD |
+| 055 | Advanced Pricing & Evaluation | **Stub** — Complex pricing models: NRC/ARC, recurring/one-time split, milestone payments, per-unit pricing, multi-year projections (D4). Evaluation criteria builder with weighted scoring matrix and domain categories (D5). Structured bid response templates mirroring RFP section numbering (S3). Bid validity/expiration dates (S4). Covers gaps D4, D5, S3, S4. Source: RFP super-summary gap analysis. 25–35 hrs. | TBD |
+| 056 | Engagement Roles & Communication | **Stub** — Third-party facilitator role: external consultant managing RFP on buyer's behalf (D7). Mediated communication channels: all vendor comms through facilitator, no direct contact mode (D6). NDA/confidentiality tracking with per-vendor status, access logging, destruction attestation (P2). Covers gaps D6, D7, P2. Source: RFP super-summary gap analysis. 20–25 hrs. | TBD |
+| **057** | **Project View — SmeBoard/SmeActivity/SmeWorkflow (Project Bloom MVP)** | **In Progress** — CEO P0. Three distinct models: SmeBoard (structural container — rank, issue #, permission inheritance from boundary), SmeActivity (work type blueprint — workflow, RACI, custom fields), SmeWorkflow (statuses + transitions). Board ≠ Activity — Board is WHERE tasks live, Activity is HOW tasks behave. Three boards (Buyer/Provider/Shared) with role-filtered tabs. Project + PRD + Plan. Demo: crystal-harbor SOC 2 (39 tasks, ~156 subtasks, 3 boards, 8 activities, 3 workflows). 13–17 hrs. | [`057-task-partition-view.md`](../local/057-task-partition-view.md) |
+| 058 | Saved Task Views & Board Management | **Stub** — criteria-based cross-board task filters (NOT boards — boards are structural per Kevin). Saved queries with auto-refresh, criteria builder dialog, default views per board (Critical Path, Overdue, My Tasks). Board management UI (create/rename custom boards, permission overrides). Blocked on 057. 8–12 hrs. | [`058-saved-task-views.md`](../local/058-saved-task-views.md) |
+| 059 | AuditgraphDB Migration (Neon → Pipeline + GQL) | **Planning** — Incremental direct swap, one entity at a time. 8 original entities migrate from Neon; 9 new Project Bloom entities (PR #8) built directly against GQL. Blocked on PR #7 merge. 27–38 hrs across 3 waves. | [`059-auditgraph-migration.md`](../local/059-auditgraph-migration.md) |
 
 ### What's built (Phases 1–4)
 
@@ -109,23 +120,27 @@ Lifecycle:
   Post to marketplace                                      Transparency Center activates
 ```
 
-### Phase 1 — RFP + Bid + Engagement/Project Creation (Plans 031–033, 039–042)
+### Phase 1 — RFP + Bid + Engagement/Project Creation (Plans 031–033, 039–042, 054–055)
 
 - **Document upload** — buyers upload procurement docs (exhibits, SOWs, budgets) to RFP (Plan 031 — complete)
 - **RFP creation wizard** — lightweight: upload docs, AI suggests domain-level summary (6 typed categories: Functional, Security, Compliance, Legal, Financial, Evaluation), buyer writes description + budget range. NO subtask decomposition at this stage. (Plan 032)
+- **RFP package builder** — closed/invitation-only RFPs, multi-document packages with templates, form builder for structured submissions, intent-to-bid/withdraw workflow (Plan 054)
 - **Vendor bid flow** — vendor reads RFP description + browses uploaded documents, submits Bid: approach narrative, pricing, timeline, team qualifications. NOT responding to subtasks (they don't exist yet). (Plan 033)
+- **Advanced pricing & evaluation** — complex pricing models (NRC/ARC, milestones, multi-year), weighted scoring matrix, structured bid response templates, bid validity dates (Plan 055)
 - **Bid negotiation** — demand-side accept/reject/request changes loop (Plan 033)
 - **Engagement creation** — accepted Bid triggers Engagement (corp-to-corp vetting: D&B, banking, officer checks). May already exist if corps have worked together before. (Plan 022)
-- **Project bloom** — Project created under Engagement → AI decomposes uploaded documents into full typed task/subtask tree (~39 tasks, ~200 subtasks for a complex RFP). Both parties review and refine. Transparency Center activates. (Plan 040)
-- **Supply-side vendor profile** — vendors pre-load corporate docs, D&B, banking, background checks once. Auto-fills engagement requirements for every bid. (Plan 041)
+- **Project bloom** — Project created under Engagement → AI decomposes uploaded documents into full typed task/subtask tree (~39 tasks, ~200 subtasks for a complex RFP). Both parties review and refine. Transparency Center activates. Assessment task templates + deliverable templates added. (Plan 040)
+- **Supply-side vendor profile** — vendors pre-load corporate docs, D&B, banking, background checks, named contacts, staff resumes once. Auto-fills engagement requirements for every bid. (Plan 041)
 - **Project plugin** — bundled MCP + templates + parsers. Dual-path: ingest legacy docs OR AI-driven questionnaire for native project creation. (Plan 042)
 
-### Phase 2 — Engagement Execution (future plans)
+### Phase 2 — Engagement Execution (Plans 022, 056, future plans)
 
+- **Engagement roles & communication** — facilitator role, mediated messaging channels, NDA tracking (Plan 056)
 - **Demand/supply view filtering** — role-based visibility of task data (buyer sees requirements, provider sees obligations, shared = transparency)
 - **Task status state machine** — pending -> in_progress -> awaiting_approval -> completed
 - **Task approval workflow** — vendor completes -> demand reviews -> approve/reject per subtask
 - **Evidence/artifact linking** — provider attaches certs, audit reports, policies to specific subtasks
+- **Payment milestone tracking** — milestone-based payment schedules (0-80-20), acceptance periods, sign-off workflow (gap E5)
 - **Invoice generation** — auto-generate on approval with line items per task/subtask
 - **Progress indicators** — domain-level rollups (e.g., "Security: 78%, Compliance: 92%") + on-track/behind/ahead
 - **Scope adjustment** — formal change request process with audit trail
@@ -139,34 +154,89 @@ Lifecycle:
 - **Compliance tracking** — data classification (PII/CUI/HIPAA) with access logging
 - **Living documentation** — meetings surface tasks, engagement docs evolve
 
-### CDPH RFP Reference (2026-03-06)
+### RFP Reference Analysis (2026-03-06; expanded 2026-03-16)
 
-The CDPH HBEDS RFP (`.claude/references/CA Department of Public Health RFP/`) is the gold-standard reference for demand-side architecture. Key metrics from full decomposition:
+Three reference sets validated and expanded the architecture. Full analysis: [`.claude/notes/rfp-reference-super-summary.md`](../../notes/rfp-reference-super-summary.md)
 
-| Metric | Value |
-|--------|-------|
-| Documents in RFP | 17 (7 exhibits + 4 attachments + master RFP + datasets) |
-| Domain types needed | 6 (Functional, Security, Compliance, Legal, Financial, Evaluation) |
-| Top-level tasks | ~39 |
-| Total subtasks | ~200 |
-| Data elements (Exhibit A2) | 78 CDC/NHSN fields |
-| Compliance standards referenced | NIST SP800-53, OWASP ASVS, FIPS-140, HIPAA, PCI DSS, FIDO2 |
+| Source | Type | Key Contribution |
+|--------|------|-----------------|
+| **CDPH HBEDS RFP** | Government SaaS, 17 docs | Task decomposition validation, compliance standards, multi-facility scope |
+| **Vancouver Clinic Enterprise Imaging** | Private healthcare, 10 docs | Invitation-only access, complex pricing, facilitator role, NDA tracking |
+| **AAH Policies & Standards** | Supply-side, 23 docs | Document taxonomy, engagement execution templates, framework tagging |
 
-Full analysis: [`.claude/notes/cdph-rfp-analysis.md`](../../notes/cdph-rfp-analysis.md)
+### Consolidated Capability Gaps (25 total — 2026-03-16)
 
-### Gaps Identified from CDPH RFP Analysis (2026-03-06)
+**Sources:** CDPH (government), Vancouver Clinic (enterprise), AAH (supply-side). See super-summary for full details.
+
+#### Demand Side (D1–D9)
+
+| # | Gap | Priority | Plan | Status |
+|---|-----|----------|------|--------|
+| D1 | Closed/invitation-only RFPs | Critical | **054** | Stub |
+| D2 | Multi-document RFP packages (templates, exhibits, forms) | Critical | **054** | Stub |
+| D3 | Form builder for structured submission requirements | High | **054** | Stub |
+| D4 | Complex pricing models (NRC/ARC, milestone, multi-year) | High | **055** | Stub |
+| D5 | Evaluation criteria builder (weighted scoring matrix) | High | **055** | Stub |
+| D6 | Communication channel controls (mediated messaging) | Medium | **056** | Stub |
+| D7 | Third-party facilitator role | Medium | **056** | Stub |
+| D8 | Bid/performance bond tracking | Low | Future | — |
+| D9 | GenAI disclosure requirement | Low | Future | — |
+
+#### Supply Side (S1–S7)
+
+| # | Gap | Priority | Plan | Status |
+|---|-----|----------|------|--------|
+| S1 | Corporate vetting documents (financials, D&B, SEC) | High | **041** (expand) | Concept |
+| S2 | Intent to Bid / Withdraw workflow | High | **054** | Stub |
+| S3 | Structured bid response templates (mirror RFP sections) | High | **055** | Stub |
+| S4 | Bid validity / expiration dates | Medium | **055** | Stub |
+| S5 | Named contact roles (primary, exec, tech, legal) | Medium | **041** (expand) | Concept |
+| S6 | Legal attestation forms (non-discrimination, affidavits) | Medium | Future | — |
+| S7 | Staff resumes / qualifications per bid | Medium | **041** (expand) | Concept |
+
+#### Engagement Execution (E1–E6)
+
+| # | Gap | Priority | Plan | Status |
+|---|-----|----------|------|--------|
+| E1 | Expanded document type taxonomy (19 new types) | High | **046** (expand) | Phases 1-5,7 done |
+| E2 | Assessment task templates (gap analysis, control mapping) | High | **040** (expand) | Draft |
+| E3 | Compliance framework tagging (NIST controls, PCI-DSS reqs) | High | **029** (expand) | Complete base |
+| E4 | Deliverable templates (gap report, risk register, roadmap) | Medium | **040** (expand) | Draft |
+| E5 | Payment milestone tracking (0-80-20, sign-off workflow) | Medium | **022** (expand) | Stub |
+| E6 | Multi-year contract management | Low | Future | — |
+
+#### Platform (P1–P3)
+
+| # | Gap | Priority | Plan | Status |
+|---|-----|----------|------|--------|
+| P1 | Vendor conference scheduling (calendar integration) | Low | Future | — |
+| P2 | NDA / confidentiality tracking | Medium | **056** | Stub |
+| P3 | Site visit coordination | Low | Future | — |
+
+#### Earlier CDPH-Specific Gaps (2026-03-06, retained)
 
 | Gap | Priority | Affects Plan | Notes |
 |-----|----------|-------------|-------|
-| **Structured pricing model** | High | 033, 040 | Bids need recurring + one-time + tiered pricing fields (e.g., quarterly per-facility subscription + onboarding fee + 5-year projections). Current bid model is free-text only. |
-| **Bidder qualification profiles** | Medium | 033 | Exhibit G requires past performance references, key personnel bios, org charts, similar project experience. Provider profile needs structured quals beyond free-text. Individual certs deferred to ZB platform (Plan 021 cancelled). |
-| **Timeline/milestone tracking** | Medium | 040 | RFPs have hard dates (implementation deadlines, go-live milestones). Engagements need milestone entities with date tracking + status. |
-| **Exhibit overlap detection** | Low | 040 | ~30% overlap between CDPH Privacy (Exhibit E) and Security (Exhibit F) requirements. AI decomposition should cross-reference and deduplicate during bloom. |
-| **Multi-facility/scope support** | Low | 032 | CDPH covers 105 hospitals across 27 counties. RFP scope may span multiple facilities — engagement model currently assumes one-to-one buyer/provider. |
-| **Supply-side vendor profile (one-time load)** | High | 041 | Vendors need to load corporate docs, D&B, banking, background checks once and pre-fill for every engagement. Currently no vendor profile entity beyond provider_profiles. (2026-03-06) |
-| **Bidirectional requirements model** | Medium | 022, 041 | Both buyer and vendor have requirements at Engagement and Project levels. Need a generic "requirements" concept that flows in both directions, not just demand→supply. (2026-03-06) |
-| **Engagement-level corp vetting** | High | 022 | D&B rating, banking info, officer background checks, C Corp/LLC verification, financial statements. Currently no engagement-level requirements model — all requirements are at task level. (2026-03-06) |
-| **~~Compliance standard linking~~** | ~~Low~~ | N/A | ZB platform strength — framework mapping + evidence collection handled natively. Not an SME Mart concern. |
+| **Structured pricing model** | High | 055 (D4) | Consolidated into D4 above |
+| **Bidder qualification profiles** | Medium | 041 (S1, S7) | Consolidated into S1/S7 above |
+| **Timeline/milestone tracking** | Medium | 040 | RFPs have hard dates. Engagements need milestone entities with date tracking + status. |
+| **Exhibit overlap detection** | Low | 040 | ~30% overlap between Privacy and Security requirements. AI decomposition should deduplicate during bloom. |
+| **Multi-facility/scope support** | Low | 032 | RFP scope may span multiple facilities — engagement model currently assumes one-to-one buyer/provider. |
+| **Supply-side vendor profile (one-time load)** | High | 041 (S1) | Consolidated into S1 above |
+| **Bidirectional requirements model** | Medium | 022, 041 | Both buyer and vendor have requirements at Engagement and Project levels. |
+| **Engagement-level corp vetting** | High | 022 | D&B rating, banking info, officer background checks, C Corp/LLC verification, financial statements. |
+| **~~Compliance standard linking~~** | ~~Low~~ | N/A | ZB platform strength — not an SME Mart concern. |
+
+### Future Backlog (Phase 3+)
+
+Items deferred from gap analysis — revisit when Phase 1/2 plans are complete:
+
+- **D8** — Bid/performance bond management
+- **D9** — GenAI disclosure tracking
+- **S6** — Legal attestation forms (notarized affidavits, non-discrimination)
+- **E6** — Multi-year contract lifecycle management (renewal notifications, extension options)
+- **P1** — Vendor conference scheduling with calendar integration
+- **P3** — Site visit coordination through platform
 
 ### Platform Alignment Roadmap
 

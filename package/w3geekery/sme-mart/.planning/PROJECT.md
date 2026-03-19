@@ -27,6 +27,9 @@ All 17 SME Mart entity types read and write through ZeroBias AuditgraphDB (Pipel
 - ✓ GQL schema package live in prod (8 classes) — Plan 034 Phases 1-4
 - ✓ Receiver Pipeline created + tested with sample Engagement — Plan 034 Phase 4
 - ✓ PipelineWriteService and GraphqlReadService created — Plan 059
+- ✓ Field mapping constants, GQL type interfaces, test mocks, roundtrip tests for all 8 entities — Migration Phase 1
+- ✓ WorkRequest → Engagement rename, EngagementsService + BidsService migrated to Pipeline+GQL — Migration Phase 2
+- ✓ NotesService, OrgDocumentService, NoteFolderService (tree rebuild) migrated to Pipeline+GQL — Migration Phase 3
 
 ### Active
 
@@ -82,4 +85,4 @@ All 17 SME Mart entity types read and write through ZeroBias AuditgraphDB (Pipel
 | 9 Bloom entities built directly against GQL (no Neon) | No legacy to migrate — start clean | — Pending |
 
 ---
-*Last updated: 2026-03-18 after initialization*
+*Last updated: 2026-03-18 after Phase 1 (Infrastructure Setup) completion*

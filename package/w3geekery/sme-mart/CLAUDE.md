@@ -2,6 +2,8 @@
 
 > **On Startup:** Read `.claude/plans/public/PLAN.md` — source of truth for architecture, phases, and decisions.
 
+> **⚠️ UAT Migration In Progress:** CI/dev is being rebuilt with hydra. UAT is our temporary dev environment. See [`.claude/notes/uat-migration-tracker.md`](.claude/notes/uat-migration-tracker.md) for checklist and ID mapping. `npm run dev` now targets UAT.
+
 ## Purpose
 
 SME Mart is a **marketplace for Subject Matter Experts** in compliance/cybersecurity — "Upwork meets Whop" for ZeroBias platform users. Built with **Angular 21**.
@@ -10,6 +12,7 @@ SME Mart is a **marketplace for Subject Matter Experts** in compliance/cybersecu
 
 | What | Where |
 |------|-------|
+| **⚠️ UAT Migration Tracker** | [`.claude/notes/uat-migration-tracker.md`](.claude/notes/uat-migration-tracker.md) — CI→UAT ID mapping, checklist, config updates |
 | **Architecture & Plan** | [`.claude/plans/public/PLAN.md`](.claude/plans/public/PLAN.md) |
 | **Source Paths (SDKs, repos)** | [`.claude/docs/SOURCE_PATHS.md`](.claude/docs/SOURCE_PATHS.md) |
 | **Angular 21 Docs** | [`AGENTS.md`](AGENTS.md) — local docs index in `.angular-docs/` (refresh: `npx angular-agents-md`) |
@@ -52,7 +55,7 @@ Angular 21 dropped type suffixes from filenames (e.g., `foo.ts` instead of `foo.
 
 Temporary hosting while the ZeroBias platform publishing path is WIP.
 
-- **API proxy:** Vercel Edge Middleware proxies `/api/*` → `ci.zerobias.com` with CI API key
+- **API proxy:** Vercel Edge Middleware proxies `/api/*` → `uat.zerobias.com` (was CI, migrating to UAT)
 - **Database:** Direct Neon HTTP (`dbMode: 'neon'`) — Hub Module connector not active in QA
 - **Auth:** API key-based (same as local dev), no session/login flow
 - **Build config:** `ng build --configuration vercel` → `environment.vercel.ts`

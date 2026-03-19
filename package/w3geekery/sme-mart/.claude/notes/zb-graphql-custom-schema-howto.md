@@ -225,9 +225,7 @@ npm install -g @zerobias-com/platform-dataloader
 
 #### 6.3 Create a Scratch Database
 
-##### Option A: Quick Setup via `content-dev-schema` (Recommended)
-
-The `@zerobias-org/util-content-dev-schema` package (v0.0.6) automates the entire scratch DB setup in one command — Docker container, full platform schema (300+ tables across hydra/catalog/store/portal), extensions, domains, and dataloader installation.
+The `@zerobias-org/util-content-dev-schema` package automates the entire scratch DB setup in one command — Docker container, full platform schema (300+ tables across hydra/catalog/store/portal), extensions, domains, and dataloader installation.
 
 ```bash
 # One-command setup (requires Docker running + ZB_TOKEN set)
@@ -235,115 +233,19 @@ npx @zerobias-org/util-content-dev-schema
 ```
 
 **Connection:** `postgres://postgres:welcome@localhost:15432/content_dev`
+**Container:** `supabase-pg-content-dev` (Supabase PostgreSQL 17)
 
 > **Source:** `~/Projects/zb/zerobias-org/util/packages/content-schema/`
-> Uses Supabase PostgreSQL 17 image (not `sarumont/postgres-plus`), port **15432** (not 5432), database **content_dev** (not scratch).
 
-After setup, skip to [6.4 Run Dataloader Against Your Schema](#64-run-dataloader-against-your-schema), adjusting env vars for the content-dev connection:
+Set env vars for the content-dev connection:
 ```bash
 export PGUSER=postgres PGPASSWORD=welcome PGHOST=localhost PGPORT=15432 PGDATABASE=content_dev PGSSLMODE=disable
 ```
 
-##### Option B: Manual Setup (Legacy)
-
-The dataloader needs a PostgreSQL database with the full platform schema (hydra schemas, catalog tables, base content). The manual approach uses Docker with the ZeroBias-specific PostgreSQL image that includes the required `plv8` extension.
-
-**Step 1: Start the Docker container**
-
-```bash
-docker run -d --name zb-scratch-db \
-  -e POSTGRES_PASSWORD=postgres \
-  -p 5432:5432 \
-  sarumont/postgres-plus:latest
-```
-
-> On Apple Silicon (M1/M2/M3), this runs via Rosetta emulation (AMD64 image). The warning is cosmetic — it works fine for verification purposes.
-
-**Step 2: Create the scratch database with extensions and domains**
-
-```bash
-export PGPASSWORD=postgres
-psql -U postgres -h localhost -c "CREATE DATABASE scratch;"
-psql -U postgres -h localhost -d scratch <<'SQL'
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-CREATE EXTENSION IF NOT EXISTS btree_gist;
-CREATE EXTENSION IF NOT EXISTS citext;
-CREATE EXTENSION IF NOT EXISTS pgcrypto;
-SQL
-```
-
-Create required domains (separate statements — PG13 doesn't support `IF NOT EXISTS` for domains):
-```bash
-psql -U postgres -h localhost -d scratch -c "CREATE DOMAIN public.nmtoken AS citext CHECK (VALUE ~ '^[A-Z0-9\.\_\-\:]+$');" 2>/dev/null || true
-psql -U postgres -h localhost -d scratch -c "CREATE DOMAIN public.hostname AS citext CHECK (VALUE ~ '^[a-zA-Z0-9\.\-]+$');" 2>/dev/null || true
-```
-
-**Step 3: Apply hydra schemas via sem-apply**
-
-The dataloader's `node_modules` contains all required hydra schema packages. Find them at:
-```
-$(npm root -g)/@zerobias-com/platform-dataloader/node_modules/@zerobias-com/
-```
-
-Apply each in order:
-```bash
-DL_MODULES="$(npm root -g)/@zerobias-com/platform-dataloader/node_modules/@zerobias-com"
-export PGUSER=postgres PGPASSWORD=postgres PGHOST=localhost PGPORT=5432 PGDATABASE=scratch PGSSLMODE=disable
-URL="postgres://$PGUSER:$PGPASSWORD@$PGHOST:$PGPORT/$PGDATABASE?sslmode=$PGSSLMODE"
-
-cd $DL_MODULES/hydra-schema-principal && sem-apply --url $URL
-cd $DL_MODULES/hydra-schema-resource && sem-apply --url $URL
-cd $DL_MODULES/hydra-schema-principal-role && sem-apply --url $URL
-cd $DL_MODULES/hydra-schema-security && sem-apply --url $URL
-cd $DL_MODULES/health-check && sem-apply --url $URL
-```
-
-**Step 4: Apply the full platform schema**
-
-```bash
-cd $DL_MODULES/platform-sql/src/ddl
-# Check if catalog schema exists (it shouldn't on first run)
-psql -X -A -d $URL -t -c "SELECT EXISTS(SELECT 1 FROM information_schema.schemata WHERE schema_name = 'catalog');"
-# If 'f' (false), apply the full schema:
-psql -d $URL -a -q -f ./full_schema.sql > /dev/null
-# Apply DDL migrations:
-sem-apply --url $URL
-```
-
-**Step 5: Load base content (coretype + base schema)**
-
-The dataloader requires base data types (string, integer, etc.) and the base schema package before it can process any custom schemas.
-
-```bash
-export PGUSER=postgres PGPASSWORD=postgres PGHOST=localhost PGPORT=5432 PGDATABASE=scratch PGSSLMODE=disable
-DL_CONTENT="$(npm root -g)/@zerobias-com/platform-dataloader/node_modules/@zerobias-com/platform-content/src"
-
-# Load coretype (base data types — MUST be first)
-dataloader --content-dev --skip-pgboss --skip-dynamo -d $DL_CONTENT/coretype/
-
-# Load platform schema content
-dataloader --content-dev --skip-pgboss --skip-dynamo -d $DL_CONTENT/schemas/zerobias/platform/
-```
-
-If your schema imports `zerobias.zerobias.base.schema` (or transitively depends on it), also load:
-```bash
-# Find base schema in your schema repo's node_modules (it's a @zerobias-org package)
-dataloader --content-dev --skip-pgboss --skip-dynamo \
-  -d path/to/schema/node_modules/@zerobias-org/schema-zerobias-zerobias-base/
-```
-
-**Step 6: Save the Docker image for reuse**
-
-```bash
-docker commit zb-scratch-db zb-scratch-db:ready
-```
-
-Next time, just `docker start zb-scratch-db` — no need to repeat steps 2-5.
-
 #### 6.4 Run Dataloader Against Your Schema
 
 ```bash
-export PGUSER=postgres PGPASSWORD=postgres PGHOST=localhost PGPORT=5432 PGDATABASE=scratch PGSSLMODE=disable
+export PGUSER=postgres PGPASSWORD=welcome PGHOST=localhost PGPORT=15432 PGDATABASE=content_dev PGSSLMODE=disable
 
 dataloader --content-dev --skip-pgboss --skip-dynamo \
   -d path/to/schema/package/myvendor/myapp/

@@ -571,3 +571,130 @@ Brian explicitly endorsed Clark hitting platform blocks as a feature, not a bug:
 Clark should continue filing explicit feature requests with schema, extensions, UI mockups, and use cases — this creates the demand signal that drives backend velocity from Kevin/Chris.
 
 *Captured: 2026-03-06 from meeting transcript. Full transcript: `meetings/2026-03-06-marketplace-meeting.md`*
+
+---
+
+## 2026-03-16: Transparency Partitions — The Most Critical Path
+
+### Brian's Directive (Slack, 1:48–2:03 PM PT)
+
+#### Policies = Requirements
+
+All policies, procedures, and implementation artifacts are **requirements**. To pass an assessment, you must have a policy in place that is adhered to. Reference: **OPA channel in Slack** for policies/standards context.
+
+#### The MOST Critical Path: Task/SubTask Partitioning
+
+> "The absolute most critical path is a task - subtask being partitioned into supply - transparency - demand parties associated with a project. That is the MOST critical path we have."
+> "I think you and Dan and Kevin and everyone need this immediately. Likely immediately."
+
+### Three Partitions at Every Level
+
+Every entity in the hierarchy (Project, Plan, Task, SubTask) must be partitioned into three zones:
+
+| Partition | Type | Description |
+|-----------|------|-------------|
+| **Demand** | Single party (buyer) | Buyer's private side — requirements, internal notes, evaluation criteria |
+| **Transparency** | Multi-party (buyer + seller + auditors + others) | Shared middle — what both sides publish for visibility |
+| **Supply** | Single party (seller/provider) | Provider's private side — readiness work, internal prep |
+
+#### Partition Flow
+
+```
+Demand (Buyer)                    Transparency (Shared)                Supply (Provider)
+┌─────────────────┐              ┌─────────────────────┐              ┌─────────────────┐
+│ Private reqs    │──publish──►  │ Published reqs      │  ◄──publish──│ Private readiness│
+│ Internal notes  │              │ Published evidence   │              │ Internal prep    │
+│ Eval criteria   │              │ Status rollups       │              │ Cost analysis    │
+│ Scoring (priv)  │              │ Compliance status    │              │ Resource alloc   │
+└─────────────────┘              └─────────────────────┘              └─────────────────┘
+```
+
+- **Demand side** publishes requirements to the Transparency partition (may keep some requirements private)
+- **Supply side** does its own readiness work, then publishes what they are required to publish to the Transparency partition
+- **Transparency partition** is the shared middle where both parties (and auditors, insurers, etc.) can see published information
+
+#### Partitions Must Exist at EVERY Level
+
+Brian explicitly stated partitions are required at Project level too, not just Task/SubTask:
+
+> "I don't see how projects and plans also don't have partitions. They must."
+> "A project has a Transparency center. That aggregates the lower level transparency from task/subtasks."
+
+```
+Engagement
+├── Project (Demand | Transparency | Supply)
+│   ├── Plan (Demand | Transparency | Supply)
+│   │   ├── Task (Demand | Transparency | Supply)
+│   │   │   ├── SubTask (Demand | Transparency | Supply)
+│   │   │   └── SubTask (Demand | Transparency | Supply)
+│   │   └── Task (Demand | Transparency | Supply)
+│   └── Plan (Demand | Transparency | Supply)
+└── Project
+```
+
+**Rollup:** SubTask transparency → Task transparency → Plan transparency → Project transparency → Engagement-level transparency reporting.
+
+#### Projects Sit Over Boundaries
+
+> "Projects sit over one or many boundaries. And all roll up to engagement which is able to look across all projects level transparency reporting."
+
+#### The Headline
+
+> "Clark. Just to drive this home. ZeroBias — the Transparency Platform. Do you now see how important? Literally the headline."
+> "It's the biggest friction of all in regulated commerce."
+
+### Three Windows Model
+
+Clark confirmed: "There's 3 windows for the entire thing — the shared middle is whitelist: 'I need these specific things to be visible to both parties.'"
+
+### Implications
+
+1. **Task/SubTask partitioning is THE priority** — Brian considers this the single most critical path for the platform
+2. **Every entity gets 3 zones** — not just tasks, but Projects and Plans too
+3. **Transparency = selective publishing** — each side chooses what to publish to the shared middle
+4. **Rollup aggregation** — transparency data aggregates upward through the hierarchy
+5. **This IS the ZeroBias value prop** — transparency in regulated commerce is the core differentiator
+
+### Gap: 25 New Gaps Found
+
+Clark noted "25 New Gaps found" — likely from the OPA/policies analysis, validating how many requirements still need task/subtask decomposition.
+
+*Captured: 2026-03-16 from Slack (1:48–2:03 PM PT)*
+
+---
+
+## 2026-03-16: Kevin Clarifies Board Semantics
+
+### Kevin's Clarification (Slack, 4:16 PM & 8:27–8:28 PM PT)
+
+**A Board is structural, not a filter.**
+
+> "No, nothing crosses a board. A task is on exactly one board."
+> "The board is the ground a task plugs in to. It has rank, issue number, workflows, etc. It is structural. Not a property of a task; the ground underneath it."
+
+### Key Takeaways
+
+- **A Task belongs to exactly ONE Board** — tasks do not span boards
+- **Boards are NOT smart collections/filters** — they are not arbitrary subsets or saved queries
+- **Board is the structural foundation** — it provides rank, issue numbering, workflow definitions
+- **Board scopes:** org, boundary, user, or project
+- **Board is to Task as Table is to Row** — the ground the task "plugs in to"
+
+### Correction to Prior Understanding
+
+The Feb 25 notes described Boards as "user-created collections of Tasks" which implied a looser, tag-like grouping. Kevin's clarification makes it clear:
+
+| What We Thought | What It Actually Is |
+|---|---|
+| Boards = flexible groupings/views | Boards = structural containers |
+| Tasks could appear on multiple boards | Tasks belong to exactly one board |
+| Boards are like saved filters | Boards provide rank, issue #, workflows |
+
+### Implications for SME Mart
+
+1. **Board selection matters at task creation** — can't move tasks between boards casually
+2. **Workflow is board-level** — different boards can have different workflows
+3. **Issue numbering is per-board** — each board has its own sequence
+4. **Board hierarchy** maps cleanly to partitioning: a demand-side board, supply-side board, and transparency board within a boundary could implement Brian's 3-partition model
+
+*Captured: 2026-03-16 from Slack (Kevin McCarthy, 4:16 PM & 8:27–8:28 PM PT)*
