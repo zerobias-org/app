@@ -249,6 +249,7 @@ export const NOTE_FOLDER_FIELD_MAPPING = {
  *
  * Neon table: service_offerings (columns in snake_case)
  * GQL entity: ServiceOffering (provider catalog listing)
+ * Key rename: title → name (GQL entity uses 'name' field inherited from Object base class)
  * Enum field: pricing_type (PricingType enum)
  * Array field: includes (string array of service inclusions)
  */
@@ -256,7 +257,7 @@ export const SERVICE_OFFERING_FIELD_MAPPING = {
   neonToGql: {
     id: 'id',
     provider_id: 'providerId',
-    title: 'title', // ServiceOffering uses 'title' (not 'name')
+    title: 'name', // ServiceOffering.title → name (Object inherited field)
     description: 'description',
     category: 'category',
     subcategory: 'subcategory',
@@ -272,7 +273,7 @@ export const SERVICE_OFFERING_FIELD_MAPPING = {
   gqlToNeon: {
     id: 'id',
     providerId: 'provider_id',
-    title: 'title',
+    name: 'title',
     description: 'description',
     category: 'category',
     subcategory: 'subcategory',
