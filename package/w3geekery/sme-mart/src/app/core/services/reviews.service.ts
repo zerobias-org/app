@@ -7,6 +7,15 @@ import { PagedResults } from '@zerobias-org/types-core-js';
 import type { Review, AdminReviewRow } from '../models';
 import type { GqlReviewResponse } from '../gql-types';
 
+/**
+ * ReviewsService - FULLY MIGRATED TO PIPELINE (Phase 5)
+ *
+ * All writes go through PipelineWriteService (fire-and-forget async).
+ * All reads go through GraphqlReadService (from AuditgraphDB).
+ *
+ * Neon reviews table archived 2 weeks after Phase 5 completion (2026-04-02).
+ * 2-week observation period for production stability verification.
+ */
 @Injectable({ providedIn: 'root' })
 export class ReviewsService {
   private readonly pipelineWrite = inject(PipelineWriteService);

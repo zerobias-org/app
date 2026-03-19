@@ -7,7 +7,23 @@ import { neon } from '@neondatabase/serverless';
 import { environment } from '../../../environments/environment';
 
 /**
- * Central service for SME Mart database access.
+ * SmeMartDbService - PARTIAL DEPRECATION (Phase 5 Migration)
+ *
+ * MIGRATED TO PIPELINE (Phase 5):
+ * - Engagement, Bid, BidResponse
+ * - Note, NoteFolder
+ * - SmeMartDocument
+ * - ServiceOffering, Review
+ *
+ * These 8 entities now use PipelineWriteService (writes) + GraphqlReadService (reads).
+ * Neon tables for these entities will be archived 2 weeks after Phase 5 completion.
+ * Archival timeline: 2-week observation period for production stability verification.
+ * Target archival date: 2026-04-02
+ *
+ * REMAINING IN NEON (still use SmeMartDbService):
+ * - Categories, Notifications, Provider Profiles
+ * - Impersonation context, Note hierarchy cache
+ * - Admin settings, Resource management, Marketplace users
  *
  * Supports two modes via `environment.dbMode`:
  *   - 'hub'  — DataProducer via Generic SQL Hub Module (production)

@@ -6,6 +6,15 @@ import { BID_FIELD_MAPPING, BID_RESPONSE_FIELD_MAPPING, mapNeonToGql, mapGqlToNe
 import type { Bid, BidSummaryRow, BidWizardData, BidResponse } from '../models';
 import type { GqlBidResponse, GqlBidResponseResponse } from '../gql-types';
 
+/**
+ * BidsService - FULLY MIGRATED TO PIPELINE (Phase 5)
+ *
+ * All writes go through PipelineWriteService (fire-and-forget async).
+ * All reads go through GraphqlReadService (from AuditgraphDB).
+ *
+ * Neon bids table archived 2 weeks after Phase 5 completion (2026-04-02).
+ * 2-week observation period for production stability verification.
+ */
 @Injectable({ providedIn: 'root' })
 export class BidsService {
   private readonly pipelineWrite = inject(PipelineWriteService);

@@ -13,6 +13,15 @@ import type {
 } from '../models';
 import type { GqlEngagementResponse } from '../gql-types';
 
+/**
+ * EngagementsService - FULLY MIGRATED TO PIPELINE (Phase 5)
+ *
+ * All writes go through PipelineWriteService (fire-and-forget async).
+ * All reads go through GraphqlReadService (from AuditgraphDB).
+ *
+ * Neon work_requests table archived 2 weeks after Phase 5 completion (2026-04-02).
+ * 2-week observation period for production stability verification.
+ */
 @Injectable({ providedIn: 'root' })
 export class EngagementsService {
   private readonly pipelineWrite = inject(PipelineWriteService);

@@ -7,6 +7,15 @@ import { PagedResults } from '@zerobias-org/types-core-js';
 import type { ServiceOffering } from '../models';
 import type { GqlServiceOfferingResponse } from '../gql-types';
 
+/**
+ * ServiceOfferingsService - FULLY MIGRATED TO PIPELINE (Phase 5)
+ *
+ * All writes go through PipelineWriteService (fire-and-forget async).
+ * All reads go through GraphqlReadService (from AuditgraphDB).
+ *
+ * Neon service_offerings table archived 2 weeks after Phase 5 completion (2026-04-02).
+ * 2-week observation period for production stability verification.
+ */
 @Injectable({ providedIn: 'root' })
 export class ServiceOfferingsService {
   private readonly pipelineWrite = inject(PipelineWriteService);
