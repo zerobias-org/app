@@ -11,8 +11,8 @@ import { BidsService } from './bids.service';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
 import { NotificationService } from './notification.service';
-import { ENGAGEMENT_GQL_FIXTURE, BID_GQL_FIXTURE } from '../test-helpers/gql-fixtures';
-import { fakePipelineWriteService, fakeGraphqlReadService } from '../test-helpers/angular';
+import { ENGAGEMENT_GQL_FIXTURE, BID_GQL_FIXTURE } from '../../test-helpers/gql-fixtures';
+import { fakePipelineWriteService, fakeGraphqlReadService } from '../../test-helpers/angular';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 describe('Wave 1 Integration: Engagement → Bid Flow', () => {

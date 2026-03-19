@@ -19,7 +19,7 @@ export class ReviewsService {
   async listReviewsByProvider(providerId: string, approvedOnly = true): Promise<Review[]> {
     const filters: Record<string, string> = { providerId: `.eq.${providerId}` };
     if (approvedOnly) {
-      filters.approved = '.eq.true';
+      filters['approved'] = '.eq.true';
     }
 
     const gqlOptions: GqlQueryOptions = {
