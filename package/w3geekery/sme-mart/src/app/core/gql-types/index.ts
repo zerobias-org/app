@@ -42,3 +42,22 @@ export type {
   GqlDocumentResponse,
   DocumentType,
 } from './document.types';
+
+export type {
+  GqlSmeMartProjectResponse,
+} from './sme-mart-project.types';
+
+export type {
+  GqlSmeMartBoardResponse,
+} from './sme-mart-board.types';
+
+export type {
+  GqlSmeMartActivityResponse,
+  SmeMartCustomField,
+} from './sme-mart-activity.types';
+
+export type {
+  GqlSmeMartWorkflowResponse,
+  SmeMartWorkflowStatus,
+  SmeMartWorkflowTransition,
+} from './sme-mart-workflow.types';

@@ -20,3 +20,7 @@ export * from './bid-response.model';
 export * from './bid-ai.model';
 export * from './notification.model';
 export * from './demo-data.model';
+export * from './sme-mart-project.model';
+export * from './sme-mart-board.model';
+export * from './sme-mart-activity.model';
+export * from './sme-mart-workflow.model';
