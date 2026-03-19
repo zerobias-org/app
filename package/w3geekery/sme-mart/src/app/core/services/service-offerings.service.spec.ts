@@ -64,7 +64,7 @@ describe('ServiceOfferingsService (Pipeline + GraphQL)', () => {
 
       expect(result).toHaveProperty('pageNumber', 1);
       expect(result).toHaveProperty('pageSize', 50);
-      expect(result).toHaveProperty('totalCount', 1);
+      expect(result).toHaveProperty('count', 1);
     });
 
     it('should transform GQL responses to Neon shape (title not name)', async () => {

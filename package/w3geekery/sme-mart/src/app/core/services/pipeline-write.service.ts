@@ -56,14 +56,14 @@ export class PipelineWriteService {
    */
   async pushEntities(
     className: SmeMartClassName,
-    data: Record<string, unknown>[],
+    data: object[],
     tagIds: string[] = [],
   ): Promise<void> {
     const classId = SME_MART_CLASS_IDS[className];
     const pipelineApi = this.clientApi.platformClient.getPipelineApi();
     const batch = new SimpleBatch(
       new UUID(classId),
-      data,
+      data as Record<string, unknown>[],
       tagIds.map(id => new UUID(id)),
     );
     await pipelineApi.receive(new UUID(PIPELINE_ID), batch);

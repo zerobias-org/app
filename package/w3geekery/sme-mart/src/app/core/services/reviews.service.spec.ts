@@ -156,7 +156,8 @@ describe('ReviewsService (Pipeline + GraphQL)', () => {
 
       expect(result).toHaveProperty('items');
       expect(result).toHaveProperty('pageNumber');
-      expect(result).toHaveProperty('totalCount');
+      expect(result).toHaveProperty('count');
+      expect(result.count).toBe(1);
     });
   });
 

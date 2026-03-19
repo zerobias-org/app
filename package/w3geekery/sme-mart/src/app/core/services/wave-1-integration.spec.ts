@@ -13,6 +13,7 @@ import { GraphqlReadService } from './graphql-read.service';
 import { NotificationService } from './notification.service';
 import { ENGAGEMENT_GQL_FIXTURE, BID_GQL_FIXTURE } from '../../test-helpers/gql-fixtures';
 import { fakePipelineWriteService, fakeGraphqlReadService } from '../../test-helpers/angular';
+import type { GqlBidResponse } from '../gql-types';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 describe('Wave 1 Integration: Engagement → Bid Flow', () => {
@@ -69,7 +70,8 @@ describe('Wave 1 Integration: Engagement → Bid Flow', () => {
     expect(pipelineWrite.pushEntity).toHaveBeenCalledWith(
       'Engagement',
       expect.objectContaining({
-        title: 'HIPAA Compliance Audit',
+        name: 'HIPAA Compliance Audit',
+        buyerZerobiasUserId: 'buyer-001',
       }),
     );
 
@@ -91,7 +93,7 @@ describe('Wave 1 Integration: Engagement → Bid Flow', () => {
     expect(pipelineWrite.pushEntity).toHaveBeenCalledWith(
       'Bid',
       expect.objectContaining({
-        cover_letter: 'We can help',
+        coverLetter: 'We can help',
       }),
     );
 
@@ -155,16 +157,42 @@ describe('Wave 1 Integration: Engagement → Bid Flow', () => {
     expect(draft.status).toBe('draft');
     expect(draft.wizard_step).toBe(0);
 
-    graphqlRead.getById.mockResolvedValue(draft as any);
-
     // Save progress
     const wizardData = {
       approach: { executive_summary: 'Summary' },
       pricing: { proposed_price: '7500', total_estimated_hours: 40 },
     };
+
+    // Build GQL response for saveDraft mock (draft converted to GQL shape)
+    const draftGql: GqlBidResponse = {
+      id: draft.id,
+      engagementId: draft.request_id!,
+      providerId: draft.provider_id!,
+      coverLetter: draft.cover_letter ?? undefined,
+      proposedPrice: draft.proposed_price ?? undefined,
+      proposedTimeline: draft.proposed_timeline ?? undefined,
+      status: 'DRAFT',
+      wizardStep: 0,
+      createdAt: draft.created_at,
+      updatedAt: draft.updated_at,
+    };
+
+    graphqlRead.getById.mockResolvedValue(draftGql);
     const saved = await bidsService.saveDraft(draft.id, wizardData, 2);
     expect(saved.wizard_step).toBe(2);
     expect(saved.proposed_price).toBe('7500');
+
+    // Build GQL response for submitDraft mock (saved bid with pricing)
+    const savedGql: GqlBidResponse = {
+      ...draftGql,
+      proposedPrice: '7500',
+      totalEstimatedHours: 40,
+      wizardData: wizardData as any,
+      wizardStep: 2,
+      updatedAt: new Date().toISOString(),
+    };
+
+    graphqlRead.getById.mockResolvedValue(savedGql);
 
     // Submit
     const submitted = await bidsService.submitDraft(draft.id, {

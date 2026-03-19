@@ -8,7 +8,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { DatePipe, TitleCasePipe } from '@angular/common';
 import { BidCard } from '../../../shared/components/bid-card/bid-card.component';
 import { EngagementContextService } from '../../../core/services/engagement-context.service';
-import { EngagementsService } from '../../core/services/engagements.service';
+import { EngagementsService } from '../../../core/services/engagements.service';
 
 @Component({
   selector: 'app-overview-tab',

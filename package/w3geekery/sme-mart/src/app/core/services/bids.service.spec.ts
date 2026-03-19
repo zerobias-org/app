@@ -125,7 +125,7 @@ describe('BidsService (Pipeline + GraphQL)', () => {
       expect(pipelineWrite.pushEntity).toHaveBeenCalledWith(
         'Bid',
         expect.objectContaining({
-          cover_letter: 'Test letter',
+          coverLetter: 'Test letter',
         }),
       );
       expect(result).toHaveProperty('id');

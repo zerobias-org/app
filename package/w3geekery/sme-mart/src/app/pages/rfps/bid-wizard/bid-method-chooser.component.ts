@@ -76,13 +76,15 @@ import type { BidMethod } from '../../../core/models/bid-ai.model';
               contextual responses. You'll review and edit every field before submitting.
             </p>
           }
-          <button mat-flat-button (click)="confirm()">
-            @if (selectedMethod() === 'ai') {
+          @if (selectedMethod() === 'ai') {
+            <button mat-flat-button (click)="confirm()">
               <mat-icon>auto_awesome</mat-icon> Generate AI Draft
-            } @else {
+            </button>
+          } @else {
+            <button mat-flat-button (click)="confirm()">
               <mat-icon>edit_note</mat-icon> Start Manual Entry
-            }
-          </button>
+            </button>
+          }
         </div>
       }
     </div>

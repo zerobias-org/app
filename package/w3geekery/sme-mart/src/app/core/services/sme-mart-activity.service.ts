@@ -1,7 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService, type GqlQueryOptions } from './graphql-read.service';
-import { SME_MART_ACTIVITY_FIELD_MAPPING, mapGqlToNeon } from '../field-mappings';
+import { SmeMartWorkflowService } from './sme-mart-workflow.service';
+import { SME_MART_ACTIVITY_FIELD_MAPPING, SME_MART_WORKFLOW_FIELD_MAPPING, mapGqlToNeon } from '../field-mappings';
 import type { QueryOptions } from '@zerobias-org/data-utils';
 import { PagedResults } from '@zerobias-org/types-core-js';
 import type {
@@ -160,6 +161,7 @@ export class SmeMartActivityService {
    */
   async getActivityWorkflow(activityId: string): Promise<SmeMartWorkflow | null> {
     const activity = await this.getActivity(activityId);
+    console.log('[getActivityWorkflow] activity:', activity);
     if (!activity?.workflowId) return null;
 
     // If workflowService is injected, use it; otherwise query directly
@@ -175,33 +177,15 @@ export class SmeMartActivityService {
       workflowFields,
     );
 
+    console.log('[getActivityWorkflow] workflow:', workflow);
     if (!workflow) return null;
 
-    return mapGqlToNeon<SmeMartWorkflow>(workflow, {
-      /* use WORKFLOW_FIELD_MAPPING */
-    } as any);
+    const mapped = mapGqlToNeon<SmeMartWorkflow>(workflow, SME_MART_WORKFLOW_FIELD_MAPPING.gqlToNeon);
+    console.log('[getActivityWorkflow] mapped:', mapped);
+    return mapped;
   }
 
   private generateUUID(): string {
     return `activity-${Date.now()}-${Math.random().toString(36).substring(7)}`;
-  }
-}
-
-// Forward declaration to avoid circular dependency
-@Injectable({ providedIn: 'root' })
-class SmeMartWorkflowService {
-  private readonly graphqlRead = inject(GraphqlReadService);
-
-  async getWorkflow(id: string): Promise<SmeMartWorkflow | null> {
-    const workflowFields = ['id', 'name', 'statuses', 'transitions', 'createdAt', 'updatedAt'];
-    const workflow = await this.graphqlRead.getById<GqlSmeMartWorkflowResponse>(
-      'SmeMartWorkflow',
-      id,
-      workflowFields,
-    );
-
-    if (!workflow) return null;
-
-    return mapGqlToNeon<SmeMartWorkflow>(workflow, {} as any);
   }
 }

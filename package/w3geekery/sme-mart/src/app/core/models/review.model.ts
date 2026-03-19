@@ -12,9 +12,9 @@ export interface Review {
   updated_at: string;
 }
 
-// VIEW model — v_admin_reviews
+// VIEW model — v_admin_reviews (fields optional post-GQL migration)
 export interface AdminReviewRow extends Review {
-  provider_name: string;
-  provider_avatar: string | null;
-  request_title: string | null;
+  provider_name?: string;
+  provider_avatar?: string | null;
+  request_title?: string | null;
 }

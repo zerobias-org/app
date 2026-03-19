@@ -6,7 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { CurrencyPipe, DecimalPipe } from '@angular/common';
+import { CurrencyPipe } from '@angular/common';
 import { ComplianceProgress } from '../compliance-progress/compliance-progress.component';
 import type { ComplianceSummary } from '../../../core/models';
 
@@ -28,7 +28,7 @@ export interface AcceptBidDialogResult {
   standalone: true,
   imports: [
     MatDialogModule, MatButtonModule, MatIconModule, MatChipsModule,
-    MatProgressBarModule, CurrencyPipe, DecimalPipe,
+    MatProgressBarModule, CurrencyPipe,
     ComplianceProgress,
   ],
   template: `

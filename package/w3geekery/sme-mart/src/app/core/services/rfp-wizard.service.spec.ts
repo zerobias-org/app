@@ -15,6 +15,7 @@ interface MockEngagements {
   createRfp: MockFn;
   updateRfp: MockFn;
   getEngagement: MockFn;
+  getEngagementRaw: MockFn;
 }
 
 interface MockDocService {
@@ -46,6 +47,7 @@ describe('RfpWizardService', () => {
       createRfp: vi.fn().mockResolvedValue(makeDraft()),
       updateRfp: vi.fn().mockResolvedValue(makeDraft()),
       getEngagement: vi.fn().mockResolvedValue(makeDraft()),
+      getEngagementRaw: vi.fn().mockResolvedValue(makeDraft()),
     };
 
     mockDocService = {
@@ -188,7 +190,7 @@ describe('RfpWizardService', () => {
         evaluationCriteria: [],
       };
 
-      mockWorkRequests.getEngagement.mockResolvedValue({
+      mockWorkRequests.getEngagementRaw.mockResolvedValue({
         ...makeDraft(),
         rfp_wizard_data: savedData,
         rfp_wizard_step: 3,
@@ -203,12 +205,12 @@ describe('RfpWizardService', () => {
     });
 
     it('should throw when draft not found', async () => {
-      mockWorkRequests.getEngagement.mockResolvedValue(null);
+      mockWorkRequests.getEngagementRaw.mockResolvedValue(null);
       await expect(service.loadDraft('nonexistent')).rejects.toThrow('not found');
     });
 
     it('should use empty defaults when no wizard data saved', async () => {
-      mockWorkRequests.getEngagement.mockResolvedValue({
+      mockWorkRequests.getEngagementRaw.mockResolvedValue({
         ...makeDraft(),
         rfp_wizard_data: null,
         rfp_wizard_step: null,

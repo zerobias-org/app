@@ -148,9 +148,19 @@ describe('SmeMartProjectService', () => {
     });
 
     it('should respect pagination options', async () => {
+      // Create 25 items for page 2 (items 26-50)
+      const pageItems = Array.from({ length: 25 }, (_, i) => ({
+        id: `proj-${26 + i}`,
+        name: `Project ${26 + i}`,
+        status: 'active',
+        startDate: '2026-03-19',
+        createdAt: '2026-03-19T00:00:00Z',
+        updatedAt: '2026-03-19T00:00:00Z',
+      } as GqlSmeMartProjectResponse));
+
       const mockResponse = {
-        items: [],
-        page: { pageNumber: 2, pageSize: 25, totalCount: 0 },
+        items: pageItems,
+        page: { pageNumber: 2, pageSize: 25, totalCount: 50 },
       };
 
       mockGraphqlRead.query.mockResolvedValue(mockResponse as any);

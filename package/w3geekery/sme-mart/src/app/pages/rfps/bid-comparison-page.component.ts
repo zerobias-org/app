@@ -154,7 +154,7 @@ export class BidComparisonPage implements OnInit {
       this.rfpTitle.set(rfp.title || '');
 
       // Load requirements from wizard data
-      const rawWr = await this.engagements.getWorkRequest(this.rfpId);
+      const rawWr = await this.engagements.getEngagementRaw(this.rfpId);
       const rfpData = (rawWr as any)?.rfp_wizard_data as RfpData | undefined;
       if (rfpData?.taskGroups) {
         this.taskGroups.set(rfpData.taskGroups);

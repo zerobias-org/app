@@ -120,7 +120,7 @@ describe('EngagementsService (Pipeline + GraphQL)', () => {
 
       expect(pipelineWrite.pushEntity).toHaveBeenCalledWith(
         'Engagement',
-        expect.objectContaining({ title: 'Test RFP' }),
+        expect.objectContaining({ name: 'Test RFP' }),
       );
       expect(result).toHaveProperty('id');
       expect(result.title).toBe('Test RFP');

@@ -27,7 +27,7 @@ describe('engagementToResource', () => {
     const r = engagementToResource(engagement);
     expect(r.id).toBe('eng-001');
     expect(r.name).toBe('SOC 2 Readiness Assessment');
-    expect(r.type).toBe('sme-mart:engagement');
+    expect(r.type).toBe('sme-mart:work-request');
     expect(r.ownerId).toBe('u-200');
     expect(r.created).toBe('2026-01-01T00:00:00Z');
     expect(r.updated).toBe('2026-02-01T12:00:00Z');

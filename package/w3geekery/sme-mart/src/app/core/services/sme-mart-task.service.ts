@@ -199,6 +199,16 @@ export class SmeMartTaskService {
 
     // Step 4: Return root tasks (parentId is null)
     const rootTasks = allTasks.filter(t => !t.parentId);
+
+    // If no roots found, warn about cycle and return empty tree
+    if (rootTasks.length === 0 && allTasks.length > 0) {
+      console.warn(
+        '[SmeMartTaskService] Cycle detected in task tree: no root tasks found. ' +
+        'All tasks have parent references, forming a cycle.',
+      );
+      return [];
+    }
+
     return rootTasks
       .sort((a, b) => (a.rank ?? 0) - (b.rank ?? 0))
       .map(buildNode);

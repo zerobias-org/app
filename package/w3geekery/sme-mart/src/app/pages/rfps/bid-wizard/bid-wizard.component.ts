@@ -15,7 +15,7 @@ import { CurrencyPipe, DecimalPipe } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { BidsService } from '../../../core/services/bids.service';
 import { BidAiService } from '../../../core/services/bid-ai.service';
-import { EngagementsService } from '../../core/services/engagements.service';
+import { EngagementsService } from '../../../core/services/engagements.service';
 import { ImpersonationService } from '../../../core/services/impersonation.service';
 import { ProviderProfilesService } from '../../../core/services/provider-profiles.service';
 import { BidResponseService } from '../../../core/services/bid-response.service';
@@ -113,7 +113,7 @@ export class BidWizard implements OnInit, OnDestroy {
       this.rfpDescription.set(rfp.description || '');
 
       // Load RFP requirements from wizard data
-      const rawWr = await this.engagements.getWorkRequest(this.rfpId);
+      const rawWr = await this.engagements.getEngagementRaw(this.rfpId);
       const rfpData = (rawWr as any)?.rfp_wizard_data as RfpData | undefined;
       if (rfpData?.taskGroups) {
         this.taskGroups.set(rfpData.taskGroups);

@@ -10,7 +10,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ZerobiasClientApp } from '@zerobias-com/zerobias-client';
 import { ZbChipColorsDirective, ZbCustomizableTableComponent, ZbResourceStatusComponent } from '@zerobias-org/ngx-library';
-import { EngagementsService } from '../../core/services/engagements.service';
+import { EngagementsService } from '../../../core/services/engagements.service';
 import type { EngagementSummaryRow } from '../../../core/models';
 
 @Component({
@@ -24,7 +24,7 @@ import type { EngagementSummaryRow } from '../../../core/models';
   providers: [JsonPipe],
   template: `
     <div class="org-engagements">
-      @if (!loading() && engagements().length === 0) {
+      @if (!loading() && items().length === 0) {
         <div class="empty-state">
           <mat-icon class="empty-icon">work_off</mat-icon>
           <h3>No engagements yet</h3>
@@ -38,7 +38,7 @@ import type { EngagementSummaryRow } from '../../../core/models';
         <zb-customizable-table
           [columns]="columns"
           [columnLabels]="columnLabels"
-          [data]="engagements()"
+          [data]="items()"
           [loading]="loading()"
           [page]="page"
           [templateRefs]="cellTemplates"

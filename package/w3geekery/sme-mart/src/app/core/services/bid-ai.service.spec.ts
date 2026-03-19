@@ -20,7 +20,7 @@ describe('BidAiService', () => {
         title: 'HIPAA Assessment',
         description: 'Full HIPAA assessment needed',
       }),
-      getWorkRequest: vi.fn().mockResolvedValue({
+      getEngagementRaw: vi.fn().mockResolvedValue({
         rfp_wizard_data: {
           category: 'compliance',
           budgetType: 'fixed',
@@ -132,7 +132,7 @@ describe('BidAiService', () => {
     });
 
     it('should handle missing rfp_wizard_data', async () => {
-      mockWorkRequests.getWorkRequest.mockResolvedValue({});
+      mockWorkRequests.getEngagementRaw.mockResolvedValue({});
 
       const ctx = await service.gatherContext('rfp-001', 'p-001');
 

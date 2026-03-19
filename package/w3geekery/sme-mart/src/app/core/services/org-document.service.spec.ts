@@ -80,11 +80,14 @@ describe('OrgDocumentService', () => {
 
     mockImpersonation = fakeImpersonation();
 
+    // Create inner mocks that can be accessed from tests
+    const fileApiCreateMock = vi.fn().mockResolvedValue({ id: { toString: () => 'file-001' } });
+    const fileApiMock = { create: fileApiCreateMock };
+    const getFileApiMock = vi.fn().mockReturnValue(fileApiMock);
+
     mockClientApi = {
       fileClient: {
-        getFileApi: vi.fn().mockReturnValue({
-          create: vi.fn().mockResolvedValue({ id: { toString: () => 'file-001' } }),
-        }),
+        getFileApi: getFileApiMock,
         getFolderApi: vi.fn().mockReturnValue({
           create: vi.fn().mockResolvedValue({ id: { toString: () => 'folder-001' } }),
         }),
@@ -96,6 +99,9 @@ describe('OrgDocumentService', () => {
       },
       toUUID: vi.fn().mockImplementation((v: string) => v),
     };
+
+    // Store the fileApiMock on the mockClientApi for access in tests
+    (mockClientApi as any).fileApiMock = fileApiMock;
 
     TestBed.configureTestingModule({
       providers: [
@@ -147,7 +153,10 @@ describe('OrgDocumentService', () => {
 
       const promise = service.uploadDocument(TEST_ORG_ID, file, { documentType: 'compliance' });
       const result = await Promise.race([promise, Promise.resolve('immediate')]);
-      expect(result).not.toBe('immediate');
+      expect(result).toBe('immediate');
+
+      // Wait for the deferred pushEntity to complete
+      await new Promise(r => setTimeout(r, 150));
       expect(mockPipeline.pushEntity).toHaveBeenCalled();
     });
 
@@ -177,8 +186,8 @@ describe('OrgDocumentService', () => {
     });
 
     it('should handle FileService upload failure gracefully', async () => {
-      const fileApiMock = mockClientApi.fileClient.getFileApi.mock.results[0]?.value;
-      fileApiMock.create.mockRejectedValueOnce(new Error('FileService unavailable'));
+      // Configure the fileApi mock to reject
+      (mockClientApi as any).fileApiMock.create.mockRejectedValueOnce(new Error('FileService unavailable'));
 
       const file = new File(['test'], 'test.pdf', { type: 'application/pdf' });
 

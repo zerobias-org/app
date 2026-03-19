@@ -12,10 +12,10 @@
 
 - [x] **Phase 1: Infrastructure Setup** - Create field mappings and test infrastructure for migration pipeline (COMPLETED)
 - [x] **Phase 2: Wave 1 - Core Marketplace** - Migrate Engagement, Bid, BidResponse entities (workRequestsService + bidsService) (COMPLETED 2026-03-18)
-- [ ] **Phase 3: Wave 2 - Attachments** - Migrate Note, NoteFolder, SmeMartDocument entities
-- [ ] **Phase 4: Wave 3 - Standalone Entities** - Migrate ServiceOffering and Review entities
+- [x] **Phase 3: Wave 2 - Attachments** - Migrate Note, NoteFolder, SmeMartDocument entities (COMPLETED 2026-03-19)
+- [x] **Phase 4: Wave 3 - Standalone Entities** - Migrate ServiceOffering and Review entities (COMPLETED 2026-03-19)
 - [x] **Phase 5: Verification & Cleanup** - Verify production stability and archive legacy Neon tables (COMPLETED 2026-03-19)
-- [ ] **Phase 6: Project Bloom Entities** - Build 9 new SmeMartProject, SmeMartBoard, SmeMartTask, etc. entities on clean Pipeline foundation
+- [x] **Phase 6: Project Bloom Entities** - Build 9 new SmeMartProject, SmeMartBoard, SmeMartTask, etc. entities on clean Pipeline foundation (COMPLETED 2026-03-19)
 
 ---
 
@@ -76,8 +76,9 @@
 4. Existing notes/documents created before migration are queryable via GQL after Pipeline ingestion completes
 5. All wave 2 unit tests pass with Pipeline+GraphQL mocks; notes and document components work unchanged
 
-**Plans:** 0/1 Not started
-- [ ] 03-01-PLAN.md — NotesService, NoteFolderService, DocumentService migration
+**Plans:** 2/2 Complete
+- [x] 03-01-PLAN.md — Wave 1 tests, field mapping verification (COMPLETED 2026-03-18)
+- [x] 03-02-PLAN.md — NoteFolderService, NotesService, DocumentService migration (COMPLETED 2026-03-19)
 
 ---
 
@@ -96,8 +97,8 @@
 4. All wave 3 unit tests pass with Pipeline+GraphQL mocks
 5. No remaining Neon reads for any of the 8 migrated entity types (all now Pipeline writes + GQL reads)
 
-**Plans:** 0/1 Not started
-- [ ] 04-01-PLAN.md — CatalogService, ReviewsService migration
+**Plans:** 1/1 Complete
+- [x] 04-01-PLAN.md — ServiceOfferingsService, ReviewsService migration (COMPLETED 2026-03-19)
 
 ---
 
@@ -135,9 +136,9 @@
 4. All 9 Bloom services have unit tests using Pipeline+GraphQL mocks; test coverage ≥80%
 5. GQL schema PR #8 is merged and types are auto-generated for all 9 new entity classes; services use strongly-typed GQL responses
 
-**Plans:** 2/2 In Planning
-- [ ] 06-01-PLAN.md — SmeMartProject, SmeMartBoard, SmeMartActivity, SmeMartWorkflow services (infrastructure + 4 container entities)
-- [ ] 06-02-PLAN.md — SmeMartTask (tree rebuild), ProjectPrd/PrdSection, ProjectPlan/Milestone services (content entities + child entities)
+**Plans:** 2/2 Complete
+- [x] 06-01-PLAN.md — SmeMartProject, SmeMartBoard, SmeMartActivity, SmeMartWorkflow services (COMPLETED 2026-03-19)
+- [x] 06-02-PLAN.md — SmeMartTask (tree rebuild), ProjectPrd/PrdSection, ProjectPlan/Milestone services (COMPLETED 2026-03-19)
 
 ---
 
@@ -147,10 +148,10 @@
 |-------|-------------|-----------------|--------|-----------|
 | 1 | Infrastructure Setup | 1/1 | Completed | 2026-03-17 |
 | 2 | Wave 1: Core Marketplace | 1/1 | Completed | 2026-03-18 |
-| 3 | Wave 2: Attachments | 0/1 | Not started | — |
-| 4 | Wave 3: Standalone | 0/1 | Not started | — |
+| 3 | Wave 2: Attachments | 2/2 | Completed | 2026-03-19 |
+| 4 | Wave 3: Standalone | 1/1 | Completed | 2026-03-19 |
 | 5 | Verification & Cleanup | 1/1 | Completed | 2026-03-19 |
-| 6 | Project Bloom Entities | 2/2 | Planning | 2026-03-19 |
+| 6 | Project Bloom Entities | 2/2 | Completed | 2026-03-19 |
 
 ---
 
@@ -186,5 +187,5 @@ Wave 2 and Wave 3 can overlap if capacity allows, but both depend on Wave 1 stab
 ---
 
 **Created:** 2026-03-18
-**Last Updated:** 2026-03-19T01:15:00Z
-**Status:** Phase 6 Planning Complete (4 of 6 phases planned, 67% complete: phases 1-2 done, phase 5 done, phase 6 plans created)
+**Last Updated:** 2026-03-19T20:55:00Z
+**Status:** All 6 phases complete (9/9 plans executed). Milestone v1.0 ready for completion.

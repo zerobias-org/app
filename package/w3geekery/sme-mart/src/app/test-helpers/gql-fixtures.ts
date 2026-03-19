@@ -97,6 +97,8 @@ export const BID_GQL_FIXTURE: GqlBidResponse = {
   },
   wizardStep: 5, // Completed all steps
   aiAssisted: false,
+  aiModel: 'claude-3.5-sonnet',
+  aiGeneratedAt: '2026-03-18T11:00:00Z',
   createdAt: '2026-03-18T11:00:00Z',
   updatedAt: '2026-03-18T14:15:00Z',
 };
@@ -113,6 +115,7 @@ export const BID_GQL_FIXTURE_DRAFT: GqlBidResponse = {
     },
   },
   wizardStep: 1, // Only completed approach step
+  aiAssisted: false,
   createdAt: '2026-03-18T12:00:00Z',
   updatedAt: '2026-03-18T12:05:00Z',
 };
@@ -263,6 +266,8 @@ export const DOCUMENT_GQL_FIXTURE: GqlDocumentResponse = {
   mimeType: 'application/pdf',
   documentType: 'compliance',
   displayName: 'Final Audit Report',
+  zbTaskId: 'task-uuid-001',
+  zbTaskAttachmentId: 'attachment-uuid-001',
   archived: false,
   uploadedByZerobiasUserId: 'user-provider-001-uuid',
   createdAt: '2026-03-18T14:30:00Z',
@@ -281,6 +286,8 @@ export const DOCUMENT_GQL_FIXTURE_SOW: GqlDocumentResponse = {
   mimeType: 'application/pdf',
   documentType: 'sow',
   displayName: 'Statement of Work',
+  zbTaskId: 'task-uuid-002',
+  zbTaskAttachmentId: 'attachment-uuid-002',
   archived: false,
   uploadedByZerobiasUserId: 'user-buyer-001-uuid',
   createdAt: '2026-03-18T09:30:00Z',

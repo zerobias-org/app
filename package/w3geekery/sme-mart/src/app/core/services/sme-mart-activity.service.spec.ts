@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { SmeMartActivityService } from './sme-mart-activity.service';
+import { SmeMartWorkflowService } from './sme-mart-workflow.service';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
 import type { GqlSmeMartActivityResponse, GqlSmeMartWorkflowResponse } from '../gql-types';
@@ -38,11 +39,16 @@ describe('SmeMartActivityService', () => {
       rawQuery: vi.fn().mockResolvedValue(null),
     };
 
+    const mockWorkflowService = {
+      getWorkflow: vi.fn().mockResolvedValue(null),
+    };
+
     TestBed.configureTestingModule({
       providers: [
         SmeMartActivityService,
         { provide: PipelineWriteService, useValue: mockPipelineWrite },
         { provide: GraphqlReadService, useValue: mockGraphqlRead },
+        { provide: SmeMartWorkflowService, useValue: mockWorkflowService },
       ],
     });
 
@@ -195,7 +201,7 @@ describe('SmeMartActivityService', () => {
   });
 
   describe('getActivityWorkflow', () => {
-    it('should fetch workflow by activity workflowId', async () => {
+    it('should fetch workflow by activity workflowId using injected workflowService', async () => {
       const activity: GqlSmeMartActivityResponse = {
         id: 'activity-123',
         name: 'Test',
@@ -205,22 +211,22 @@ describe('SmeMartActivityService', () => {
         updatedAt: '2026-03-19T00:00:00Z',
       };
 
-      const workflow: GqlSmeMartWorkflowResponse = {
+      const workflow = {
         id: 'workflow-456',
         name: 'Standard Workflow',
         statuses: [{ name: 'todo' }, { name: 'done' }],
+        transitions: [],
         createdAt: '2026-03-19T00:00:00Z',
         updatedAt: '2026-03-19T00:00:00Z',
       };
 
-      mockGraphqlRead.getById.mockImplementation((className: string) => {
-        if (className === 'SmeMartActivity') return Promise.resolve(activity);
-        if (className === 'SmeMartWorkflow') return Promise.resolve(workflow);
-        return Promise.resolve(null);
-      });
+      mockGraphqlRead.getById.mockResolvedValue(activity);
+      const workflowService = TestBed.inject(SmeMartWorkflowService);
+      vi.spyOn(workflowService, 'getWorkflow').mockResolvedValue(workflow as any);
 
       const result = await service.getActivityWorkflow('activity-123');
 
+      expect(result).toBeDefined();
       expect(result?.id).toBe('workflow-456');
       expect(result?.name).toBe('Standard Workflow');
     });

@@ -110,7 +110,13 @@ export class SmeMartProjectService {
       mapGqlToNeon<SmeMartProject>(gql, SME_MART_PROJECT_FIELD_MAPPING.gqlToNeon),
     );
 
-    return PagedResults.fromArray(items, pageNumber, pageSize, result.page.totalCount ?? items.length);
+    // Create PagedResults with pre-paginated items from GraphQL
+    const paged = new PagedResults<SmeMartProject>();
+    paged.items = items;
+    paged.pageNumber = result.page.pageNumber;
+    paged.pageSize = result.page.pageSize;
+    paged.count = result.page.totalCount ?? items.length;
+    return paged;
   }
 
   /**
