@@ -80,14 +80,10 @@ export class MyEngagementList implements OnInit {
 
   async loadData(): Promise<void> {
     try {
-      const userId = this.impersonation.effectiveUserId();
       const result = await this.engagements.listEngagements({ pageSize: 200 });
-      // Filter to engagements where user is buyer or accepted provider
-      const myItems = (result.items || []).filter(e =>
-        e.buyer_zerobias_user_id === userId ||
-        e.accepted_provider_id === userId,
-      );
-      this.items.set(myItems);
+      // TODO: Filter by buyer/provider once buyerZerobiasUserId is added to GQL schema
+      // For now, show all engagements (field not in AuditgraphDB schema yet)
+      this.items.set(result.items || []);
     } catch (err) {
       console.warn('[MyEngagementList] Failed to load:', err);
     } finally {

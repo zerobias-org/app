@@ -168,23 +168,12 @@ export class GraphqlReadService {
   ): string {
     const args: string[] = [];
 
+    // Only filters go inside the GQL query string.
+    // pageSize, pageNumber, sort are HTTP query params handled by the SDK call.
     if (options.filters) {
       for (const [field, value] of Object.entries(options.filters)) {
         args.push(`${field}: "${value}"`);
       }
-    }
-
-    if (options.pageSize) {
-      args.push(`pageSize: ${options.pageSize}`);
-    }
-    if (options.pageNumber) {
-      args.push(`pageNumber: ${options.pageNumber}`);
-    }
-    if (options.sortBy?.length) {
-      args.push(`sortBy: [${options.sortBy.map(s => `"${s}"`).join(', ')}]`);
-    }
-    if (options.sortDir?.length) {
-      args.push(`sortDir: [${options.sortDir.map(s => `"${s}"`).join(', ')}]`);
     }
 
     const argStr = args.length > 0 ? `(${args.join(', ')})` : '';

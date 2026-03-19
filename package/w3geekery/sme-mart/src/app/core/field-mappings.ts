@@ -53,6 +53,9 @@ export const ENGAGEMENT_FIELD_MAPPING = {
     zerobiasTaskId: 'zerobias_task_id',
     createdAt: 'created_at',
     updatedAt: 'updated_at',
+    // Object base class date fields (GQL uses these names)
+    dateCreated: 'created_at',
+    dateLastModified: 'updated_at',
   },
   sourceSchema: 'zerobias-org/schema PR #7',
   lastVerified: '2026-03-18',

@@ -248,22 +248,21 @@ export class EngagementsService {
    * Get standard field list for Engagement GQL queries.
    */
   private getEngagementFields(): string[] {
+    // Only fields that exist in the GQL Engagement schema (Object base + custom properties)
+    // Object inherited: id, name, description, dateCreated, dateLastModified
+    // Custom (from Engagement.yml): category, status, budgetMin, budgetMax, timeline, engagementTag
     return [
       'id',
       'name',
       'description',
       'category',
-      'buyerZerobiasUserId',
-      'budgetType',
+      'status',
       'budgetMin',
       'budgetMax',
       'timeline',
-      'status',
       'engagementTag',
-      'zerobiasTagId',
-      'zerobiasTaskId',
-      'createdAt',
-      'updatedAt',
+      'dateCreated',
+      'dateLastModified',
     ];
   }
 
