@@ -2,13 +2,14 @@ import { Injectable, inject } from '@angular/core';
 import { ZerobiasClientApi } from '@zerobias-com/zerobias-client';
 import { ExecuteRawGraphqlQuery, SortObject } from '@zerobias-com/graphql-sdk';
 import { UUID } from '@zerobias-org/types-core-js';
+import { environment } from '../../../environments/environment';
 
 import type { SmeMartClassName } from './pipeline-write.service';
 
 // ---------------------------------------------------------------------------
-// Platform boundary ID (prod)
+// Boundary ID (from environment — per-environment, NOT deterministic)
 // ---------------------------------------------------------------------------
-const BOUNDARY_ID = '2842fab1-ceff-4ec4-bf09-ce5e7c33c3e2';
+const BOUNDARY_ID = environment.boundaryId;
 
 /**
  * Page info returned alongside query results.

@@ -2,40 +2,40 @@ import { Injectable, inject } from '@angular/core';
 import { ZerobiasClientApi } from '@zerobias-com/zerobias-client';
 import { SimpleBatch } from '@zerobias-com/platform-sdk';
 import { UUID } from '@zerobias-org/types-core-js';
+import { environment } from '../../../environments/environment';
 
 // ---------------------------------------------------------------------------
-// SME Mart AuditgraphDB class IDs (prod)
+// SME Mart AuditgraphDB class IDs (deterministic — same across all environments)
 // ---------------------------------------------------------------------------
-// Phase 1-5 migrated entities (original 8 from Neon)
 const SME_MART_CLASS_IDS = {
-  Engagement:     '7711aa41-e55b-5cda-9b7a-35844a2006a1',
-  Bid:            'ccddd2e5-e455-585e-9bb7-902903228b0d',
-  BidResponse:    'a024a0b5-50df-59cc-ba8e-25fcd82f69c3',
-  ServiceOffering:'ff689173-4787-52c5-808b-6b2435a625a7',
-  Note:           'fe7c58a9-c13b-5a4b-817f-5c4b419ed28c',
-  NoteFolder:     '4d50975e-d4dc-5654-8e43-f3c5da01f49d',
-  Review:         'ef5d821a-46f5-5f44-8e59-0854777d803c',
-  SmeMartDocument:'e1497ca8-a621-57f6-9263-f9a19fea3c34',
+  // Original 8 entities (migrated from Neon in Phases 2-4)
+  Engagement:      '7711aa41-e55b-5cda-9b7a-35844a2006a1',
+  Bid:             'ccddd2e5-e455-585e-9bb7-902903228b0d',
+  BidResponse:     'a024a0b5-50df-59cc-ba8e-25fcd82f69c3',
+  ServiceOffering: 'ff689173-4787-52c5-808b-6b2435a625a7',
+  Note:            'fe7c58a9-c13b-5a4b-817f-5c4b419ed28c',
+  NoteFolder:      '4d50975e-d4dc-5654-8e43-f3c5da01f49d',
+  Review:          'ef5d821a-46f5-5f44-8e59-0854777d803c',
+  SmeMartDocument: 'e1497ca8-a621-57f6-9263-f9a19fea3c34',
 
-  // Phase 6 Bloom entities (greenfield, no Neon)
-  // TODO: Replace placeholders with actual class IDs from platform after PR #8 merge
-  SmeMartProject:   'TODO-uuid-placeholder-sme-mart-project',
-  SmeMartBoard:     'TODO-uuid-placeholder-sme-mart-board',
-  SmeMartActivity:  'TODO-uuid-placeholder-sme-mart-activity',
-  SmeMartWorkflow:  'TODO-uuid-placeholder-sme-mart-workflow',
-  SmeMartTask:      'TODO-uuid-placeholder-sme-mart-task',
-  ProjectPrd:       'TODO-uuid-placeholder-project-prd',
-  PrdSection:       'TODO-uuid-placeholder-prd-section',
-  ProjectPlan:      'TODO-uuid-placeholder-project-plan',
-  PlanMilestone:    'TODO-uuid-placeholder-plan-milestone',
+  // Phase 6 Bloom entities (greenfield — built directly on Pipeline+GQL)
+  SmeMartProject:  'c66114a2-48e2-5b93-b7d6-7ccd6ef45a03',
+  SmeMartBoard:    '20be589b-194e-5227-ba6e-c7edae42f34b',
+  SmeMartActivity: '36405d75-76f1-5f4b-ab3b-22c562d41e07',
+  SmeMartWorkflow: '295938d2-5c63-5140-a945-2ba28b88b268',
+  SmeMartTask:     'e15f1e0a-1bc9-5002-b4bc-3482d4499561',
+  ProjectPrd:      '920fca70-4dcf-5d9e-ba16-1dfd0f8061f0',
+  PrdSection:      'd30445f3-e26d-5153-83be-fe810f63220c',
+  ProjectPlan:     'bc6159da-19a3-51d0-89a8-f2147078c760',
+  PlanMilestone:   'ac1a1cc8-db44-5c1d-b359-5fb02e3d381d',
 } as const;
 
 export type SmeMartClassName = keyof typeof SME_MART_CLASS_IDS;
 
 // ---------------------------------------------------------------------------
-// Pipeline ID (prod — receiver differential)
+// Pipeline ID (from environment — per-environment, NOT deterministic)
 // ---------------------------------------------------------------------------
-const PIPELINE_ID = '091d5068-0527-4f45-9839-37f6d5c1669e';
+const PIPELINE_ID = environment.pipelineId;
 
 /**
  * Pushes SME Mart entity data into AuditgraphDB via the Receiver Pipeline.
