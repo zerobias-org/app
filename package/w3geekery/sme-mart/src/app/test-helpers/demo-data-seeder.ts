@@ -142,6 +142,7 @@ export function seedDemoEngagements(): DemoEngagement[] {
 export const DEMO_BIDS: DemoBid[] = [
   {
     id: 'bid-001-gina-crystal',
+    name: 'Gina Auditor - SOC 2 Type I Bid',
     engagementId: 'eng-001-crystal-harbor',
     providerId: 'a3-gina-auditor',
     coverLetter: 'SOC 2 Type I assessment with fast-track methodology',
@@ -156,6 +157,7 @@ export const DEMO_BIDS: DemoBid[] = [
   },
   {
     id: 'bid-002-marcus-crystal',
+    name: 'Marcus Webb - SOC 2 Evidence Bid',
     engagementId: 'eng-001-crystal-harbor',
     providerId: 'marcus-webb',
     coverLetter: 'Evidence-focused SOC 2 assessment approach',
@@ -168,6 +170,7 @@ export const DEMO_BIDS: DemoBid[] = [
   },
   {
     id: 'bid-003-james-velvet',
+    name: 'James Okafor - NIST CSF Bid',
     engagementId: 'eng-002-velvet-summit',
     providerId: 'james-okafor',
     coverLetter: 'NIST CSF implementation with GRC strategy focus',
@@ -181,6 +184,7 @@ export const DEMO_BIDS: DemoBid[] = [
   },
   {
     id: 'bid-004-bob-amber',
+    name: 'Bob IT - AI Agent Bid',
     engagementId: 'eng-003-amber-circuit',
     providerId: 'a1-bob-it',
     coverLetter: 'AI Agent for compliance automation',
@@ -193,6 +197,7 @@ export const DEMO_BIDS: DemoBid[] = [
   },
   {
     id: 'bid-005-carlos-amber',
+    name: 'Carlos Rivera - SecOps Automation Bid',
     engagementId: 'eng-003-amber-circuit',
     providerId: 'carlos-rivera',
     coverLetter: 'Security operations and compliance automation',
@@ -205,6 +210,7 @@ export const DEMO_BIDS: DemoBid[] = [
   },
   {
     id: 'bid-006-alex-silver',
+    name: 'Alex Nguyen - HIPAA Training Bid',
     engagementId: 'eng-004-silver-bridge',
     providerId: 'alex-nguyen',
     coverLetter: 'HIPAA compliance training program',
@@ -217,6 +223,7 @@ export const DEMO_BIDS: DemoBid[] = [
   },
   {
     id: 'bid-007-gina-coral',
+    name: 'Gina Auditor - ISO 27001 Bid',
     engagementId: 'eng-005-coral-meadow',
     providerId: 'a3-gina-auditor',
     coverLetter: 'ISO 27001 gap assessment with remediation roadmap',
@@ -249,6 +256,7 @@ export function seedDemoBids(engagementIds?: string[]): DemoBid[] {
 export const DEMO_BID_RESPONSES: DemoBidResponse[] = [
   {
     id: 'bidr-001-gina-crystal-req1',
+    name: 'CC6.1 Access Logging Response',
     bidId: 'bid-001-gina-crystal',
     requirementId: 'req-soc2-control-1',
     complianceStatus: 'met',
@@ -256,11 +264,12 @@ export const DEMO_BID_RESPONSES: DemoBidResponse[] = [
     estimatedHours: 8,
     estimatedCost: 600,
     certificationRef: 'SOC 2 CC6.1',
-    readyDate: new Date(2026, 4, 1).toISOString(),
+    readyDate: '2026-05-01',
     updatedAt: new Date(2026, 2, 8).toISOString(),
   },
   {
     id: 'bidr-002-gina-crystal-req2',
+    name: 'A1.1 Availability Response',
     bidId: 'bid-001-gina-crystal',
     requirementId: 'req-soc2-control-2',
     complianceStatus: 'partially_met',
@@ -268,11 +277,12 @@ export const DEMO_BID_RESPONSES: DemoBidResponse[] = [
     estimatedHours: 12,
     estimatedCost: 900,
     certificationRef: 'SOC 2 A1.1',
-    readyDate: new Date(2026, 4, 15).toISOString(),
+    readyDate: '2026-05-15',
     updatedAt: new Date(2026, 2, 8).toISOString(),
   },
   {
     id: 'bidr-003-james-velvet-req1',
+    name: 'NIST Identify Function Response',
     bidId: 'bid-003-james-velvet',
     requirementId: 'req-nist-identify',
     complianceStatus: 'planned',
@@ -280,7 +290,7 @@ export const DEMO_BID_RESPONSES: DemoBidResponse[] = [
     estimatedHours: 40,
     estimatedCost: 8000,
     certificationRef: 'NIST CSF Identify',
-    readyDate: new Date(2026, 5, 1).toISOString(),
+    readyDate: '2026-06-01',
     updatedAt: new Date(2026, 2, 9).toISOString(),
   },
 ];
@@ -305,6 +315,7 @@ export function seedDemoBidResponses(bidIds?: string[]): DemoBidResponse[] {
 export const DEMO_NOTES: DemoNote[] = [
   {
     id: 'note-001-crystal-kickoff',
+    name: 'Kickoff Meeting - Crystal Harbor',
     engagementId: 'eng-001-crystal-harbor',
     folderId: 'folder-001-crystal',
     title: 'Kickoff Meeting - Crystal Harbor',
@@ -320,6 +331,7 @@ export const DEMO_NOTES: DemoNote[] = [
   },
   {
     id: 'note-002-crystal-progress',
+    name: 'Progress Update - Week 2',
     engagementId: 'eng-001-crystal-harbor',
     folderId: 'folder-001-crystal',
     title: 'Progress Update - Week 2',
@@ -333,6 +345,7 @@ export const DEMO_NOTES: DemoNote[] = [
   },
   {
     id: 'note-003-velvet-strategy',
+    name: 'NIST CSF Strategy Session',
     engagementId: 'eng-002-velvet-summit',
     folderId: 'folder-002-velvet',
     title: 'NIST CSF Strategy Session',
@@ -348,6 +361,7 @@ export const DEMO_NOTES: DemoNote[] = [
   },
   {
     id: 'note-004-silver-agenda',
+    name: 'Training Module Outline',
     engagementId: 'eng-004-silver-bridge',
     title: 'Training Module Outline',
     body: 'HIPAA training: 3 modules (60 min each) covering privacy, security, breach notification.',
@@ -360,6 +374,7 @@ export const DEMO_NOTES: DemoNote[] = [
   },
   {
     id: 'note-005-coral-findings',
+    name: 'ISO 27001 Gap Analysis Findings',
     engagementId: 'eng-005-coral-meadow',
     folderId: 'folder-005-coral',
     title: 'ISO 27001 Gap Analysis Findings',
@@ -449,9 +464,12 @@ export function seedDemoNoteFolders(engagementIds?: string[]): DemoNoteFolder[] 
 export const DEMO_DOCUMENTS: DemoSmeMartDocument[] = [
   {
     id: 'doc-001-crystal-scope',
+    name: 'SOC 2 Scope Statement',
     engagementId: 'eng-001-crystal-harbor',
     filename: 'soc2-scope-statement.pdf',
     mimeType: 'application/pdf',
+    size: 245000,
+    fileVersionId: 'fv-demo-001',
     fileSizeBytes: 245000,
     documentType: 'scope',
     displayName: 'SOC 2 Scope Statement',
@@ -463,9 +481,12 @@ export const DEMO_DOCUMENTS: DemoSmeMartDocument[] = [
   },
   {
     id: 'doc-002-crystal-wip',
+    name: 'Access Control Audit WIP',
     engagementId: 'eng-001-crystal-harbor',
     filename: 'access-control-audit.xlsx',
     mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    size: 125000,
+    fileVersionId: 'fv-demo-002',
     fileSizeBytes: 125000,
     documentType: 'workingpaper',
     displayName: 'Access Control Audit WIP',
@@ -477,9 +498,12 @@ export const DEMO_DOCUMENTS: DemoSmeMartDocument[] = [
   },
   {
     id: 'doc-003-velvet-plan',
+    name: 'NIST CSF 3-Month Roadmap',
     engagementId: 'eng-002-velvet-summit',
     filename: 'nist-csf-roadmap.docx',
     mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    size: 89000,
+    fileVersionId: 'fv-demo-003',
     fileSizeBytes: 89000,
     documentType: 'plan',
     displayName: 'NIST CSF 3-Month Roadmap',
@@ -574,6 +598,7 @@ export function seedDemoServiceOfferings(): DemoServiceOffering[] {
 export const DEMO_REVIEWS: DemoReview[] = [
   {
     id: 'review-001-gina-by-pinnacle',
+    name: 'Review of Gina Auditor - Crystal Harbor',
     providerId: 'a3-gina-auditor',
     reviewerZerobiasUserId: 'demo-buyer-pinnacle',
     engagementId: 'eng-001-crystal-harbor',
@@ -585,6 +610,7 @@ export const DEMO_REVIEWS: DemoReview[] = [
   },
   {
     id: 'review-002-james-by-fintech',
+    name: 'Review of James Okafor - Velvet Summit',
     providerId: 'james-okafor',
     reviewerZerobiasUserId: 'buyer-fintech-002',
     engagementId: 'eng-002-velvet-summit',

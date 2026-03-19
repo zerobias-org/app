@@ -36,6 +36,7 @@ export interface DemoEngagement {
  */
 export interface DemoBid {
   id: string;
+  name: string;
   engagementId: string;
   providerId: string;
   coverLetter: string;
@@ -61,6 +62,7 @@ export interface DemoBid {
  */
 export interface DemoBidResponse {
   id: string;
+  name: string;
   bidId: string;
   requirementId: string;
   complianceStatus: 'met' | 'partially_met' | 'not_met' | 'not_applicable' | 'planned';
@@ -79,6 +81,7 @@ export interface DemoBidResponse {
  */
 export interface DemoNote {
   id: string;
+  name: string;
   engagementId: string;
   folderId?: string;
   title: string;
@@ -124,9 +127,12 @@ export interface DemoNoteFolder {
  */
 export interface DemoSmeMartDocument {
   id: string;
+  name: string;
   engagementId: string;
   zbFileId?: string;
   zbFileVersionId?: string;
+  fileVersionId: string;
+  size: number;
   filename: string;
   mimeType: string;
   fileSizeBytes: number;
@@ -168,6 +174,7 @@ export interface DemoServiceOffering {
  */
 export interface DemoReview {
   id: string;
+  name: string;
   providerId: string;
   reviewerZerobiasUserId: string;
   engagementId: string;
