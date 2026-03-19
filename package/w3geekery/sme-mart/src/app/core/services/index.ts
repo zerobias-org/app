@@ -31,3 +31,9 @@ export { BidResponseService } from './bid-response.service';
 export { BidAiService } from './bid-ai.service';
 export { DocumentService } from './document.service';
 export { SmeDocLinkService } from './sme-doc-link.service';
+
+// Project Bloom services (Phase 6)
+export { SmeMartProjectService } from './sme-mart-project.service';
+export { SmeMartBoardService } from './sme-mart-board.service';
+export { SmeMartActivityService } from './sme-mart-activity.service';
+export { SmeMartWorkflowService } from './sme-mart-workflow.service';
