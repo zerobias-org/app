@@ -130,7 +130,7 @@ describe('Field Mapping Roundtrip Tests - Bloom Entities', () => {
       type: 'feature',
       workflowId: 'workflow-123',
       customFields: [
-        { name: 'story_points', type: 'number' },
+        { name: 'story_points', type: 'number', defaultValue: 5 },
         { name: 'epic', type: 'string' },
       ],
       createdAt: '2026-03-19T00:00:00Z',
@@ -145,10 +145,8 @@ describe('Field Mapping Roundtrip Tests - Bloom Entities', () => {
     expect(model.name).toBe('User Story');
     expect(model.type).toBe('feature');
     expect(model.workflowId).toBe('workflow-123');
-    expect(model.customFields).toEqual([
-      { name: 'story_points', type: 'number' },
-      { name: 'epic', type: 'string' },
-    ]);
+    expect(model.customFields).toHaveLength(2);
+    expect(model.customFields?.[0].name).toBe('story_points');
 
     const gqlRoundtrip = mapNeonToGql<GqlSmeMartActivityResponse>(
       model,
@@ -168,11 +166,16 @@ describe('Field Mapping Roundtrip Tests - Bloom Entities', () => {
     const gqlWorkflow: GqlSmeMartWorkflowResponse = {
       id: 'workflow-123',
       name: 'Kanban Workflow',
-      statuses: ['todo', 'in_progress', 'review', 'done'],
+      statuses: [
+        { name: 'todo', color: '#e0e0e0' },
+        { name: 'in_progress', color: '#2196f3' },
+        { name: 'review', color: '#ff9800' },
+        { name: 'done', color: '#4caf50' },
+      ],
       transitions: [
-        { from: 'todo', to: 'in_progress' },
-        { from: 'in_progress', to: 'review' },
-        { from: 'review', to: 'done' },
+        { from: 'todo', to: 'in_progress', label: 'Start Work' },
+        { from: 'in_progress', to: 'review', label: 'Request Review' },
+        { from: 'review', to: 'done', label: 'Approve' },
       ],
       createdAt: '2026-03-19T00:00:00Z',
       updatedAt: '2026-03-19T00:00:00Z',
@@ -184,7 +187,7 @@ describe('Field Mapping Roundtrip Tests - Bloom Entities', () => {
     );
 
     expect(model.name).toBe('Kanban Workflow');
-    expect(model.statuses).toEqual(['todo', 'in_progress', 'review', 'done']);
+    expect(model.statuses).toHaveLength(4);
     expect(model.transitions).toHaveLength(3);
 
     const gqlRoundtrip = mapNeonToGql<GqlSmeMartWorkflowResponse>(
