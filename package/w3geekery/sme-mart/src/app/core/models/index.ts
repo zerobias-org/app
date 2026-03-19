@@ -19,3 +19,4 @@ export * from './org-document.model';
 export * from './bid-response.model';
 export * from './bid-ai.model';
 export * from './notification.model';
+export * from './demo-data.model';
