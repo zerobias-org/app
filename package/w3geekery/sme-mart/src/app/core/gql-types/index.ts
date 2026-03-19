@@ -61,3 +61,17 @@ export type {
   SmeMartWorkflowStatus,
   SmeMartWorkflowTransition,
 } from './sme-mart-workflow.types';
+
+export type {
+  GqlSmeMartTaskResponse,
+} from './sme-mart-task.types';
+
+export type {
+  GqlProjectPrdResponse,
+  GqlPrdSectionResponse,
+} from './project-prd.types';
+
+export type {
+  GqlProjectPlanResponse,
+  GqlPlanMilestoneResponse,
+} from './project-plan.types';
