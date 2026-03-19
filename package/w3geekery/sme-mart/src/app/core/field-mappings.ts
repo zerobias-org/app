@@ -575,6 +575,186 @@ export const SME_MART_WORKFLOW_FIELD_MAPPING = {
 } as const;
 
 /**
+ * SmeMartTask field mapping (greenfield — no Neon table)
+ *
+ * GQL entity: SmeMartTask (hierarchical tasks within Board)
+ * Model type: SmeMartTask (fields in camelCase)
+ *
+ * No Neon table → no actual translation needed.
+ * Mapping exists for consistency and roundtrip testing.
+ */
+export const SME_MART_TASK_FIELD_MAPPING = {
+  neonToGql: {
+    id: 'id',
+    boardId: 'boardId',
+    parentId: 'parentId',
+    name: 'name',
+    code: 'code',
+    status: 'status',
+    rank: 'rank',
+    priority: 'priority',
+    description: 'description',
+    dueDate: 'dueDate',
+    activityId: 'activityId',
+    customFields: 'customFields',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+  },
+  gqlToNeon: {
+    id: 'id',
+    boardId: 'boardId',
+    parentId: 'parentId',
+    name: 'name',
+    code: 'code',
+    status: 'status',
+    rank: 'rank',
+    priority: 'priority',
+    description: 'description',
+    dueDate: 'dueDate',
+    activityId: 'activityId',
+    customFields: 'customFields',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+  },
+  sourceSchema: 'zerobias-org/schema PR #8 (Bloom)',
+  lastVerified: '2026-03-19',
+} as const;
+
+/**
+ * ProjectPrd field mapping (greenfield — no Neon table)
+ *
+ * GQL entity: ProjectPrd (project requirements document container)
+ * Model type: ProjectPrd (fields in camelCase)
+ *
+ * No Neon table → no actual translation needed.
+ * Mapping exists for consistency and roundtrip testing.
+ */
+export const PROJECT_PRD_FIELD_MAPPING = {
+  neonToGql: {
+    id: 'id',
+    parentId: 'parentId',
+    title: 'title',
+    summary: 'summary',
+    sourceDocuments: 'sourceDocuments',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+  },
+  gqlToNeon: {
+    id: 'id',
+    parentId: 'parentId',
+    title: 'title',
+    summary: 'summary',
+    sourceDocuments: 'sourceDocuments',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+  },
+  sourceSchema: 'zerobias-org/schema PR #8 (Bloom)',
+  lastVerified: '2026-03-19',
+} as const;
+
+/**
+ * PrdSection field mapping (greenfield — no Neon table)
+ *
+ * GQL entity: PrdSection (section within a ProjectPrd)
+ * Model type: PrdSection (fields in camelCase)
+ *
+ * No Neon table → no actual translation needed.
+ * Mapping exists for consistency and roundtrip testing.
+ */
+export const PRD_SECTION_FIELD_MAPPING = {
+  neonToGql: {
+    id: 'id',
+    parentId: 'parentId',
+    type: 'type',
+    content: 'content',
+    sortOrder: 'sortOrder',
+    sourceDocuments: 'sourceDocuments',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+  },
+  gqlToNeon: {
+    id: 'id',
+    parentId: 'parentId',
+    type: 'type',
+    content: 'content',
+    sortOrder: 'sortOrder',
+    sourceDocuments: 'sourceDocuments',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+  },
+  sourceSchema: 'zerobias-org/schema PR #8 (Bloom)',
+  lastVerified: '2026-03-19',
+} as const;
+
+/**
+ * ProjectPlan field mapping (greenfield — no Neon table)
+ *
+ * GQL entity: ProjectPlan (project execution plan container)
+ * Model type: ProjectPlan (fields in camelCase)
+ *
+ * No Neon table → no actual translation needed.
+ * Mapping exists for consistency and roundtrip testing.
+ */
+export const PROJECT_PLAN_FIELD_MAPPING = {
+  neonToGql: {
+    id: 'id',
+    parentId: 'parentId',
+    title: 'title',
+    approach: 'approach',
+    estimatedDuration: 'estimatedDuration',
+    teamStructure: 'teamStructure',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+  },
+  gqlToNeon: {
+    id: 'id',
+    parentId: 'parentId',
+    title: 'title',
+    approach: 'approach',
+    estimatedDuration: 'estimatedDuration',
+    teamStructure: 'teamStructure',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+  },
+  sourceSchema: 'zerobias-org/schema PR #8 (Bloom)',
+  lastVerified: '2026-03-19',
+} as const;
+
+/**
+ * PlanMilestone field mapping (greenfield — no Neon table)
+ *
+ * GQL entity: PlanMilestone (milestone within a ProjectPlan)
+ * Model type: PlanMilestone (fields in camelCase)
+ *
+ * No Neon table → no actual translation needed.
+ * Mapping exists for consistency and roundtrip testing.
+ */
+export const PLAN_MILESTONE_FIELD_MAPPING = {
+  neonToGql: {
+    id: 'id',
+    parentId: 'parentId',
+    name: 'name',
+    targetDate: 'targetDate',
+    status: 'status',
+    sortOrder: 'sortOrder',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+  },
+  gqlToNeon: {
+    id: 'id',
+    parentId: 'parentId',
+    name: 'name',
+    targetDate: 'targetDate',
+    status: 'status',
+    sortOrder: 'sortOrder',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+  },
+  sourceSchema: 'zerobias-org/schema PR #8 (Bloom)',
+  lastVerified: '2026-03-19',
+} as const;
+
+/**
  * All field mapping constants exported as a single object for easier iteration.
  */
 export const ALL_FIELD_MAPPINGS = {
@@ -590,4 +770,9 @@ export const ALL_FIELD_MAPPINGS = {
   SmeMartBoard: SME_MART_BOARD_FIELD_MAPPING,
   SmeMartActivity: SME_MART_ACTIVITY_FIELD_MAPPING,
   SmeMartWorkflow: SME_MART_WORKFLOW_FIELD_MAPPING,
+  SmeMartTask: SME_MART_TASK_FIELD_MAPPING,
+  ProjectPrd: PROJECT_PRD_FIELD_MAPPING,
+  PrdSection: PRD_SECTION_FIELD_MAPPING,
+  ProjectPlan: PROJECT_PLAN_FIELD_MAPPING,
+  PlanMilestone: PLAN_MILESTONE_FIELD_MAPPING,
 } as const;
