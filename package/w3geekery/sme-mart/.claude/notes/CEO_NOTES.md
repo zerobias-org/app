@@ -698,3 +698,85 @@ The Feb 25 notes described Boards as "user-created collections of Tasks" which i
 4. **Board hierarchy** maps cleanly to partitioning: a demand-side board, supply-side board, and transparency board within a boundary could implement Brian's 3-partition model
 
 *Captured: 2026-03-16 from Slack (Kevin McCarthy, 4:16 PM & 8:27–8:28 PM PT)*
+
+---
+
+## 2026-03-19: Tasks as Runtime Access Control — Boundary API Gating
+
+### Brian's Directive (via Clark, 2026-03-19)
+
+Brian expanded on the task/subtask architecture with explicit runtime access control semantics:
+
+### Core Principle: All Boundary Access Requires Task Approval
+
+> "The only way to get anything from a boundary /app/api/object/read/write is an approval of a task/subtask."
+
+**Tasks/subtasks are the runtime execution layer** — they are the GET/POST/read/write operations themselves. No approved task = no data access through the boundary API.
+
+### Demand Side (Boundary Owner) = Approving Party
+
+The demand-side owner of the boundary is the approving party for each task (network owner side). They gate all access:
+
+- **Approved run** = task executes, boundary API accessible
+- **Denied run** = task blocked, no boundary API access
+
+### Transparency Partition: Requirement-Based Approval Visibility
+
+The transparency partition shows denied/accepted status based on requirement tests:
+
+| Requirements | Type | Behavior |
+|---|---|---|
+| **Requirements 1-5** | Hard requirements | Must ALL be met for approval |
+| **Requirements 6-10** | Soft requirements | Shown as met/not met, but non-blocking |
+
+Status shown in transparency: **"approved run"** or **"denied run"** per task.
+
+### Supply Side: Explicit Resource Requirements
+
+The supply-side task partition defines and publishes explicit technical requirements to the transparency partition:
+
+> "Supply side task partition defines and publishes to transparency partition is explicit: task requires AWS S3 ARN policy, IAM setting, data objects X, Y, Z, read & write — daily, hourly, etc."
+
+**Example supply-side task definition:**
+```
+Task: "Data Sync — Client Records"
+  Requires:
+    - AWS S3 ARN: arn:aws:s3:::client-records-bucket/*
+    - IAM Policy: ReadWrite
+    - Data Objects: ClientProfile, ComplianceRecord, AuditLog
+    - Operations: Read & Write
+    - Schedule: Daily (midnight UTC)
+```
+
+### Architecture Summary
+
+```
+Boundary API (/app/api/object/read|write)
+    ↑
+    │ GATED BY
+    ↓
+Task/SubTask (approved/denied)
+    │
+    ├── Demand Side: Owner approves/denies based on requirements
+    │   ├── Hard reqs (1-5): ALL must pass
+    │   └── Soft reqs (6-10): informational
+    │
+    ├── Transparency: Shows approval status + requirement test results
+    │
+    └── Supply Side: Publishes explicit resource requirements
+        ├── ARN policies
+        ├── IAM settings
+        ├── Data objects (X, Y, Z)
+        ├── Operation types (read/write)
+        └── Schedule (daily/hourly/etc.)
+```
+
+### Implications for SME Mart
+
+1. **Tasks are NOT just tracking items** — they are runtime permission gates for boundary API access
+2. **Task approval workflow is THE access control mechanism** — replaces or augments traditional RBAC
+3. **Supply side publishes infrastructure requirements** — AWS ARN, IAM, data objects, schedule
+4. **Hard vs soft requirements** — binary pass/fail for hard (1-5), advisory for soft (6-10)
+5. **This changes the task UI fundamentally** — must show approved/denied runtime status, not just workflow status
+
+*Captured: 2026-03-19 from Clark relaying Brian's directives*

@@ -1,88 +1,77 @@
-# SME Mart — AuditgraphDB Migration
+# SME Mart
 
 ## What This Is
 
-SME Mart is a marketplace for Subject Matter Experts in compliance and cybersecurity — "Upwork meets Whop" for ZeroBias platform users. Built with Angular 21, it connects buyers seeking compliance services (SOC 2, ISO 27001, HIPAA, etc.) with qualified providers. The app is live on Vercel with Phases 1-4 complete and Phase 5 (Engagements & Admin) in progress.
+SME Mart is a marketplace for Subject Matter Experts in compliance and cybersecurity — "Upwork meets Whop" for ZeroBias platform users. Built with Angular 21, it connects buyers seeking compliance services (SOC 2, ISO 27001, HIPAA, etc.) with qualified providers. The app runs on Vercel with all 17 entity types reading/writing through ZeroBias AuditgraphDB.
 
 ## Core Value
 
-All 17 SME Mart entity types read and write through ZeroBias AuditgraphDB (Pipeline writes + GraphQL reads), replacing the Neon PostgreSQL data layer entirely.
+A transparent, task-gated marketplace where every boundary API operation requires task/subtask approval — demand/supply/transparency partitions at every level of the hierarchy.
+
+## Current State (after v1.0)
+
+- **Data layer:** All 17 entity types on AuditgraphDB (Pipeline writes + GraphQL reads). Neon PostgreSQL in observation period (archival 2026-04-02).
+- **Services:** 14 domain services migrated/built against Pipeline+GQL. 7 non-migrated services still use SmeMartDbService (categories, notifications, etc.).
+- **Tests:** 94+ Bloom tests, 27 Wave 3 tests, roundtrip validation for all entities. Build errors in unrelated components block full `npm test`.
+- **Codebase:** 40,882 LOC TypeScript, Angular 21 standalone components.
+- **Live:** Vercel deployment on `poc/sme-mart` branch.
 
 ## Requirements
 
 ### Validated
 
-- ✓ Angular 21 app scaffolding with standalone components — Phase 1
-- ✓ Neon-backed SmeMartDbService with DataProducer CRUD — Phase 2
-- ✓ 10 domain services + 8 model files — Phase 3
-- ✓ Marketplace pages: Home, ProviderList, ProviderDetail, ServiceCatalog, MyProfile — Phase 4
-- ✓ Engagement detail with child routes (overview/details/tasks/timeline) — Phase 5
-- ✓ Notes system with folders, drag-drop, OneNote-style layout — Phase 5
-- ✓ RFP creation wizard with requirements editor, JSON import, method chooser — Phase 5
-- ✓ Vendor bid response flow with per-requirement responses, compliance progress — Phase 5
-- ✓ Document upload/management at org and engagement level — Phase 5
-- ✓ Tag system with hierarchical naming, resource tag editor — Phase 5
-- ✓ Notification center (Neon-backed, ZB Cards pattern) — Phase 5
-- ✓ 456 unit tests across 33 spec files — Phase 5
-- ✓ GQL schema package live in prod (8 classes) — Plan 034 Phases 1-4
-- ✓ Receiver Pipeline created + tested with sample Engagement — Plan 034 Phase 4
-- ✓ PipelineWriteService and GraphqlReadService created — Plan 059
-- ✓ Field mapping constants, GQL type interfaces, test mocks, roundtrip tests for all 8 entities — Migration Phase 1
-- ✓ WorkRequest → Engagement rename, EngagementsService + BidsService migrated to Pipeline+GQL — Migration Phase 2
-- ✓ NotesService, OrgDocumentService, NoteFolderService (tree rebuild) migrated to Pipeline+GQL — Migration Phase 3
+- ✓ All 8 existing entities migrated from Neon to Pipeline+GQL — v1.0
+- ✓ 9 new Project Bloom entity services built on Pipeline+GQL — v1.0
+- ✓ Field mapping infrastructure (17 constants, types, roundtrip tests) — v1.0
+- ✓ Zero component changes during migration — v1.0
+- ✓ Demo data seeding via Pipeline — v1.0
+- ✓ SmeMartDbService removed from all migrated services — v1.0
 
 ### Active
 
-- [ ] Migrate 8 existing entities from Neon to Pipeline+GQL (Engagement, Bid, BidResponse, ServiceOffering, Note, NoteFolder, Review, SmeMartDocument)
-- [ ] Build 9 new Project Bloom entities directly against Pipeline+GQL (SmeMartProject, SmeMartBoard, SmeMartActivity, SmeMartWorkflow, SmeMartTask, ProjectPrd, PrdSection, ProjectPlan, PlanMilestone)
-- [ ] Fix schema naming issue (PR #9) — blocks PR #8 (Bloom entities)
-- [ ] Merge PR #8 (Project Bloom entity definitions) — blocked on PR #9
-- [ ] GQL types available for all 17 entity classes
-- [ ] Demo data seeded via Pipeline instead of Neon SQL
-- [ ] All domain services bypass SmeMartDbService for migrated entities
-- [ ] Tests updated to mock PipelineWriteService + GraphqlReadService
-- [ ] Neon entity tables archived after migration verified
+- [ ] Task/subtask partitioning into demand/supply/transparency (CEO P0)
+- [ ] Tasks as runtime access control — boundary API gating via task approval
+- [ ] Hard requirements (1-5) / soft requirements (6-10) approval model
+- [ ] Supply-side explicit resource requirements (ARN, IAM, data objects, schedule)
+- [ ] Project Bloom UI (boards, tasks, activities, workflows)
+- [ ] Fix build errors blocking `npm test`
+- [ ] Neon table archival (scheduled 2026-04-02)
+- [ ] Transparency Center (aggregated rollups from subtask → project)
 
 ### Out of Scope
 
-- Auth flow / login (ZeroBias platform handles this) — not SME Mart responsibility
-- LLM-assisted bid generation (Plan 033 Phase 5) — separate initiative
-- AI document decomposition for Project Bloom (Plan 040) — separate initiative after entities exist
-- Transparency Center (Plan 023) — depends on Project Bloom completion
-- E2E Playwright tests (Plan 052) — separate initiative
-- ngx-library re-skin (Phase 6) — after migration
-- Production deployment pipeline (Phase 7) — after migration
-- Internal Marketplace (Plan 050) — future concept
-- Reverse Bid Flow (Plan 051) — future concept
+- Auth flow / login — ZeroBias platform handles this
+- LLM-assisted bid generation — separate initiative
+- Scoring app — separate ZB platform app
+- Billing app — separate ZB platform app
+- E2E Playwright tests — separate initiative
+- Internal Marketplace (BU-to-BU) — future concept
+- Reverse Bid Flow — future concept
 
 ## Context
 
-- **Existing architecture:** Angular 21 standalone components, SmeMartDbService wraps Neon via Generic SQL Hub Module (DataProducer interface). Neon VIEWs for consolidated reads.
-- **Target architecture:** Writes via Receiver Differential Pipeline (Batch API). Reads via auto-generated GraphQL API (read-only). Tags and links become native AuditgraphDB relationships.
-- **Schema repo:** `zerobias-org/schema` — YAML packages define classes, fields, enums, links. Auto-deployed on merge to dev/qa/main branches.
-- **Pipeline:** `091d5068-0527-4f45-9839-37f6d5c1669e` (SME Mart Entity Pipeline) — receiver/differential/dynamic/json.
-- **Eventual consistency:** Pipeline writes are async. UI uses optimistic updates — no polling needed unless issues arise.
-- **PR chain:** PR #9 (schema naming fix) → PR #8 (9 Bloom entities) → GQL types available.
-- **Schema reloads every 15 minutes** after merge to schema repo branches.
-- **15 hrs/week cap** — Clark / W3Geekery contractor.
+- **Architecture:** Angular 21 standalone components, PipelineWriteService (writes) + GraphqlReadService (reads), optimistic updates for eventual consistency
+- **Pipeline:** `091d5068-0527-4f45-9839-37f6d5c1669e` (SME Mart Entity Pipeline)
+- **Schema:** `zerobias-org/schema` YAML packages, auto-deployed on merge, 15-min reload
+- **Team:** Clark (W3Geekery contractor, 15 hrs/week), Kevin (CIO, platform), Brian (CEO, directives)
+- **Deployment:** Vercel (temporary), target: ZeroBias platform publishing
 
 ## Constraints
 
-- **Tech stack**: Angular 21, standalone components, no Nx, `@zerobias-org/ngx-library` for theming
-- **Data layer**: Must use Pipeline (writes) + GQL (reads) — no direct Neon for migrated entities
-- **Schema PRs**: PR #9 must merge before PR #8; both must merge before GQL types are available for Bloom entities
-- **Backward compat**: Public API of domain services stays identical — zero component changes for migration
-- **Budget**: 15 hrs/week contractor time
+- **Tech stack:** Angular 21, standalone components, no Nx, `@zerobias-org/ngx-library`
+- **Data layer:** Pipeline (writes) + GQL (reads) — no direct Neon for migrated entities
+- **Budget:** 15 hrs/week contractor time
+- **CEO priority:** Task/subtask partitioning is THE critical path
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Direct swap (no adapter pattern) | Each domain service is already isolated — swap internals, keep public API | — Pending |
-| Incremental migration by entity waves | Linked entities migrate together; reduces risk vs big-bang | — Pending |
-| Wave order: Engagement+Bids → Notes+Docs → Standalone → Bloom | Dependency graph: core flow first, then attachments, then independent | — Pending |
-| Optimistic updates for write visibility | Pipeline async delay; component already has data from create call | — Pending |
-| 9 Bloom entities built directly against GQL (no Neon) | No legacy to migrate — start clean | — Pending |
+| Direct swap (no adapter pattern) | Services already isolated, swap internals | ✓ Good — zero component changes |
+| Wave-based migration (core → attachments → standalone → bloom) | Dependency-ordered, highest usage first | ✓ Good — smooth progression |
+| Optimistic updates for write visibility | Pipeline 5-10s async delay | ✓ Good — UX feels instant |
+| 9 Bloom entities built on clean Pipeline foundation | No legacy to migrate | ✓ Good — clean services |
+| Archive Neon (don't delete) | Safety-first, 2-week observation | — Pending (2026-04-02) |
 
 ---
-*Last updated: 2026-03-18 after Phase 1 (Infrastructure Setup) completion*
+*Last updated: 2026-03-20 after v1.0 milestone*

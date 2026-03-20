@@ -1,9 +1,9 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.0
-milestone_name: milestone
+milestone_name: AuditgraphDB Migration
 status: milestone_complete
-last_updated: "2026-03-19T20:55:00.000Z"
+last_updated: "2026-03-20T00:00:00Z"
 progress:
   total_phases: 6
   completed_phases: 6
@@ -13,69 +13,18 @@ progress:
 
 # STATE.md — Session Context
 
-**Session Name:** `poc/sme-mart` (SME Mart AuditgraphDB Migration Roadmap)
+**Session Name:** `poc/sme-mart`
 **Date Created:** 2026-03-18
-**Current Focus:** Milestone v1.0 complete — all 6 phases done
+**Current Focus:** v1.0 archived. Ready for `/gsd:new-milestone`.
 
 ---
 
 ## Project Reference
 
-**Project:** SME Mart AuditgraphDB Migration
-**Core Value:** Migrate all 17 SME Mart entity types from Neon PostgreSQL to AuditgraphDB (Pipeline writes + GraphQL reads)
+See: .planning/PROJECT.md (updated 2026-03-20)
 
-**Roadmap Location:** `.planning/ROADMAP.md`
-**Requirements Location:** `.planning/REQUIREMENTS.md`
-
----
-
-## Current Position
-
-Phase: All 6 phases COMPLETED
-Plans: 9/9 executed
-Next: `/gsd:complete-milestone` to archive and start next milestone
-
-## Key Decisions
-
-| Decision | Rationale | Status |
-|----------|-----------|--------|
-| 6-phase structure (not 7) | Compressed phases 5-6 into single Verification phase to fit standard granularity with 15 hr/week budget | ✓ Approved in roadmap |
-| Field mapping constants first | Prevents rework during wave migrations; enables parallel test infrastructure setup | ✓ Phase 1 dependency |
-| Wave 1 (Engagement+Bids) before Wave 2 | Core flow must work first; highest usage = highest testing priority | ✓ Sequencing locked |
-| Optimistic updates for consistency | Pipeline async delay (~5-10s); components already have data from create call | ✓ Architectural pattern |
-| Direct swap (no adapter pattern) | Domain services already isolated; swapping internals keeps public API unchanged | ✓ Zero component changes needed |
-| Archive Neon (Phase 5, not delete) | Cold backup to S3, keep 2-4 weeks read-only, then drop after verification | ✓ Safety-first approach |
-
----
-
-## Blocked Dependencies
-
-- **Phase 6 (Project Bloom) → Schema PR #8 merge** — GQL types for 9 new entity classes not available until schema repo merges PR #8. Estimate: 1-2 weeks pending Kevin's timeline.
-
----
-
-## Critical Context
-
-### Architecture Patterns
-
-- **Domain services:** Public API unchanged; internals swap from SmeMartDbService → PipelineWriteService + GraphqlReadService
-- **Field mapping:** Snake_case Neon columns (e.g., `engagement_id`) → camelCase GQL fields (e.g., `engagementId`). Explicit mapping constants per entity prevent bugs.
-- **Relationships:** Replace Neon JOINs + VIEWs with nested GQL queries. Test for pagination on one-to-many relationships per entity.
-
-### Services Affected (Wave Order)
-
-1. **Wave 1 (Phase 2):** `workRequestsService`, `bidsService`
-2. **Wave 2 (Phase 3):** `notesService`, `documentService`
-3. **Wave 3 (Phase 4):** `catalogService`, `reviewsService` (future)
-4. **New (Phase 6):** 9 Bloom services (no SmeMartDbService)
-
-### GQL & Pipeline References
-
-- **Pipeline ID:** `091d5068-0527-4f45-9839-37f6d5c1669e` (SME Mart Entity Pipeline)
-- **Schema Repo:** `zerobias-org/schema` — auto-deploys YAML packages on merge
-- **Schema Reload:** Every 15 minutes after merge
-- **GQL Endpoint:** Auto-generated from schema classes
-- **Client accessor:** `ZerobiasClientApi.graphqlClient.getBoundaryApi()`
+**Core value:** Transparent, task-gated marketplace with demand/supply/transparency partitions
+**Current focus:** Planning next milestone
 
 ---
 
@@ -89,62 +38,13 @@ claude --resume poc/sme-mart
 
 **If starting fresh:**
 
-- Read `.planning/ROADMAP.md` for phase structure
-- Read `.planning/REQUIREMENTS.md` for full requirement list and traceability
-- Check `.planning/research/SUMMARY.md` for architectural decisions and confidence levels
-- Review `CLAUDE.md` for project conventions and SmeMartDbService migration patterns
+- Read `.planning/PROJECT.md` for current state
+- Read `.planning/ROADMAP.md` for milestone history
+- Read `.planning/MILESTONES.md` for v1.0 accomplishments
+- Read `CLAUDE.md` for project conventions
+- Read `.claude/notes/CEO_NOTES.md` for Brian's directives
 
 ---
 
-## Metrics
-
-| Metric | Value | Note |
-|--------|-------|------|
-| **Total Requirements** | 32 | v1 scope only |
-| **Phases** | 6 | Standard granularity (5-8) |
-| **Entities to Migrate** | 8 | Engagement, Bid, BidResponse, ServiceOffering, Note, NoteFolder, Review, SmeMartDocument |
-| **Entities to Build** | 9 | Project Bloom new services |
-| **Estimated Effort** | 27-38 hrs | Over 2-3 weeks at 15 hrs/week |
-| **Test Coverage Target** | ≥80% | Phase 5+ (existing: 456+ unit tests) |
-
----
-
-## Known Gaps & Workarounds
-
-**Gap 1: GQL types blocked on Schema PR #8 merge**
-
-- Workaround: Shadow-test wave 1 against mock GQL service in parallel
-- Resolution: Kevin to merge PR #8 (estimated 1-2 weeks)
-
-**Gap 2: Eventual consistency delay (5-10s)**
-
-- Workaround: Optimistic updates in components show data immediately
-- Fallback: `ensureIndexed()` polling utility if UX issues arise (defer to v2 unless needed)
-
-**Gap 3: Neon table archival ops planning**
-
-- Workaround: Keep tables renamed as `*_archived` for 2-4 weeks post-migration
-- Resolution: Coordinate with ops for S3 backup + deletion plan (Phase 5)
-
----
-
-## Next Steps
-
-1. **Complete milestone** — Run `/gsd:complete-milestone` to archive v1.0 and prepare for next milestone
-2. **Monitor Neon observation period** — 2026-03-19 to 2026-04-02 (verify all Neon queries deprecated)
-3. **Execute Neon archival** — Archive 8 migrated tables on 2026-04-02 (S3 backup kept)
-4. **Fix build errors** — GSD worktree fixing 1.1.28 SDK upgrade type issues (in progress)
-
----
-
-**Last Updated:** 2026-03-19T20:55:00Z
-**Phase 02-01 Completed:** 2026-03-18T21:40:43Z (Plan executed: 5 tasks, 5 commits, SUMMARY.md created)
-**Phase 02-02 Completed:** 2026-03-18T22:45:00Z (Gap closure: 3 blockers fixed, 2 commits, SUMMARY.md created)
-**Phase 03-01 Completed:** 2026-03-18T23:00:00Z (Wave 1 tests: 5 tasks, field mapping verification, test infrastructure)
-**Phase 03-02 Completed:** 2026-03-18T23:05:00Z (NoteFolderService: 3 tasks, flat-fetch tree rebuild, 8 unit tests, 2 commits)
-**Phase 03-03 Completed:** 2026-03-19T00:00:00Z (NotesService, DocumentService migration)
-**Phase 04-01 Completed:** 2026-03-19T00:30:00Z (ServiceOfferingsService + ReviewsService: 3 tasks, 13+ unit tests, 4 commits, SUMMARY.md created)
-**Phase 05-01 Completed:** 2026-03-19T00:45:00Z (Demo data seeding: 3 tasks, DemoDataService, test infrastructure verified, Neon archival scheduled for 2026-04-02)
-**Phase 06-01 Completed:** 2026-03-19T15:52:00Z (Bloom container services: 3 tasks, 4 services, 34 unit tests, 3 commits, SUMMARY.md created)
-**Phase 06-02 Completed:** 2026-03-19T16:00:00Z (Content entity services: SmeMartTask, ProjectPrd, ProjectPlan — 5 services, 9 entity roundtrip tests, SUMMARY.md created)
-**Milestone v1.0:** All 6 phases complete, 9/9 plans executed. Ready for `/gsd:complete-milestone`.
+**Last Updated:** 2026-03-20
+**Milestone v1.0:** Archived. 6 phases, 9 plans, 32 requirements satisfied.
