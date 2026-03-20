@@ -50,7 +50,8 @@ __screenshots__/
 .claude/.obsidian/
 .claude/diagrams/
 .claude/proposals/
-.claude/notes/meetings/*.docx
+.claude/notes/meetings/**/*.docx
+.claude/notes/meetings/**/*.txt
 
 # GSD planning (local-only)
 .planning/
