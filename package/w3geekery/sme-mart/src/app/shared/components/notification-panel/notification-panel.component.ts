@@ -65,7 +65,8 @@ export class NotificationPanel implements OnInit, OnDestroy {
   readonly badgeHidden = computed(() => this.unreadCount() === 0);
 
   ngOnInit(): void {
-    this.notificationService.startPolling();
+    // TODO: Re-enable after notification service migrated to GQL (Plan 060+)
+    // this.notificationService.startPolling();
   }
 
   ngOnDestroy(): void {
