@@ -88,13 +88,14 @@ export class NoteFolderTree implements OnInit {
     const engId = this._engagementId();
     if (!engId) return;
 
-    // Capture expanded state before reload
-    const expandedIds = this.collectExpandedIds(this._fullTree());
+    // Capture in-memory expanded state first, then merge with localStorage
+    const memoryIds = this.collectExpandedIds(this._fullTree());
+    const storedIds = this.loadExpandedIds(engId);
+    const expandedIds = new Set([...memoryIds, ...storedIds]);
 
     this.loading.set(true);
     try {
       const nodes = await this.hierarchy.getFolderTree(engId);
-      // Restore expanded state from before reload
       if (expandedIds.size > 0) {
         this.restoreExpanded(nodes, expandedIds);
       }
@@ -139,6 +140,8 @@ export class NoteFolderTree implements OnInit {
   toggleExpand(node: FolderTreeNode, event: Event): void {
     event.stopPropagation();
     node.expanded = !node.expanded;
+    // Persist expanded state to localStorage
+    this.saveExpandedIds(this._engagementId());
     // Trigger change detection by replacing the tree reference
     this._fullTree.set([...this._fullTree()]);
   }
@@ -303,12 +306,20 @@ export class NoteFolderTree implements OnInit {
     });
   }
 
+  /** Resolve color: local preference overrides DB color. */
+  resolveColor(node: FolderTreeNode): string | null {
+    return this.folderColors()[node.folder.id] ?? node.folder.color ?? null;
+  }
+
   onColorChange(node: FolderTreeNode, color: string | null): void {
+    // Update local prefs for immediate UI feedback
     if (color) {
       this.prefs.setFolderColor(node.folder.id, color);
     } else {
       this.prefs.removeFolderColor(node.folder.id);
     }
+    // Persist to DB via pipeline
+    this.hierarchy.updateFolder(node.folder.id, { color });
   }
 
   async onDeleteFolder(node: FolderTreeNode, event: Event): Promise<void> {
@@ -340,5 +351,28 @@ export class NoteFolderTree implements OnInit {
     } catch (err: any) {
       this.snackBar.open(`Failed to delete: ${err.message}`, 'Dismiss', { duration: 5000 });
     }
+  }
+
+  // ── localStorage persistence for expanded state ──
+
+  private storageKey(engId: string): string {
+    return `sme-mart.folder-expanded.${engId}`;
+  }
+
+  private saveExpandedIds(engId: string): void {
+    if (!engId) return;
+    const ids = this.collectExpandedIds(this._fullTree());
+    try {
+      localStorage.setItem(this.storageKey(engId), JSON.stringify([...ids]));
+    } catch { /* quota exceeded — silently ignore */ }
+  }
+
+  private loadExpandedIds(engId: string): Set<string> {
+    if (!engId) return new Set();
+    try {
+      const raw = localStorage.getItem(this.storageKey(engId));
+      if (raw) return new Set(JSON.parse(raw));
+    } catch { /* corrupt data — ignore */ }
+    return new Set();
   }
 }

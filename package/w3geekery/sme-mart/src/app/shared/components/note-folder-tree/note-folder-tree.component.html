@@ -23,7 +23,7 @@
   <!-- Collapsed: icon strip -->
   <div class="icon-strip">
     @for (node of tree(); track node.folder.id) {
-      @let fc = folderColors()[node.folder.id];
+      @let fc = resolveColor(node);
       <span class="icon-strip-item"
             [class.selected]="selectedId() === node.folder.id"
             (click)="selectFolder(node.folder.id)"
@@ -41,7 +41,7 @@
 
 <ng-template #folderList let-nodes>
   @for (node of nodes; track node.folder.id) {
-    @let fc = folderColors()[node.folder.id];
+    @let fc = resolveColor(node);
     <div class="folder-row"
          [class.selected]="selectedId() === node.folder.id"
          [class.drop-target]="dropTargetId() === node.folder.id"

@@ -25,7 +25,7 @@
     <!-- Collapsed: icon strip -->
     <div class="icon-strip">
       @for (node of topLevelFolders(); track node.folder.id) {
-        @let fc = folderColors()[node.folder.id];
+        @let fc = resolveColor(node);
         <span class="icon-strip-item"
               [class.selected]="selectedId() === node.folder.id"
               [class.drop-target]="dropTargetId() === node.folder.id"
@@ -41,7 +41,7 @@
   } @else {
     <!-- Expanded: full tabs -->
     @for (node of topLevelFolders(); track node.folder.id) {
-      @let fc = folderColors()[node.folder.id];
+      @let fc = resolveColor(node);
       <div class="notebook-tab"
            [class.selected]="selectedId() === node.folder.id"
            [class.drop-target]="dropTargetId() === node.folder.id"

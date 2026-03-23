@@ -106,8 +106,12 @@ export class NotesNotebooksColumn implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.loadTree();
+        // Optimistic insert: add to tree immediately so UI updates without waiting for GQL
+        this.insertFolderOptimistically(result);
         this.treeChanged.emit();
+
+        // Background verify: re-query after pipeline has time to persist
+        setTimeout(() => this.loadTree(), 3000);
       }
     });
   }
@@ -124,8 +128,9 @@ export class NotesNotebooksColumn implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.loadTree();
+        this.updateFolderOptimistically(node.folder.id, result);
         this.treeChanged.emit();
+        setTimeout(() => this.loadTree(), 3000);
       }
     });
   }
@@ -162,11 +167,14 @@ export class NotesNotebooksColumn implements OnInit {
   }
 
   onColorChange(node: FolderTreeNode, color: string | null): void {
+    // Update local prefs for immediate UI feedback
     if (color) {
       this.prefs.setFolderColor(node.folder.id, color);
     } else {
       this.prefs.removeFolderColor(node.folder.id);
     }
+    // Persist to DB via pipeline
+    this.hierarchy.updateFolder(node.folder.id, { color });
   }
 
   // ── Drop targets for cross-notebook DnD ──
@@ -214,11 +222,78 @@ export class NotesNotebooksColumn implements OnInit {
     }
   }
 
+  /** Resolve color: local preference overrides DB color. */
+  resolveColor(node: FolderTreeNode): string | null {
+    return this.folderColors()[node.folder.id] ?? node.folder.color ?? null;
+  }
+
   accessLabel(level: string): string {
     switch (level) {
       case 'personal': return 'Personal';
       case 'project': return 'Project';
       default: return 'Boundary';
     }
+  }
+
+  // ── Optimistic tree mutations ──
+
+  /** Insert a newly created folder into the tree without re-querying GQL. */
+  private insertFolderOptimistically(folder: { id: string; name: string; parent_id?: string | null; description?: string; color?: string | null; access_level?: string; sort_order?: number }): void {
+    const newNode: FolderTreeNode = {
+      folder: {
+        ...folder,
+        parent_id: folder.parent_id ?? null,
+        color: folder.color ?? null,
+        access_level: folder.access_level ?? 'boundary',
+        sort_order: folder.sort_order ?? 0,
+        note_count: 0,
+        subfolder_count: 0,
+      } as any,
+      children: [],
+      level: 0,
+      expanded: false,
+    };
+
+    const currentTree = this.tree();
+    const parentId = folder.parent_id;
+
+    if (!parentId) {
+      // Root-level notebook
+      this.tree.set([...currentTree, newNode]);
+    } else {
+      // Child folder — find parent and insert
+      const updatedTree = this.insertIntoTree(currentTree, parentId, newNode);
+      this.tree.set(updatedTree);
+    }
+  }
+
+  /** Update an existing folder's properties in the tree. */
+  private updateFolderOptimistically(folderId: string, updated: { name?: string; description?: string; color?: string | null }): void {
+    const patchNode = (nodes: FolderTreeNode[]): FolderTreeNode[] =>
+      nodes.map(n => {
+        if (n.folder.id === folderId) {
+          return {
+            ...n,
+            folder: { ...n.folder, ...updated },
+          };
+        }
+        return { ...n, children: patchNode(n.children) };
+      });
+    this.tree.set(patchNode(this.tree()));
+  }
+
+  /** Recursively insert a node under the given parentId. */
+  private insertIntoTree(nodes: FolderTreeNode[], parentId: string, newNode: FolderTreeNode): FolderTreeNode[] {
+    return nodes.map(n => {
+      if (n.folder.id === parentId) {
+        newNode.level = n.level + 1;
+        return {
+          ...n,
+          folder: { ...n.folder, subfolder_count: (n.folder.subfolder_count ?? 0) + 1 },
+          children: [...n.children, newNode],
+        };
+      }
+      return { ...n, children: this.insertIntoTree(n.children, parentId, newNode) };
+    });
   }
 }

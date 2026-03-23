@@ -108,7 +108,7 @@ interface ParentOption {
     </mat-dialog-actions>
   `,
   styles: [`
-    .full-width { width: 100%; }
+    .full-width { width: 100%; margin-bottom: 4px; }
     .color-section { margin-bottom: 1rem; }
     .color-label {
       display: block;
