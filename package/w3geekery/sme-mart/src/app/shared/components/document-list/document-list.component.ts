@@ -125,9 +125,10 @@ export class DocumentListComponent implements OnInit, OnDestroy {
   async loadDocuments(): Promise<void> {
     this.loading.set(true);
     try {
-      const docs = await this.docService.listDocuments(this.engagementId);
-      this.documents.set(docs);
-      this.rebuildViewUrls(docs);
+      // Use OrgDocumentService (GQL) instead of DocumentService (Neon)
+      const docs = await this.orgDocService.listDocuments(this.engagementId);
+      this.documents.set(docs as unknown as EngagementDocument[]);
+      this.rebuildViewUrls(docs as unknown as EngagementDocument[]);
     } catch (err: any) {
       this.snackBar.open(`Failed to load documents: ${err.message}`, 'Dismiss', { duration: 5000 });
     } finally {

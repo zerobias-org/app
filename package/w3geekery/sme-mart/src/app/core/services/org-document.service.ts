@@ -29,6 +29,7 @@ import type {
 import type { DocumentType } from '../models/document.model';
 
 export interface OrgDocListOptions {
+  engagementId?: string;
   documentType?: DocumentType;
   archived?: boolean;
   pageNumber?: number;
@@ -151,10 +152,12 @@ export class OrgDocumentService {
     const pageSize = opts?.pageSize ?? 50;
 
     const filters: Record<string, string> = {
-      engagementId: `.eq.${orgId}`,
       archived: `.eq.${archived}`,
     };
 
+    if (opts?.engagementId) {
+      filters['engagementId'] = `.eq.${opts.engagementId}`;
+    }
     if (opts?.documentType) {
       filters['documentType'] = `.eq.${opts.documentType}`;
     }
@@ -197,16 +200,18 @@ export class OrgDocumentService {
     targetId: string,
     orgId: string,
   ): Promise<OrgDocumentDetail[]> {
-    // Query GQL for documents (filtering by shared_with relationship not yet implemented)
     // TODO(Plan 046): Implement document sharing queries in GQL schema
+    const filters: Record<string, string> = {
+      archived: '.eq.false',
+    };
+    if (targetType === 'engagement') {
+      filters['engagementId'] = `.eq.${targetId}`;
+    }
     const result = await this.graphqlRead.query<GqlDocumentResponse>(
       'SmeMartDocument',
       this.getDocumentFields(),
       {
-        filters: {
-          orgId: `.eq.${orgId}`,
-          archived: '.eq.false',
-        },
+        filters,
         pageNumber: 1,
         pageSize: 100,
       },
@@ -382,21 +387,20 @@ export class OrgDocumentService {
   private getDocumentFields(): string[] {
     return [
       'id',
-      'engagementId',
-      'zbFileId',
-      'zbFileVersionId',
-      'filename',
-      'mimeType',
-      'fileSizeBytes',
-      'documentType',
-      'displayName',
+      'name',
       'description',
-      'zbTaskId',
-      'zbTaskAttachmentId',
-      'uploadedByZerobiasUserId',
+      'engagementId',
       'archived',
-      'createdAt',
-      'updatedAt',
+      'displayName',
+      'uploadedByZerobiasUserId',
+      'documentType',
+      'fileVersionId',
+      'size',
+      'mimeType',
+      'downloadUrl',
+      'viewUrl',
+      'dateCreated',
+      'dateLastModified',
     ];
   }
 }

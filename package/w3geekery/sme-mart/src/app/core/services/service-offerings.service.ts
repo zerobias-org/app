@@ -30,7 +30,9 @@ export class ServiceOfferingsService {
     const pageSize = options?.pageSize ?? 50;
 
     const gqlOptions: GqlQueryOptions = {
-      filters: { isActive: '.eq.true' },
+      filters: {
+        isActive: '.eq.true',
+      },
       pageNumber,
       pageSize,
     };
@@ -155,19 +157,19 @@ export class ServiceOfferingsService {
   private getServiceOfferingFields(): string[] {
     return [
       'id',
-      'providerId',
-      'title',
+      'name',
       'description',
+      'providerId',
+      'isActive',
       'category',
       'subcategory',
       'pricingType',
       'price',
       'deliveryTime',
-      'includes',
-      'requirements',
-      'isActive',
-      'createdAt',
-      'updatedAt',
+      'serviceIncludes',
+      'serviceRequirements',
+      'dateCreated',
+      'dateLastModified',
     ];
   }
 }

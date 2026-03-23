@@ -181,7 +181,7 @@ export class NotesService {
         filters: {
           engagementId: `.eq.${engagementId}`,
           archived: '.eq.false',
-          title: `.ilike.%${query}%`,
+          name: `.ilike.%${query}%`,
         },
         pageNumber,
         pageSize,
@@ -212,11 +212,8 @@ export class NotesService {
         engagementId: `.eq.${engagementId}`,
         archived: '.eq.false',
       };
-
       if (folderId) {
         filters['folderId'] = `.eq.${folderId}`;
-      } else {
-        filters['folderId'] = '.is.null';
       }
 
       const gqlOptions: GqlQueryOptions = {
@@ -252,7 +249,7 @@ export class NotesService {
         filters: {
           engagementId: `.eq.${engagementId}`,
           archived: '.eq.false',
-          body: `.ilike.%sme-doc://${docId}%`,
+          content: `.ilike.%sme-doc://${docId}%`,
         },
         pageNumber,
         pageSize,
@@ -283,25 +280,19 @@ export class NotesService {
   private getNoteFields(): string[] {
     return [
       'id',
-      'title',
-      'body',
+      'name',
+      'description',
       'engagementId',
       'folderId',
-      'authorZerobiasUserId',
-      'updatedByZerobiasUserId',
       'archived',
-      'accessLevel',
+      'authorZerobiasUserId',
       'isMeetingMinutes',
-      'meetingDate',
-      'meetingDurationMinutes',
-      'backingTaskId',
-      'injectedToTaskId',
-      'injectedCommentId',
-      'injectedAt',
       'boundaryId',
       'projectId',
-      'createdAt',
-      'updatedAt',
+      'content',
+      'accessLevel',
+      'dateCreated',
+      'dateLastModified',
     ];
   }
 }

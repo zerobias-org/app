@@ -26,9 +26,11 @@ export class ReviewsService {
    * Queries GraphQL with providerId and optional approved filter, returns array (no pagination).
    */
   async listReviewsByProvider(providerId: string, approvedOnly = true): Promise<Review[]> {
-    const filters: Record<string, string> = { providerId: `.eq.${providerId}` };
+    const filters: Record<string, string> = {
+      providerId: `.eq.${providerId}`,
+    };
     if (approvedOnly) {
-      filters['approved'] = '.eq.true';
+      filters['status'] = '.eq.approved';
     }
 
     const gqlOptions: GqlQueryOptions = {
@@ -86,7 +88,7 @@ export class ReviewsService {
     const pageSize = options?.pageSize ?? 50;
 
     const gqlOptions: GqlQueryOptions = {
-      filters: { approved: '.eq.false' },
+      filters: { status: '.eq.pending' },
       pageNumber,
       pageSize,
     };
@@ -221,16 +223,16 @@ export class ReviewsService {
   private getReviewFields(): string[] {
     return [
       'id',
+      'name',
+      'description',
       'providerId',
-      'reviewerZerobiasUserId',
       'engagementId',
+      'reviewerZerobiasUserId',
       'rating',
       'reviewText',
-      'approved',
-      'approvedAt',
-      'approvedBy',
-      'createdAt',
-      'updatedAt',
+      'status',
+      'dateCreated',
+      'dateLastModified',
     ];
   }
 }

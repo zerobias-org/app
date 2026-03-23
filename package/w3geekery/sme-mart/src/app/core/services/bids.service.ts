@@ -27,7 +27,9 @@ export class BidsService {
    */
   async listBidsByRequest(requestId: string): Promise<Bid[]> {
     const gqlOptions: GqlQueryOptions = {
-      filters: { engagementId: `.eq.${requestId}` },
+      filters: {
+        engagementId: `.eq.${requestId}`,
+      },
       pageSize: 100,
     };
 
@@ -46,7 +48,9 @@ export class BidsService {
    */
   async listBidSummaries(requestId: string): Promise<BidSummaryRow[]> {
     const gqlOptions: GqlQueryOptions = {
-      filters: { engagementId: `.eq.${requestId}` },
+      filters: {
+        engagementId: `.eq.${requestId}`,
+      },
       pageSize: 100,
     };
 
@@ -245,7 +249,7 @@ export class BidsService {
       filters: {
         engagementId: `.eq.${requestId}`,
         providerId: `.eq.${providerId}`,
-        status: `.eq.draft`,
+        status: '.eq.draft',
       },
       pageSize: 1,
     };
@@ -333,25 +337,22 @@ export class BidsService {
   private getBidFields(): string[] {
     return [
       'id',
+      'name',
+      'description',
       'engagementId',
       'providerId',
       'coverLetter',
-      'proposedPrice',
-      'proposedTimeline',
+      'price',
       'status',
+      'timeline',
       'executiveSummary',
       'teamDescription',
       'totalEstimatedHours',
       'pricingBreakdown',
       'wizardData',
       'wizardStep',
-      'aiAssisted',
-      'aiModel',
-      'aiGeneratedAt',
-      'createdAt',
-      'updatedAt',
-      // Nested bidResponses for compliance
-      'bidResponses(id,bidId,requirementId,complianceStatus,responseText,estimatedHours,estimatedCost,certificationRef,readyDate,respondedAt,updatedAt)',
+      'dateCreated',
+      'dateLastModified',
     ];
   }
 

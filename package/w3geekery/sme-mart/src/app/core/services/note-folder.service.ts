@@ -126,20 +126,38 @@ export class NoteFolderService {
     engagementId: string,
   ): Promise<NoteFolderTreeNode[]> {
     // Step 1: Query flat list of all folders for this engagement
+    // NOTE: `parent` is a GQL relationship (not a scalar `parentId`), so we
+    // query `parent { id }` and flatten it to `parentId` before mapping.
     const result = await this.graphqlRead.query<GqlNoteFolderResponse>(
       'NoteFolder',
-      ['id', 'engagementId', 'parentId', 'name', 'description', 'sortOrder',
-       'color', 'createdByZerobiasUserId', 'createdAt', 'updatedAt', 'accessLevel'],
+      // Object inherited: id, name, description, dateCreated, dateLastModified
+      // Custom (from NoteFolder.yml): engagementId, color, sortOrder
+      // Relationships (traversed as nested): parent { id }
+      ['id', 'name', 'description', 'engagementId', 'color', 'sortOrder', 'dateCreated', 'dateLastModified', 'dateDeleted', 'parent { id }'],
       {
-        filters: { engagementId: `.eq.${engagementId}` },
+        filters: {
+          engagementId: `.eq.${engagementId}`,
+        },
         pageSize: 1000,
       },
     );
 
-    // Step 2: Map all results to Neon type
-    const allFolders: NoteFolder[] = result.items.map(gqlFolder =>
-      mapGqlToNeon<NoteFolder>(gqlFolder, NOTE_FOLDER_FIELD_MAPPING.gqlToNeon),
-    );
+    // Step 2: Flatten nested `parent { id }` → `parentId`, filter deleted, then map to Neon type
+    const allFolders: NoteFolder[] = result.items
+      .filter(gqlFolder => {
+        // GQL doesn't auto-filter by dateDeleted — exclude soft-deleted folders
+        const deleted = (gqlFolder as unknown as Record<string, unknown>)['dateDeleted'];
+        return !deleted;
+      })
+      .map(gqlFolder => {
+        const flat = { ...gqlFolder } as Record<string, unknown>;
+        // Flatten relationship: { parent: { id: "..." } } → { parentId: "..." }
+        const parent = flat['parent'] as { id: string } | null | undefined;
+        flat['parentId'] = parent?.id ?? null;
+        delete flat['parent'];
+        delete flat['dateDeleted'];
+        return mapGqlToNeon<NoteFolder>(flat, NOTE_FOLDER_FIELD_MAPPING.gqlToNeon);
+      });
 
     // Step 3: Build in-memory tree
     const folderMap = new Map<string, NoteFolder>(
@@ -223,17 +241,17 @@ export class NoteFolderService {
   }
 
   /**
-   * Delete (soft-delete) a note folder by setting archived: true.
+   * Delete (soft-delete) a note folder by setting dateDeleted.
    *
-   * Returns optimistically while Pipeline push happens in background.
+   * Uses Object base class `dateDeleted` (YYYY-MM-DD format) which is
+   * recognized by AuditgraphDB. The `archived` flag was Neon-era only.
    */
   async deleteFolder(folderId: string): Promise<void> {
-    const now = new Date().toISOString();
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
 
     const gqlData: Record<string, unknown> = {
       id: folderId,
-      archived: true,
-      updatedAt: now,
+      dateDeleted: today,
     };
 
     // Fire-and-forget push

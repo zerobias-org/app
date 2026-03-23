@@ -31,7 +31,7 @@ export const ENGAGEMENT_FIELD_MAPPING = {
     status: 'status',
     engagement_tag: 'engagementTag',
     zerobias_tag_id: 'zerobiasTagId',
-    zerobias_boundary_id: 'zerobiasTagId', // Link to platform boundary
+    zerobias_boundary_id: 'zerobiasBoundaryId',
     zerobias_task_id: 'zerobiasTaskId',
     created_at: 'createdAt',
     updated_at: 'updatedAt',
@@ -50,6 +50,7 @@ export const ENGAGEMENT_FIELD_MAPPING = {
     status: 'status',
     engagementTag: 'engagement_tag',
     zerobiasTagId: 'zerobias_tag_id',
+    zerobiasBoundaryId: 'zerobias_boundary_id',
     zerobiasTaskId: 'zerobias_task_id',
     createdAt: 'created_at',
     updatedAt: 'updated_at',
@@ -58,7 +59,7 @@ export const ENGAGEMENT_FIELD_MAPPING = {
     dateLastModified: 'updated_at',
   },
   sourceSchema: 'zerobias-org/schema PR #7',
-  lastVerified: '2026-03-18',
+  lastVerified: '2026-03-20',
 } as const;
 
 /**
@@ -108,9 +109,15 @@ export const BID_FIELD_MAPPING = {
     aiGeneratedAt: 'ai_generated_at',
     createdAt: 'created_at',
     updatedAt: 'updated_at',
+    // Object base class date fields (GQL uses these names)
+    dateCreated: 'created_at',
+    dateLastModified: 'updated_at',
+    // GQL schema field names (Bid.yml uses price/timeline, not proposedPrice/proposedTimeline)
+    price: 'proposed_price',
+    timeline: 'proposed_timeline',
   },
   sourceSchema: 'zerobias-org/schema PR #7',
-  lastVerified: '2026-03-18',
+  lastVerified: '2026-03-19',
 } as const;
 
 /**
@@ -146,9 +153,11 @@ export const BID_RESPONSE_FIELD_MAPPING = {
     readyDate: 'ready_date',
     respondedAt: 'responded_at',
     updatedAt: 'updated_at',
+    dateCreated: 'created_at',
+    dateLastModified: 'updated_at',
   },
   sourceSchema: 'zerobias-org/schema PR #7',
-  lastVerified: '2026-03-18',
+  lastVerified: '2026-03-19',
 } as const;
 
 /**
@@ -203,9 +212,15 @@ export const NOTE_FIELD_MAPPING = {
     isMeetingMinutes: 'is_meeting_minutes',
     boundaryId: 'boundary_id',
     projectId: 'project_id',
+    // Object base class date fields (GQL uses these names)
+    dateCreated: 'created_at',
+    dateLastModified: 'updated_at',
+    // GQL schema field names (Note.yml uses content, not body; Object uses name, not title)
+    content: 'body',
+    name: 'title',
   },
   sourceSchema: 'zerobias-org/schema PR #7',
-  lastVerified: '2026-03-18',
+  lastVerified: '2026-03-19',
 } as const;
 
 /**
@@ -242,9 +257,11 @@ export const NOTE_FOLDER_FIELD_MAPPING = {
     accessLevel: 'access_level',
     sortOrder: 'sort_order',
     color: 'color',
+    dateCreated: 'created_at',
+    dateLastModified: 'updated_at',
   },
   sourceSchema: 'zerobias-org/schema PR #7',
-  lastVerified: '2026-03-18',
+  lastVerified: '2026-03-19',
 } as const;
 
 /**
@@ -267,8 +284,8 @@ export const SERVICE_OFFERING_FIELD_MAPPING = {
     pricing_type: 'pricingType',
     price: 'price',
     delivery_time: 'deliveryTime',
-    includes: 'includes', // Array of strings
-    requirements: 'requirements',
+    includes: 'serviceIncludes', // Renamed: 'includes' collides with Object base class
+    requirements: 'serviceRequirements', // Renamed: 'requirements' collides with Object base class
     is_active: 'isActive',
     created_at: 'createdAt',
     updated_at: 'updatedAt',
@@ -283,14 +300,16 @@ export const SERVICE_OFFERING_FIELD_MAPPING = {
     pricingType: 'pricing_type',
     price: 'price',
     deliveryTime: 'delivery_time',
-    includes: 'includes',
-    requirements: 'requirements',
+    serviceIncludes: 'includes',
+    serviceRequirements: 'requirements',
     isActive: 'is_active',
     createdAt: 'created_at',
     updatedAt: 'updated_at',
+    dateCreated: 'created_at',
+    dateLastModified: 'updated_at',
   },
   sourceSchema: 'zerobias-org/schema PR #7',
-  lastVerified: '2026-03-18',
+  lastVerified: '2026-03-19',
 } as const;
 
 /**
@@ -326,9 +345,11 @@ export const REVIEW_FIELD_MAPPING = {
     approvedBy: 'approved_by',
     createdAt: 'created_at',
     updatedAt: 'updated_at',
+    dateCreated: 'created_at',
+    dateLastModified: 'updated_at',
   },
   sourceSchema: 'zerobias-org/schema PR #7',
-  lastVerified: '2026-03-18',
+  lastVerified: '2026-03-19',
 } as const;
 
 /**
@@ -375,9 +396,16 @@ export const DOCUMENT_FIELD_MAPPING = {
     createdAt: 'created_at',
     updatedAt: 'updated_at',
     archived: 'archived',
+    dateCreated: 'created_at',
+    dateLastModified: 'updated_at',
+    // File base class field mappings (GQL names → Neon names)
+    fileVersionId: 'zb_file_version_id',
+    size: 'file_size_bytes',
+    downloadUrl: 'download_url',
+    viewUrl: 'view_url',
   },
   sourceSchema: 'zerobias-org/schema PR #7',
-  lastVerified: '2026-03-18',
+  lastVerified: '2026-03-19',
 } as const;
 
 // ─────────────────────────────────────────────────────────────────────────────
