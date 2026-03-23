@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { NoteFolderService, type NoteFolderTreeNode } from './note-folder.service';
+import { NotesService } from './notes.service';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
 import { ImpersonationService } from './impersonation.service';
@@ -24,6 +25,7 @@ export interface FolderTreeNode {
 @Injectable({ providedIn: 'root' })
 export class NoteHierarchyService {
   private readonly folderService = inject(NoteFolderService);
+  private readonly notesService = inject(NotesService);
   private readonly pipelineWrite = inject(PipelineWriteService);
   private readonly graphqlRead = inject(GraphqlReadService);
   private readonly impersonation = inject(ImpersonationService);
@@ -78,21 +80,24 @@ export class NoteHierarchyService {
   // ── Tree building ──
 
   async getFolderTree(engagementId: string): Promise<FolderTreeNode[]> {
-    const gqlTree = await this.folderService.getNoteFolderTree(engagementId);
-    return this.transformTree(gqlTree, 0);
+    // Fetch tree and note counts in parallel
+    const [gqlTree, noteCounts] = await Promise.all([
+      this.folderService.getNoteFolderTree(engagementId),
+      this.notesService.getNoteCounts(engagementId),
+    ]);
+    return this.transformTree(gqlTree, 0, noteCounts);
   }
 
   /**
    * Transform NoteFolderTreeNode[] (from NoteFolderService) to FolderTreeNode[]
-   * (expected by UI components). Adds level, expanded, and count defaults.
+   * (expected by UI components). Adds level, expanded, and counts.
    */
-  private transformTree(nodes: NoteFolderTreeNode[], level: number): FolderTreeNode[] {
+  private transformTree(nodes: NoteFolderTreeNode[], level: number, noteCounts: Map<string, number>): FolderTreeNode[] {
     return nodes.map(node => {
-      const children = node.children ? this.transformTree(node.children, level + 1) : [];
+      const children = node.children ? this.transformTree(node.children, level + 1, noteCounts) : [];
       const folder: NoteFolderWithCounts = {
         ...node,
-        // Counts not available from GQL (were from Neon VIEW) — default to 0
-        note_count: 0,
+        note_count: noteCounts.get(node.id) ?? 0,
         subfolder_count: children.length,
       };
       return {

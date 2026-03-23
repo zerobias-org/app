@@ -55,7 +55,7 @@
           <span class="tab-title" #tabTitleEl
                 [matTooltip]="node.folder.name" [matTooltipShowDelay]="300" matTooltipPosition="above"
                 [matTooltipDisabled]="isDragging() || tabTitleEl.scrollWidth <= tabTitleEl.clientWidth">{{ node.folder.name }}</span>
-          <span class="tab-count">{{ node.folder.note_count }}</span>
+          <span class="tab-count" [matTooltip]="totalNoteCount(node) + ' notes'" [matTooltipShowDelay]="500">{{ node.folder.subfolder_count }}</span>
 
           <!-- Context menu -->
           <span class="menu-btn" [matMenuTriggerFor]="notebookMenu"

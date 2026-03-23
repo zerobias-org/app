@@ -222,6 +222,15 @@ export class NotesNotebooksColumn implements OnInit {
     }
   }
 
+  /** Total note count across a notebook and all its descendant folders. */
+  totalNoteCount(node: FolderTreeNode): number {
+    let count = node.folder.note_count ?? 0;
+    for (const child of node.children) {
+      count += this.totalNoteCount(child);
+    }
+    return count;
+  }
+
   /** Resolve color: local preference overrides DB color. */
   resolveColor(node: FolderTreeNode): string | null {
     return this.folderColors()[node.folder.id] ?? node.folder.color ?? null;

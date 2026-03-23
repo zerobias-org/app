@@ -386,6 +386,13 @@ export class NotesPanel implements OnInit {
     );
   }
 
+  /** Called on title blur — updates sidebar list title immediately without saving. */
+  onNoteTitleChanged(event: { id: string; title: string }): void {
+    this.notes.update(list =>
+      list.map(n => n.id === event.id ? { ...n, title: event.title } : n),
+    );
+  }
+
   /** Called when the inline editor deletes (archives) a note. */
   onNoteDeleted(noteId: string): void {
     this.notes.update(list => list.filter(n => n.id !== noteId));

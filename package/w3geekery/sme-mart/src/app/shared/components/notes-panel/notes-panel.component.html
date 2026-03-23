@@ -133,6 +133,7 @@
       [engagementId]="engId()"
       (noteSaved)="onNoteSaved($event)"
       (noteDeleted)="onNoteDeleted($event)"
+      (titleChanged)="onNoteTitleChanged($event)"
       (docLinkClick)="onDocLinkClick($event)">
     </app-note-editor-panel>
   </mat-sidenav-content>

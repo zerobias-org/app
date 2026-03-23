@@ -267,6 +267,32 @@ export class NotesService {
   // Use SmeResourceTagEditor or ResourceTagAutocomplete component for tag UI.
 
   /**
+   * Get note counts per folder for an engagement.
+   * Returns a map of folderId → count (only non-archived notes).
+   */
+  async getNoteCounts(engagementId: string): Promise<Map<string, number>> {
+    const result = await this.graphqlRead.query<{ id: string; folderId: string | null }>(
+      'Note',
+      ['id', 'folderId'],
+      {
+        filters: {
+          engagementId: `.eq.${engagementId}`,
+          archived: '.eq.false',
+        },
+        pageSize: 1000,
+      },
+    );
+
+    const counts = new Map<string, number>();
+    for (const note of result.items) {
+      if (note.folderId) {
+        counts.set(note.folderId, (counts.get(note.folderId) ?? 0) + 1);
+      }
+    }
+    return counts;
+  }
+
+  /**
    * Get standard field list for Note GQL queries.
    */
   private getNoteFields(): string[] {

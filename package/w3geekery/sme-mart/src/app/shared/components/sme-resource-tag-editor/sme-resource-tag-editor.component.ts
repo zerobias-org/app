@@ -92,6 +92,9 @@ export class SmeResourceTagEditor implements OnInit, OnChanges {
         this.resourceId, this.resourceType,
       );
       this.assignedTags.set(tags);
+    } catch {
+      // TODO: migrate SmeMartResourceService.getTagsForResource from Neon to hydra/GQL
+      this.assignedTags.set([]);
     } finally {
       this.loading.set(false);
     }

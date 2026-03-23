@@ -146,10 +146,19 @@ export class NoteEditorPanel {
     setTimeout(() => this.accessSelect?.open(), 0);
   }
 
+  /** Emitted on title blur to update the note name in the sidebar list immediately. */
+  @Output() titleChanged = new EventEmitter<{ id: string; title: string }>();
+
   onTitleBlur(): void {
-    // Stay in edit mode if title changed (form is dirty) — user needs to save.
     const n = this.note();
-    if (n && this.form.get('title')!.value === n.title) {
+    if (!n) return;
+    const newTitle = this.form.get('title')!.value?.trim();
+    if (newTitle && newTitle !== n.title) {
+      // Update local note so the editor header reflects the change
+      this.note.set({ ...n, title: newTitle });
+      // Notify parent to update the sidebar list immediately
+      this.titleChanged.emit({ id: n.id, title: newTitle });
+    } else {
       this.editingTitle.set(false);
     }
   }
