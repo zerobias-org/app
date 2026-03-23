@@ -39,20 +39,11 @@ export class NotesService {
     // Build GQL data with camelCase field names
     const gqlData: Record<string, unknown> = {
       id: crypto.randomUUID(),
+      name: data.title || 'Untitled Note',
+      content: data.body ?? null,
       engagementId,
-      title: data.title,
-      body: data.body,
       folderId: data.folder_id ?? null,
       accessLevel: data.access_level ?? 'boundary',
-      isMeetingMinutes: data.is_meeting_minutes ?? false,
-      meetingDate: data.meeting_date ?? null,
-      meetingDurationMinutes: data.meeting_duration_minutes ?? null,
-      boundaryId: data.boundary_id ?? null,
-      projectId: data.project_id ?? null,
-      authorZerobiasUserId: userId,
-      archived: false,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
     };
 
     // Fire-and-forget Pipeline push

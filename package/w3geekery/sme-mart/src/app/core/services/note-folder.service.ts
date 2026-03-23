@@ -126,14 +126,12 @@ export class NoteFolderService {
     engagementId: string,
   ): Promise<NoteFolderTreeNode[]> {
     // Step 1: Query flat list of all folders for this engagement
-    // NOTE: `parent` is a GQL relationship (not a scalar `parentId`), so we
-    // query `parent { id }` and flatten it to `parentId` before mapping.
+    // `parentId` is now a scalar field (schema v1.0.3) — no need to traverse `parent { id }`.
     const result = await this.graphqlRead.query<GqlNoteFolderResponse>(
       'NoteFolder',
       // Object inherited: id, name, description, dateCreated, dateLastModified
-      // Custom (from NoteFolder.yml): engagementId, color, sortOrder
-      // Relationships (traversed as nested): parent { id }
-      ['id', 'name', 'description', 'engagementId', 'color', 'sortOrder', 'dateCreated', 'dateLastModified', 'dateDeleted', 'parent { id }'],
+      // Custom (from NoteFolder.yml): engagementId, parentId, color, sortOrder
+      ['id', 'name', 'description', 'engagementId', 'parentId', 'color', 'sortOrder', 'dateCreated', 'dateLastModified', 'dateDeleted'],
       {
         filters: {
           engagementId: `.eq.${engagementId}`,
@@ -142,7 +140,7 @@ export class NoteFolderService {
       },
     );
 
-    // Step 2: Flatten nested `parent { id }` → `parentId`, filter deleted, then map to Neon type
+    // Step 2: Filter deleted, then map to Neon type
     const allFolders: NoteFolder[] = result.items
       .filter(gqlFolder => {
         // GQL doesn't auto-filter by dateDeleted — exclude soft-deleted folders
@@ -151,10 +149,6 @@ export class NoteFolderService {
       })
       .map(gqlFolder => {
         const flat = { ...gqlFolder } as Record<string, unknown>;
-        // Flatten relationship: { parent: { id: "..." } } → { parentId: "..." }
-        const parent = flat['parent'] as { id: string } | null | undefined;
-        flat['parentId'] = parent?.id ?? null;
-        delete flat['parent'];
         delete flat['dateDeleted'];
         return mapGqlToNeon<NoteFolder>(flat, NOTE_FOLDER_FIELD_MAPPING.gqlToNeon);
       });

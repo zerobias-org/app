@@ -173,8 +173,8 @@ export const NOTE_FIELD_MAPPING = {
     id: 'id',
     engagement_id: 'engagementId',
     folder_id: 'folderId',
-    title: 'title', // Note uses 'title' (not 'name' like Engagement)
-    body: 'body', // Note content stored as 'body'
+    title: 'name', // GQL Object base class uses 'name'; Neon used 'title'
+    body: 'content', // GQL Note.yml uses 'content'; Neon used 'body'
     author_zerobias_user_id: 'authorZerobiasUserId',
     created_at: 'createdAt',
     updated_at: 'updatedAt',
@@ -195,8 +195,8 @@ export const NOTE_FIELD_MAPPING = {
     id: 'id',
     engagementId: 'engagement_id',
     folderId: 'folder_id',
-    title: 'title',
-    body: 'body',
+    name: 'title',
+    content: 'body',
     authorZerobiasUserId: 'author_zerobias_user_id',
     createdAt: 'created_at',
     updatedAt: 'updated_at',

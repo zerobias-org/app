@@ -61,9 +61,21 @@ export class PipelineWriteService {
   ): Promise<void> {
     const classId = SME_MART_CLASS_IDS[className];
     const pipelineApi = this.clientApi.platformClient.getPipelineApi();
+
+    // Ensure every object has `name` (required by AuditgraphDB Object base class).
+    // If not provided, derive from common fields or use className + id as fallback.
+    const ensured = (data as Record<string, unknown>[]).map(obj => {
+      if (obj['name']) return obj;
+      const name = obj['title'] || obj['coverLetter']?.toString().substring(0, 100)
+        || obj['reviewText']?.toString().substring(0, 100)
+        || obj['displayName'] || obj['category']
+        || `${className}-${obj['id'] ?? 'unknown'}`;
+      return { ...obj, name };
+    });
+
     const batch = new SimpleBatch(
       new UUID(classId),
-      data as Record<string, unknown>[],
+      ensured,
       tagIds.map(id => new UUID(id)),
     );
     await pipelineApi.receive(new UUID(PIPELINE_ID), batch);
