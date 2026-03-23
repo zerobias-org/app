@@ -215,9 +215,6 @@ export const NOTE_FIELD_MAPPING = {
     // Object base class date fields (GQL uses these names)
     dateCreated: 'created_at',
     dateLastModified: 'updated_at',
-    // GQL schema field names (Note.yml uses content, not body; Object uses name, not title)
-    content: 'body',
-    name: 'title',
   },
   sourceSchema: 'zerobias-org/schema PR #7',
   lastVerified: '2026-03-19',
