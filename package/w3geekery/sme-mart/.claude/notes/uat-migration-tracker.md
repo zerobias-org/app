@@ -99,6 +99,46 @@ Neon DB is independent of ZeroBias environment — same database across CI/QA/UA
 
 ---
 
+### 7. GQL Schema (AuditgraphDB)
+
+Schema class IDs are **deterministic** (derived from YAML content) — same across all environments (prod, UAT, CI). No per-environment class ID mapping needed.
+
+| Entity | Class ID | Status |
+|--------|----------|--------|
+| Engagement | `7711aa41-e55b-5cda-9b7a-35844a2006a1` | ✅ Live on UAT |
+| Bid | `ccddd2e5-e455-585e-9bb7-902903228b0d` | ✅ Live on UAT |
+| BidResponse | `a024a0b5-50df-59cc-ba8e-25fcd82f69c3` | ✅ Live on UAT |
+| ServiceOffering | `ff689173-4787-52c5-808b-6b2435a625a7` | ✅ Live on UAT |
+| Note | `fe7c58a9-c13b-5a4b-817f-5c4b419ed28c` | ✅ Live on UAT |
+| NoteFolder | `4d50975e-d4dc-5654-8e43-f3c5da01f49d` | ✅ Live on UAT |
+| Review | `ef5d821a-46f5-5f44-8e59-0854777d803c` | ✅ Live on UAT |
+| SmeMartDocument | `e1497ca8-a621-57f6-9263-f9a19fea3c34` | ✅ Live on UAT |
+| SmeMartProject | `c66114a2-48e2-5b93-b7d6-7ccd6ef45a03` | ✅ Live on UAT |
+| SmeMartBoard | `20be589b-194e-5227-ba6e-c7edae42f34b` | ✅ Live on UAT |
+| SmeMartActivity | `36405d75-76f1-5f4b-ab3b-22c562d41e07` | ✅ Live on UAT |
+| SmeMartWorkflow | `295938d2-5c63-5140-a945-2ba28b88b268` | ✅ Live on UAT |
+| SmeMartTask | `e15f1e0a-1bc9-5002-b4bc-3482d4499561` | ✅ Live on UAT |
+| ProjectPrd | `920fca70-4dcf-5d9e-ba16-1dfd0f8061f0` | ✅ Live on UAT |
+| PrdSection | `d30445f3-e26d-5153-83be-fe810f63220c` | ✅ Live on UAT |
+| ProjectPlan | `bc6159da-19a3-51d0-89a8-f2147078c760` | ✅ Live on UAT |
+| PlanMilestone | `ac1a1cc8-db44-5c1d-b359-5fb02e3d381d` | ✅ Live on UAT |
+
+**Key insight:** Class IDs are deterministic UUIDs from schema YAML — same across all ZB environments. Pipeline IDs are NOT — they're per-environment.
+
+### 8. Receiver Pipeline (AuditgraphDB)
+
+| Entity | Prod Value | UAT Value | Status |
+|--------|------------|-----------|--------|
+| Pipeline name | SME Mart Entity Pipeline | SME Mart Entity Pipeline | ✅ Done |
+| Pipeline ID | `091d5068-0527-4f45-9839-37f6d5c1669e` | `591861da-0eac-45b3-ad1c-eb4e46734402` | ✅ Done |
+| Boundary | Platform (`2842fab1-ceff-4ec4-bf09-ce5e7c33c3e2`) | Platform (`2f2d220c-d688-4925-9f97-78d3afc80b00`) | ✅ Done |
+| Org | Zerobias (`57c741cf-a58e-5efc-bf2f-93c4f6cf76ec`) | Zerobias (`57c741cf-a58e-5efc-bf2f-93c4f6cf76ec`) | ✅ Same |
+| Boundary Product ID | `94f0b2f2-e795-4db9-b0e8-d04fa499d06c` | `2095d8c2-1cab-4117-8e7e-bf2864e7747d` | ✅ Done |
+| Execution Mode | `receiver` | `receiver` | — |
+| Batch Mode | `differential` | `differential` | — |
+
+---
+
 ## Notes
 
 - UAT uses **hydra** for tags/resources (same as what CI will eventually use)

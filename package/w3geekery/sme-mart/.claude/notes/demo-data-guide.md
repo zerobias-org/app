@@ -69,6 +69,42 @@ These 5 work_requests have been converted from RFPs to active engagements. Each 
 
 ---
 
+---
+
+## RFPs (Open — no `engagementTag`)
+
+These 4 engagements do NOT have an `engagementTag`, so they appear on the /rfps page.
+
+### 1. Penetration Testing for Healthcare Portal
+| Buyer | Category | Budget | Status | Bids |
+|-------|----------|--------|--------|------|
+| (unassigned) | Assessors | $12K–$18K fixed | open | 0 |
+
+**Demo value:** Open RFP with no bids yet. Shows the "waiting for bids" state.
+
+### 2. Cloud Security Posture Review
+| Buyer | Category | Budget | Status | Bids |
+|-------|----------|--------|--------|------|
+| (unassigned) | Advisors | $8K–$15K fixed | open | 2 pending (Gina $11K, Carlos $9.5K) |
+
+**Demo value:** Open RFP with competing bids from different specialties (auditor vs SOC analyst).
+
+### 3. AI-Powered Vulnerability Triage Agent
+| Buyer | Category | Budget | Status | Bids |
+|-------|----------|--------|--------|------|
+| (unassigned) | Agentic | $25K–$40K negotiable | open | 3 pending (Bob $35K, Sarah $28K, Clark $38K) |
+
+**Demo value:** Most competitive RFP. Three different approaches: AI agent (Bob), pipeline-native (Sarah), ZeroBias Hub module (Clark). Wide price spread.
+
+### 4. FedRAMP Readiness Assessment
+| Buyer | Category | Budget | Status | Bids |
+|-------|----------|--------|--------|------|
+| (unassigned) | Assessors | $30K–$50K fixed | draft | 0 |
+
+**Demo value:** Draft status — buyer hasn't published yet. Highest budget RFP.
+
+---
+
 ### 2. NIST CSF Implementation Advisor
 **What it demonstrates:** Advisory engagement, hourly billing, long timeline
 

@@ -4,6 +4,8 @@
 
 > **⚠️ UAT Migration In Progress:** CI/dev is being rebuilt with hydra. UAT is our temporary dev environment. See [`.claude/notes/uat-migration-tracker.md`](.claude/notes/uat-migration-tracker.md) for checklist and ID mapping. `npm run dev` now targets UAT.
 
+> **⚠️ ALWAYS prefer `~/Projects/w3geekery/zerobias-org-forks/` over `~/Projects/zb/` for every repo that exists in zerobias-org-forks (app, login, module, schema, etc.).** We are a 3rd-party developer — work from the w3geekery fork, push to the fork, and create cross-fork PRs to zerobias-org. Only use `~/Projects/zb/` for read-only reference unless specifically asked otherwise.
+
 ## Purpose
 
 SME Mart is a **marketplace for Subject Matter Experts** in compliance/cybersecurity — "Upwork meets Whop" for ZeroBias platform users. Built with **Angular 21**.

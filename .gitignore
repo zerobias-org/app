@@ -12,3 +12,6 @@ vercel.env
 
 # Deprecated Next.js prototype (archived, kept on disk for reference)
 package/w3geekery/sme-mart-nextjs-deprecated/
+
+# Session-specific context (not shared)
+**/restart_context.md
