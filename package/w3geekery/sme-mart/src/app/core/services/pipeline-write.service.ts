@@ -46,9 +46,35 @@ const PIPELINE_ID = environment.pipelineId;
  * All objects must conform to their class schema (id, name required;
  * custom fields as defined in w3geekery.sme-mart.schema YAML).
  */
+interface CacheEntry {
+  data: Record<string, unknown>;
+}
+
 @Injectable({ providedIn: 'root' })
 export class PipelineWriteService {
   private readonly clientApi = inject(ZerobiasClientApi);
+
+  /**
+   * Write-through cache for pipeline objects.
+   * Pipeline receive is full-replace — partial pushes null unmentioned fields.
+   * This cache lets services skip the GQL fetch on rapid successive edits
+   * (e.g., color → rename → move) by reusing the last-pushed full object.
+   */
+  private readonly cache = new Map<string, CacheEntry>();
+
+  private cacheKey(className: string, id: string): string {
+    return `${className}:${id}`;
+  }
+
+  /**
+   * Get a cached object if fresh (within TTL).
+   * Services should use: `cache.getCached(...) ?? await gqlRead.getById(...)`
+   */
+  getCached(className: SmeMartClassName, id: string): Record<string, unknown> | null {
+    const entry = this.cache.get(this.cacheKey(className, id));
+    if (!entry) return null;
+    return { ...entry.data };
+  }
 
   /**
    * Push one or more objects of a given class into AuditgraphDB.
@@ -79,6 +105,16 @@ export class PipelineWriteService {
       tagIds.map(id => new UUID(id)),
     );
     await pipelineApi.receive(new UUID(PIPELINE_ID), batch);
+
+    // Update cache with pushed objects (write-through)
+    for (const obj of ensured) {
+      const id = obj['id'] as string;
+      if (id) {
+        this.cache.set(this.cacheKey(className, id), {
+          data: { ...obj },
+        });
+      }
+    }
   }
 
   /**

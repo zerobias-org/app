@@ -44,6 +44,7 @@ export class NotesService {
       engagementId,
       folderId: data.folder_id ?? null,
       accessLevel: data.access_level ?? 'boundary',
+      archived: false,
     };
 
     // Fire-and-forget Pipeline push

@@ -203,30 +203,31 @@ export class NoteFolderService {
     folderId: string,
     data: UpdateNoteFolderRequest,
   ): Promise<NoteFolder> {
-    const userId = this.impersonation.effectiveUserId();
-    const now = new Date().toISOString();
+    // Use cache if fresh, otherwise fetch — pipeline receive is full-replace
+    const cached = this.pipelineWrite.getCached('NoteFolder', folderId);
+    const current = cached ?? await this.graphqlRead.getById<GqlNoteFolderResponse>(
+      'NoteFolder',
+      folderId,
+      ['id', 'name', 'description', 'engagementId', 'parentId', 'color', 'sortOrder', 'accessLevel', 'dateCreated', 'dateLastModified'],
+    );
 
-    // Build GQL data with updated fields
-    const gqlData: Record<string, unknown> = {
-      id: folderId,
-      updatedAt: now,
-      updatedByZerobiasUserId: userId,
+    // Merge updates onto current state
+    const merged: Record<string, unknown> = {
+      ...(current ?? { id: folderId }),
       ...Object.entries(data).reduce((acc, [key, value]) => {
-        if (value !== undefined) {
-          acc[key] = value;
-        }
+        if (value !== undefined) acc[key] = value;
         return acc;
       }, {} as Record<string, unknown>),
     };
 
     // Map to Neon type
     const neonData = mapGqlToNeon<NoteFolder>(
-      gqlData,
+      merged,
       NOTE_FOLDER_FIELD_MAPPING.gqlToNeon,
     );
 
-    // Fire-and-forget push
-    this.pipelineWrite.pushEntity('NoteFolder', gqlData).catch(err => {
+    // Fire-and-forget push (full object)
+    this.pipelineWrite.pushEntity('NoteFolder', merged).catch(err => {
       console.error('[NoteFolderService] Failed to push folder update to pipeline:', err);
     });
 
@@ -241,14 +242,21 @@ export class NoteFolderService {
    * recognized by AuditgraphDB. The `archived` flag was Neon-era only.
    */
   async deleteFolder(folderId: string): Promise<void> {
-    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+    // Use cache if fresh, otherwise fetch — pipeline receive is full-replace
+    const cached = this.pipelineWrite.getCached('NoteFolder', folderId);
+    const current = cached ?? await this.graphqlRead.getById<GqlNoteFolderResponse>(
+      'NoteFolder',
+      folderId,
+      ['id', 'name', 'description', 'engagementId', 'parentId', 'color', 'sortOrder', 'accessLevel', 'dateCreated', 'dateLastModified'],
+    );
 
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
     const gqlData: Record<string, unknown> = {
-      id: folderId,
+      ...(current ?? { id: folderId }),
       dateDeleted: today,
     };
 
-    // Fire-and-forget push
+    // Fire-and-forget push (full object with dateDeleted set)
     this.pipelineWrite.pushEntity('NoteFolder', gqlData).catch(err => {
       console.error('[NoteFolderService] Failed to soft-delete folder:', err);
     });
