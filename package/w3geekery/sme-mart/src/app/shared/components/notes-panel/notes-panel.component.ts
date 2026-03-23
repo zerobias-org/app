@@ -72,8 +72,8 @@ export class NotesPanel implements OnInit {
   readonly selectedFolderId = signal<string | null>(null);
   readonly selectedNoteId = signal<string | null>(null);
   readonly drawerOpen = signal(true);
-  readonly showNotebooks = signal(true);
-  readonly showFolders = signal(true);
+  readonly showNotebooks = signal(this.loadColumnState('notebooks', true));
+  readonly showFolders = signal(this.loadColumnState('folders', true));
 
   /** Active document-link filter (set via @Input or cleared by user). */
   readonly _docFilter = signal<string | null>(null);
@@ -181,11 +181,29 @@ export class NotesPanel implements OnInit {
   }
 
   toggleNotebooks(): void {
-    this.showNotebooks.update(v => !v);
+    this.showNotebooks.update(v => {
+      this.saveColumnState('notebooks', !v);
+      return !v;
+    });
   }
 
   toggleFolders(): void {
-    this.showFolders.update(v => !v);
+    this.showFolders.update(v => {
+      this.saveColumnState('folders', !v);
+      return !v;
+    });
+  }
+
+  private saveColumnState(col: string, expanded: boolean): void {
+    try { localStorage.setItem(`sme-mart.notes-col.${col}`, JSON.stringify(expanded)); } catch {}
+  }
+
+  private loadColumnState(col: string, fallback: boolean): boolean {
+    try {
+      const raw = localStorage.getItem(`sme-mart.notes-col.${col}`);
+      if (raw !== null) return JSON.parse(raw);
+    } catch {}
+    return fallback;
   }
 
   selectNote(note: NoteWithTags): void {

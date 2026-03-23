@@ -182,20 +182,34 @@ export class UserPreferencesService {
   }
 
   private async loadPkv(key: string, apply: (val: any) => void): Promise<void> {
+    // Try PKV first, fall back to localStorage
     try {
       const pkv = await this.clientApi.danaClient.getPkvApi().getPrincipalKeyValue(key);
       if (pkv?.value) {
         apply(pkv.value);
+        return;
       }
     } catch {
-      // PKV not found — use defaults (first time user)
+      // PKV unavailable — fall through to localStorage
     }
+
+    // localStorage fallback
+    try {
+      const raw = localStorage.getItem(key);
+      if (raw) apply(JSON.parse(raw));
+    } catch { /* corrupt data — use defaults */ }
   }
 
   private debouncedSave(key: string, value: Record<string, unknown>): void {
     const existing = this.saveTimers.get(key);
     if (existing) clearTimeout(existing);
 
+    // Always save to localStorage immediately (synchronous, reliable)
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+    } catch { /* quota exceeded */ }
+
+    // Attempt PKV save in background (may fail if API is down)
     this.saveTimers.set(
       key,
       setTimeout(async () => {
@@ -203,8 +217,8 @@ export class UserPreferencesService {
         try {
           const pkv = new Pkv(key, value as { [k: string]: object });
           await this.clientApi.danaClient.getPkvApi().upsertPrincipalKeyValue(pkv);
-        } catch (err) {
-          console.warn(`[Preferences] Failed to save ${key}:`, err);
+        } catch {
+          // PKV save failed — localStorage has the data, no need to warn
         }
       }, SAVE_DEBOUNCE_MS),
     );
