@@ -9,9 +9,11 @@ vercel.env
 # Local Claude plans and settings (not shared)
 **/.claude/plans/local/
 **/.claude/settings.local.json
+**/.claude/ideas/
+**/.planning/
 
 # Deprecated Next.js prototype (archived, kept on disk for reference)
 package/w3geekery/sme-mart-nextjs-deprecated/
 
 # Session-specific context (not shared)
-**/restart_context.md
+**/restart_context*
