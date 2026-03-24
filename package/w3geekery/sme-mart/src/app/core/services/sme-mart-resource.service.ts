@@ -138,6 +138,12 @@ export class SmeMartResourceService {
     resourceType: SmeMartResourceType,
   ): Promise<SmeMartResourceLink[]> {
     if (this.db.mode() === 'neon') {
+      // Neon sme_resource_links uses UUID columns — skip query for non-UUID IDs
+      // (e.g., GQL slug IDs like "eng-001-crystal-harbor")
+      const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (!uuidPattern.test(resourceId)) {
+        return [];
+      }
       const rows = await this.db.neonQueryPublic<SmeMartResourceLinkRow>(
         `SELECT * FROM "sme_resource_links"
          WHERE ("from_resource_id" = '${resourceId}' AND "from_resource_type" = '${resourceType}')
