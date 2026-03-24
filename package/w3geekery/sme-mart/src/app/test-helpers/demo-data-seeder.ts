@@ -44,7 +44,7 @@ export const DEMO_ENGAGEMENTS: DemoEngagement[] = [
     status: 'in_progress',
     engagementTag: 'sme-mart.eng.crystal-harbor',
     zerobiasTagId: 'e1864514-af28-4397-93a5-f05e443b05cb',
-    zerobiasTaskId: 'fafe9c00-136c-4ee1-985d-c3a1f7aa0095',
+    zerobiasTaskId: 'abc5d715-b97d-4c76-a24b-95c643b68795',
     createdAt: new Date(2026, 2, 1).toISOString(),
     updatedAt: new Date(2026, 2, 10).toISOString(),
   },
@@ -62,7 +62,7 @@ export const DEMO_ENGAGEMENTS: DemoEngagement[] = [
     status: 'in_progress',
     engagementTag: 'sme-mart.eng.velvet-summit',
     zerobiasTagId: '355a0e23-e22b-4622-b186-08e860513de6',
-    zerobiasTaskId: '9d4a93a9-9258-46e7-975d-5c518228f476',
+    zerobiasTaskId: 'c3b5fc15-2cf3-406d-961b-570f78689821',
     createdAt: new Date(2026, 2, 2).toISOString(),
     updatedAt: new Date(2026, 2, 11).toISOString(),
   },
@@ -80,7 +80,7 @@ export const DEMO_ENGAGEMENTS: DemoEngagement[] = [
     status: 'in_progress',
     engagementTag: 'sme-mart.eng.amber-circuit',
     zerobiasTagId: '49e67643-85da-44b0-a47a-c67c56a4d2d7',
-    zerobiasTaskId: '9ab5a79a-aaae-40b6-b49c-a418bc359c68',
+    zerobiasTaskId: '3a6799c6-65ea-4833-9cf9-3f739f0fe587',
     createdAt: new Date(2026, 2, 3).toISOString(),
     updatedAt: new Date(2026, 2, 12).toISOString(),
   },
@@ -98,7 +98,7 @@ export const DEMO_ENGAGEMENTS: DemoEngagement[] = [
     status: 'in_progress',
     engagementTag: 'sme-mart.eng.silver-bridge',
     zerobiasTagId: 'ba599b51-6d87-4c46-9c98-05244a928cc9',
-    zerobiasTaskId: '127dfed5-39ca-4696-945a-109c1c39097c',
+    zerobiasTaskId: '900dfe93-ad93-4c02-996c-a8c13700e8ab',
     createdAt: new Date(2026, 2, 4).toISOString(),
     updatedAt: new Date(2026, 2, 13).toISOString(),
   },
@@ -116,7 +116,7 @@ export const DEMO_ENGAGEMENTS: DemoEngagement[] = [
     status: 'in_progress',
     engagementTag: 'sme-mart.eng.coral-meadow',
     zerobiasTagId: '3b2e84a6-52bc-41d7-8e8c-5e78e65a033c',
-    zerobiasTaskId: '43bcbbfd-cd40-4020-b83b-97bdb38f6e61',
+    zerobiasTaskId: 'd9895a40-38a4-4dad-9e8a-6ee588104cf0',
     createdAt: new Date(2026, 2, 5).toISOString(),
     updatedAt: new Date(2026, 2, 14).toISOString(),
   },
@@ -311,13 +311,19 @@ export function seedDemoBidResponses(bidIds?: string[]): DemoBidResponse[] {
 
 /**
  * Demo Notes (linked to engagements)
+ *
+ * IMPORTANT: folderId must point to a LEAF folder, not the notebook root.
+ * Notebook roots (e.g., folder-001-crystal) are "notebooks" in the UI —
+ * notes belong to subfolders within them (e.g., General, Alpha, Beta).
+ * If folderId points to the notebook root, the note won't appear when
+ * clicking any subfolder in the UI.
  */
 export const DEMO_NOTES: DemoNote[] = [
   {
     id: 'note-001-crystal-kickoff',
     name: 'Kickoff Meeting - Crystal Harbor',
     engagementId: 'eng-001-crystal-harbor',
-    folderId: 'folder-001-crystal',
+    folderId: 'folder-001-crystal-general', // General subfolder, NOT notebook root
     title: 'Kickoff Meeting - Crystal Harbor',
     body: 'Initial SOC 2 scoping with Pinnacle Corp. Identified 3 control gaps in access management.',
     authorZerobiasUserId: 'a3-gina-auditor',
@@ -333,7 +339,7 @@ export const DEMO_NOTES: DemoNote[] = [
     id: 'note-002-crystal-progress',
     name: 'Progress Update - Week 2',
     engagementId: 'eng-001-crystal-harbor',
-    folderId: 'folder-001-crystal',
+    folderId: 'folder-001-crystal-general', // General subfolder, NOT notebook root
     title: 'Progress Update - Week 2',
     body: 'Completed access logging audit. Found 2 non-compliant systems. Remediation plan drafted.',
     authorZerobiasUserId: 'a3-gina-auditor',
@@ -347,7 +353,7 @@ export const DEMO_NOTES: DemoNote[] = [
     id: 'note-003-velvet-strategy',
     name: 'NIST CSF Strategy Session',
     engagementId: 'eng-002-velvet-summit',
-    folderId: 'folder-002-velvet',
+    folderId: 'folder-002-velvet-general', // General subfolder, NOT notebook root
     title: 'NIST CSF Strategy Session',
     body: 'Outlined 3-month implementation roadmap. Prioritized Identify and Protect functions.',
     authorZerobiasUserId: 'james-okafor',
@@ -376,7 +382,7 @@ export const DEMO_NOTES: DemoNote[] = [
     id: 'note-005-coral-findings',
     name: 'ISO 27001 Gap Analysis Findings',
     engagementId: 'eng-005-coral-meadow',
-    folderId: 'folder-005-coral',
+    folderId: 'folder-005-coral-general', // General subfolder, NOT notebook root
     title: 'ISO 27001 Gap Analysis Findings',
     body: 'Identified 12 gaps across Control objectives. 8 critical, 4 medium. Roadmap created.',
     authorZerobiasUserId: 'a3-gina-auditor',
@@ -404,8 +410,14 @@ export function seedDemoNotes(engagementIds?: string[]): DemoNote[] {
 
 /**
  * Demo NoteFolders (linked to engagements)
+ *
+ * Folder hierarchy: Notebook (root, parentId=null) → subfolders (parentId=notebook)
+ * Notes must point to SUBFOLDER IDs, not notebook root IDs.
+ * The app's "Notebooks" column shows root folders; "Folders" column shows children.
+ * `ensureDefaultFolder` auto-creates a "General" subfolder if a notebook has none.
  */
 export const DEMO_NOTE_FOLDERS: DemoNoteFolder[] = [
+  // ── Crystal Harbor notebook + subfolders ──
   {
     id: 'folder-001-crystal',
     engagementId: 'eng-001-crystal-harbor',
@@ -419,6 +431,18 @@ export const DEMO_NOTE_FOLDERS: DemoNoteFolder[] = [
     color: '#1976d2',
   },
   {
+    id: 'folder-001-crystal-general',
+    engagementId: 'eng-001-crystal-harbor',
+    parentId: 'folder-001-crystal',
+    name: 'General',
+    createdByZerobiasUserId: 'a3-gina-auditor',
+    createdAt: new Date(2026, 2, 6).toISOString(),
+    updatedAt: new Date(2026, 2, 6).toISOString(),
+    accessLevel: 'boundary',
+    sortOrder: 0,
+  },
+  // ── Velvet Summit notebook + subfolders ──
+  {
     id: 'folder-002-velvet',
     engagementId: 'eng-002-velvet-summit',
     name: 'NIST CSF Implementation',
@@ -431,6 +455,18 @@ export const DEMO_NOTE_FOLDERS: DemoNoteFolder[] = [
     color: '#388e3c',
   },
   {
+    id: 'folder-002-velvet-general',
+    engagementId: 'eng-002-velvet-summit',
+    parentId: 'folder-002-velvet',
+    name: 'General',
+    createdByZerobiasUserId: 'james-okafor',
+    createdAt: new Date(2026, 2, 7).toISOString(),
+    updatedAt: new Date(2026, 2, 7).toISOString(),
+    accessLevel: 'boundary',
+    sortOrder: 0,
+  },
+  // ── Coral Meadow notebook + subfolders ──
+  {
     id: 'folder-005-coral',
     engagementId: 'eng-005-coral-meadow',
     name: 'ISO 27001 Gap Assessment',
@@ -441,6 +477,17 @@ export const DEMO_NOTE_FOLDERS: DemoNoteFolder[] = [
     accessLevel: 'boundary',
     sortOrder: 1,
     color: '#d32f2f',
+  },
+  {
+    id: 'folder-005-coral-general',
+    engagementId: 'eng-005-coral-meadow',
+    parentId: 'folder-005-coral',
+    name: 'General',
+    createdByZerobiasUserId: 'a3-gina-auditor',
+    createdAt: new Date(2026, 2, 10).toISOString(),
+    updatedAt: new Date(2026, 2, 10).toISOString(),
+    accessLevel: 'boundary',
+    sortOrder: 0,
   },
 ];
 

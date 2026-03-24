@@ -43,7 +43,7 @@ This doc maps every demo entity to show which data demonstrates each aspect of t
 
 ## Engagements (Active — `in_progress`)
 
-These 5 work_requests have been converted from RFPs to active engagements. Each has a ZeroBias Task on **UAT** (`uat` profile), boundary "W3Geekery Testing". CI IDs in parentheses for reference.
+These 5 work_requests have been converted from RFPs to active engagements. Each has a ZeroBias Task on **UAT** (`uat` profile), boundary **"SME Marketplace"** (`e3871f0b-56f0-4e5e-87c6-6ca196bf88c7`). Old IDs in parentheses for reference.
 
 ### 1. SOC 2 Type I Fast-Track Assessment
 **What it demonstrates:** Assessor engagement, fixed-price, fast timeline, accepted bid with rejected alternative
@@ -55,8 +55,8 @@ These 5 work_requests have been converted from RFPs to active engagements. Each 
 | **Buyer** | Pinnacle Corp |
 | **Budget** | $6,000–$9,000 (fixed) |
 | **Timeline** | 4 weeks |
-| **ZB Task ID** | `fafe9c00-136c-4ee1-985d-c3a1f7aa0095` (CI: `223318eb-feb5-4454-8454-a28efc935f4d`) |
-| **ZB Task Code** | `aha1-1` (CI: `aha1-4`) |
+| **ZB Task ID** | `abc5d715-b97d-4c76-a24b-95c643b68795` (old: `fafe9c00-...`) |
+| **ZB Task Code** | `aha1-1` |
 | **ZB Tag ID** | `e1864514-af28-4397-93a5-f05e443b05cb` (old ZB-Ops: `b4c97483-...`, CI: `518acc1c-...`) |
 
 **Bids:**
@@ -115,7 +115,7 @@ These 4 engagements do NOT have an `engagementTag`, so they appear on the /rfps 
 | **Buyer** | FinTech Inc |
 | **Budget** | $150–$250/hr (hourly) |
 | **Timeline** | 3 months |
-| **ZB Task ID** | `9d4a93a9-9258-46e7-975d-5c518228f476` (CI: `f30ffe2b-1e6d-458e-9d65-72df5b9ff599`) |
+| **ZB Task ID** | `c3b5fc15-2cf3-406d-961b-570f78689821` (old: `9d4a93a9-...`) |
 | **ZB Task Code** | `aha1-2` (CI: `aha1-5`) |
 | **ZB Tag ID** | `355a0e23-e22b-4622-b186-08e860513de6` (old ZB-Ops: `0630ad1b-...`, CI: `e07c3ee5-...`) |
 
@@ -138,7 +138,7 @@ These 4 engagements do NOT have an `engagementTag`, so they appear on the /rfps 
 | **Buyer** | Startup XYZ |
 | **Budget** | $10,000–$20,000 (negotiable) |
 | **Timeline** | 8–12 weeks |
-| **ZB Task ID** | `9ab5a79a-aaae-40b6-b49c-a418bc359c68` (CI: `4a3ad32b-4800-43db-83be-a33d134317d0`) |
+| **ZB Task ID** | `3a6799c6-65ea-4833-9cf9-3f739f0fe587` (old: `9ab5a79a-...`) |
 | **ZB Task Code** | `aha1-3` (CI: `aha1-6`) |
 | **ZB Tag ID** | `49e67643-85da-44b0-a47a-c67c56a4d2d7` (old ZB-Ops: `b244cd6c-...`, CI: `aacd35bd-...`) |
 
@@ -162,7 +162,7 @@ These 4 engagements do NOT have an `engagementTag`, so they appear on the /rfps 
 | **Buyer** | Lakewood Health |
 | **Budget** | $8,000–$12,000 (fixed) |
 | **Timeline** | 6 weeks |
-| **ZB Task ID** | `127dfed5-39ca-4696-945a-109c1c39097c` (CI: `67659347-8925-414c-822c-76a41ef1ff40`) |
+| **ZB Task ID** | `900dfe93-ad93-4c02-996c-a8c13700e8ab` (old: `127dfed5-...`) |
 | **ZB Task Code** | `aha1-4` (CI: `aha1-7`) |
 | **ZB Tag ID** | `ba599b51-6d87-4c46-9c98-05244a928cc9` (old ZB-Ops: `29ab33e0-...`, CI: `b3b590d8-...`) |
 
@@ -185,7 +185,7 @@ These 4 engagements do NOT have an `engagementTag`, so they appear on the /rfps 
 | **Buyer** | HealthTech Co |
 | **Budget** | $5,000–$7,500 (fixed) |
 | **Timeline** | 4 weeks |
-| **ZB Task ID** | `43bcbbfd-cd40-4020-b83b-97bdb38f6e61` (CI: `46cf4833-035c-4113-8e00-175a31ed9ab3`) |
+| **ZB Task ID** | `d9895a40-38a4-4dad-9e8a-6ee588104cf0` (old: `43bcbbfd-...`) |
 | **ZB Task Code** | `aha1-5` (CI: `aha1-8`) |
 | **ZB Tag ID** | `3b2e84a6-52bc-41d7-8e8c-5e78e65a033c` (old ZB-Ops: `b8e84e56-...`, CI: `49cbb0b8-...`) |
 
@@ -267,18 +267,18 @@ Every engagement has a `zerobias_tag_id` — these are ZeroBias Tags used to lab
 | `sme-mart.eng.coral-meadow` | `3b2e84a6-52bc-41d7-8e8c-5e78e65a033c` |
 
 ### Tasks (on UAT, `uat` profile)
-All tasks are `todo` in boundary "W3Geekery Testing" (`7c43e376-b079-41f5-a42c-9ce7c64597fc`), activity "Ad Hoc Activity - One person" (`e15830c8-4274-4d67-bf9b-c22b60001e32`), workflow "Software Development Lifecycle".
+All tasks are `todo` in boundary **"SME Marketplace"** (`e3871f0b-56f0-4e5e-87c6-6ca196bf88c7`), activity "Ad Hoc Activity - One person" (`e15830c8-4274-4d67-bf9b-c22b60001e32`), workflow "Software Development Lifecycle".
 
 | Task Code | Task Name | UAT Task ID |
 |-----------|-----------|-------------|
-| `aha1-1` | SOC 2 Readiness Assessment | `fafe9c00-136c-4ee1-985d-c3a1f7aa0095` |
-| `aha1-2` | NIST CSF Gap Analysis | `9d4a93a9-9258-46e7-975d-5c518228f476` |
-| `aha1-3` | Compliance Automation Setup | `9ab5a79a-aaae-40b6-b49c-a418bc359c68` |
-| `aha1-4` | FedRAMP Authorization Support | `127dfed5-39ca-4696-945a-109c1c39097c` |
-| `aha1-5` | ISO 27001 Evidence Collection | `43bcbbfd-cd40-4020-b83b-97bdb38f6e61` |
+| `aha1-1` | SOC 2 Readiness Assessment | `abc5d715-b97d-4c76-a24b-95c643b68795` |
+| `aha1-2` | NIST CSF Gap Analysis | `c3b5fc15-2cf3-406d-961b-570f78689821` |
+| `aha1-3` | Compliance Automation Setup | `3a6799c6-65ea-4833-9cf9-3f739f0fe587` |
+| `aha1-4` | FedRAMP Authorization Support | `900dfe93-ad93-4c02-996c-a8c13700e8ab` |
+| `aha1-5` | ISO 27001 Evidence Collection | `d9895a40-38a4-4dad-9e8a-6ee588104cf0` |
 
 ### Boundary
-All engagements share boundary **"W3Geekery Testing"**: `7c43e376-b079-41f5-a42c-9ce7c64597fc`
+All engagements share boundary **"SME Marketplace"**: `e3871f0b-56f0-4e5e-87c6-6ca196bf88c7`
 
 ---
 
