@@ -250,7 +250,7 @@ export class EngagementsService {
   private getEngagementFields(): string[] {
     // Only fields that exist in the GQL Engagement schema (Object base + custom properties)
     // Object inherited: id, name, description, dateCreated, dateLastModified
-    // Custom (from Engagement.yml): category, status, budgetMin, budgetMax, timeline, engagementTag
+    // Custom (from Engagement.yml): all camelCase field names
     return [
       'id',
       'name',
@@ -261,6 +261,10 @@ export class EngagementsService {
       'budgetMax',
       'timeline',
       'engagementTag',
+      'zerobiasTaskId',
+      'zerobiasTagId',
+      'buyerZerobiasUserId',
+      'buyerZerobiasOrgId',
       'dateCreated',
       'dateLastModified',
     ];
