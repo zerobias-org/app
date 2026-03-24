@@ -1,0 +1,53 @@
+<app-list-page
+  title="RFPs & Engagements"
+  searchPlaceholder="Search engagements..."
+  [(searchValue)]="searchTerm"
+  [sortOptions]="sortOptions"
+  [(sortValue)]="sortBy"
+  [items]="filteredEngagements()"
+  [loading]="loading()"
+  emptyText="No engagements found. Try adjusting your filters or post an RFP to get started."
+>
+  <!-- Header action -->
+  <button listPageHeaderActions mat-flat-button color="primary" (click)="openNewRfpDialog()">
+    <mat-icon>add</mat-icon>
+    Post an RFP
+  </button>
+
+  <!-- Extra toolbar controls -->
+  <ng-container listPageToolbarExtras>
+    <mat-button-toggle-group [value]="lifecycleFilter()" (change)="lifecycleFilter.set($event.value)" hideSingleSelectionIndicator>
+      <mat-button-toggle value="all">All</mat-button-toggle>
+      <mat-button-toggle value="rfp">RFPs</mat-button-toggle>
+      <mat-button-toggle value="engagement">Engagements</mat-button-toggle>
+    </mat-button-toggle-group>
+
+    @if (currentProviderId()) {
+      <mat-chip-set>
+        <mat-chip [highlighted]="myBidsOnly()" (click)="toggleMyBids()">
+          <mat-icon matChipAvatar>person</mat-icon>
+          My Bids
+        </mat-chip>
+      </mat-chip-set>
+    }
+
+    <mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
+      <mat-label>Status</mat-label>
+      <mat-select [value]="statusFilter()" (selectionChange)="statusFilter.set($event.value)">
+        <mat-option value="all">All Statuses</mat-option>
+        <mat-option value="open">Open</mat-option>
+        <mat-option value="in_progress">In Progress</mat-option>
+        <mat-option value="draft">Draft</mat-option>
+        <mat-option value="completed">Completed</mat-option>
+        <mat-option value="cancelled">Cancelled</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </ng-container>
+
+  <!-- Results grid -->
+  <div listPageResults class="engagement-grid">
+    @for (e of filteredEngagements(); track e.id) {
+      <app-engagement-card [engagement]="e" [currentProviderId]="currentProviderId()"></app-engagement-card>
+    }
+  </div>
+</app-list-page>

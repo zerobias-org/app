@@ -1,0 +1,9 @@
+<div class="tab-content">
+  <app-timeline-panel
+    [events]="timelineEvents()"
+    [loading]="loading()"
+    [taskId]="taskId"
+    (drillDown)="onTimelineDrillDown($event)"
+    (commentPosted)="onCommentPosted($event)">
+  </app-timeline-panel>
+</div>

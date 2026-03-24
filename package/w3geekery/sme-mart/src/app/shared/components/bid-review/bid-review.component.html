@@ -1,0 +1,205 @@
+@if (bidData(); as bid) {
+  <div class="bid-review">
+    <!-- Back + header -->
+    <div class="review-header">
+      <button mat-button (click)="onBack()" class="back-btn">
+        <mat-icon>arrow_back</mat-icon> Back to Comparison
+      </button>
+      <h3>
+        <mat-icon>rate_review</mat-icon>
+        Bid Review — {{ providerName() }}
+      </h3>
+      <mat-chip-set>
+        <mat-chip [class]="'status-' + status()">{{ status() | titlecase }}</mat-chip>
+      </mat-chip-set>
+    </div>
+
+    <!-- Key metrics -->
+    <div class="metrics-row">
+      @if (proposedPrice()) {
+        <div class="metric">
+          <span class="metric-label">Price</span>
+          <span class="metric-value">{{ proposedPrice() | currency:'USD':'symbol':'1.0-0' }}</span>
+        </div>
+      }
+      @if (proposedTimeline()) {
+        <div class="metric">
+          <span class="metric-label">Timeline</span>
+          <span class="metric-value">{{ proposedTimeline() }}</span>
+        </div>
+      }
+      @if (sumHours()) {
+        <div class="metric">
+          <span class="metric-label">Total Hours</span>
+          <span class="metric-value">{{ sumHours() | number:'1.0-0' }}</span>
+        </div>
+      }
+      @if (sumCost()) {
+        <div class="metric">
+          <span class="metric-label">Total Cost</span>
+          <span class="metric-value">{{ sumCost() | currency:'USD':'symbol':'1.0-0' }}</span>
+        </div>
+      }
+    </div>
+
+    <!-- Overall compliance -->
+    @if (compliance(); as comp) {
+      <mat-card appearance="outlined" class="section-card">
+        <mat-card-header>
+          <mat-card-title>Overall Compliance</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <app-compliance-progress [summary]="comp" />
+        </mat-card-content>
+      </mat-card>
+    }
+
+    <!-- Executive Summary -->
+    @if (executiveSummary()) {
+      <mat-card appearance="outlined" class="section-card">
+        <mat-card-header>
+          <mat-card-title>Executive Summary</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <app-markdown-view [content]="executiveSummary()" />
+        </mat-card-content>
+      </mat-card>
+    }
+
+    <!-- Team -->
+    @if (teamDescription()) {
+      <mat-card appearance="outlined" class="section-card">
+        <mat-card-header>
+          <mat-card-title>Team & Qualifications</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <app-markdown-view [content]="teamDescription()" />
+        </mat-card-content>
+      </mat-card>
+    }
+
+    <!-- Per-requirement review grouped by task type -->
+    <h4>Requirement Responses</h4>
+    @for (group of groups(); track group.taskType) {
+      <mat-card appearance="outlined" class="requirement-group-card">
+        <mat-card-header>
+          <mat-card-title>
+            {{ group.taskType }}
+            <span class="group-count">({{ group.met }}/{{ group.total }} met, {{ group.responded }}/{{ group.total }} responded)</span>
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <mat-accordion multi>
+            @for (req of group.requirements; track req.requirementId) {
+              <mat-expansion-panel>
+                <mat-expansion-panel-header>
+                  <mat-panel-title>
+                    @if (req.response) {
+                      <span class="status-dot"
+                            [style.background]="getStatusColor(req.response.compliance_status)"></span>
+                      {{ getStatusLabel(req.response.compliance_status) }}
+                    } @else {
+                      <span class="status-dot" style="background: #e0e0e0"></span>
+                      No Response
+                    }
+                  </mat-panel-title>
+                  <mat-panel-description class="req-text-preview">
+                    {{ req.requirementText }}
+                  </mat-panel-description>
+                </mat-expansion-panel-header>
+
+                <div class="requirement-detail">
+                  <div class="buyer-requirement">
+                    <span class="detail-label">Buyer Requirement</span>
+                    <p>{{ req.requirementText }}</p>
+                  </div>
+
+                  @if (req.response; as resp) {
+                    <mat-divider />
+                    <div class="vendor-response">
+                      <span class="detail-label">Vendor Response</span>
+                      <div class="response-meta">
+                        <mat-chip [style.--mdc-chip-label-text-color]="getStatusColor(resp.compliance_status)">
+                          {{ getStatusLabel(resp.compliance_status) }}
+                        </mat-chip>
+                        @if (resp.estimated_hours) {
+                          <span class="meta-item">
+                            <mat-icon>timer</mat-icon>
+                            {{ resp.estimated_hours | number:'1.0-1' }} hrs
+                          </span>
+                        }
+                        @if (resp.estimated_cost) {
+                          <span class="meta-item">
+                            <mat-icon>payments</mat-icon>
+                            {{ resp.estimated_cost | currency:'USD':'symbol':'1.0-0' }}
+                          </span>
+                        }
+                      </div>
+                      @if (resp.response_text) {
+                        <app-markdown-view [content]="resp.response_text" />
+                      }
+                      @if (resp.certification_ref) {
+                        <div class="cert-ref">
+                          <mat-icon>verified</mat-icon>
+                          {{ resp.certification_ref }}
+                        </div>
+                      }
+                      @if (resp.ready_date) {
+                        <div class="ready-date">
+                          <mat-icon>event</mat-icon>
+                          Ready by {{ resp.ready_date | date:'mediumDate' }}
+                        </div>
+                      }
+                    </div>
+                  } @else {
+                    <mat-divider />
+                    <p class="no-response">Vendor has not responded to this requirement.</p>
+                  }
+                </div>
+              </mat-expansion-panel>
+            }
+          </mat-accordion>
+        </mat-card-content>
+      </mat-card>
+    }
+
+    <!-- Pricing breakdown -->
+    @if (pricingBreakdown().length > 0) {
+      <mat-card appearance="outlined" class="section-card">
+        <mat-card-header>
+          <mat-card-title>Pricing Breakdown</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="breakdown-table">
+            <div class="breakdown-header">
+              <span>Category</span>
+              <span>Hours</span>
+              <span>Cost</span>
+              <span>Notes</span>
+            </div>
+            @for (row of pricingBreakdown(); track $index) {
+              <div class="breakdown-row">
+                <span>{{ row.taskType }}</span>
+                <span>{{ row.estimatedHours | number:'1.0-1' }}</span>
+                <span>{{ row.estimatedCost | currency:'USD':'symbol':'1.0-0' }}</span>
+                <span>{{ row.notes || '' }}</span>
+              </div>
+            }
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
+
+    <!-- Action buttons -->
+    @if (isPending()) {
+      <div class="review-actions">
+        <button mat-button color="warn" (click)="onReject()">
+          <mat-icon>close</mat-icon> Reject Bid
+        </button>
+        <button mat-flat-button color="primary" (click)="onAccept()">
+          <mat-icon>check</mat-icon> Accept Bid
+        </button>
+      </div>
+    }
+  </div>
+}

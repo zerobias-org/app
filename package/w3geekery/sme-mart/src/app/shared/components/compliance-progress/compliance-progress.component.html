@@ -1,0 +1,31 @@
+@if (labelVisible() && !isCompact()) {
+  <div class="compliance-label">
+    <span class="count">{{ responded() }}/{{ total() }}</span>
+    <span class="pct">({{ respondedPct() }}%)</span>
+  </div>
+}
+
+<div class="stacked-bar" [class.compact]="isCompact()">
+  @for (seg of segments(); track seg.cssClass) {
+    <div
+      class="bar-segment"
+      [class]="seg.cssClass"
+      [style.width.%]="seg.pct"
+      [matTooltip]="seg.label + ': ' + seg.count">
+    </div>
+  }
+  @if (segments().length === 0) {
+    <div class="bar-segment seg-empty" style="width: 100%"></div>
+  }
+</div>
+
+@if (labelVisible() && !isCompact()) {
+  <div class="compliance-legend">
+    @for (seg of segments(); track seg.cssClass) {
+      <span class="legend-item">
+        <span class="legend-dot" [class]="seg.cssClass"></span>
+        {{ seg.label }} ({{ seg.count }})
+      </span>
+    }
+  </div>
+}

@@ -1,0 +1,127 @@
+<zb-simple-panel [title]="panelTitle()" mode="header-only">
+  @if (!readonly()) {
+    <button headerAction mat-icon-button color="primary" (click)="startAdd()" [disabled]="addStep() !== 0" matTooltip="Add Link">
+      <mat-icon>add</mat-icon>
+    </button>
+  }
+
+  <!-- Inline Add Form -->
+  @if (addStep() > 0) {
+    <div class="add-form">
+      <!-- Step 1: Pick resource type -->
+      @if (addStep() === 1) {
+        <div class="add-step">
+          <span class="step-label">Select resource type</span>
+          <div class="type-chips">
+            @for (type of linkableTypes(); track type) {
+              <button mat-stroked-button
+                      class="type-chip"
+                      (click)="onTypeSelected(type)">
+                <mat-icon>{{ resourceTypeIcons[type] }}</mat-icon>
+                {{ resourceTypeLabels[type] }}
+              </button>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Step 2: Search & pick resource -->
+      @if (addStep() === 2) {
+        <div class="add-step">
+          <span class="step-label">
+            Search {{ resourceTypeLabels[selectedType()!] }}s
+          </span>
+          <mat-form-field appearance="outline" class="search-field">
+            <mat-icon matPrefix>search</mat-icon>
+            <input matInput
+                   placeholder="Type to search..."
+                   [value]="searchQuery()"
+                   (input)="onSearchInput($any($event.target).value)"
+                   [matAutocomplete]="resourceAuto">
+            <mat-autocomplete #resourceAuto="matAutocomplete"
+                              (optionSelected)="onResourceSelected($event.option.value)"
+                              [displayWith]="displayResourceName">
+              @for (result of searchResults(); track result.id) {
+                <mat-option [value]="result">
+                  <mat-icon class="option-icon">{{ resourceTypeIcons[result.type] }}</mat-icon>
+                  <span>{{ result.name }}</span>
+                  @if (result.description) {
+                    <span class="option-desc">{{ result.description }}</span>
+                  }
+                </mat-option>
+              }
+              @if (searchResults().length === 0 && !searching()) {
+                <mat-option disabled>No results found</mat-option>
+              }
+            </mat-autocomplete>
+          </mat-form-field>
+        </div>
+      }
+
+      <!-- Step 3: Pick link type & confirm -->
+      @if (addStep() === 3) {
+        <div class="add-step">
+          <div class="step-summary">
+            <mat-icon>{{ resourceTypeIcons[selectedType()!] }}</mat-icon>
+            <span class="summary-name">{{ selectedResource()!.name }}</span>
+          </div>
+          <mat-form-field appearance="outline" class="link-type-field">
+            <mat-label>Relationship</mat-label>
+            <mat-select [value]="selectedLinkType()"
+                        (selectionChange)="selectedLinkType.set($event.value)">
+              @for (lt of allLinkTypes; track lt) {
+                <mat-option [value]="lt">{{ linkTypeLabels[lt] }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <div class="step-actions">
+            <button mat-button (click)="confirmAdd()" [disabled]="adding()" color="primary">
+              {{ adding() ? 'Adding...' : 'Add Link' }}
+            </button>
+          </div>
+        </div>
+      }
+
+      <div class="add-form-actions">
+        <button mat-button (click)="cancelAdd()" class="cancel-btn">Cancel</button>
+        @if (addStep() > 1) {
+          <button mat-button (click)="addStep.set(addStep() === 3 ? 2 : 1)" class="back-btn">
+            Back
+          </button>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Links List -->
+  @if (loading()) {
+    <div class="loading-row">Loading links...</div>
+  } @else if (links().length === 0 && addStep() === 0) {
+    <zb-empty-state-container
+      [loading]="false"
+      emptyText="No linked resources yet.">
+    </zb-empty-state-container>
+  } @else {
+    @for (resolved of links(); track resolved.link.id) {
+      <div class="link-row" (click)="navigateToResource(resolved)"
+           [class.clickable]="resolved.navigable">
+        <mat-icon class="type-icon">{{ resourceTypeIcons[resolved.targetType] }}</mat-icon>
+        <div class="link-info">
+          <span class="link-name">{{ resolved.targetName }}</span>
+          <div class="link-meta">
+            <span class="relation-chip">{{ resolved.relationLabel }}</span>
+            <span class="type-label">{{ resourceTypeLabels[resolved.targetType] }}</span>
+          </div>
+        </div>
+        @if (!readonly()) {
+          <button mat-icon-button
+                  class="remove-btn"
+                  matTooltip="Remove link"
+                  (click)="removeLink(resolved); $event.stopPropagation()">
+            <mat-icon>close</mat-icon>
+          </button>
+        }
+      </div>
+    }
+  }
+</zb-simple-panel>

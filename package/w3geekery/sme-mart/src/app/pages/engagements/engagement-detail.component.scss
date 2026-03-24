@@ -1,0 +1,60 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.engagement-detail-page {
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem;
+  flex: 1;
+  min-height: 0;
+}
+
+// Tab panel fills remaining space
+mat-tab-nav-panel,
+[mat-tab-nav-panel] {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.back-btn {
+  align-self: flex-start;
+  margin-bottom: 1rem;
+}
+
+.loading-message {
+  text-align: center;
+  padding: 3rem;
+  color: var(--zb-secondary-text);
+}
+
+// Status colors
+.status-open { --mdc-chip-label-text-color: var(--zb-color-success); }
+.status-draft { --mdc-chip-label-text-color: var(--zb-color-gray); }
+.status-in_progress { --mdc-chip-label-text-color: var(--zb-color-warning); }
+.status-completed { --mdc-chip-label-text-color: var(--zb-color-info); }
+.status-cancelled { --mdc-chip-label-text-color: var(--zb-color-error); }
+
+// Transparency Center View
+.tc-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .tag-chip code {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 0.85em;
+  }
+}

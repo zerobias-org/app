@@ -1,0 +1,57 @@
+<div class="rfp-wizard">
+  <div class="wizard-header">
+    <h1>Create RFP</h1>
+    <p class="subtitle">Define your requirements and let providers submit bids.</p>
+  </div>
+
+  @if (loading()) {
+    <div class="wizard-loading">
+      <p>Loading draft...</p>
+    </div>
+  } @else if (!creationMethod()) {
+    <!-- Method chooser for new RFPs -->
+    <app-rfp-method-chooser (methodChosen)="onMethodChosen($event)" />
+  } @else {
+    <mat-stepper #stepper [linear]="true" [animationDuration]="'300'">
+
+      <!-- Step 1: Basics -->
+      <mat-step [editable]="true" label="Basics">
+        <app-rfp-step-basics
+          [initialData]="wizard.rfpData()"
+          (saved)="onBasicsSaved()" />
+      </mat-step>
+
+      <!-- Step 2: Documents -->
+      <mat-step [editable]="true" label="Documents" [optional]="true">
+        <app-rfp-step-documents
+          [engagementId]="wizard.draftId()"
+          [documents]="wizard.documents()"
+          (next)="onDocumentsSaved()" />
+      </mat-step>
+
+      <!-- Step 3: Requirements -->
+      <mat-step [editable]="true" label="Requirements">
+        <app-rfp-step-requirements
+          [taskGroups]="wizard.rfpData().taskGroups"
+          (next)="onRequirementsSaved()" />
+      </mat-step>
+
+      <!-- Step 4: Terms -->
+      <mat-step [editable]="true" label="Terms" [optional]="true">
+        <app-rfp-step-terms
+          [rfpData]="wizard.rfpData()"
+          (next)="onTermsSaved()" />
+      </mat-step>
+
+      <!-- Step 5: Review -->
+      <mat-step [editable]="true" label="Review">
+        <app-rfp-step-review
+          [rfpData]="wizard.rfpData()"
+          [documents]="wizard.documents()"
+          (publish)="onPublish()"
+          (saveDraft)="onSaveDraft()" />
+      </mat-step>
+
+    </mat-stepper>
+  }
+</div>

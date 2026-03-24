@@ -1,0 +1,88 @@
+.filter-section {
+  margin-bottom: 0.5rem;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  cursor: pointer;
+  user-select: none;
+
+  .collapse-icon {
+    transition: transform 0.2s ease;
+    font-size: 1.25rem;
+    width: 1.25rem;
+    height: 1.25rem;
+
+    &.collapsed {
+      transform: rotate(-90deg);
+    }
+  }
+
+  .section-title {
+    font-weight: 500;
+    font-size: 0.875rem;
+  }
+
+  .count-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 0.625rem;
+    background: var(--zb-primary);
+    color: var(--zb-primary-contrast-text-color);
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0 0.375rem;
+  }
+
+  .spacer {
+    flex: 1;
+  }
+
+  .remove-btn {
+    width: 24px;
+    height: 24px;
+    line-height: 24px;
+
+    mat-icon {
+      font-size: 1rem;
+      width: 1rem;
+      height: 1rem;
+    }
+  }
+}
+
+.section-body {
+  padding: 0.25rem 0 0.5rem;
+}
+
+.filter-search {
+  width: 100%;
+}
+
+.chip-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+
+  mat-chip {
+    cursor: pointer;
+
+    &.selected {
+      --mat-chip-elevated-container-color: var(--mat-sys-primary-container);
+      --mat-chip-label-text-color: var(--mat-sys-on-primary-container);
+    }
+  }
+}
+
+.selected-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+}

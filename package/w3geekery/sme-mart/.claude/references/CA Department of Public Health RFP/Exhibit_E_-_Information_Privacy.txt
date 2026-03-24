@@ -1,0 +1,272 @@
+	EXHIBIT E – INFORMATION PRIVACY AND SECURITY REQUIREMENTS
+Part 1
+General Information
+
+This Information Privacy and Security Requirements Exhibit (Exhibit) sets forth the information privacy and security requirements Contractor is obligated to follow with respect to all personal and confidential information (as defined herein) Disclosed to Contractor, or collected, created, maintained, stored, transmitted, or Used by Contractor for or on behalf of the California Department of Public Health ( CDPH), pursuant to Contractor’s agreement with CDPH. (Such personal and confidential information is referred to herein collectively as CDPH PCI.) CDPH and Contractor desire to protect the privacy and provide for the security of CDPH PCI pursuant to this Exhibit and in compliance with state and federal laws applicable to the CDPH PCI.
+
+Order of Precedence: With respect to information privacy and security requirements for all CDPH PCI, the terms and conditions of this Exhibit shall take precedence over any conflicting terms or conditions set forth in any other part of the agreement between Contractor and CDPH, including Exhibit A (Scope of Work), all other exhibits and any other attachments, and shall prevail over any such conflicting terms or conditions.
+
+Effect on lower tier transactions: The terms of this Exhibit shall apply to all contracts, subcontracts, and subawards, and the information privacy and security requirements Contractor is obligated to follow with respect to CDPH PCI Disclosed to Contractor, or collected, created, maintained, stored, transmitted, or Used by Contractor for or on behalf of CDPH, pursuant to Contractor’s agreement with CDPH.  When applicable the Contractor shall incorporate the relevant provisions of this Exhibit into each subcontract or subaward to its agents, subcontractors, or independent consultants.
+
+Definitions: For purposes of the agreement between Contractor and CDPH, including this Exhibit, the following definitions shall apply:
+
+Breach: “Breach” means:
+
+the unauthorized acquisition, access, Use, or Disclosure of CDPH PCI in a manner which compromises the security, confidentiality, or integrity of the information; or
+the same as the definition of "breach of the security of the system" set forth in California Civil Code section 1798.29(f).
+
+Confidential Information: “Confidential Information” means information that:
+
+does not meet the definition of “public records” set forth in California Government code section 7920.530, or is exempt from Disclosure under any of the provisions of Section 7920.000, et seq. of the California Government code or any other applicable state or federal laws; or
+is contained in documents, files, folders, books, or records that are clearly labeled, marked, or designated with the word “confidential” by CDPH. 
+
+Disclosure: “Disclosure” means the release, transfer, provision of, access to, or divulging in any manner of information outside the entity holding the information.
+
+PCI: “PCI” means “Personal Information” and “Confidential Information” (as these terms are defined herein).
+
+Personal Information: “Personal Information” means information, in any medium (paper, electronic, oral) that:
+
+directly identifies or uniquely describes an individual; or
+could be Used in combination with other information to indirectly identify or uniquely describe an individual, or link an individual to the information; or
+meets the definition of “personal information” set forth in California Civil Code section 1798.3, subdivision (a); or
+is one of the data elements set forth in California Civil Code section 1798.29, subdivision (g)(1) or (g)(2); or
+meets the definition of “medical information” set forth in either California Civil Code section 1798.29, subdivision (h)(2) or California Civil Code section 56.05, subdivision (j); or
+meets the definition of “health insurance information” set forth in California Civil Code section 1798.29, subdivision (h)(3); or
+is protected from Disclosure under applicable state or federal law.
+
+Security Incident: “Security Incident” means:
+
+an attempted Breach; or
+the attempted or successful unauthorized access or Disclosure, modification, or destruction of CDPH PCI, in violation of any state or federal law or in a manner not permitted under the agreement between Contractor and CDPH, including this Exhibit; or 
+the attempted or successful modification or destruction of, or interference with, Contractor’s system operations in an information technology system, that negatively impacts the confidentiality, availability, or integrity of CDPH PCI; or
+any event that is reasonably believed to have compromised the confidentiality, integrity, or availability of an information asset, system, process, data storage, or transmission; or
+an information Security Incident may also include an event that constitutes a violation or imminent threat of violation of information security policies or procedures, including acceptable use policies.
+The term “Security Incident” shall not include pings and other broadcast attacks on Contractor’s firewall, port scans, unsuccessful log-on attempts, denials of service and any combination of the above, so long as no such incident results in any defeat or circumvention of Contractor’s IT security infrastructure or in any unauthorized access to, or Use, or Disclosure of, CDPH PCI.
+
+Use: “Use” means the sharing, employment, application, utilization, examination, or analysis of information.
+
+Workforce Member(s): “Workforce Member(s)” means an employee, contractor, agent, volunteer, trainee, or other person whose conduct, in the performance of work for Contractor, is under the direct control of Contractor, whether or not they are paid by Contractor. Pursuant to state policy, Workforce Member(s) must only be located in the continental United States.
+
+Use and Disclosure Restrictions: The Contractor and its Workforce Member(s) shall protect from unauthorized Use or Disclosure any CDPH PCI. The Contractor shall not Use or Disclose, except as otherwise specifically permitted by the agreement between Contractor and CDPH (including this Exhibit), any CDPH PCI to anyone other than CDPH personnel or programs without prior written authorization from the CDPH Program Contract Manager, except if Disclosure is required by state or federal law.
+
+[Reserved] 
+
+Safeguards: The Contractor shall implement administrative, physical, and technical safeguards that reasonably and appropriately protect the privacy, confidentiality, security, integrity, and availability of CDPH PCI, including electronic or computerized CDPH PCI. At each location where CDPH PCI exists under Contractor’s control, the Contractor shall develop and maintain a written information privacy and security program that includes administrative, technical, and physical safeguards appropriate to the size and complexity of the Contractor’s operations and the nature and scope of its activities in performing its agreement with CDPH, including this Exhibit, and which incorporates the requirements of Section VII, Security, below. Contractor shall provide CDPH with Contractor’s current and updated policies within five (5) business days of a request by CDPH for the policies.
+
+Security: The Contractor shall take any and all steps reasonably necessary to ensure the continuous security of all computerized data systems containing CDPH PCI. These steps shall include, at a minimum, complying with all of the data system security precautions listed in the Contractor Data Security Standards set forth in Attachment 1 to this Exhibit.
+
+Security Officer: At each place where CDPH PCI is located, the Contractor shall designate a Security Officer to oversee its compliance with this Exhibit and to communicate with CDPH on matters concerning this Exhibit.
+
+Training: The Contractor shall provide training on its obligations under this Exhibit, at its own expense, to all of its Workforce Member(s) who assist in the performance of Contractor’s obligations under Contractor’s agreement with CDPH, including this Exhibit, or otherwise Use or Disclose CDPH PCI.
+
+
+The Contractor shall require Workforce Member(s) who receive training to certify, either in hard copy or electronic form, the date on which the training was completed.
+The Contractor shall retain Workforce Member(s) certifications for CDPH inspection for a period of three (3) years following contract termination or completion.
+Contractor shall provide CDPH with its Workforce Member(s)’ certifications within five (5) business days of a request by CDPH for the Workforce Member(s)’ certifications.
+
+Workforce Member(s) Discipline: Contractor shall impose discipline that it deems appropriate (in its sole discretion) on such employees and other Contractor Workforce Member(s) under Contractor’s direct control who intentionally or negligently violate any provisions of this Exhibit.
+
+Breach and Security Incident Responsibilities:
+
+Notification to CDPH of Breach or Security Incident: The Contractor shall notify CDPH immediately by telephone and email upon the discovery of a Breach, and within twenty-four (24) hours by email of the discovery of any Security Incident, unless a law enforcement agency determines that the notification will impede a criminal investigation, in which case the notification required by this section shall be made to CDPH immediately after the law enforcement agency determines that such notification will not compromise the investigation. Notification shall be provided to the CDPH Program Contract Manager, the CDPH Privacy Officer and the CDPH Chief Information Security Officer, using the contact information listed in Section XI (F), below. If the Breach or Security Incident is discovered after business hours or on a weekend or holiday and involves CDPH PCI in electronic or computerized form, notification to CDPH shall be provided by calling the CDPH Information Security Office at the telephone numbers listed in Section XI(F), below. For purposes of this Section, Breaches and Security Incidents shall be treated as discovered by Contractor as of the first day on which such Breach or Security Incident is known to the Contractor, or, by exercising reasonable diligence would have been known to the Contractor. Contractor shall be deemed to have knowledge of a Breach if such Breach is known, or by exercising reasonable diligence would have been known, to any person, other than the person committing the Breach, who is a Workforce Member(s) or agent of the Contractor.
+
+Contractor shall take:
+
+Prompt action to immediately investigate such Breach or Security Incident
+Prompt corrective action to mitigate any risks or damages involved with the Breach or Security Incident and to protect the operating environment; and
+any action pertaining to a Breach required by applicable state and federal laws, including, specifically, California Civil Code section 1798.29.
+
+
+Investigation of Breach and Security Incidents: The Contractor shall immediately investigate such Breach or Security Incident. As soon as the information is known and subject to the legitimate needs of law enforcement, Contractor shall inform the CDPH Program Contract Manager, the CDPH Privacy Officer, and the CDPH Chief Information Security Officer of:
+
+what data elements were involved, and the extent of the data Disclosure or access involved in the Breach, including, specifically, the number of individuals whose Personal Information was Breached; 
+a description of the unauthorized persons known or reasonably believed to have improperly Used the CDPH PCI and/or a description of the unauthorized persons known or reasonably believed to have improperly accessed or acquired the CDPH PCI, or to whom it is known or reasonably believed to have had the CDPH PCI improperly Disclosed to them; 
+a description of where the CDPH PCI is believed to have been improperly Used or Disclosed; 
+a description of the probable and proximate causes of the Breach or Security Incident; and
+whether Civil Code section 1798.29 or any other state or federal laws requiring individual notifications of Breaches have been triggered.
+
+Written Report(s): The Contractor shall provide written report(s) of the investigation to the CDPH Program Contract Manager, the CDPH Privacy Officer, and the CDPH Chief Information Security Officer as soon as practicable after the discovery of the Breach or Security Incident, and as further requested. The report(s) shall include, but not be limited to, the information specified above, as well as a complete, detailed corrective action plan, including information on measures that were taken to halt and/or contain the Breach or Security Incident, and measures to be taken to prevent the recurrence or further Disclosure of CDPH PCI regarding such Breach or Security Incident.
+Notification to Individuals: If notification to individuals whose information was Breached is required under state or federal law, and regardless of whether Contractor is considered only a custodian and/or non-owner of the CDPH PCI, Contractor shall, at its sole expense, and at the sole election of CDPH, either:
+
+make notification to the individuals affected by the Breach (including substitute notification), pursuant to the content and timeliness provisions of such applicable state or federal Breach notice laws. Contractor shall inform the CDPH Privacy Officer of the time, manner, and content of any such notifications, prior to the transmission of such notifications to the individuals; or
+cooperate with and assist CDPH in its notification (including substitute notification) to the individuals affected by the Breach.
+
+
+Submission of Sample Notification to Attorney General: If notification to more than 500 individuals is required pursuant to California Civil Code section 1798.29, and regardless of whether Contractor is considered only a custodian and/or non-owner of the CDPH PCI, Contractor shall, at its sole expense, and at the sole election of CDPH, either:
+
+electronically submit a single sample copy of the security breach notification, excluding any personally identifiable information, to the Attorney General pursuant to the format, content and timeliness provisions of Section 1798.29, subdivision (e). Contractor shall inform the CDPH Privacy Officer of the time, manner, and content of any such submissions, prior to the transmission of such submissions to the Attorney General; or
+cooperate with and assist CDPH in its submission of a sample copy of the notification to the Attorney General.
+
+CDPH Contact Information: To direct communications to the above referenced CDPH staff, the Contractor shall initiate contact as indicated herein. CDPH reserves the right to make changes to the contact information below by verbal or written notice to the Contractor. Said changes shall not require an amendment to this Exhibit or the agreement to which it is incorporated.
+
+
+Documentation of Disclosures for Requests for Accounting: Contractor shall document and make available to CDPH or (at the direction of CDPH) to an individual such Disclosures of CDPH PCI, and information related to such Disclosures, necessary to respond to a proper request by the subject individual for an accounting of disclosures of Personal Information as required by Civil Code section 1798.25, or any applicable state or federal law.
+
+Requests for CDPH PCI by Third Parties: The Contractor and its employees, agents, or subcontractors shall promptly transmit to the CDPH Program Contract Manager all requests for Disclosure of any CDPH PCI requested by third parties to the agreement between Contractor and CDPH, unless prohibited from doing so by applicable state or federal law. The only instance in which this would not be required is if the person requesting the information or accounting of disclosures is the individual themselves, seeking information directly from the Contractor as to all records directly held by the Contractor.
+
+Audits, Inspection and Enforcement: CDPH may inspect the facilities, systems, books, and records of Contractor as it may relate to CDPH, to monitor compliance with this Exhibit. Contractor shall promptly remedy any violation of any provision of this Exhibit and shall certify the same to the CDPH Program Contract Manager in writing.
+
+Return or Destruction of CDPH PCI on Expiration or Termination: Upon expiration or termination of the agreement between Contractor and CDPH for any reason, Contractor shall securely return or destroy the CDPH PCI. If return or destruction is not feasible, Contractor shall provide a written explanation to the CDPH Program Contract Manager, the CDPH Privacy Officer and the CDPH Chief Information Security Officer, using the contact information listed in Section XI (F), above. 
+
+Retention Required by Law: If required by state or federal law, Contractor may retain, after expiration or termination, CDPH PCI for the time specified as necessary to comply with the law. 
+Obligations Continue Until Return or Destruction: Contractor’s obligations under this Exhibit shall continue until Contractor returns or destroys the CDPH PCI or returns the CDPH PCI to CDPH; provided however, that on expiration or termination of the agreement between Contractor and CDPH, Contractor shall not further Use or Disclose the CDPH PCI except as required by state or federal law. 
+Notification of Election to Destroy CDPH PCI: If Contractor elects to destroy the CDPH PCI, Contractor shall certify in writing, to the CDPH Program Contract Manager, the CDPH Privacy Officer, and the CDPH Chief Information Security Officer, using the contact information listed in Section XI (F), above, that the CDPH PCI has been securely destroyed. The notice shall include the date and type of destruction method used.
+
+Amendment: The parties acknowledge that state and federal laws regarding information security and privacy rapidly evolve, and that amendment of this Exhibit may be required to provide for procedures to ensure compliance with such laws. The parties specifically agree to take such action as is necessary to implement new standards and requirements imposed by regulations and other applicable laws relating to the security or privacy of CDPH PCI. The parties agree to promptly enter into negotiations concerning an amendment to this Exhibit consistent with new standards and requirements imposed by applicable laws and regulations.
+
+Assistance in Litigation or Administrative Proceedings: Contractor shall make itself and any subcontractors, Workforce Member(s) or agents assisting Contractor in the performance of its obligations under the agreement between Contractor and CDPH, available to CDPH at no cost to CDPH to testify as witnesses, in the event of litigation or administrative proceedings being commenced against CDPH, its director, officers, or employees based upon claimed violation of laws relating to security and privacy, which involves inactions or actions by the Contractor, except where Contractor or its subcontractor, Workforce Member(s) or agent is a named adverse party.
+No Third-Party Beneficiaries: Nothing express or implied in the terms and conditions of this Exhibit is intended to confer, nor shall anything herein confer, upon any person other than CDPH or Contractor and their respective successors or assignees, any rights, remedies, obligations, or liabilities whatsoever.
+
+Interpretation: The terms and conditions in this Exhibit shall be interpreted as broadly as necessary to implement and comply with regulations and applicable state laws. The parties agree that any ambiguity in the terms and conditions of this Exhibit shall be resolved in favor of a meaning that complies and is consistent with state and federal laws and regulations.
+
+Survival: If Contractor does not return or destroy the CDPH PCI upon the completion or termination of the Agreement, the respective rights and obligations of Contractor under Sections VI, VII and XI of this Exhibit shall survive the completion or termination of the agreement between Contractor and CDPH.
+
+Part 2
+Contractor Data Security Standards
+I.	Personnel Controls
+A.	Workforce Member(s) Training and Confidentiality. Before being allowed access to CDPH PCI, all Contractor’s Workforce Member(s) who will be granted access to CDPH PCI must be trained in their security and privacy roles and responsibilities at Contractor’s expense and must sign a confidentiality Use statement indicating they will not improperly Use or Disclose the CDPH PCI to which they have access. Training must be on an annual basis. Acknowledgments of completed training and confidentiality statements, which have been signed and dated by Workforce Member(s) must be retained by the Contractor for a period of three (3) years following contract termination. Contractor shall provide the acknowledgements within five (5) business days to CDPH if so requested.
+
+B. 	Workforce Member(s) Discipline. Appropriate sanctions, including termination of employment where appropriate, must be applied against Workforce Member(s) who fail to comply with privacy policies and procedures, acceptable Use agreements, or any other provisions of these requirements.
+ 
+Workforce Member(s) Assessment. Before being permitted access to CDPH PCI, Contractor must assure there is no indication its Workforce Member(s) may present a risk to the security or integrity of CDPH PCI. Contractor shall retain the Workforce Member(s)’ assessment documentation for a period of three (3) years following contract termination.
+
+II.	Technical Security Controls
+Encryption. 
+
+All desktop computers and mobile computing devices must be encrypted, in accordance with CDPH Cryptographic Standards or using the latest FIPS 140 validated cryptographic modules.
+All electronic files that contain CDPH PCI must be encrypted when stored on any removable media type device (such as USB thumb drives, CD/DVD, tape backup, etc.), in accordance with CDPH Cryptographic Standards or using the latest FIPS 140 validated cryptographic modules.
+CDPH PCI must be encrypted during data in-transit and at-rest on all public telecommunications and network systems, and at all points not in the direct ownership and control of the Department, in accordance with CDPH Cryptographic Standards or using the latest FIPS 140 validated cryptographic modules.
+
+Server Security. Servers containing unencrypted CDPH PCI must have sufficient local and network perimeter administrative, physical, and technical controls in place to protect the CDPH information asset, based upon a current risk assessment/system security review.
+
+Minimum Necessary. Only the minimum amount of CDPH PCI required to complete an authorized task or workflow may be copied, downloaded, or exported to any individual device. 
+
+Antivirus software. Contractor shall employ automatically updated malicious code protection mechanisms (anti-malware programs or other physical or software-based solutions) at its network perimeter and at workstations, servers, or mobile computing devices to continuously monitor and take action against system or device attacks, anomalies, and suspicious or inappropriate activities.
+
+Patch Management. All devices that process or store CDPH PCI must have a documented patch management process. Vulnerability patching for Common Vulnerability Scoring System (CVSS) “Critical” severity ratings (CVSS 9.0 – 10.0) shall be completed within forty-eight (48) hours of publication or availability of vendor supplied patch; “High” severity rated (CVSS 7.0- 8.9) shall be completed within seven (7) calendar days of publication or availability of vendor supplied patch; all other vulnerability ratings (CVSS 0.1 – 6.9) shall be completed within thirty (30) days of publication or availability of vendor supplied patch, unless prior ISO and PO variance approval is granted.
+
+User Identification and Access Control. All Contractor Workforce Member(s) must have a unique local and/or network user identification (ID) to access CDPH PCI. To access systems/applications that store, process, or transmit CDPH PCI, it must comply with SIMM 5360-C Multi-factor Authentication (MFA) Standard and NIST SP800-63B Digital Identity Guidelines. The SIMM 5350-C provides steps for determining the Authenticator Assurance Level (AAL), and a set of permitted authenticator types for each AAL (0-3). Note: MFA requirement does not apply to AAL 0.
+
+All Contractor Workforce Member(s) are required to leverage FIDO authentication. The FIDO authentication is AAL 3 compliance. FIDO certified devices such as YubiKeys and Windows Hello for Business (WHfB) are the mechanism for user authentication in the Department.
+
+Should a Workforce Member(s) no longer be authorized to access CDPH PCI, or an ID has been compromised, that ID shall be promptly disabled or deleted. User ID’s must integrate with user role-based access controls to ensure that individual access to CDPH PCI is commensurate with job-related responsibilities.
+
+
+CDPH PCI Destruction. When no longer required for business needs or legal retention periods, all electronic and physical media holding CDPH PCI must be purged from Contractor’s systems and facilities using the appropriate guidelines for each media type as described in the prevailing “National Institute of Standards and Technology – Special Publication 800-88” – “Media Sanitization Decision Matrix.”
+
+
+Reauthentication. Contractor’s computing devices holding, or processing CDPH PCI must comply the Reauthentication requirement, in which a session must be terminated (e.g., logged out) when the specified time is reached. Note: Reauthentication requirement does not apply to Authenticator Assurance Level (AAL) 0.
+
+	
+In addition, reauthentication of individuals is required in the following situations:
+
+When authenticators change
+When roles change
+When the execution of privileged function occurs (e.g., performing a critical transaction)
+
+Warning Banners. During a user log-on process, all systems providing access to CDPH PCI, must display a warning banner stating that the CDPH PCI is confidential, system and user activities are logged, and system and CDPH PCI Use is for authorized business purposes only. Users must be directed to log-off the system if they do not agree with these conditions. 
+
+System Logging. Contractor shall ensure its information systems and devices that hold or process CDPH PCI are capable of being audited and the events necessary to reconstruct transactions and support after-the-fact investigations are maintained. This includes the auditing necessary to cover related events, such as the various steps in distributed, transaction-based processes and actions in service-oriented architectures. Audit trail information with CDPH PCI must be stored with read-only permissions and be archived for six (6) years after event occurrence. There must be protect audit information and audit logging tools from unauthorized access, modification, and deletion. There must also be a documented and routine procedure in place to review system logs for unauthorized access.
+
+Live Data Usage. Using live data (production data) for testing and training purposes is not allowed. Synthetic data must be Used. If synthetic data cannot be generated and/or used, a de-identification process against the live data must be done to reduce privacy risks to individuals. The de-identification process removes identifying information from a dataset so that individual data cannot be linked with specific individuals. Refer to CHHS Data De-Identification Guidelines.
+
+Privileged Access Management (PAM). Contractor who responsible for setting up and maintaining privileged accounts related to CDPH electronic information resources shall comply with the CDPH PAM Security Standard. Information resources include user workstations as well as servers, databases, applications, and systems managed on-premises and on the cloud.
+
+Intrusion Detection. All Contractor systems and devices holding, processing, or transporting CDPH PCI that interact with untrusted devices or systems via the Contractor intranet and/or the internet must be protected by a monitored comprehensive intrusion detection system and/or intrusion prevention system.
+
+III.	Audit Controls
+
+System Security Review. Contractor, to assure that administrative, physical, and technical controls are functioning effectively and providing adequate levels of protection for CDPH PCI, shall conduct at least, an annual administrative assessment of risk, including the likelihood and magnitude of harm from the unauthorized access, Use, Disclosure, disruption, modification, or destruction of an information system or device holding processing, or transporting CDPH PCI, along with periodic technical security reviews using vulnerability scanning tools and other appropriate technical assessments.
+
+Change Control. All Contractor systems and devices holding, processing, or transporting CDPH PCI shall have a documented change control process for hardware, firmware, and software to protect the systems and assets against improper modification before, during, and after system implementation. 
+
+IV.	Business Continuity / Disaster Recovery Controls
+
+Emergency Mode Operation Plan. Contractor shall develop and maintain technical recovery and business continuity plans for systems holding, processing, or transporting CDPH PCI to ensure the continuation of critical business processes and the confidentiality, integrity, and availability of CDPH PCI following an interruption or disaster event lasting more than twenty-four (24) hours. 
+
+CDPH PCI Backup Plan. Contractor shall have a documented, tested, accurate, and regularly scheduled full backup process for systems and devices holding CDPH PCI.
+
+
+V.	Paper Document Controls
+
+Supervision of CDPH PCI. CDPH PCI in any physical format shall not be left unattended at any time. When not under the direct observation of an authorized Contractor Workforce Member(s), the CDPH PCI must be stored in a locked file cabinet, desk, or room. It also shall not be left unattended at any time in private vehicles or common carrier transportation, and it shall not be placed in checked baggage on common carrier transportation.
+ 
+Escorting Visitors. Visitors who are not authorized to see CDPH PCI must be escorted by authorized Workforce Member(s) when in areas where CDPH PCI is present, and CDPH PCI shall be kept out of sight of visitors. 
+
+Removal of CDPH PCI. CDPH PCI in any format must not be removed from the secure computing environment or secure physical storage of the Contractor, except with express written permission of the CDPH PCI owner.
+ 
+Faxing and Printing. Contractor shall control access to information system output devices, such as printers and facsimile devices, to prevent unauthorized individuals from obtaining any output containing CDPH PCI. Fax numbers shall be verified with the intended recipient before transmittal. 
+
+E.	Mailing. Mailings of CDPH PCI shall be sealed and secured from damage or inappropriate viewing to the extent possible. Mailings which include five hundred (500) or more individually identifiable records of CDPH PCI in a single package shall be sent using a tracked mailing method which includes verification of delivery and receipt, unless the prior written permission of CDPH to use another method is obtained. 
+
+
+[Table 1]
+CDPH Program Contract Manager | CDPH Privacy Officer | CDPH Chief Information Security Officer
+See the Scope of Work exhibit for Program Contract Manager | Privacy Officer
+Privacy Office
+c/o Office of Legal Services
+California Dept. of Public Health
+P.O. Box 997377, MS 0506 
+Sacramento, CA 95899-7377
+Email: privacy@cdph.ca.gov
+Telephone: (877) 421-9634 | Chief Information Security Officer
+Information Security Office
+California Dept. of Public Health
+P.O. Box 997413, MS 6302
+Sacramento, CA 95899-7413
+Email: CDPH.InfoSecurityOffice@cdph.ca.gov  
+Telephone: (855) 500-0016
+
+[Table 2]
+ | AAL 1 | AAL 1 | AAL 2 | AAL 2 | AAL 3
+Permitted Authenticator Types | Permitted Authenticator Types | Memorized Secret
+Look-Up Secret
+Out-of-Band Devices
+Single-Factor One-Time Password (OTP) Device
+Multi-Factor OTP Device
+Single-Factor Cryptographic Software
+Single-Factor Cryptographic Device
+Multi-Factor Cryptographic Software
+Multi-Factor Cryptographic Device | Multi-Factor OTP Device 
+Multi-Factor Cryptographic Software 
+Multi-Factor Cryptographic Device
+Memorized Secret 
+plus: 
+Look-Up Secret
+Out-of-Band Device 
+Single-Factor OTP Device
+Single-Factor Cryptographic Software 
+Single-Factor Cryptographic Device | Multi-Factor OTP Device 
+Multi-Factor Cryptographic Software 
+Multi-Factor Cryptographic Device
+Memorized Secret 
+plus: 
+Look-Up Secret
+Out-of-Band Device 
+Single-Factor OTP Device
+Single-Factor Cryptographic Software 
+Single-Factor Cryptographic Device | Multi-Factor Cryptographic Device 
+Single-Factor Cryptographic Device used in conjunction with Memorized Secret 
+Multi-Factor OTP device (software or hardware) used in conjunction with a Single-Factor Cryptographic Device 
+Multi-Factor OTP device (hardware only) used in conjunction with a Single-Factor Cryptographic Software 
+Single-Factor OTP device (hardware only) used in conjunction with a Multi-Factor Cryptographic Software Authenticator
+Single-Factor OTP device (hardware only) used in conjunction with a Single-Factor Cryptographic Software Authenticator and a Memorized Secret. | Multi-Factor Cryptographic Device 
+Single-Factor Cryptographic Device used in conjunction with Memorized Secret 
+Multi-Factor OTP device (software or hardware) used in conjunction with a Single-Factor Cryptographic Device 
+Multi-Factor OTP device (hardware only) used in conjunction with a Single-Factor Cryptographic Software 
+Single-Factor OTP device (hardware only) used in conjunction with a Multi-Factor Cryptographic Software Authenticator
+Single-Factor OTP device (hardware only) used in conjunction with a Single-Factor Cryptographic Software Authenticator and a Memorized Secret. | Multi-Factor Cryptographic Device 
+Single-Factor Cryptographic Device used in conjunction with Memorized Secret 
+Multi-Factor OTP device (software or hardware) used in conjunction with a Single-Factor Cryptographic Device 
+Multi-Factor OTP device (hardware only) used in conjunction with a Single-Factor Cryptographic Software 
+Single-Factor OTP device (hardware only) used in conjunction with a Multi-Factor Cryptographic Software Authenticator
+Single-Factor OTP device (hardware only) used in conjunction with a Single-Factor Cryptographic Software Authenticator and a Memorized Secret.
+
+[Table 3]
+ |  | AAL 1 | AAL 1 | AAL 2 | AAL 2 | AAL 3
+Reauthentication | Reauthentication | 30 Days – Fix Period of Time, regardless user activity | 30 Days – Fix Period of Time, regardless user activity | 12 hours – Fix Period of Time, regardless user activity; 30 minutes inactivity
+May use one of the authenticators to reauthenticate | 12 hours – Fix Period of Time, regardless user activity; 30 minutes inactivity
+May use one of the authenticators to reauthenticate | 12 hours – Fix Period of Time regardless user activity; 15 minutes inactivity 
+Must use both authenticators to reauthenticate | 12 hours – Fix Period of Time regardless user activity; 15 minutes inactivity 
+Must use both authenticators to reauthenticate | 12 hours – Fix Period of Time regardless user activity; 15 minutes inactivity 
+Must use both authenticators to reauthenticate

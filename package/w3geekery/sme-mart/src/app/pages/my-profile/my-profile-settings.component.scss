@@ -1,0 +1,10 @@
+.settings-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 480px;
+}
+
+mat-card-content {
+  padding-top: 1rem;
+}

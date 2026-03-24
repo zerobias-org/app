@@ -1,0 +1,75 @@
+.service-card {
+  cursor: pointer;
+  transition: box-shadow 0.2s ease, transform 0.15s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--zb-card-shadow-hover);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--zb-primary);
+    outline-offset: 2px;
+  }
+
+  mat-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+
+  .category-chip {
+    flex-shrink: 0;
+  }
+}
+
+.description {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--zb-secondary-text);
+  margin: 0;
+}
+
+.meta-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.8125rem;
+  color: var(--zb-secondary-text);
+}
+
+.meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.meta-icon {
+  font-size: 1rem;
+  width: 1rem;
+  height: 1rem;
+}
+
+.pricing-type {
+  color: var(--zb-secondary-text);
+}
+
+.provider-section {
+  margin-left: auto;
+}
+
+.provider-menu-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  width: auto;
+  height: auto;
+  padding: 0.25rem;
+  font-size: 0.8125rem;
+  color: var(--zb-secondary-text);
+
+  .provider-name {
+    font-size: 0.8125rem;
+  }
+}

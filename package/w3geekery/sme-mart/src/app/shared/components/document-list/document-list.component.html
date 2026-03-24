@@ -1,0 +1,104 @@
+<zb-simple-panel title="Documents" mode="header-only">
+  <div headerAction>
+    <span class="doc-count">({{ documentCount() }})</span>
+    @if (isOwner) {
+      <button mat-icon-button (click)="openLibrary()" matTooltip="Attach from library">
+        <mat-icon>folder_open</mat-icon>
+      </button>
+      <button mat-icon-button (click)="showUpload.set(!showUpload())"
+        [matTooltip]="showUpload() ? 'Close upload' : 'Upload document'">
+        <mat-icon>{{ showUpload() ? 'close' : 'add' }}</mat-icon>
+      </button>
+    }
+  </div>
+
+  <!-- Upload panel (expandable) -->
+  @if (showUpload()) {
+    <app-document-upload
+      [engagementId]="engagementId"
+      (uploaded)="onDocumentUploaded($event)"
+      (cancelled)="showUpload.set(false)">
+    </app-document-upload>
+  }
+
+  <!-- Loading -->
+  @if (loading()) {
+    <div class="loading-state">
+      <mat-spinner diameter="32"></mat-spinner>
+    </div>
+  } @else if (documents().length === 0) {
+    <zb-empty-state-container
+      [emptyText]="isOwner ? 'No documents yet. Click + to upload.' : 'No documents uploaded.'">
+    </zb-empty-state-container>
+  } @else {
+
+    <!-- Document rows -->
+    <div class="document-rows">
+      @for (doc of documents(); track doc.id) {
+        <div class="document-row" [attr.data-doc-id]="doc.id"
+             [class.highlighted]="highlightDocId() === doc.id">
+          <div class="doc-main">
+            <mat-icon class="doc-icon">{{ fileIcon(doc.mime_type) }}</mat-icon>
+
+            <div class="doc-info">
+              <span class="doc-name">{{ displayName(doc) }}</span>
+              <span class="doc-meta">
+                <mat-chip class="type-chip"
+                  [style.background-color]="typeColor(doc.document_type)"
+                  [style.color]="'#fff'">
+                  {{ typeLabel(doc.document_type) }}
+                </mat-chip>
+                <span class="doc-size">{{ fileSize(doc.file_size_bytes) }}</span>
+                <span class="doc-date">{{ doc.created_at | date:'shortDate' }}</span>
+              </span>
+            </div>
+
+            <div class="doc-actions">
+              @if (previewableCache[doc.id]) {
+                <button mat-icon-button (click)="togglePreview(doc)"
+                  [matTooltip]="expandedPreviews[doc.id] ? 'Hide preview' : 'Preview'">
+                  <mat-icon>{{ expandedPreviews[doc.id] ? 'visibility_off' : 'visibility' }}</mat-icon>
+                </button>
+              }
+              <button mat-icon-button [matMenuTriggerFor]="docMenu">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #docMenu="matMenu">
+                @if (previewableCache[doc.id]) {
+                  <button mat-menu-item (click)="openInNewTab(doc)">
+                    <mat-icon>open_in_new</mat-icon> Open in new tab
+                  </button>
+                }
+                <button mat-menu-item (click)="downloadDocument(doc)">
+                  <mat-icon>download</mat-icon> Download
+                </button>
+                <button mat-menu-item (click)="showRelatedNotes.emit(doc.id)">
+                  <mat-icon>find_in_page</mat-icon> Show related notes
+                </button>
+                @if (isOwner) {
+                  <button mat-menu-item (click)="archiveDocument(doc)">
+                    <mat-icon>archive</mat-icon> Archive
+                  </button>
+                }
+              </mat-menu>
+            </div>
+          </div>
+
+          <!-- Inline preview -->
+          @if (previewableCache[doc.id] && expandedPreviews[doc.id]) {
+            <div class="preview-panel">
+              <iframe
+                [src]="viewUrls[doc.id] | safeResourceUrl"
+                class="preview-iframe"
+                [style.height.px]="previewHeights[doc.id] || DEFAULT_PREVIEW_HEIGHT">
+              </iframe>
+              <div class="resize-handle" (mousedown)="onResizeStart($event, doc)">
+                <div class="resize-grip"></div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</zb-simple-panel>

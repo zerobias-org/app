@@ -1,0 +1,97 @@
+.bid-card {
+  margin-bottom: 1rem;
+}
+
+.avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--mat-sys-primary-container);
+  color: var(--mat-sys-on-primary-container);
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.status-chips {
+  margin-left: auto;
+}
+
+.status-draft { --mdc-chip-label-text-color: var(--zb-color-gray); }
+.status-pending { --mdc-chip-label-text-color: var(--zb-color-warning); }
+.status-accepted { --mdc-chip-label-text-color: var(--zb-color-success); }
+.status-rejected { --mdc-chip-label-text-color: var(--zb-color-error); }
+.status-withdrawn { --mdc-chip-label-text-color: var(--zb-color-gray); }
+
+.bid-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.875rem;
+    color: var(--zb-secondary-text);
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+}
+
+.bid-section {
+  margin-bottom: 0.75rem;
+
+  .section-label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--zb-secondary-text);
+    margin-bottom: 0.25rem;
+  }
+
+  .section-text {
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--zb-text);
+    margin: 0;
+    white-space: pre-wrap;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+.cover-letter {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--zb-text);
+  margin: 0 0 0.75rem;
+  white-space: pre-wrap;
+}
+
+.bid-compliance {
+  margin-bottom: 0.75rem;
+
+  .compliance-inline {
+    font-size: 0.75rem;
+    color: var(--zb-secondary-text);
+    margin-top: 0.25rem;
+    display: block;
+  }
+}
+
+.submitted-date {
+  font-size: 0.8rem;
+  color: var(--zb-secondary-text);
+}

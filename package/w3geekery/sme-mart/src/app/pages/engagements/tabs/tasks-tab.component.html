@@ -1,0 +1,17 @@
+@if (ctx.engagement(); as eng) {
+  <div class="tab-content">
+    @if (eng.zerobias_task_id) {
+      <app-task-list-panel
+        [masterTaskId]="eng.zerobias_task_id!"
+        [boundaryId]="eng.zerobias_boundary_id"
+        [isOwner]="ctx.isOwner()">
+      </app-task-list-panel>
+    } @else {
+      <zb-empty-state-container
+        icon="task_alt"
+        title="No ZeroBias Task Linked"
+        description="This engagement does not have a linked ZeroBias Task yet.">
+      </zb-empty-state-container>
+    }
+  </div>
+}

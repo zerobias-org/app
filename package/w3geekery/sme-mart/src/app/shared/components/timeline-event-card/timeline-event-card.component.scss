@@ -1,0 +1,236 @@
+:host {
+  display: block;
+}
+
+mat-card {
+  border-left: 3px solid transparent;
+  transition: border-color 0.2s ease;
+
+  &.accent-comment            { border-left-color: var(--mat-sys-primary, #03aff0); }
+  &.accent-attachment          { border-left-color: var(--mat-sys-secondary, #6c757d); }
+  &.accent-bid_submitted  { border-left-color: var(--mat-sys-tertiary, #6aa84f); }
+  &.accent-bid_accepted   { border-left-color: var(--zb-color-success, #4caf50); }
+
+  &.collapsed {
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
+    border-left-width: 2px;
+  }
+}
+
+// Collapsed single-line row
+.collapsed-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: var(--zb-secondary-text, #666);
+  border-radius: 4px;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: var(--mat-sys-surface-variant, rgba(0, 0, 0, 0.04));
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--mat-sys-primary, #03aff0);
+    outline-offset: 2px;
+  }
+
+  .type-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    opacity: 0.7;
+  }
+
+  .type-label {
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .actor-name {
+    white-space: nowrap;
+    &::before { content: '·'; margin-right: 0.25rem; }
+  }
+
+  .preview {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    opacity: 0.6;
+    &::before { content: '—'; margin-right: 0.25rem; }
+  }
+
+  .timestamp {
+    white-space: nowrap;
+    opacity: 0.5;
+    font-size: 0.8125rem;
+  }
+
+  .expand-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    opacity: 0.4;
+  }
+}
+
+// Expanded card header
+.card-header-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  width: 100%;
+
+  .type-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    opacity: 0.8;
+  }
+
+  .type-label {
+    font-weight: 600;
+    font-size: 0.875rem;
+  }
+
+  .actor {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .actor-name {
+    font-size: 0.875rem;
+  }
+
+  .spacer { flex: 1; }
+
+  .timestamp {
+    font-size: 0.8125rem;
+    color: var(--zb-secondary-text, #666);
+  }
+}
+
+// Avatar
+.avatar-img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.avatar-circle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--mat-sys-primary-container, #e0f2fe);
+  color: var(--mat-sys-on-primary-container, #03aff0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6875rem;
+  font-weight: 600;
+}
+
+// Comment body (rendered markdown)
+.comment-body {
+  line-height: 1.7;
+  font-size: 0.9375rem;
+
+  p { margin: 0.5rem 0; }
+  p:first-child { margin-top: 0; }
+  p:last-child { margin-bottom: 0; }
+
+  code {
+    background: var(--mat-sys-surface-variant, rgba(0, 0, 0, 0.06));
+    padding: 0.1rem 0.3rem;
+    border-radius: 3px;
+    font-size: 0.875em;
+  }
+
+  pre {
+    background: var(--mat-sys-surface-variant, rgba(0, 0, 0, 0.06));
+    padding: 0.75rem;
+    border-radius: 6px;
+    overflow-x: auto;
+
+    code {
+      background: none;
+      padding: 0;
+    }
+  }
+
+  a {
+    color: var(--mat-sys-primary, #03aff0);
+    text-decoration: underline;
+  }
+
+  ul, ol { padding-left: 1.25rem; }
+  blockquote {
+    border-left: 3px solid var(--mat-sys-outline-variant, #ccc);
+    margin: 0.5rem 0;
+    padding-left: 0.75rem;
+    color: var(--zb-secondary-text, #666);
+  }
+}
+
+// Attachment chips
+.attachment-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+// Attachment detail
+.attachment-detail {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  .file-size {
+    color: var(--zb-secondary-text, #666);
+    font-size: 0.8125rem;
+  }
+}
+
+// Bid info
+.bid-info {
+  .price {
+    font-weight: 600;
+    font-size: 1.125rem;
+    color: var(--mat-sys-primary, #03aff0);
+  }
+
+  .preview-text {
+    font-style: italic;
+    color: var(--zb-secondary-text, #666);
+    font-size: 0.875rem;
+  }
+}
+
+// Bid accepted
+.bid-accepted {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  .success-icon {
+    color: var(--zb-color-success, #4caf50);
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.9375rem;
+  }
+}

@@ -1,0 +1,123 @@
+@if (bidData(); as bid) {
+  <div class="bid-summary">
+    <!-- Header -->
+    <div class="summary-header">
+      <h3>Bid Details</h3>
+      <mat-chip-set>
+        <mat-chip [class]="'status-' + status()">{{ status() | titlecase }}</mat-chip>
+      </mat-chip-set>
+    </div>
+
+    <!-- Key metrics -->
+    <div class="metrics-row">
+      @if (proposedPrice()) {
+        <div class="metric">
+          <span class="metric-label">Price</span>
+          <span class="metric-value">{{ proposedPrice() | currency:'USD':'symbol':'1.0-0' }}</span>
+        </div>
+      }
+      @if (proposedTimeline()) {
+        <div class="metric">
+          <span class="metric-label">Timeline</span>
+          <span class="metric-value">{{ proposedTimeline() }}</span>
+        </div>
+      }
+      @if (sumHours()) {
+        <div class="metric">
+          <span class="metric-label">Total Hours</span>
+          <span class="metric-value">{{ sumHours() | number:'1.0-1' }}</span>
+        </div>
+      }
+      @if (sumCost()) {
+        <div class="metric">
+          <span class="metric-label">Total Cost (from responses)</span>
+          <span class="metric-value">{{ sumCost() | currency:'USD':'symbol':'1.0-0' }}</span>
+        </div>
+      }
+    </div>
+
+    <!-- Compliance progress -->
+    @if (compliance(); as comp) {
+      <mat-card appearance="outlined" class="summary-section">
+        <mat-card-header>
+          <mat-card-title>Compliance Summary</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <app-compliance-progress [summary]="comp" />
+        </mat-card-content>
+      </mat-card>
+    }
+
+    <!-- Approach -->
+    @if (executiveSummary()) {
+      <mat-card appearance="outlined" class="summary-section">
+        <mat-card-header>
+          <mat-card-title>Executive Summary</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <app-markdown-view [content]="executiveSummary()" />
+        </mat-card-content>
+      </mat-card>
+    }
+
+    @if (coverLetter()) {
+      <mat-card appearance="outlined" class="summary-section">
+        <mat-card-header>
+          <mat-card-title>Cover Letter</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p class="plain-text">{{ coverLetter() }}</p>
+        </mat-card-content>
+      </mat-card>
+    }
+
+    <!-- Team -->
+    @if (teamDescription()) {
+      <mat-card appearance="outlined" class="summary-section">
+        <mat-card-header>
+          <mat-card-title>Team & Qualifications</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <app-markdown-view [content]="teamDescription()" />
+        </mat-card-content>
+      </mat-card>
+    }
+
+    <!-- Pricing breakdown -->
+    @if (pricingBreakdown().length > 0) {
+      <mat-card appearance="outlined" class="summary-section">
+        <mat-card-header>
+          <mat-card-title>Pricing Breakdown</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="breakdown-table">
+            <div class="breakdown-header">
+              <span>Category</span>
+              <span>Hours</span>
+              <span>Cost</span>
+              <span>Notes</span>
+            </div>
+            @for (row of pricingBreakdown(); track $index) {
+              <div class="breakdown-row">
+                <span>{{ row.taskType }}</span>
+                <span>{{ row.estimatedHours | number:'1.0-1' }}</span>
+                <span>{{ row.estimatedCost | currency:'USD':'symbol':'1.0-0' }}</span>
+                <span>{{ row.notes || '' }}</span>
+              </div>
+            }
+            <div class="breakdown-totals">
+              <span>Totals</span>
+              <span>{{ totalEstimatedHours() | number:'1.0-1' }} hrs</span>
+              <span>{{ totalEstimatedCost() | currency:'USD':'symbol':'1.0-0' }}</span>
+              <span></span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
+
+    <div class="summary-footer">
+      Submitted {{ createdAt() | date:'medium' }}
+    </div>
+  </div>
+}

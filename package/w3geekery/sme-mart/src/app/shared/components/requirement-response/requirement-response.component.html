@@ -1,0 +1,130 @@
+<div class="requirement-response-panel">
+  <!-- Left: Category list with progress -->
+  <div class="category-list">
+    <h4>Requirement Categories</h4>
+
+    @for (group of groups(); track group.taskType) {
+      @let summary = groupSummaries().get(group.taskType);
+      <button
+        class="category-item"
+        [class.selected]="selectedType() === group.taskType"
+        (click)="selectType(group.taskType)">
+        <span class="category-name">{{ group.displayName }}</span>
+        <span class="category-progress">
+          {{ summary?.responded || 0 }}/{{ group.requirements.length }}
+        </span>
+        <div class="progress-bar">
+          <div class="progress-fill"
+            [style.width.%]="group.requirements.length ? ((summary?.responded || 0) / group.requirements.length) * 100 : 0">
+          </div>
+        </div>
+      </button>
+    }
+
+    <div class="overall-progress">
+      <span class="overall-label">Overall Progress</span>
+      <span class="overall-count">{{ overallSummary().responded }}/{{ overallSummary().total }}</span>
+      <div class="progress-bar large">
+        <div class="progress-fill"
+          [style.width.%]="overallSummary().total ? (overallSummary().responded / overallSummary().total) * 100 : 0">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: Requirements for selected category -->
+  <div class="requirement-list">
+    @if (selectedGroup(); as group) {
+      <h4>{{ group.displayName }} ({{ group.requirements.length }} requirements)</h4>
+
+      <mat-accordion multi>
+        @for (req of group.requirements; track req.id) {
+          @let draft = getDraft(req.id);
+          <mat-expansion-panel>
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <span class="req-title">{{ req.title }}</span>
+              </mat-panel-title>
+              <mat-panel-description>
+                <mat-chip-set>
+                  <mat-chip [class]="'status-' + draft.compliance_status" class="compact-chip">
+                    {{ draft.compliance_status | titlecase }}
+                  </mat-chip>
+                  <mat-chip [class]="getPriorityClass(req.priority)" class="compact-chip">
+                    {{ getPriorityLabel(req.priority) }}
+                  </mat-chip>
+                </mat-chip-set>
+              </mat-panel-description>
+            </mat-expansion-panel-header>
+
+            <!-- Requirement detail (buyer's ask) -->
+            @if (req.description) {
+              <div class="buyer-requirement">
+                <span class="field-label">Buyer Requires:</span>
+                <p>{{ req.description }}</p>
+              </div>
+            }
+            @if (req.standardReference) {
+              <div class="standard-ref">
+                <mat-icon>policy</mat-icon>
+                <span>{{ req.standardReference }}</span>
+              </div>
+            }
+
+            <!-- Vendor response form -->
+            <div class="response-form">
+              <mat-form-field appearance="outline" class="status-field">
+                <mat-label>Compliance Status</mat-label>
+                <mat-select
+                  [value]="draft.compliance_status"
+                  (selectionChange)="updateDraft(req.id, 'compliance_status', $event.value)">
+                  @for (opt of statusOptions; track opt.value) {
+                    <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Your Response</mat-label>
+                <textarea matInput
+                  rows="3"
+                  [value]="draft.response_text"
+                  (input)="updateDraft(req.id, 'response_text', $any($event.target).value)"
+                  placeholder="Describe how you meet this requirement..."></textarea>
+              </mat-form-field>
+
+              <div class="estimate-row">
+                <mat-form-field appearance="outline" class="narrow-field">
+                  <mat-label>Est. Hours</mat-label>
+                  <input matInput type="number"
+                    [value]="draft.estimated_hours"
+                    (input)="updateDraft(req.id, 'estimated_hours', +$any($event.target).value || null)">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="narrow-field">
+                  <mat-label>Est. Cost</mat-label>
+                  <span matPrefix>$&nbsp;</span>
+                  <input matInput type="number"
+                    [value]="draft.estimated_cost"
+                    (input)="updateDraft(req.id, 'estimated_cost', +$any($event.target).value || null)">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Certification Ref</mat-label>
+                  <input matInput
+                    [value]="draft.certification_ref"
+                    (input)="updateDraft(req.id, 'certification_ref', $any($event.target).value)"
+                    placeholder="e.g., SOC 2 Type II">
+                </mat-form-field>
+              </div>
+            </div>
+          </mat-expansion-panel>
+        }
+      </mat-accordion>
+    } @else {
+      <div class="empty-state">
+        <p>Select a requirement category from the left to begin responding.</p>
+      </div>
+    }
+  </div>
+</div>

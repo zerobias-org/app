@@ -1,0 +1,210 @@
+@use '@angular/material' as mat;
+@use 'theme' as theme;
+@use 'theme-variables' as tv;
+@use 'buttons';
+@use 'chips';
+@use 'checkbox';
+
+// M3 Theme — light default
+html {
+  color-scheme: light;
+  @include mat.theme(theme.$theme);
+}
+
+// CSS custom properties for both themes
+// These mixins internally target html {} and body.dark-theme {} respectively
+// — call at root level, never nested inside a selector
+@include tv.zb-theme-variables-light(theme.$theme);
+@include tv.zb-theme-variables-dark(theme.$altTheme);
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
+  background-color: var(--zb-background);
+  color: var(--zb-text);
+  transition: background-color 0.3s ease, color 0.3s ease;
+
+  // Dark theme toggled via ZbThemeService (adds body.dark-theme class)
+  &.dark-theme {
+    color-scheme: dark;
+    @include mat.theme(theme.$altTheme);
+  }
+}
+
+// Resizable drawer (used by filter sidebars)
+.resizable-drawer {
+  width: var(--drawer-width, 280px);
+}
+
+.drawer-resize-handle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 8px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s ease;
+
+  &:hover,
+  &:active {
+    background-color: var(--mat-sys-outline-variant, rgba(0, 0, 0, 0.08));
+  }
+
+  .resize-grip {
+    width: 3px;
+    height: 24px;
+    border-radius: 2px;
+    background-color: var(--mat-sys-outline, rgba(0, 0, 0, 0.2));
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+
+  &:hover .resize-grip,
+  &:active .resize-grip {
+    opacity: 1;
+  }
+}
+
+// Snackbar — ensure readable contrast in dark theme
+// Tokens are read from nearest ancestor; CDK overlay lives inside <body>
+body.dark-theme {
+  --mat-snack-bar-container-color: #d9d9d9;
+  --mat-snack-bar-supporting-text-color: #1a1a1a;
+  --mat-snack-bar-button-color: #1a1a1a;
+}
+
+// Scrollbar styling
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--zb-scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--zb-scrollbar-thumb);
+  border-radius: 4px;
+
+  &:hover {
+    background: var(--zb-scrollbar-thumb-hover);
+  }
+}
+
+// ============================================================================
+// Master task card — two-tone panel styling
+// zb-simple-panel uses ViewEncapsulation.None so these selectors are global
+// ============================================================================
+
+.master-card {
+  zb-simple-panel.header-only .simple-panel-body {
+    background-color: var(--zb-background-card, var(--mat-sys-surface));
+  }
+}
+
+// Tags panel — flatten the zb-remote-table empty state so it matches Links/Sub-tasks
+app-resource-tags-panel zb-empty-state-container .fill {
+  border: none;
+  background-color: transparent;
+  border-radius: 0;
+  margin: 0;
+}
+
+// ============================================================================
+// Transition menus (rendered in CDK overlay, needs global scope)
+// ============================================================================
+
+// Transition menu — overlay panel
+.transition-menu.mat-mdc-menu-panel {
+  min-width: 350px;
+
+  .mat-mdc-menu-item-text {
+    width: 100%;
+  }
+}
+
+// ── Color swatch submenu (rendered in CDK overlay, needs global scope) ──
+
+.color-swatch-menu .mat-mdc-menu-content {
+  padding: 0;
+}
+
+.swatch-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 12px;
+  max-width: 180px;
+}
+
+.swatch {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+
+  &:hover {
+    transform: scale(1.15);
+  }
+
+  &.active {
+    border-color: var(--mat-sys-on-surface);
+  }
+}
+
+.swatch-none {
+  background: var(--mat-sys-surface-variant);
+  border-style: dashed;
+}
+
+.check {
+  font-size: 12px;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.swatch-none .check {
+  color: var(--mat-sys-on-surface-variant);
+  text-shadow: none;
+}
+
+// Transition row inside menu items — "Action Name  →  STATUS"
+.transition-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+
+  .transition-name {
+    font-size: 14px;
+    font-weight: 500;
+    flex-grow: 1;
+    flex-basis: 150px;
+  }
+
+  .transition-arrow {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    color: var(--mat-sys-on-surface-variant, #666);
+    flex-shrink: 0;
+  }
+
+  .transition-state {
+    flex-basis: 120px;
+    flex-shrink: 0;
+  }
+}

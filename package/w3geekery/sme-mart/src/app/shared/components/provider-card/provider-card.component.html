@@ -1,0 +1,46 @@
+<mat-card appearance="outlined" class="provider-card" (click)="navigate()" tabindex="0" role="button">
+  <mat-card-header>
+    <div class="avatar-wrapper" mat-card-avatar>
+      @if (avatarUrl()) {
+        <img [src]="avatarUrl()" [alt]="displayName()" class="avatar-img" />
+      } @else {
+        <span class="avatar-initials">{{ initials() }}</span>
+      }
+    </div>
+    <mat-card-title>{{ displayName() }}</mat-card-title>
+    <mat-card-subtitle>{{ headline() }}</mat-card-subtitle>
+  </mat-card-header>
+
+  @if (topSkills().length) {
+    <mat-card-content>
+      <div class="skills-row">
+        @for (skill of topSkills(); track skill) {
+          <mat-chip-set>
+            <mat-chip>{{ skill }}</mat-chip>
+          </mat-chip-set>
+        }
+      </div>
+    </mat-card-content>
+  }
+
+  <mat-card-footer>
+    <div class="stats-row">
+      @if (rating() !== null) {
+        <span class="stat">
+          <mat-icon class="stat-icon star">star</mat-icon>
+          {{ rating()!.toFixed(1) }}
+        </span>
+      }
+      <span class="stat">
+        <mat-icon class="stat-icon">work</mat-icon>
+        {{ jobsCompleted() }} jobs
+      </span>
+      @if (reviewCount()) {
+        <span class="stat">
+          <mat-icon class="stat-icon">rate_review</mat-icon>
+          {{ reviewCount() }} reviews
+        </span>
+      }
+    </div>
+  </mat-card-footer>
+</mat-card>

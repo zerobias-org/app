@@ -1,0 +1,38 @@
+.rfp-wizard {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+.wizard-header {
+  margin-bottom: 24px;
+
+  h1 {
+    margin: 0 0 4px;
+    font-size: 24px;
+    font-weight: 500;
+  }
+
+  .subtitle {
+    margin: 0;
+    color: var(--mat-sys-on-surface-variant, #666);
+    font-size: 14px;
+  }
+}
+
+.wizard-loading {
+  display: flex;
+  justify-content: center;
+  padding: 64px 0;
+  color: var(--mat-sys-on-surface-variant, #666);
+}
+
+:host ::ng-deep {
+  .mat-horizontal-stepper-header-container {
+    margin-bottom: 24px;
+  }
+
+  .mat-horizontal-content-container {
+    padding: 0;
+  }
+}

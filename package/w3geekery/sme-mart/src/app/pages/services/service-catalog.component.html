@@ -1,0 +1,39 @@
+<app-list-page
+  title="Services"
+  description="Browse services offered by subject matter experts — filter by category, specialty, or provider."
+  searchPlaceholder="Search services..."
+  [(searchValue)]="searchTerm"
+  [sortOptions]="sortOptions"
+  [(sortValue)]="sortBy"
+  [items]="filteredServices()"
+  [loading]="loading()"
+  emptyText="No services found. Try adjusting your search or filters."
+>
+  <!-- Provider filter chip -->
+  @if (providerFilter()) {
+    <div listPageFilterBar class="active-filter-bar">
+      <mat-chip-set>
+        <mat-chip [removable]="true" (removed)="clearProviderFilter()">
+          <mat-icon matChipAvatar>person</mat-icon>
+          Services by {{ providerFilterName() || 'Provider' }}
+          <mat-icon matChipRemove>cancel</mat-icon>
+        </mat-chip>
+      </mat-chip-set>
+    </div>
+  }
+
+  <!-- Results -->
+  <div listPageResults>
+    <div class="results-count">{{ filteredServices().length }} services found</div>
+    <div class="service-grid">
+      @for (svc of filteredServices(); track svc.id) {
+        <app-service-card
+          [service]="svc"
+          (serviceSelect)="onServiceSelect($event)"
+          (viewProviderServices)="onViewProviderServices($event)"
+          (viewProviderProfile)="onViewProviderProfile($event)"
+        />
+      }
+    </div>
+  </div>
+</app-list-page>

@@ -1,0 +1,128 @@
+:host {
+  display: block;
+}
+
+.upload-container {
+  border: 2px dashed var(--mat-sys-outline-variant);
+  border-radius: 8px;
+  padding: 1rem;
+  transition: border-color 0.2s, background-color 0.2s;
+
+  &.drag-over {
+    border-color: var(--mat-sys-primary);
+    background: color-mix(in srgb, var(--mat-sys-primary) 5%, transparent);
+  }
+}
+
+.drop-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 1.5rem 1rem;
+  cursor: pointer;
+  text-align: center;
+
+  .drop-icon {
+    font-size: 2.5rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    color: var(--mat-sys-outline);
+  }
+
+  p {
+    margin: 0;
+    color: var(--mat-sys-on-surface-variant);
+    font-size: 0.875rem;
+  }
+
+  .hint {
+    font-size: 0.75rem;
+    color: var(--mat-sys-outline);
+  }
+}
+
+.metadata-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-top: 0.75rem;
+
+  mat-form-field {
+    width: 100%;
+  }
+}
+
+.file-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.file-entry {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 4px;
+  background: var(--mat-sys-surface-container-low);
+
+  &.done {
+    background: color-mix(in srgb, var(--mat-sys-primary) 8%, transparent);
+  }
+
+  &.error {
+    background: color-mix(in srgb, var(--mat-sys-error) 8%, transparent);
+  }
+
+  .file-icon {
+    color: var(--mat-sys-outline);
+    flex-shrink: 0;
+  }
+
+  .file-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+
+    .file-name {
+      font-size: 0.875rem;
+      font-weight: 500;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .file-size {
+      font-size: 0.75rem;
+      color: var(--mat-sys-outline);
+    }
+  }
+
+  .file-progress {
+    flex: 0 0 80px;
+  }
+
+  .status-icon.done {
+    color: var(--mat-sys-primary);
+  }
+
+  .error-text {
+    font-size: 0.75rem;
+    color: var(--mat-sys-error);
+  }
+
+  .remove-btn {
+    flex-shrink: 0;
+  }
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}

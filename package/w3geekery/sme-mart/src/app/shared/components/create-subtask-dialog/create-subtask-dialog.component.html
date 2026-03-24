@@ -1,0 +1,66 @@
+<h2 mat-dialog-title>Create New Task</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Task Name</mat-label>
+      <input matInput formControlName="name" placeholder="e.g. Phase 1: Gap Assessment">
+    </mat-form-field>
+
+    <label class="editor-label">Task Description</label>
+    <app-markdown-editor
+      [content]="form.get('description')!.value || ''"
+      (contentChange)="form.get('description')!.setValue($event)"
+      height="350px"
+      placeholder="Describe the task (Markdown supported)">
+    </app-markdown-editor>
+
+    <div class="form-row">
+      <!-- Status / Initial Transition -->
+      @if (hasTransitions()) {
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Status</mat-label>
+          <mat-select [value]="selectedTransition()"
+            (selectionChange)="selectTransition($event.value)">
+            <mat-option [value]="null">
+              <span class="transition-option">
+                <span>Default (Backlog)</span>
+              </span>
+            </mat-option>
+            @for (t of initialTransitions(); track t.id.toString()) {
+              <mat-option [value]="t">
+                <span class="transition-option">
+                  <span>{{ t.name }}</span>
+                  <mat-icon class="transition-arrow">arrow_right_alt</mat-icon>
+                  <zb-resource-status [label]="t.status" [pill]="true" [showDot]="false" size="small"></zb-resource-status>
+                </span>
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      }
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Priority</mat-label>
+        <mat-select formControlName="priority">
+          @for (opt of priorityOptions; track opt.value) {
+            <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()" [disabled]="submitting()">Cancel</button>
+  <button mat-flat-button color="primary"
+    [disabled]="form.invalid || submitting()"
+    (click)="onSubmit()">
+    @if (submitting()) {
+      Creating…
+    } @else {
+      Create
+    }
+  </button>
+</mat-dialog-actions>

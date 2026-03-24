@@ -1,0 +1,24 @@
+@if (loading()) {
+  <div class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Loading tasks…</p>
+  </div>
+} @else if (error()) {
+  <zb-empty-state-container
+    [loading]="false"
+    [emptyText]="'Failed to load tasks: ' + error()!">
+  </zb-empty-state-container>
+} @else if (masterTask()) {
+  <!-- Master Task (contains tags, links, and sub-tasks panels) -->
+  <section class="master-section">
+    <h3 class="section-title">Engagement Task</h3>
+    <app-task-card
+      [task]="masterTask()!"
+      [isMaster]="true"
+      [isOwner]="isOwnerFlag()"
+      [masterSubTasks]="subTasks()"
+      (transitioned)="onTaskTransitioned($event)"
+      (createSubTask)="openCreateDialog()">
+    </app-task-card>
+  </section>
+}

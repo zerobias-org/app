@@ -1,0 +1,29 @@
+@if (!composerOpen()) {
+  <button mat-stroked-button (click)="toggleComposer()" class="add-comment-btn">
+    <mat-icon>add_comment</mat-icon>
+    Add Comment
+  </button>
+}
+
+@if (composerOpen()) {
+  <div class="composer-panel">
+    <app-markdown-editor
+      [content]="commentText()"
+      (contentChange)="commentText.set($event)"
+      height="180px"
+      placeholder="Write a comment…">
+    </app-markdown-editor>
+    <div class="composer-actions">
+      <button mat-button (click)="toggleComposer()" [disabled]="submitting()">Cancel</button>
+      <button mat-flat-button color="primary"
+        [disabled]="!commentText().trim() || submitting()"
+        (click)="submit()">
+        @if (submitting()) {
+          Posting…
+        } @else {
+          Post Comment
+        }
+      </button>
+    </div>
+  </div>
+}
