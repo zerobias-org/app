@@ -14,4 +14,7 @@ export const environment = {
   // AuditgraphDB Pipeline + Boundary (UAT — SME Marketplace boundary, Zerobias org)
   pipelineId: 'f6d1f579-fe02-4158-b99e-a55113fd70cb',
   boundaryId: 'e3871f0b-56f0-4e5e-87c6-6ca196bf88c7',
+  featureFlags: {
+    prefsBackend: 'localStorage' as 'localStorage' | 'pkv',
+  },
 };

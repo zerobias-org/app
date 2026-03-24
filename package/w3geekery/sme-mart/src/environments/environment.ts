@@ -19,4 +19,10 @@ export const environment = {
   // AuditgraphDB Pipeline + Boundary (UAT — SME Marketplace boundary, Zerobias org)
   pipelineId: 'f6d1f579-fe02-4158-b99e-a55113fd70cb',
   boundaryId: 'e3871f0b-56f0-4e5e-87c6-6ca196bf88c7',
+  // Feature flags
+  featureFlags: {
+    /** User prefs backend: 'localStorage' (fast, no network) or 'pkv' (cross-device sync via ZB API).
+     *  Set to 'localStorage' while PKV returns 500 on UAT. Switch to 'pkv' when fixed. */
+    prefsBackend: 'localStorage' as 'localStorage' | 'pkv',
+  },
 };

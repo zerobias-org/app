@@ -12,6 +12,7 @@ import {
   type FilterType,
   type TimelineEnabledFilters,
 } from '../models';
+import { FeatureFlagsService } from './feature-flags.service';
 
 const ROLE_KEY = 'sme-mart.user-role';
 const FILTERS_KEY = 'sme-mart.catalog-filters';
@@ -26,14 +27,15 @@ export type FolderColorMap = Record<string, string>;
 type ThemePreference = 'light' | 'dark' | 'system';
 
 /**
- * PKV-backed user preferences: role toggle (buyer/provider/both)
- * and catalog filter state. Falls back to localStorage when PKV
- * is unavailable (e.g., before auth).
+ * User preferences with configurable backend (localStorage or PKV).
+ * Controlled by feature flag `prefsBackend` in environment.featureFlags.
+ * Set to 'pkv' when ZB PKV API is working; 'localStorage' when it's broken.
  */
 @Injectable({ providedIn: 'root' })
 export class UserPreferencesService {
   private readonly clientApi = inject(ZerobiasClientApi);
   private readonly themeService = inject(ZbThemeService);
+  private readonly flags = inject(FeatureFlagsService);
 
   readonly userRole = signal<UserRole>('both');
   readonly themePreference = signal<ThemePreference>(
@@ -182,18 +184,21 @@ export class UserPreferencesService {
   }
 
   private async loadPkv(key: string, apply: (val: any) => void): Promise<void> {
-    // Try PKV first, fall back to localStorage
-    try {
-      const pkv = await this.clientApi.danaClient.getPkvApi().getPrincipalKeyValue(key);
-      if (pkv?.value) {
-        apply(pkv.value);
-        return;
+    const backend = this.flags.get('prefsBackend');
+
+    if (backend === 'pkv') {
+      try {
+        const pkv = await this.clientApi.danaClient.getPkvApi().getPrincipalKeyValue(key);
+        if (pkv?.value) {
+          apply(pkv.value);
+          return;
+        }
+      } catch {
+        // PKV unavailable — fall through to localStorage
       }
-    } catch {
-      // PKV unavailable — fall through to localStorage
     }
 
-    // localStorage fallback
+    // localStorage (primary when backend='localStorage', fallback when PKV fails)
     try {
       const raw = localStorage.getItem(key);
       if (raw) apply(JSON.parse(raw));
@@ -209,7 +214,9 @@ export class UserPreferencesService {
       localStorage.setItem(key, JSON.stringify(value));
     } catch { /* quota exceeded */ }
 
-    // Attempt PKV save in background (may fail if API is down)
+    // Only attempt PKV save if backend is 'pkv'
+    if (this.flags.get('prefsBackend') !== 'pkv') return;
+
     this.saveTimers.set(
       key,
       setTimeout(async () => {
