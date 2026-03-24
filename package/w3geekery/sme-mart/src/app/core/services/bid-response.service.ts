@@ -1,29 +1,57 @@
 import { Injectable, inject } from '@angular/core';
-import { SmeMartDbService } from './sme-mart-db.service';
+import { PipelineWriteService } from './pipeline-write.service';
+import { GraphqlReadService } from './graphql-read.service';
+import { BID_RESPONSE_FIELD_MAPPING, mapGqlToNeon, mapNeonToGql } from '../field-mappings';
 import type { BidResponse, ComplianceSummary } from '../models';
 
+/** GQL fields to request for BidResponse queries */
+const GQL_FIELDS = [
+  'id', 'bidId', 'requirementId', 'complianceStatus', 'responseText',
+  'estimatedHours', 'estimatedCost', 'certificationRef', 'readyDate',
+  'respondedAt', 'updatedAt',
+];
+
+/**
+ * BidResponseService — MIGRATED TO PIPELINE + GQL (Plan 059 Wave 5)
+ *
+ * Reads: GraphqlReadService (AuditgraphDB)
+ * Writes: PipelineWriteService (Receiver Pipeline)
+ *
+ * Model uses snake_case (BidResponse interface). GQL returns camelCase.
+ * mapGqlToNeon converts GQL responses back to snake_case for consumers.
+ */
 @Injectable({ providedIn: 'root' })
 export class BidResponseService {
-  private readonly db = inject(SmeMartDbService);
+  private readonly pipeline = inject(PipelineWriteService);
+  private readonly gql = inject(GraphqlReadService);
 
   /** Load all responses for a bid. */
   async listByBid(bidId: string): Promise<BidResponse[]> {
-    const result = await this.db.searchRows<BidResponse>(
-      'bid_responses',
-      `(bid_id=${bidId})`,
-      { pageSize: 200 },
+    const result = await this.gql.query<Record<string, unknown>>(
+      'BidResponse',
+      GQL_FIELDS,
+      { filters: { bidId: `.eq.${bidId}` }, pageSize: 200 },
     );
-    return result.items || [];
+    return result.items.map(gql =>
+      mapGqlToNeon<BidResponse>(gql, BID_RESPONSE_FIELD_MAPPING.gqlToNeon),
+    );
   }
 
   /** Get a single response by bid + requirement. */
   async getByRequirement(bidId: string, requirementId: string): Promise<BidResponse | null> {
-    const result = await this.db.searchRows<BidResponse>(
-      'bid_responses',
-      `(&(bid_id=${bidId})(requirement_id=${requirementId}))`,
-      { pageSize: 1 },
+    const result = await this.gql.query<Record<string, unknown>>(
+      'BidResponse',
+      GQL_FIELDS,
+      {
+        filters: {
+          bidId: `.eq.${bidId}`,
+          requirementId: `.eq.${requirementId}`,
+        },
+        pageSize: 1,
+      },
     );
-    return result.items?.[0] || null;
+    if (!result.items.length) return null;
+    return mapGqlToNeon<BidResponse>(result.items[0], BID_RESPONSE_FIELD_MAPPING.gqlToNeon);
   }
 
   /** Create or update a response (upsert pattern). */
@@ -37,20 +65,25 @@ export class BidResponseService {
   }): Promise<BidResponse> {
     const existing = await this.getByRequirement(bidId, requirementId);
 
-    const fields: Record<string, unknown> = {
+    const neonFields: Record<string, unknown> = {
+      bid_id: bidId,
+      requirement_id: requirementId,
       ...data,
       responded_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     };
 
     if (existing) {
-      return this.db.updateRow<BidResponse>('bid_responses', existing.id, fields);
+      neonFields['id'] = existing.id;
+    } else {
+      neonFields['id'] = `br-${bidId.slice(0, 8)}-${requirementId.slice(0, 8)}-${Date.now()}`;
     }
 
-    return this.db.createRow<BidResponse>('bid_responses', {
-      bid_id: bidId,
-      requirement_id: requirementId,
-      ...fields,
-    });
+    const gqlData = mapNeonToGql<Record<string, unknown>>(neonFields, BID_RESPONSE_FIELD_MAPPING.neonToGql);
+    await this.pipeline.pushEntity('BidResponse', gqlData);
+
+    // Return the local model immediately (optimistic — pipeline is async)
+    return { ...existing, ...neonFields } as BidResponse;
   }
 
   /** Batch save multiple responses. */

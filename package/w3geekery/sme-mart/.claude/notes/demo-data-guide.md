@@ -57,7 +57,7 @@ These 5 work_requests have been converted from RFPs to active engagements. Each 
 | **Timeline** | 4 weeks |
 | **ZB Task ID** | `fafe9c00-136c-4ee1-985d-c3a1f7aa0095` (CI: `223318eb-feb5-4454-8454-a28efc935f4d`) |
 | **ZB Task Code** | `aha1-1` (CI: `aha1-4`) |
-| **ZB Tag ID** | `b4c97483-edbe-4854-b81c-aba40c7f1b9d` (CI: `518acc1c-acc5-4831-b4db-5648cd5f9558`) |
+| **ZB Tag ID** | `e1864514-af28-4397-93a5-f05e443b05cb` (old ZB-Ops: `b4c97483-...`, CI: `518acc1c-...`) |
 
 **Bids:**
 | Provider | Price | Timeline | Status |
@@ -117,7 +117,7 @@ These 4 engagements do NOT have an `engagementTag`, so they appear on the /rfps 
 | **Timeline** | 3 months |
 | **ZB Task ID** | `9d4a93a9-9258-46e7-975d-5c518228f476` (CI: `f30ffe2b-1e6d-458e-9d65-72df5b9ff599`) |
 | **ZB Task Code** | `aha1-2` (CI: `aha1-5`) |
-| **ZB Tag ID** | `0630ad1b-0c12-4914-b90b-36ae8f7ca628` (CI: `e07c3ee5-4bfc-42bf-b61d-33c08750d20a`) |
+| **ZB Tag ID** | `355a0e23-e22b-4622-b186-08e860513de6` (old ZB-Ops: `0630ad1b-...`, CI: `e07c3ee5-...`) |
 
 **Bids:**
 | Provider | Price | Timeline | Status |
@@ -140,7 +140,7 @@ These 4 engagements do NOT have an `engagementTag`, so they appear on the /rfps 
 | **Timeline** | 8–12 weeks |
 | **ZB Task ID** | `9ab5a79a-aaae-40b6-b49c-a418bc359c68` (CI: `4a3ad32b-4800-43db-83be-a33d134317d0`) |
 | **ZB Task Code** | `aha1-3` (CI: `aha1-6`) |
-| **ZB Tag ID** | `b244cd6c-df3c-4888-932f-81c76ae51ad6` (CI: `aacd35bd-ca10-4032-9603-00d19e018194`) |
+| **ZB Tag ID** | `49e67643-85da-44b0-a47a-c67c56a4d2d7` (old ZB-Ops: `b244cd6c-...`, CI: `aacd35bd-...`) |
 
 **Bids:**
 | Provider | Price | Timeline | Status |
@@ -164,7 +164,7 @@ These 4 engagements do NOT have an `engagementTag`, so they appear on the /rfps 
 | **Timeline** | 6 weeks |
 | **ZB Task ID** | `127dfed5-39ca-4696-945a-109c1c39097c` (CI: `67659347-8925-414c-822c-76a41ef1ff40`) |
 | **ZB Task Code** | `aha1-4` (CI: `aha1-7`) |
-| **ZB Tag ID** | `29ab33e0-ca75-44ce-a809-8d2ce879c922` (CI: `b3b590d8-3140-4866-b344-ca79ef1cc2a8`) |
+| **ZB Tag ID** | `ba599b51-6d87-4c46-9c98-05244a928cc9` (old ZB-Ops: `29ab33e0-...`, CI: `b3b590d8-...`) |
 
 **Bids:**
 | Provider | Price | Timeline | Status |
@@ -187,7 +187,7 @@ These 4 engagements do NOT have an `engagementTag`, so they appear on the /rfps 
 | **Timeline** | 4 weeks |
 | **ZB Task ID** | `43bcbbfd-cd40-4020-b83b-97bdb38f6e61` (CI: `46cf4833-035c-4113-8e00-175a31ed9ab3`) |
 | **ZB Task Code** | `aha1-5` (CI: `aha1-8`) |
-| **ZB Tag ID** | `b8e84e56-bf69-4013-aa9c-9d4157b5418a` (CI: `49cbb0b8-ccd3-4d92-88e5-16e63ef81662`) |
+| **ZB Tag ID** | `3b2e84a6-52bc-41d7-8e8c-5e78e65a033c` (old ZB-Ops: `b8e84e56-...`, CI: `49cbb0b8-...`) |
 
 **Bids:**
 | Provider | Price | Timeline | Status |
@@ -260,11 +260,11 @@ Every engagement has a `zerobias_tag_id` — these are ZeroBias Tags used to lab
 
 | Engagement Tag | UAT Tag ID |
 |----------------|------------|
-| `sme-mart.eng.crystal-harbor` | `b4c97483-edbe-4854-b81c-aba40c7f1b9d` |
-| `sme-mart.eng.velvet-summit` | `0630ad1b-0c12-4914-b90b-36ae8f7ca628` |
-| `sme-mart.eng.amber-circuit` | `b244cd6c-df3c-4888-932f-81c76ae51ad6` |
-| `sme-mart.eng.silver-bridge` | `29ab33e0-ca75-44ce-a809-8d2ce879c922` |
-| `sme-mart.eng.coral-meadow` | `b8e84e56-bf69-4013-aa9c-9d4157b5418a` |
+| `sme-mart.eng.crystal-harbor` | `e1864514-af28-4397-93a5-f05e443b05cb` |
+| `sme-mart.eng.velvet-summit` | `355a0e23-e22b-4622-b186-08e860513de6` |
+| `sme-mart.eng.amber-circuit` | `49e67643-85da-44b0-a47a-c67c56a4d2d7` |
+| `sme-mart.eng.silver-bridge` | `ba599b51-6d87-4c46-9c98-05244a928cc9` |
+| `sme-mart.eng.coral-meadow` | `3b2e84a6-52bc-41d7-8e8c-5e78e65a033c` |
 
 ### Tasks (on UAT, `uat` profile)
 All tasks are `todo` in boundary "W3Geekery Testing" (`7c43e376-b079-41f5-a42c-9ce7c64597fc`), activity "Ad Hoc Activity - One person" (`e15830c8-4274-4d67-bf9b-c22b60001e32`), workflow "Software Development Lifecycle".

@@ -11,7 +11,7 @@ export const environment = {
   // TODO: Move to server-side proxy when Hub connection is working
   neonConnectionString:
     'postgresql://neondb_owner:npg_NjsYRTy2U6re@ep-aged-fog-af9wu771.c-2.us-west-2.aws.neon.tech/neondb?sslmode=require',
-  // AuditgraphDB Pipeline + Boundary (UAT — Zerobias org, same as dev)
-  pipelineId: '591861da-0eac-45b3-ad1c-eb4e46734402',
-  boundaryId: '2f2d220c-d688-4925-9f97-78d3afc80b00',
+  // AuditgraphDB Pipeline + Boundary (UAT — SME Marketplace boundary, Zerobias org)
+  pipelineId: 'f6d1f579-fe02-4158-b99e-a55113fd70cb',
+  boundaryId: 'e3871f0b-56f0-4e5e-87c6-6ca196bf88c7',
 };

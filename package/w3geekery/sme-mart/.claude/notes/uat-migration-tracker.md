@@ -14,8 +14,9 @@ CI/dev (`ci.zerobias.com`) is being nuked and rebuilt with hydra. UAT (`uat.zero
 
 | Entity | CI Value | UAT Value | Status |
 |--------|----------|-----------|--------|
-| Boundary name | W3Geekery Dev | W3Geekery Testing | ✅ Done |
-| Boundary ID | `b1e4b97e-6ef2-4e7e-8dbc-c3750fb9306e` | `7c43e376-b079-41f5-a42c-9ce7c64597fc` | ✅ Done |
+| Boundary name | W3Geekery Dev | **SME Marketplace** | ✅ Migrated 2026-03-24 |
+| Boundary ID | `b1e4b97e-6ef2-4e7e-8dbc-c3750fb9306e` | **`e3871f0b-56f0-4e5e-87c6-6ca196bf88c7`** | ✅ Migrated 2026-03-24 |
+| Old UAT boundary | — | `7c43e376-...` (W3Geekery Testing) | ⚠️ Superseded — tasks orphaned there |
 
 ### 2. Activity
 
@@ -28,27 +29,31 @@ Activities are platform-global (same IDs across all environments). Confirmed via
 
 ### 3. Tags (hydra)
 
-All tags follow the pattern `sme-mart.eng.<codename>`. Created via `hydraClient.getTagApi().createTag()` with `ownerId` = org ID for org-scoped tags.
+All tags follow the pattern `sme-mart.eng.<codename>`. Created via `hydraClient.getTagApi().createTag()` with `ownerId` = Zerobias org ID for org-scoped tags.
 
-| Tag Name | CI Tag ID | UAT Tag ID | Status |
-|----------|-----------|------------|--------|
-| `sme-mart.eng.crystal-harbor` | `518acc1c-acc5-4831-b4db-5648cd5f9558` | `b4c97483-edbe-4854-b81c-aba40c7f1b9d` | ✅ Done |
-| `sme-mart.eng.velvet-summit` | `e07c3ee5-4bfc-42bf-b61d-33c08750d20a` | `0630ad1b-0c12-4914-b90b-36ae8f7ca628` | ✅ Done |
-| `sme-mart.eng.amber-circuit` | `aacd35bd-ca10-4032-9603-00d19e018194` | `b244cd6c-df3c-4888-932f-81c76ae51ad6` | ✅ Done |
-| `sme-mart.eng.silver-bridge` | `b3b590d8-3140-4866-b344-ca79ef1cc2a8` | `29ab33e0-ca75-44ce-a809-8d2ce879c922` | ✅ Done |
-| `sme-mart.eng.coral-meadow` | `49cbb0b8-ccd3-4d92-88e5-16e63ef81662` | `b8e84e56-bf69-4013-aa9c-9d4157b5418a` | ✅ Done |
+**Note:** Tags were originally created under ZB Operations org (wrong org). Recreated 2026-03-23 under Zerobias org (`57c741cf-...`). Old ZB-Ops IDs in "Old UAT" column.
+
+| Tag Name | CI Tag ID | Old UAT (ZB-Ops) | UAT Tag ID (Zerobias org) | Status |
+|----------|-----------|-------------------|---------------------------|--------|
+| `sme-mart.eng.crystal-harbor` | `518acc1c-...` | `b4c97483-...` | `e1864514-af28-4397-93a5-f05e443b05cb` | ✅ Recreated |
+| `sme-mart.eng.velvet-summit` | `e07c3ee5-...` | `0630ad1b-...` | `355a0e23-e22b-4622-b186-08e860513de6` | ✅ Recreated |
+| `sme-mart.eng.amber-circuit` | `aacd35bd-...` | `b244cd6c-...` | `49e67643-85da-44b0-a47a-c67c56a4d2d7` | ✅ Recreated |
+| `sme-mart.eng.silver-bridge` | `b3b590d8-...` | `29ab33e0-...` | `ba599b51-6d87-4c46-9c98-05244a928cc9` | ✅ Recreated |
+| `sme-mart.eng.coral-meadow` | `49cbb0b8-...` | `b8e84e56-...` | `3b2e84a6-52bc-41d7-8e8c-5e78e65a033c` | ✅ Recreated |
 
 ### 4. Tasks
 
 All tasks created in boundary above, activity above, status `in_progress`, workflow "Software Development Lifecycle". Each task is tagged with its corresponding engagement tag.
 
-| Task Code | Task Name | CI Task ID | UAT Task ID | Status |
-|-----------|-----------|------------|-------------|--------|
-| `aha1-1` | SOC 2 Readiness Assessment | `223318eb-feb5-4454-8454-a28efc935f4d` | `fafe9c00-136c-4ee1-985d-c3a1f7aa0095` | ✅ Done |
-| `aha1-2` | NIST CSF Gap Analysis | `f30ffe2b-1e6d-458e-9d65-72df5b9ff599` | `9d4a93a9-9258-46e7-975d-5c518228f476` | ✅ Done |
-| `aha1-3` | Compliance Automation Setup | `4a3ad32b-4800-43db-83be-a33d134317d0` | `9ab5a79a-aaae-40b6-b49c-a418bc359c68` | ✅ Done |
-| `aha1-4` | FedRAMP Authorization Support | `67659347-8925-414c-822c-76a41ef1ff40` | `127dfed5-39ca-4696-945a-109c1c39097c` | ✅ Done |
-| `aha1-5` | ISO 27001 Evidence Collection | `46cf4833-035c-4113-8e00-175a31ed9ab3` | `43bcbbfd-cd40-4020-b83b-97bdb38f6e61` | ✅ Done |
+| Task Code | Task Name | CI Task ID | UAT Task ID (SME Marketplace) | Status |
+|-----------|-----------|------------|-------------------------------|--------|
+| `aha1-1` | SOC 2 Readiness Assessment | `223318eb-...` | `abc5d715-b97d-4c76-a24b-95c643b68795` | ✅ Recreated 2026-03-24 |
+| `aha1-2` | NIST CSF Gap Analysis | `f30ffe2b-...` | `c3b5fc15-2cf3-406d-961b-570f78689821` | ✅ Recreated 2026-03-24 |
+| `aha1-3` | Compliance Automation Setup | `4a3ad32b-...` | `3a6799c6-65ea-4833-9cf9-3f739f0fe587` | ✅ Recreated 2026-03-24 |
+| `aha1-4` | FedRAMP Authorization Support | `67659347-...` | `900dfe93-ad93-4c02-996c-a8c13700e8ab` | ✅ Recreated 2026-03-24 |
+| `aha1-5` | ISO 27001 Evidence Collection | `46cf4833-...` | `d9895a40-38a4-4dad-9e8a-6ee588104cf0` | ✅ Recreated 2026-03-24 |
+
+Old task IDs (W3Geekery Testing boundary, ZB-Ops org): `fafe9c00-...`, `9d4a93a9-...`, `9ab5a79a-...`, `127dfed5-...`, `43bcbbfd-...` — orphaned, can be cleaned up later.
 
 ### 5. Hub Module Connection (Generic SQL)
 
@@ -127,15 +132,17 @@ Schema class IDs are **deterministic** (derived from YAML content) — same acro
 
 ### 8. Receiver Pipeline (AuditgraphDB)
 
-| Entity | Prod Value | UAT Value | Status |
-|--------|------------|-----------|--------|
-| Pipeline name | SME Mart Entity Pipeline | SME Mart Entity Pipeline | ✅ Done |
-| Pipeline ID | `091d5068-0527-4f45-9839-37f6d5c1669e` | `591861da-0eac-45b3-ad1c-eb4e46734402` | ✅ Done |
-| Boundary | Platform (`2842fab1-ceff-4ec4-bf09-ce5e7c33c3e2`) | Platform (`2f2d220c-d688-4925-9f97-78d3afc80b00`) | ✅ Done |
-| Org | Zerobias (`57c741cf-a58e-5efc-bf2f-93c4f6cf76ec`) | Zerobias (`57c741cf-a58e-5efc-bf2f-93c4f6cf76ec`) | ✅ Same |
-| Boundary Product ID | `94f0b2f2-e795-4db9-b0e8-d04fa499d06c` | `2095d8c2-1cab-4117-8e7e-bf2864e7747d` | ✅ Done |
+| Entity | Prod Value | UAT Value (SME Marketplace) | Status |
+|--------|------------|----------------------------|--------|
+| Pipeline name | SME Mart Entity Pipeline | SME Mart Entity Pipeline | ✅ Recreated 2026-03-24 |
+| Pipeline ID | `091d5068-0527-4f45-9839-37f6d5c1669e` | **`f6d1f579-fe02-4158-b99e-a55113fd70cb`** | ✅ Recreated 2026-03-24 |
+| Boundary | Platform (`2842fab1-...`) | **SME Marketplace (`e3871f0b-...`)** | ✅ Migrated |
+| Org | Zerobias (`57c741cf-...`) | Zerobias (`57c741cf-...`) | ✅ Same |
+| Boundary Product ID | `94f0b2f2-...` | **`4927da5d-86b2-4ab8-a1b2-9ffa9ce2a341`** | ✅ Already existed |
 | Execution Mode | `receiver` | `receiver` | — |
 | Batch Mode | `differential` | `differential` | — |
+
+Old pipeline ID (Platform boundary): `591861da-0eac-45b3-ad1c-eb4e46734402` — superseded.
 
 ---
 

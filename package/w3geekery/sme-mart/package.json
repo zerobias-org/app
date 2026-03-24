@@ -20,6 +20,7 @@
     "dev:prod": "dotenv -e .env.local -- ng serve --proxy-config proxy-prod.conf.js",
     "build": "ng build",
     "build:prod": "ng build --configuration production",
+    "build:uat": "ng build --configuration uat",
     "build:vercel": "ng build --configuration vercel",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"

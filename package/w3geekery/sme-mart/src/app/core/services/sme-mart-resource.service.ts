@@ -1,7 +1,19 @@
 import { Injectable, inject } from '@angular/core';
 import { SmeMartDbService } from './sme-mart-db.service';
+import { GraphqlReadService, type GqlQueryOptions } from './graphql-read.service';
 import { ImpersonationService } from './impersonation.service';
 import { EngagementHierarchyService } from './engagement-hierarchy.service';
+import {
+  ENGAGEMENT_FIELD_MAPPING,
+  BID_FIELD_MAPPING,
+  NOTE_FIELD_MAPPING,
+  NOTE_FOLDER_FIELD_MAPPING,
+  SERVICE_OFFERING_FIELD_MAPPING,
+  REVIEW_FIELD_MAPPING,
+  DOCUMENT_FIELD_MAPPING,
+  mapGqlToNeon,
+} from '../field-mappings';
+import type { SmeMartClassName } from './pipeline-write.service';
 import type {
   SmeMartResource,
   SmeMartResourceType,
@@ -10,13 +22,6 @@ import type {
   SmeMartResourceLink,
   SmeMartResourceLinkRow,
   SmeMartLinkType,
-  ResourceSearchOptions,
-  Note,
-  NoteFolder,
-  WorkRequest,
-  Bid,
-  Review,
-  ServiceOffering,
 } from '../models';
 import {
   noteToResource,
@@ -31,27 +36,26 @@ import {
 /**
  * Unified resource operations for all SME Mart entities.
  *
- * Mirrors ZB ResourceApi operations, backed by Neon today.
- * On migration day, swap Neon calls for ResourceApi calls.
+ * - Tags: Neon sme_resource_tags (AuditgraphDB objects are not Hydra resources)
+ * - Links: Neon sme_resource_links (same reason — no Hydra resource identity)
+ * - Search: GraphQL (entities migrated to AuditgraphDB in Waves 1-4)
+ * - Tag search: Delegates to EngagementHierarchyService (already on Hydra)
  *
- * - Tags: ZB platform tags (real tag IDs), assignments in Neon sme_resource_tags
- * - Links: Neon sme_resource_links table
- * - Search: Neon queries with RFC4515 filters
- *
- * See: Plan 030 (sme-mart-resource-abstraction.md)
+ * See: Plan 059 Wave 5 (Hydra migration audit)
  */
 @Injectable({ providedIn: 'root' })
 export class SmeMartResourceService {
   private readonly db = inject(SmeMartDbService);
+  private readonly gql = inject(GraphqlReadService);
   private readonly impersonation = inject(ImpersonationService);
   private readonly hierarchy = inject(EngagementHierarchyService);
 
-  // ── Tag Operations ──
+  // ── Tag Operations (Neon — AuditgraphDB objects lack Hydra resource identity) ──
 
   /**
    * Assign ZB platform tags to a resource.
    * Creates rows in sme_resource_tags (Neon).
-   * Tag must already exist in ZB platform (created via danaOld.Tag.createTag).
+   * Tag must already exist in ZB platform (created via hydra.Tag.createTag).
    */
   async tagResource(
     resourceId: string,
@@ -99,21 +103,7 @@ export class SmeMartResourceService {
     return (result.items || []).map(row => this.mapTagRow(row));
   }
 
-  /** Find all resources that have a specific tag */
-  async listResourcesByTag(
-    zbTagId: string,
-    resourceType?: SmeMartResourceType,
-  ): Promise<SmeMartResourceTagRow[]> {
-    const filter = resourceType
-      ? `(&(zb_tag_id=${zbTagId})(resource_type=${resourceType}))`
-      : `(zb_tag_id=${zbTagId})`;
-    const result = await this.db.searchRows<SmeMartResourceTagRow>(
-      'sme_resource_tags', filter, { pageNumber: 1, pageSize: 200 },
-    );
-    return result.items || [];
-  }
-
-  // ── Link Operations ──
+  // ── Link Operations (Neon — no Hydra link types for AuditgraphDB objects) ──
 
   /** Create a typed link between two resources */
   async linkResources(
@@ -177,10 +167,45 @@ export class SmeMartResourceService {
       .map(row => this.mapLinkRow(row));
   }
 
-  // ── Resource Search ──
+  // ── Resource Search (GQL — entities in AuditgraphDB since Waves 1-4) ──
 
   /** Search resources by type with optional name query. Used by links panel autocomplete. */
   async searchResourcesByType(
+    type: SmeMartResourceType,
+    query?: string,
+    limit = 20,
+  ): Promise<SmeMartResource[]> {
+    const config = RESOURCE_GQL_CONFIG[type];
+
+    const options: GqlQueryOptions = {
+      pageNumber: 1,
+      pageSize: limit,
+    };
+
+    if (query) {
+      options.filters = { [config.nameField]: `.ilike.*${query}*` };
+    }
+
+    try {
+      const result = await this.gql.query<Record<string, unknown>>(
+        config.className,
+        config.fields,
+        options,
+      );
+
+      return result.items.map(gqlObj => {
+        const neonShaped = mapGqlToNeon<Record<string, any>>(gqlObj, config.gqlToNeon);
+        return config.mapper(neonShaped);
+      });
+    } catch (err) {
+      console.warn(`[SmeMartResource] GQL search failed for ${type}, falling back to Neon:`, err);
+      // Fallback to Neon for resilience during migration
+      return this.searchResourcesByTypeNeon(type, query, limit);
+    }
+  }
+
+  /** Neon fallback for searchResourcesByType (used during GQL migration transition) */
+  private async searchResourcesByTypeNeon(
     type: SmeMartResourceType,
     query?: string,
     limit = 20,
@@ -224,7 +249,7 @@ export class SmeMartResourceService {
     return (result.items || []).map(mapper);
   }
 
-  // ── Tag Search (delegates to EngagementHierarchyService) ──
+  // ── Tag Search (delegates to EngagementHierarchyService — already on Hydra) ──
 
   /**
    * Search ZB platform tags by name prefix.
@@ -273,3 +298,66 @@ export class SmeMartResourceService {
     return parts[parts.length - 1];
   }
 }
+
+// ── GQL Search Configuration ──
+
+/** Per-type config for GQL-based resource search */
+interface ResourceGqlConfig {
+  className: SmeMartClassName;
+  fields: string[];
+  nameField: string;
+  gqlToNeon: Record<string, string>;
+  mapper: (row: any) => SmeMartResource;
+}
+
+const RESOURCE_GQL_CONFIG: Record<SmeMartResourceType, ResourceGqlConfig> = {
+  'sme-mart:note': {
+    className: 'Note',
+    fields: ['id', 'name', 'content', 'authorZerobiasUserId', 'createdAt', 'updatedAt', 'folderId', 'archived', 'boundaryId', 'engagementId', 'projectId'],
+    nameField: 'name',
+    gqlToNeon: NOTE_FIELD_MAPPING.gqlToNeon,
+    mapper: noteToResource,
+  },
+  'sme-mart:note-folder': {
+    className: 'NoteFolder',
+    fields: ['id', 'name', 'description', 'createdByZerobiasUserId', 'createdAt', 'updatedAt', 'parentId', 'engagementId'],
+    nameField: 'name',
+    gqlToNeon: NOTE_FOLDER_FIELD_MAPPING.gqlToNeon,
+    mapper: noteFolderToResource,
+  },
+  'sme-mart:work-request': {
+    className: 'Engagement',
+    fields: ['id', 'name', 'description', 'buyerZerobiasUserId', 'createdAt', 'updatedAt'],
+    nameField: 'name',
+    gqlToNeon: ENGAGEMENT_FIELD_MAPPING.gqlToNeon,
+    mapper: workRequestToResource,
+  },
+  'sme-mart:bid': {
+    className: 'Bid',
+    fields: ['id', 'engagementId', 'providerId', 'coverLetter', 'createdAt', 'updatedAt'],
+    nameField: 'coverLetter',
+    gqlToNeon: BID_FIELD_MAPPING.gqlToNeon,
+    mapper: bidToResource,
+  },
+  'sme-mart:review': {
+    className: 'Review',
+    fields: ['id', 'engagementId', 'reviewerZerobiasUserId', 'reviewText', 'createdAt', 'updatedAt'],
+    nameField: 'reviewText',
+    gqlToNeon: REVIEW_FIELD_MAPPING.gqlToNeon,
+    mapper: reviewToResource,
+  },
+  'sme-mart:service-offering': {
+    className: 'ServiceOffering',
+    fields: ['id', 'name', 'description', 'providerId', 'createdAt', 'updatedAt', 'isActive'],
+    nameField: 'name',
+    gqlToNeon: SERVICE_OFFERING_FIELD_MAPPING.gqlToNeon,
+    mapper: serviceOfferingToResource,
+  },
+  'sme-mart:document': {
+    className: 'SmeMartDocument',
+    fields: ['id', 'displayName', 'filename', 'description', 'uploadedByZerobiasUserId', 'createdAt', 'updatedAt', 'zbTaskId', 'archived', 'engagementId'],
+    nameField: 'displayName',
+    gqlToNeon: DOCUMENT_FIELD_MAPPING.gqlToNeon,
+    mapper: documentToResource,
+  },
+};
