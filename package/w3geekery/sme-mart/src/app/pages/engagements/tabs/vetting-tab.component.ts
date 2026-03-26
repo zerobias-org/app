@@ -1,11 +1,13 @@
 import {
   Component, inject, signal, computed, ChangeDetectionStrategy, OnInit,
 } from '@angular/core';
+import { DatePipe, TitleCasePipe } from '@angular/common';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ZbResourceStatusComponent } from '@zerobias-org/ngx-library';
@@ -23,13 +25,15 @@ import { VettingItemDialogComponent } from '../../../shared/components/vetting-i
   selector: 'app-vetting-tab',
   standalone: true,
   imports: [
+    DatePipe,
+    TitleCasePipe,
     MatExpansionModule,
     MatButtonModule,
     MatIconModule,
     MatProgressBarModule,
     MatMenuModule,
+    MatTooltipModule,
     ZbResourceStatusComponent,
-    VettingItemDialogComponent,
   ],
   templateUrl: './vetting-tab.component.html',
   styleUrl: './vetting-tab.component.scss',
