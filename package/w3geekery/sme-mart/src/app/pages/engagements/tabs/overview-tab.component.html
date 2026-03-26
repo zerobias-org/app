@@ -10,10 +10,6 @@
         }
         <div class="detail-grid">
           <div class="detail-item">
-            <span class="label">Category</span>
-            <span class="value">{{ eng.category }}</span>
-          </div>
-          <div class="detail-item">
             <span class="label">Status</span>
             <span class="value">{{ ctx.status() | titlecase }}</span>
           </div>
@@ -38,21 +34,30 @@
       </app-bid-card>
     }
 
-    @if (eng.zerobias_tag_id) {
+    @if (eng.engagement_tag || eng.zerobias_task_id) {
       <mat-card>
         <mat-card-header>
           <mat-card-title>ZeroBias Integration</mat-card-title>
         </mat-card-header>
         <mat-card-content>
           <div class="detail-grid">
-            <div class="detail-item">
-              <span class="label">Tag ID</span>
-              <span class="value"><code>{{ eng.zerobias_tag_id }}</code></span>
-            </div>
+            @if (eng.engagement_tag) {
+              <div class="detail-item">
+                <span class="label">Tag</span>
+                <span class="value"><code>{{ eng.engagement_tag }}</code></span>
+              </div>
+            }
             @if (eng.zerobias_task_id) {
               <div class="detail-item">
-                <span class="label">Task ID</span>
-                <span class="value"><code>{{ eng.zerobias_task_id }}</code></span>
+                <span class="label">Task</span>
+                <span class="value task-code-group">
+                  <mat-icon
+                    class="copy-link-icon"
+                    (click)="copyTaskLink()"
+                    matTooltip="Copy link"
+                    matTooltipPosition="above">link</mat-icon>
+                  <code>{{ taskCode() || eng.zerobias_task_id }}</code>
+                </span>
               </div>
             }
           </div>
