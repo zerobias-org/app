@@ -44,6 +44,11 @@ export const routes: Routes = [
           import('./pages/my-engagements/my-engagements.routes').then((m) => m.MY_ENGAGEMENTS_ROUTES),
       },
       {
+        path: 'my/projects',
+        loadChildren: () =>
+          import('./pages/my-projects/my-projects.routes').then((m) => m.MY_PROJECTS_ROUTES),
+      },
+      {
         path: 'my-profile',
         loadChildren: () =>
           import('./pages/my-profile/my-profile.routes').then((m) => m.MY_PROFILE_ROUTES),
@@ -55,6 +60,11 @@ export const routes: Routes = [
         path: 'admin',
         loadChildren: () =>
           import('./pages/admin/admin.routes').then((m) => m.ADMIN_ROUTES),
+      },
+      {
+        path: 'project',
+        loadChildren: () =>
+          import('./pages/project/project.routes').then((m) => m.PROJECT_ROUTES),
       },
     ],
   },
