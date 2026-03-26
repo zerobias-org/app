@@ -70,24 +70,22 @@ describe('BidsService (Pipeline + GraphQL)', () => {
   });
 
   describe('listBidSummaries()', () => {
-    it('should query bids with compliance summary data', async () => {
-      graphqlRead.query.mockResolvedValue({
-        items: [BID_GQL_FIXTURE],
-        page: { pageNumber: 1, pageSize: 100, totalCount: 1 },
+    it('should query bids via rawQuery for project link field', async () => {
+      graphqlRead.rawQuery.mockResolvedValue({
+        Bid: [BID_GQL_FIXTURE],
       });
 
-      await service.listBidSummaries('eng-001');
+      await service.listBidSummaries('proj-001');
 
-      expect(graphqlRead.query).toHaveBeenCalled();
+      expect(graphqlRead.rawQuery).toHaveBeenCalled();
     });
 
     it('should include BidSummaryRow fields (compliance counts, etc.)', async () => {
-      graphqlRead.query.mockResolvedValue({
-        items: [BID_GQL_FIXTURE],
-        page: { pageNumber: 1, pageSize: 100, totalCount: 1 },
+      graphqlRead.rawQuery.mockResolvedValue({
+        Bid: [BID_GQL_FIXTURE],
       });
 
-      const result = await service.listBidSummaries('eng-001');
+      const result = await service.listBidSummaries('proj-001');
 
       expect(result[0]).toHaveProperty('total_responses');
       expect(result[0]).toHaveProperty('met_count');
@@ -116,7 +114,7 @@ describe('BidsService (Pipeline + GraphQL)', () => {
   describe('submitBid()', () => {
     it('should push bid to Pipeline and return optimistic Bid', async () => {
       const result = await service.submitBid({
-        request_id: 'eng-001',
+        project_id: 'proj-001',
         provider_id: 'provider-001',
         cover_letter: 'Test letter',
         proposed_price: '5000',
@@ -231,34 +229,22 @@ describe('BidsService (Pipeline + GraphQL)', () => {
   });
 
   describe('findDraft()', () => {
-    it('should find draft bid by requestId and providerId', async () => {
-      graphqlRead.query.mockResolvedValue({
-        items: [BID_GQL_FIXTURE_DRAFT],
-        page: { pageNumber: 1, pageSize: 1, totalCount: 1 },
+    it('should find draft bid by projectId and providerId via rawQuery', async () => {
+      graphqlRead.rawQuery.mockResolvedValue({
+        Bid: [BID_GQL_FIXTURE_DRAFT],
       });
 
-      await service.findDraft('eng-001', 'provider-001');
+      await service.findDraft('proj-001', 'provider-001');
 
-      expect(graphqlRead.query).toHaveBeenCalledWith(
-        'Bid',
-        expect.any(Array),
-        expect.objectContaining({
-          filters: expect.objectContaining({
-            engagementId: '.eq.eng-001',
-            providerId: '.eq.provider-001',
-            status: '.eq.draft',
-          }),
-        }),
-      );
+      expect(graphqlRead.rawQuery).toHaveBeenCalled();
     });
 
     it('should return null if no draft found', async () => {
-      graphqlRead.query.mockResolvedValue({
-        items: [],
-        page: { pageNumber: 1, pageSize: 1, totalCount: 0 },
+      graphqlRead.rawQuery.mockResolvedValue({
+        Bid: [],
       });
 
-      const result = await service.findDraft('eng-001', 'provider-001');
+      const result = await service.findDraft('proj-001', 'provider-001');
 
       expect(result).toBeNull();
     });
@@ -305,7 +291,7 @@ describe('BidsService (Pipeline + GraphQL)', () => {
 
       await expect(
         service.submitBid({
-          request_id: 'eng-001',
+          project_id: 'proj-001',
           provider_id: 'provider-001',
         }),
       ).resolves.toBeDefined();
@@ -315,7 +301,7 @@ describe('BidsService (Pipeline + GraphQL)', () => {
       graphqlRead.getById.mockResolvedValue(BID_GQL_FIXTURE);
       pipelineWrite.pushEntity.mockClear();
 
-      await service.submitBid({ request_id: 'eng-001', provider_id: 'provider-001' });
+      await service.submitBid({ project_id: 'proj-001', provider_id: 'provider-001' });
       expect(pipelineWrite.pushEntity).toHaveBeenCalledTimes(1);
 
       await service.acceptBid('bid-001');

@@ -3,6 +3,8 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { SmeMartProjectService } from './sme-mart-project.service';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
+import { SmeMartTagService } from './sme-mart-tag.service';
+import { SmeMartResourceService } from './sme-mart-resource.service';
 import type { GqlSmeMartProjectResponse } from '../gql-types';
 
 type MockFn = ReturnType<typeof vi.fn>;
@@ -43,6 +45,8 @@ describe('SmeMartProjectService', () => {
         SmeMartProjectService,
         { provide: PipelineWriteService, useValue: mockPipelineWrite },
         { provide: GraphqlReadService, useValue: mockGraphqlRead },
+        { provide: SmeMartTagService, useValue: { generateRfpTag: vi.fn(), createTag: vi.fn().mockResolvedValue(null) } },
+        { provide: SmeMartResourceService, useValue: { linkResources: vi.fn().mockResolvedValue(undefined) } },
       ],
     });
 
@@ -208,7 +212,7 @@ describe('SmeMartProjectService', () => {
 
     it('should merge update changes with existing data', async () => {
       const existing: GqlSmeMartProjectResponse = {
-        id: 'proj-123',
+        id: 'proj-merge-test',
         name: 'Original Name',
         status: 'draft',
         startDate: '2026-03-19',
@@ -219,7 +223,7 @@ describe('SmeMartProjectService', () => {
 
       mockGraphqlRead.getById.mockResolvedValue(existing);
 
-      const result = await service.updateProject('proj-123', {
+      const result = await service.updateProject('proj-merge-test', {
         status: 'active',
         // name should remain unchanged
       });

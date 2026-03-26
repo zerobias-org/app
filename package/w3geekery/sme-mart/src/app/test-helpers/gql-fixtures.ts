@@ -27,15 +27,10 @@ export const ENGAGEMENT_GQL_FIXTURE: GqlEngagementResponse = {
   id: 'eng-001-uuid-hipaa-assessment',
   name: 'HIPAA Compliance Assessment for Regional Healthcare Provider',
   description: 'Comprehensive HIPAA compliance review including audit, documentation, and remediation plan.',
-  category: 'compliance',
   buyerZerobiasUserId: 'user-buyer-001-uuid',
   buyerZerobiasOrgId: '28efd6b5-fd17-5b56-a45e-fe3263189666',
-  budgetType: 'fixed',
-  budgetMin: '10000',
-  budgetMax: '25000',
-  timeline: '30 days',
-  status: 'PUBLISHED',
-  engagementTag: 'sme-mart.engagement.hipaa-assessment-2026',
+  status: 'in_progress',
+  engagementTag: 'sme-mart.eng.hipaa-assessment-2026',
   zerobiasTagId: 'tag-uuid-001',
   zerobiasTaskId: 'task-uuid-001',
   createdAt: '2026-03-18T10:00:00Z',
@@ -135,6 +130,7 @@ export const BID_RESPONSE_GQL_FIXTURE: GqlBidResponseResponse = {
   certificationRef: 'SOC2_Type2_2025',
   readyDate: '2026-03-18',
   respondedAt: '2026-03-18T11:30:00Z',
+  createdAt: '2026-03-18T11:30:00Z',
   updatedAt: '2026-03-18T11:30:00Z',
 };
 
@@ -299,11 +295,11 @@ export const DOCUMENT_GQL_FIXTURE_SOW: GqlDocumentResponse = {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Engagement with nested bids array (simulates querying with relationships)
+ * Engagement with nested relationships (bids moved to SmeMartProject in Plan 075)
  */
-export const ENGAGEMENT_WITH_BIDS_GQL_FIXTURE: GqlEngagementResponse = {
+export const ENGAGEMENT_WITH_NOTES_GQL_FIXTURE: GqlEngagementResponse = {
   ...ENGAGEMENT_GQL_FIXTURE,
-  bids: [BID_GQL_FIXTURE, BID_GQL_FIXTURE_DRAFT],
+  notes: [NOTE_GQL_FIXTURE, NOTE_GQL_FIXTURE_PERSONAL],
 };
 
 /**

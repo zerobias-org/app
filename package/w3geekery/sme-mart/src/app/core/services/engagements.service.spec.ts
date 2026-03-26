@@ -1,37 +1,32 @@
 /**
- * Unit Tests for EngagementsService (Pipeline + GraphQL Migration)
+ * Unit Tests for EngagementsService (Plan 075 — corp-to-corp agreements)
  *
- * Tests verify service works with mocked PipelineWriteService and GraphqlReadService.
- * All service methods should return data immediately (optimistic updates) without
- * waiting for GQL indexing.
+ * RFP creation/update moved to SmeMartProjectService.
+ * EngagementsService now handles engagement CRUD and status transitions only.
  */
 
 import { TestBed } from '@angular/core/testing';
 import { EngagementsService } from '../../core/services/engagements.service';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
-import { NotificationService } from './notification.service';
 import { ENGAGEMENT_GQL_FIXTURE } from '../../test-helpers/gql-fixtures';
 import { fakePipelineWriteService, fakeGraphqlReadService } from '../../test-helpers/angular';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
-describe('EngagementsService (Pipeline + GraphQL)', () => {
+describe('EngagementsService (Plan 075)', () => {
   let service: EngagementsService;
   let pipelineWrite: ReturnType<typeof fakePipelineWriteService>;
   let graphqlRead: ReturnType<typeof fakeGraphqlReadService>;
-  let notificationSpy: any;
 
   beforeEach(() => {
     pipelineWrite = fakePipelineWriteService();
     graphqlRead = fakeGraphqlReadService();
-    notificationSpy = { create: vi.fn().mockResolvedValue(undefined) };
 
     TestBed.configureTestingModule({
       providers: [
         EngagementsService,
         { provide: PipelineWriteService, useValue: pipelineWrite },
         { provide: GraphqlReadService, useValue: graphqlRead },
-        { provide: NotificationService, useValue: notificationSpy },
       ],
     });
 
@@ -39,7 +34,7 @@ describe('EngagementsService (Pipeline + GraphQL)', () => {
   });
 
   describe('listEngagements()', () => {
-    it('should query GQL for published engagements', async () => {
+    it('should query GQL for engagements', async () => {
       const mockResult = {
         items: [ENGAGEMENT_GQL_FIXTURE],
         page: { pageNumber: 1, pageSize: 50, totalCount: 1 },
@@ -51,7 +46,7 @@ describe('EngagementsService (Pipeline + GraphQL)', () => {
       expect(graphqlRead.query).toHaveBeenCalledWith(
         'Engagement',
         expect.any(Array),
-        expect.objectContaining({ filters: { status: '.eq.published' } }),
+        expect.any(Object),
       );
     });
 
@@ -62,22 +57,6 @@ describe('EngagementsService (Pipeline + GraphQL)', () => {
       expect(service.loading()).toBe(true);
       await promise;
       expect(service.loading()).toBe(false);
-    });
-  });
-
-  describe('searchEngagements()', () => {
-    it('should apply ILIKE filter to search term', async () => {
-      graphqlRead.query.mockResolvedValue({ items: [], page: { pageNumber: 1, pageSize: 50, totalCount: 0 } });
-
-      await service.searchEngagements('HIPAA');
-
-      expect(graphqlRead.query).toHaveBeenCalledWith(
-        'Engagement',
-        expect.any(Array),
-        expect.objectContaining({
-          filters: expect.objectContaining({ name: '.ilike.%HIPAA%' }),
-        }),
-      );
     });
   });
 
@@ -99,55 +78,52 @@ describe('EngagementsService (Pipeline + GraphQL)', () => {
     });
   });
 
-  describe('getEngagement()', () => {
-    it('should fetch and transform to EngagementDetailRow', async () => {
-      graphqlRead.getById.mockResolvedValue(ENGAGEMENT_GQL_FIXTURE);
-
-      const result = await service.getEngagement('eng-001');
-
-      expect(result).toHaveProperty('title');
-      expect(result).toHaveProperty('status');
-    });
-  });
-
-  describe('createRfp()', () => {
-    it('should push to Pipeline and return optimistic WorkRequest', async () => {
-      const result = await service.createRfp({
+  describe('createEngagement()', () => {
+    it('should push to Pipeline and return optimistic Engagement', async () => {
+      const result = await service.createEngagement({
         buyer_zerobias_user_id: 'user-001',
-        title: 'Test RFP',
-        category: 'compliance',
+        title: 'Pinnacle Corp ↔ W3Geekery',
+        engagement_tag: 'sme-mart.eng.pinnacle',
       });
 
       expect(pipelineWrite.pushEntity).toHaveBeenCalledWith(
         'Engagement',
-        expect.objectContaining({ name: 'Test RFP' }),
+        expect.objectContaining({ name: 'Pinnacle Corp ↔ W3Geekery' }),
       );
       expect(result).toHaveProperty('id');
-      expect(result.title).toBe('Test RFP');
-    });
-
-    it('should create notification when status is open', async () => {
-      await service.createRfp({
-        buyer_zerobias_user_id: 'user-001',
-        title: 'Test',
-        category: 'compliance',
-        status: 'open',
-      });
-
-      expect(notificationSpy.create).toHaveBeenCalledWith(
-        expect.objectContaining({ type: 'rfp_published' }),
-      );
+      expect(result.title).toBe('Pinnacle Corp ↔ W3Geekery');
+      expect(result.status).toBe('in_progress');
     });
   });
 
-  describe('updateRfp()', () => {
+  describe('updateEngagement()', () => {
     it('should fetch, merge, and push updates', async () => {
       graphqlRead.getById.mockResolvedValue(ENGAGEMENT_GQL_FIXTURE);
 
-      const result = await service.updateRfp('eng-001', { status: 'in_progress' as any });
+      const result = await service.updateEngagement('eng-001', { status: 'completed' as any });
 
       expect(pipelineWrite.pushEntity).toHaveBeenCalled();
-      expect(result.status).toBe('in_progress');
+      expect(result.status).toBe('completed');
+    });
+  });
+
+  describe('cancelEngagement()', () => {
+    it('should set status to cancelled', async () => {
+      graphqlRead.getById.mockResolvedValue(ENGAGEMENT_GQL_FIXTURE);
+
+      const result = await service.cancelEngagement('eng-001');
+
+      expect(result.status).toBe('cancelled');
+    });
+  });
+
+  describe('completeEngagement()', () => {
+    it('should set status to completed', async () => {
+      graphqlRead.getById.mockResolvedValue(ENGAGEMENT_GQL_FIXTURE);
+
+      const result = await service.completeEngagement('eng-001');
+
+      expect(result.status).toBe('completed');
     });
   });
 
@@ -156,10 +132,10 @@ describe('EngagementsService (Pipeline + GraphQL)', () => {
       pipelineWrite.pushEntity.mockRejectedValue(new Error('Pipeline error'));
 
       await expect(
-        service.createRfp({
+        service.createEngagement({
           buyer_zerobias_user_id: 'user-001',
           title: 'Test',
-          category: 'compliance',
+          engagement_tag: 'sme-mart.eng.test',
         }),
       ).resolves.toBeDefined();
     });

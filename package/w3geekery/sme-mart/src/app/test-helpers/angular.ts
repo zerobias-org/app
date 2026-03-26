@@ -190,6 +190,7 @@ export function fakePipelineWriteService() {
     pushEntities: vi.fn().mockResolvedValue(undefined),
     deleteEntity: vi.fn().mockResolvedValue(undefined),
     deleteEntities: vi.fn().mockResolvedValue(undefined),
+    getCached: vi.fn().mockReturnValue(null),
   };
 }
 

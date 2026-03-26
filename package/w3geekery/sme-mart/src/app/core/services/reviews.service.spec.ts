@@ -36,7 +36,7 @@ describe('ReviewsService (Pipeline + GraphQL)', () => {
   });
 
   describe('listReviewsByProvider()', () => {
-    it('should query GQL with providerId filter and approved=true by default', async () => {
+    it('should query GQL with providerId filter and status=approved by default', async () => {
       graphqlRead.query.mockResolvedValue({
         items: [REVIEW_GQL_FIXTURE],
         page: { pageNumber: 1, pageSize: 100, totalCount: 1 },
@@ -50,7 +50,7 @@ describe('ReviewsService (Pipeline + GraphQL)', () => {
         expect.objectContaining({
           filters: expect.objectContaining({
             providerId: '.eq.provider-001-uuid',
-            approved: '.eq.true',
+            status: '.eq.approved',
           }),
         }),
       );
@@ -129,7 +129,7 @@ describe('ReviewsService (Pipeline + GraphQL)', () => {
   });
 
   describe('listPendingReviews()', () => {
-    it('should query GQL with approved=false filter', async () => {
+    it('should query GQL with status=pending filter', async () => {
       graphqlRead.query.mockResolvedValue({
         items: [REVIEW_GQL_FIXTURE],
         page: { pageNumber: 1, pageSize: 50, totalCount: 1 },
@@ -141,7 +141,7 @@ describe('ReviewsService (Pipeline + GraphQL)', () => {
         'Review',
         expect.any(Array),
         expect.objectContaining({
-          filters: { approved: '.eq.false' },
+          filters: { status: '.eq.pending' },
         }),
       );
     });
