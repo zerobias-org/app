@@ -24,30 +24,30 @@
           </mat-card-header>
 
           <mat-card-content>
-            <h2>{{ rfp()!.title }}</h2>
+            <h2>{{ rfp()!.name }}</h2>
             @if (rfp()!.description) {
               <p class="description">{{ rfp()!.description }}</p>
             }
 
             <div class="detail-grid">
-              @if (rfp()!.budget_min || rfp()!.budget_max) {
+              @if (rfp()!.budgetMin || rfp()!.budgetMax) {
                 <div class="detail-item">
                   <span class="label">Budget</span>
                   <span class="value">
-                    @if (rfp()!.budget_min && rfp()!.budget_max) {
-                      {{ rfp()!.budget_min | currency:'USD':'symbol':'1.0-0' }} – {{ rfp()!.budget_max | currency:'USD':'symbol':'1.0-0' }}
-                    } @else if (rfp()!.budget_max) {
-                      Up to {{ rfp()!.budget_max | currency:'USD':'symbol':'1.0-0' }}
+                    @if (rfp()!.budgetMin && rfp()!.budgetMax) {
+                      {{ rfp()!.budgetMin | currency:'USD':'symbol':'1.0-0' }} – {{ rfp()!.budgetMax | currency:'USD':'symbol':'1.0-0' }}
+                    } @else if (rfp()!.budgetMax) {
+                      Up to {{ rfp()!.budgetMax | currency:'USD':'symbol':'1.0-0' }}
                     } @else {
-                      From {{ rfp()!.budget_min | currency:'USD':'symbol':'1.0-0' }}
+                      From {{ rfp()!.budgetMin | currency:'USD':'symbol':'1.0-0' }}
                     }
                   </span>
                 </div>
               }
-              @if (rfp()!.budget_type) {
+              @if (rfp()!.budgetType) {
                 <div class="detail-item">
                   <span class="label">Budget Type</span>
-                  <span class="value">{{ rfp()!.budget_type | titlecase }}</span>
+                  <span class="value">{{ rfp()!.budgetType | titlecase }}</span>
                 </div>
               }
               @if (rfp()!.timeline) {
@@ -58,11 +58,7 @@
               }
               <div class="detail-item">
                 <span class="label">Posted</span>
-                <span class="value">{{ rfp()!.created_at | date:'mediumDate' }}</span>
-              </div>
-              <div class="detail-item">
-                <span class="label">By</span>
-                <span class="value">{{ rfp()!.buyer_display_name || 'Unknown' }}</span>
+                <span class="value">{{ rfp()!.createdAt | date:'mediumDate' }}</span>
               </div>
             </div>
 
@@ -111,7 +107,7 @@
                   <mat-icon>edit</mat-icon> Edit
                 </button>
               }
-              @if (status() === 'open') {
+              @if (status() === 'published') {
                 <button mat-stroked-button (click)="editRfp()" class="action-btn">
                   <mat-icon>edit</mat-icon> Edit
                 </button>
@@ -124,7 +120,7 @@
                 <p class="status-msg">
                   <mat-icon>check_circle</mat-icon> You've submitted a bid
                 </p>
-              } @else if (status() === 'open') {
+              } @else if (status() === 'published') {
                 <button mat-flat-button color="primary" (click)="startBidWizard()" class="action-btn">
                   <mat-icon>rate_review</mat-icon> Start Bid
                 </button>

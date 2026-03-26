@@ -7,9 +7,10 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { EngagementCard } from '../../shared/components/engagement-card/engagement-card.component';
 import { ListPage, SortOption } from '../../shared/components/list-page/list-page.component';
-import { EngagementsService } from '../../core/services/engagements.service';
+import { SmeMartProjectService } from '../../core/services/sme-mart-project.service';
 import { RfpDialog } from '../../shared/components/rfp-dialog/rfp-dialog.component';
-import type { EngagementSummaryRow, RequestStatus } from '../../core/models';
+import type { EngagementSummaryRow } from '../../core/models';
+import type { SmeMartProject } from '../../core/models';
 
 @Component({
   selector: 'app-rfp-list',
@@ -30,12 +31,12 @@ export class RfpList implements OnInit {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly dialog = inject(MatDialog);
-  private readonly engagements = inject(EngagementsService);
+  private readonly projects = inject(SmeMartProjectService);
 
-  readonly loading = this.engagements.loading;
+  readonly loading = signal(false);
   readonly rfps = signal<EngagementSummaryRow[]>([]);
   readonly searchTerm = signal('');
-  readonly statusFilter = signal<RequestStatus | 'all'>('all');
+  readonly statusFilter = signal<string>('all');
   readonly sortBy = signal<string>('newest');
 
   readonly sortOptions: SortOption[] = [
@@ -77,12 +78,16 @@ export class RfpList implements OnInit {
   }
 
   async loadData(): Promise<void> {
+    this.loading.set(true);
     try {
-      const result = await this.engagements.listEngagements({ pageSize: 200 });
-      const rfpsOnly = (result.items || []).filter(e => !e.engagement_tag);
-      this.rfps.set(rfpsOnly);
+      const result = await this.projects.listProjects({ pageSize: 200 });
+      // Map SmeMartProject → EngagementSummaryRow shape for EngagementCard
+      const items = (result.items || []).map(p => this.projectToCardRow(p));
+      this.rfps.set(items);
     } catch (err) {
       console.warn('[RfpList] Failed to load:', err);
+    } finally {
+      this.loading.set(false);
     }
   }
 
@@ -97,5 +102,39 @@ export class RfpList implements OnInit {
         this.router.navigate(['/rfps', result.id]);
       }
     });
+  }
+
+  /**
+   * Map SmeMartProject (camelCase) to EngagementSummaryRow (snake_case)
+   * for EngagementCard compatibility. Will be removed when EngagementCard
+   * is updated to accept SmeMartProject directly.
+   */
+  private projectToCardRow(p: SmeMartProject): EngagementSummaryRow {
+    return {
+      id: p.id,
+      buyer_user_id: null,
+      buyer_zerobias_user_id: '',
+      buyer_zerobias_org_id: null,
+      title: p.name,
+      description: p.description || null,
+      category: p.category || '',
+      budget_type: p.budgetType || null,
+      budget_min: p.budgetMin != null ? String(p.budgetMin) : null,
+      budget_max: p.budgetMax != null ? String(p.budgetMax) : null,
+      timeline: p.timeline || null,
+      status: p.status as any,
+      engagement_tag: null, // RFPs don't have engagement tags
+      zerobias_tag_id: null,
+      zerobias_boundary_id: null,
+      zerobias_task_id: null,
+      created_at: p.createdAt,
+      updated_at: p.updatedAt,
+      buyer_display_name: null,
+      buyer_avatar_url: null,
+      bid_count: 0,
+      pending_bid_count: 0,
+      accepted_provider_name: null,
+      accepted_provider_id: null,
+    };
   }
 }
