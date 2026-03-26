@@ -1,8 +1,16 @@
 # Plan: SME Mart Angular Rebuild
 
-**Last updated:** 2026-03-16 (054-056 new plans from RFP super-summary gap analysis; 040/041/046/029 expanded)
+**Last updated:** 2026-03-25 (scope clarification: SME Mart = marketplace + engagements. Project management = separate platform app per Kevin. Project views are barebones stubs.)
 
-> **Reference:** [Hierarchy Model](hierarchy-model.md) — Org → Engagement → Project → Boundary mapping, Notes scoping, permissions model, CEO/CIO directive reconciliation.
+> **Reference:** [Hierarchy Model](hierarchy-model.md) — Org → Engagement/Project ownership, relationships, and ZB platform entity mapping.
+
+## Scope Clarification (Kevin, 2026-03-25)
+
+**SME Mart's core scope:** Marketplace features — RFPs, bids, provider catalog, engagements (corp-to-corp agreements), corporate vetting. This is uniquely SME Mart.
+
+**Project management is a separate platform app** (like Boundary Manager). Kevin: "Projects probably would be their own app. They won't likely need space in Governance if we can avoid it." Boards, tasks, activities, workflows depend on platform Task/Board/Boundary work that Kevin's team is actively building.
+
+**Strategy:** Focus on marketplace features now. Project views in SME Mart are **barebones stubs** — enough to link engagements to projects and show basic info. Full project management UI deferred until the platform Project app takes shape. Plans marked `⏸ DEFERRED (Project App)` below.
 
 ## Status
 
@@ -29,7 +37,7 @@
 | 019 | Markdown Components (Milkdown Crepe + Renderer) | **Complete** | [`019-markdown-components.md`](../local/019-markdown-components.md) |
 | 020 | ~~Adaptive Assessments (Provider Vetting)~~ | **Cancelled** — ZB platform feature per Joe's clarification (2026-02-25) | [`020-adaptive-assessments.md`](../local/020-adaptive-assessments.md) |
 | 021 | ~~Credential Verification (Credly)~~ | **Cancelled** — ZB platform feature per Joe's clarification (2026-02-25) | [`021-credential-verification.md`](../local/021-credential-verification.md) |
-| 022 | Project Layer (Engagement → Project → Task hierarchy) | **Stub** — Engagement=corp-to-corp wrapper, Project=scoped work. Needs ZB platform Project entity. | [`022-project-layer.md`](../local/022-project-layer.md) |
+| 022 | Engagement → Project UI Restructuring | **Phase 1 done** — Project shell + routes + My Projects page built. Engagement Projects tab shows related projects. Barebones stubs for project tabs. Remaining phases deferred — project detail UI is Project App territory. | [`022-project-layer.md`](../local/022-project-layer.md) |
 | 023 | Transparency Center (3-View Architecture) | **Stub** — needs project layer + subtask types | [`023-transparency-center.md`](../local/023-transparency-center.md) |
 | 024 | Readiness & Scoring | **Stub** — Dan is building the Readiness Center; depends on 023, ZB extended user profile | [`024-readiness-scoring.md`](../local/024-readiness-scoring.md) |
 | 025 | ZB Platform Feature Requests | **Living doc** — track requests for Kevin/Chris | [`025-zb-platform-feature-requests.md`](../local/025-zb-platform-feature-requests.md) |
@@ -65,12 +73,26 @@
 | 054 | RFP Package Builder & Access Controls | **Stub** — Closed/invitation-only RFPs (D1), multi-document packages with templates/exhibits/forms (D2), form builder for structured submission requirements (D3), intent-to-bid/withdraw workflow with deadlines and destruction attestation (S2). Covers gaps D1, D2, D3, S2. Source: RFP super-summary gap analysis. 30–40 hrs. | TBD |
 | 055 | Advanced Pricing & Evaluation | **Stub** — Complex pricing models: NRC/ARC, recurring/one-time split, milestone payments, per-unit pricing, multi-year projections (D4). Evaluation criteria builder with weighted scoring matrix and domain categories (D5). Structured bid response templates mirroring RFP section numbering (S3). Bid validity/expiration dates (S4). Covers gaps D4, D5, S3, S4. Source: RFP super-summary gap analysis. 25–35 hrs. | TBD |
 | 056 | Engagement Roles & Communication | **Stub** — Third-party facilitator role: external consultant managing RFP on buyer's behalf (D7). Mediated communication channels: all vendor comms through facilitator, no direct contact mode (D6). NDA/confidentiality tracking with per-vendor status, access logging, destruction attestation (P2). Covers gaps D6, D7, P2. Source: RFP super-summary gap analysis. 20–25 hrs. | TBD |
-| **057** | **Project View — SmeBoard/SmeActivity/SmeWorkflow (Project Bloom MVP)** | **In Progress** — CEO P0. Three distinct models: SmeBoard (structural container — rank, issue #, permission inheritance from boundary), SmeActivity (work type blueprint — workflow, RACI, custom fields), SmeWorkflow (statuses + transitions). Board ≠ Activity — Board is WHERE tasks live, Activity is HOW tasks behave. Three boards (Buyer/Provider/Shared) with role-filtered tabs. Project + PRD + Plan. Demo: crystal-harbor SOC 2 (39 tasks, ~156 subtasks, 3 boards, 8 activities, 3 workflows). 13–17 hrs. | [`057-task-partition-view.md`](../local/057-task-partition-view.md) |
-| 058 | Saved Task Views & Board Management | **Stub** — criteria-based cross-board task filters (NOT boards — boards are structural per Kevin). Saved queries with auto-refresh, criteria builder dialog, default views per board (Critical Path, Overdue, My Tasks). Board management UI (create/rename custom boards, permission overrides). Blocked on 057. 8–12 hrs. | [`058-saved-task-views.md`](../local/058-saved-task-views.md) |
+| **057** | **Project View — SmeBoard/SmeActivity/SmeWorkflow (Project Bloom MVP)** | ⏸ **DEFERRED (Project App)** — Schema entities exist (PR #8). UI deferred — boards/tasks/activities/workflows are platform Project App territory per Kevin (2026-03-25). Platform Task/Board/Boundary work actively in progress. | [`057-task-partition-view.md`](../local/057-task-partition-view.md) |
+| 058 | Saved Task Views & Board Management | ⏸ **DEFERRED (Project App)** — Depends on 057 + platform Board. | [`058-saved-task-views.md`](../local/058-saved-task-views.md) |
 | 059 | AuditgraphDB Migration (Neon → Pipeline + GQL) | **Planning** — Incremental direct swap, one entity at a time. 8 original entities migrate from Neon; 9 new Project Bloom entities (PR #8) built directly against GQL. Blocked on PR #7 merge. 27–38 hrs across 3 waves. | [`059-auditgraph-migration.md`](../local/059-auditgraph-migration.md) |
 | 060 | ensureDefaultFolder Race Condition Fix | **Stub** — `ensureDefaultFolder()` creates duplicate "General" notebooks when multiple calls fire before the first pipeline push is queryable via GQL. Fix: optimistic local cache (in-memory set of pending folder names per engagement) checked before GQL query, cleared on next successful tree load. Also add `engagementId` filter to the guard (current guard searches globally). ~2 hrs. | TBD |
 | 062 | Notebook Info Page | **Stub** — "About this Notebook" panel/page showing notebook metadata: total note/folder counts, access/permissions list (who can view/edit), attached files, pinned/bookmarked notes index, creation date, last activity. Could be a slide-out panel or a dedicated route. ~4–6 hrs. | TBD |
 | 061 | Pipeline Write Cache (fetch-then-merge optimization) | **Stub** — Pipeline receive does full-replace (not merge) — partial pushes null unmentioned fields. Current workaround: every update fetches full object via GQL before pushing. Plan 061 adds an in-memory write-through cache in `PipelineWriteService` so rapid successive edits (color → rename → move) reuse the cached object instead of N GQL round-trips. Cache keyed by `className:id`, updated on every push, evicted after 60s or on page navigation. **Pending platform fix:** Asked Kevin about merge/patch mode for `Pipeline.receive` — if added, cache becomes optional optimization rather than correctness requirement. ~3 hrs. | TBD |
+| 063 | Corporate Vetting Flow | **Stub** — Engagement-level checklist/wizard for D&B, MSA, banking, officer background checks, entity verification, financials. Bidirectional (buyer + provider requirements). May use "Engagement Setup" board from Plan 057. 4–6 hrs. | [`063-corporate-vetting.md`](../local/063-corporate-vetting.md) |
+| 064 | Project Members View | ⏸ **DEFERRED (Project App)** — Scoped roles, boundary membership. Platform feature. | [`064-project-members.md`](../local/064-project-members.md) |
+| 065 | Message Center (Engagement + Project) | **Stub** — Engagement-level message center is marketplace scope. Project-level messaging deferred to Project App. 8–12 hrs. | [`065-message-center.md`](../local/065-message-center.md) |
+| 066 | Configurable Engagement Dashboard | **Stub** — Marketplace scope: engagement-level widgets. 12–16 hrs. | [`066-engagement-dashboard.md`](../local/066-engagement-dashboard.md) |
+| 067 | Project Schedule View (Gantt / Calendar) | ⏸ **DEFERRED (Project App)** — Depends on platform milestones/tasks. | [`067-project-schedule.md`](../local/067-project-schedule.md) |
+| 068 | Project Financials | ⏸ **DEFERRED (Project App)** — Budget/billing lives in project context. | [`068-project-financials.md`](../local/068-project-financials.md) |
+| 069 | Compliance Framework Linkage | ⏸ **DEFERRED (Project App)** — Task→control mapping depends on platform Board/Task. | [`069-compliance-linkage.md`](../local/069-compliance-linkage.md) |
+| 070 | Project Reviews / Retrospectives | ⏸ **DEFERRED (Project App)** — PM retrospectives live in project context. | [`070-project-reviews.md`](../local/070-project-reviews.md) |
+| **071** | **Transparency Entangled Task Pairs** | ⏸ **DEFERRED (Project App)** — Option B selected (design done). Implementation depends on platform Task/Board + entangled link types. Source: Brian 2026-03-24. | [`071-entangled-task-pairs.md`](../local/071-entangled-task-pairs.md) |
+| 072 | Task Queuing & Shift Handoff | ⏸ **DEFERRED (Project App)** — Platform task system dependency. Source: Brian 2026-03-24. | [`072-task-queuing-handoff.md`](../local/072-task-queuing-handoff.md) |
+| 073 | Agentic Memory Capture in Tasks | ⏸ **DEFERRED (Project App)** — Platform task system dependency. Source: Brian 2026-03-24. | [`073-agentic-memory-capture.md`](../local/073-agentic-memory-capture.md) |
+| 074 | Dual-Party GSD / SDD Toolkit | ⏸ **DEFERRED (Project App)** — Depends on 071 + platform + Claude Agent SDK. Source: Brian 2026-03-24. | [`074-dual-party-gsd.md`](../local/074-dual-party-gsd.md) |
+| **075** | **RFP → Project Refactor** | **Planning** — RFP = SmeMartProject in draft/published status. Bid acceptance gates on Engagement existence + vetting. Supersedes 032/033/040 for RFP flow. Schema changes + 9 phases. 22–30 hrs. | [`075-rfp-to-project-refactor.md`](../local/075-rfp-to-project-refactor.md) |
+| **076** | **Spike: Ollama Local LLM Integration** | **Research** — Evaluate Ollama for cost-reduction + capability-expansion across SME Mart and ZB UI. POC: auto-tag suggestion (RFP wizard), embedding-based semantic search (pgvector), CVE summarization. Hybrid architecture: Ollama for high-volume/low-complexity tasks, Claude for high-stakes generation. 8–12 hrs POC, 20–30 hrs expand. | [Research: `../../research/ollama-local-llm-analysis.md`](../../research/ollama-local-llm-analysis.md) |
 
 ### What's built (Phases 1–4)
 
@@ -93,61 +115,61 @@
 - **Services:** EngagementTasksService, EngagementTimelineService (ZB Tasks + Boundary Events APIs)
 - **Global styles:** `.task-status-chip` with ZB platform color palette, `.transition-row` / `.transition-menu` for CDK overlay menus
 
-## Marketplace Roadmap (Brian, 2026-03-03; updated 2026-03-06 taxonomy + project plugin)
+## Marketplace Roadmap (Brian, 2026-03-03; updated 2026-03-25 scope clarification)
 
-Brian defined a 3-phase marketplace build-out. Updated 2026-03-06 with:
-- **Taxonomy overhaul:** "Proposal" removed from vocabulary. Vendor response = **Bid**. RFP = Request for **Project**.
-- **Engagement/Project hierarchy:** Engagement = corp-to-corp wrapper (D&B, banking, officer checks, MSA). Project = scoped work under an Engagement. One Engagement → many Projects.
-- **Project plugin concept:** Bundled MCP + templates + parsers for AI-driven project creation.
-- **CDPH RFP validation:** Real 17-document government RFP confirmed the architecture (see [`.claude/notes/cdph-rfp-analysis.md`](../../notes/cdph-rfp-analysis.md)).
-
-**Key insight:** The RFP is a lightweight storefront listing. The full task/subtask decomposition "blooms" only AFTER a Bid is accepted and the Project is created under an Engagement.
+**SME Mart = Marketplace + Engagements.** Project management = separate platform app (Kevin, 2026-03-25).
 
 ```
-Engagement (corp-to-corp) ← set up once per vendor/buyer relationship
-  |-- D&B, banking, officer background checks, MSA (optional umbrella)
-  |-- Bidirectional: buyer AND vendor have requirements at this level
-  |
-  |-- Project (scoped work) ← created when Bid is accepted
-      |-- Tasks / SubTasks (AI-decomposed from RFP documents)
-      |-- MSA (optional, project-scoped)
-      |-- Deliverables, milestones
+SME Mart scope (ACTIVE):
+  RFP (storefront)  →  Bid (vendor response)  →  Engagement (corp-to-corp)
+  ───────────────       ────────────────          ──────────────────────
+  Upload documents      Approach narrative         Corp vetting (D&B, MSA)
+  AI domain tags        Price + timeline           Link to Project (relates_to)
+  Buyer description     Team qualifications        Engagement notes/docs
+  Budget range          Per-requirement response   Bid negotiation history
+  Post to marketplace   Compliance mapping
 
-Lifecycle:
-  RFP (storefront)     →    Bid (vendor response)    →    Engagement + Project (bloom)
-  ---                        ---                           ---
-  Upload documents           Approach narrative             Engagement: corp vetting (if new)
-  AI suggests domain tags    Price + timeline               Project: AI decomposes docs →
-  Buyer description          Team qualifications              ~39 tasks, ~200 subtasks
-  Budget range               <- no subtasks exist ->       Both parties refine
-  Post to marketplace                                      Transparency Center activates
+Project App scope (DEFERRED — Kevin's platform team):
+  Project (scoped work)  →  Boards/Tasks  →  Transparency Center
+  ─────────────────         ─────────────     ─────────────────
+  PRD, Plan, Milestones     Kanban, status    Entangled task pairs
+  Members, scoped roles     Activities        Compliance linkage
+  Schedule, financials      Workflows         Audit trail / crypto hash
 ```
 
-### Phase 1 — RFP + Bid + Engagement/Project Creation (Plans 031–033, 039–042, 054–055)
+### Phase 1 — RFP + Bid + Engagement Creation (MARKETPLACE — active focus)
 
-- **Document upload** — buyers upload procurement docs (exhibits, SOWs, budgets) to RFP (Plan 031 — complete)
-- **RFP creation wizard** — lightweight: upload docs, AI suggests domain-level summary (6 typed categories: Functional, Security, Compliance, Legal, Financial, Evaluation), buyer writes description + budget range. NO subtask decomposition at this stage. (Plan 032)
-- **RFP package builder** — closed/invitation-only RFPs, multi-document packages with templates, form builder for structured submissions, intent-to-bid/withdraw workflow (Plan 054)
-- **Vendor bid flow** — vendor reads RFP description + browses uploaded documents, submits Bid: approach narrative, pricing, timeline, team qualifications. NOT responding to subtasks (they don't exist yet). (Plan 033)
-- **Advanced pricing & evaluation** — complex pricing models (NRC/ARC, milestones, multi-year), weighted scoring matrix, structured bid response templates, bid validity dates (Plan 055)
-- **Bid negotiation** — demand-side accept/reject/request changes loop (Plan 033)
-- **Engagement creation** — accepted Bid triggers Engagement (corp-to-corp vetting: D&B, banking, officer checks). May already exist if corps have worked together before. (Plan 022)
-- **Project bloom** — Project created under Engagement → AI decomposes uploaded documents into full typed task/subtask tree (~39 tasks, ~200 subtasks for a complex RFP). Both parties review and refine. Transparency Center activates. Assessment task templates + deliverable templates added. (Plan 040)
-- **Supply-side vendor profile** — vendors pre-load corporate docs, D&B, banking, background checks, named contacts, staff resumes once. Auto-fills engagement requirements for every bid. (Plan 041)
-- **Project plugin** — bundled MCP + templates + parsers. Dual-path: ingest legacy docs OR AI-driven questionnaire for native project creation. (Plan 042)
+- **Document upload** — buyers upload procurement docs to RFP (Plan 031 — complete)
+- **RFP creation wizard** — upload docs, AI suggests domain summary, buyer writes description + budget (Plan 032 — complete)
+- **RFP package builder** — closed/invitation-only RFPs, multi-document packages, form builder, intent-to-bid/withdraw (Plan 054)
+- **Vendor bid flow** — bid submission with approach, pricing, timeline, team (Plan 033 — Phases 1-4 complete)
+- **Advanced pricing & evaluation** — NRC/ARC models, weighted scoring matrix, structured templates, bid validity (Plan 055)
+- **Bid negotiation** — accept/reject/request changes loop (Plan 033)
+- **Engagement creation** — accepted Bid triggers Engagement (corp-to-corp vetting). Link to Project via `relates_to`. (Plan 022)
+- **Supply-side vendor profile** — vendors pre-load corporate docs, D&B, banking once. Auto-fills engagement requirements. (Plan 041)
 
-### Phase 2 — Engagement Execution (Plans 022, 056, future plans)
+### Phase 2 — Engagement Management (MARKETPLACE — active focus)
 
-- **Engagement roles & communication** — facilitator role, mediated messaging channels, NDA tracking (Plan 056)
-- **Demand/supply view filtering** — role-based visibility of task data (buyer sees requirements, provider sees obligations, shared = transparency)
-- **Task status state machine** — pending -> in_progress -> awaiting_approval -> completed
-- **Task approval workflow** — vendor completes -> demand reviews -> approve/reject per subtask
-- **Evidence/artifact linking** — provider attaches certs, audit reports, policies to specific subtasks
-- **Payment milestone tracking** — milestone-based payment schedules (0-80-20), acceptance periods, sign-off workflow (gap E5)
-- **Invoice generation** — auto-generate on approval with line items per task/subtask
-- **Progress indicators** — domain-level rollups (e.g., "Security: 78%, Compliance: 92%") + on-track/behind/ahead
-- **Scope adjustment** — formal change request process with audit trail
-- **~~Compliance standard references~~** — ZB platform strength; framework mapping + evidence collection handled natively. SME Mart just connects engagements to boundaries.
+- **Corporate vetting** — D&B, MSA, banking, officer checks checklist/wizard (Plan 063)
+- **Engagement roles & communication** — facilitator role, mediated channels, NDA tracking (Plan 056)
+- **Engagement dashboard** — configurable widgets for cross-project visibility (Plan 066)
+- **Engagement messaging** — engagement-scoped message center (Plan 065)
+
+### Phase 3 — Project Management (DEFERRED — Platform Project App)
+
+These features will live in the platform Project app when Kevin's team builds it. Design work and schema entities are done; UI implementation deferred.
+
+- Boards, tasks, activities, workflows (Plan 057)
+- Saved task views (Plan 058)
+- Transparency entangled task pairs (Plan 071 — design complete, Option B)
+- Project members + scoped roles (Plan 064)
+- Project schedule / Gantt (Plan 067)
+- Project financials (Plan 068)
+- Compliance framework linkage (Plan 069)
+- Project reviews / retrospectives (Plan 070)
+- Task queuing & shift handoff (Plan 072)
+- Agentic memory capture (Plan 073)
+- Dual-party GSD toolkit (Plan 074)
 
 ### Phase 3 — Observability + Audit (Plans 023, future)
 
