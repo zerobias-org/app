@@ -72,7 +72,8 @@ export const ENGAGEMENT_FIELD_MAPPING = {
 export const BID_FIELD_MAPPING = {
   neonToGql: {
     id: 'id',
-    request_id: 'engagementId', // Foreign key to Engagement
+    request_id: 'engagementId', // Legacy FK to Engagement
+    project_id: 'project', // Link to SmeMartProject (Plan 075)
     provider_id: 'providerId',
     cover_letter: 'coverLetter',
     proposed_price: 'proposedPrice',
@@ -93,6 +94,7 @@ export const BID_FIELD_MAPPING = {
   gqlToNeon: {
     id: 'id',
     engagementId: 'request_id',
+    project: 'project_id', // SmeMartProject link (Plan 075)
     providerId: 'provider_id',
     coverLetter: 'cover_letter',
     proposedPrice: 'proposed_price',
@@ -164,7 +166,7 @@ export const BID_RESPONSE_FIELD_MAPPING = {
  * Note field mapping
  *
  * Neon table: notes (columns in snake_case)
- * GQL entity: Note
+ * GQL entity: Note (fields in camelCase, but uses 'title' and 'body' directly, not 'name'/'content')
  * Access level enum: 'personal' | 'boundary' | 'project'
  * Relationship: folder_id → folder (bidirectional linkTo NoteFolder.id.notes)
  */
@@ -173,8 +175,8 @@ export const NOTE_FIELD_MAPPING = {
     id: 'id',
     engagement_id: 'engagementId',
     folder_id: 'folderId',
-    title: 'name', // GQL Object base class uses 'name'; Neon used 'title'
-    body: 'content', // GQL Note.yml uses 'content'; Neon used 'body'
+    title: 'title', // Neon title → GQL title (direct field name)
+    body: 'body', // Neon body → GQL body (direct field name)
     author_zerobias_user_id: 'authorZerobiasUserId',
     created_at: 'createdAt',
     updated_at: 'updatedAt',
@@ -195,8 +197,8 @@ export const NOTE_FIELD_MAPPING = {
     id: 'id',
     engagementId: 'engagement_id',
     folderId: 'folder_id',
-    name: 'title',
-    content: 'body',
+    title: 'title',
+    body: 'body',
     authorZerobiasUserId: 'author_zerobias_user_id',
     createdAt: 'created_at',
     updatedAt: 'updated_at',
@@ -217,7 +219,7 @@ export const NOTE_FIELD_MAPPING = {
     dateLastModified: 'updated_at',
   },
   sourceSchema: 'zerobias-org/schema PR #7',
-  lastVerified: '2026-03-19',
+  lastVerified: '2026-03-25',
 } as const;
 
 /**
@@ -265,10 +267,9 @@ export const NOTE_FOLDER_FIELD_MAPPING = {
  * ServiceOffering field mapping
  *
  * Neon table: service_offerings (columns in snake_case)
- * GQL entity: ServiceOffering (provider catalog listing)
- * Key rename: title → name (GQL entity uses 'name' field inherited from Object base class)
+ * GQL entity: ServiceOffering (provider catalog listing, uses 'name' not 'title')
  * Enum field: pricing_type (PricingType enum)
- * Array field: includes (string array of service inclusions)
+ * Array field: includes (string array of service inclusions, uses direct 'includes' name)
  */
 export const SERVICE_OFFERING_FIELD_MAPPING = {
   neonToGql: {
@@ -281,8 +282,8 @@ export const SERVICE_OFFERING_FIELD_MAPPING = {
     pricing_type: 'pricingType',
     price: 'price',
     delivery_time: 'deliveryTime',
-    includes: 'serviceIncludes', // Renamed: 'includes' collides with Object base class
-    requirements: 'serviceRequirements', // Renamed: 'requirements' collides with Object base class
+    includes: 'includes', // Direct field name (no renaming)
+    requirements: 'requirements', // Direct field name (no renaming)
     is_active: 'isActive',
     created_at: 'createdAt',
     updated_at: 'updatedAt',
@@ -297,8 +298,8 @@ export const SERVICE_OFFERING_FIELD_MAPPING = {
     pricingType: 'pricing_type',
     price: 'price',
     deliveryTime: 'delivery_time',
-    serviceIncludes: 'includes',
-    serviceRequirements: 'requirements',
+    includes: 'includes',
+    requirements: 'requirements',
     isActive: 'is_active',
     createdAt: 'created_at',
     updatedAt: 'updated_at',
@@ -306,7 +307,7 @@ export const SERVICE_OFFERING_FIELD_MAPPING = {
     dateLastModified: 'updated_at',
   },
   sourceSchema: 'zerobias-org/schema PR #7',
-  lastVerified: '2026-03-19',
+  lastVerified: '2026-03-25',
 } as const;
 
 /**
@@ -485,23 +486,45 @@ export const SME_MART_PROJECT_FIELD_MAPPING = {
     name: 'name',
     description: 'description',
     status: 'status',
+    engagementId: 'engagement',
     startDate: 'startDate',
     targetEndDate: 'targetEndDate',
-    createdAt: 'createdAt',
-    updatedAt: 'updatedAt',
+    category: 'category',
+    budgetType: 'budgetType',
+    budgetMin: 'budgetMin',
+    budgetMax: 'budgetMax',
+    timeline: 'timeline',
+    responseDeadline: 'responseDeadline',
+    questionsDeadline: 'questionsDeadline',
+    evaluationCriteria: 'evaluationCriteria',
+    wizardStep: 'wizardStep',
+    wizardData: 'wizardData',
+    createdAt: 'dateCreated',
+    updatedAt: 'dateLastModified',
   },
   gqlToNeon: {
     id: 'id',
     name: 'name',
     description: 'description',
     status: 'status',
+    engagement: 'engagementId',
     startDate: 'startDate',
     targetEndDate: 'targetEndDate',
-    createdAt: 'createdAt',
-    updatedAt: 'updatedAt',
+    category: 'category',
+    budgetType: 'budgetType',
+    budgetMin: 'budgetMin',
+    budgetMax: 'budgetMax',
+    timeline: 'timeline',
+    responseDeadline: 'responseDeadline',
+    questionsDeadline: 'questionsDeadline',
+    evaluationCriteria: 'evaluationCriteria',
+    wizardStep: 'wizardStep',
+    wizardData: 'wizardData',
+    dateCreated: 'createdAt',
+    dateLastModified: 'updatedAt',
   },
-  sourceSchema: 'zerobias-org/schema PR #8 (Bloom)',
-  lastVerified: '2026-03-19',
+  sourceSchema: 'zerobias-org/schema PR #20 (Plan 075)',
+  lastVerified: '2026-03-25',
 } as const;
 
 /**

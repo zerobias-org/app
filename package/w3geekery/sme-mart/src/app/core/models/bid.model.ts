@@ -2,7 +2,8 @@ import { BidStatus } from './enums';
 
 export interface Bid {
   id: string;
-  request_id: string | null;
+  request_id: string | null; // Legacy — being replaced by project_id (Plan 075)
+  project_id?: string | null; // SmeMartProject reference (Plan 075)
   provider_id: string | null;
   cover_letter: string | null;
   proposed_price: string | null;
