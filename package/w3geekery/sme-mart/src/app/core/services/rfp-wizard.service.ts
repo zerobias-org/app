@@ -1,10 +1,10 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
-import { EngagementsService } from '../../core/services/engagements.service';
+import { SmeMartProjectService } from './sme-mart-project.service';
 import { DocumentService } from './document.service';
 import { ImpersonationService } from './impersonation.service';
 import { SmeMartTagService } from './sme-mart-tag.service';
 import type {
-  WorkRequest,
+  SmeMartProject,
   RfpData,
   RfpTaskGroup,
   EvaluationCriterion,
@@ -12,9 +12,15 @@ import type {
 } from '../models';
 import type { EngagementFormValues } from '../../shared/components/engagement-form/engagement-form.component';
 
+/**
+ * RfpWizardService — Plan 075 Phase 2 rewrite
+ *
+ * Now backed by SmeMartProjectService (SmeMartProject in draft status)
+ * instead of EngagementsService. RFP fields live on SmeMartProject.
+ */
 @Injectable({ providedIn: 'root' })
 export class RfpWizardService {
-  private readonly engagements = inject(EngagementsService);
+  private readonly projects = inject(SmeMartProjectService);
   private readonly docService = inject(DocumentService);
   private readonly impersonation = inject(ImpersonationService);
   private readonly tagService = inject(SmeMartTagService);
@@ -23,10 +29,10 @@ export class RfpWizardService {
   // State
   // ---------------------------------------------------------------------------
 
-  /** The work_requests row backing this wizard session. */
-  readonly draft = signal<WorkRequest | null>(null);
+  /** The SmeMartProject row backing this wizard session. */
+  readonly draft = signal<SmeMartProject | null>(null);
 
-  /** Full wizard data (persisted to rfp_wizard_data JSONB). */
+  /** Full wizard data (persisted to SmeMartProject.wizardData). */
   readonly rfpData = signal<RfpData>(this.emptyRfpData());
 
   /** Last completed step (0-indexed). */
@@ -46,15 +52,15 @@ export class RfpWizardService {
 
   /** Load an existing draft for resuming the wizard. */
   async loadDraft(id: string): Promise<void> {
-    const row = await this.engagements.getEngagementRaw(id);
-    if (!row) throw new Error(`Draft ${id} not found`);
+    const project = await this.projects.getProject(id);
+    if (!project) throw new Error(`Draft ${id} not found`);
 
-    this.draft.set(row);
+    this.draft.set(project);
 
-    // Hydrate wizard data from JSONB column
-    const wizardData = (row as any).rfp_wizard_data as RfpData | null;
+    // Hydrate wizard data from the wizardData JSON field
+    const wizardData = project.wizardData as RfpData | null;
     this.rfpData.set(wizardData ?? this.emptyRfpData());
-    this.currentStep.set((row as any).rfp_wizard_step ?? 0);
+    this.currentStep.set(Number(project.wizardStep) || 0);
 
     // Load documents
     const docs = await this.docService.listDocuments(id);
@@ -78,7 +84,7 @@ export class RfpWizardService {
   // Step 1: Basics
   // ---------------------------------------------------------------------------
 
-  /** Create the draft row (first save) or update basics on an existing draft. */
+  /** Create the draft project (first save) or update basics on an existing draft. */
   async saveBasics(values: EngagementFormValues): Promise<string> {
     this.saving.set(true);
     try {
@@ -97,31 +103,30 @@ export class RfpWizardService {
 
       let id = this.draftId();
       if (!id) {
-        // Create new draft row
-        const row = await this.engagements.createRfp({
-          buyer_zerobias_user_id: this.impersonation.effectiveUserId(),
-          title: values.title,
+        // Create new SmeMartProject as RFP draft
+        const project = await this.projects.createAsRfp({
+          name: values.title,
           description: values.description || undefined,
           category: values.category,
-          budget_type: values.budget_type || undefined,
-          budget_min: values.budget_min || undefined,
-          budget_max: values.budget_max || undefined,
+          budgetType: values.budget_type || undefined,
+          budgetMin: values.budget_min ? Number(values.budget_min) : undefined,
+          budgetMax: values.budget_max ? Number(values.budget_max) : undefined,
           timeline: values.timeline || undefined,
-          status: 'draft',
         });
-        this.draft.set(row);
-        id = row.id;
+        this.draft.set(project);
+        id = project.id;
       } else {
-        // Update existing draft
-        await this.engagements.updateRfp(id, {
-          title: values.title,
-          description: values.description || null,
+        // Update existing draft project
+        const project = await this.projects.updateProject(id, {
+          name: values.title,
+          description: values.description || undefined,
           category: values.category,
-          budget_type: values.budget_type || null,
-          budget_min: values.budget_min || null,
-          budget_max: values.budget_max || null,
-          timeline: values.timeline || null,
-        } as Partial<WorkRequest>);
+          budgetType: (values.budget_type || undefined) as SmeMartProject['budgetType'],
+          budgetMin: values.budget_min ? Number(values.budget_min) : undefined,
+          budgetMax: values.budget_max ? Number(values.budget_max) : undefined,
+          timeline: values.timeline || undefined,
+        });
+        this.draft.set(project);
       }
 
       await this.persistWizardState(id, 1);
@@ -136,8 +141,8 @@ export class RfpWizardService {
   // ---------------------------------------------------------------------------
 
   /** Reload documents from the service (e.g., after attaching from library). */
-  async refreshDocuments(engagementId: string): Promise<void> {
-    const docs = await this.docService.listDocuments(engagementId);
+  async refreshDocuments(projectId: string): Promise<void> {
+    const docs = await this.docService.listDocuments(projectId);
     this.documents.set(docs);
   }
 
@@ -199,6 +204,15 @@ export class RfpWizardService {
     if (!id) return;
     this.saving.set(true);
     try {
+      // Also persist deadline fields to top-level SmeMartProject columns
+      const data = this.rfpData();
+      await this.projects.updateProject(id, {
+        responseDeadline: data.responseDeadline,
+        questionsDeadline: data.questionsDeadline,
+        evaluationCriteria: data.evaluationCriteria?.length
+          ? { criteria: data.evaluationCriteria }
+          : undefined,
+      });
       await this.persistWizardState(id, 4);
     } finally {
       this.saving.set(false);
@@ -217,16 +231,9 @@ export class RfpWizardService {
     try {
       const data = this.rfpData();
 
-      // Create the RFP tag: sme-mart.rfp.{identifier}
-      const rfpTagName = this.tagService.generateRfpTag(data.rfpTagIdentifier);
-      const tag = await this.tagService.createTag(rfpTagName, `RFP: ${data.title}`);
-
-      // Update work_request with tag info and status
-      await this.engagements.updateRfp(id, {
-        engagement_tag: rfpTagName,
-        zerobias_tag_id: tag?.id?.toString() || null,
-        status: 'open',
-      } as Partial<WorkRequest>);
+      // Publish via SmeMartProjectService (creates tag + sets status)
+      const { project } = await this.projects.publishRfp(id, data.rfpTagIdentifier);
+      this.draft.set(project);
 
       await this.persistWizardState(id, 5);
     } finally {
@@ -253,9 +260,9 @@ export class RfpWizardService {
 
   private async persistWizardState(draftId: string, step: number): Promise<void> {
     this.currentStep.set(step);
-    await this.engagements.updateRfp(draftId, {
-      rfp_wizard_data: this.rfpData() as any,
-      rfp_wizard_step: step,
-    } as any);
+    await this.projects.updateProject(draftId, {
+      wizardData: this.rfpData() as unknown as Record<string, unknown>,
+      wizardStep: String(step),
+    });
   }
 }

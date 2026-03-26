@@ -206,6 +206,8 @@ export class NotesService {
       };
       if (folderId) {
         filters['folderId'] = `.eq.${folderId}`;
+      } else {
+        filters['folderId'] = '.is.null';
       }
 
       const gqlOptions: GqlQueryOptions = {
