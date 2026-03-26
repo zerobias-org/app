@@ -12,6 +12,7 @@
 
 import type {
   DemoEngagement,
+  DemoSmeMartProject,
   DemoBid,
   DemoBidResponse,
   DemoNote,
@@ -26,110 +27,404 @@ import type {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Demo Engagements (5 active from demo-data-guide.md)
- * All are in 'in_progress' status with associated ZB Tasks.
+ * Demo Engagements — Corp-to-Corp Agreements (new model, 2026-03-24)
+ *
+ * An Engagement is the agreement between two orgs — NOT where work lives.
+ * Work lives in SmeMartProjects under each engagement.
+ * Pinnacle Corp has 2 projects to demonstrate 1:many.
  */
 export const DEMO_ENGAGEMENTS: DemoEngagement[] = [
   {
-    id: 'eng-001-crystal-harbor',
-    name: 'SOC 2 Type I Fast-Track Assessment',
-    description: 'Fast-track SOC 2 Type I assessment for healthcare startup',
+    id: 'eng-001-pinnacle',
+    name: 'Pinnacle Corp ↔ W3Geekery',
+    description: 'Master service agreement for compliance and security services. Pinnacle Corp (Series B SaaS) engaged W3Geekery for SOC 2 assessment and ongoing monitoring.',
     category: 'Assessors',
     buyerZerobiasUserId: 'demo-buyer-pinnacle',
     buyerZerobiasOrgId: 'org-pinnacle-corp',
-    budgetType: 'fixed',
-    budgetMin: 6000,
-    budgetMax: 9000,
-    timeline: '4 weeks',
+    budgetType: 'negotiable',
+    budgetMin: 0,
+    budgetMax: 0,
+    timeline: 'Ongoing',
     status: 'in_progress',
-    engagementTag: 'sme-mart.eng.crystal-harbor',
+    engagementTag: 'sme-mart.eng.pinnacle',
     zerobiasTagId: 'e1864514-af28-4397-93a5-f05e443b05cb',
     zerobiasTaskId: 'abc5d715-b97d-4c76-a24b-95c643b68795',
-    createdAt: new Date(2026, 2, 1).toISOString(),
+    createdAt: new Date(2026, 1, 15).toISOString(),
     updatedAt: new Date(2026, 2, 10).toISOString(),
   },
   {
-    id: 'eng-002-velvet-summit',
-    name: 'NIST CSF Implementation Advisor',
-    description: 'Advisory engagement for NIST CSF implementation',
+    id: 'eng-002-fintech',
+    name: 'FinTech Inc ↔ W3Geekery',
+    description: 'GRC advisory engagement. FinTech Inc engaged W3Geekery for NIST CSF implementation guidance.',
     category: 'Advisors',
     buyerZerobiasUserId: 'buyer-fintech-002',
     buyerZerobiasOrgId: 'org-fintech-inc',
-    budgetType: 'hourly',
-    budgetMin: 150,
-    budgetMax: 250,
-    timeline: '3 months',
+    budgetType: 'negotiable',
+    budgetMin: 0,
+    budgetMax: 0,
+    timeline: 'Ongoing',
     status: 'in_progress',
-    engagementTag: 'sme-mart.eng.velvet-summit',
+    engagementTag: 'sme-mart.eng.fintech',
     zerobiasTagId: '355a0e23-e22b-4622-b186-08e860513de6',
     zerobiasTaskId: 'c3b5fc15-2cf3-406d-961b-570f78689821',
-    createdAt: new Date(2026, 2, 2).toISOString(),
+    createdAt: new Date(2026, 1, 20).toISOString(),
     updatedAt: new Date(2026, 2, 11).toISOString(),
   },
   {
-    id: 'eng-003-amber-circuit',
-    name: 'AI Agent for Compliance Evidence Collection',
-    description: 'Agentic solution for automating compliance evidence gathering',
+    id: 'eng-003-startup-xyz',
+    name: 'Startup XYZ ↔ W3Geekery',
+    description: 'Agentic services engagement. Startup XYZ engaged W3Geekery for AI-driven compliance automation.',
     category: 'Agentic',
     buyerZerobiasUserId: 'buyer-startup-003',
     buyerZerobiasOrgId: 'org-startup-xyz',
     budgetType: 'negotiable',
-    budgetMin: 10000,
-    budgetMax: 20000,
-    timeline: '8-12 weeks',
+    budgetMin: 0,
+    budgetMax: 0,
+    timeline: 'Ongoing',
     status: 'in_progress',
-    engagementTag: 'sme-mart.eng.amber-circuit',
+    engagementTag: 'sme-mart.eng.startup-xyz',
     zerobiasTagId: '49e67643-85da-44b0-a47a-c67c56a4d2d7',
     zerobiasTaskId: '3a6799c6-65ea-4833-9cf9-3f739f0fe587',
-    createdAt: new Date(2026, 2, 3).toISOString(),
+    createdAt: new Date(2026, 1, 25).toISOString(),
     updatedAt: new Date(2026, 2, 12).toISOString(),
   },
   {
-    id: 'eng-004-silver-bridge',
-    name: 'HIPAA Security Awareness Training',
-    description: 'Healthcare compliance training program for staff',
+    id: 'eng-004-lakewood',
+    name: 'Lakewood Health ↔ W3Geekery',
+    description: 'Healthcare compliance engagement. Lakewood Health engaged W3Geekery for HIPAA training and security awareness.',
     category: 'Training',
     buyerZerobiasUserId: 'demo-buyer-lakewood',
     buyerZerobiasOrgId: 'org-lakewood-health',
-    budgetType: 'fixed',
-    budgetMin: 8000,
-    budgetMax: 12000,
-    timeline: '6 weeks',
+    budgetType: 'negotiable',
+    budgetMin: 0,
+    budgetMax: 0,
+    timeline: 'Ongoing',
     status: 'in_progress',
-    engagementTag: 'sme-mart.eng.silver-bridge',
+    engagementTag: 'sme-mart.eng.lakewood',
     zerobiasTagId: 'ba599b51-6d87-4c46-9c98-05244a928cc9',
     zerobiasTaskId: '900dfe93-ad93-4c02-996c-a8c13700e8ab',
-    createdAt: new Date(2026, 2, 4).toISOString(),
+    createdAt: new Date(2026, 2, 1).toISOString(),
     updatedAt: new Date(2026, 2, 13).toISOString(),
   },
   {
-    id: 'eng-005-coral-meadow',
-    name: 'ISO 27001 Gap Assessment',
-    description: 'Cross-framework gap analysis for ISO 27001 compliance',
+    id: 'eng-005-healthtech',
+    name: 'HealthTech Co ↔ W3Geekery',
+    description: 'ISO 27001 compliance engagement. HealthTech Co engaged W3Geekery for gap assessment and remediation planning.',
     category: 'Assessors',
     buyerZerobiasUserId: 'buyer-health-004',
     buyerZerobiasOrgId: 'org-healthtech',
-    budgetType: 'fixed',
-    budgetMin: 5000,
-    budgetMax: 7500,
-    timeline: '4 weeks',
+    budgetType: 'negotiable',
+    budgetMin: 0,
+    budgetMax: 0,
+    timeline: 'Ongoing',
     status: 'in_progress',
-    engagementTag: 'sme-mart.eng.coral-meadow',
+    engagementTag: 'sme-mart.eng.healthtech',
     zerobiasTagId: '3b2e84a6-52bc-41d7-8e8c-5e78e65a033c',
     zerobiasTaskId: 'd9895a40-38a4-4dad-9e8a-6ee588104cf0',
-    createdAt: new Date(2026, 2, 5).toISOString(),
+    createdAt: new Date(2026, 2, 2).toISOString(),
     updatedAt: new Date(2026, 2, 14).toISOString(),
   },
 ];
 
 /**
- * Builder function: Generate demo engagements with unique IDs.
- * Used for testing and fixture generation.
+ * Builder function: Generate demo engagements.
  */
 export function seedDemoEngagements(): DemoEngagement[] {
-  return DEMO_ENGAGEMENTS.map(eng => ({
-    ...eng,
-  }));
+  return DEMO_ENGAGEMENTS.map(eng => ({ ...eng }));
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SmeMartProject Fixtures (scoped work under engagements)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Demo Projects — Scoped work items under engagements.
+ *
+ * These are the former "engagements" (crystal-harbor, velvet-summit, etc.)
+ * now properly modeled as projects. Pinnacle gets 2 projects to demo 1:many.
+ *
+ * Note: Downstream entities (bids, notes, docs) still reference engagementId
+ * using the OLD engagement IDs (eng-001-crystal-harbor, etc.) which are now
+ * project IDs. This is intentional — the GQL schema field is still called
+ * engagementId and will be aliased/migrated when the schema catches up.
+ */
+export const DEMO_PROJECTS: DemoSmeMartProject[] = [
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Active projects (linked to engagements, with RFP fields for history)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  // ── Pinnacle Corp: 2 projects ──
+  {
+    id: 'proj-001-crystal-harbor',
+    name: 'SOC 2 Type I Fast-Track Assessment',
+    description: 'Fast-track SOC 2 Type I assessment. 4-week engagement with Gina Auditor. Controls: access logging, availability, change management.',
+    status: 'active',
+    engagement: 'eng-001-pinnacle',
+    startDate: '2026-03-01',
+    targetEndDate: '2026-03-29',
+    category: 'Assessors',
+    budgetType: 'fixed',
+    budgetMin: 6000,
+    budgetMax: 9000,
+    timeline: '4 weeks',
+    buyerZerobiasUserId: 'demo-buyer-pinnacle',
+    buyerZerobiasOrgId: 'org-pinnacle-corp',
+  },
+  {
+    id: 'proj-002-pinnacle-type2',
+    name: 'SOC 2 Type II Continuous Monitoring',
+    description: 'Follow-on to crystal-harbor Type I. 6-month continuous monitoring engagement for SOC 2 Type II readiness.',
+    status: 'draft',
+    engagement: 'eng-001-pinnacle',
+    startDate: '2026-04-01',
+    targetEndDate: '2026-09-30',
+    category: 'Assessors',
+    budgetType: 'negotiable',
+    timeline: '6 months',
+    buyerZerobiasUserId: 'demo-buyer-pinnacle',
+    buyerZerobiasOrgId: 'org-pinnacle-corp',
+  },
+  // ── FinTech Inc: 1 project ──
+  {
+    id: 'proj-003-velvet-summit',
+    name: 'NIST CSF Implementation Advisor',
+    description: 'Advisory project for NIST CSF implementation. 3-month phased rollout: Identify, Protect, Detect functions.',
+    status: 'active',
+    engagement: 'eng-002-fintech',
+    startDate: '2026-03-02',
+    targetEndDate: '2026-06-02',
+    category: 'Advisors',
+    budgetType: 'hourly',
+    budgetMin: 150,
+    budgetMax: 250,
+    timeline: '3 months',
+    buyerZerobiasUserId: 'buyer-fintech-002',
+    buyerZerobiasOrgId: 'org-fintech-inc',
+  },
+  // ── Startup XYZ: 1 project ──
+  {
+    id: 'proj-004-amber-circuit',
+    name: 'AI Agent for Compliance Evidence Collection',
+    description: 'Agentic solution for automating compliance evidence gathering. 10-12 week build with Bob IT.',
+    status: 'active',
+    engagement: 'eng-003-startup-xyz',
+    startDate: '2026-03-03',
+    targetEndDate: '2026-05-28',
+    category: 'Agentic',
+    budgetType: 'negotiable',
+    budgetMin: 10000,
+    budgetMax: 20000,
+    timeline: '10-12 weeks',
+    buyerZerobiasUserId: 'buyer-startup-003',
+    buyerZerobiasOrgId: 'org-startup-xyz',
+  },
+  // ── Lakewood Health: 1 project ──
+  {
+    id: 'proj-005-silver-bridge',
+    name: 'HIPAA Security Awareness Training',
+    description: 'Healthcare compliance training program. 3 modules (60 min each): privacy, security, breach notification.',
+    status: 'active',
+    engagement: 'eng-004-lakewood',
+    startDate: '2026-03-04',
+    targetEndDate: '2026-04-15',
+    category: 'Training',
+    budgetType: 'fixed',
+    budgetMin: 8000,
+    budgetMax: 12000,
+    timeline: '6 weeks',
+    buyerZerobiasUserId: 'demo-buyer-lakewood',
+    buyerZerobiasOrgId: 'org-lakewood-health',
+  },
+  // ── HealthTech Co: 1 project ──
+  {
+    id: 'proj-006-coral-meadow',
+    name: 'ISO 27001 Gap Assessment',
+    description: 'Cross-framework gap analysis for ISO 27001 compliance. 12 gaps identified, 8 critical.',
+    status: 'active',
+    engagement: 'eng-005-healthtech',
+    startDate: '2026-03-05',
+    targetEndDate: '2026-04-02',
+    category: 'Assessors',
+    budgetType: 'fixed',
+    budgetMin: 5000,
+    budgetMax: 7500,
+    timeline: '4 weeks',
+    buyerZerobiasUserId: 'buyer-health-004',
+    buyerZerobiasOrgId: 'org-healthtech',
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Published RFPs (marketplace listings — no engagement yet)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  {
+    id: 'rfp-001-pentest',
+    name: 'Penetration Testing for Healthcare Portal',
+    description: 'Full-stack penetration test of patient portal. OWASP Top 10, API testing, social engineering assessment.',
+    status: 'published',
+    startDate: '2026-03-20',
+    category: 'Assessors',
+    budgetType: 'fixed',
+    budgetMin: 12000,
+    budgetMax: 18000,
+    timeline: '3-4 weeks',
+    responseDeadline: '2026-04-15T23:59:59Z',
+    questionsDeadline: '2026-04-08T23:59:59Z',
+  },
+  {
+    id: 'rfp-002-cloud-security',
+    name: 'Cloud Security Posture Review',
+    description: 'Comprehensive review of AWS/Azure cloud security posture. Identity management, network segmentation, encryption at rest/transit.',
+    status: 'published',
+    startDate: '2026-03-18',
+    category: 'Advisors',
+    budgetType: 'fixed',
+    budgetMin: 8000,
+    budgetMax: 15000,
+    timeline: '4-6 weeks',
+    responseDeadline: '2026-04-10T23:59:59Z',
+  },
+  {
+    id: 'rfp-003-ai-vuln-triage',
+    name: 'AI-Powered Vulnerability Triage Agent',
+    description: 'Build an AI agent that triages vulnerability scan results, prioritizes remediation, and generates executive summaries.',
+    status: 'published',
+    startDate: '2026-03-15',
+    category: 'Agentic',
+    budgetType: 'negotiable',
+    budgetMin: 25000,
+    budgetMax: 40000,
+    timeline: '8-12 weeks',
+    responseDeadline: '2026-04-20T23:59:59Z',
+    questionsDeadline: '2026-04-10T23:59:59Z',
+  },
+  {
+    id: 'rfp-004-fedramp',
+    name: 'FedRAMP Readiness Assessment',
+    description: 'FedRAMP Moderate readiness assessment with gap analysis, POA&M development, and 3P assessor preparation.',
+    status: 'draft',
+    startDate: '2026-03-22',
+    category: 'Assessors',
+    budgetType: 'fixed',
+    budgetMin: 30000,
+    budgetMax: 50000,
+    timeline: '12-16 weeks',
+  },
+  {
+    id: 'rfp-005-soc2-acme',
+    name: 'SOC 2 Type II Assessment Support',
+    description: 'SOC 2 Type II assessment support for SaaS platform. Evidence collection, control testing, report preparation.',
+    status: 'published',
+    startDate: '2026-03-19',
+    category: 'Assessors',
+    budgetType: 'fixed',
+    budgetMin: 8000,
+    budgetMax: 12000,
+    timeline: '6-8 weeks',
+    responseDeadline: '2026-04-12T23:59:59Z',
+    buyerZerobiasUserId: 'buyer-acme-001',
+    buyerZerobiasOrgId: 'org-acme-corp',
+  },
+  {
+    id: 'rfp-006-hipaa-risk',
+    name: 'HIPAA Risk Assessment & Remediation Plan',
+    description: 'Comprehensive HIPAA risk assessment with remediation roadmap for healthcare organization.',
+    status: 'published',
+    startDate: '2026-03-21',
+    category: 'Advisors',
+    budgetType: 'fixed',
+    budgetMin: 10000,
+    budgetMax: 15000,
+    timeline: '4-6 weeks',
+    responseDeadline: '2026-04-14T23:59:59Z',
+    buyerZerobiasUserId: 'demo-buyer-lakewood',
+    buyerZerobiasOrgId: 'org-lakewood-health',
+  },
+  {
+    id: 'rfp-007-phi-monitoring',
+    name: 'Automated PHI Access Monitoring Agent',
+    description: 'AI agent for real-time PHI access monitoring, anomaly detection, and automated audit trail generation.',
+    status: 'published',
+    startDate: '2026-03-20',
+    category: 'Agentic',
+    budgetType: 'negotiable',
+    budgetMin: 12000,
+    budgetMax: 25000,
+    timeline: '8-10 weeks',
+    responseDeadline: '2026-04-18T23:59:59Z',
+    buyerZerobiasUserId: 'demo-buyer-lakewood',
+    buyerZerobiasOrgId: 'org-lakewood-health',
+  },
+  {
+    id: 'rfp-008-soc-monitoring',
+    name: 'SOC Monitoring Setup for Healthcare Cloud',
+    description: 'Security operations center setup for healthcare cloud environment. SIEM deployment, alert tuning, runbook development.',
+    status: 'published',
+    startDate: '2026-03-19',
+    category: 'SecOps',
+    budgetType: 'fixed',
+    budgetMin: 18000,
+    budgetMax: 25000,
+    timeline: '6-8 weeks',
+    responseDeadline: '2026-04-16T23:59:59Z',
+    buyerZerobiasUserId: 'demo-buyer-lakewood',
+    buyerZerobiasOrgId: 'org-lakewood-health',
+  },
+  {
+    id: 'rfp-009-security-training',
+    name: 'Security Training Program Development',
+    description: 'Enterprise-wide security awareness training program. Role-based modules, phishing simulations, compliance tracking.',
+    status: 'published',
+    startDate: '2026-03-18',
+    category: 'Training',
+    budgetType: 'fixed',
+    budgetMin: 15000,
+    budgetMax: 20000,
+    timeline: '8-10 weeks',
+    responseDeadline: '2026-04-15T23:59:59Z',
+    buyerZerobiasUserId: 'buyer-enterprise-005',
+    buyerZerobiasOrgId: 'org-enterprise-co',
+  },
+  {
+    id: 'rfp-010-devsecops',
+    name: 'DevSecOps Pipeline Hardening',
+    description: 'Harden CI/CD pipelines with SAST, DAST, SCA, secret scanning. GitHub Actions + container security.',
+    status: 'published',
+    startDate: '2026-03-17',
+    category: 'DevSecOps',
+    budgetType: 'hourly',
+    budgetMin: 150,
+    budgetMax: 200,
+    timeline: '3-6 months',
+    responseDeadline: '2026-04-14T23:59:59Z',
+    buyerZerobiasUserId: 'demo-buyer-pinnacle',
+    buyerZerobiasOrgId: 'org-pinnacle-corp',
+  },
+  {
+    id: 'rfp-011-evidence-prep',
+    name: 'Compliance Evidence Package Preparation',
+    description: 'Prepare evidence packages for SOC 2, ISO 27001 audits. Data collection, formatting, reviewer-ready bundles.',
+    status: 'published',
+    startDate: '2026-03-16',
+    category: 'Data Services',
+    budgetType: 'fixed',
+    budgetMin: 3500,
+    budgetMax: 5000,
+    timeline: '2-3 weeks',
+    responseDeadline: '2026-04-10T23:59:59Z',
+    buyerZerobiasUserId: 'demo-buyer-pinnacle',
+    buyerZerobiasOrgId: 'org-pinnacle-corp',
+  },
+];
+
+/**
+ * Builder function: Generate demo projects.
+ */
+export function seedDemoProjects(engagementIds?: string[]): DemoSmeMartProject[] {
+  if (!engagementIds || engagementIds.length === 0) {
+    return DEMO_PROJECTS.map(proj => ({ ...proj }));
+  }
+  return DEMO_PROJECTS.filter(proj => proj.engagement && engagementIds.includes(proj.engagement)).map(proj => ({ ...proj }));
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -140,10 +435,13 @@ export function seedDemoEngagements(): DemoEngagement[] {
  * Demo Bids (linked to demo engagements)
  */
 export const DEMO_BIDS: DemoBid[] = [
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Bids on active projects (accepted/rejected — historical)
+  // ═══════════════════════════════════════════════════════════════════════════
   {
     id: 'bid-001-gina-crystal',
     name: 'Gina Auditor - SOC 2 Type I Bid',
-    engagementId: 'eng-001-crystal-harbor',
+    project: 'proj-001-crystal-harbor',
     providerId: 'a3-gina-auditor',
     coverLetter: 'SOC 2 Type I assessment with fast-track methodology',
     proposedPrice: 7500,
@@ -158,7 +456,7 @@ export const DEMO_BIDS: DemoBid[] = [
   {
     id: 'bid-002-marcus-crystal',
     name: 'Marcus Webb - SOC 2 Evidence Bid',
-    engagementId: 'eng-001-crystal-harbor',
+    project: 'proj-001-crystal-harbor',
     providerId: 'marcus-webb',
     coverLetter: 'Evidence-focused SOC 2 assessment approach',
     proposedPrice: 4000,
@@ -171,7 +469,7 @@ export const DEMO_BIDS: DemoBid[] = [
   {
     id: 'bid-003-james-velvet',
     name: 'James Okafor - NIST CSF Bid',
-    engagementId: 'eng-002-velvet-summit',
+    project: 'proj-003-velvet-summit',
     providerId: 'james-okafor',
     coverLetter: 'NIST CSF implementation with GRC strategy focus',
     proposedPrice: 200,
@@ -185,7 +483,7 @@ export const DEMO_BIDS: DemoBid[] = [
   {
     id: 'bid-004-bob-amber',
     name: 'Bob IT - AI Agent Bid',
-    engagementId: 'eng-003-amber-circuit',
+    project: 'proj-004-amber-circuit',
     providerId: 'a1-bob-it',
     coverLetter: 'AI Agent for compliance automation',
     proposedPrice: 15000,
@@ -198,7 +496,7 @@ export const DEMO_BIDS: DemoBid[] = [
   {
     id: 'bid-005-carlos-amber',
     name: 'Carlos Rivera - SecOps Automation Bid',
-    engagementId: 'eng-003-amber-circuit',
+    project: 'proj-004-amber-circuit',
     providerId: 'carlos-rivera',
     coverLetter: 'Security operations and compliance automation',
     proposedPrice: 18000,
@@ -211,7 +509,7 @@ export const DEMO_BIDS: DemoBid[] = [
   {
     id: 'bid-006-alex-silver',
     name: 'Alex Nguyen - HIPAA Training Bid',
-    engagementId: 'eng-004-silver-bridge',
+    project: 'proj-005-silver-bridge',
     providerId: 'alex-nguyen',
     coverLetter: 'HIPAA compliance training program',
     proposedPrice: 10000,
@@ -224,7 +522,7 @@ export const DEMO_BIDS: DemoBid[] = [
   {
     id: 'bid-007-gina-coral',
     name: 'Gina Auditor - ISO 27001 Bid',
-    engagementId: 'eng-005-coral-meadow',
+    project: 'proj-006-coral-meadow',
     providerId: 'a3-gina-auditor',
     coverLetter: 'ISO 27001 gap assessment with remediation roadmap',
     proposedPrice: 6500,
@@ -234,16 +532,132 @@ export const DEMO_BIDS: DemoBid[] = [
     createdAt: new Date(2026, 2, 10).toISOString(),
     updatedAt: new Date(2026, 2, 12).toISOString(),
   },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Bids on published RFPs (pending — marketplace activity)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  // Cloud Security Posture Review (rfp-002)
+  {
+    id: 'bid-008-gina-cloud',
+    name: 'Gina Auditor - Cloud Security Bid',
+    project: 'rfp-002-cloud-security',
+    providerId: 'a3-gina-auditor',
+    coverLetter: 'Cloud security posture review with multi-cloud expertise',
+    proposedPrice: 11000,
+    proposedTimeline: '5 weeks',
+    executiveSummary: 'AWS/Azure certified security assessor',
+    status: 'pending',
+    createdAt: new Date(2026, 2, 20).toISOString(),
+    updatedAt: new Date(2026, 2, 20).toISOString(),
+  },
+  {
+    id: 'bid-009-carlos-cloud',
+    name: 'Carlos Rivera - Cloud SecOps Bid',
+    project: 'rfp-002-cloud-security',
+    providerId: 'carlos-rivera',
+    coverLetter: 'Security operations perspective on cloud posture',
+    proposedPrice: 9500,
+    proposedTimeline: '4 weeks',
+    executiveSummary: 'SecOps specialist with cloud infrastructure expertise',
+    status: 'pending',
+    createdAt: new Date(2026, 2, 21).toISOString(),
+    updatedAt: new Date(2026, 2, 21).toISOString(),
+  },
+
+  // AI Vulnerability Triage Agent (rfp-003)
+  {
+    id: 'bid-010-bob-vuln',
+    name: 'Bob IT - AI Vuln Triage Bid',
+    project: 'rfp-003-ai-vuln-triage',
+    providerId: 'a1-bob-it',
+    coverLetter: 'AI-powered vulnerability triage with LLM integration',
+    proposedPrice: 35000,
+    proposedTimeline: '10 weeks',
+    executiveSummary: 'AI Agent Builder — built 3 similar triage agents',
+    status: 'pending',
+    createdAt: new Date(2026, 2, 18).toISOString(),
+    updatedAt: new Date(2026, 2, 18).toISOString(),
+  },
+  {
+    id: 'bid-011-sarah-vuln',
+    name: 'Sarah Chen - DevSecOps Triage Bid',
+    project: 'rfp-003-ai-vuln-triage',
+    providerId: 'sarah-chen',
+    coverLetter: 'DevSecOps-integrated vulnerability management agent',
+    proposedPrice: 28000,
+    proposedTimeline: '8 weeks',
+    executiveSummary: 'DevSecOps lead with CI/CD security automation',
+    status: 'pending',
+    createdAt: new Date(2026, 2, 19).toISOString(),
+    updatedAt: new Date(2026, 2, 19).toISOString(),
+  },
+  {
+    id: 'bid-012-clark-vuln',
+    name: 'Clark Stacer - Platform Triage Bid',
+    project: 'rfp-003-ai-vuln-triage',
+    providerId: 'clark-stacer',
+    coverLetter: 'Platform-native triage agent with ZeroBias integration',
+    proposedPrice: 38000,
+    proposedTimeline: '12 weeks',
+    executiveSummary: 'Platform architect with compliance automation expertise',
+    status: 'pending',
+    createdAt: new Date(2026, 2, 20).toISOString(),
+    updatedAt: new Date(2026, 2, 20).toISOString(),
+  },
+
+  // SOC 2 Type II - Acme Corp (rfp-005)
+  {
+    id: 'bid-013-gina-acme',
+    name: 'Gina Auditor - Acme SOC 2 Bid',
+    project: 'rfp-005-soc2-acme',
+    providerId: 'a3-gina-auditor',
+    coverLetter: 'SOC 2 Type II assessment with continuous monitoring setup',
+    proposedPrice: 10000,
+    proposedTimeline: '8 weeks',
+    executiveSummary: 'SOC 2 specialist — 50+ assessments completed',
+    status: 'pending',
+    createdAt: new Date(2026, 2, 22).toISOString(),
+    updatedAt: new Date(2026, 2, 22).toISOString(),
+  },
+  {
+    id: 'bid-014-james-acme',
+    name: 'James Okafor - Acme GRC Bid',
+    project: 'rfp-005-soc2-acme',
+    providerId: 'james-okafor',
+    coverLetter: 'GRC-integrated SOC 2 approach with framework alignment',
+    proposedPrice: 11500,
+    proposedTimeline: '6 weeks',
+    executiveSummary: 'GRC consultant with SOC 2 experience',
+    status: 'pending',
+    createdAt: new Date(2026, 2, 23).toISOString(),
+    updatedAt: new Date(2026, 2, 23).toISOString(),
+  },
+
+  // SOC Monitoring Healthcare (rfp-008)
+  {
+    id: 'bid-015-carlos-soc',
+    name: 'Carlos Rivera - SOC Monitoring Bid',
+    project: 'rfp-008-soc-monitoring',
+    providerId: 'carlos-rivera',
+    coverLetter: 'SIEM deployment with healthcare-specific detection rules',
+    proposedPrice: 22000,
+    proposedTimeline: '7 weeks',
+    executiveSummary: 'SecOps specialist — 5 healthcare SOC deployments',
+    status: 'pending',
+    createdAt: new Date(2026, 2, 22).toISOString(),
+    updatedAt: new Date(2026, 2, 22).toISOString(),
+  },
 ];
 
 /**
  * Builder function: Generate demo bids linked to specific engagements.
  */
-export function seedDemoBids(engagementIds?: string[]): DemoBid[] {
-  if (!engagementIds || engagementIds.length === 0) {
+export function seedDemoBids(projectIds?: string[]): DemoBid[] {
+  if (!projectIds || projectIds.length === 0) {
     return DEMO_BIDS.map(bid => ({ ...bid }));
   }
-  return DEMO_BIDS.filter(bid => engagementIds.includes(bid.engagementId)).map(bid => ({ ...bid }));
+  return DEMO_BIDS.filter(bid => projectIds.includes(bid.project)).map(bid => ({ ...bid }));
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -322,7 +736,7 @@ export const DEMO_NOTES: DemoNote[] = [
   {
     id: 'note-001-crystal-kickoff',
     name: 'Kickoff Meeting - Crystal Harbor',
-    engagementId: 'eng-001-crystal-harbor',
+    engagementId: 'proj-001-crystal-harbor',
     folderId: 'folder-001-crystal-general', // General subfolder, NOT notebook root
     title: 'Kickoff Meeting - Crystal Harbor',
     body: 'Initial SOC 2 scoping with Pinnacle Corp. Identified 3 control gaps in access management.',
@@ -338,7 +752,7 @@ export const DEMO_NOTES: DemoNote[] = [
   {
     id: 'note-002-crystal-progress',
     name: 'Progress Update - Week 2',
-    engagementId: 'eng-001-crystal-harbor',
+    engagementId: 'proj-001-crystal-harbor',
     folderId: 'folder-001-crystal-general', // General subfolder, NOT notebook root
     title: 'Progress Update - Week 2',
     body: 'Completed access logging audit. Found 2 non-compliant systems. Remediation plan drafted.',
@@ -352,7 +766,7 @@ export const DEMO_NOTES: DemoNote[] = [
   {
     id: 'note-003-velvet-strategy',
     name: 'NIST CSF Strategy Session',
-    engagementId: 'eng-002-velvet-summit',
+    engagementId: 'proj-003-velvet-summit',
     folderId: 'folder-002-velvet-general', // General subfolder, NOT notebook root
     title: 'NIST CSF Strategy Session',
     body: 'Outlined 3-month implementation roadmap. Prioritized Identify and Protect functions.',
@@ -368,7 +782,7 @@ export const DEMO_NOTES: DemoNote[] = [
   {
     id: 'note-004-silver-agenda',
     name: 'Training Module Outline',
-    engagementId: 'eng-004-silver-bridge',
+    engagementId: 'proj-005-silver-bridge',
     title: 'Training Module Outline',
     body: 'HIPAA training: 3 modules (60 min each) covering privacy, security, breach notification.',
     authorZerobiasUserId: 'alex-nguyen',
@@ -381,7 +795,7 @@ export const DEMO_NOTES: DemoNote[] = [
   {
     id: 'note-005-coral-findings',
     name: 'ISO 27001 Gap Analysis Findings',
-    engagementId: 'eng-005-coral-meadow',
+    engagementId: 'proj-006-coral-meadow',
     folderId: 'folder-005-coral-general', // General subfolder, NOT notebook root
     title: 'ISO 27001 Gap Analysis Findings',
     body: 'Identified 12 gaps across Control objectives. 8 critical, 4 medium. Roadmap created.',
@@ -420,7 +834,7 @@ export const DEMO_NOTE_FOLDERS: DemoNoteFolder[] = [
   // ── Crystal Harbor notebook + subfolders ──
   {
     id: 'folder-001-crystal',
-    engagementId: 'eng-001-crystal-harbor',
+    engagementId: 'proj-001-crystal-harbor',
     name: 'Crystal Harbor Assessment',
     description: 'SOC 2 Type I assessment notes and documentation',
     createdByZerobiasUserId: 'a3-gina-auditor',
@@ -432,7 +846,7 @@ export const DEMO_NOTE_FOLDERS: DemoNoteFolder[] = [
   },
   {
     id: 'folder-001-crystal-general',
-    engagementId: 'eng-001-crystal-harbor',
+    engagementId: 'proj-001-crystal-harbor',
     parentId: 'folder-001-crystal',
     name: 'General',
     createdByZerobiasUserId: 'a3-gina-auditor',
@@ -444,7 +858,7 @@ export const DEMO_NOTE_FOLDERS: DemoNoteFolder[] = [
   // ── Velvet Summit notebook + subfolders ──
   {
     id: 'folder-002-velvet',
-    engagementId: 'eng-002-velvet-summit',
+    engagementId: 'proj-003-velvet-summit',
     name: 'NIST CSF Implementation',
     description: 'Implementation roadmap and strategy notes',
     createdByZerobiasUserId: 'james-okafor',
@@ -456,7 +870,7 @@ export const DEMO_NOTE_FOLDERS: DemoNoteFolder[] = [
   },
   {
     id: 'folder-002-velvet-general',
-    engagementId: 'eng-002-velvet-summit',
+    engagementId: 'proj-003-velvet-summit',
     parentId: 'folder-002-velvet',
     name: 'General',
     createdByZerobiasUserId: 'james-okafor',
@@ -468,7 +882,7 @@ export const DEMO_NOTE_FOLDERS: DemoNoteFolder[] = [
   // ── Coral Meadow notebook + subfolders ──
   {
     id: 'folder-005-coral',
-    engagementId: 'eng-005-coral-meadow',
+    engagementId: 'proj-006-coral-meadow',
     name: 'ISO 27001 Gap Assessment',
     description: 'Gap analysis findings and remediation planning',
     createdByZerobiasUserId: 'a3-gina-auditor',
@@ -480,7 +894,7 @@ export const DEMO_NOTE_FOLDERS: DemoNoteFolder[] = [
   },
   {
     id: 'folder-005-coral-general',
-    engagementId: 'eng-005-coral-meadow',
+    engagementId: 'proj-006-coral-meadow',
     parentId: 'folder-005-coral',
     name: 'General',
     createdByZerobiasUserId: 'a3-gina-auditor',
@@ -512,7 +926,7 @@ export const DEMO_DOCUMENTS: DemoSmeMartDocument[] = [
   {
     id: 'doc-001-crystal-scope',
     name: 'SOC 2 Scope Statement',
-    engagementId: 'eng-001-crystal-harbor',
+    engagementId: 'proj-001-crystal-harbor',
     filename: 'soc2-scope-statement.pdf',
     mimeType: 'application/pdf',
     size: 245000,
@@ -529,7 +943,7 @@ export const DEMO_DOCUMENTS: DemoSmeMartDocument[] = [
   {
     id: 'doc-002-crystal-wip',
     name: 'Access Control Audit WIP',
-    engagementId: 'eng-001-crystal-harbor',
+    engagementId: 'proj-001-crystal-harbor',
     filename: 'access-control-audit.xlsx',
     mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     size: 125000,
@@ -546,7 +960,7 @@ export const DEMO_DOCUMENTS: DemoSmeMartDocument[] = [
   {
     id: 'doc-003-velvet-plan',
     name: 'NIST CSF 3-Month Roadmap',
-    engagementId: 'eng-002-velvet-summit',
+    engagementId: 'proj-003-velvet-summit',
     filename: 'nist-csf-roadmap.docx',
     mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     size: 89000,
@@ -648,7 +1062,7 @@ export const DEMO_REVIEWS: DemoReview[] = [
     name: 'Review of Gina Auditor - Crystal Harbor',
     providerId: 'a3-gina-auditor',
     reviewerZerobiasUserId: 'demo-buyer-pinnacle',
-    engagementId: 'eng-001-crystal-harbor',
+    engagementId: 'proj-001-crystal-harbor',
     rating: 5,
     reviewText: 'Exceptional SOC 2 expertise. Fast-tracked without compromising quality. Highly recommended.',
     approved: false,
@@ -660,7 +1074,7 @@ export const DEMO_REVIEWS: DemoReview[] = [
     name: 'Review of James Okafor - Velvet Summit',
     providerId: 'james-okafor',
     reviewerZerobiasUserId: 'buyer-fintech-002',
-    engagementId: 'eng-002-velvet-summit',
+    engagementId: 'proj-003-velvet-summit',
     rating: 5,
     reviewText: 'Outstanding GRC consultant. Developed comprehensive NIST CSF roadmap. Strategic insights valuable.',
     approved: false,
