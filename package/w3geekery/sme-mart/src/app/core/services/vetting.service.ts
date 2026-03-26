@@ -1,0 +1,366 @@
+/**
+ * VettingService — CRUD for engagement corporate vetting items.
+ *
+ * All writes go through PipelineWriteService (fire-and-forget async).
+ * All reads go through GraphqlReadService (from AuditgraphDB).
+ *
+ * Plan 063: Corporate Vetting Flow
+ */
+
+import { Injectable, inject } from '@angular/core';
+import { PipelineWriteService } from './pipeline-write.service';
+import { GraphqlReadService, type GqlQueryOptions } from './graphql-read.service';
+import { ImpersonationService } from './impersonation.service';
+import { VETTING_ITEM_FIELD_MAPPING, mapGqlToNeon, mapNeonToGql } from '../field-mappings';
+import type { GqlVettingItemResponse } from '../gql-types';
+import type {
+  EngagementVettingItem,
+  CreateVettingItemRequest,
+  UpdateVettingItemRequest,
+  VettingSummary,
+  VettingStatus,
+} from '../models';
+import {
+  DEFAULT_VETTING_TEMPLATES,
+  VETTING_STATUS_TRANSITIONS,
+} from '../models';
+
+@Injectable({ providedIn: 'root' })
+export class VettingService {
+  private readonly pipelineWrite = inject(PipelineWriteService);
+  private readonly graphqlRead = inject(GraphqlReadService);
+  private readonly impersonation = inject(ImpersonationService);
+
+  // ── Query ──
+
+  /**
+   * List all vetting items for an engagement.
+   * Returns items sorted by category (always first) then name.
+   */
+  async listVettingItems(engagementId: string): Promise<EngagementVettingItem[]> {
+    const result = await this.graphqlRead.query<GqlVettingItemResponse>(
+      'EngagementVettingItem',
+      this.getFields(),
+      {
+        filters: {
+          engagementId: `.eq.${engagementId}`,
+        },
+        pageSize: 200,
+      },
+    );
+
+    const items = result.items
+      .filter(gql => !(gql as unknown as Record<string, unknown>)['dateDeleted'])
+      .map(gql => this.fromGql(gql));
+
+    // Sort: always → conditional → nice_to_have, then alphabetical
+    const categoryOrder: Record<string, number> = { always: 0, conditional: 1, nice_to_have: 2 };
+    items.sort((a, b) => {
+      const catDiff = (categoryOrder[a.category] ?? 9) - (categoryOrder[b.category] ?? 9);
+      return catDiff !== 0 ? catDiff : a.name.localeCompare(b.name);
+    });
+
+    return items;
+  }
+
+  /**
+   * Get a single vetting item by ID.
+   */
+  async getVettingItem(id: string): Promise<EngagementVettingItem | null> {
+    // Check cache first
+    const cached = this.pipelineWrite.getCached('EngagementVettingItem', id);
+    if (cached) return this.fromGql(cached as unknown as GqlVettingItemResponse);
+
+    const gql = await this.graphqlRead.getById<GqlVettingItemResponse>(
+      'EngagementVettingItem',
+      id,
+      this.getFields(),
+    );
+    if (!gql) return null;
+
+    this.pipelineWrite.seedCache('EngagementVettingItem', id, gql as unknown as Record<string, unknown>);
+    return this.fromGql(gql);
+  }
+
+  /**
+   * Get summary counts for tab badge display.
+   */
+  async getVettingSummary(engagementId: string): Promise<VettingSummary> {
+    const items = await this.listVettingItems(engagementId);
+
+    const summary: VettingSummary = {
+      total: items.length,
+      verified: 0,
+      waived: 0,
+      pending: 0,
+      rejected: 0,
+      expired: 0,
+      requiredRemaining: 0,
+    };
+
+    for (const item of items) {
+      switch (item.status) {
+        case 'verified':     summary.verified++; break;
+        case 'waived':       summary.waived++; break;
+        case 'rejected':     summary.rejected++; break;
+        case 'expired':      summary.expired++; break;
+        default:             summary.pending++; break;
+      }
+
+      // Count required items not yet resolved
+      if (item.category === 'always' && item.status !== 'verified' && item.status !== 'waived') {
+        summary.requiredRemaining++;
+      }
+    }
+
+    return summary;
+  }
+
+  // ── Initialization ──
+
+  /**
+   * Seed default vetting items for an engagement if none exist.
+   * Called lazily on first visit to the vetting tab.
+   * Returns the full list (seeded or existing).
+   */
+  async initializeVetting(engagementId: string): Promise<EngagementVettingItem[]> {
+    const existing = await this.listVettingItems(engagementId);
+    if (existing.length > 0) return existing;
+
+    // Seed from default templates
+    const now = new Date().toISOString();
+    const items: EngagementVettingItem[] = DEFAULT_VETTING_TEMPLATES.map(template => ({
+      id: crypto.randomUUID(),
+      engagement_id: engagementId,
+      name: template.name,
+      description: template.description,
+      category: template.category,
+      vetting_type: template.vetting_type,
+      evidence_type: template.evidence_type,
+      status: 'not_started' as VettingStatus,
+      direction: template.direction,
+      condition_trigger: null,
+      document_ids: [],
+      submitted_at: null,
+      verified_at: null,
+      verified_by: null,
+      expires_at: null,
+      rejection_reason: null,
+      waived_reason: null,
+      notes: null,
+      created_at: now,
+      updated_at: now,
+    }));
+
+    // Push all items to pipeline in one batch
+    const gqlItems = items.map(item => this.toGql(item));
+    this.pipelineWrite.pushEntities('EngagementVettingItem', gqlItems).catch(err => {
+      console.error('[VettingService] Failed to seed default vetting items:', err);
+    });
+
+    return items;
+  }
+
+  // ── Create ──
+
+  /**
+   * Add a custom vetting item to an engagement.
+   */
+  async addVettingItem(
+    engagementId: string,
+    data: CreateVettingItemRequest,
+  ): Promise<EngagementVettingItem> {
+    const now = new Date().toISOString();
+
+    const item: EngagementVettingItem = {
+      id: crypto.randomUUID(),
+      engagement_id: engagementId,
+      name: data.name,
+      description: data.description ?? null,
+      category: data.category,
+      vetting_type: data.vetting_type,
+      evidence_type: data.evidence_type,
+      status: 'not_started',
+      direction: data.direction,
+      condition_trigger: data.condition_trigger ?? null,
+      document_ids: [],
+      submitted_at: null,
+      verified_at: null,
+      verified_by: null,
+      expires_at: null,
+      rejection_reason: null,
+      waived_reason: null,
+      notes: null,
+      created_at: now,
+      updated_at: now,
+    };
+
+    const gqlData = this.toGql(item);
+    this.pipelineWrite.pushEntity('EngagementVettingItem', gqlData).catch(err => {
+      console.error('[VettingService] Failed to push vetting item:', err);
+    });
+
+    return item;
+  }
+
+  // ── Update ──
+
+  /**
+   * Update a vetting item. Validates status transitions.
+   */
+  async updateVettingItem(
+    id: string,
+    data: UpdateVettingItemRequest,
+  ): Promise<EngagementVettingItem> {
+    // Fetch current (cache-aware)
+    const cached = this.pipelineWrite.getCached('EngagementVettingItem', id);
+    let current: EngagementVettingItem | null;
+    if (cached) {
+      current = this.fromGql(cached as unknown as GqlVettingItemResponse);
+    } else {
+      const gql = await this.graphqlRead.getById<GqlVettingItemResponse>(
+        'EngagementVettingItem',
+        id,
+        this.getFields(),
+      );
+      if (!gql) throw new Error(`Vetting item ${id} not found`);
+      current = this.fromGql(gql);
+    }
+    if (!current) throw new Error(`Vetting item ${id} not found`);
+
+    // Validate status transition if status is changing
+    if (data.status && data.status !== current.status) {
+      const allowed = VETTING_STATUS_TRANSITIONS[current.status];
+      if (!allowed.includes(data.status)) {
+        throw new Error(`Invalid status transition: ${current.status} → ${data.status}`);
+      }
+    }
+
+    const now = new Date().toISOString();
+    const updated: EngagementVettingItem = {
+      ...current,
+      ...this.applyUpdates(data),
+      updated_at: now,
+    };
+
+    // Auto-set timestamps on status changes
+    if (data.status === 'submitted' && !updated.submitted_at) {
+      updated.submitted_at = now;
+    }
+    if (data.status === 'verified') {
+      updated.verified_at = now;
+      updated.verified_by = data.verified_by ?? this.impersonation.effectiveUserId();
+    }
+
+    const gqlData = this.toGql(updated);
+    this.pipelineWrite.pushEntity('EngagementVettingItem', gqlData).catch(err => {
+      console.error('[VettingService] Failed to update vetting item:', err);
+    });
+
+    return updated;
+  }
+
+  // ── Delete ──
+
+  /**
+   * Soft-delete a vetting item.
+   */
+  async deleteVettingItem(id: string): Promise<void> {
+    const cached = this.pipelineWrite.getCached('EngagementVettingItem', id);
+    const current = cached ?? await this.graphqlRead.getById<GqlVettingItemResponse>(
+      'EngagementVettingItem',
+      id,
+      this.getFields(),
+    );
+
+    const today = new Date().toISOString().split('T')[0];
+    const gqlData: Record<string, unknown> = {
+      ...(current ?? { id }),
+      dateDeleted: today,
+    };
+
+    this.pipelineWrite.pushEntity('EngagementVettingItem', gqlData).catch(err => {
+      console.error('[VettingService] Failed to delete vetting item:', err);
+    });
+  }
+
+  // ── Private helpers ──
+
+  /**
+   * Convert UpdateVettingItemRequest to partial EngagementVettingItem.
+   * Maps snake_case request keys to snake_case model keys.
+   */
+  private applyUpdates(data: UpdateVettingItemRequest): Partial<EngagementVettingItem> {
+    const partial: Partial<EngagementVettingItem> = {};
+    if (data.name !== undefined) partial.name = data.name;
+    if (data.description !== undefined) partial.description = data.description;
+    if (data.status !== undefined) partial.status = data.status;
+    if (data.document_ids !== undefined) partial.document_ids = data.document_ids;
+    if (data.notes !== undefined) partial.notes = data.notes;
+    if (data.verified_by !== undefined) partial.verified_by = data.verified_by;
+    if (data.expires_at !== undefined) partial.expires_at = data.expires_at;
+    if (data.rejection_reason !== undefined) partial.rejection_reason = data.rejection_reason;
+    if (data.waived_reason !== undefined) partial.waived_reason = data.waived_reason;
+    return partial;
+  }
+
+  /**
+   * Transform GQL response → Neon model.
+   * Special handling: documentIds is a JSON string in GQL, parsed to string[] in model.
+   */
+  private fromGql(gql: GqlVettingItemResponse): EngagementVettingItem {
+    const mapped = mapGqlToNeon<EngagementVettingItem>(gql, VETTING_ITEM_FIELD_MAPPING.gqlToNeon);
+
+    // Parse documentIds from JSON string → string[]
+    const rawDocIds = (gql as unknown as Record<string, unknown>)['documentIds'];
+    if (typeof rawDocIds === 'string' && rawDocIds) {
+      try { mapped.document_ids = JSON.parse(rawDocIds); } catch { mapped.document_ids = []; }
+    } else {
+      mapped.document_ids = Array.isArray(mapped.document_ids) ? mapped.document_ids : [];
+    }
+
+    return mapped;
+  }
+
+  /**
+   * Transform Neon model → GQL data for pipeline push.
+   * Special handling: document_ids array → JSON string for GQL.
+   */
+  private toGql(item: EngagementVettingItem): Record<string, unknown> {
+    const gql = mapNeonToGql<GqlVettingItemResponse>(
+      item,
+      VETTING_ITEM_FIELD_MAPPING.neonToGql,
+    ) as unknown as Record<string, unknown>;
+
+    // Serialize document_ids array → JSON string for GQL
+    gql['documentIds'] = JSON.stringify(item.document_ids ?? []);
+
+    return gql;
+  }
+
+  private getFields(): string[] {
+    return [
+      'id',
+      'name',
+      'description',
+      'engagementId',
+      'category',
+      'vettingType',
+      'evidenceType',
+      'status',
+      'direction',
+      'conditionTrigger',
+      'documentIds',
+      'submittedAt',
+      'verifiedAt',
+      'verifiedBy',
+      'expiresAt',
+      'rejectionReason',
+      'waivedReason',
+      'notes',
+      'dateCreated',
+      'dateLastModified',
+      'dateDeleted',
+    ];
+  }
+}

@@ -25,6 +25,7 @@ const TABS: readonly TabDef[] = [
   { path: 'documents', label: 'Documents' },
   { path: 'details', label: 'Details' },
   { path: 'tasks', label: 'Tasks' },
+  { path: 'vetting', label: 'Vetting' },
   { path: 'timeline', label: 'Timeline' },
   { path: 'notes', label: 'Notes' },
 ] as const;

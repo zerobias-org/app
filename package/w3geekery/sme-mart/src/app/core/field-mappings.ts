@@ -805,6 +805,57 @@ export const PLAN_MILESTONE_FIELD_MAPPING = {
   lastVerified: '2026-03-19',
 } as const;
 
+// ── EngagementVettingItem (Plan 063) ──
+
+export const VETTING_ITEM_FIELD_MAPPING = {
+  neonToGql: {
+    id: 'id',
+    name: 'name',
+    description: 'description',
+    engagement_id: 'engagementId',
+    category: 'category',
+    vetting_type: 'vettingType',
+    evidence_type: 'evidenceType',
+    status: 'status',
+    direction: 'direction',
+    condition_trigger: 'conditionTrigger',
+    document_ids: 'documentIds',
+    submitted_at: 'submittedAt',
+    verified_at: 'verifiedAt',
+    verified_by: 'verifiedBy',
+    expires_at: 'expiresAt',
+    rejection_reason: 'rejectionReason',
+    waived_reason: 'waivedReason',
+    notes: 'notes',
+    created_at: 'createdAt',
+    updated_at: 'updatedAt',
+  },
+  gqlToNeon: {
+    id: 'id',
+    name: 'name',
+    description: 'description',
+    engagementId: 'engagement_id',
+    category: 'category',
+    vettingType: 'vetting_type',
+    evidenceType: 'evidence_type',
+    status: 'status',
+    direction: 'direction',
+    conditionTrigger: 'condition_trigger',
+    documentIds: 'document_ids',
+    submittedAt: 'submitted_at',
+    verifiedAt: 'verified_at',
+    verifiedBy: 'verified_by',
+    expiresAt: 'expires_at',
+    rejectionReason: 'rejection_reason',
+    waivedReason: 'waived_reason',
+    notes: 'notes',
+    dateCreated: 'created_at',
+    dateLastModified: 'updated_at',
+  },
+  sourceSchema: 'zerobias-org/schema (Plan 063 — Corporate Vetting)',
+  lastVerified: '2026-03-26',
+} as const;
+
 /**
  * All field mapping constants exported as a single object for easier iteration.
  */
@@ -826,4 +877,5 @@ export const ALL_FIELD_MAPPINGS = {
   PrdSection: PRD_SECTION_FIELD_MAPPING,
   ProjectPlan: PROJECT_PLAN_FIELD_MAPPING,
   PlanMilestone: PLAN_MILESTONE_FIELD_MAPPING,
+  EngagementVettingItem: VETTING_ITEM_FIELD_MAPPING,
 } as const;

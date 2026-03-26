@@ -28,6 +28,9 @@ const SME_MART_CLASS_IDS = {
   PrdSection:      'd30445f3-e26d-5153-83be-fe810f63220c',
   ProjectPlan:     'bc6159da-19a3-51d0-89a8-f2147078c760',
   PlanMilestone:   'ac1a1cc8-db44-5c1d-b359-5fb02e3d381d',
+
+  // Plan 063 — Corporate Vetting (update after schema PR merge + dataloader verify)
+  EngagementVettingItem: '66fa174f-86b2-5854-b7c1-7ffe26fcaa46',
 } as const;
 
 export type SmeMartClassName = keyof typeof SME_MART_CLASS_IDS;
