@@ -160,7 +160,11 @@ export class SmeMartProjectService {
     id: string,
     changes: UpdateSmeMartProjectRequest,
   ): Promise<SmeMartProject> {
-    const existing = await this.getProject(id);
+    // Check write-through cache first (avoids GQL round-trip on rapid edits)
+    const cached = this.pipelineWrite.getCached('SmeMartProject', id);
+    const existing = cached
+      ? mapGqlToNeon<SmeMartProject>(cached, SME_MART_PROJECT_FIELD_MAPPING.gqlToNeon)
+      : await this.getProject(id);
     if (!existing) {
       throw new Error(`Project ${id} not found`);
     }

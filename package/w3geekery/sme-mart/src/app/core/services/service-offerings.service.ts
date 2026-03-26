@@ -119,14 +119,16 @@ export class ServiceOfferingsService {
    * Returns optimistic ServiceOffering immediately.
    */
   async updateService(serviceId: string, data: Partial<ServiceOffering>): Promise<ServiceOffering> {
-    // Fetch current offering to merge updates
-    const current = await this.graphqlRead.getById<GqlServiceOfferingResponse>(
-      'ServiceOffering',
-      serviceId,
-      this.getServiceOfferingFields(),
-    );
-
-    if (!current) throw new Error(`ServiceOffering ${serviceId} not found`);
+    // Check write-through cache first, fall back to GQL fetch
+    let current = this.pipelineWrite.getCached('ServiceOffering', serviceId) as GqlServiceOfferingResponse | null;
+    if (!current) {
+      current = await this.graphqlRead.getById<GqlServiceOfferingResponse>(
+        'ServiceOffering',
+        serviceId,
+        this.getServiceOfferingFields(),
+      );
+      if (!current) throw new Error(`ServiceOffering ${serviceId} not found`);
+    }
 
     // Transform current GQL to Neon, merge updates, transform back to GQL
     const neonCurrent = mapGqlToNeon<ServiceOffering>(current, SERVICE_OFFERING_FIELD_MAPPING.gqlToNeon);

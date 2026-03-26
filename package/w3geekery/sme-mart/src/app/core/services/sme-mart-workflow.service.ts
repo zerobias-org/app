@@ -112,7 +112,11 @@ export class SmeMartWorkflowService {
     id: string,
     changes: UpdateSmeMartWorkflowRequest,
   ): Promise<SmeMartWorkflow> {
-    const existing = await this.getWorkflow(id);
+    // Check write-through cache first (avoids GQL round-trip on rapid edits)
+    const cached = this.pipelineWrite.getCached('SmeMartWorkflow', id);
+    const existing = cached
+      ? mapGqlToNeon<SmeMartWorkflow>(cached, SME_MART_WORKFLOW_FIELD_MAPPING.gqlToNeon)
+      : await this.getWorkflow(id);
     if (!existing) {
       throw new Error(`Workflow ${id} not found`);
     }

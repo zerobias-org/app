@@ -180,7 +180,11 @@ export class EngagementsService {
    * Update an engagement and push changes to Pipeline.
    */
   async updateEngagement(id: string, data: Partial<Engagement>): Promise<Engagement> {
-    const current = await this.getEngagementRaw(id);
+    // Check write-through cache first, fall back to GQL fetch
+    const cached = this.pipelineWrite.getCached('Engagement', id);
+    const current = cached
+      ? mapGqlToNeon<Engagement>(cached, ENGAGEMENT_FIELD_MAPPING.gqlToNeon)
+      : await this.getEngagementRaw(id);
     if (!current) throw new Error(`Engagement ${id} not found`);
 
     const updated: Engagement = { ...current, ...data, updated_at: new Date().toISOString() };

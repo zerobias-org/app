@@ -118,6 +118,12 @@ export class BidsService {
    * Fetch a single bid by ID.
    */
   async getBid(id: string): Promise<Bid | null> {
+    // Check write-through cache first (avoids GQL round-trip on rapid edits)
+    const cached = this.pipelineWrite.getCached('Bid', id);
+    if (cached) {
+      return mapGqlToNeon<Bid>(cached, BID_FIELD_MAPPING.gqlToNeon);
+    }
+
     const bid = await this.graphqlRead.getById<GqlBidResponse>(
       'Bid',
       id,
@@ -125,6 +131,7 @@ export class BidsService {
     );
     if (!bid) return null;
 
+    this.pipelineWrite.seedCache('Bid', id, bid as unknown as Record<string, unknown>);
     return mapGqlToNeon<Bid>(bid, BID_FIELD_MAPPING.gqlToNeon);
   }
 

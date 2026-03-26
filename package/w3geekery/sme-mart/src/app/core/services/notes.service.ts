@@ -60,13 +60,17 @@ export class NotesService {
   async updateNote(noteId: string, data: UpdateNoteRequest): Promise<Note> {
     const userId = this.impersonation.effectiveUserId();
 
-    // Fetch current note to merge updates
-    const current = await this.graphqlRead.getById<GqlNoteResponse>(
-      'Note',
-      noteId,
-      this.getNoteFields(),
-    );
-    if (!current) throw new Error(`Note ${noteId} not found`);
+    // Check write-through cache first, fall back to GQL fetch
+    let current = this.pipelineWrite.getCached('Note', noteId) as GqlNoteResponse | null;
+    if (!current) {
+      current = await this.graphqlRead.getById<GqlNoteResponse>(
+        'Note',
+        noteId,
+        this.getNoteFields(),
+      );
+      if (!current) throw new Error(`Note ${noteId} not found`);
+      this.pipelineWrite.seedCache('Note', noteId, current as unknown as Record<string, unknown>);
+    }
 
     // Build updated GQL data
     const gqlData: Record<string, unknown> = {
@@ -91,13 +95,16 @@ export class NotesService {
   }
 
   async deleteNote(noteId: string): Promise<Note> {
-    // Fetch current note to update archived flag
-    const current = await this.graphqlRead.getById<GqlNoteResponse>(
-      'Note',
-      noteId,
-      this.getNoteFields(),
-    );
-    if (!current) throw new Error(`Note ${noteId} not found`);
+    // Check write-through cache first, fall back to GQL fetch
+    let current = this.pipelineWrite.getCached('Note', noteId) as GqlNoteResponse | null;
+    if (!current) {
+      current = await this.graphqlRead.getById<GqlNoteResponse>(
+        'Note',
+        noteId,
+        this.getNoteFields(),
+      );
+      if (!current) throw new Error(`Note ${noteId} not found`);
+    }
 
     // Build updated GQL data with archived: true
     const gqlData: Record<string, unknown> = {
