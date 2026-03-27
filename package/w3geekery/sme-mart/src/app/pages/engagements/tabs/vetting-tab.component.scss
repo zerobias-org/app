@@ -131,6 +131,47 @@
   border-top: 1px solid var(--zb-divider, rgba(0, 0, 0, 0.08));
 }
 
+// ── Gate banner ──
+
+.gate-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+
+  > mat-icon {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+  }
+
+  .gate-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+
+    strong { font-size: 0.95rem; }
+    span { font-size: 0.85rem; opacity: 0.85; }
+  }
+
+  &.gate-verified {
+    background: rgba(76, 175, 80, 0.1);
+    color: var(--zb-color-success, #2e7d32);
+  }
+
+  &.gate-blocked {
+    background: rgba(244, 67, 54, 0.1);
+    color: var(--zb-color-error, #c62828);
+  }
+
+  &.gate-progress {
+    background: rgba(255, 152, 0, 0.1);
+    color: var(--zb-color-warn, #e65100);
+  }
+}
+
 // ── Empty state ──
 
 .empty-state {

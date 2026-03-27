@@ -39,6 +39,20 @@ mat-tab-nav-panel,
 .status-completed { --mdc-chip-label-text-color: var(--zb-color-info); }
 .status-cancelled { --mdc-chip-label-text-color: var(--zb-color-error); }
 
+// Vetting gate chip colors
+.vetting-verified {
+  --mdc-chip-label-text-color: var(--zb-color-success, #2e7d32);
+  --mdc-chip-elevated-container-color: rgba(76, 175, 80, 0.1);
+}
+.vetting-blocked {
+  --mdc-chip-label-text-color: var(--zb-color-error, #c62828);
+  --mdc-chip-elevated-container-color: rgba(244, 67, 54, 0.1);
+}
+.vetting-in_progress {
+  --mdc-chip-label-text-color: var(--zb-color-warn, #e65100);
+  --mdc-chip-elevated-container-color: rgba(255, 152, 0, 0.1);
+}
+
 // Transparency Center View
 .tc-header {
   display: flex;

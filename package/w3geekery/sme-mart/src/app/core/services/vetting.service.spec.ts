@@ -328,4 +328,73 @@ describe('VettingService', () => {
       expect(summary.requiredRemaining).toBe(0);
     });
   });
+
+  // ── Gate status ──
+
+  describe('gateStatus computation', () => {
+    it('should be "verified" when all required items resolved', async () => {
+      graphqlRead.query.mockResolvedValue({
+        items: [
+          { ...VETTING_GQL_FIXTURE, id: '1', status: 'verified', category: 'always' },
+          { ...VETTING_GQL_FIXTURE, id: '2', status: 'waived', category: 'always' },
+          { ...VETTING_GQL_FIXTURE, id: '3', status: 'not_started', category: 'conditional' },
+        ],
+        page: { pageNumber: 1, pageSize: 200, totalCount: 3 },
+      });
+
+      const summary = await service.getVettingSummary('eng-001');
+      expect(summary.gateStatus).toBe('verified');
+    });
+
+    it('should be "blocked" when any item is rejected', async () => {
+      graphqlRead.query.mockResolvedValue({
+        items: [
+          { ...VETTING_GQL_FIXTURE, id: '1', status: 'verified', category: 'always' },
+          { ...VETTING_GQL_FIXTURE, id: '2', status: 'rejected', category: 'always' },
+        ],
+        page: { pageNumber: 1, pageSize: 200, totalCount: 2 },
+      });
+
+      const summary = await service.getVettingSummary('eng-001');
+      expect(summary.gateStatus).toBe('blocked');
+    });
+
+    it('should be "in_progress" when some items resolved, some pending', async () => {
+      graphqlRead.query.mockResolvedValue({
+        items: [
+          { ...VETTING_GQL_FIXTURE, id: '1', status: 'verified', category: 'always' },
+          { ...VETTING_GQL_FIXTURE, id: '2', status: 'not_started', category: 'always' },
+        ],
+        page: { pageNumber: 1, pageSize: 200, totalCount: 2 },
+      });
+
+      const summary = await service.getVettingSummary('eng-001');
+      expect(summary.gateStatus).toBe('in_progress');
+    });
+
+    it('should be "not_started" when all items are not_started', async () => {
+      graphqlRead.query.mockResolvedValue({
+        items: [
+          { ...VETTING_GQL_FIXTURE, id: '1', status: 'not_started', category: 'always' },
+          { ...VETTING_GQL_FIXTURE, id: '2', status: 'not_started', category: 'always' },
+        ],
+        page: { pageNumber: 1, pageSize: 200, totalCount: 2 },
+      });
+
+      const summary = await service.getVettingSummary('eng-001');
+      expect(summary.gateStatus).toBe('not_started');
+    });
+
+    it('should be "verified" when no required items exist', async () => {
+      graphqlRead.query.mockResolvedValue({
+        items: [
+          { ...VETTING_GQL_FIXTURE, id: '1', status: 'not_started', category: 'nice_to_have' },
+        ],
+        page: { pageNumber: 1, pageSize: 200, totalCount: 1 },
+      });
+
+      const summary = await service.getVettingSummary('eng-001');
+      expect(summary.gateStatus).toBe('verified');
+    });
+  });
 });

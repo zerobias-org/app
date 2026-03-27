@@ -93,7 +93,11 @@ export interface VettingSummary {
   rejected: number;
   expired: number;
   requiredRemaining: number; // "always" items not yet verified/waived
+  gateStatus: VettingGateStatus; // overall vetting gate
 }
+
+/** Vetting gate status — drives the engagement header chip and tab banner. */
+export type VettingGateStatus = 'not_started' | 'in_progress' | 'blocked' | 'verified';
 
 // ── Valid status transitions ──
 

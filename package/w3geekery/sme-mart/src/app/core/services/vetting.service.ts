@@ -19,6 +19,7 @@ import type {
   UpdateVettingItemRequest,
   VettingSummary,
   VettingStatus,
+  VettingGateStatus,
 } from '../models';
 import {
   DEFAULT_VETTING_TEMPLATES,
@@ -96,8 +97,10 @@ export class VettingService {
       rejected: 0,
       expired: 0,
       requiredRemaining: 0,
+      gateStatus: 'not_started',
     };
 
+    let requiredTotal = 0;
     for (const item of items) {
       switch (item.status) {
         case 'verified':     summary.verified++; break;
@@ -108,10 +111,16 @@ export class VettingService {
       }
 
       // Count required items not yet resolved
-      if (item.category === 'always' && item.status !== 'verified' && item.status !== 'waived') {
-        summary.requiredRemaining++;
+      if (item.category === 'always') {
+        requiredTotal++;
+        if (item.status !== 'verified' && item.status !== 'waived') {
+          summary.requiredRemaining++;
+        }
       }
     }
+
+    // Compute gate status
+    summary.gateStatus = this.computeGateStatus(summary, requiredTotal);
 
     return summary;
   }
@@ -336,6 +345,21 @@ export class VettingService {
     gql['documentIds'] = JSON.stringify(item.document_ids ?? []);
 
     return gql;
+  }
+
+  /**
+   * Derive overall vetting gate status from summary counts.
+   * - not_started: no items have any activity
+   * - in_progress: some items resolved, some remaining
+   * - blocked: any required item is rejected or expired
+   * - verified: all required (always) items are verified or waived
+   */
+  private computeGateStatus(summary: VettingSummary, requiredTotal: number): VettingGateStatus {
+    if (requiredTotal === 0) return 'verified'; // no required items = pass
+    if (summary.requiredRemaining === 0) return 'verified';
+    if (summary.rejected > 0 || summary.expired > 0) return 'blocked';
+    if (summary.verified > 0 || summary.waived > 0 || summary.pending < summary.total) return 'in_progress';
+    return 'not_started';
   }
 
   private getFields(): string[] {

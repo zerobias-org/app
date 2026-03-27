@@ -17,6 +17,8 @@ import type {
   EngagementVettingItem,
   VettingStatus,
   VettingDirection,
+  VettingSummary,
+  VettingGateStatus,
 } from '../../../core/models';
 import { VETTING_STATUS_TRANSITIONS } from '../../../core/models';
 import { VettingItemDialogComponent } from '../../../shared/components/vetting-item-dialog/vetting-item-dialog.component';
@@ -60,10 +62,17 @@ export class VettingTab implements OnInit {
     this.items().filter(i => i.direction === 'provider_requires'),
   );
 
-  // ── Progress ──
+  // ── Progress & gate ──
 
   readonly buyerProgress = computed(() => this.calcProgress(this.buyerRequires()));
   readonly providerProgress = computed(() => this.calcProgress(this.providerRequires()));
+
+  readonly summary = signal<VettingSummary | null>(null);
+  readonly gateStatus = computed<VettingGateStatus>(() => this.summary()?.gateStatus ?? 'not_started');
+  readonly requiredRemaining = computed(() => this.summary()?.requiredRemaining ?? 0);
+  readonly rejectedOrExpiredCount = computed(() =>
+    (this.summary()?.rejected ?? 0) + (this.summary()?.expired ?? 0),
+  );
 
   async ngOnInit(): Promise<void> {
     if (!this.engagementId) return;
@@ -75,6 +84,8 @@ export class VettingTab implements OnInit {
     try {
       const result = await this.vetting.initializeVetting(this.engagementId);
       this.items.set(result);
+      const summaryResult = await this.vetting.getVettingSummary(this.engagementId);
+      this.summary.set(summaryResult);
     } catch (err) {
       console.error('[VettingTab] Failed to load vetting items:', err);
     } finally {

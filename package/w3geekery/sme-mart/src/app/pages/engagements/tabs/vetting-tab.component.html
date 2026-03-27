@@ -3,6 +3,40 @@
     <p class="loading-message">Loading vetting checklist...</p>
   } @else {
 
+    <!-- Vetting gate banner -->
+    @switch (gateStatus()) {
+      @case ('verified') {
+        <div class="gate-banner gate-verified">
+          <mat-icon>verified</mat-icon>
+          <div class="gate-text">
+            <strong>Vetting Complete</strong>
+            <span>All required items have been verified. Project work can begin.</span>
+          </div>
+        </div>
+      }
+      @case ('blocked') {
+        <div class="gate-banner gate-blocked">
+          <mat-icon>block</mat-icon>
+          <div class="gate-text">
+            <strong>Vetting Blocked</strong>
+            <span>{{ rejectedOrExpiredCount() }} item(s) rejected or expired — resolve before proceeding.</span>
+          </div>
+        </div>
+      }
+      @case ('in_progress') {
+        <div class="gate-banner gate-progress">
+          <mat-icon>hourglass_top</mat-icon>
+          <div class="gate-text">
+            <strong>Vetting In Progress</strong>
+            <span>{{ requiredRemaining() }} required item(s) remaining.</span>
+          </div>
+        </div>
+      }
+      @default {
+        <!-- not_started — no banner needed, the empty checklist speaks for itself -->
+      }
+    }
+
     <!-- Requirements FOR Provider (buyer's requirements) -->
     <section class="vetting-section">
       <div class="section-header">
