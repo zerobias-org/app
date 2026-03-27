@@ -53,6 +53,8 @@ export class NotesNotebooksColumn implements OnInit {
   @Output() folderDroppedOnNotebook = new EventEmitter<{ folderId: string; notebookId: string }>();
   /** Emitted when user clicks "Info" on a notebook. Parent shows overview panel. */
   @Output() notebookInfo = new EventEmitter<string>();
+  /** Emitted after tree loads with the notebook count (0 = no notebooks exist). */
+  @Output() notebookCount = new EventEmitter<number>();
 
   readonly isCollapsed = this._collapsed;
 
@@ -79,6 +81,7 @@ export class NotesNotebooksColumn implements OnInit {
     try {
       const nodes = await this.hierarchy.getFolderTree(engId);
       this.tree.set(nodes);
+      this.notebookCount.emit(nodes.length);
 
       // Auto-select first notebook if none selected
       if (!this._selectedFolderId() && nodes.length > 0) {

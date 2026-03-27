@@ -1,9 +1,6 @@
 <div class="notebook-overview">
   <!-- Header -->
   <div class="overview-header">
-    <button mat-icon-button (click)="close.emit()" class="close-btn" matTooltip="Close overview">
-      <mat-icon>close</mat-icon>
-    </button>
     <div class="header-title-row">
       @if (notebookColor()) {
         <span class="color-dot" [style.background]="notebookColor()"></span>

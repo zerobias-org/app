@@ -48,7 +48,8 @@
         (toggleCollapse)="toggleNotebooks()"
         (noteDroppedOnNotebook)="onNoteDroppedOnNotebook($event)"
         (folderDroppedOnNotebook)="onFolderDroppedOnNotebook($event)"
-        (notebookInfo)="onNotebookInfo($event)">
+        (notebookInfo)="onNotebookInfo($event)"
+        (notebookCount)="onNotebookCountChanged($event)">
       </app-notes-notebooks-column>
 
       <!-- Folder tree (collapsible to icon, scoped to selected notebook) -->
@@ -127,9 +128,18 @@
     </div>
   </mat-sidenav>
 
-  <!-- Main content: notebook overview OR note editor -->
+  <!-- Main content: no-notebooks prompt, notebook overview, or note editor -->
   <mat-sidenav-content>
-    @if (showOverview()) {
+    @if (hasNoNotebooks()) {
+      <div class="empty-state no-notebooks-state">
+        <mat-icon>auto_stories</mat-icon>
+        <h3>No notebooks yet</h3>
+        <p>Create a notebook to start organizing your notes.</p>
+        <button mat-flat-button color="primary" (click)="notebooksCol?.openCreateDialog()">
+          <mat-icon>add</mat-icon> Create a Notebook
+        </button>
+      </div>
+    } @else if (showOverview()) {
       <app-notebook-overview
         [notebookNode]="overviewNotebookNode()!"
         [engagementId]="engId()"

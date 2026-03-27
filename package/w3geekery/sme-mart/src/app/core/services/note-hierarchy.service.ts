@@ -77,20 +77,21 @@ export class NoteHierarchyService {
    * working yet (schema PR pending).
    */
   async ensureDefaultFolder(engagementId: string, notebookId: string): Promise<NoteFolder | null> {
-    const key = this.pendingKey(engagementId, 'General');
+    const key = this.pendingKey(engagementId, notebookId);
 
-    // Guard: another call is already creating this folder (pipeline not yet queryable)
+    // Guard: another call is already creating a folder for this notebook
     if (this.pendingCreations.has(key)) return null;
 
     const tree = await this.getFolderTree(engagementId);
 
-    // Guard: don't create if a "General" folder already exists anywhere in the tree
-    const hasGeneral = this.findNodeByName(tree, 'General');
-    if (hasGeneral) return null;
-
-    // Find the notebook node and check if it has children
+    // Find the notebook node
     const notebook = this.findNodeById(tree, notebookId);
+
+    // Guard: if notebook has ANY children, don't create — use what exists
     if (notebook && notebook.children.length > 0) return null;
+
+    // Guard: notebook not found in tree (might be newly created, not yet in GQL)
+    if (!notebook) return null;
 
     // Mark as pending before creating (cleared on next successful tree load)
     this.pendingCreations.add(key);

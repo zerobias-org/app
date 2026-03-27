@@ -83,6 +83,9 @@ export class NotesPanel implements OnInit {
   readonly overviewNotebookNode = signal<FolderTreeNode | null>(null);
   readonly showOverview = computed(() => this.overviewNotebookNode() !== null);
 
+  /** True when no notebooks exist yet — shows "Create a Notebook" prompt. */
+  readonly hasNoNotebooks = signal(false);
+
   readonly noteCount = computed(() => this.notes().length);
   readonly engId = this._engagementId;
   readonly folderColors = this.prefs.folderColors;
@@ -166,6 +169,11 @@ export class NotesPanel implements OnInit {
         this.folderTree?.loadTree();
         this.notebooksCol?.loadTree();
       }
+
+      // Show notebook overview when selecting a notebook (Plan 062)
+      await this.onNotebookInfo(notebookId);
+    } else {
+      this.overviewNotebookNode.set(null);
     }
   }
 
@@ -175,6 +183,10 @@ export class NotesPanel implements OnInit {
     this.overviewNotebookNode.set(null); // close overview when folder is selected
     this.searchQuery.set('');
     this.loadNotes();
+  }
+
+  onNotebookCountChanged(count: number): void {
+    this.hasNoNotebooks.set(count === 0);
   }
 
   /** Show notebook overview panel (Plan 062). */
@@ -243,18 +255,56 @@ export class NotesPanel implements OnInit {
 
   async createNewNote(): Promise<void> {
     const engId = this._engagementId();
-    const folderId = this.selectedFolderId();
     if (!engId) return;
+
+    let targetFolderId = this.selectedFolderId();
+
+    // If no folder selected, auto-resolve or ask user to pick one
+    if (!targetFolderId) {
+      const tree = await this.hierarchy.getFolderTree(engId);
+      const notebookId = this.selectedNotebookId();
+      const notebook = tree.find(n => n.folder.id === notebookId);
+      const folders = notebook?.children ?? [];
+
+      if (folders.length === 0) {
+        this.snackBar.open('Create a folder first — notes must live in a folder', 'OK', { duration: 4000 });
+        return;
+      }
+
+      if (folders.length === 1) {
+        // Auto-select the only folder
+        targetFolderId = folders[0].folder.id;
+        this.selectedFolderId.set(targetFolderId);
+        this.loadNotes();
+      } else {
+        // Multiple folders — open picker dialog (reuse MoveItemDialog as folder picker)
+        const dialogRef = this.dialog.open(MoveItemDialog, {
+          data: {
+            engagementId: engId,
+            itemType: 'note',
+            currentFolderId: null,
+            currentNotebookId: notebookId,
+            itemName: 'New Note',
+          } as MoveItemDialogData,
+          width: '440px',
+        });
+
+        const result: MoveItemDialogResult | undefined = await dialogRef.afterClosed().toPromise();
+        if (!result?.targetFolderId) return; // cancelled
+        targetFolderId = result.targetFolderId;
+        this.selectedFolderId.set(targetFolderId);
+        this.loadNotes();
+      }
+    }
 
     try {
       const created = await this.notesService.createNote(engId, {
         title: 'Untitled',
         body: '',
-        folder_id: folderId,
+        folder_id: targetFolderId,
         access_level: 'boundary',
       });
 
-      // Build a NoteWithTags from the raw Note so the editor panel can use it
       const newNote: NoteWithTags = {
         ...created,
         tags: null,
@@ -265,6 +315,7 @@ export class NotesPanel implements OnInit {
 
       this.notes.update(list => [newNote, ...list]);
       this.selectedNoteId.set(newNote.id);
+      this.overviewNotebookNode.set(null); // switch to editor
       this.folderTree?.loadTree();
     } catch (err: any) {
       this.snackBar.open(`Failed to create note: ${err.message}`, 'Dismiss', { duration: 5000 });
