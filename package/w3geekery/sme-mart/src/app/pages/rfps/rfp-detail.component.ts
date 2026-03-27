@@ -99,9 +99,9 @@ export class RfpDetail implements OnInit {
         return;
       }
 
-      // If this project is active (has engagement link), redirect to engagement route
-      if (project.status === 'active' || project.engagementId) {
-        this.router.navigate(['/engagements', project.engagementId || id, 'overview'], { replaceUrl: true });
+      // If this project has an engagement link, redirect to engagement route
+      if (project.engagementId) {
+        this.router.navigate(['/engagements', project.engagementId, 'overview'], { replaceUrl: true });
         return;
       }
 
@@ -148,8 +148,8 @@ export class RfpDetail implements OnInit {
     try {
       const result = await this.lifecycle.acceptBid(bidId, eng.id);
       this.snackBar.open('Bid accepted — engagement created', 'OK', { duration: 4000 });
-      // Navigate to the new engagement's overview
-      this.router.navigate(['/engagements', eng.id, 'overview']);
+      // Navigate to the new engagement's overview (use engagement ID, not project ID)
+      this.router.navigate(['/engagements', result.workRequest.id, 'overview']);
     } catch (err: any) {
       this.snackBar.open(`Failed: ${err.message}`, 'Dismiss', { duration: 5000 });
     }

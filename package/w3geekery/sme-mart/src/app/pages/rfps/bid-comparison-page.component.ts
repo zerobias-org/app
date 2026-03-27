@@ -225,7 +225,7 @@ export class BidComparisonPage implements OnInit {
       // Accept the selected bid → creates engagement
       const acceptResult = await this.lifecycle.acceptBid(bidId, this.rfpId);
       this.snackBar.open('Bid accepted — engagement created', 'OK', { duration: 4000 });
-      this.router.navigate(['/engagements', this.rfpId, 'overview']);
+      this.router.navigate(['/engagements', acceptResult.workRequest.id, 'overview']);
     } catch (err: any) {
       this.snackBar.open(`Failed: ${err.message}`, 'Dismiss', { duration: 5000 });
     }

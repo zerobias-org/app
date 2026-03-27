@@ -94,7 +94,7 @@ describe('RfpDetail (Plan 075)', () => {
       expect(mockRouter.navigate).toHaveBeenCalledWith(['/rfps']);
     });
 
-    it('should redirect to engagement route if project is active with engagement', async () => {
+    it('should redirect to engagement route if project has engagementId', async () => {
       mockProjects.getProject.mockResolvedValue(
         makeSmeMartProject({ status: 'active', engagementId: 'eng-001' }),
       );
@@ -103,6 +103,18 @@ describe('RfpDetail (Plan 075)', () => {
         ['/engagements', 'eng-001', 'overview'],
         { replaceUrl: true },
       );
+    });
+
+    it('should NOT redirect active project without engagementId', async () => {
+      mockProjects.getProject.mockResolvedValue(
+        makeSmeMartProject({ status: 'active', engagementId: undefined }),
+      );
+      await component.ngOnInit();
+      expect(mockRouter.navigate).not.toHaveBeenCalledWith(
+        expect.arrayContaining(['/engagements']),
+        expect.anything(),
+      );
+      expect(component.rfp()).not.toBeNull();
     });
 
     it('should set currentUserId from impersonation', async () => {
