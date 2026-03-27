@@ -47,7 +47,8 @@
         (treeChanged)="onFolderTreeChanged()"
         (toggleCollapse)="toggleNotebooks()"
         (noteDroppedOnNotebook)="onNoteDroppedOnNotebook($event)"
-        (folderDroppedOnNotebook)="onFolderDroppedOnNotebook($event)">
+        (folderDroppedOnNotebook)="onFolderDroppedOnNotebook($event)"
+        (notebookInfo)="onNotebookInfo($event)">
       </app-notes-notebooks-column>
 
       <!-- Folder tree (collapsible to icon, scoped to selected notebook) -->
@@ -126,15 +127,24 @@
     </div>
   </mat-sidenav>
 
-  <!-- Main content: inline note editor -->
+  <!-- Main content: notebook overview OR note editor -->
   <mat-sidenav-content>
-    <app-note-editor-panel
-      [noteData]="selectedNote()"
-      [engagementId]="engId()"
-      (noteSaved)="onNoteSaved($event)"
-      (noteDeleted)="onNoteDeleted($event)"
-      (titleChanged)="onNoteTitleChanged($event)"
-      (docLinkClick)="onDocLinkClick($event)">
-    </app-note-editor-panel>
+    @if (showOverview()) {
+      <app-notebook-overview
+        [notebookNode]="overviewNotebookNode()!"
+        [engagementId]="engId()"
+        (close)="closeOverview()"
+        (navigateToNote)="onOverviewNavigateToNote($event)">
+      </app-notebook-overview>
+    } @else {
+      <app-note-editor-panel
+        [noteData]="selectedNote()"
+        [engagementId]="engId()"
+        (noteSaved)="onNoteSaved($event)"
+        (noteDeleted)="onNoteDeleted($event)"
+        (titleChanged)="onNoteTitleChanged($event)"
+        (docLinkClick)="onDocLinkClick($event)">
+      </app-note-editor-panel>
+    }
   </mat-sidenav-content>
 </mat-sidenav-container>

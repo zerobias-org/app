@@ -51,6 +51,8 @@ export class NotesNotebooksColumn implements OnInit {
   @Output() noteDroppedOnNotebook = new EventEmitter<{ noteId: string; notebookId: string }>();
   /** Emitted when a folder is dropped onto a notebook. Parent handles the dialog. */
   @Output() folderDroppedOnNotebook = new EventEmitter<{ folderId: string; notebookId: string }>();
+  /** Emitted when user clicks "Info" on a notebook. Parent shows overview panel. */
+  @Output() notebookInfo = new EventEmitter<string>();
 
   readonly isCollapsed = this._collapsed;
 

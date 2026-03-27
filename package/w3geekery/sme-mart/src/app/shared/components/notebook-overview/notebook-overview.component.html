@@ -1,0 +1,95 @@
+<div class="notebook-overview">
+  <!-- Header -->
+  <div class="overview-header">
+    <button mat-icon-button (click)="close.emit()" class="close-btn" matTooltip="Close overview">
+      <mat-icon>close</mat-icon>
+    </button>
+    <div class="header-title-row">
+      @if (notebookColor()) {
+        <span class="color-dot" [style.background]="notebookColor()"></span>
+      }
+      <mat-icon class="header-icon">auto_stories</mat-icon>
+      <h2>{{ notebookName() }}</h2>
+    </div>
+    @if (notebookDescription()) {
+      <p class="description">{{ notebookDescription() }}</p>
+    }
+    <mat-chip-set class="access-chip-set">
+      <mat-chip>
+        <mat-icon matChipAvatar>{{ accessIcon() }}</mat-icon>
+        {{ accessLabel() }}
+      </mat-chip>
+    </mat-chip-set>
+  </div>
+
+  <mat-divider />
+
+  @if (loading()) {
+    <div class="loading-state">
+      <mat-spinner diameter="32" />
+      <span>Loading notebook info...</span>
+    </div>
+  } @else if (stats()) {
+    <!-- Stats grid -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <mat-icon>description</mat-icon>
+        <span class="stat-value">{{ stats()!.totalNotes }}</span>
+        <span class="stat-label">Notes</span>
+      </div>
+      <div class="stat-card">
+        <mat-icon>folder</mat-icon>
+        <span class="stat-value">{{ stats()!.totalFolders }}</span>
+        <span class="stat-label">Folders</span>
+      </div>
+      @if (stats()!.meetingMinutesCount > 0) {
+        <div class="stat-card">
+          <mat-icon>groups</mat-icon>
+          <span class="stat-value">{{ stats()!.meetingMinutesCount }}</span>
+          <span class="stat-label">Meeting Notes</span>
+        </div>
+      }
+    </div>
+
+    <mat-divider />
+
+    <!-- Metadata -->
+    <div class="metadata-section">
+      <h3>Details</h3>
+      <div class="metadata-grid">
+        <div class="meta-item">
+          <span class="meta-label">Created</span>
+          <span class="meta-value">{{ createdAt() | date:'mediumDate' }}</span>
+        </div>
+        @if (stats()!.lastActivityAt) {
+          <div class="meta-item">
+            <span class="meta-label">Last activity</span>
+            <span class="meta-value">{{ stats()!.lastActivityAt | date:'medium' }}</span>
+          </div>
+        }
+        <div class="meta-item">
+          <span class="meta-label">Access</span>
+          <span class="meta-value">{{ accessTooltip() }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent notes -->
+    @if (stats()!.recentNotes.length > 0) {
+      <mat-divider />
+
+      <div class="recent-section">
+        <h3>Recent Notes</h3>
+        <div class="recent-list">
+          @for (note of stats()!.recentNotes; track note.id) {
+            <div class="recent-item" (click)="onNoteClick(note.id)">
+              <mat-icon class="recent-icon">description</mat-icon>
+              <span class="recent-title">{{ note.title }}</span>
+              <span class="recent-date">{{ note.updatedAt | date:'MMM d' }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  }
+</div>
