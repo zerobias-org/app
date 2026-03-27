@@ -23,7 +23,8 @@
     "build:uat": "ng build --configuration uat",
     "build:vercel": "ng build --configuration vercel",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "test:report": "node scripts/test-report.js"
   },
   "prettier": {
     "printWidth": 100,

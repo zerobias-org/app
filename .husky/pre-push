@@ -1,0 +1,20 @@
+#!/bin/sh
+
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+# Skip tests on main/master (merge targets, not feature branches)
+if [ "$BRANCH" = "main" ] || [ "$BRANCH" = "master" ]; then
+  exit 0
+fi
+
+echo "Running tests before push..."
+cd package/w3geekery/sme-mart && npm test 2>/dev/null
+EXIT_CODE=$?
+
+if [ $EXIT_CODE -ne 0 ]; then
+  echo ""
+  echo "Tests failed — push blocked. Fix tests or skip with: git push --no-verify"
+  exit 1
+fi
+
+echo "Tests passed"
