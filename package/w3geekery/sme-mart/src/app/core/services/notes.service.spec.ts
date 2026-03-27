@@ -22,8 +22,8 @@ describe('NotesService', () => {
     // Default GQL fixtures
     const noteFixture: GqlNoteResponse = {
       id: 'note-001',
-      title: 'Test Note',
-      body: 'Test Content',
+      name: 'Test Note',
+      content: 'Test Content',
       engagementId: 'wr-001',
       folderId: null,
       authorZerobiasUserId: 'u-100',
@@ -99,7 +99,7 @@ describe('NotesService', () => {
       await service.updateNote('note-001', { title: 'Revised' });
       expect(mockPipeline.pushEntity).toHaveBeenCalledWith('Note', expect.objectContaining({
         id: 'note-001',
-        title: 'Revised',
+        name: 'Revised', // neonToGql maps title → name (GQL Object base class)
       }));
     });
 

@@ -33,6 +33,8 @@ export const ENGAGEMENT_FIELD_MAPPING = {
     zerobias_tag_id: 'zerobiasTagId',
     zerobias_boundary_id: 'zerobiasBoundaryId',
     zerobias_task_id: 'zerobiasTaskId',
+    facilitator_user_id: 'facilitatorUserId', // Plan 056
+    communication_mode: 'communicationMode', // Plan 056
     created_at: 'createdAt',
     updated_at: 'updatedAt',
   },
@@ -52,14 +54,16 @@ export const ENGAGEMENT_FIELD_MAPPING = {
     zerobiasTagId: 'zerobias_tag_id',
     zerobiasBoundaryId: 'zerobias_boundary_id',
     zerobiasTaskId: 'zerobias_task_id',
+    facilitatorUserId: 'facilitator_user_id', // Plan 056
+    communicationMode: 'communication_mode', // Plan 056
     createdAt: 'created_at',
     updatedAt: 'updated_at',
     // Object base class date fields (GQL uses these names)
     dateCreated: 'created_at',
     dateLastModified: 'updated_at',
   },
-  sourceSchema: 'zerobias-org/schema PR #7',
-  lastVerified: '2026-03-20',
+  sourceSchema: 'zerobias-org/schema PR #28 (v1.0.9)',
+  lastVerified: '2026-03-27',
 } as const;
 
 /**
@@ -88,6 +92,8 @@ export const BID_FIELD_MAPPING = {
     ai_assisted: 'aiAssisted',
     ai_model: 'aiModel',
     ai_generated_at: 'aiGeneratedAt',
+    pricing_model: 'pricingModel', // Plan 055
+    bid_valid_until: 'bidValidUntil', // Plan 055
     created_at: 'createdAt',
     updated_at: 'updatedAt',
   },
@@ -109,6 +115,8 @@ export const BID_FIELD_MAPPING = {
     aiAssisted: 'ai_assisted',
     aiModel: 'ai_model',
     aiGeneratedAt: 'ai_generated_at',
+    pricingModel: 'pricing_model', // Plan 055
+    bidValidUntil: 'bid_valid_until', // Plan 055
     createdAt: 'created_at',
     updatedAt: 'updated_at',
     // Object base class date fields (GQL uses these names)
@@ -118,8 +126,8 @@ export const BID_FIELD_MAPPING = {
     price: 'proposed_price',
     timeline: 'proposed_timeline',
   },
-  sourceSchema: 'zerobias-org/schema PR #7',
-  lastVerified: '2026-03-19',
+  sourceSchema: 'zerobias-org/schema PR #28 (v1.0.9)',
+  lastVerified: '2026-03-27',
 } as const;
 
 /**
@@ -175,8 +183,8 @@ export const NOTE_FIELD_MAPPING = {
     id: 'id',
     engagement_id: 'engagementId',
     folder_id: 'folderId',
-    title: 'title', // Neon title → GQL title (direct field name)
-    body: 'body', // Neon body → GQL body (direct field name)
+    title: 'name',    // Neon title → GQL name (Object base class)
+    body: 'content',  // Neon body → GQL content (custom property)
     author_zerobias_user_id: 'authorZerobiasUserId',
     created_at: 'createdAt',
     updated_at: 'updatedAt',
@@ -197,8 +205,8 @@ export const NOTE_FIELD_MAPPING = {
     id: 'id',
     engagementId: 'engagement_id',
     folderId: 'folder_id',
-    title: 'title',
-    body: 'body',
+    name: 'title',     // GQL Object base class `name` → Neon `title`
+    content: 'body',   // GQL custom property `content` → Neon `body`
     authorZerobiasUserId: 'author_zerobias_user_id',
     createdAt: 'created_at',
     updatedAt: 'updated_at',
@@ -486,7 +494,8 @@ export const SME_MART_PROJECT_FIELD_MAPPING = {
     name: 'name',
     description: 'description',
     status: 'status',
-    engagementId: 'engagement',
+    engagementId: 'engagementId', // scalar field (schema v1.0.9) — also push as link
+    projectType: 'projectType', // 'rfp' | 'pilot' | 'project' (Plan 077)
     startDate: 'startDate',
     targetEndDate: 'targetEndDate',
     category: 'category',
@@ -507,7 +516,9 @@ export const SME_MART_PROJECT_FIELD_MAPPING = {
     name: 'name',
     description: 'description',
     status: 'status',
-    engagement: 'engagementId',
+    engagementId: 'engagementId', // scalar field (schema v1.0.9)
+    engagement: 'engagementId', // link field — also maps to model engagementId
+    projectType: 'projectType', // 'rfp' | 'pilot' | 'project' (Plan 077)
     startDate: 'startDate',
     targetEndDate: 'targetEndDate',
     category: 'category',
@@ -523,8 +534,8 @@ export const SME_MART_PROJECT_FIELD_MAPPING = {
     dateCreated: 'createdAt',
     dateLastModified: 'updatedAt',
   },
-  sourceSchema: 'zerobias-org/schema PR #20 (Plan 075)',
-  lastVerified: '2026-03-25',
+  sourceSchema: 'zerobias-org/schema PR #28 (v1.0.9)',
+  lastVerified: '2026-03-27',
 } as const;
 
 /**
@@ -648,6 +659,7 @@ export const SME_MART_TASK_FIELD_MAPPING = {
     dueDate: 'dueDate',
     activityId: 'activityId',
     customFields: 'customFields',
+    transparencyConfig: 'transparencyConfig', // Plan 078
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
   },
@@ -664,11 +676,12 @@ export const SME_MART_TASK_FIELD_MAPPING = {
     dueDate: 'dueDate',
     activityId: 'activityId',
     customFields: 'customFields',
+    transparencyConfig: 'transparencyConfig', // Plan 078
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
   },
-  sourceSchema: 'zerobias-org/schema PR #8 (Bloom)',
-  lastVerified: '2026-03-19',
+  sourceSchema: 'zerobias-org/schema PR #28 (v1.0.9)',
+  lastVerified: '2026-03-27',
 } as const;
 
 /**

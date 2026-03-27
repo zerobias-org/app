@@ -37,6 +37,7 @@ export class NotesService {
     const userId = this.impersonation.effectiveUserId();
 
     // Build GQL data with camelCase field names
+    // GQL uses `name` (Object base) and `content` (custom property)
     const gqlData: Record<string, unknown> = {
       id: crypto.randomUUID(),
       name: data.title || 'Untitled Note',

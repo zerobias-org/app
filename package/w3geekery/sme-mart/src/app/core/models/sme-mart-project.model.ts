@@ -13,6 +13,7 @@ export interface SmeMartProject {
   description?: string | null;
   status: string; // 'draft', 'published', 'active', 'completed', 'archived'
   engagementId?: string | null; // parent engagement (corp-to-corp agreement)
+  projectType?: string | null; // 'rfp' | 'pilot' | 'project' (Plan 077)
   startDate: string; // YYYY-MM-DD
   targetEndDate?: string | null; // YYYY-MM-DD
   createdAt: string; // ISO 8601

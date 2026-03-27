@@ -55,6 +55,8 @@ export interface GqlEngagementResponse extends GqlBaseEntity {
   zerobiasTagId?: string | null;
   zerobiasBoundaryId?: string | null;
   zerobiasTaskId?: string | null;
+  facilitatorUserId?: string | null; // third-party consultant (Plan 056)
+  communicationMode?: string | null; // 'direct' | 'mediated' (Plan 056)
   notes?: GqlNoteResponse[] | null;
 }
 
@@ -102,6 +104,8 @@ export interface GqlBidResponse extends GqlBaseEntity {
   aiAssisted?: boolean | null;
   aiModel?: string | null;
   aiGeneratedAt?: string | null;
+  pricingModel?: string | null; // 'fixed' | 'hourly' | 'milestone' | 'nrc_arc' (Plan 055)
+  bidValidUntil?: string | null; // ISO date — bid expiration (Plan 055)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -144,8 +148,8 @@ export interface GqlNoteFolderResponse extends GqlBaseEntity {
 export interface GqlNoteResponse extends GqlBaseEntity {
   engagementId?: string | null;
   folderId?: string | null;
-  title: string;
-  body?: string | null;
+  name: string;          // Object base class — used as note title
+  content?: string | null; // Custom property — rich-text note body
   authorZerobiasUserId: string;
   updatedByZerobiasUserId?: string | null;
   archived: boolean;
@@ -253,6 +257,8 @@ export interface GqlSmeMartProjectResponse extends GqlBaseEntity {
   boundaryId?: string | null;
   partition?: SmeMartPartition | null;
   status?: string | null;
+  engagementId?: string | null; // scalar mirror of engagement link (schema v1.0.9)
+  projectType?: string | null; // 'rfp' | 'pilot' | 'project' (Plan 077)
   startDate?: string | null;
   endDate?: string | null;
   targetEndDate?: string | null;
@@ -308,6 +314,7 @@ export interface GqlSmeMartTaskResponse extends GqlBaseEntity {
   estimatedHours?: number | null;
   dueDate?: string | null;
   customFields?: GqlCustomField[] | null;
+  transparencyConfig?: string | null; // JSON publish/private controls (Plan 078)
 }
 
 export interface GqlProjectPrdResponse extends GqlBaseEntity {

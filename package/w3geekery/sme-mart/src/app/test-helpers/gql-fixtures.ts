@@ -154,8 +154,8 @@ export const NOTE_FOLDER_GQL_FIXTURE: GqlNoteFolderResponse = {
 
 export const NOTE_GQL_FIXTURE: GqlNoteResponse = {
   id: 'note-001-uuid-kickoff-call',
-  title: 'Kickoff Call Notes',
-  body: '**Attendees:** Buyer team, Provider team lead\n\n**Key Findings:**\n- Organization has 250+ employees\n- Current systems: Epic EHR, MEDIDATA clinical trial management\n- Previous audits: SOC2 Type 2 in 2024\n\n**Next Steps:**\n1. Schedule technical deep-dives with IT team\n2. Collect documentation on data handling procedures\n3. Review current security policies',
+  name: 'Kickoff Call Notes',
+  content: '**Attendees:** Buyer team, Provider team lead\n\n**Key Findings:**\n- Organization has 250+ employees\n- Current systems: Epic EHR, MEDIDATA clinical trial management\n- Previous audits: SOC2 Type 2 in 2024\n\n**Next Steps:**\n1. Schedule technical deep-dives with IT team\n2. Collect documentation on data handling procedures\n3. Review current security policies',
   engagementId: 'eng-001-uuid-hipaa-assessment',
   folderId: 'folder-001-uuid-assessment-phase',
   authorZerobiasUserId: 'user-buyer-001-uuid',
@@ -177,8 +177,8 @@ export const NOTE_GQL_FIXTURE: GqlNoteResponse = {
 
 export const NOTE_GQL_FIXTURE_PERSONAL: GqlNoteResponse = {
   id: 'note-002-uuid-provider-questions',
-  title: 'Questions for Provider',
-  body: '**Review Comments from Ben:**\n- Need clarification on incident response procedures (page 3)\n- Encryption key management - ask about HSM implementation\n- Backup testing frequency and documentation\n\n**Follow-up Items:**\n1. Schedule call with provider security team\n2. Request additional documentation on disaster recovery',
+  name: 'Questions for Provider',
+  content: '**Review Comments from Ben:**\n- Need clarification on incident response procedures (page 3)\n- Encryption key management - ask about HSM implementation\n- Backup testing frequency and documentation\n\n**Follow-up Items:**\n1. Schedule call with provider security team\n2. Request additional documentation on disaster recovery',
   engagementId: 'eng-001-uuid-hipaa-assessment',
   folderId: 'folder-001-uuid-assessment-phase',
   authorZerobiasUserId: 'user-buyer-001-uuid',

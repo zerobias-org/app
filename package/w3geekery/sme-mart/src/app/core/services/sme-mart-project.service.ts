@@ -38,6 +38,8 @@ export class SmeMartProjectService {
     'name',
     'description',
     'status',
+    'engagementId', // scalar mirror of engagement link (schema v1.0.9)
+    'projectType', // 'rfp' | 'pilot' | 'project' (Plan 077)
     'startDate',
     'targetEndDate',
     // RFP fields (Plan 075)
@@ -53,14 +55,6 @@ export class SmeMartProjectService {
     'wizardData',
     'dateCreated',
     'dateLastModified',
-  ];
-
-  /** All fields including link expansions — for rawQuery only */
-  private readonly allFields = [
-    ...this.scalarFields.filter(f => f !== 'dateCreated' && f !== 'dateLastModified'),
-    'dateCreated',
-    'dateLastModified',
-    'engagement { id }',
   ];
 
   // ---------------------------------------------------------------------------
@@ -269,28 +263,27 @@ export class SmeMartProjectService {
   /**
    * List projects filtered by engagement ID.
    *
-   * Uses rawQuery because `engagement` is a link field (not a scalar),
-   * requiring nested filter syntax: engagement: { id: ".eq.xxx" }
+   * Uses `engagementId` scalar field (schema v1.0.9) for server-side filtering.
    */
   async listProjectsByEngagement(engagementId: string, options?: QueryOptions): Promise<PagedResults<SmeMartProject>> {
     const pageNumber = options?.pageNumber ?? 1;
     const pageSize = options?.pageSize ?? 50;
 
-    // engagement is a link field — needs subfield selection and nested filter
-    const fieldStr = this.allFields.join(' ');
-    const query = `{ SmeMartProject(engagement: { id: ".eq.${engagementId}" }) { ${fieldStr} } }`;
+    const gqlOptions: GqlQueryOptions = {
+      pageNumber,
+      pageSize,
+      filters: { engagementId: `.eq.${engagementId}` },
+    };
 
-    const data = await this.graphqlRead.rawQuery(query, pageNumber, pageSize);
-    const rawItems = (data['SmeMartProject'] as Record<string, unknown>[]) ?? [];
+    const result = await this.graphqlRead.query<GqlSmeMartProjectResponse>(
+      'SmeMartProject',
+      this.scalarFields,
+      gqlOptions,
+    );
 
-    // Flatten nested link: { engagement: { id: "..." } } → { engagement: "..." }
-    const items = rawItems.map(gql => {
-      const flat = { ...gql };
-      if (flat['engagement'] && typeof flat['engagement'] === 'object') {
-        flat['engagement'] = (flat['engagement'] as Record<string, unknown>)['id'];
-      }
-      return mapGqlToNeon<SmeMartProject>(flat as any, SME_MART_PROJECT_FIELD_MAPPING.gqlToNeon);
-    });
+    const items = result.items.map(gql =>
+      mapGqlToNeon<SmeMartProject>(gql, SME_MART_PROJECT_FIELD_MAPPING.gqlToNeon),
+    );
 
     const paged = new PagedResults<SmeMartProject>();
     paged.items = items;
@@ -353,6 +346,10 @@ export class SmeMartProjectService {
       project,
       SME_MART_PROJECT_FIELD_MAPPING.neonToGql,
     );
+    // Push both scalar `engagementId` AND link `engagement` for relationship
+    if (project.engagementId) {
+      gqlData['engagement'] = project.engagementId;
+    }
     this.pipelineWrite.pushEntity('SmeMartProject', gqlData).catch(err => {
       console.error('[ProjectService] Failed to push project:', err);
     });

@@ -17,6 +17,8 @@ export interface Engagement {
   zerobias_tag_id: string | null;
   zerobias_boundary_id: string | null;
   zerobias_task_id: string | null;
+  facilitator_user_id?: string | null; // third-party consultant (Plan 056)
+  communication_mode?: string | null; // 'direct' | 'mediated' (Plan 056)
   created_at: string;
   updated_at: string;
 }

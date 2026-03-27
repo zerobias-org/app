@@ -47,6 +47,8 @@ function makeBid(overrides?: Partial<Bid>): Bid {
     ai_assisted: false,
     ai_model: null,
     ai_generated_at: null,
+    pricing_model: 'fixed', // Plan 055
+    bid_valid_until: '2026-06-30T23:59:59Z', // Plan 055
     created_at: '2026-03-18T11:00:00Z',
     updated_at: '2026-03-18T14:15:00Z',
     ...overrides,

@@ -24,6 +24,10 @@ export interface Bid {
   ai_assisted?: boolean | null;
   ai_model?: string | null;
   ai_generated_at?: string | null;
+
+  // Advanced pricing (Plan 055)
+  pricing_model?: string | null; // 'fixed' | 'hourly' | 'milestone' | 'nrc_arc'
+  bid_valid_until?: string | null; // ISO date — bid expiration
 }
 
 export interface TaskTypePricing {
