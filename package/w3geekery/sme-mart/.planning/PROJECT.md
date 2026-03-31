@@ -8,6 +8,14 @@ SME Mart is a marketplace for Subject Matter Experts in compliance and cybersecu
 
 A transparent, task-gated marketplace where every boundary API operation requires task/subtask approval — demand/supply/transparency partitions at every level of the hierarchy.
 
+## Current Milestone: v1.1 Org Navigation & Vendor Profile
+
+**Goal:** Three-tier org navigation as foundation, then supply-side vendor profile with one-time corporate doc loading and engagement pre-fill.
+
+**Target features:**
+- Plan 079: My Organizations refactor — `/orgs` card/table list, `/orgs/:orgId` read-only overview (members, groups, boundaries), org switching stub
+- Plan 041: Supply-side vendor profile — `VendorProfileItem` GQL entity, 6 profile sections, engagement vetting pre-fill from org profile
+
 ## Current State (after v1.0)
 
 - **Data layer:** All 17 entity types on AuditgraphDB (Pipeline writes + GraphQL reads). Neon PostgreSQL in observation period (archival 2026-04-02).
@@ -29,14 +37,16 @@ A transparent, task-gated marketplace where every boundary API operation require
 
 ### Active
 
-- [ ] Task/subtask partitioning into demand/supply/transparency (CEO P0)
-- [ ] Tasks as runtime access control — boundary API gating via task approval
-- [ ] Hard requirements (1-5) / soft requirements (6-10) approval model
-- [ ] Supply-side explicit resource requirements (ARN, IAM, data objects, schedule)
-- [ ] Project Bloom UI (boards, tasks, activities, workflows)
+- [ ] My Organizations refactor — three-tier org navigation (Plan 079)
+- [ ] Supply-side vendor profile — one-time corporate doc loading (Plan 041)
+- [ ] Task/subtask partitioning into demand/supply/transparency (CEO P0, deferred)
+- [ ] Tasks as runtime access control — boundary API gating via task approval (deferred)
+- [ ] Hard requirements (1-5) / soft requirements (6-10) approval model (deferred)
+- [ ] Supply-side explicit resource requirements (ARN, IAM, data objects, schedule) (deferred)
+- [ ] Project Bloom UI (boards, tasks, activities, workflows) (deferred)
 - [ ] Fix build errors blocking `npm test`
 - [ ] Neon table archival (scheduled 2026-04-02)
-- [ ] Transparency Center (aggregated rollups from subtask → project)
+- [ ] Transparency Center (aggregated rollups from subtask → project) (deferred)
 
 ### Out of Scope
 
@@ -74,4 +84,4 @@ A transparent, task-gated marketplace where every boundary API operation require
 | Archive Neon (don't delete) | Safety-first, 2-week observation | — Pending (2026-04-02) |
 
 ---
-*Last updated: 2026-03-20 after v1.0 milestone*
+*Last updated: 2026-03-30 after v1.1 milestone start*

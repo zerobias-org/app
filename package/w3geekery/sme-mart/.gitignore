@@ -53,11 +53,12 @@ __screenshots__/
 .claude/.obsidian/
 .claude/diagrams/
 .claude/proposals/
+.claude/plans-archive/
 .claude/notes/meetings/**/*.docx
 .claude/notes/meetings/**/*.txt
 
-# GSD planning (local-only)
-.planning/
+# GSD planning — tracked in git (no secrets; verified 2026-03-30)
+# .planning/
 
 # System files
 .DS_Store

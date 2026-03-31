@@ -1,30 +1,58 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: AuditgraphDB Migration
-status: milestone_complete
-last_updated: "2026-03-20T00:00:00Z"
+milestone: v1.1
+milestone_name: Org Navigation & Vendor Profile
+status: executing
+last_updated: "2026-03-31T15:28:30.755Z"
+last_activity: 2026-03-31 -- Phase 07 execution started
 progress:
-  total_phases: 6
-  completed_phases: 6
-  total_plans: 9
-  completed_plans: 9
+  total_phases: 5
+  completed_phases: 0
+  total_plans: 1
+  completed_plans: 0
 ---
 
 # STATE.md — Session Context
 
-**Session Name:** `poc/sme-mart`
-**Date Created:** 2026-03-18
-**Current Focus:** v1.0 archived. Ready for `/gsd:new-milestone`.
+**Session Name:** `gsd-plan`
+**Date Created:** 2026-03-30
+**Current Focus:** Phase 07 — org-navigation
+
+---
+
+## Current Position
+
+Phase: 07 (org-navigation) — EXECUTING
+Plan: 1 of 1
+Status: Executing Phase 07
+Last activity: 2026-03-31 -- Phase 07 execution started
 
 ---
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-20)
+See: .planning/PROJECT.md (updated 2026-03-30)
 
 **Core value:** Transparent, task-gated marketplace with demand/supply/transparency partitions
-**Current focus:** Planning next milestone
+**Current focus:** v1.1 Org Navigation & Vendor Profile
+
+---
+
+## Accumulated Context
+
+From v1.0:
+
+- All 17 entity types on AuditgraphDB (Pipeline writes + GraphQL reads)
+- 14 domain services migrated, 7 still on SmeMartDbService
+- Build errors in unrelated components block `npm test`
+- Neon archival scheduled 2026-04-02
+
+v1.1 decisions:
+
+- Schema PR first — VendorProfileItem to zerobias-org/schema:dev blocks phases 9-11
+- /orgs/:orgId is read-only — editing on /org only
+- Org switching stubbed (disabled button with tooltip)
+- Flexible budget, 15 hrs/week cap
 
 ---
 
@@ -33,18 +61,18 @@ See: .planning/PROJECT.md (updated 2026-03-20)
 **Resume this session:**
 
 ```bash
-claude --resume poc/sme-mart
+claude --resume gsd-plan
 ```
 
 **If starting fresh:**
 
 - Read `.planning/PROJECT.md` for current state
-- Read `.planning/ROADMAP.md` for milestone history
+- Read `.planning/ROADMAP.md` for milestone roadmap
+- Read `.planning/REQUIREMENTS.md` for v1.1 requirements (33 total)
 - Read `.planning/MILESTONES.md` for v1.0 accomplishments
 - Read `CLAUDE.md` for project conventions
-- Read `.claude/notes/CEO_NOTES.md` for Brian's directives
 
 ---
 
-**Last Updated:** 2026-03-20
-**Milestone v1.0:** Archived. 6 phases, 9 plans, 32 requirements satisfied.
+**Last Updated:** 2026-03-30
+**Milestone v1.1:** Roadmap complete. 5 phases (7-11), 33 requirements, 100% coverage.

@@ -1,6 +1,6 @@
-# UAT Migration Tracker
+# UAT Migration Tracker — ✅ COMPLETE (2026-03-30)
 
-CI/dev (`ci.zerobias.com`) is being nuked and rebuilt with hydra. UAT (`uat.zerobias.com`) is our temporary CI/dev replacement. This file tracks everything that needs to be recreated on UAT.
+CI/dev (`ci.zerobias.com`) was nuked and rebuilt with hydra. UAT (`uat.zerobias.com`) is our temporary CI/dev replacement. All migration steps verified complete 2026-03-30.
 
 **UAT Credentials (Clark Stacer):**
 - API Key: `660e553e-b2b4-4972-b8e3-c9cd9617f101`
@@ -151,4 +151,4 @@ Old pipeline ID (Platform boundary): `591861da-0eac-45b3-ad1c-eb4e46734402` — 
 - UAT uses **hydra** for tags/resources (same as what CI will eventually use)
 - Tag creation on UAT should use `hydraClient.getTagApi().createTag()` — no more `danaOld` path
 - Task→Tag linking uses `hydraClient.getResourceApi()` for resource tagging
-- The Neon demo data (work_requests, bids, providers, etc.) references `zerobias_task_id` and `zerobias_tag_id` columns — these will need SQL UPDATEs after creating UAT entities
+- Neon `work_requests` rows updated with UAT tag/task IDs ✅ (all 5 verified 2026-03-30)

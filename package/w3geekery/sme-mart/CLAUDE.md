@@ -1,8 +1,8 @@
 # CLAUDE.md - SME Mart
 
-> **On Startup:** Read `.claude/plans/public/PLAN.md` — source of truth for architecture, phases, and decisions.
+> **On Startup:** Read `.planning/BACKLOG.md` — source of truth for all pending work. Read `.planning/PROJECT.md` + `.planning/ROADMAP.md` for current milestone state.
 
-> **⚠️ UAT Migration In Progress:** CI/dev is being rebuilt with hydra. UAT is our temporary dev environment. See [`.claude/notes/uat-migration-tracker.md`](.claude/notes/uat-migration-tracker.md) for checklist and ID mapping. `npm run dev` now targets UAT.
+> **UAT Environment:** CI/dev was rebuilt with hydra. UAT (`uat.zerobias.com`) is the active dev environment. Migration complete 2026-03-30 — see [`.claude/notes/uat-migration-tracker.md`](.claude/notes/uat-migration-tracker.md) for ID mapping reference. `npm run dev` targets UAT.
 
 > **⚠️ ALWAYS prefer `~/Projects/w3geekery/zerobias-org-forks/` over `~/Projects/zb/` for every repo that exists in zerobias-org-forks (app, login, module, schema, etc.).** We are a 3rd-party developer — work from the w3geekery fork, push to the fork, and create cross-fork PRs to zerobias-org. Only use `~/Projects/zb/` for read-only reference unless specifically asked otherwise.
 
@@ -14,8 +14,10 @@ SME Mart is a **marketplace for Subject Matter Experts** in compliance/cybersecu
 
 | What | Where |
 |------|-------|
-| **⚠️ UAT Migration Tracker** | [`.claude/notes/uat-migration-tracker.md`](.claude/notes/uat-migration-tracker.md) — CI→UAT ID mapping, checklist, config updates |
-| **Architecture & Plan** | [`.claude/plans/public/PLAN.md`](.claude/plans/public/PLAN.md) |
+| **UAT ID Reference** | [`.claude/notes/uat-migration-tracker.md`](.claude/notes/uat-migration-tracker.md) — CI→UAT ID mapping (migration complete) |
+| **Backlog (all pending work)** | [`.planning/BACKLOG.md`](.planning/BACKLOG.md) — select items for next GSD milestone |
+| **Project & Milestone State** | [`.planning/PROJECT.md`](.planning/PROJECT.md), [`.planning/ROADMAP.md`](.planning/ROADMAP.md) |
+| **Plan Archive (historical)** | `.claude/plans-archive/` — old PLAN.md + 55 plan files (local-only, gitignored) |
 | **Source Paths (SDKs, repos)** | [`.claude/docs/SOURCE_PATHS.md`](.claude/docs/SOURCE_PATHS.md) |
 | **Angular 21 Docs** | [`AGENTS.md`](AGENTS.md) — local docs index in `.angular-docs/` (refresh: `npx angular-agents-md`) |
 | **Next.js prototype** (archived) | `../sme-mart-nextjs-deprecated/` |
@@ -33,6 +35,8 @@ SME Mart is a **marketplace for Subject Matter Experts** in compliance/cybersecu
 
 - **`/angular-architect`** — invoke the global skill for general Angular 21 architecture questions
 - **`sme-mart-architect`** — project-level skill (`.claude/skills/`) with SME Mart-specific patterns: ngx-library, DataProducer, standalone components, no Nx. Invoke for implementation work.
+- **`/meta:director`** — Architect/QA role alongside GSD. Modes: `design`, `review`, `checkpoint`, `watch`, `retro`. Project adapter at `.claude/commands/meta/director.md` (upstream: `zerobias-org/meta-harness`). Director state lives in `.planning/director/`.
+- **`/meta:sync`** — Sync meta-harness upstream and merge changes into the project adapter. Run periodically (start of milestone or when Kevin mentions updates).
 
 ## File Naming Convention
 
