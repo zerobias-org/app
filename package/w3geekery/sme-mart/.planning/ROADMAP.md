@@ -24,8 +24,8 @@
 <details open>
 <summary>🚧 v1.1 Org Navigation & Vendor Profile (Phases 7-11) — IN PROGRESS</summary>
 
-- [ ] Phase 7: Org Navigation (Plan 079) — 0/1 plans
-- [ ] Phase 8: Vendor Profile Schema (Plan 041 Phase 1) — 0/1 plans
+- [x] Phase 7: Org Navigation (Plan 079) — 1/1 plans complete (2026-03-31)
+- [ ] Phase 8: Vendor Profile Schema (Plan 041 Phase 1) — 1/1 plans created (08-01-PLAN.md)
 - [ ] Phase 9: Vendor Profile Service (Plan 041 Phase 2) — 0/1 plans
 - [ ] Phase 10: Vendor Profile UI (Plan 041 Phase 3) — 0/1 plans
 - [ ] Phase 11: Vetting Pre-Fill (Plan 041 Phase 4) — 0/1 plans
@@ -53,7 +53,7 @@
 4. Nav sidebar shows "My Organizations" (renamed from "My Organization") with route `/orgs`, and an org switching button is present but disabled with tooltip explaining it requires session auth
 5. `/orgs/:orgId` is strictly read-only — attempting to edit org info redirects to or disables edit controls
 
-**Plans:** TBD
+**Plans:** 07-01-PLAN.md ✅
 
 ---
 
@@ -68,13 +68,13 @@
 **Requirements:** VPR-01, VPR-02, VPR-03, VPR-04, VPR-05, VPR-06
 
 **Success Criteria** (what must be TRUE):
-1. `VendorProfileItem` GQL schema entity submitted to `zerobias-org/schema:dev` via PR with `section` discriminator field (enum: corporate_identity, attestation, insurance, reference, personnel, financial) and JSON `data` field for section-specific content
+1. `MarketplaceProfileItem` GQL schema entity submitted to `zerobias-org/schema:dev` via PR with `section` discriminator field (enum: corporate_identity, attestation, insurance, reference, personnel, financial) and JSON `data` field for section-specific content
 2. Schema is org-scoped with appropriate links for org ownership and engagement references
 3. Schema passes dataloader verification (`npm run verify` in schema repo succeeds with zero errors)
 4. PR is merged to `zerobias-org/schema:dev` and schema reload propagates to platform within 15 minutes
-5. Service layer can query `VendorProfileItem` entities via GQL without 404 or schema errors
+5. Service layer can query `MarketplaceProfileItem` entities via GQL without 404 or schema errors
 
-**Plans:** TBD
+**Plans:** 08-01-PLAN.md (created 2026-03-31, awaiting execution)
 
 ---
 
@@ -147,8 +147,8 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 7. Org Navigation | 0/1 | Not started | — |
-| 8. Vendor Profile Schema | 0/1 | Not started | — |
+| 7. Org Navigation | 1/1 | Complete | 2026-03-31 |
+| 8. Vendor Profile Schema | 0/1 | Plan created, awaiting execution | — |
 | 9. Vendor Profile Service | 0/1 | Not started | — |
 | 10. Vendor Profile UI | 0/1 | Not started | — |
 | 11. Vetting Pre-Fill | 0/1 | Not started | — |
@@ -156,4 +156,4 @@
 ---
 
 **Created:** 2026-03-30
-**Last Updated:** 2026-03-30 (v1.1 roadmap added)
+**Last Updated:** 2026-03-31 (Phase 8 plan created)
