@@ -15,7 +15,7 @@ describe('OrgListComponent', () => {
         {
           provide: ZerobiasClientApp,
           useValue: {
-            listMyOrgs: () => of([]),
+            getOrgs: () => of([]),
             getCurrentOrg: () => of(null),
           },
         },

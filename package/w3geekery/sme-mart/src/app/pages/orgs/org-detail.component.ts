@@ -10,7 +10,9 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ZbSimplePanelComponent, ZbAvatarLabelComponent } from '@zerobias-org/ngx-library';
 import { ZerobiasClientApp } from '@zerobias-com/zerobias-client';
-import { map } from 'rxjs';
+import { map, switchMap, from } from 'rxjs';
+import { ZerobiasClientApi } from '@zerobias-com/zerobias-client';
+import { UUID } from '@zerobias-org/types-core-js';
 
 interface OrgInfo {
   id: string;
@@ -58,6 +60,7 @@ interface OrgDetail {
 export class OrgDetailComponent implements OnInit {
   private readonly app = inject(ZerobiasClientApp);
   private readonly route = inject(ActivatedRoute);
+  private readonly clientApi = inject(ZerobiasClientApi);
 
   readonly orgId = toSignal(
     this.route.paramMap.pipe(map(p => p.get('orgId') || '')),
@@ -68,31 +71,69 @@ export class OrgDetailComponent implements OnInit {
 
   readonly isCurrent = computed(() => this.currentOrgId() === this.orgId());
 
-  // Stub data until proper API is available
-  readonly orgData = signal<OrgDetail>({
-    org: null,
-    members: [],
-    groups: [],
-    boundaries: [],
-  });
+  readonly orgData = toSignal(
+    this.route.paramMap.pipe(
+      switchMap(params => {
+        const id = params.get('orgId') || '';
+        if (!id) {
+          return from(Promise.resolve([null, [], [], []]));
+        }
+
+        // Load org from the list and find the one matching this ID
+        const orgsPromise = this.app.getOrgs()
+          .toPromise()
+          .then(orgs => {
+            const org = (orgs || []).find((o: any) => o.id === id) || null;
+            return org as any;
+          });
+
+        // Load members and groups via clientApi.hydraClient
+        const orgId = new UUID(id);
+        const membersPromise = this.clientApi.hydraClient?.getOrgApi?.()
+          .listOrgMembers?.(orgId)
+          .then((result: any) => (result?.items || []))
+          .catch(() => []) || Promise.resolve([]);
+
+        const groupsPromise = this.clientApi.hydraClient?.getOrgApi?.()
+          .listGroups?.(orgId)
+          .then((result: any) => (result?.items || []))
+          .catch(() => []) || Promise.resolve([]);
+
+        // Boundaries: Stub as empty array for now
+        // For current org, boundary listing API will be implemented in Phase 08+
+        const boundariesPromise = Promise.resolve([]);
+
+        // Combine all promises into an Observable
+        return from(
+          Promise.all([orgsPromise, membersPromise, groupsPromise, boundariesPromise])
+            .then(([org, members, groups, boundaries]) => {
+              return [org || null, members || [], groups || [], boundaries || []] as const;
+            })
+            .catch(() => {
+              return [null, [], [], []] as const;
+            })
+        );
+      })
+    ),
+    {
+      initialValue: [null, [], [], []]
+    }
+  );
 
   // Computed signals for template
-  readonly org = computed(() => this.orgData().org);
-  readonly members = computed(() => this.orgData().members);
-  readonly groups = computed(() => this.orgData().groups);
-  readonly boundaries = computed(() => this.orgData().boundaries);
+  readonly org = computed(() => this.orgData()[0] as OrgInfo | null);
+  readonly members = computed(() => this.orgData()[1] as OrgMember[]);
+  readonly groups = computed(() => this.orgData()[2] as OrgGroup[]);
+  readonly boundaries = computed(() => this.orgData()[3] as any[]);
 
   ngOnInit(): void {
-    // Get current org ID
     try {
       const currentId = this.app.getCurrentOrgId();
       this.currentOrgId.set(currentId || null);
     } catch {
       this.currentOrgId.set(null);
     }
-
-    // TODO: Load org data using proper API when available
-    // For now, leave data empty (stub per FLAG-3)
+    // Data loading is now handled via toSignal(combineLatest(...)) above
   }
 
   goToOrgProfile(): void {

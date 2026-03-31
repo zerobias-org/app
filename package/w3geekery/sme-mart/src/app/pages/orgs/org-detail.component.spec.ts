@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 import { OrgDetailComponent } from './org-detail.component';
-import { ZerobiasClientApp } from '@zerobias-com/zerobias-angular-client';
+import { ZerobiasClientApp, ZerobiasClientApi } from '@zerobias-com/zerobias-client';
 import { of } from 'rxjs';
 
 describe('OrgDetailComponent', () => {
@@ -21,12 +21,18 @@ describe('OrgDetailComponent', () => {
         {
           provide: ZerobiasClientApp,
           useValue: {
-            getOrg: () => of(null),
+            getOrgs: () => of([]),
             getCurrentOrg: () => of(null),
+            getCurrentOrgId: () => null,
+          },
+        },
+        {
+          provide: ZerobiasClientApi,
+          useValue: {
             hydraClient: {
               getOrgApi: () => ({
-                listOrgMembers: () => of([]),
-                listGroups: () => of([]),
+                listOrgMembers: () => Promise.resolve({ items: [] }),
+                listGroups: () => Promise.resolve({ items: [] }),
               }),
             },
           },

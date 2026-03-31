@@ -1,6 +1,7 @@
 import {
   Component, inject, signal, computed, ChangeDetectionStrategy,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -11,6 +12,7 @@ import { FormsModule } from '@angular/forms';
 import { ZbSearchInputComponent, ZbEmptyStateContainerComponent } from '@zerobias-org/ngx-library';
 import { ZerobiasClientApp } from '@zerobias-com/zerobias-client';
 import { UserPreferencesService } from '../../core/services/user-preferences.service';
+import { map } from 'rxjs';
 
 interface OrgListItem {
   id: string;
@@ -45,14 +47,31 @@ export class OrgListComponent {
   // System org UUID
   private readonly SYSTEM_ORG_ID = '00000000-0000-0000-0000-000000000000';
 
-  readonly allOrgs = signal<OrgListItem[]>([]);
+  readonly allOrgs = toSignal(
+    this.app.getOrgs().pipe(
+      map(orgs => (orgs || []).map((org: any) => ({
+        id: org.id?.toString() || org.id,
+        name: org.name || '',
+        description: org.description,
+        hidden: org.hidden,
+        memberCount: org.memberCount,
+      } as OrgListItem)))
+    ),
+    { initialValue: [] }
+  );
+
   readonly searchTerm = signal('');
   readonly viewMode = signal<'cards' | 'table'>('cards');
-  readonly currentOrgId = signal<string | null>(null);
-  readonly isLoading = signal(true);
+
+  readonly currentOrgId = toSignal(
+    this.app.getCurrentOrg().pipe(map(org => org?.id || null)),
+    { initialValue: null }
+  );
+
+  readonly isLoading = signal(false);
 
   readonly filteredOrgs = computed(() => {
-    const all = this.allOrgs();
+    const all = this.allOrgs() as OrgListItem[];
     const term = this.searchTerm().toLowerCase();
 
     return all.filter((org: OrgListItem) => {
@@ -72,12 +91,10 @@ export class OrgListComponent {
   });
 
   constructor() {
-    // Load view mode preference
+    // Load view mode preference from UserPreferencesService
     const savedMode = this.prefs.getOrgListViewMode();
     this.viewMode.set(savedMode);
-
-    // Initialize org list - stub for now, will need proper API call
-    this.isLoading.set(false);
+    // Data loading is now handled via toSignal(app.listMyOrgs())
   }
 
   toggleViewMode(): void {
@@ -87,7 +104,10 @@ export class OrgListComponent {
   }
 
   isActive(orgId: string): boolean {
-    return this.currentOrgId() === orgId;
+    const currentId = this.currentOrgId();
+    if (!currentId) return false;
+    const currentIdStr = typeof currentId === 'string' ? currentId : currentId.toString();
+    return currentIdStr === orgId;
   }
 
   getMemberCount(org: OrgListItem): number {
