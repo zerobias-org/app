@@ -19,6 +19,7 @@ const FILTERS_KEY = 'sme-mart.catalog-filters';
 const TIMELINE_FILTERS_KEY = 'sme-mart.timeline-filters';
 const THEME_KEY = 'sme-mart.theme-preference';
 const FOLDER_COLORS_KEY = 'sme-mart.folder-colors';
+const ORG_LIST_VIEW_MODE_KEY = 'sme-mart.org-list-view-mode';
 const SAVE_DEBOUNCE_MS = 500;
 
 /** Personal folder color map: folderId → hex color */
@@ -170,6 +171,19 @@ export class UserPreferencesService {
 
   getFolderColor(folderId: string): string | null {
     return this.folderColors()[folderId] ?? null;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Org List View Mode
+  // ---------------------------------------------------------------------------
+
+  getOrgListViewMode(): 'cards' | 'table' {
+    const stored = localStorage.getItem(ORG_LIST_VIEW_MODE_KEY);
+    return (stored as 'cards' | 'table') || 'cards';
+  }
+
+  setOrgListViewMode(mode: 'cards' | 'table'): void {
+    localStorage.setItem(ORG_LIST_VIEW_MODE_KEY, mode);
   }
 
   // ---------------------------------------------------------------------------

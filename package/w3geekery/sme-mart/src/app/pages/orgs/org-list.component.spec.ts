@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { OrgListComponent } from './org-list.component';
-import { ZerobiasClientApp } from '@zerobias-com/zerobias-angular-client';
-import { UserPreferencesService } from '@app/core/services/user-preferences.service';
+import { ZerobiasClientApp } from '@zerobias-com/zerobias-client';
+import { UserPreferencesService } from '../../core/services/user-preferences.service';
 import { of } from 'rxjs';
 
 describe('OrgListComponent', () => {

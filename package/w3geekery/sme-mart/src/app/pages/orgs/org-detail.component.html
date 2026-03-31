@@ -1,0 +1,125 @@
+<div class="org-detail-page">
+  <!-- Header -->
+  <header class="org-header">
+    <h1>{{ org()?.name || 'Organization' }}</h1>
+    @if (org()?.description) {
+      <p class="org-subtitle">{{ org()?.description }}</p>
+    }
+  </header>
+
+  <!-- Info Banner -->
+  @if (isCurrent()) {
+    <div class="info-banner">
+      <mat-icon>check_circle</mat-icon>
+      <span>This is your active organization</span>
+    </div>
+  }
+
+  <!-- Action Buttons -->
+  <div class="action-buttons">
+    @if (isCurrent()) {
+      <button
+        mat-raised-button
+        color="primary"
+        [routerLink]="'/org'"
+      >
+        <mat-icon>settings</mat-icon>
+        Go to Org Profile
+      </button>
+    } @else {
+      <button
+        mat-raised-button
+        disabled
+        [matTooltip]="'Available when session auth is enabled'"
+      >
+        <mat-icon>login</mat-icon>
+        Switch to Org
+      </button>
+    }
+  </div>
+
+  <!-- Org Information Panel -->
+  <zb-simple-panel title="Organization Information">
+    <div class="panel-content">
+      <div class="info-row">
+        <label>Name:</label>
+        <span>{{ org()?.name || '-' }}</span>
+      </div>
+      @if (org()?.description) {
+        <div class="info-row">
+          <label>Description:</label>
+          <span>{{ org()?.description }}</span>
+        </div>
+      }
+      @if (org()?.id) {
+        <div class="info-row">
+          <label>Organization ID:</label>
+          <span class="id-text">{{ org()?.id }}</span>
+        </div>
+      }
+    </div>
+  </zb-simple-panel>
+
+  <!-- Members Panel -->
+  <zb-simple-panel title="Members">
+    <div class="panel-content">
+      @if (members().length === 0) {
+        <p class="empty-message">No members found</p>
+      } @else {
+        <div class="members-list">
+          @for (member of members(); track member.id) {
+            <div class="member-item">
+              <zb-avatar-label
+                [label]="member.display_name || member.email"
+                [subText]="member.email"
+              />
+              @if (member.role) {
+                <span class="role-badge">{{ member.role }}</span>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </zb-simple-panel>
+
+  <!-- Groups Panel -->
+  <zb-simple-panel title="Groups">
+    <div class="panel-content">
+      @if (groups().length === 0) {
+        <p class="empty-message">No groups found</p>
+      } @else {
+        <div class="groups-list">
+          @for (group of groups(); track group.id) {
+            <div class="group-item">
+              <div class="group-info">
+                <h4 class="group-name">{{ group.name }}</h4>
+              </div>
+              <span class="member-count-badge">{{ group.memberCount || 0 }} members</span>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </zb-simple-panel>
+
+  <!-- Boundaries Panel -->
+  <zb-simple-panel title="Boundaries">
+    <div class="panel-content">
+      @if (boundaries().length === 0) {
+        <p class="empty-message">No boundaries associated</p>
+      } @else {
+        <div class="boundaries-list">
+          @for (boundary of boundaries(); track boundary.id) {
+            <div class="boundary-item">
+              <h4 class="boundary-name">{{ boundary.name }}</h4>
+              @if (boundary.state) {
+                <span class="boundary-status">{{ boundary.state }}</span>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </zb-simple-panel>
+</div>

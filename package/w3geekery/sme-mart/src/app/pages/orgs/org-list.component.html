@@ -1,0 +1,99 @@
+<div class="org-list-page">
+  <!-- Header -->
+  <header class="org-list-header">
+    <div>
+      <h1>My Organizations</h1>
+      <p class="subtitle">View all organizations you belong to</p>
+    </div>
+  </header>
+
+  <!-- Toolbar -->
+  <div class="org-list-toolbar">
+    <div class="search-container">
+      <zb-search-input
+        [ngModel]="searchTerm()"
+        (ngModelChange)="searchTerm.set($event)"
+        placeholder="Search organizations..."
+      />
+    </div>
+    <button
+      mat-icon-button
+      [matTooltip]="viewMode() === 'cards' ? 'Switch to table view' : 'Switch to card view'"
+      (click)="toggleViewMode()"
+      class="view-toggle-btn"
+    >
+      <mat-icon>{{ viewMode() === 'cards' ? 'view_list' : 'dashboard' }}</mat-icon>
+    </button>
+  </div>
+
+  <!-- Empty State -->
+  @if (filteredOrgs().length === 0) {
+    <zb-empty-state-container />
+  }
+
+  <!-- Cards View -->
+  @if (viewMode() === 'cards' && filteredOrgs().length > 0) {
+    <div class="org-cards-grid">
+      @for (org of filteredOrgs(); track org.id) {
+        <div
+          [routerLink]="['/orgs', org.id]"
+          class="org-card"
+          [class.active]="isActive(org.id)"
+        >
+          <div class="card-header">
+            <h3 class="org-name">{{ org.name }}</h3>
+            @if (isActive(org.id)) {
+              <span class="active-badge">Active</span>
+            }
+          </div>
+
+          @if (org.description) {
+            <p class="org-description">{{ org.description }}</p>
+          }
+
+          <div class="card-footer">
+            <div class="member-count">
+              <mat-icon>people</mat-icon>
+              <span>{{ getMemberCount(org) }} members</span>
+            </div>
+            <mat-icon class="arrow">arrow_forward</mat-icon>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Table View -->
+  @if (viewMode() === 'table' && filteredOrgs().length > 0) {
+    <div class="org-table-container">
+      <table class="org-table">
+        <thead>
+          <tr>
+            <th class="col-name">Organization Name</th>
+            <th class="col-description">Description</th>
+            <th class="col-members">Members</th>
+            <th class="col-status">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (org of filteredOrgs(); track org.id) {
+            <tr
+              [routerLink]="['/orgs', org.id]"
+              class="org-row"
+              [class.active-row]="isActive(org.id)"
+            >
+              <td class="col-name">{{ org.name }}</td>
+              <td class="col-description">{{ org.description || '-' }}</td>
+              <td class="col-members">{{ getMemberCount(org) }}</td>
+              <td class="col-status">
+                @if (isActive(org.id)) {
+                  <span class="status-chip">Active</span>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

@@ -39,6 +39,11 @@ export const routes: Routes = [
           import('./pages/org/org.routes').then((m) => m.ORG_ROUTES),
       },
       {
+        path: 'orgs',
+        loadChildren: () =>
+          import('./pages/orgs/orgs.routes').then((m) => m.ORGS_ROUTES),
+      },
+      {
         path: 'my/engagements',
         loadChildren: () =>
           import('./pages/my-engagements/my-engagements.routes').then((m) => m.MY_ENGAGEMENTS_ROUTES),
