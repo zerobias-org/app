@@ -12,6 +12,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonModule } from '@angular/material/button';
 import { ZbCustomizableTableComponent } from '@zerobias-org/ngx-library';
+import { UUID } from '@zerobias-org/types-core-js';
 import { BoundaryService } from '../../../core/services/boundary.service';
 
 /**
@@ -96,8 +97,11 @@ export class ProjectPartiesTabComponent {
       const namesMap: Record<string, string> = {};
 
       for (const boundaryId of boundaryIds) {
+        // Convert string boundaryId to UUID for API calls
+        const boundaryUUID = new UUID(boundaryId);
+
         // Load parties
-        const parties = await this.boundaryService.listBoundaryParties(boundaryId);
+        const parties = await this.boundaryService.listBoundaryParties(boundaryUUID);
 
         if (!parties || parties.length === 0) {
           partiesMap[boundaryId] = [];
@@ -109,9 +113,10 @@ export class ProjectPartiesTabComponent {
         const partiesWithRoles: BoundaryPartyRow[] = [];
 
         for (const party of parties) {
+          const partyUUID = new UUID(party.id);
           const roles = await this.boundaryService.listBoundaryPartyRoles(
-            boundaryId,
-            party.id
+            boundaryUUID,
+            partyUUID
           );
           const roleNames = (roles || []).map((r) => r.name || '').filter(Boolean).join(', ');
 
@@ -126,7 +131,7 @@ export class ProjectPartiesTabComponent {
         partiesMap[boundaryId] = partiesWithRoles;
 
         // Try to get boundary name from getBoundary API (FLAG-4 resolution)
-        const boundaryInfo = await this.boundaryService.getBoundary(boundaryId);
+        const boundaryInfo = await this.boundaryService.getBoundary(boundaryUUID);
         namesMap[boundaryId] = boundaryInfo?.name || `Boundary ${boundaryId.substring(0, 8)}...`;
       }
 
