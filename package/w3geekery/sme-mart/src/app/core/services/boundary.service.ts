@@ -1,39 +1,12 @@
 import { Injectable, inject } from '@angular/core';
 import { ZerobiasClientApi } from '@zerobias-com/zerobias-client';
 import { UUID } from '@zerobias-org/types-core-js';
+import { PartyExtended, BoundaryPartyRoleExtended, BoundaryTeam as SdkBoundaryTeam } from '@zerobias-com/platform-sdk';
 
-/**
- * Boundary party information from platform API.
- * Typed with proper fields instead of loose index signatures.
- */
-export interface BoundaryParty {
-  id: string;
-  name?: string;
-  email?: string;
-  partyType?: string;
-  created?: string;
-  updated?: string;
-}
-
-/**
- * Boundary party role information.
- */
-export interface BoundaryPartyRole {
-  id: string;
-  name?: string;
-  description?: string;
-  permissions?: string[];
-}
-
-/**
- * Boundary team information.
- */
-export interface BoundaryTeam {
-  id: string;
-  name?: string;
-  description?: string;
-  memberCount?: number;
-}
+// Export SDK types directly for use in components
+export type BoundaryParty = PartyExtended;
+export type BoundaryPartyRole = BoundaryPartyRoleExtended;
+export type BoundaryTeam = SdkBoundaryTeam;
 
 /**
  * Service wrapping platform.Boundary APIs for parties, roles, and teams.

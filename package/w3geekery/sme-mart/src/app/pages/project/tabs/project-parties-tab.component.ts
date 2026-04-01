@@ -113,15 +113,16 @@ export class ProjectPartiesTabComponent {
         const partiesWithRoles: BoundaryPartyRow[] = [];
 
         for (const party of parties) {
-          const partyUUID = new UUID(party.id);
+          // party.id is already a UUID from SDK; use it directly
+          const partyUUID = party.id instanceof UUID ? party.id : new UUID(party.id);
           const roles = await this.boundaryService.listBoundaryPartyRoles(
             boundaryUUID,
             partyUUID
           );
-          const roleNames = (roles || []).map((r) => r.name || '').filter(Boolean).join(', ');
+          const roleNames = (roles || []).map((r) => r.role?.name || '').filter(Boolean).join(', ');
 
           partiesWithRoles.push({
-            id: party.id,
+            id: party.id.toString(),
             name: party.name || 'Unknown Party',
             roles: roleNames || 'No roles',
             teams: '', // TODO: Load teams if needed
