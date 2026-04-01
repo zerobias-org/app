@@ -32,6 +32,11 @@ export const ORG_ROUTES: Routes = [
         loadComponent: () =>
           import('./tabs/settings-tab.component').then(m => m.SettingsTab),
       },
+      {
+        path: 'profile',
+        loadComponent: () =>
+          import('./tabs/vendor-profile-tab.component').then(m => m.VendorProfileTab),
+      },
     ],
   },
 ];

@@ -260,12 +260,12 @@ export class VendorProfileService {
    * @returns Typed section data object
    */
   private parseData(dataStr: string): SectionData {
-    if (!dataStr) return {};
+    if (!dataStr) return {} as SectionData;
     try {
       return JSON.parse(dataStr) as SectionData;
     } catch (err) {
       console.warn('[VendorProfileService] Failed to parse data JSON:', dataStr, err);
-      return {};
+      return {} as SectionData;
     }
   }
 

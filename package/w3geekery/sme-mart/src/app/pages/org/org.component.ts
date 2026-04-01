@@ -70,6 +70,7 @@ export class OrgPage implements OnInit, OnDestroy {
     { label: 'Projects', icon: 'assignment', path: 'projects' },
     { label: 'Members', icon: 'people', path: 'members' },
     { label: 'Settings', icon: 'settings', path: 'settings' },
+    { label: 'Corporate Profile', icon: 'business', path: 'profile' },
   ];
 
   ngOnInit(): void {

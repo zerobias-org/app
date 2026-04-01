@@ -1,0 +1,347 @@
+<div class="form-container">
+  <!-- Form Header -->
+  <div class="form-header">
+    <h2>{{ mode() === 'create' ? 'Add ' : 'Edit ' }}{{ section() | titlecase }} Item</h2>
+    <button mat-icon-button (click)="onCancel()" type="button" class="close-btn">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Form Content -->
+  <form [formGroup]="form()!" (ngSubmit)="onSubmit()" class="form-content">
+    <!-- Renewal Notice (D-13) -->
+    @if (mode() === 'edit' && isItemExpired()) {
+      <mat-card class="renewal-notice">
+        <mat-card-content>
+          <p>
+            This item expired on {{ item()?.expires_at | date }}.
+            Update with current information.
+          </p>
+        </mat-card-content>
+      </mat-card>
+    }
+
+    <!-- Section-Specific Form Fields -->
+    @switch (section()) {
+      @case ('corporate_identity') {
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Legal Entity Name</mat-label>
+          <input matInput formControlName="legalEntityName" type="text" required />
+          @if (form()?.get('legalEntityName')?.hasError('required')) {
+            <mat-error>Legal Entity Name is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Business Type</mat-label>
+          <input matInput formControlName="businessType" type="text" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Founded Year</mat-label>
+          <input matInput formControlName="foundedYear" type="number" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Years in Business</mat-label>
+          <input matInput formControlName="yearsInBusiness" type="number" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Certifications</mat-label>
+          <input
+            matInput
+            formControlName="certifications"
+            type="text"
+            placeholder="Separate with commas" />
+          <mat-hint>Comma-separated list (e.g., "ISO 27001, SOC 2")</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Number of Employees</mat-label>
+          <input matInput formControlName="numberOfEmployees" type="number" />
+        </mat-form-field>
+      }
+
+      @case ('attestation') {
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Service Type</mat-label>
+          <input matInput formControlName="serviceType" type="text" required />
+          @if (form()?.get('serviceType')?.hasError('required')) {
+            <mat-error>Service Type is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Years of Experience</mat-label>
+          <input matInput formControlName="yearsExperience" type="number" required />
+          @if (form()?.get('yearsExperience')?.hasError('required')) {
+            <mat-error>Years of Experience is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Client Count</mat-label>
+          <input matInput formControlName="clientCount" type="number" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Average Project Duration</mat-label>
+          <input matInput formControlName="avgProjectDuration" type="text" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Certifications</mat-label>
+          <input
+            matInput
+            formControlName="certifications"
+            type="text"
+            placeholder="Separate with commas" />
+          <mat-hint>Comma-separated list</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Specializations</mat-label>
+          <input
+            matInput
+            formControlName="specializations"
+            type="text"
+            placeholder="Separate with commas" />
+          <mat-hint>Comma-separated list</mat-hint>
+        </mat-form-field>
+      }
+
+      @case ('insurance') {
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Policy Number</mat-label>
+          <input matInput formControlName="policyNumber" type="text" required />
+          @if (form()?.get('policyNumber')?.hasError('required')) {
+            <mat-error>Policy Number is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Carrier</mat-label>
+          <input matInput formControlName="carrier" type="text" required />
+          @if (form()?.get('carrier')?.hasError('required')) {
+            <mat-error>Carrier is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Coverage Type</mat-label>
+          <input matInput formControlName="coverageType" type="text" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Coverage Amount</mat-label>
+          <input matInput formControlName="coverageAmount" type="number" required />
+          @if (form()?.get('coverageAmount')?.hasError('required')) {
+            <mat-error>Coverage Amount is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Effective Date</mat-label>
+          <input
+            matInput
+            formControlName="effectiveDate"
+            type="date"
+            [matDatepicker]="effectiveDatePicker"
+            required />
+          <mat-datepicker-toggle matIconSuffix [for]="effectiveDatePicker"></mat-datepicker-toggle>
+          <mat-datepicker #effectiveDatePicker></mat-datepicker>
+          @if (form()?.get('effectiveDate')?.hasError('required')) {
+            <mat-error>Effective Date is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Expiration Date</mat-label>
+          <input
+            matInput
+            formControlName="expirationDate"
+            type="date"
+            [matDatepicker]="expirationDatePicker"
+            required />
+          <mat-datepicker-toggle matIconSuffix [for]="expirationDatePicker"></mat-datepicker-toggle>
+          <mat-datepicker #expirationDatePicker></mat-datepicker>
+          @if (form()?.get('expirationDate')?.hasError('required')) {
+            <mat-error>Expiration Date is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Limits</mat-label>
+          <input matInput formControlName="limits" type="text" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Deductible</mat-label>
+          <input matInput formControlName="deductible" type="number" />
+        </mat-form-field>
+      }
+
+      @case ('personnel') {
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Name</mat-label>
+          <input matInput formControlName="name" type="text" required />
+          @if (form()?.get('name')?.hasError('required')) {
+            <mat-error>Name is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Title</mat-label>
+          <input matInput formControlName="title" type="text" required />
+          @if (form()?.get('title')?.hasError('required')) {
+            <mat-error>Title is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Years of Experience</mat-label>
+          <input matInput formControlName="yearsExperience" type="number" required />
+          @if (form()?.get('yearsExperience')?.hasError('required')) {
+            <mat-error>Years of Experience is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Specialization</mat-label>
+          <input matInput formControlName="specialization" type="text" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Credentials</mat-label>
+          <input
+            matInput
+            formControlName="credentials"
+            type="text"
+            placeholder="Separate with commas" />
+          <mat-hint>Comma-separated list</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Certifications</mat-label>
+          <input
+            matInput
+            formControlName="certifications"
+            type="text"
+            placeholder="Separate with commas" />
+          <mat-hint>Comma-separated list</mat-hint>
+        </mat-form-field>
+      }
+
+      @case ('reference') {
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Client Name</mat-label>
+          <input matInput formControlName="clientName" type="text" required />
+          @if (form()?.get('clientName')?.hasError('required')) {
+            <mat-error>Client Name is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Contact Person</mat-label>
+          <input matInput formControlName="contactPerson" type="text" required />
+          @if (form()?.get('contactPerson')?.hasError('required')) {
+            <mat-error>Contact Person is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Email</mat-label>
+          <input matInput formControlName="email" type="email" required />
+          @if (form()?.get('email')?.hasError('required')) {
+            <mat-error>Email is required</mat-error>
+          }
+          @if (form()?.get('email')?.hasError('email')) {
+            <mat-error>Email must be valid</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Phone</mat-label>
+          <input matInput formControlName="phone" type="text" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Project Type</mat-label>
+          <input matInput formControlName="projectType" type="text" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Project Duration</mat-label>
+          <input matInput formControlName="projectDuration" type="text" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Outcome</mat-label>
+          <input matInput formControlName="outcome" type="text" />
+        </mat-form-field>
+      }
+
+      @case ('financial') {
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Annual Revenue</mat-label>
+          <input matInput formControlName="annualRevenue" type="number" required />
+          @if (form()?.get('annualRevenue')?.hasError('required')) {
+            <mat-error>Annual Revenue is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Profit Margin</mat-label>
+          <input matInput formControlName="profitMargin" type="number" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Employee Count</mat-label>
+          <input matInput formControlName="employeeCount" type="number" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Years Operating</mat-label>
+          <input matInput formControlName="yearsOperating" type="number" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Revenue Growth</mat-label>
+          <input matInput formControlName="revenueGrowth" type="number" />
+        </mat-form-field>
+      }
+    }
+
+    <!-- Base Fields (All Sections) -->
+    <mat-form-field appearance="outline" class="form-field">
+      <mat-label>Name</mat-label>
+      <input matInput formControlName="name" type="text" required />
+      @if (form()?.get('name')?.hasError('required')) {
+        <mat-error>Name is required</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="form-field">
+      <mat-label>Description</mat-label>
+      <textarea matInput formControlName="description" rows="3"></textarea>
+    </mat-form-field>
+  </form>
+
+  <!-- Form Footer -->
+  <div class="form-footer">
+    <button mat-stroked-button (click)="onCancel()" type="button">Cancel</button>
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="onSubmit()"
+      [disabled]="submitting() || !form()?.valid"
+      type="button">
+      @if (submitting()) {
+        <span>Saving...</span>
+      } @else {
+        <span>Save</span>
+      }
+    </button>
+  </div>
+</div>
