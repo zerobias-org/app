@@ -98,11 +98,10 @@ export interface PersonnelData {
  */
 export interface FinancialData {
   annualRevenue: number;
-  yearsInBusiness: number;
-  creditScore?: number;
-  bankReferences?: string[];
-  taxIdVerified?: boolean;
-  liabilityCoverage?: number;
+  profitMargin: number;
+  employeeCount: number;
+  yearsOperating: number;
+  revenueGrowth?: number;
 }
 
 // ── Domain Model (snake_case — matches Neon schema) ──
