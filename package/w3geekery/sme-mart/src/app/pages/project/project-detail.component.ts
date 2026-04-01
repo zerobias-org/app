@@ -58,7 +58,7 @@ const MORE_TAB_GROUPS: readonly TabGroup[] = [
   {
     heading: 'Governance',
     tabs: [
-      { path: 'members', label: 'Members', icon: 'group' },
+      { path: 'parties', label: 'Parties', icon: 'group' },
       { path: 'compliance', label: 'Compliance', icon: 'verified_user' },
       { path: 'reviews', label: 'Reviews', icon: 'rate_review' },
     ],

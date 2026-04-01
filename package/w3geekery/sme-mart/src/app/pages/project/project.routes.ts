@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { ProjectDetail } from './project-detail.component';
 import { ProjectOverviewTab } from './tabs/project-overview-tab.component';
 import { ProjectComingSoonTab } from './tabs/project-coming-soon-tab.component';
+import { ProjectPartiesTabComponent } from './tabs/project-parties-tab.component';
 
 /**
  * Top-level project routes.
@@ -21,7 +22,7 @@ export const PROJECT_ROUTES: Routes = [
       { path: 'notes', component: ProjectComingSoonTab, data: { title: 'Notes' } },
       { path: 'documents', component: ProjectComingSoonTab, data: { title: 'Documents' } },
       { path: 'timeline', component: ProjectComingSoonTab, data: { title: 'Timeline' } },
-      { path: 'members', component: ProjectComingSoonTab, data: { title: 'Members' } },
+      { path: 'parties', component: ProjectPartiesTabComponent, data: { title: 'Parties' } },
       { path: 'messages', component: ProjectComingSoonTab, data: { title: 'Messages' } },
       { path: 'dashboard', component: ProjectComingSoonTab, data: { title: 'Dashboard' } },
       { path: 'financials', component: ProjectComingSoonTab, data: { title: 'Financials' } },
