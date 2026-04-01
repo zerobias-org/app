@@ -49,10 +49,10 @@
 
 ### Vetting Pre-Fill (Plan 041 — Phase 4)
 
-- [ ] **VPF-01**: Engagement vetting tab suggests matching org profile items by section→vetting_type mapping
-- [ ] **VPF-02**: Vendor can select which profile items to attach to engagement vetting
-- [ ] **VPF-03**: Attached items are pointers (references), not copies of the profile data
-- [ ] **VPF-04**: Pre-fill suggestions update when profile items are added/updated
+- [x] **VPF-01**: Engagement vetting tab suggests matching org profile items by section→vetting_type mapping
+- [x] **VPF-02**: Vendor can select which profile items to attach to engagement vetting
+- [x] **VPF-03**: Attached items are pointers (references), not copies of the profile data
+- [x] **VPF-04**: Pre-fill suggestions update when profile items are added/updated
 
 ## Deferred (v1.2+)
 
@@ -108,10 +108,10 @@
 | VPU-05 | 10 | Complete |
 | VPU-06 | 10 | Complete |
 | VPU-07 | 10 | Complete |
-| VPF-01 | 11 | Pending |
-| VPF-02 | 11 | Pending |
-| VPF-03 | 11 | Pending |
-| VPF-04 | 11 | Pending |
+| VPF-01 | 11 | Complete |
+| VPF-02 | 11 | Complete |
+| VPF-03 | 11 | Complete |
+| VPF-04 | 11 | Complete |
 
 **Coverage:**
 - v1.1 requirements: 33 total

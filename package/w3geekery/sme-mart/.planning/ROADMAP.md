@@ -139,7 +139,7 @@
 4. When vendor adds new profile items or updates existing ones, the pre-fill suggestions panel updates automatically to reflect the new or changed items available for attachment
 
 **Plans:**
-- [ ] 11-01-PLAN.md — Wave 0 (test stubs) + Waves 1-3 (suggestion panel integration, checklist card, delete blocking)
+1/1 plans complete
 
 ---
 
@@ -177,7 +177,7 @@
 | 8. Vendor Profile Schema | 1/1 | Complete | 2026-04-01 |
 | 9. Vendor Profile Service | 1/1 | Complete | 2026-04-01 |
 | 10. Vendor Profile UI | 2/2 | Complete | 2026-04-01 |
-| 11. Vetting Pre-Fill | 1/1 | Plan created | 2026-04-01 |
+| 11. Vetting Pre-Fill | 1/1 | Complete    | 2026-04-01 |
 | 12. Project-Centric Boundary Model | 2/2 | Complete | 2026-04-01 |
 
 ---
