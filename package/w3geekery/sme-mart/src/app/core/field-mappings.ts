@@ -869,6 +869,47 @@ export const VETTING_ITEM_FIELD_MAPPING = {
   lastVerified: '2026-03-26',
 } as const;
 
+// ── MarketplaceProfileItem (Plan 041) ──
+
+/**
+ * MarketplaceProfileItem field mapping
+ *
+ * Neon table: marketplace_profile_items (columns in snake_case)
+ * GQL entity: MarketplaceProfileItem (fields in camelCase)
+ * JSON field: data → needs JSON.parse() on read, JSON.stringify() on write
+ *
+ * Section discriminator: corporate_identity, attestation, insurance, reference, personnel, financial
+ * Org-scoped: scalar orgId field (no bidirectional link)
+ */
+export const MARKETPLACE_PROFILE_ITEM_FIELD_MAPPING = {
+  neonToGql: {
+    id: 'id',
+    org_id: 'orgId',
+    section: 'section',
+    name: 'name',
+    description: 'description',
+    data: 'data',                    // JSON string — needs parsing
+    expires_at: 'expiresAt',
+    status: 'status',
+    created_at: 'createdAt',
+    updated_at: 'updatedAt',
+  },
+  gqlToNeon: {
+    id: 'id',
+    orgId: 'org_id',
+    section: 'section',
+    name: 'name',
+    description: 'description',
+    data: 'data',                    // JSON string — needs parsing
+    expiresAt: 'expires_at',
+    status: 'status',
+    dateCreated: 'created_at',
+    dateLastModified: 'updated_at',
+  },
+  sourceSchema: 'zerobias-org/schema PR #31 (Phase 8)',
+  lastVerified: '2026-04-01',
+} as const;
+
 /**
  * All field mapping constants exported as a single object for easier iteration.
  */
@@ -891,4 +932,5 @@ export const ALL_FIELD_MAPPINGS = {
   ProjectPlan: PROJECT_PLAN_FIELD_MAPPING,
   PlanMilestone: PLAN_MILESTONE_FIELD_MAPPING,
   EngagementVettingItem: VETTING_ITEM_FIELD_MAPPING,
+  MarketplaceProfileItem: MARKETPLACE_PROFILE_ITEM_FIELD_MAPPING,
 } as const;

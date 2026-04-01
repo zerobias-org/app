@@ -31,6 +31,9 @@ const SME_MART_CLASS_IDS = {
 
   // Plan 063 — Corporate Vetting (update after schema PR merge + dataloader verify)
   EngagementVettingItem: '66fa174f-86b2-5854-b7c1-7ffe26fcaa46',
+
+  // Plan 041 — Vendor Profile Service (deterministic UUID v5 from schema)
+  MarketplaceProfileItem: 'ee1e68b7-f003-5f5f-a111-7ec93b37681c',
 } as const;
 
 export type SmeMartClassName = keyof typeof SME_MART_CLASS_IDS;
