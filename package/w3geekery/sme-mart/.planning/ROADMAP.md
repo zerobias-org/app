@@ -25,8 +25,8 @@
 <summary>🚧 v1.1 Org Navigation & Vendor Profile (Phases 7-12) — IN PROGRESS</summary>
 
 - [x] Phase 7: Org Navigation (Plan 079) — 1/1 plans complete (2026-03-31)
-- [ ] Phase 8: Vendor Profile Schema (Plan 041 Phase 1) — 1/1 plans created (08-01-PLAN.md)
-- [ ] Phase 9: Vendor Profile Service (Plan 041 Phase 2) — 0/1 plans
+- [x] Phase 8: Vendor Profile Schema (Plan 041 Phase 1) — 1/1 plans complete (2026-04-01)
+- [x] Phase 9: Vendor Profile Service (Plan 041 Phase 2) — 1/1 plans complete (2026-04-01)
 - [ ] Phase 10: Vendor Profile UI (Plan 041 Phase 3) — 0/1 plans
 - [ ] Phase 11: Vetting Pre-Fill (Plan 041 Phase 4) — 0/1 plans
 - [ ] Phase 12: Project-Centric Boundary Model (Plan 080) — 1/1 plans created (12-01-PLAN.md)
@@ -90,13 +90,13 @@
 **Requirements:** VPS-01, VPS-02, VPS-03, VPS-04, VPS-05
 
 **Success Criteria** (what must be TRUE):
-1. `VendorProfileService` reads profile items via GraphQL using GQL read path and writes items via Pipeline using Pipeline write path for all 6 profile sections
-2. Service supports full CRUD operations (create, read, update, delete) for all sections with proper error handling and validation
-3. Field mapping constants exist with bidirectional GQL↔domain mapping for all profile item fields, documented with clear semantics
-4. Roundtrip tests pass validating GQL→domain→Pipeline→GQL cycle for representative profile items from each section
-5. Service tests achieve 80%+ code coverage with isolated unit tests and integration tests against live GQL/Pipeline endpoints
+1. ✅ `VendorProfileService` reads profile items via GraphQL using GQL read path and writes items via Pipeline using Pipeline write path for all 6 profile sections
+2. ✅ Service supports full CRUD operations (create, read, update, delete) for all sections with proper error handling and validation
+3. ✅ Field mapping constants exist with bidirectional GQL↔domain mapping for all profile item fields, documented with clear semantics
+4. ✅ Roundtrip tests pass validating GQL→domain→Pipeline→GQL cycle for representative profile items from each section
+5. ✅ Service tests achieve 80%+ code coverage with isolated unit tests and integration tests against live GQL/Pipeline endpoints
 
-**Plans:** TBD
+**Plans:** 09-01-PLAN.md ✅ (completed 2026-04-01)
 
 ---
 
@@ -175,13 +175,13 @@
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 7. Org Navigation | 1/1 | Complete | 2026-03-31 |
-| 8. Vendor Profile Schema | 1/1 | Executed, PR pending merge | 2026-04-01 |
-| 9. Vendor Profile Service | 0/1 | Blocked on Phase 8 merge | — |
-| 10. Vendor Profile UI | 0/1 | Not started | — |
+| 8. Vendor Profile Schema | 1/1 | Complete | 2026-04-01 |
+| 9. Vendor Profile Service | 1/1 | Complete | 2026-04-01 |
+| 10. Vendor Profile UI | 0/1 | Blocked on Phase 9 complete | — |
 | 11. Vetting Pre-Fill | 0/1 | Not started | — |
 | 12. Project-Centric Boundary Model | 1/1 | Plan created | 2026-04-01 |
 
 ---
 
 **Created:** 2026-03-30
-**Last Updated:** 2026-04-01 (Phase 12 plan created)
+**Last Updated:** 2026-04-01 (Phase 9 complete, Phase 12 plan created)

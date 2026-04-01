@@ -2,29 +2,29 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Org Navigation & Vendor Profile
-status: Awaiting PR review and schema reload
-last_updated: "2026-04-01T15:22:54.376Z"
+status: verifying
+last_updated: "2026-04-01T17:56:50.536Z"
 last_activity: 2026-04-01
 progress:
-  total_phases: 5
-  completed_phases: 2
-  total_plans: 3
-  completed_plans: 3
+  total_phases: 6
+  completed_phases: 3
+  total_plans: 5
+  completed_plans: 4
 ---
 
 # STATE.md — Session Context
 
 **Session Name:** `gsd-plan`
 **Date Created:** 2026-03-30
-**Current Focus:** Phase 08 — vendor-profile-schema
+**Current Focus:** Phase 12 — project-centric-boundary-model
 
 ---
 
 ## Current Position
 
-Phase: 9
-Plan: Not started
-Status: Awaiting PR review and schema reload
+Phase: 12 (project-centric-boundary-model) — EXECUTING
+Plan: 1 of 1
+Status: Phase complete — ready for verification
 Last activity: 2026-04-01
 
 ---
@@ -49,10 +49,14 @@ From v1.0:
 
 v1.1 decisions:
 
-- Schema PR first — VendorProfileItem to zerobias-org/schema:dev blocks phases 9-11
+- Schema PR first — MarketplaceProfileItem to zerobias-org/schema:dev blocks phases 9-11
 - /orgs/:orgId is read-only — editing on /org only
 - Org switching stubbed (disabled button with tooltip)
 - Flexible budget, 15 hrs/week cap
+
+### Roadmap Evolution
+
+- Phase 12 added (2026-04-01): Project-Centric Boundary Model (Plan 080) — internal/external org badges, project parties tab. Independent of Phases 9-11, can run in parallel.
 
 ---
 
