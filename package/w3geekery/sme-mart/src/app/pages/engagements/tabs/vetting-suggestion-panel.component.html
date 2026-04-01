@@ -1,0 +1,85 @@
+<div class="suggestion-panel">
+  <!-- Suggestion Chip (shows when not attached and suggestions available) -->
+  @if (!isAttached() && canSuggest()) {
+    <button
+      mat-icon-button
+      (click)="toggleExpanded()"
+      matTooltip="Suggested profile items from Corporate Profile"
+      class="suggestion-chip"
+    >
+      <mat-icon>lightbulb_outline</mat-icon>
+      <span class="label">Suggested from Profile</span>
+    </button>
+  }
+
+  <!-- Linked to Profile Chip (shows when attached) -->
+  @if (isAttached() && attachedItem()) {
+    <div class="linked-chip">
+      <zb-resource-status
+        [label]="'PROFILE_LINKED'"
+        [pill]="true"
+        [showDot]="false"
+        size="small"
+      />
+      <span class="item-name">{{ attachedItem()!.name }}</span>
+      @if (attachedItemExpired()) {
+        <span class="expired-warning">⚠ EXPIRED</span>
+      }
+      <button
+        mat-icon-button
+        matTooltip="Detach profile item"
+        (click)="onLinkedItemDetach()"
+        [disabled]="detachInProgress()"
+      >
+        <mat-icon>clear</mat-icon>
+      </button>
+    </div>
+  }
+
+  <!-- Suggestion Mini-Panel (expandable, shows matching profile items) -->
+  @if (expanded() && canSuggest()) {
+    <div class="suggestion-mini-panel">
+      @if (loading()) {
+        <mat-spinner diameter="30" class="spinner" />
+      } @else {
+        @if (suggestedItems().length === 0) {
+          <p class="no-items">No profile items match this vetting type.</p>
+        } @else {
+          <div class="items-list">
+            @for (item of suggestedItems(); track item.id) {
+              <div class="item-row">
+                <div class="item-info">
+                  <span class="item-name">{{ item.name }}</span>
+                  @if (isExpiredStatus(item)) {
+                    <zb-resource-status
+                      [label]="'EXPIRED'"
+                      [pill]="true"
+                      [showDot]="false"
+                      size="small"
+                    />
+                    <span class="warning-text">Update your profile first</span>
+                  } @else if (isExpiringSoonStatus(item)) {
+                    <zb-resource-status
+                      [label]="'EXPIRING_SOON'"
+                      [pill]="true"
+                      [showDot]="false"
+                      size="small"
+                    />
+                  }
+                </div>
+                <button
+                  mat-raised-button
+                  color="primary"
+                  (click)="onSuggestionItemAttach(item)"
+                  [disabled]="attachInProgress()"
+                >
+                  Attach
+                </button>
+              </div>
+            }
+          </div>
+        }
+      }
+    </div>
+  }
+</div>

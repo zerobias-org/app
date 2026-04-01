@@ -1,0 +1,121 @@
+.suggestion-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.suggestion-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background-color: #f5f5f5;
+  border-radius: 20px;
+  border: 1px solid #ddd;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  .label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #666;
+  }
+
+  &:hover {
+    background-color: #efefef;
+    border-color: #999;
+  }
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.linked-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background-color: #e8f5e9;
+  border-radius: 4px;
+  border-left: 4px solid #4caf50;
+
+  .item-name {
+    flex: 1;
+    font-weight: 500;
+    color: #333;
+  }
+
+  .expired-warning {
+    font-size: 12px;
+    font-weight: 600;
+    color: #d32f2f;
+  }
+
+  button {
+    flex-shrink: 0;
+  }
+}
+
+.suggestion-mini-panel {
+  margin-left: 24px;
+  padding: 12px;
+  background-color: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+
+  .spinner {
+    margin: 12px auto;
+  }
+
+  .no-items {
+    margin: 0;
+    font-size: 13px;
+    color: #999;
+    text-align: center;
+    padding: 8px 0;
+  }
+
+  .items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 8px;
+    background-color: white;
+    border: 1px solid #f0f0f0;
+    border-radius: 4px;
+
+    .item-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+
+      .item-name {
+        font-weight: 500;
+        color: #333;
+        font-size: 14px;
+      }
+
+      .warning-text {
+        font-size: 11px;
+        color: #f57c00;
+      }
+    }
+
+    button {
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+  }
+}
