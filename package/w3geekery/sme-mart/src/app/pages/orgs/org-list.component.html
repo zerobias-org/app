@@ -11,9 +11,10 @@
   <div class="org-list-toolbar">
     <div class="search-container">
       <zb-search-input
-        [ngModel]="searchTerm()"
-        (ngModelChange)="searchTerm.set($event)"
+        [value]="searchTerm()"
+        (searchChange)="searchTerm.set($event)"
         placeholder="Search organizations..."
+        message=""
       />
     </div>
     <button
@@ -26,8 +27,13 @@
     </button>
   </div>
 
+  <!-- Loading -->
+  @if (isLoading()) {
+    <p class="loading-text">Loading organizations...</p>
+  }
+
   <!-- Empty State -->
-  @if (filteredOrgs().length === 0) {
+  @if (!isLoading() && filteredOrgs().length === 0) {
     <zb-empty-state-container />
   }
 
@@ -42,14 +48,18 @@
         >
           <div class="card-header">
             <h3 class="org-name">{{ org.name }}</h3>
-            @if (isActive(org.id)) {
-              <span class="active-badge">Active</span>
-            }
+            <zb-resource-status [label]="org.badgeLabel" />
           </div>
 
           @if (org.description) {
             <p class="org-description">{{ org.description }}</p>
           }
+
+          <div class="metrics-row">
+            <span>{{ org.metrics.engagementCount }} Engagements</span>
+            <span>·</span>
+            <span>{{ org.metrics.projectCount }} Projects</span>
+          </div>
 
           <div class="card-footer">
             <div class="member-count">
@@ -70,9 +80,9 @@
         <thead>
           <tr>
             <th class="col-name">Organization Name</th>
-            <th class="col-description">Description</th>
+            <th class="col-badge">Type</th>
+            <th class="col-metrics">Metrics</th>
             <th class="col-members">Members</th>
-            <th class="col-status">Status</th>
           </tr>
         </thead>
         <tbody>
@@ -83,13 +93,13 @@
               [class.active-row]="isActive(org.id)"
             >
               <td class="col-name">{{ org.name }}</td>
-              <td class="col-description">{{ org.description || '-' }}</td>
-              <td class="col-members">{{ getMemberCount(org) }}</td>
-              <td class="col-status">
-                @if (isActive(org.id)) {
-                  <span class="status-chip">Active</span>
-                }
+              <td class="col-badge">
+                <zb-resource-status [label]="org.badgeLabel" />
               </td>
+              <td class="col-metrics">
+                {{ org.metrics.engagementCount }} E · {{ org.metrics.projectCount }} P
+              </td>
+              <td class="col-members">{{ getMemberCount(org) }}</td>
             </tr>
           }
         </tbody>

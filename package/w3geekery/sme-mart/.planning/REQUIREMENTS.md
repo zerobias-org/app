@@ -1,0 +1,123 @@
+# Requirements: SME Mart v1.1 — Org Navigation & Vendor Profile
+
+**Defined:** 2026-03-30
+**Core Value:** Transparent, task-gated marketplace with demand/supply/transparency partitions
+**Source Plans:** Backlog #079 (My Organizations Refactor), #041 (Supply-Side Vendor Profile)
+
+## v1.1 Requirements
+
+### Org Navigation (Plan 079)
+
+- [x] **ORG-01**: User can view `/orgs` page listing all their organizations as cards or table rows
+- [ ] **ORG-02**: Org list filters out `hidden:true` orgs, System Org, and ops orgs
+- [x] **ORG-03**: User can navigate to `/orgs/:orgId` read-only overview for any org
+- [x] **ORG-04**: Org overview displays org info (name, description, metadata)
+- [ ] **ORG-05**: Org overview displays members list via `hydra.Org.listOrgMembers`
+- [ ] **ORG-06**: Org overview displays groups list via `hydra.Org.listGroups`
+- [x] **ORG-07**: Org overview displays boundaries associated with the org
+- [ ] **ORG-08**: Org overview has "Go to Org Profile" action linking to `/org` for current org
+- [ ] **ORG-09**: Nav sidebar updated: "My Organization" renamed to "My Organizations", route → `/orgs`
+- [ ] **ORG-10**: Org switching button present but disabled with tooltip ("Available when session auth is enabled")
+- [ ] **ORG-11**: `/orgs/:orgId` is strictly read-only — editing stays on `/org` route
+
+### Vendor Profile Schema (Plan 041 — Phase 1)
+
+- [ ] **VPR-01**: `VendorProfileItem` GQL schema entity submitted to `zerobias-org/schema:dev` via PR
+- [ ] **VPR-02**: Entity has `section` discriminator field (enum: corporate_identity, attestation, insurance, reference, personnel, financial)
+- [ ] **VPR-03**: Entity has JSON `data` field for section-specific structured content
+- [ ] **VPR-04**: Entity is org-scoped (multiple org members can contribute items)
+- [ ] **VPR-05**: Schema includes appropriate links (org ownership, engagement reference)
+- [ ] **VPR-06**: Schema passes dataloader verification before PR submission
+
+### Vendor Profile Service (Plan 041 — Phase 2)
+
+- [ ] **VPS-01**: `VendorProfileService` reads profile items via GraphQL (GQL read path)
+- [ ] **VPS-02**: `VendorProfileService` writes profile items via Pipeline (Pipeline write path)
+- [ ] **VPS-03**: Service supports CRUD for all 6 profile sections
+- [ ] **VPS-04**: Field mapping constants with bidirectional GQL↔domain mapping
+- [ ] **VPS-05**: Roundtrip tests validating GQL→domain→Pipeline→GQL cycle
+
+### Vendor Profile UI (Plan 041 — Phase 3)
+
+- [ ] **VPU-01**: Corporate Profile tab visible on `/org` (current org) page
+- [ ] **VPU-02**: Tab displays profile items organized by section (6 sections)
+- [ ] **VPU-03**: User can add new profile items to any section
+- [ ] **VPU-04**: User can edit existing profile items
+- [ ] **VPU-05**: User can delete profile items
+- [ ] **VPU-06**: Expired items display with visual indicator (not hidden)
+- [ ] **VPU-07**: Expired items auto-generate "updated version needed" checklist prompt
+
+### Vetting Pre-Fill (Plan 041 — Phase 4)
+
+- [ ] **VPF-01**: Engagement vetting tab suggests matching org profile items by section→vetting_type mapping
+- [ ] **VPF-02**: Vendor can select which profile items to attach to engagement vetting
+- [ ] **VPF-03**: Attached items are pointers (references), not copies of the profile data
+- [ ] **VPF-04**: Pre-fill suggestions update when profile items are added/updated
+
+## Deferred (v1.2+)
+
+### Template→Instance Workflow (Plan 054)
+
+- **TPL-01**: Org-level document templates (MSA, NDA, SOW) instantiated per-engagement
+- **TPL-02**: Engagement-specific terms/signatures on template instances
+
+### Org Switching (Full)
+
+- **OSW-01**: `danaOld.Org.selectOrg` functional org switching (requires session auth, not API key)
+
+## Out of Scope
+
+| Feature | Reason |
+|---------|--------|
+| Org switching (functional) | `selectOrg` endpoint is stubbed/placeholder until off API key auth |
+| Editing non-current orgs | `/orgs/:orgId` is read-only; edit only on `/org` for current org |
+| Template→Instance workflow | Plan 054, separate milestone |
+| RFP package builder | Plan 054, separate milestone |
+| Task/subtask partitioning | CEO P0 but platform-dependent, deferred |
+
+## Traceability
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| ORG-01 | 7 | Complete |
+| ORG-02 | 7 | Pending |
+| ORG-03 | 7 | Complete |
+| ORG-04 | 7 | Complete |
+| ORG-05 | 7 | Pending |
+| ORG-06 | 7 | Pending |
+| ORG-07 | 7 | Complete |
+| ORG-08 | 7 | Pending |
+| ORG-09 | 7 | Pending |
+| ORG-10 | 7 | Pending |
+| ORG-11 | 7 | Pending |
+| VPR-01 | 8 | Pending |
+| VPR-02 | 8 | Pending |
+| VPR-03 | 8 | Pending |
+| VPR-04 | 8 | Pending |
+| VPR-05 | 8 | Pending |
+| VPR-06 | 8 | Pending |
+| VPS-01 | 9 | Pending |
+| VPS-02 | 9 | Pending |
+| VPS-03 | 9 | Pending |
+| VPS-04 | 9 | Pending |
+| VPS-05 | 9 | Pending |
+| VPU-01 | 10 | Pending |
+| VPU-02 | 10 | Pending |
+| VPU-03 | 10 | Pending |
+| VPU-04 | 10 | Pending |
+| VPU-05 | 10 | Pending |
+| VPU-06 | 10 | Pending |
+| VPU-07 | 10 | Pending |
+| VPF-01 | 11 | Pending |
+| VPF-02 | 11 | Pending |
+| VPF-03 | 11 | Pending |
+| VPF-04 | 11 | Pending |
+
+**Coverage:**
+- v1.1 requirements: 33 total
+- Mapped to phases: 33 (100%)
+- Unmapped: 0
+
+---
+*Requirements defined: 2026-03-30*
+*Last updated: 2026-03-30 after roadmap creation*

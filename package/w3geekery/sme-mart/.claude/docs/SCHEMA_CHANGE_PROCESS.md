@@ -64,16 +64,14 @@ Both sides of the link must be defined. The format is `ClassName.id.reversePrope
 
 **`npm run validate` is NOT sufficient.** It only checks YAML structure/naming. The REAL validation requires running the actual dataloader against the scratch database.
 
-### Update dataloader to latest
+### Update dataloader to latest (REQUIRED)
 
-Always check you're on the latest version before running. CI uses the latest — if your local version is behind, you may pass locally but fail CI.
+**ALWAYS update dataloader before every validation run.** This is not optional. CI uses the latest version — older local versions may be more lenient and pass schemas that fail on CI. We learned this the hard way: v1.0.89 accepted nested `field:` indent that v1.0.92 correctly rejected.
 
 ```bash
-# Check current version
-dataloader --version 2>&1 | grep "Dataloader v"
-
-# Update to latest
+# REQUIRED: update first, then check version
 npm install -g @zerobias-com/platform-dataloader@latest
+dataloader --version 2>&1 | grep "Dataloader v"
 ```
 
 ### Ensure scratch DB is running
@@ -165,8 +163,11 @@ EOF
 
 **Critical flags:**
 - `--repo zerobias-org/schema` (upstream, NOT the fork)
-- `--base dev` (NEVER main or qa — only dev has CI)
+- `--base dev` (default — dev has the CI dataloader check)
 - `--head w3geekery:feat/<branch>` (cross-fork reference)
+
+**Fallback if dev CI is broken:**
+If the dev branch CI workflow is down (e.g., `nfa_test` DB missing on Actions runner), target `--base qa` instead. This bypasses the broken dev CI while still deploying the schema to an environment. Resume targeting `--base dev` once CI is fixed.
 
 ## 7. After merge
 
