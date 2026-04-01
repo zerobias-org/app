@@ -124,7 +124,6 @@
               <zb-customizable-table
                 [data]="group.projects"
                 [columns]="['name', 'status']"
-                [readonly]="true"
                 (rowClick)="navigateToProject($event.id)"
               >
               </zb-customizable-table>
