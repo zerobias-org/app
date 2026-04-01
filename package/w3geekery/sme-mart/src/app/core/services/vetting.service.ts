@@ -293,6 +293,83 @@ export class VettingService {
     });
   }
 
+  // ── Reference Counting (D-12, D-13) ──
+
+  /**
+   * Get count of vetting items referencing a profile item (D-13)
+   *
+   * Queries all EngagementVettingItem records where profileItemId matches.
+   * Used by vendor-profile-tab delete handler to block deletion (D-12).
+   *
+   * @param profileItemId UUID of the profile item to check
+   * @returns Number of vetting items that reference this profile item
+   */
+  async getProfileItemReferenceCount(profileItemId: string): Promise<number> {
+    try {
+      const result = await this.graphqlRead.query<{
+        items: Array<{ id: string }>;
+      }>(
+        'EngagementVettingItem',
+        ['id'],  // Minimal fields for counting
+        {
+          filters: {
+            profileItemId: `.eq.${profileItemId}`,
+          },
+          pageSize: 200,
+        },
+      );
+      // Filter out soft-deleted items (dateDeleted present)
+      const activeItems = result.items.filter(
+        item => !(item as unknown as Record<string, unknown>)['dateDeleted'],
+      );
+      return activeItems.length;
+    } catch (err) {
+      console.error('[VettingService] getProfileItemReferenceCount failed:', err);
+      return 0;
+    }
+  }
+
+  /**
+   * Get engagement IDs that reference a profile item (D-13)
+   *
+   * Returns list of engagement IDs (with minimal data) for showing engagement names
+   * in the delete-blocked error message (D-12).
+   *
+   * @param profileItemId UUID of the profile item to check
+   * @returns Array of engagement IDs (deduped) that reference this profile item
+   */
+  async getProfileItemReferences(
+    profileItemId: string,
+  ): Promise<{ engagementId: string; itemId: string }[]> {
+    try {
+      const result = await this.graphqlRead.query<{
+        items: Array<{ id: string; engagementId: string }>;
+      }>(
+        'EngagementVettingItem',
+        ['id', 'engagementId'],
+        {
+          filters: {
+            profileItemId: `.eq.${profileItemId}`,
+          },
+          pageSize: 200,
+        },
+      );
+      // Filter out soft-deleted items
+      const activeItems = (result.items as unknown as Array<
+        Record<string, unknown>
+      >).filter(item => !item['dateDeleted']);
+      return activeItems
+        .filter(item => item.engagementId as string)  // Only items with engagement
+        .map(item => ({
+          engagementId: item.engagementId as string,
+          itemId: item.id as string,
+        }));
+    } catch (err) {
+      console.error('[VettingService] getProfileItemReferences failed:', err);
+      return [];
+    }
+  }
+
   // ── Private helpers ──
 
   /**
