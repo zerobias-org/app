@@ -22,6 +22,7 @@ import { Subscription } from 'rxjs';
 import { ZerobiasClientApp } from '@zerobias-com/zerobias-client';
 import { ZbResourceStatusComponent } from '@zerobias-org/ngx-library';
 import { VendorProfileService } from '../../../core/services/vendor-profile.service';
+import { VettingService } from '../../../core/services/vetting.service';
 import type {
   MarketplaceProfileItem,
   SectionType,
@@ -62,6 +63,7 @@ const SECTION_ORDER: SectionType[] = [
 export class VendorProfileTab implements OnInit, OnDestroy {
   private readonly app = inject(ZerobiasClientApp);
   private readonly vendorProfileService = inject(VendorProfileService);
+  private readonly vetting = inject(VettingService);
   private readonly snackBar = inject(MatSnackBar);
   private sub?: Subscription;
 
@@ -233,6 +235,18 @@ export class VendorProfileTab implements OnInit, OnDestroy {
 
   async confirmDelete(item: MarketplaceProfileItem): Promise<void> {
     try {
+      // Check if profile item is referenced by any vetting items (D-12, D-13)
+      const refCount = await this.vetting.getProfileItemReferenceCount(item.id);
+      if (refCount > 0) {
+        this.snackBar.open(
+          `This item is used in ${refCount} engagement(s). Detach from vetting first.`,
+          'OK',
+          { duration: 5000 },
+        );
+        return;  // Block deletion
+      }
+
+      // User confirmed, delete the item
       await this.vendorProfileService.deleteProfileItem(item.id);
       await this.loadItems();
       this.snackBar.open('Profile item deleted successfully', 'OK', { duration: 3000 });
