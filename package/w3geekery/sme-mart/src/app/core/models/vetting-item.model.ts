@@ -57,6 +57,7 @@ export interface EngagementVettingItem {
   notes: string | null;
   created_at: string;
   updated_at: string;
+  profile_item_id?: string | null;
 }
 
 // ── Requests ──
@@ -81,6 +82,7 @@ export interface UpdateVettingItemRequest {
   expires_at?: string;
   rejection_reason?: string;
   waived_reason?: string;
+  profile_item_id?: string | null;
 }
 
 // ── Summary (for tab badge) ──

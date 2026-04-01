@@ -310,6 +310,7 @@ export class VettingService {
     if (data.expires_at !== undefined) partial.expires_at = data.expires_at;
     if (data.rejection_reason !== undefined) partial.rejection_reason = data.rejection_reason;
     if (data.waived_reason !== undefined) partial.waived_reason = data.waived_reason;
+    if (data.profile_item_id !== undefined) partial.profile_item_id = data.profile_item_id;
     return partial;
   }
 
@@ -382,6 +383,7 @@ export class VettingService {
       'rejectionReason',
       'waivedReason',
       'notes',
+      'profileItemId',
       'dateCreated',
       'dateLastModified',
       'dateDeleted',

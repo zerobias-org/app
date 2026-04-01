@@ -842,6 +842,7 @@ export const VETTING_ITEM_FIELD_MAPPING = {
     notes: 'notes',
     created_at: 'createdAt',
     updated_at: 'updatedAt',
+    profile_item_id: 'profileItemId',
   },
   gqlToNeon: {
     id: 'id',
@@ -862,6 +863,7 @@ export const VETTING_ITEM_FIELD_MAPPING = {
     rejectionReason: 'rejection_reason',
     waivedReason: 'waived_reason',
     notes: 'notes',
+    profileItemId: 'profile_item_id',
     dateCreated: 'created_at',
     dateLastModified: 'updated_at',
   },
