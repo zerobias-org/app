@@ -37,6 +37,31 @@
       }
     }
 
+    <!-- Expired attachments checklist (D-09) — auto-generated for expired profile items -->
+    @if (expiredAttachments().length > 0) {
+      <div class="expired-attachments-alert">
+        <div class="alert-header">
+          <mat-icon>warning</mat-icon>
+          <span class="title">Items Needing Renewal</span>
+        </div>
+        <div class="alert-body">
+          @for (item of expiredAttachments(); track item.itemId) {
+            <div class="alert-item">
+              <span class="item-label">⚠ {{ item.name }} is expired</span>
+              <button
+                mat-stroked-button
+                routerLink="/org"
+                fragment="profile"
+                class="action-button"
+              >
+                Update in Corporate Profile
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
     <!-- Requirements FOR Provider (buyer's requirements) -->
     <section class="vetting-section">
       <div class="section-header">
@@ -125,6 +150,13 @@
                   <span class="detail-value">{{ item.document_ids.length }} attached</span>
                 </div>
               }
+
+              <!-- Suggestion panel for profile item linking (D-04) -->
+              <app-vetting-suggestion-panel
+                [vettingItem]="item"
+                [onAttach]="(profileItem) => attachProfileItem(item.id, profileItem)"
+                [onDetach]="() => detachProfileItem(item.id)"
+              />
 
               <div class="item-actions">
                 @if (getNextStatuses(item).length > 0) {

@@ -2,6 +2,7 @@ import {
   Component, inject, signal, computed, ChangeDetectionStrategy, OnInit,
 } from '@angular/core';
 import { DatePipe, TitleCasePipe } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -13,6 +14,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { ZbResourceStatusComponent } from '@zerobias-org/ngx-library';
 import { EngagementContextService } from '../../../core/services/engagement-context.service';
 import { VettingService } from '../../../core/services/vetting.service';
+import { VendorProfileService } from '../../../core/services/vendor-profile.service';
 import type {
   EngagementVettingItem,
   VettingStatus,
@@ -20,8 +22,11 @@ import type {
   VettingSummary,
   VettingGateStatus,
 } from '../../../core/models';
+import type { MarketplaceProfileItem } from '../../../core/models/marketplace-profile-item.model';
 import { VETTING_STATUS_TRANSITIONS } from '../../../core/models';
+import { isExpired } from '../../../core/utilities/expiration.utility';
 import { VettingItemDialogComponent } from '../../../shared/components/vetting-item-dialog/vetting-item-dialog.component';
+import { VettingSuggestionPanelComponent } from './vetting-suggestion-panel.component';
 
 @Component({
   selector: 'app-vetting-tab',
@@ -29,6 +34,7 @@ import { VettingItemDialogComponent } from '../../../shared/components/vetting-i
   imports: [
     DatePipe,
     TitleCasePipe,
+    RouterModule,
     MatExpansionModule,
     MatButtonModule,
     MatIconModule,
@@ -36,6 +42,7 @@ import { VettingItemDialogComponent } from '../../../shared/components/vetting-i
     MatMenuModule,
     MatTooltipModule,
     ZbResourceStatusComponent,
+    VettingSuggestionPanelComponent,
   ],
   templateUrl: './vetting-tab.component.html',
   styleUrl: './vetting-tab.component.scss',
@@ -44,6 +51,7 @@ import { VettingItemDialogComponent } from '../../../shared/components/vetting-i
 export class VettingTab implements OnInit {
   private readonly ctx = inject(EngagementContextService);
   private readonly vetting = inject(VettingService);
+  private readonly vendorProfile = inject(VendorProfileService);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
 
@@ -106,6 +114,42 @@ export class VettingTab implements OnInit {
       this.snackBar.open(`Status updated to ${this.formatStatus(newStatus)}`, '', { duration: 2000 });
     } catch (err: any) {
       this.snackBar.open(err.message || 'Failed to update status', 'OK', { duration: 4000 });
+    }
+  }
+
+  // ── Profile item suggestions (D-09, D-11) ──
+
+  readonly expiredAttachments = computed(() =>
+    this.items()
+      .filter(item => item.profile_item_id && isExpired({ expires_at: item.expires_at }))
+      .map(item => ({
+        itemId: item.id,
+        profileItemId: item.profile_item_id || '',
+        name: item.name,
+      })),
+  );
+
+  async attachProfileItem(vettingItemId: string, profileItem: MarketplaceProfileItem): Promise<void> {
+    try {
+      await this.vetting.updateVettingItem(vettingItemId, {
+        profile_item_id: profileItem.id,
+      });
+      await this.loadItems();
+      this.snackBar.open(`Attached: ${profileItem.name}`, '', { duration: 2000 });
+    } catch (err: any) {
+      this.snackBar.open(err.message || 'Failed to attach profile item', 'OK', { duration: 4000 });
+    }
+  }
+
+  async detachProfileItem(vettingItemId: string): Promise<void> {
+    try {
+      await this.vetting.updateVettingItem(vettingItemId, {
+        profile_item_id: null,
+      });
+      await this.loadItems();
+      this.snackBar.open('Profile item detached', '', { duration: 2000 });
+    } catch (err: any) {
+      this.snackBar.open(err.message || 'Failed to detach profile item', 'OK', { duration: 4000 });
     }
   }
 
