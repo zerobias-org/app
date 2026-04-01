@@ -359,10 +359,10 @@ export class VettingService {
         Record<string, unknown>
       >).filter(item => !item['dateDeleted']);
       return activeItems
-        .filter(item => item.engagementId as string)  // Only items with engagement
+        .filter(item => item['engagementId'] as string)  // Only items with engagement
         .map(item => ({
-          engagementId: item.engagementId as string,
-          itemId: item.id as string,
+          engagementId: item['engagementId'] as string,
+          itemId: item['id'] as string,
         }));
     } catch (err) {
       console.error('[VettingService] getProfileItemReferences failed:', err);

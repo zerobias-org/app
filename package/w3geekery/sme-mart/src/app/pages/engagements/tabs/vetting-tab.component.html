@@ -154,8 +154,8 @@
               <!-- Suggestion panel for profile item linking (D-04) -->
               <app-vetting-suggestion-panel
                 [vettingItem]="item"
-                [onAttach]="(profileItem) => attachProfileItem(item.id, profileItem)"
-                [onDetach]="() => detachProfileItem(item.id)"
+                [onAttach]="getAttachCallback(item.id)"
+                [onDetach]="getDetachCallback(item.id)"
               />
 
               <div class="item-actions">

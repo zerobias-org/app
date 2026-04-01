@@ -129,28 +129,41 @@ export class VettingTab implements OnInit {
       })),
   );
 
-  async attachProfileItem(vettingItemId: string, profileItem: MarketplaceProfileItem): Promise<void> {
-    try {
-      await this.vetting.updateVettingItem(vettingItemId, {
-        profile_item_id: profileItem.id,
-      });
-      await this.loadItems();
-      this.snackBar.open(`Attached: ${profileItem.name}`, '', { duration: 2000 });
-    } catch (err: any) {
-      this.snackBar.open(err.message || 'Failed to attach profile item', 'OK', { duration: 4000 });
-    }
+  attachProfileItem(vettingItemId: string, profileItem: MarketplaceProfileItem): Promise<void> {
+    return (async () => {
+      try {
+        await this.vetting.updateVettingItem(vettingItemId, {
+          profile_item_id: profileItem.id,
+        });
+        await this.loadItems();
+        this.snackBar.open(`Attached: ${profileItem.name}`, '', { duration: 2000 });
+      } catch (err: any) {
+        this.snackBar.open(err.message || 'Failed to attach profile item', 'OK', { duration: 4000 });
+      }
+    })();
   }
 
-  async detachProfileItem(vettingItemId: string): Promise<void> {
-    try {
-      await this.vetting.updateVettingItem(vettingItemId, {
-        profile_item_id: null,
-      });
-      await this.loadItems();
-      this.snackBar.open('Profile item detached', '', { duration: 2000 });
-    } catch (err: any) {
-      this.snackBar.open(err.message || 'Failed to detach profile item', 'OK', { duration: 4000 });
-    }
+  detachProfileItem(vettingItemId: string): Promise<void> {
+    return (async () => {
+      try {
+        await this.vetting.updateVettingItem(vettingItemId, {
+          profile_item_id: null,
+        });
+        await this.loadItems();
+        this.snackBar.open('Profile item detached', '', { duration: 2000 });
+      } catch (err: any) {
+        this.snackBar.open(err.message || 'Failed to detach profile item', 'OK', { duration: 4000 });
+      }
+    })();
+  }
+
+  // Helper to get callback functions for suggestion panel
+  getAttachCallback(vettingItemId: string): (item: MarketplaceProfileItem) => Promise<void> {
+    return (item: MarketplaceProfileItem) => this.attachProfileItem(vettingItemId, item);
+  }
+
+  getDetachCallback(vettingItemId: string): () => Promise<void> {
+    return () => this.detachProfileItem(vettingItemId);
   }
 
   // ── Add item ──
