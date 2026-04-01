@@ -27,9 +27,9 @@
 - [x] Phase 7: Org Navigation (Plan 079) — 1/1 plans complete (2026-03-31)
 - [x] Phase 8: Vendor Profile Schema (Plan 041 Phase 1) — 1/1 plans complete (2026-04-01)
 - [x] Phase 9: Vendor Profile Service (Plan 041 Phase 2) — 1/1 plans complete (2026-04-01)
-- [ ] Phase 10: Vendor Profile UI (Plan 041 Phase 3) — 0/1 plans
-- [ ] Phase 11: Vetting Pre-Fill (Plan 041 Phase 4) — 0/1 plans
-- [ ] Phase 12: Project-Centric Boundary Model (Plan 080) — 1/1 plans created (12-01-PLAN.md)
+- [x] Phase 10: Vendor Profile UI (Plan 041 Phase 3) — 2/2 plans complete (2026-04-01)
+- [ ] Phase 11: Vetting Pre-Fill (Plan 041 Phase 4) — 1/1 plans created (2026-04-01)
+- [x] Phase 12: Project-Centric Boundary Model (Plan 080) — 2/2 plans complete (2026-04-01)
 
 </details>
 
@@ -75,7 +75,7 @@
 4. PR is merged to `zerobias-org/schema:dev` and schema reload propagates to platform within 15 minutes
 5. Service layer can query `MarketplaceProfileItem` entities via GQL without 404 or schema errors
 
-**Plans:** 08-01-PLAN.md (created 2026-03-31, awaiting execution)
+**Plans:** 08-01-PLAN.md ✅
 
 ---
 
@@ -96,7 +96,7 @@
 4. ✅ Roundtrip tests pass validating GQL→domain→Pipeline→GQL cycle for representative profile items from each section
 5. ✅ Service tests achieve 80%+ code coverage with isolated unit tests and integration tests against live GQL/Pipeline endpoints
 
-**Plans:** 09-01-PLAN.md ✅ (completed 2026-04-01)
+**Plans:** 09-01-PLAN.md ✅
 
 ---
 
@@ -118,9 +118,7 @@
 5. Expired items (based on `expiresAt` field, if present) display with visual indicator (color, badge, etc.) and are NOT hidden — users see what needs renewal
 6. Expired items auto-generate a "updated version needed" checklist prompt (appears as a card or notification) suggesting the vendor update the expired item
 
-**Plans:** 2/2 plans complete
-
-**UI hint**: yes
+**Plans:** 2/2 plans complete ✅
 
 ---
 
@@ -140,7 +138,8 @@
 3. Attached items remain pointers to the live vendor profile — if the vendor updates a profile item later, the vetting sees the current version, not a stale copy
 4. When vendor adds new profile items or updates existing ones, the pre-fill suggestions panel updates automatically to reflect the new or changed items available for attachment
 
-**Plans:** TBD
+**Plans:**
+- [ ] 11-01-PLAN.md — Wave 0 (test stubs) + Waves 1-3 (suggestion panel integration, checklist card, delete blocking)
 
 ---
 
@@ -162,7 +161,7 @@
 5. Parties tab shows party name, roles (`listBoundaryPartyRoles`), and teams (`listBoundaryTeams`) per boundary — all read-only
 6. No boundary admin/CRUD operations in SME Mart (stays in ZB Governance)
 
-**Plans:** 2/2 plans complete
+**Plans:** 2/2 plans complete ✅
 
 **Canonical refs:**
 - `.planning/director/DECISIONS.md` — Internal vs External detection, Project Members → Parties, Boundary Admin scope decisions
@@ -177,11 +176,11 @@
 | 7. Org Navigation | 1/1 | Complete | 2026-03-31 |
 | 8. Vendor Profile Schema | 1/1 | Complete | 2026-04-01 |
 | 9. Vendor Profile Service | 1/1 | Complete | 2026-04-01 |
-| 10. Vendor Profile UI | 2/2 | Complete    | 2026-04-01 |
-| 11. Vetting Pre-Fill | 0/1 | Not started | — |
-| 12. Project-Centric Boundary Model | 1/1 | Complete    | 2026-04-01 |
+| 10. Vendor Profile UI | 2/2 | Complete | 2026-04-01 |
+| 11. Vetting Pre-Fill | 1/1 | Plan created | 2026-04-01 |
+| 12. Project-Centric Boundary Model | 2/2 | Complete | 2026-04-01 |
 
 ---
 
 **Created:** 2026-03-30
-**Last Updated:** 2026-04-01 (Phase 9 complete, Phase 12 plan created)
+**Last Updated:** 2026-04-01 (Phase 11 plan created)
