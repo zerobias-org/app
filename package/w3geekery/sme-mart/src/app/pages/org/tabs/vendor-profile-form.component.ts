@@ -335,11 +335,10 @@ export class VendorProfileForm implements OnInit {
       case 'financial':
         return {
           annualRevenue: this.parseNumber(formValue['annualRevenue']),
-          yearsInBusiness: 0,
           profitMargin: this.parseNumber(formValue['profitMargin']),
           employeeCount: this.parseNumber(formValue['employeeCount']),
           yearsOperating: this.parseNumber(formValue['yearsOperating']),
-          creditScore: undefined,
+          revenueGrowth: formValue['revenueGrowth'] ? this.parseNumber(formValue['revenueGrowth']) : undefined,
         } as FinancialData;
 
       default:
