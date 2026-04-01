@@ -211,7 +211,7 @@ export class OrgDetailComponent implements OnInit {
           if (eng.items && eng.items.length > 0) {
             this.engagementMap.update(map => ({
               ...map,
-              [engId]: eng.items[0],
+              [engId as string]: eng.items[0],
             }));
           }
         } catch (err) {
