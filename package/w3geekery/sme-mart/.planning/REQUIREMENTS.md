@@ -39,13 +39,13 @@
 
 ### Vendor Profile UI (Plan 041 — Phase 3)
 
-- [ ] **VPU-01**: Corporate Profile tab visible on `/org` (current org) page
-- [ ] **VPU-02**: Tab displays profile items organized by section (6 sections)
-- [ ] **VPU-03**: User can add new profile items to any section
-- [ ] **VPU-04**: User can edit existing profile items
-- [ ] **VPU-05**: User can delete profile items
-- [ ] **VPU-06**: Expired items display with visual indicator (not hidden)
-- [ ] **VPU-07**: Expired items auto-generate "updated version needed" checklist prompt
+- [x] **VPU-01**: Corporate Profile tab visible on `/org` (current org) page
+- [x] **VPU-02**: Tab displays profile items organized by section (6 sections)
+- [x] **VPU-03**: User can add new profile items to any section
+- [x] **VPU-04**: User can edit existing profile items
+- [x] **VPU-05**: User can delete profile items
+- [x] **VPU-06**: Expired items display with visual indicator (not hidden)
+- [x] **VPU-07**: Expired items auto-generate "updated version needed" checklist prompt
 
 ### Vetting Pre-Fill (Plan 041 — Phase 4)
 
@@ -101,13 +101,13 @@
 | VPS-03 | 9 | Pending |
 | VPS-04 | 9 | Pending |
 | VPS-05 | 9 | Pending |
-| VPU-01 | 10 | Pending |
-| VPU-02 | 10 | Pending |
-| VPU-03 | 10 | Pending |
-| VPU-04 | 10 | Pending |
-| VPU-05 | 10 | Pending |
-| VPU-06 | 10 | Pending |
-| VPU-07 | 10 | Pending |
+| VPU-01 | 10 | Complete |
+| VPU-02 | 10 | Complete |
+| VPU-03 | 10 | Complete |
+| VPU-04 | 10 | Complete |
+| VPU-05 | 10 | Complete |
+| VPU-06 | 10 | Complete |
+| VPU-07 | 10 | Complete |
 | VPF-01 | 11 | Pending |
 | VPF-02 | 11 | Pending |
 | VPF-03 | 11 | Pending |

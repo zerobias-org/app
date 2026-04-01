@@ -118,7 +118,7 @@
 5. Expired items (based on `expiresAt` field, if present) display with visual indicator (color, badge, etc.) and are NOT hidden — users see what needs renewal
 6. Expired items auto-generate a "updated version needed" checklist prompt (appears as a card or notification) suggesting the vendor update the expired item
 
-**Plans:** TBD
+**Plans:** 2/2 plans complete
 
 **UI hint**: yes
 
@@ -162,7 +162,7 @@
 5. Parties tab shows party name, roles (`listBoundaryPartyRoles`), and teams (`listBoundaryTeams`) per boundary — all read-only
 6. No boundary admin/CRUD operations in SME Mart (stays in ZB Governance)
 
-**Plans:** 12-01-PLAN.md (created 2026-04-01)
+**Plans:** 2/2 plans complete
 
 **Canonical refs:**
 - `.planning/director/DECISIONS.md` — Internal vs External detection, Project Members → Parties, Boundary Admin scope decisions
@@ -177,9 +177,9 @@
 | 7. Org Navigation | 1/1 | Complete | 2026-03-31 |
 | 8. Vendor Profile Schema | 1/1 | Complete | 2026-04-01 |
 | 9. Vendor Profile Service | 1/1 | Complete | 2026-04-01 |
-| 10. Vendor Profile UI | 0/1 | Blocked on Phase 9 complete | — |
+| 10. Vendor Profile UI | 2/2 | Complete    | 2026-04-01 |
 | 11. Vetting Pre-Fill | 0/1 | Not started | — |
-| 12. Project-Centric Boundary Model | 1/1 | Plan created | 2026-04-01 |
+| 12. Project-Centric Boundary Model | 1/1 | Complete    | 2026-04-01 |
 
 ---
 
