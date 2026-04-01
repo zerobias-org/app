@@ -38,13 +38,12 @@ A transparent, task-gated marketplace where every boundary API operation require
 ### Active
 
 - [x] My Organizations refactor — three-tier org navigation (Plan 079) — Validated in Phase 7: Org Navigation (2026-03-31)
-- [ ] Supply-side vendor profile — one-time corporate doc loading (Plan 041)
+- [ ] Supply-side vendor profile — one-time corporate doc loading (Plan 041) — Schema validated in Phase 8 (2026-04-01)
 - [ ] Task/subtask partitioning into demand/supply/transparency (CEO P0, deferred)
 - [ ] Tasks as runtime access control — boundary API gating via task approval (deferred)
 - [ ] Hard requirements (1-5) / soft requirements (6-10) approval model (deferred)
 - [ ] Supply-side explicit resource requirements (ARN, IAM, data objects, schedule) (deferred)
 - [ ] Project Bloom UI (boards, tasks, activities, workflows) (deferred)
-- [ ] Fix build errors blocking `npm test`
 - [ ] Neon table archival (scheduled 2026-04-02)
 - [ ] Transparency Center (aggregated rollups from subtask → project) (deferred)
 
@@ -84,4 +83,4 @@ A transparent, task-gated marketplace where every boundary API operation require
 | Archive Neon (don't delete) | Safety-first, 2-week observation | — Pending (2026-04-02) |
 
 ---
-*Last updated: 2026-03-31 after Phase 7 completion*
+*Last updated: 2026-04-01 after Phase 8 completion*

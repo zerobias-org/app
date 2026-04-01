@@ -2,8 +2,8 @@
 phase: 08-vendor-profile-schema
 plan: 01
 type: execute
-status: checkpoint-reached
-completed_date: 2026-03-31T17:28:00Z
+status: complete
+completed_date: 2026-04-01T00:00:00Z
 duration_minutes: 3
 subsystem: schema
 tags:
@@ -47,10 +47,9 @@ tech_stack:
 
 ## Completion Status
 
-✅ **CHECKPOINT REACHED** — Phase 8 Plan 01 is at Task 4 checkpoint (human-verify gate). All code tasks (1-3) are complete. Awaiting maintainer review and merge of zerobias-org/schema PR #30.
+✅ **COMPLETE** — All 4 tasks done. PR #31 merged to zerobias-org/schema dev/qa/main. Published as `@zerobias-org/schema-w3geekery-smemart@1.0.11`. Schema live on platform.
 
-**Checkpoint Type:** `human-verify`
-**Progress:** 3 of 4 tasks complete (Task 4 is checkpoint gate)
+**Progress:** 4 of 4 tasks complete
 
 ---
 
@@ -74,7 +73,7 @@ tech_stack:
 - **Dataloader Marker:** ✅ `.dataloader-validated` created (timestamp within 30 min)
 - **Schema Repo Commit:** ✅ `67fbfbe` — `feat(w3geekery): add MarketplaceProfileItem schema class...`
 - **Git Push:** ✅ Pushed to `origin/feat/marketplace-profile-item`
-- **Cross-Fork PR:** ✅ PR #30 submitted to `zerobias-org/schema:dev`
+- **Cross-Fork PR:** ✅ PR #31 submitted to `zerobias-org/schema:dev`
 
 ---
 
@@ -82,7 +81,7 @@ tech_stack:
 
 | Req ID | Title | Mapped To | Status |
 |--------|-------|-----------|--------|
-| **VPR-01** | GQL schema entity submitted to zerobias-org/schema:dev | PR #30 | ✅ |
+| **VPR-01** | GQL schema entity submitted to zerobias-org/schema:dev | PR #31 | ✅ |
 | **VPR-02** | Section discriminator field with 6 enum values | `enums/marketplaceProfileItem.section.yml` | ✅ |
 | **VPR-03** | JSON data field for section-specific content | `fields/marketplaceProfileItem.data.yml` | ✅ |
 | **VPR-04** | Org-scoped via scalar orgId field | `fields/marketplaceProfileItem.orgId.yml` | ✅ |
@@ -148,7 +147,7 @@ As per Director FLAG-1 verification (confirmed existing convention):
 
 ### Immediate (Maintainer Action)
 
-1. **PR Review & Merge** — zerobias-org/schema maintainers review PR #30
+1. **PR Review & Merge** — zerobias-org/schema maintainers review PR #31
    - Expected: 1-2 business days
    - CI checks will validate dataloader on merge
    - No action required from Clark
@@ -160,7 +159,7 @@ As per Director FLAG-1 verification (confirmed existing convention):
 ### Phase 9 (Service Layer) Prerequisites
 
 ✅ **Ready when:**
-- Schema PR #30 merged to zerobias-org/schema:dev
+- Schema PR #31 merged to zerobias-org/schema:dev
 - Platform GQL schema reloads (verify with `query { MarketplaceProfileItem { id } }`)
 - Phase 9 can begin service layer implementation
 
@@ -182,7 +181,7 @@ As per Director FLAG-1 verification (confirmed existing convention):
 
 ## Deviations from Plan
 
-**None** — plan executed exactly as specified.
+**YAML indent fix required.** Initial commit had nested `field:` indent (extra indent under property key). Dataloader v1.0.89 accepted it but v1.0.92 correctly rejected it. Fixed to sibling indent, re-validated, force-pushed as PR #31 (PR #30 was the original, retargeted to qa then reverted).
 
 - ✅ All 7 YAML files created with correct content
 - ✅ Enum values in UPPER_SNAKE_CASE (verified convention)
@@ -214,7 +213,7 @@ None — schema definitions are complete. Service layer (Phase 9) will add:
 - ✅ Schema repo commit `67fbfbe` verified in git log
 
 **PR Status:**
-- ✅ PR #30 exists at https://github.com/zerobias-org/schema/pull/30
+- ✅ PR #31 exists at https://github.com/zerobias-org/schema/pull/30
 - ✅ Base branch: `dev`
 - ✅ Head branch: `w3geekery:feat/marketplace-profile-item`
 - ✅ Files: 7 (1 class + 5 fields + 1 enum)
@@ -232,7 +231,7 @@ None — schema definitions are complete. Service layer (Phase 9) will add:
 
 ---
 
-**Status:** Awaiting PR review and merge by zerobias-org/schema maintainers. No further action until merge is complete and platform schema reloads (watch for ~15 min after merge).
+**Status:** COMPLETE. PR #31 merged 2026-04-01. Published as @zerobias-org/schema-w3geekery-smemart@1.0.11. Schema live on all environments (dev/qa/main).
 
 ---
 
