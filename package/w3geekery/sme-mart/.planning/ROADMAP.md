@@ -3,7 +3,7 @@
 ## Milestones
 
 - ✅ **v1.0 AuditgraphDB Migration** — Phases 1-6 (shipped 2026-03-19) | [Archive](milestones/v1.0-ROADMAP.md)
-- 🚧 **v1.1 Org Navigation & Vendor Profile** — Phases 7-11 (in progress)
+- 🚧 **v1.1 Org Navigation & Vendor Profile** — Phases 7-12 (in progress)
 
 ## Phases
 
@@ -22,13 +22,14 @@
 ---
 
 <details open>
-<summary>🚧 v1.1 Org Navigation & Vendor Profile (Phases 7-11) — IN PROGRESS</summary>
+<summary>🚧 v1.1 Org Navigation & Vendor Profile (Phases 7-12) — IN PROGRESS</summary>
 
 - [x] Phase 7: Org Navigation (Plan 079) — 1/1 plans complete (2026-03-31)
 - [ ] Phase 8: Vendor Profile Schema (Plan 041 Phase 1) — 1/1 plans created (08-01-PLAN.md)
 - [ ] Phase 9: Vendor Profile Service (Plan 041 Phase 2) — 0/1 plans
 - [ ] Phase 10: Vendor Profile UI (Plan 041 Phase 3) — 0/1 plans
 - [ ] Phase 11: Vetting Pre-Fill (Plan 041 Phase 4) — 0/1 plans
+- [ ] Phase 12: Project-Centric Boundary Model (Plan 080) — 1/1 plans created (12-01-PLAN.md)
 
 </details>
 
@@ -143,17 +144,44 @@
 
 ---
 
+### Phase 12: Project-Centric Boundary Model
+
+**Goal:** Surface internal/external org membership distinction and project boundary parties in the UI. My Orgs cards show Internal/External badges and engagement/project counts. Project detail replaces `members` stub with read-only `parties` tab showing boundary parties, roles, and teams.
+
+**Depends on:** Phase 7 (org navigation must exist). Independent of Phases 9-11 — can run in parallel with vendor profile work.
+
+**Plan:** Plan 080 (Project-Centric Boundary Model)
+
+**Requirements:** SC-1, SC-2, SC-3, SC-4, SC-5, SC-6 (success criteria detailed below)
+
+**Success Criteria** (what must be TRUE):
+1. My Orgs cards display Internal/External badge based on `whoAmI().ownerId === org.id` comparison
+2. My Orgs cards show engagement count and project count badges
+3. `/orgs/:orgId` overview shows engagements and projects grouped with navigation links
+4. Project detail page has `parties` tab (replacing `members` stub) showing boundary parties from `platform.Boundary.listBoundaryParties` using `SmeMartProject.boundaryIds`
+5. Parties tab shows party name, roles (`listBoundaryPartyRoles`), and teams (`listBoundaryTeams`) per boundary — all read-only
+6. No boundary admin/CRUD operations in SME Mart (stays in ZB Governance)
+
+**Plans:** 12-01-PLAN.md (created 2026-04-01)
+
+**Canonical refs:**
+- `.planning/director/DECISIONS.md` — Internal vs External detection, Project Members → Parties, Boundary Admin scope decisions
+- `.planning/director/SESSION-STATE.md` — ZB APIs confirmed available (boundary party/role/team endpoints)
+
+---
+
 ## Progress
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 7. Org Navigation | 1/1 | Complete | 2026-03-31 |
-| 8. Vendor Profile Schema | 0/1 | Plan created, awaiting execution | — |
-| 9. Vendor Profile Service | 0/1 | Not started | — |
+| 8. Vendor Profile Schema | 1/1 | Executed, PR pending merge | 2026-04-01 |
+| 9. Vendor Profile Service | 0/1 | Blocked on Phase 8 merge | — |
 | 10. Vendor Profile UI | 0/1 | Not started | — |
 | 11. Vetting Pre-Fill | 0/1 | Not started | — |
+| 12. Project-Centric Boundary Model | 1/1 | Plan created | 2026-04-01 |
 
 ---
 
 **Created:** 2026-03-30
-**Last Updated:** 2026-03-31 (Phase 8 plan created)
+**Last Updated:** 2026-04-01 (Phase 12 plan created)
