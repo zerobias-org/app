@@ -38,7 +38,8 @@ A transparent, task-gated marketplace where every boundary API operation require
 ### Active
 
 - [x] My Organizations refactor — three-tier org navigation (Plan 079) — Validated in Phase 7: Org Navigation (2026-03-31)
-- [ ] Supply-side vendor profile — one-time corporate doc loading (Plan 041) — Schema (Phase 8) + Service layer (Phase 9) complete (2026-04-01)
+- [x] Project-centric boundary model — Internal/External badges, engagement/project counts, boundary parties tab (Plan 080) — Validated in Phase 12 (2026-04-01)
+- [x] Supply-side vendor profile — one-time corporate doc loading (Plan 041) — Schema (Phase 8) + Service (Phase 9) + UI (Phase 10) + Vetting Pre-Fill (Phase 11) complete (2026-04-01)
 - [ ] Task/subtask partitioning into demand/supply/transparency (CEO P0, deferred)
 - [ ] Tasks as runtime access control — boundary API gating via task approval (deferred)
 - [ ] Hard requirements (1-5) / soft requirements (6-10) approval model (deferred)
@@ -83,4 +84,4 @@ A transparent, task-gated marketplace where every boundary API operation require
 | Archive Neon (don't delete) | Safety-first, 2-week observation | — Pending (2026-04-02) |
 
 ---
-*Last updated: 2026-04-01 after Phase 9 completion*
+*Last updated: 2026-04-01 after Phase 11 completion*
