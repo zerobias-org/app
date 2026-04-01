@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { ZerobiasClientApi } from '@zerobias-com/zerobias-client';
+import { UUID } from '@zerobias-org/types-core-js';
 
 /**
  * Boundary party information from platform API.
@@ -50,11 +51,11 @@ export class BoundaryService {
    * @param boundaryId - UUID of the boundary
    * @returns Array of BoundaryParty objects
    */
-  async listBoundaryParties(boundaryId: string): Promise<BoundaryParty[]> {
+  async listBoundaryParties(boundaryId: UUID): Promise<BoundaryParty[]> {
     try {
       const api = this.clientApi.platformClient.getBoundaryApi();
       const result = await api.listBoundaryParties(boundaryId, 1, 100);
-      return result.results || [];
+      return result.items || [];
     } catch (error) {
       console.error('Failed to list boundary parties for', boundaryId, error);
       return [];
@@ -69,13 +70,13 @@ export class BoundaryService {
    * @returns Array of BoundaryPartyRole objects
    */
   async listBoundaryPartyRoles(
-    boundaryId: string,
-    partyId: string
+    boundaryId: UUID,
+    partyId: UUID
   ): Promise<BoundaryPartyRole[]> {
     try {
       const api = this.clientApi.platformClient.getBoundaryApi();
       const result = await api.listBoundaryPartyRoles(boundaryId, partyId, 1, 100);
-      return result.results || [];
+      return result.items || [];
     } catch (error) {
       console.error(
         'Failed to list boundary party roles for',
@@ -93,11 +94,11 @@ export class BoundaryService {
    * @param boundaryId - UUID of the boundary
    * @returns Array of BoundaryTeam objects
    */
-  async listBoundaryTeams(boundaryId: string): Promise<BoundaryTeam[]> {
+  async listBoundaryTeams(boundaryId: UUID): Promise<BoundaryTeam[]> {
     try {
       const api = this.clientApi.platformClient.getBoundaryApi();
       const result = await api.listBoundaryTeams(boundaryId, 1, 100);
-      return result.results || [];
+      return result.items || [];
     } catch (error) {
       console.error('Failed to list boundary teams for', boundaryId, error);
       return [];
@@ -112,13 +113,13 @@ export class BoundaryService {
    * @param boundaryId - UUID of the boundary
    * @returns Boundary object with id and name, or null if not found
    */
-  async getBoundary(boundaryId: string): Promise<{ id: string; name?: string } | null> {
+  async getBoundary(boundaryId: UUID): Promise<{ id: string; name?: string } | null> {
     try {
       const api = this.clientApi.platformClient.getBoundaryApi();
       const result = await api.getBoundary(boundaryId);
       if (result) {
         return {
-          id: result.id?.toString() || boundaryId,
+          id: result.id?.toString() || boundaryId.toString(),
           name: result.name,
         };
       }
