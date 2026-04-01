@@ -1,18 +1,20 @@
 import {
-  Component, inject, signal, computed, ChangeDetectionStrategy, OnInit,
+  Component, inject, signal, computed, ChangeDetectionStrategy, OnInit, effect,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { ZbSimplePanelComponent, ZbAvatarLabelComponent } from '@zerobias-org/ngx-library';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { ZbSimplePanelComponent, ZbAvatarLabelComponent, ZbCustomizableTableComponent } from '@zerobias-org/ngx-library';
 import { ZerobiasClientApp } from '@zerobias-com/zerobias-client';
 import { map, switchMap, from } from 'rxjs';
 import { ZerobiasClientApi } from '@zerobias-com/zerobias-client';
 import { UUID } from '@zerobias-org/types-core-js';
+import { GraphqlReadService } from '../../core/services/graphql-read.service';
 
 interface OrgInfo {
   id: string;
@@ -40,6 +42,20 @@ interface OrgDetail {
   boundaries: any[];
 }
 
+interface SmeMartProject {
+  id: string;
+  name: string;
+  status?: string;
+  engagementId?: string;
+  description?: string;
+}
+
+interface EngagementGroup {
+  engagementId: string;
+  engagementName: string;
+  projects: SmeMartProject[];
+}
+
 @Component({
   selector: 'app-org-detail',
   standalone: true,
@@ -50,8 +66,10 @@ interface OrgDetail {
     MatIconModule,
     MatDividerModule,
     MatTooltipModule,
+    MatProgressSpinnerModule,
     ZbSimplePanelComponent,
     ZbAvatarLabelComponent,
+    ZbCustomizableTableComponent,
   ],
   templateUrl: './org-detail.component.html',
   styleUrl: './org-detail.component.scss',
@@ -61,6 +79,8 @@ export class OrgDetailComponent implements OnInit {
   private readonly app = inject(ZerobiasClientApp);
   private readonly route = inject(ActivatedRoute);
   private readonly clientApi = inject(ZerobiasClientApi);
+  private readonly router = inject(Router);
+  private readonly graphqlRead = inject(GraphqlReadService);
 
   readonly orgId = toSignal(
     this.route.paramMap.pipe(map(p => p.get('orgId') || '')),
@@ -126,6 +146,28 @@ export class OrgDetailComponent implements OnInit {
   readonly groups = computed(() => this.orgData()[2] as OrgGroup[]);
   readonly boundaries = computed(() => this.orgData()[3] as any[]);
 
+  // Projects management
+  readonly projects = signal<SmeMartProject[]>([]);
+  readonly engagementMap = signal<Record<string, any>>({});
+  readonly projectsLoading = signal(false);
+
+  readonly engagementGroups = computed(() => {
+    const all = this.projects();
+    const groups = new Map<string, SmeMartProject[]>();
+
+    for (const proj of all) {
+      const engId = proj.engagementId || 'ungrouped';
+      if (!groups.has(engId)) groups.set(engId, []);
+      groups.get(engId)!.push(proj);
+    }
+
+    return Array.from(groups.entries()).map(([engId, prjs]) => ({
+      engagementId: engId,
+      engagementName: this.engagementMap()[engId]?.name || 'Unknown Engagement',
+      projects: prjs,
+    }));
+  });
+
   ngOnInit(): void {
     try {
       const currentId = this.app.getCurrentOrgId();
@@ -133,7 +175,63 @@ export class OrgDetailComponent implements OnInit {
     } catch {
       this.currentOrgId.set(null);
     }
-    // Data loading is now handled via toSignal(combineLatest(...)) above
+
+    // Load projects when orgId changes
+    effect(() => {
+      const id = this.orgId();
+      if (id) {
+        this.loadProjectsForOrg(id);
+      }
+    });
+  }
+
+  private async loadProjectsForOrg(orgId: string): Promise<void> {
+    this.projectsLoading.set(true);
+    try {
+      const result = await this.graphqlRead.query<SmeMartProject>(
+        'SmeMartProject',
+        ['id', 'name', 'status', 'engagementId', 'description'],
+        { filters: { ownerId: `.eq.${orgId}` }, pageSize: 100, pageNumber: 1 }
+      );
+      this.projects.set(result.items || []);
+
+      // Load engagement names for grouping headers
+      const engagementIds = Array.from(new Set(
+        (result.items || []).map(p => p.engagementId).filter(Boolean)
+      ));
+
+      for (const engId of engagementIds) {
+        try {
+          const eng = await this.graphqlRead.query<any>(
+            'Engagement',
+            ['id', 'name'],
+            { filters: { id: `.eq.${engId}` }, pageSize: 1, pageNumber: 1 }
+          );
+
+          if (eng.items && eng.items.length > 0) {
+            this.engagementMap.update(map => ({
+              ...map,
+              [engId]: eng.items[0],
+            }));
+          }
+        } catch (err) {
+          console.error('Failed to load engagement', engId, err);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load projects for org', orgId, error);
+      this.projects.set([]);
+    } finally {
+      this.projectsLoading.set(false);
+    }
+  }
+
+  navigateToProject(projectId: string): void {
+    this.router.navigate(['/project', projectId]);
+  }
+
+  navigateToEngagement(engagementId: string): void {
+    this.router.navigate(['/engagement', engagementId]);
   }
 
   goToOrgProfile(): void {

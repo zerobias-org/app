@@ -103,6 +103,38 @@
     </div>
   </zb-simple-panel>
 
+  <!-- Projects Panel -->
+  <zb-simple-panel title="Projects">
+    <div class="panel-content">
+      @if (projectsLoading()) {
+        <div class="panel-spinner">
+          <mat-spinner diameter="40" />
+        </div>
+      } @else if (engagementGroups().length === 0) {
+        <p class="empty-message">No projects yet</p>
+      } @else {
+        <div class="projects-container">
+          @for (group of engagementGroups(); track group.engagementId) {
+            <div class="engagement-group">
+              <h4>
+                <a (click)="navigateToEngagement(group.engagementId)">
+                  {{ group.engagementName }}
+                </a>
+              </h4>
+              <zb-customizable-table
+                [data]="group.projects"
+                [columns]="['name', 'status']"
+                [readonly]="true"
+                (rowClick)="navigateToProject($event.id)"
+              >
+              </zb-customizable-table>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </zb-simple-panel>
+
   <!-- Boundaries Panel -->
   <zb-simple-panel title="Boundaries">
     <div class="panel-content">
