@@ -7,7 +7,7 @@
  * Plan 063: Corporate Vetting Flow
  */
 
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService, type GqlQueryOptions } from './graphql-read.service';
 import { ImpersonationService } from './impersonation.service';
@@ -26,11 +26,29 @@ import {
   VETTING_STATUS_TRANSITIONS,
 } from '../models';
 
+/**
+ * Pilot completion suggestion signal payload.
+ * Non-blocking suggestion that appears in vetting panel when pilot is marked complete.
+ */
+export interface PilotCompletionSuggestion {
+  pilotId: string;
+  pilotName: string;
+  completionDate: string; // ISO datetime
+  completionNotes?: string;
+  engagementId: string;
+  summary: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class VettingService {
   private readonly pipelineWrite = inject(PipelineWriteService);
   private readonly graphqlRead = inject(GraphqlReadService);
   private readonly impersonation = inject(ImpersonationService);
+
+  // ── Pilot Completion Suggestion Signal (Plan 077 Task 1) ──
+
+  private readonly _pilotCompletionSuggestion = signal<PilotCompletionSuggestion | null>(null);
+  readonly pilotCompletionSuggestion = this._pilotCompletionSuggestion.asReadonly();
 
   // ── Query ──
 
@@ -438,6 +456,23 @@ export class VettingService {
     if (summary.rejected > 0 || summary.expired > 0) return 'blocked';
     if (summary.verified > 0 || summary.waived > 0 || summary.pending < summary.total) return 'in_progress';
     return 'not_started';
+  }
+
+  // ── Pilot Completion Suggestion Methods (Plan 077) ──
+
+  /**
+   * Set the pilot completion suggestion signal.
+   * Called from project-detail.component when pilot is marked complete.
+   */
+  setPilotCompletionSuggestion(suggestion: PilotCompletionSuggestion): void {
+    this._pilotCompletionSuggestion.set(suggestion);
+  }
+
+  /**
+   * Clear the pilot completion suggestion (when buyer dismisses).
+   */
+  clearPilotCompletionSuggestion(): void {
+    this._pilotCompletionSuggestion.set(null);
   }
 
   private getFields(): string[] {
