@@ -16,9 +16,17 @@ import type { SmeMartProject } from '../../core/models';
           <mat-icon mat-card-avatar class="project-icon">folder_special</mat-icon>
           <mat-card-title>{{ proj.name }}</mat-card-title>
           <mat-card-subtitle>
-            <mat-chip [class]="'status-' + proj.status" size="small">
-              {{ proj.status | titlecase }}
-            </mat-chip>
+            <div class="project-chips">
+              <mat-chip [class]="'status-' + proj.status" size="small">
+                {{ proj.status | titlecase }}
+              </mat-chip>
+              @if (proj.projectType) {
+                <mat-chip [class]="'type-' + proj.projectType" size="small">
+                  <mat-icon>{{ getTypeIcon(proj.projectType) }}</mat-icon>
+                  {{ proj.projectType | titlecase }}
+                </mat-chip>
+              }
+            </div>
           </mat-card-subtitle>
         </mat-card-header>
         <mat-card-content>
@@ -53,6 +61,12 @@ import type { SmeMartProject } from '../../core/models';
 
     .project-icon {
       color: var(--zb-color-primary);
+    }
+
+    .project-chips {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
     }
 
     .project-desc {
@@ -90,9 +104,27 @@ import type { SmeMartProject } from '../../core/models';
     .status-draft { --mdc-chip-label-text-color: var(--zb-color-gray); }
     .status-completed { --mdc-chip-label-text-color: var(--zb-color-info); }
     .status-cancelled { --mdc-chip-label-text-color: var(--zb-color-error); }
+
+    // Type colors
+    .type-pilot { --mdc-chip-label-text-color: var(--zb-color-warning, #ff9800); }
+    .type-rfp { --mdc-chip-label-text-color: var(--zb-color-info, #2196f3); }
+    .type-project { --mdc-chip-label-text-color: var(--zb-color-success, #4caf50); }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProjectCard {
   readonly project = input.required<SmeMartProject>();
+
+  getTypeIcon(type: string): string {
+    switch (type) {
+      case 'rfp':
+        return 'description';
+      case 'pilot':
+        return 'science';
+      case 'project':
+        return 'folder_open';
+      default:
+        return 'folder_special';
+    }
+  }
 }
