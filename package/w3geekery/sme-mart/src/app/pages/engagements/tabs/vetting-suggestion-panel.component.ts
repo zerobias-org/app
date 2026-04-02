@@ -7,7 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCardModule } from '@angular/material/card';
-import { toSignal } from '@angular/core/rxjs-interop';
+
 import { ZbResourceStatusComponent } from '@zerobias-org/ngx-library';
 import { EngagementVettingItem } from '../../../core/models';
 import { VendorProfileService } from '../../../core/services/vendor-profile.service';
@@ -81,10 +81,7 @@ export class VettingSuggestionPanelComponent {
 
   // ── Pilot Completion Suggestion (Plan 077 Task 3) ──
 
-  readonly pilotSuggestion = toSignal(
-    this.vetting.pilotCompletionSuggestion,
-    { initialValue: null }
-  );
+  readonly pilotSuggestion = this.vetting.pilotCompletionSuggestion;
 
   // ── Lifecycle ──
 

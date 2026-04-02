@@ -11,7 +11,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { TitleCasePipe } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { SmeMartProjectService } from '../../core/services/sme-mart-project.service';
-import { SmeMartResourceService } from '../../core/services/sme-mart-resource.service';
+
 import { VettingService, PilotCompletionSuggestion } from '../../core/services/vetting.service';
 import { ProjectContextService } from '../../core/services/project-context.service';
 import { ImpersonationService } from '../../core/services/impersonation.service';
@@ -100,7 +100,7 @@ export class ProjectDetail implements OnInit, OnDestroy {
   private readonly dialog = inject(MatDialog);
   private readonly impersonation = inject(ImpersonationService);
   private readonly projectService = inject(SmeMartProjectService);
-  private readonly resourceService = inject(SmeMartResourceService);
+
   private readonly vetting = inject(VettingService);
   readonly ctx = inject(ProjectContextService);
 
@@ -222,30 +222,21 @@ export class ProjectDetail implements OnInit, OnDestroy {
       // 1. Create new project with type 'project'
       const newProject = await this.projectService.createProject({
         name: project.name,
-        description: project.description,
-        engagementId: project.engagementId,
+        description: project.description ?? undefined,
+        engagementId: project.engagementId ?? undefined,
         projectType: 'project',
-        status: 'draft', // Reset to draft for real project workflow
+        status: 'draft',
         startDate: new Date().toISOString(),
-        targetEndDate: project.targetEndDate,
-        category: project.category,
-        budgetType: project.budgetType,
-        budgetMin: project.budgetMin,
-        budgetMax: project.budgetMax,
-        timeline: project.timeline,
+        targetEndDate: project.targetEndDate ?? undefined,
+        category: project.category ?? undefined,
+        budgetType: project.budgetType ?? undefined,
+        budgetMin: project.budgetMin ?? undefined,
+        budgetMax: project.budgetMax ?? undefined,
+        timeline: project.timeline ?? undefined,
       });
 
-      // 2. Link pilot → promoted project (use relates_to since promoted_to/promoted_from don't exist on platform)
-      await this.resourceService.linkResources(
-        project.id,
-        'sme-mart:project',
-        newProject.id,
-        'sme-mart:project',
-        'relates_to',
-        { relationship: 'promoted_to', promotedAt: new Date().toISOString() }
-      );
-
-      // 3. Update pilot with promotedProjectId pointer
+      // 2. Update pilot with promotedProjectId pointer (bidirectional link via data model,
+      //    not platform linkResources — 'sme-mart:project' is not a registered resource type)
       await this.projectService.updateProject(project.id, {
         promotedProjectId: newProject.id,
       });

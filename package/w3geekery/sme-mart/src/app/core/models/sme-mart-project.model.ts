@@ -36,6 +36,7 @@ export interface SmeMartProject {
 export interface CreateSmeMartProjectRequest {
   name: string;
   description?: string;
+  engagementId?: string;
   status?: string;
   projectType?: 'rfp' | 'pilot' | 'project';
   startDate?: string;
@@ -59,6 +60,7 @@ export interface UpdateSmeMartProjectRequest {
   status?: string;
   projectType?: 'rfp' | 'pilot' | 'project';
   targetEndDate?: string;
+  promotedProjectId?: string;
   // RFP fields
   category?: string;
   budgetType?: BudgetType | null;
