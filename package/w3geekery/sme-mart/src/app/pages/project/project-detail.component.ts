@@ -11,6 +11,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { TitleCasePipe } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { SmeMartProjectService } from '../../core/services/sme-mart-project.service';
+import { SmeMartResourceService } from '../../core/services/sme-mart-resource.service';
+import { VettingService, PilotCompletionSuggestion } from '../../core/services/vetting.service';
 import { ProjectContextService } from '../../core/services/project-context.service';
 import { ImpersonationService } from '../../core/services/impersonation.service';
 import { ProjectCompletionDialogComponent } from './project-completion-dialog.component';
@@ -98,18 +100,26 @@ export class ProjectDetail implements OnInit, OnDestroy {
   private readonly dialog = inject(MatDialog);
   private readonly impersonation = inject(ImpersonationService);
   private readonly projectService = inject(SmeMartProjectService);
+  private readonly resourceService = inject(SmeMartResourceService);
+  private readonly vetting = inject(VettingService);
   readonly ctx = inject(ProjectContextService);
 
   private refreshSub?: Subscription;
 
   readonly loading = signal(true);
   readonly isCompletingPilot = signal(false);
+  readonly isPromoting = signal(false);
   readonly primaryTabs = PRIMARY_TABS;
   readonly moreTabGroups = MORE_TAB_GROUPS;
 
   readonly canCompletePilot = computed(() => {
     const project = this.ctx.project();
     return project?.projectType === 'pilot' && project?.status !== 'completed';
+  });
+
+  readonly canPromote = computed(() => {
+    const project = this.ctx.project();
+    return project?.projectType === 'pilot' && project?.status === 'completed';
   });
 
   /** Check if the currently active route is inside the "More" dropdown */
@@ -189,11 +199,101 @@ export class ProjectDetail implements OnInit, OnDestroy {
 
       this.ctx.setProject(updated);
       this.snackBar.open('Pilot marked complete', 'Dismiss', { duration: 3000 });
+
+      // Trigger vetting suggestion (async, non-blocking)
+      this.createPilotCompletionSuggestion(updated, result.notes);
     } catch (err) {
       console.error('[ProjectDetail] completePilot failed:', err);
       this.snackBar.open('Failed to mark pilot complete', 'Dismiss', { duration: 5000 });
     } finally {
       this.isCompletingPilot.set(false);
+    }
+  }
+
+  async promoteToProject(): Promise<void> {
+    const project = this.ctx.project();
+    if (!project || project.projectType !== 'pilot' || project.status !== 'completed') {
+      this.snackBar.open('Can only promote completed pilots', 'Dismiss');
+      return;
+    }
+
+    this.isPromoting.set(true);
+    try {
+      // 1. Create new project with type 'project'
+      const newProject = await this.projectService.createProject({
+        name: project.name,
+        description: project.description,
+        engagementId: project.engagementId,
+        projectType: 'project',
+        status: 'draft', // Reset to draft for real project workflow
+        startDate: new Date().toISOString(),
+        targetEndDate: project.targetEndDate,
+        category: project.category,
+        budgetType: project.budgetType,
+        budgetMin: project.budgetMin,
+        budgetMax: project.budgetMax,
+        timeline: project.timeline,
+      });
+
+      // 2. Link pilot → promoted project (use relates_to since promoted_to/promoted_from don't exist on platform)
+      await this.resourceService.linkResources(
+        project.id,
+        'sme-mart:project',
+        newProject.id,
+        'sme-mart:project',
+        'relates_to',
+        { relationship: 'promoted_to', promotedAt: new Date().toISOString() }
+      );
+
+      // 3. Update pilot with promotedProjectId pointer
+      await this.projectService.updateProject(project.id, {
+        promotedProjectId: newProject.id,
+      });
+
+      this.snackBar.open('Pilot promoted to project', 'View', {
+        duration: 5000,
+      }).onAction().subscribe(() => {
+        this.router.navigate(['/projects', newProject.id]);
+      });
+
+      // Navigate to new project
+      setTimeout(() => {
+        this.router.navigate(['/projects', newProject.id]);
+      }, 1000);
+
+    } catch (err) {
+      console.error('[ProjectDetail] Promotion failed:', err);
+      this.snackBar.open('Failed to promote pilot', 'Dismiss', { duration: 5000 });
+    } finally {
+      this.isPromoting.set(false);
+    }
+  }
+
+  /**
+   * Create a pilot completion suggestion when pilot is marked complete.
+   * Non-blocking — errors are silently logged.
+   */
+  private async createPilotCompletionSuggestion(
+    project: any,
+    notes?: string
+  ): Promise<void> {
+    try {
+      if (!project.engagementId) return;
+
+      const suggestion: PilotCompletionSuggestion = {
+        pilotId: project.id,
+        pilotName: project.name,
+        completionDate: new Date().toISOString(),
+        completionNotes: notes || '',
+        engagementId: project.engagementId,
+        summary: `Pilot "${project.name}" completed. Ready for vetting checklist.`,
+      };
+
+      // Signal the suggestion to vetting service
+      this.vetting.setPilotCompletionSuggestion(suggestion);
+    } catch (err) {
+      console.warn('[ProjectDetail] Failed to create vetting suggestion:', err);
+      // Silent fail — vetting is non-critical
     }
   }
 

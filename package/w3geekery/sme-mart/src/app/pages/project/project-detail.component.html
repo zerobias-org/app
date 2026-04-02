@@ -26,6 +26,12 @@
               <span>Mark Pilot Complete</span>
             </button>
           }
+          @if (canPromote()) {
+            <button mat-menu-item (click)="promoteToProject()" [disabled]="isPromoting()">
+              <mat-icon>{{ isPromoting() ? 'hourglass_empty' : 'arrow_upward' }}</mat-icon>
+              <span>{{ isPromoting() ? 'Promoting...' : 'Promote to Project' }}</span>
+            </button>
+          }
         </mat-menu>
       </div>
 
