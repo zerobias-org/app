@@ -6,10 +6,12 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatCardModule } from '@angular/material/card';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { ZbResourceStatusComponent } from '@zerobias-org/ngx-library';
 import { EngagementVettingItem } from '../../../core/models';
 import { VendorProfileService } from '../../../core/services/vendor-profile.service';
-import { VettingService } from '../../../core/services/vetting.service';
+import { VettingService, PilotCompletionSuggestion } from '../../../core/services/vetting.service';
 import { EngagementContextService } from '../../../core/services/engagement-context.service';
 import { MarketplaceProfileItem } from '../../../core/models/marketplace-profile-item.model';
 import {
@@ -30,6 +32,7 @@ import {
     MatButtonModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
+    MatCardModule,
     ZbResourceStatusComponent,
   ],
   templateUrl: './vetting-suggestion-panel.component.html',
@@ -75,6 +78,13 @@ export class VettingSuggestionPanelComponent {
     const item = this.attachedItem();
     return item ? isExpired(item) : false;
   });
+
+  // ── Pilot Completion Suggestion (Plan 077 Task 3) ──
+
+  readonly pilotSuggestion = toSignal(
+    this.vetting.pilotCompletionSuggestion,
+    { initialValue: null }
+  );
 
   // ── Lifecycle ──
 
@@ -123,6 +133,10 @@ export class VettingSuggestionPanelComponent {
     if (this.expanded()) {
       this.loadProfileItems();
     }
+  }
+
+  dismissPilotSuggestion(): void {
+    this.vetting.clearPilotCompletionSuggestion();
   }
 
   // ── Helpers ──

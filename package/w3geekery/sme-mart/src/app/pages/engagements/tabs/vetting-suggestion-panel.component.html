@@ -1,4 +1,28 @@
 <div class="suggestion-panel">
+  <!-- Pilot Completion Suggestion Card (Plan 077 Task 3) -->
+  @if (pilotSuggestion()) {
+    <mat-card class="suggestion-card pilot-suggestion-card">
+      <mat-card-header>
+        <mat-card-title>Pilot Completion Suggestion</mat-card-title>
+        <button mat-icon-button (click)="dismissPilotSuggestion()" class="dismiss-btn">
+          <mat-icon>close</mat-icon>
+        </button>
+      </mat-card-header>
+      <mat-card-content>
+        <p><strong>Pilot:</strong> {{ pilotSuggestion()!.pilotName }}</p>
+        <p><strong>Completed:</strong> {{ pilotSuggestion()!.completionDate | date:'mediumDate' }}</p>
+        @if (pilotSuggestion()!.completionNotes) {
+          <p><strong>Notes:</strong> {{ pilotSuggestion()!.completionNotes }}</p>
+        }
+        <p class="suggestion-text">This pilot is ready for vetting. Consider adding a vetting checklist item to the engagement.</p>
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-button (click)="dismissPilotSuggestion()">Dismiss</button>
+        <button mat-raised-button color="primary">Add Vetting Item</button>
+      </mat-card-actions>
+    </mat-card>
+  }
+
   <!-- Suggestion Chip (shows when not attached and suggestions available) -->
   @if (!isAttached() && canSuggest()) {
     <button
