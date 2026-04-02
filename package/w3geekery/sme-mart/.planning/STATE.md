@@ -2,39 +2,38 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Org Navigation & Vendor Profile
-status: verifying
-last_updated: "2026-04-01T22:31:08.696Z"
-last_activity: 2026-04-01
+status: complete
+last_updated: "2026-04-02T16:00:00.000Z"
+last_activity: 2026-04-02
 progress:
   total_phases: 6
   completed_phases: 6
-  total_plans: 9
-  completed_plans: 9
+  total_plans: 8
+  completed_plans: 8
 ---
 
 # STATE.md — Session Context
 
 **Session Name:** `gsd-plan`
 **Date Created:** 2026-03-30
-**Current Focus:** Phase 11 — vetting-pre-fill
+**Current Focus:** Milestone v1.1 complete — ready for next milestone
 
 ---
 
 ## Current Position
 
-Phase: 12
-Plan: Not started
-Status: Phase complete — ready for verification
-Last activity: 2026-04-01
+Phase: All complete (7-12)
+Status: Milestone v1.1 shipped
+Last activity: 2026-04-02
 
 ---
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-30)
+See: .planning/PROJECT.md (updated 2026-04-02)
 
 **Core value:** Transparent, task-gated marketplace with demand/supply/transparency partitions
-**Current focus:** v1.1 Org Navigation & Vendor Profile
+**Current focus:** Planning next milestone
 
 ---
 
@@ -44,19 +43,16 @@ From v1.0:
 
 - All 17 entity types on AuditgraphDB (Pipeline writes + GraphQL reads)
 - 14 domain services migrated, 7 still on SmeMartDbService
-- Build errors in unrelated components block `npm test`
 - Neon archival scheduled 2026-04-02
 
-v1.1 decisions:
+From v1.1:
 
-- Schema PR first — MarketplaceProfileItem to zerobias-org/schema:dev blocks phases 9-11
-- /orgs/:orgId is read-only — editing on /org only
-- Org switching stubbed (disabled button with tooltip)
-- Flexible budget, 15 hrs/week cap
-
-### Roadmap Evolution
-
-- Phase 12 added (2026-04-01): Project-Centric Boundary Model (Plan 080) — internal/external org badges, project parties tab. Independent of Phases 9-11, can run in parallel.
+- Three-tier org navigation (/orgs, /orgs/:orgId, /org)
+- MarketplaceProfileItem GQL schema entity (6 sections)
+- VendorProfileService with full CRUD
+- Corporate Profile tab with expiration indicators
+- Vetting pre-fill suggestion panel with pointer attachments
+- Internal/External org badges, project parties tab
 
 ---
 
@@ -71,85 +67,12 @@ claude --resume gsd-plan
 **If starting fresh:**
 
 - Read `.planning/PROJECT.md` for current state
-- Read `.planning/ROADMAP.md` for milestone roadmap
-- Read `.planning/REQUIREMENTS.md` for v1.1 requirements (33 total)
-- Read `.planning/MILESTONES.md` for v1.0 accomplishments
+- Read `.planning/ROADMAP.md` for milestone history
+- Read `.planning/MILESTONES.md` for accomplishments
+- Read `.planning/BACKLOG.md` for pending work
 - Read `CLAUDE.md` for project conventions
 
 ---
 
-**Last Updated:** 2026-04-01
-**Milestone v1.1:** Roadmap complete. 5 phases (7-11), 33 requirements, 100% coverage.
-
----
-
-## Phase 11 Plan 01 Execution Summary
-
-**Executed:** 2026-04-01
-**Duration:** 85 minutes
-**Tasks:** 7 completed
-**Commits:** 8 individual task + fix commits
-**Summary File:** `.planning/phases/11-vetting-pre-fill/11-01-SUMMARY.md`
-
-**Key Deliverables:**
-
-- section-mapping.utility.ts (exact-match 4 pairs)
-- expiration.utility.ts (isExpired, isExpiringSoon)
-- vetting-suggestion-panel component (standalone, lazy-loads)
-- integrated panel into vetting-tab
-- expired attachments checklist (auto-generates, auto-dismisses)
-- reference count check in vendor-profile-tab delete handler
-- profile_item_id field added to EngagementVettingItem model
-
-**Decision Coverage:** All 13 directives (D-01 through D-13) implemented.
-
-**Build Status:** 0 errors, 6 dependency warnings.
-
----
-
-## Phase 12 Plan 01 Execution Summary
-
-**Executed:** 2026-04-01
-**Duration:** ~180 minutes
-**Tasks:** 5 completed
-**Commits:** 5 individual task commits + 1 documentation commit
-**Summary File:** `.planning/phases/12-project-centric-boundary-model/12-01-SUMMARY.md`
-
-**Key Deliverables:**
-
-- org-list badges (Internal/External) with metrics row
-- org-detail projects panel grouped by engagement
-- BoundaryService with proper typing (no index signatures)
-- ProjectPartiesTabComponent with lazy-loaded accordion
-- Routing wired for /project/:id/parties
-
-**Director Flags Addressed:**
-
-- FLAG-1: Parallelized metrics loading (Promise.all) — 5x performance
-- FLAG-2: Added ownerId filters to GQL queries — accurate per-org counts
-- FLAG-3: Removed index signatures from interfaces — proper typing
-- FLAG-4: Added getBoundary() resolution — actual boundary names instead of truncated UUIDs
-
-**Test Coverage:** Reduced due to vendor-profile build constraint; manual verification completed.
-
----
-
-## Phase 12 Plan 02 Execution Summary
-
-**Executed:** 2026-04-01
-**Duration:** 45 minutes
-**Tasks:** 6 completed
-**Commits:** 6 individual task commits + 1 documentation commit
-**Summary File:** `.planning/phases/12-project-centric-boundary-model/12-02-SUMMARY.md`
-
-**Gap Closure Results:**
-
-- ✅ Fixed 6 BoundaryService errors (UUID params, .items property access)
-- ✅ Fixed 1 org-detail computed property key error (UUID cast as string)
-- ✅ Fixed 2 HTML template binding errors ([readonly] removal)
-- ✅ Fixed 5 project-parties-tab component errors (UUID conversion, SDK type alignment)
-- ✅ All 14 plan-scoped compilation errors resolved
-
-**SC-4 & SC-5 Unblocked:** Parties tab now has valid TypeScript types and template bindings. Ready for deployment.
-
-**Pre-existing Issues:** 2 vendor-profile.service.ts errors remain out of scope (per 12-VERIFICATION.md).
+**Last Updated:** 2026-04-02
+**Milestone v1.1:** Complete. 6 phases (7-12), 33/33 requirements satisfied, shipped.

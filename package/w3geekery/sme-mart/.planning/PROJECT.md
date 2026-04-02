@@ -2,26 +2,21 @@
 
 ## What This Is
 
-SME Mart is a marketplace for Subject Matter Experts in compliance and cybersecurity — "Upwork meets Whop" for ZeroBias platform users. Built with Angular 21, it connects buyers seeking compliance services (SOC 2, ISO 27001, HIPAA, etc.) with qualified providers. The app runs on Vercel with all 17 entity types reading/writing through ZeroBias AuditgraphDB.
+SME Mart is a marketplace for Subject Matter Experts in compliance and cybersecurity — "Upwork meets Whop" for ZeroBias platform users. Built with Angular 21, it connects buyers seeking compliance services (SOC 2, ISO 27001, HIPAA, etc.) with qualified providers. The app runs on Vercel with all 17 entity types reading/writing through ZeroBias AuditgraphDB. Vendors manage corporate profiles (6 sections: corporate identity, attestations, insurance, references, personnel, financial) that pre-fill engagement vetting. Organizations are navigable with Internal/External badges and project boundary parties.
 
 ## Core Value
 
 A transparent, task-gated marketplace where every boundary API operation requires task/subtask approval — demand/supply/transparency partitions at every level of the hierarchy.
 
-## Current Milestone: v1.1 Org Navigation & Vendor Profile
+## Current State (after v1.1)
 
-**Goal:** Three-tier org navigation as foundation, then supply-side vendor profile with one-time corporate doc loading and engagement pre-fill.
-
-**Target features:**
-- Plan 079: My Organizations refactor — `/orgs` card/table list, `/orgs/:orgId` read-only overview (members, groups, boundaries), org switching stub
-- Plan 041: Supply-side vendor profile — `VendorProfileItem` GQL entity, 6 profile sections, engagement vetting pre-fill from org profile
-
-## Current State (after v1.0)
-
-- **Data layer:** All 17 entity types on AuditgraphDB (Pipeline writes + GraphQL reads). Neon PostgreSQL in observation period (archival 2026-04-02).
-- **Services:** 14 domain services migrated/built against Pipeline+GQL. 7 non-migrated services still use SmeMartDbService (categories, notifications, etc.).
+- **Data layer:** All 17 entity types + MarketplaceProfileItem on AuditgraphDB (Pipeline writes + GraphQL reads). Neon PostgreSQL pending archival.
+- **Services:** 14 domain services migrated/built against Pipeline+GQL + VendorProfileService. 7 non-migrated services still use SmeMartDbService (categories, notifications, etc.).
+- **Org navigation:** Three-tier navigation — `/orgs` list, `/orgs/:orgId` read-only detail, `/org` for current org editing. Org switching stubbed (requires session auth).
+- **Vendor profile:** 6-section corporate profile on `/org` with CRUD, expiration indicators, renewal prompts. Vetting pre-fill suggestion panel with pointer-based attachments.
+- **Boundary model:** Internal/External org badges, engagement/project counts, boundary parties tab with roles on project detail.
 - **Tests:** 94+ Bloom tests, 27 Wave 3 tests, roundtrip validation for all entities. Build errors in unrelated components block full `npm test`.
-- **Codebase:** 40,882 LOC TypeScript, Angular 21 standalone components.
+- **Codebase:** ~77,000 LOC TypeScript, Angular 21 standalone components.
 - **Live:** Vercel deployment on `poc/sme-mart` branch.
 
 ## Requirements
@@ -34,12 +29,12 @@ A transparent, task-gated marketplace where every boundary API operation require
 - ✓ Zero component changes during migration — v1.0
 - ✓ Demo data seeding via Pipeline — v1.0
 - ✓ SmeMartDbService removed from all migrated services — v1.0
+- ✓ My Organizations refactor — three-tier org navigation (Plan 079) — v1.1
+- ✓ Project-centric boundary model — Internal/External badges, engagement/project counts, boundary parties tab (Plan 080) — v1.1
+- ✓ Supply-side vendor profile — 6-section corporate docs, CRUD, expiration, pre-fill (Plan 041) — v1.1
 
 ### Active
 
-- [x] My Organizations refactor — three-tier org navigation (Plan 079) — Validated in Phase 7: Org Navigation (2026-03-31)
-- [x] Project-centric boundary model — Internal/External badges, engagement/project counts, boundary parties tab (Plan 080) — Validated in Phase 12 (2026-04-01)
-- [x] Supply-side vendor profile — one-time corporate doc loading (Plan 041) — Schema (Phase 8) + Service (Phase 9) + UI (Phase 10) + Vetting Pre-Fill (Phase 11) complete (2026-04-01)
 - [ ] Task/subtask partitioning into demand/supply/transparency (CEO P0, deferred)
 - [ ] Tasks as runtime access control — boundary API gating via task approval (deferred)
 - [ ] Hard requirements (1-5) / soft requirements (6-10) approval model (deferred)
@@ -62,7 +57,7 @@ A transparent, task-gated marketplace where every boundary API operation require
 
 - **Architecture:** Angular 21 standalone components, PipelineWriteService (writes) + GraphqlReadService (reads), optimistic updates for eventual consistency
 - **Pipeline:** `091d5068-0527-4f45-9839-37f6d5c1669e` (SME Mart Entity Pipeline)
-- **Schema:** `zerobias-org/schema` YAML packages, auto-deployed on merge, 15-min reload
+- **Schema:** `zerobias-org/schema` YAML packages, auto-deployed on merge, 15-min reload. MarketplaceProfileItem added v1.1.
 - **Team:** Clark (W3Geekery contractor, 15 hrs/week), Kevin (CIO, platform), Brian (CEO, directives)
 - **Deployment:** Vercel (temporary), target: ZeroBias platform publishing
 
@@ -82,6 +77,11 @@ A transparent, task-gated marketplace where every boundary API operation require
 | Optimistic updates for write visibility | Pipeline 5-10s async delay | ✓ Good — UX feels instant |
 | 9 Bloom entities built on clean Pipeline foundation | No legacy to migrate | ✓ Good — clean services |
 | Archive Neon (don't delete) | Safety-first, 2-week observation | — Pending (2026-04-02) |
+| Schema PR first for vendor profile | MarketplaceProfileItem blocks phases 9-11 | ✓ Good — unblocked cleanly |
+| Single entity with section discriminator | Simpler than per-section classes | ✓ Good — flexible JSON data |
+| Profile items as pointers (not copies) | Vetting sees live profile updates | ✓ Good — no stale data |
+| /orgs/:orgId read-only | Editing stays on /org for current org | ✓ Good — clear separation |
+| Org switching stubbed | Requires session auth, not API key | — Pending (platform dependency) |
 
 ---
-*Last updated: 2026-04-01 after Phase 11 completion*
+*Last updated: 2026-04-02 after v1.1 milestone*
