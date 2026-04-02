@@ -1,4 +1,4 @@
-import { Component, inject, signal, ChangeDetectionStrategy, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, signal, computed, ChangeDetectionStrategy, OnInit, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
@@ -7,11 +7,13 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
 import { TitleCasePipe } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { SmeMartProjectService } from '../../core/services/sme-mart-project.service';
 import { ProjectContextService } from '../../core/services/project-context.service';
 import { ImpersonationService } from '../../core/services/impersonation.service';
+import { ProjectCompletionDialogComponent } from './project-completion-dialog.component';
 
 interface TabDef {
   readonly path: string;
@@ -83,6 +85,7 @@ const ALL_MORE_TABS: readonly TabDef[] = MORE_TAB_GROUPS.flatMap(g => g.tabs);
     MatDividerModule,
     MatSnackBarModule,
     TitleCasePipe,
+    ProjectCompletionDialogComponent,
   ],
   templateUrl: './project-detail.component.html',
   styleUrl: './project-detail.component.scss',
@@ -92,6 +95,7 @@ export class ProjectDetail implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly dialog = inject(MatDialog);
   private readonly impersonation = inject(ImpersonationService);
   private readonly projectService = inject(SmeMartProjectService);
   readonly ctx = inject(ProjectContextService);
@@ -99,8 +103,14 @@ export class ProjectDetail implements OnInit, OnDestroy {
   private refreshSub?: Subscription;
 
   readonly loading = signal(true);
+  readonly isCompletingPilot = signal(false);
   readonly primaryTabs = PRIMARY_TABS;
   readonly moreTabGroups = MORE_TAB_GROUPS;
+
+  readonly canCompletePilot = computed(() => {
+    const project = this.ctx.project();
+    return project?.projectType === 'pilot' && project?.status !== 'completed';
+  });
 
   /** Check if the currently active route is inside the "More" dropdown */
   isMoreActive(): boolean {
@@ -153,6 +163,37 @@ export class ProjectDetail implements OnInit, OnDestroy {
       this.router.navigate(['/engagements', engId]);
     } else {
       this.router.navigate(['/my/engagements']);
+    }
+  }
+
+  async completePilot(): Promise<void> {
+    const project = this.ctx.project();
+    if (!project || project.projectType !== 'pilot' || project.status === 'completed') {
+      return;
+    }
+
+    this.isCompletingPilot.set(true);
+    try {
+      const dialogRef = this.dialog.open(ProjectCompletionDialogComponent, {
+        width: '500px',
+        data: { project },
+      });
+
+      const result = await dialogRef.afterClosed().toPromise();
+      if (!result) return; // User cancelled
+
+      // Update project status to 'completed'
+      const updated = await this.projectService.updateProject(project.id, {
+        status: 'completed',
+      });
+
+      this.ctx.setProject(updated);
+      this.snackBar.open('Pilot marked complete', 'Dismiss', { duration: 3000 });
+    } catch (err) {
+      console.error('[ProjectDetail] completePilot failed:', err);
+      this.snackBar.open('Failed to mark pilot complete', 'Dismiss', { duration: 5000 });
+    } finally {
+      this.isCompletingPilot.set(false);
     }
   }
 

@@ -14,6 +14,19 @@
             Back to Engagements
           }
         </button>
+
+        <button mat-icon-button [matMenuTriggerFor]="projectActions">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+
+        <mat-menu #projectActions="matMenu">
+          @if (canCompletePilot()) {
+            <button mat-menu-item (click)="completePilot()">
+              <mat-icon>done</mat-icon>
+              <span>Mark Pilot Complete</span>
+            </button>
+          }
+        </mat-menu>
       </div>
 
       <div class="project-header__title">
