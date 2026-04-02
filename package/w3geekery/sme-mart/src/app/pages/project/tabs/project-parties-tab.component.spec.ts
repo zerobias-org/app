@@ -52,11 +52,11 @@ describe('ProjectPartiesTabComponent', () => {
     TestBed.runInInjectionContext(() => {
       fixture.componentRef.setInput('project', {
         id: 'proj-1',
-        boundaryIds: ['boundary-1', 'boundary-2'],
+        boundaryIds: ['00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002'],
       });
     });
 
-    expect(component.boundaryIds()).toEqual(['boundary-1', 'boundary-2']);
+    expect(component.boundaryIds()).toEqual(['00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002']);
   });
 
   it('should display empty state when boundaryIds is empty', async () => {
@@ -79,10 +79,11 @@ describe('ProjectPartiesTabComponent', () => {
     TestBed.runInInjectionContext(() => {
       fixture.componentRef.setInput('project', {
         id: 'proj-1',
-        boundaryIds: ['boundary-1'],
+        boundaryIds: [],
       });
     });
 
+    // Manually set loading state (don't trigger actual boundary loading)
     component.partiesLoading.set(true);
     fixture.detectChanges();
 
@@ -109,7 +110,7 @@ describe('ProjectPartiesTabComponent', () => {
     TestBed.runInInjectionContext(() => {
       fixture.componentRef.setInput('project', {
         id: 'proj-1',
-        boundaryIds: ['boundary-1'],
+        boundaryIds: ['00000000-0000-0000-0000-000000000001'],
       });
     });
 

@@ -151,11 +151,10 @@ function createPersonnelItem(): MarketplaceProfileItem {
 function createFinancialItem(): MarketplaceProfileItem {
   const data: FinancialData = {
     annualRevenue: 5250000,
-    yearsInBusiness: 9,
-    creditScore: 780,
-    bankReferences: ['JP Morgan Commercial', 'Silicon Valley Bank'],
-    taxIdVerified: true,
-    liabilityCoverage: 2000000,
+    profitMargin: 18.5,
+    employeeCount: 42,
+    yearsOperating: 9,
+    revenueGrowth: 12.3,
   };
 
   return {
@@ -236,10 +235,10 @@ describe('VendorProfileService — Roundtrip Field Validation', () => {
       const created = await service.createProfileItem(original.org_id, {
         section: original.section,
         name: original.name,
-        description: original.description,
+        description: original.description ?? undefined,
         data: JSON.parse(original.data) as InsuranceData,
-        expiresAt: original.expires_at || undefined,
-        status: original.status,
+        expiresAt: original.expires_at ?? undefined,
+        status: original.status ?? undefined,
       });
 
       // Retrieve via service (triggers fromGql)
@@ -274,10 +273,10 @@ describe('VendorProfileService — Roundtrip Field Validation', () => {
       const created = await service.createProfileItem(original.org_id, {
         section: original.section,
         name: original.name,
-        description: original.description,
+        description: original.description ?? undefined,
         data: JSON.parse(original.data) as AttestationData,
-        expiresAt: original.expires_at || undefined,
-        status: original.status,
+        expiresAt: original.expires_at ?? undefined,
+        status: original.status ?? undefined,
       });
 
       const retrieved = await service.getProfileItem(created.id);
@@ -308,10 +307,10 @@ describe('VendorProfileService — Roundtrip Field Validation', () => {
       const created = await service.createProfileItem(original.org_id, {
         section: original.section,
         name: original.name,
-        description: original.description,
+        description: original.description ?? undefined,
         data: JSON.parse(original.data) as CorporateIdentityData,
-        expiresAt: original.expires_at || undefined,
-        status: original.status,
+        expiresAt: original.expires_at ?? undefined,
+        status: original.status ?? undefined,
       });
 
       const retrieved = await service.getProfileItem(created.id);
@@ -396,9 +395,9 @@ describe('VendorProfileService — Roundtrip Field Validation', () => {
 
       const retrievedData = JSON.parse(retrieved.data) as FinancialData;
       expect(retrievedData.annualRevenue).toBe(5250000);
-      expect(retrievedData.creditScore).toBe(780);
-      expect(retrievedData.taxIdVerified).toBe(true);
-      expect(retrievedData.bankReferences).toContain('JP Morgan Commercial');
+      expect(retrievedData.profitMargin).toBe(18.5);
+      expect(retrievedData.employeeCount).toBe(42);
+      expect(retrievedData.yearsOperating).toBe(9);
     });
   });
 
@@ -444,9 +443,9 @@ describe('VendorProfileService — Roundtrip Field Validation', () => {
       const created = await service.createProfileItem(original.org_id, {
         section: original.section,
         name: original.name,
-        description: original.description,
+        description: original.description ?? undefined,
         data: JSON.parse(original.data) as InsuranceData,
-        expiresAt: original.expires_at || undefined,
+        expiresAt: original.expires_at ?? undefined,
       });
 
       // Verify domain model has snake_case
@@ -472,7 +471,7 @@ describe('VendorProfileService — Roundtrip Field Validation', () => {
       const created = await service.createProfileItem(original.org_id, {
         section: original.section,
         name: original.name,
-        description: original.description,
+        description: original.description ?? undefined,
         data: JSON.parse(original.data) as CorporateIdentityData,
       });
 
@@ -514,9 +513,8 @@ describe('VendorProfileService — Roundtrip Field Validation', () => {
       expect(result).not.toBeNull();
       if (!result) throw new Error('Result is null');
 
-      // Service should parse gracefully (returning empty object for malformed)
-      const data = JSON.parse(result.data);
-      expect(typeof data).toBe('object');
+      // Service keeps raw data string — consumer handles parse errors
+      expect(result.data).toBe('not valid json {]');
     });
 
     it('should throw validation error for missing required fields', async () => {

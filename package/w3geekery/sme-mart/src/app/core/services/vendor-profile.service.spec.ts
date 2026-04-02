@@ -496,8 +496,8 @@ describe('VendorProfileService', () => {
       // Verify Pipeline push had camelCase fields
       const call = pipelineWrite.pushEntity.mock.calls[0];
       const pushed = call[1] as Record<string, unknown>;
-      expect(pushed.orgId).toBe('org-test');
-      expect(pushed.name).toBe('Test Name');
+      expect(pushed['orgId']).toBe('org-test');
+      expect(pushed['name']).toBe('Test Name');
     });
   });
 
@@ -515,9 +515,8 @@ describe('VendorProfileService', () => {
 
       const result = await service.listProfileItems('org-001');
 
-      expect(result[0].data).toBeTruthy(); // Should have empty object stringified
-      const parsed = JSON.parse(result[0].data);
-      expect(parsed).toEqual({});
+      // Service keeps raw data string — consumer handles parse errors
+      expect(result[0].data).toBe('not json');
     });
 
     it('should throw ValidationError for invalid section', async () => {

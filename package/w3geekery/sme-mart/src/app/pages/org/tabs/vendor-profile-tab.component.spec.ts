@@ -1,39 +1,54 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { CommonModule } from '@angular/common';
+import { vi } from 'vitest';
 import { VendorProfileService } from '../../../core/services/vendor-profile.service';
-import { ZerobiasClientApp } from '@zerobias-com/zerobias-client';
+import { VettingService } from '../../../core/services/vetting.service';
+import { PipelineWriteService } from '../../../core/services/pipeline-write.service';
+import { GraphqlReadService } from '../../../core/services/graphql-read.service';
+import { ImpersonationService } from '../../../core/services/impersonation.service';
+import { ZerobiasClientApp, ZerobiasClientApi } from '@zerobias-com/zerobias-client';
 import { VendorProfileTab } from './vendor-profile-tab.component';
 
 describe('VendorProfileTab', () => {
   let component: VendorProfileTab;
   let fixture: ComponentFixture<VendorProfileTab>;
-  let vendorProfileService: jasmine.SpyObj<VendorProfileService>;
-  let zerobiasApp: jasmine.SpyObj<ZerobiasClientApp>;
+
+  const vendorProfileServiceMock = {
+    listProfileItems: vi.fn().mockResolvedValue([]),
+    createProfileItem: vi.fn(),
+    updateProfileItem: vi.fn(),
+    deleteProfileItem: vi.fn(),
+    getProfileItemReferenceCount: vi.fn().mockResolvedValue(0),
+  };
+
+  const vettingServiceMock = {
+    listVettingItems: vi.fn().mockResolvedValue([]),
+  };
+
+  const zerobiasAppMock = {
+    getCurrentOrg: vi.fn().mockReturnValue({ id: 'org-1', name: 'Test Org' }),
+  };
 
   beforeEach(async () => {
-    const vendorProfileServiceSpy = jasmine.createSpyObj('VendorProfileService', [
-      'listProfileItems',
-      'createProfileItem',
-      'updateProfileItem',
-      'deleteProfileItem',
-    ]);
-
-    const zerobiasAppSpy = jasmine.createSpyObj('ZerobiasClientApp', ['getCurrentOrg']);
-
     await TestBed.configureTestingModule({
       imports: [CommonModule, MatExpansionModule, MatSidenavModule, VendorProfileTab],
       providers: [
-        { provide: VendorProfileService, useValue: vendorProfileServiceSpy },
-        { provide: ZerobiasClientApp, useValue: zerobiasAppSpy },
+        { provide: VendorProfileService, useValue: vendorProfileServiceMock },
+        { provide: VettingService, useValue: vettingServiceMock },
+        { provide: ZerobiasClientApp, useValue: zerobiasAppMock },
+        { provide: ZerobiasClientApi, useValue: {} },
+        { provide: PipelineWriteService, useValue: {} },
+        { provide: GraphqlReadService, useValue: {} },
+        { provide: ImpersonationService, useValue: {} },
+        { provide: MatSnackBar, useValue: { open: vi.fn() } },
       ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(VendorProfileTab);
     component = fixture.componentInstance;
-    vendorProfileService = TestBed.inject(VendorProfileService) as jasmine.SpyObj<VendorProfileService>;
-    zerobiasApp = TestBed.inject(ZerobiasClientApp) as jasmine.SpyObj<ZerobiasClientApp>;
   });
 
   it('should create', () => {

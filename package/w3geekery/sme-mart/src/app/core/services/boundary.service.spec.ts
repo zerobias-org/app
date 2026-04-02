@@ -1,6 +1,11 @@
 import { TestBed } from '@angular/core/testing';
 import { BoundaryService } from './boundary.service';
 import { ZerobiasClientApi } from '@zerobias-com/zerobias-client';
+import { UUID } from '@zerobias-org/types-core-js';
+
+function toUUID(s: string): UUID {
+  return s as unknown as UUID;
+}
 
 describe('BoundaryService', () => {
   let service: BoundaryService;
@@ -9,10 +14,10 @@ describe('BoundaryService', () => {
 
   beforeEach(() => {
     mockBoundaryApi = {
-      listBoundaryParties: async () => ({ results: [] }),
-      listBoundaryPartyRoles: async () => ({ results: [] }),
-      listBoundaryTeams: async () => ({ results: [] }),
-      getBoundary: async () => ({ id: 'boundary-1', name: 'Test Boundary' }),
+      listBoundaryParties: async () => ({ items: [] }),
+      listBoundaryPartyRoles: async () => ({ items: [] }),
+      listBoundaryTeams: async () => ({ items: [] }),
+      getBoundary: async () => ({ id: toUUID('boundary-1'), name: 'Test Boundary' }),
     };
 
     mockClientApi = {
@@ -37,12 +42,12 @@ describe('BoundaryService', () => {
 
   describe('listBoundaryParties', () => {
     it('should call getBoundaryApi().listBoundaryParties with correct parameters', async () => {
-      const boundaryId = 'test-boundary-id';
-      mockBoundaryApi.listBoundaryParties = async (id: string, page: number, size: number) => {
+      const boundaryId = toUUID('test-boundary-id');
+      mockBoundaryApi.listBoundaryParties = async (id: UUID, page: number, size: number) => {
         expect(id).toBe(boundaryId);
         expect(page).toBe(1);
         expect(size).toBe(100);
-        return { results: [{ id: 'party-1', name: 'Party One' }] };
+        return { items: [{ id: 'party-1', name: 'Party One' }] };
       };
 
       const result = await service.listBoundaryParties(boundaryId);
@@ -55,7 +60,7 @@ describe('BoundaryService', () => {
         throw new Error('API error');
       };
 
-      const result = await service.listBoundaryParties('test-boundary-id');
+      const result = await service.listBoundaryParties(toUUID('test-boundary-id'));
 
       expect(result).toEqual([]);
     });
@@ -63,11 +68,11 @@ describe('BoundaryService', () => {
 
   describe('listBoundaryPartyRoles', () => {
     it('should call getBoundaryApi().listBoundaryPartyRoles with correct parameters', async () => {
-      const boundaryId = 'test-boundary-id';
-      const partyId = 'test-party-id';
+      const boundaryId = toUUID('test-boundary-id');
+      const partyId = toUUID('test-party-id');
       mockBoundaryApi.listBoundaryPartyRoles = async (
-        bId: string,
-        pId: string,
+        bId: UUID,
+        pId: UUID,
         page: number,
         size: number
       ) => {
@@ -75,7 +80,7 @@ describe('BoundaryService', () => {
         expect(pId).toBe(partyId);
         expect(page).toBe(1);
         expect(size).toBe(100);
-        return { results: [{ id: 'role-1', name: 'Admin' }] };
+        return { items: [{ id: 'role-1', name: 'Admin' }] };
       };
 
       const result = await service.listBoundaryPartyRoles(boundaryId, partyId);
@@ -88,7 +93,7 @@ describe('BoundaryService', () => {
         throw new Error('API error');
       };
 
-      const result = await service.listBoundaryPartyRoles('boundary-id', 'party-id');
+      const result = await service.listBoundaryPartyRoles(toUUID('boundary-id'), toUUID('party-id'));
 
       expect(result).toEqual([]);
     });
@@ -96,12 +101,12 @@ describe('BoundaryService', () => {
 
   describe('listBoundaryTeams', () => {
     it('should call getBoundaryApi().listBoundaryTeams with correct parameters', async () => {
-      const boundaryId = 'test-boundary-id';
-      mockBoundaryApi.listBoundaryTeams = async (id: string, page: number, size: number) => {
+      const boundaryId = toUUID('test-boundary-id');
+      mockBoundaryApi.listBoundaryTeams = async (id: UUID, page: number, size: number) => {
         expect(id).toBe(boundaryId);
         expect(page).toBe(1);
         expect(size).toBe(100);
-        return { results: [{ id: 'team-1', name: 'Team One' }] };
+        return { items: [{ id: 'team-1', name: 'Team One' }] };
       };
 
       const result = await service.listBoundaryTeams(boundaryId);
@@ -114,7 +119,7 @@ describe('BoundaryService', () => {
         throw new Error('API error');
       };
 
-      const result = await service.listBoundaryTeams('test-boundary-id');
+      const result = await service.listBoundaryTeams(toUUID('test-boundary-id'));
 
       expect(result).toEqual([]);
     });
@@ -127,7 +132,7 @@ describe('BoundaryService', () => {
         name: 'Test Boundary',
       });
 
-      const result = await service.getBoundary('boundary-1');
+      const result = await service.getBoundary(toUUID('boundary-1'));
 
       expect(result).toEqual({ id: 'boundary-1', name: 'Test Boundary' });
     });
@@ -137,7 +142,7 @@ describe('BoundaryService', () => {
         throw new Error('API error');
       };
 
-      const result = await service.getBoundary('boundary-1');
+      const result = await service.getBoundary(toUUID('boundary-1'));
 
       expect(result).toBeNull();
     });

@@ -54,12 +54,17 @@ describe('CreateSubTaskDialog', () => {
   it('should not submit while already submitting', async () => {
     component.form.patchValue({ name: 'Test' });
     // Simulate concurrent submit
-    const slow = new Promise(r => setTimeout(r, 100));
+    let resolveSlowPromise: () => void;
+    const slow = new Promise<{ id: string; name: string }>(r => {
+      resolveSlowPromise = () => r({ id: 'new-task', name: 'Test' });
+    });
     mockTasksService.createSubTask.mockReturnValue(slow);
-    component.onSubmit(); // starts submitting
+    const firstSubmit = component.onSubmit(); // starts submitting
     expect(component.submitting()).toBe(true);
-    await component.onSubmit(); // should bail
+    await component.onSubmit(); // should bail (already submitting)
     expect(mockTasksService.createSubTask).toHaveBeenCalledTimes(1);
+    resolveSlowPromise!(); // resolve before teardown
+    await firstSubmit;
   });
 
   it('should have priority options', () => {

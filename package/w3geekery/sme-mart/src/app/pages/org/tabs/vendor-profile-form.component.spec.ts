@@ -7,16 +7,18 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { vi } from 'vitest';
 import { VendorProfileForm } from './vendor-profile-form.component';
 
 describe('VendorProfileForm', () => {
   let component: VendorProfileForm;
   let fixture: ComponentFixture<VendorProfileForm>;
-  let snackBar: jasmine.SpyObj<MatSnackBar>;
+
+  const snackBarMock = {
+    open: vi.fn(),
+  };
 
   beforeEach(async () => {
-    const snackBarSpy = jasmine.createSpyObj('MatSnackBar', ['open']);
-
     await TestBed.configureTestingModule({
       imports: [
         ReactiveFormsModule,
@@ -30,13 +32,12 @@ describe('VendorProfileForm', () => {
       ],
       providers: [
         FormBuilder,
-        { provide: MatSnackBar, useValue: snackBarSpy },
+        { provide: MatSnackBar, useValue: snackBarMock },
       ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(VendorProfileForm);
     component = fixture.componentInstance;
-    snackBar = TestBed.inject(MatSnackBar) as jasmine.SpyObj<MatSnackBar>;
   });
 
   it('should create', () => {
