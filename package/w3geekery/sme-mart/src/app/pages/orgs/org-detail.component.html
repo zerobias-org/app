@@ -144,8 +144,11 @@
           @for (boundary of boundaries(); track boundary.id) {
             <div class="boundary-item">
               <h4 class="boundary-name">{{ boundary.name }}</h4>
-              @if (boundary.state) {
-                <span class="boundary-status">{{ boundary.state }}</span>
+              @if (boundary.boundaryType) {
+                <span class="boundary-type">{{ boundary.boundaryType }}</span>
+              }
+              @if (boundary.status) {
+                <span class="boundary-status">{{ boundary.status }}</span>
               }
             </div>
           }

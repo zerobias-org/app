@@ -119,9 +119,12 @@ export class OrgDetailComponent implements OnInit {
           .then((result: any) => (result?.items || []))
           .catch(() => []) || Promise.resolve([]);
 
-        // Boundaries: Stub as empty array for now
-        // For current org, boundary listing API will be implemented in Phase 08+
-        const boundariesPromise = Promise.resolve([]);
+        // Load boundaries for this org (scoped by dana-org-id header)
+        const boundariesPromise = this.clientApi.platformClient
+          .getBoundaryApi()
+          .listBoundaries(1, 100)
+          .then(result => result.items || [])
+          .catch(() => []);
 
         // Combine all promises into an Observable
         return from(
