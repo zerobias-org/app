@@ -397,4 +397,69 @@ describe('VettingService', () => {
       expect(summary.gateStatus).toBe('verified');
     });
   });
+
+  describe('Pilot Completion Suggestion Signal (Plan 077)', () => {
+    it('should initialize pilotCompletionSuggestion as null', () => {
+      expect(service.pilotCompletionSuggestion()).toBe(null);
+    });
+
+    it('should set pilot completion suggestion via setPilotCompletionSuggestion', () => {
+      const suggestion = {
+        pilotId: 'pilot-1',
+        pilotName: 'Test Pilot',
+        completionDate: new Date().toISOString(),
+        completionNotes: 'Completed successfully',
+        engagementId: 'eng-123',
+        summary: 'Pilot completed. Ready for vetting.',
+      };
+
+      service.setPilotCompletionSuggestion(suggestion);
+
+      expect(service.pilotCompletionSuggestion()).toEqual(suggestion);
+    });
+
+    it('should clear pilot completion suggestion via clearPilotCompletionSuggestion', () => {
+      const suggestion = {
+        pilotId: 'pilot-1',
+        pilotName: 'Test Pilot',
+        completionDate: new Date().toISOString(),
+        completionNotes: '',
+        engagementId: 'eng-123',
+        summary: 'Pilot completed.',
+      };
+
+      service.setPilotCompletionSuggestion(suggestion);
+      expect(service.pilotCompletionSuggestion()).toBeTruthy();
+
+      service.clearPilotCompletionSuggestion();
+
+      expect(service.pilotCompletionSuggestion()).toBe(null);
+    });
+
+    it('should allow updating suggestion multiple times', () => {
+      const suggestion1 = {
+        pilotId: 'pilot-1',
+        pilotName: 'Pilot One',
+        completionDate: '2026-04-01T10:00:00Z',
+        completionNotes: 'First pilot',
+        engagementId: 'eng-123',
+        summary: 'First',
+      };
+
+      const suggestion2 = {
+        pilotId: 'pilot-2',
+        pilotName: 'Pilot Two',
+        completionDate: '2026-04-02T10:00:00Z',
+        completionNotes: 'Second pilot',
+        engagementId: 'eng-124',
+        summary: 'Second',
+      };
+
+      service.setPilotCompletionSuggestion(suggestion1);
+      expect(service.pilotCompletionSuggestion()?.pilotName).toBe('Pilot One');
+
+      service.setPilotCompletionSuggestion(suggestion2);
+      expect(service.pilotCompletionSuggestion()?.pilotName).toBe('Pilot Two');
+    });
+  });
 });

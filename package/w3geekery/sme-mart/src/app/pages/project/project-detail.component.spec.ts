@@ -4,6 +4,8 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ProjectDetail } from './project-detail.component';
 import { SmeMartProjectService } from '../../core/services/sme-mart-project.service';
+import { SmeMartResourceService } from '../../core/services/sme-mart-resource.service';
+import { VettingService } from '../../core/services/vetting.service';
 import { ProjectContextService } from '../../core/services/project-context.service';
 import { ImpersonationService } from '../../core/services/impersonation.service';
 import { makeSmeMartProject } from '../../test-helpers/factories';
@@ -15,6 +17,8 @@ describe('ProjectDetail', () => {
   let mockRouter: any;
   let mockActivatedRoute: any;
   let mockProjectService: any;
+  let mockResourceService: any;
+  let mockVettingService: any;
   let mockProjectContext: any;
   let mockDialog: any;
   let mockSnackBar: any;
@@ -46,6 +50,19 @@ describe('ProjectDetail', () => {
       updateProject: jasmine.createSpy('updateProject').and.resolveTo(
         makeSmeMartProject({ id: 'proj-123', status: 'completed' })
       ),
+      createProject: jasmine.createSpy('createProject').and.resolveTo(
+        makeSmeMartProject({ id: 'proj-456', name: 'Promoted Project', projectType: 'project', status: 'draft' })
+      ),
+    };
+
+    mockResourceService = {
+      linkResources: jasmine.createSpy('linkResources').and.resolveTo(undefined),
+    };
+
+    mockVettingService = {
+      pilotCompletionSuggestion: jasmine.createSpy('pilotCompletionSuggestion').and.returnValue(null),
+      setPilotCompletionSuggestion: jasmine.createSpy('setPilotCompletionSuggestion'),
+      clearPilotCompletionSuggestion: jasmine.createSpy('clearPilotCompletionSuggestion'),
     };
 
     mockProjectContext = {
@@ -84,6 +101,8 @@ describe('ProjectDetail', () => {
         { provide: Router, useValue: mockRouter },
         { provide: ActivatedRoute, useValue: mockActivatedRoute },
         { provide: SmeMartProjectService, useValue: mockProjectService },
+        { provide: SmeMartResourceService, useValue: mockResourceService },
+        { provide: VettingService, useValue: mockVettingService },
         { provide: ProjectContextService, useValue: mockProjectContext },
         { provide: MatDialog, useValue: mockDialog },
         { provide: MatSnackBar, useValue: mockSnackBar },
@@ -327,6 +346,246 @@ describe('ProjectDetail', () => {
       component.goToEngagement();
 
       expect(mockRouter.navigate).toHaveBeenCalledWith(['/my/engagements']);
+    });
+  });
+
+  describe('canPromote computed', () => {
+    it('should return true when projectType=pilot and status=completed', () => {
+      mockProjectContext.project = jasmine.createSpy('project').and.returnValue(
+        makeSmeMartProject({ projectType: 'pilot', status: 'completed' })
+      );
+
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        imports: [ProjectDetail],
+        providers: [
+          { provide: Router, useValue: mockRouter },
+          { provide: ActivatedRoute, useValue: mockActivatedRoute },
+          { provide: SmeMartProjectService, useValue: mockProjectService },
+          { provide: SmeMartResourceService, useValue: mockResourceService },
+          { provide: VettingService, useValue: mockVettingService },
+          { provide: ProjectContextService, useValue: mockProjectContext },
+          { provide: MatDialog, useValue: mockDialog },
+          { provide: MatSnackBar, useValue: mockSnackBar },
+          { provide: ImpersonationService, useValue: mockImpersonation },
+        ],
+      });
+      fixture = TestBed.createComponent(ProjectDetail);
+      component = fixture.componentInstance;
+
+      expect(component.canPromote()).toBe(true);
+    });
+
+    it('should return false when status!=completed', () => {
+      mockProjectContext.project = jasmine.createSpy('project').and.returnValue(
+        makeSmeMartProject({ projectType: 'pilot', status: 'active' })
+      );
+
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        imports: [ProjectDetail],
+        providers: [
+          { provide: Router, useValue: mockRouter },
+          { provide: ActivatedRoute, useValue: mockActivatedRoute },
+          { provide: SmeMartProjectService, useValue: mockProjectService },
+          { provide: SmeMartResourceService, useValue: mockResourceService },
+          { provide: VettingService, useValue: mockVettingService },
+          { provide: ProjectContextService, useValue: mockProjectContext },
+          { provide: MatDialog, useValue: mockDialog },
+          { provide: MatSnackBar, useValue: mockSnackBar },
+          { provide: ImpersonationService, useValue: mockImpersonation },
+        ],
+      });
+      fixture = TestBed.createComponent(ProjectDetail);
+      component = fixture.componentInstance;
+
+      expect(component.canPromote()).toBe(false);
+    });
+
+    it('should return false when projectType!=pilot', () => {
+      mockProjectContext.project = jasmine.createSpy('project').and.returnValue(
+        makeSmeMartProject({ projectType: 'project', status: 'completed' })
+      );
+
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        imports: [ProjectDetail],
+        providers: [
+          { provide: Router, useValue: mockRouter },
+          { provide: ActivatedRoute, useValue: mockActivatedRoute },
+          { provide: SmeMartProjectService, useValue: mockProjectService },
+          { provide: SmeMartResourceService, useValue: mockResourceService },
+          { provide: VettingService, useValue: mockVettingService },
+          { provide: ProjectContextService, useValue: mockProjectContext },
+          { provide: MatDialog, useValue: mockDialog },
+          { provide: MatSnackBar, useValue: mockSnackBar },
+          { provide: ImpersonationService, useValue: mockImpersonation },
+        ],
+      });
+      fixture = TestBed.createComponent(ProjectDetail);
+      component = fixture.componentInstance;
+
+      expect(component.canPromote()).toBe(false);
+    });
+  });
+
+  describe('promoteToProject', () => {
+    it('should create new project with projectType=project and status=draft', async () => {
+      const pilot = makeSmeMartProject({ id: 'pilot-1', projectType: 'pilot', status: 'completed', name: 'Test Pilot' });
+      mockProjectContext.project = jasmine.createSpy('project').and.returnValue(pilot);
+
+      await component.promoteToProject();
+
+      expect(mockProjectService.createProject).toHaveBeenCalledWith(jasmine.objectContaining({
+        projectType: 'project',
+        status: 'draft',
+        name: 'Test Pilot',
+      }));
+    });
+
+    it('should copy key fields from pilot to new project', async () => {
+      const pilot = makeSmeMartProject({
+        id: 'pilot-1',
+        projectType: 'pilot',
+        status: 'completed',
+        name: 'Test Pilot',
+        description: 'Test desc',
+        category: 'test-cat',
+      });
+      mockProjectContext.project = jasmine.createSpy('project').and.returnValue(pilot);
+
+      await component.promoteToProject();
+
+      const call = mockProjectService.createProject.calls.mostRecent().args[0];
+      expect(call.name).toBe('Test Pilot');
+      expect(call.description).toBe('Test desc');
+      expect(call.category).toBe('test-cat');
+    });
+
+    it('should link pilot to promoted project', async () => {
+      const pilot = makeSmeMartProject({ id: 'pilot-1', projectType: 'pilot', status: 'completed' });
+      mockProjectContext.project = jasmine.createSpy('project').and.returnValue(pilot);
+
+      await component.promoteToProject();
+
+      expect(mockResourceService.linkResources).toHaveBeenCalledWith(
+        'pilot-1',
+        'sme-mart:project',
+        jasmine.any(String),
+        'sme-mart:project',
+        'relates_to',
+        jasmine.objectContaining({ relationship: 'promoted_to' })
+      );
+    });
+
+    it('should update pilot with promotedProjectId', async () => {
+      const pilot = makeSmeMartProject({ id: 'pilot-1', projectType: 'pilot', status: 'completed' });
+      mockProjectContext.project = jasmine.createSpy('project').and.returnValue(pilot);
+
+      await component.promoteToProject();
+
+      const updateCall = mockProjectService.updateProject.calls.mostRecent();
+      expect(updateCall.args[0]).toBe('pilot-1');
+      expect(updateCall.args[1]).toEqual(jasmine.objectContaining({ promotedProjectId: 'proj-456' }));
+    });
+
+    it('should navigate to new project after promotion', async () => {
+      const pilot = makeSmeMartProject({ id: 'pilot-1', projectType: 'pilot', status: 'completed' });
+      mockProjectContext.project = jasmine.createSpy('project').and.returnValue(pilot);
+      mockRouter.navigate = jasmine.createSpy('navigate');
+
+      await component.promoteToProject();
+
+      // Navigation is delayed by 1s, so we need to wait a bit
+      await new Promise(resolve => setTimeout(resolve, 1100));
+
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/projects', 'proj-456']);
+    });
+
+    it('should set isPromoting during promotion', async () => {
+      const pilot = makeSmeMartProject({ id: 'pilot-1', projectType: 'pilot', status: 'completed' });
+      mockProjectContext.project = jasmine.createSpy('project').and.returnValue(pilot);
+
+      const promotionPromise = component.promoteToProject();
+      expect(component.isPromoting()).toBe(true);
+
+      await promotionPromise;
+      expect(component.isPromoting()).toBe(false);
+    });
+
+    it('should show success snackbar on promotion', async () => {
+      const pilot = makeSmeMartProject({ id: 'pilot-1', projectType: 'pilot', status: 'completed' });
+      mockProjectContext.project = jasmine.createSpy('project').and.returnValue(pilot);
+
+      mockSnackBar.open = jasmine.createSpy('open').and.returnValue({
+        onAction: () => ({ subscribe: () => {} }),
+      });
+
+      await component.promoteToProject();
+
+      expect(mockSnackBar.open).toHaveBeenCalledWith('Pilot promoted to project', 'View', { duration: 5000 });
+    });
+
+    it('should show error snackbar on promotion failure', async () => {
+      mockProjectService.createProject = jasmine.createSpy('createProject').and.rejectWith(new Error('API error'));
+
+      const pilot = makeSmeMartProject({ id: 'pilot-1', projectType: 'pilot', status: 'completed' });
+      mockProjectContext.project = jasmine.createSpy('project').and.returnValue(pilot);
+
+      await component.promoteToProject();
+
+      expect(mockSnackBar.open).toHaveBeenCalledWith('Failed to promote pilot', 'Dismiss', { duration: 5000 });
+    });
+
+    it('should not proceed if projectType is not pilot', async () => {
+      mockProjectContext.project = jasmine.createSpy('project').and.returnValue(
+        makeSmeMartProject({ projectType: 'project', status: 'completed' })
+      );
+
+      await component.promoteToProject();
+
+      expect(mockProjectService.createProject).not.toHaveBeenCalled();
+    });
+
+    it('should not proceed if status is not completed', async () => {
+      mockProjectContext.project = jasmine.createSpy('project').and.returnValue(
+        makeSmeMartProject({ projectType: 'pilot', status: 'active' })
+      );
+
+      await component.promoteToProject();
+
+      expect(mockProjectService.createProject).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('completePilot integration with vetting', () => {
+    it('should call setPilotCompletionSuggestion after pilot completion', async () => {
+      const pilot = makeSmeMartProject({ id: 'pilot-1', projectType: 'pilot', status: 'active', engagementId: 'eng-123', name: 'Test Pilot' });
+      mockProjectContext.project = jasmine.createSpy('project').and.returnValue(pilot);
+
+      await component.completePilot();
+
+      expect(mockVettingService.setPilotCompletionSuggestion).toHaveBeenCalledWith(jasmine.objectContaining({
+        pilotId: 'pilot-1',
+        pilotName: 'Test Pilot',
+        engagementId: 'eng-123',
+      }));
+    });
+
+    it('should include completion notes in suggestion if provided', async () => {
+      const pilot = makeSmeMartProject({ id: 'pilot-1', projectType: 'pilot', status: 'active', engagementId: 'eng-123', name: 'Test Pilot' });
+      mockProjectContext.project = jasmine.createSpy('project').and.returnValue(pilot);
+
+      mockDialog.open = jasmine.createSpy('open').and.returnValue({
+        afterClosed: () => ({
+          toPromise: () => Promise.resolve({ notes: 'Pilot completed successfully' }),
+        }),
+      });
+
+      await component.completePilot();
+
+      const suggestionCall = mockVettingService.setPilotCompletionSuggestion.calls.mostRecent();
+      expect(suggestionCall.args[0].completionNotes).toBe('Pilot completed successfully');
     });
   });
 });
