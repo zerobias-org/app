@@ -46,6 +46,51 @@ Browser loads index.html
 
 If the director's design mode asks about "boot sequence," this is what it means for SME Mart.
 
+## Platform Security & Permission Model (CRITICAL — read before any boundary/permission work)
+
+**Source:** ZeroBias Platform Security Guide (kb9) + Kevin corrections (2026-04-02).
+**Reference:** `.claude/docs/ZB_PLATFORM_SECURITY_GUIDE.md`
+**How to refresh:** `meta.getKbArticleContent` with `code: "kb9"` via ZB MCP.
+
+### The Actual Layering
+
+```
+Org (tenancy, governance, resource ownership)
+ ├── Resource Authorization (platform-wide IAM)
+ │    └── Access Rules → Principals × Permissions × Resource Selectors
+ └── Boundary (compliance scope + operational permissions)
+      ├── Who can see collected data
+      ├── Who can open tasks
+      ├── Who can run hub module operations
+      ├── Frameworks, controls, evidence
+      └── NOT a general policy engine (no door locks, no arbitrary IAM)
+```
+
+**Org** = tenancy + governance container. Owns all resources. Users must belong to at least one. Multi-org membership is a first-class use case (auditors, consultants, shared services across divisions). Domain registration is *recommended practice*, not a hard constraint today.
+
+**Boundary** = compliance scope + operational permissions. Controls who can do what *inside* the boundary — open a task, see collected data, allow/disallow hub module operations. It is NOT a general-purpose policy engine. Boundaries are bound to compliance frameworks and organize data/evidence.
+
+**Resource Authorization** = the general IAM layer. Access Rules grant Principals (users, groups, API keys) permissions on Resources (apps, boundaries, connections, audits). Resource Selectors support exact match, type-based, tag-based, and property-value matching.
+
+### Brian's Vision vs Platform Reality
+
+| Brian says | Platform reality | Gap? |
+|------------|-----------------|------|
+| Org = strictly legal entity (same email domain + IDP) | Org = governance container. Domain verification coming but not enforced. Multi-org membership is normal. | No gap — aspirational direction, not a constraint today |
+| Boundary is THE security construct | Boundary controls operational permissions within its scope. Resource Authorization is the general IAM. | No gap — Brian is directionally right for the SME Mart use case |
+| External parties interact through boundary permission sets | Boundary party/role/team APIs already exist (`listBoundaryParties`, `listBoundaryPartyRoles`, `listBoundaryTeams`). Cross-org grants supported via Resource Authorization. | No gap — APIs exist, SME Mart just needs to surface them |
+| The platform needs to change | It doesn't. The features Brian wants are already built. | **No platform gap.** SME Mart UI gap only. |
+
+### Design Rule
+
+**Brian's instincts about WHAT should happen are usually right. His understanding of HOW the platform works is often wrong.** Our job is to map his vision onto existing platform constructs, not build new platform features. Always verify API availability before accepting "platform needs to change" claims.
+
+When Brian describes a feature:
+1. Translate his business language into platform concepts (boundary, resource, access rule, party, role)
+2. Search ZB MCP to verify the API exists (`zerobias_search`)
+3. If the API exists → build the SME Mart UI that surfaces it
+4. If the API doesn't exist → flag to Kevin, don't build a workaround
+
 ## Data Layer Pattern
 
 ```

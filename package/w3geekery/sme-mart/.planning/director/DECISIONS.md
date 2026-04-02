@@ -1,5 +1,29 @@
 # Director Decisions
 
+## v1.2 Milestone Scope: RFP Packages + Document Templates + Pilot Projects
+**Date:** 2026-04-02
+**Decision:** v1.2 focuses on three items: (1) Plan 054 MVP — closed/invitation-only RFPs + multi-document packages (D1, D2). Form builder (D3) and destruction attestation (S2) deferred to v1.3. (2) Plan 046 partial — cherry-pick document templates + preview from remaining phases to enable 054's template→instance workflow. (3) Plan 077 — Pilot Projects (Brian asked 2026-03-27). LLM-assisted bid generation (033 P5) deferred to v1.3 as it builds on 054.
+**Why:** 054 is the highest business value unblocked feature — transforms RFPs from Craigslist-style postings into structured packages. 046 partial provides the template infrastructure 054 needs. 077 is a quick Brian-requested win. Total ~32–36 hrs (~2.5 weeks at 15 hrs/week). The platform mapping work (Brian→platform construct alignment) is a design deliverable, not code.
+**Anti-pattern:** Agent may try to build the full form builder (D3) or destruction attestation workflow (S2) — those are explicitly out of scope for v1.2 MVP. Agent may try to build custom document storage — documents use existing org document infrastructure from Plan 046.
+
+## Form Builder is a Reusable Component (Not RFP-Specific)
+**Date:** 2026-04-02
+**Decision:** The form builder (D3) must be built as a reusable, context-agnostic component. It's not "RFP form builder" — it's a generic dynamic form builder/renderer that takes a JSON field config and renders Angular Material form fields. First use: buyer defines submission requirements on an RFP. Future uses: vendor defines resource requirements during engagement (S3 access, API credentials, VPN, schedule), vetting checklists, any structured data collection in the marketplace.
+**Why:** Supply side also has requirements. Brian's transparency entangled task pairs (3/24 meeting) will need structured forms on both sides. Building it RFP-specific would mean rebuilding it when vendor requirements come.
+**Anti-pattern:** Agent may put the form builder inside the RFP module/folder. It should be a shared component (`src/app/shared/` or `src/app/components/form-builder/`) that RFP imports, not owned by RFP.
+
+## Demo Seed Scripts for Friday UI Demos
+**Date:** 2026-04-02
+**Decision:** Every milestone ships with runnable demo seed/cleanup scripts. For v1.2: a CLI script (node/ts) that creates a realistic RFP package (compliance engagement, documents attached, vendor invited, bid submitted) via ZB MCP/Platform APIs. Cleanup script deletes everything. Clark walks Brian through the UI showing the seeded state, then demos vendor flow manually.
+**Why:** Brian needs to see features in action on Fridays. Manual setup before each demo is error-prone and slow. Scripts also double as integration testing — if the seed script breaks, something is wrong.
+**Anti-pattern:** Agent may try to build Playwright UI automation for the demo. That's brittle and slow to maintain. Seed scripts create state via API; the demo is a manual UI walkthrough of that state.
+
+## Map Brian's Vision to Existing Platform (Cross-Milestone)
+**Date:** 2026-04-02
+**Decision:** Brian's boundary/permission vision maps onto existing ZeroBias platform constructs. No platform changes needed. SME Mart builds UI that surfaces what's already there.
+**Why:** Brian describes the right outcomes (boundary-scoped permissions, cross-org collaboration via projects, external parties interacting through boundaries) but incorrectly believes the platform needs to change. Kevin confirmed (2026-04-02): boundaries control operational permissions (tasks, collected data, hub module operations) — not a general policy engine, but sufficient for SME Mart. Platform Security Guide (kb9) documents the full Resource Authorization model. All boundary party/role/team APIs already exist.
+**Anti-pattern:** Agent may try to design custom permission systems, propose platform feature requests, or build workarounds for "missing" APIs. Always verify via `zerobias_search` before concluding an API doesn't exist. See ORG-07 lesson.
+
 ## VendorProfileItem: Single Entity with Section Discriminator
 **Date:** 2026-03-30
 **Decision:** Use one `VendorProfileItem` GQL entity with `section` discriminator + JSON `data`, rather than separate entity types per section.

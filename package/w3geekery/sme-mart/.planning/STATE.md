@@ -1,30 +1,31 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.1
-milestone_name: Org Navigation & Vendor Profile
-status: complete
-last_updated: "2026-04-02T16:00:00.000Z"
-last_activity: 2026-04-02
+milestone: v1.2
+milestone_name: RFP Packages & Pilot Projects
+status: executing
+last_updated: "2026-04-02T22:51:25.725Z"
+last_activity: 2026-04-02 -- Phase 13 execution started
 progress:
-  total_phases: 6
-  completed_phases: 6
-  total_plans: 8
-  completed_plans: 8
+  total_phases: 5
+  completed_phases: 0
+  total_plans: 2
+  completed_plans: 0
 ---
 
 # STATE.md — Session Context
 
 **Session Name:** `gsd-plan`
-**Date Created:** 2026-03-30
-**Current Focus:** Milestone v1.1 complete — ready for next milestone
+**Date Created:** 2026-04-02
+**Current Focus:** Phase 13 — pilot-projects
 
 ---
 
 ## Current Position
 
-Phase: All complete (7-12)
-Status: Milestone v1.1 shipped
-Last activity: 2026-04-02
+Phase: 13 (pilot-projects) — EXECUTING
+Plan: 1 of 2
+Status: Executing Phase 13
+Last activity: 2026-04-02 -- Phase 13 execution started
 
 ---
 
@@ -33,7 +34,47 @@ Last activity: 2026-04-02
 See: .planning/PROJECT.md (updated 2026-04-02)
 
 **Core value:** Transparent, task-gated marketplace with demand/supply/transparency partitions
-**Current focus:** Planning next milestone
+**Current focus:** v1.2 RFP Packages & Pilot Projects
+**Roadmap phases:** 13-17
+
+---
+
+## Roadmap Summary
+
+**Phase 13: Pilot Projects** (6–8 hrs)
+
+- Goal: Enable POC testing with projectType discriminator and promotion workflow
+- Requirements: PLT-01, PLT-02, PLT-03, PLT-04
+- Dependencies: None (v1.1 complete)
+
+**Phase 14: Invitation Controls** (12–16 hrs)
+
+- Goal: Close RFPs to invited vendors with access control gates
+- Requirements: D1-01 through D1-06
+- Dependencies: Phase 13
+
+**Phase 15: Document Templates** (14–18 hrs)
+
+- Goal: Org-level reusable templates with variable substitution
+- Requirements: D2-01 through D2-05
+- Dependencies: Phase 14
+- Research flag: Template variable substitution syntax design (needs design doc before execution)
+
+**Phase 16: Form Builder** (16–20 hrs)
+
+- Goal: Buyer-defined structured forms with dynamic vendor submission
+- Requirements: D3-01 through D3-06, DEMO-01, DEMO-02, DEMO-03
+- Dependencies: Phase 15
+- Research flag: JSON Schema subset + DynamicFormComponent rendering strategy (needs design doc before execution)
+
+**Phase 17: Demo Seed Scripts** (~4 hrs)
+
+- Goal: CLI scripts creating full RFP package flow for Friday Brian demos
+- Requirements: DEMO-01, DEMO-02, DEMO-03
+- Dependencies: Phases 13-16
+
+**Total budget:** ~40–44 hours (2.7–2.9 weeks at 15 hrs/week)
+**Requirement coverage:** 24/24 (100%)
 
 ---
 
@@ -54,6 +95,13 @@ From v1.1:
 - Vetting pre-fill suggestion panel with pointer attachments
 - Internal/External org badges, project parties tab
 
+From v1.2 Research:
+
+- Phase order mandated by dependencies (pilot → invitation → template → form)
+- Two research phases needed (15 & 16) — template variable syntax + JSON Schema subset before execution
+- Five critical pitfalls identified with clear prevention patterns (documented in ROADMAP.md Phase Details)
+- No platform blockers or stack changes required (Pipeline + GQL + Angular 21 only)
+
 ---
 
 ## Session Continuity
@@ -64,15 +112,17 @@ From v1.1:
 claude --resume gsd-plan
 ```
 
+**Next step:** Execute `/gsd:plan-phase 13` to begin Phase 13 planning
+
 **If starting fresh:**
 
 - Read `.planning/PROJECT.md` for current state
-- Read `.planning/ROADMAP.md` for milestone history
-- Read `.planning/MILESTONES.md` for accomplishments
-- Read `.planning/BACKLOG.md` for pending work
+- Read `.planning/ROADMAP.md` for complete roadmap (phases 13-16)
+- Read `.planning/REQUIREMENTS.md` for traceability (all 24 requirements mapped)
 - Read `CLAUDE.md` for project conventions
+- Check `.planning/director/` for architecture review state (if director mode active)
 
 ---
 
 **Last Updated:** 2026-04-02
-**Milestone v1.1:** Complete. 6 phases (7-12), 33/33 requirements satisfied, shipped.
+**Milestone v1.2:** Roadmap created. Ready for Phase 13 planning.

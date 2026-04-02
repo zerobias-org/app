@@ -8,6 +8,18 @@ SME Mart is a marketplace for Subject Matter Experts in compliance and cybersecu
 
 A transparent, task-gated marketplace where every boundary API operation requires task/subtask approval — demand/supply/transparency partitions at every level of the hierarchy.
 
+## Current Milestone: v1.2 RFP Packages & Pilot Projects
+
+**Goal:** Transform RFPs into structured multi-document packages with invitation controls, a simple form builder for structured submission requirements, document templates, and pilot project lifecycle.
+
+**Target features:**
+- Closed/invitation-only RFPs (D1)
+- Multi-document packages with templates/exhibits (D2)
+- Simple form builder — buyer-defined fields as JSON config, vendor dynamic renderer (D3)
+- Document templates + preview (046 partial — enables template→instance workflow)
+- Pilot Projects — projectType field, pilot→vetting item, pilot→real project lifecycle (077)
+- Demo seed scripts — CLI for Friday Brian demos + cleanup
+
 ## Current State (after v1.1)
 
 - **Data layer:** All 17 entity types + MarketplaceProfileItem on AuditgraphDB (Pipeline writes + GraphQL reads). Neon PostgreSQL pending archival.
@@ -83,5 +95,22 @@ A transparent, task-gated marketplace where every boundary API operation require
 | /orgs/:orgId read-only | Editing stays on /org for current org | ✓ Good — clear separation |
 | Org switching stubbed | Requires session auth, not API key | — Pending (platform dependency) |
 
+## Evolution
+
+This document evolves at phase transitions and milestone boundaries.
+
+**After each phase transition** (via `/gsd:transition`):
+1. Requirements invalidated? → Move to Out of Scope with reason
+2. Requirements validated? → Move to Validated with phase reference
+3. New requirements emerged? → Add to Active
+4. Decisions to log? → Add to Key Decisions
+5. "What This Is" still accurate? → Update if drifted
+
+**After each milestone** (via `/gsd:complete-milestone`):
+1. Full review of all sections
+2. Core Value check — still the right priority?
+3. Audit Out of Scope — reasons still valid?
+4. Update Context with current state
+
 ---
-*Last updated: 2026-04-02 after v1.1 milestone*
+*Last updated: 2026-04-02 after v1.2 milestone started*

@@ -496,6 +496,7 @@ export const SME_MART_PROJECT_FIELD_MAPPING = {
     status: 'status',
     engagementId: 'engagementId', // scalar field (schema v1.0.9) — also push as link
     projectType: 'projectType', // 'rfp' | 'pilot' | 'project' (Plan 077)
+    promotedProjectId: 'promotedProjectId', // Plan 077: pilot→project link
     startDate: 'startDate',
     targetEndDate: 'targetEndDate',
     category: 'category',
@@ -519,6 +520,7 @@ export const SME_MART_PROJECT_FIELD_MAPPING = {
     engagementId: 'engagementId', // scalar field (schema v1.0.9)
     engagement: 'engagementId', // link field — also maps to model engagementId
     projectType: 'projectType', // 'rfp' | 'pilot' | 'project' (Plan 077)
+    promotedProjectId: 'promotedProjectId', // Plan 077: pilot→project link
     startDate: 'startDate',
     targetEndDate: 'targetEndDate',
     category: 'category',

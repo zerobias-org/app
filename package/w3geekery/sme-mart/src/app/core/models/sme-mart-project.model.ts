@@ -13,7 +13,8 @@ export interface SmeMartProject {
   description?: string | null;
   status: string; // 'draft', 'published', 'active', 'completed', 'archived'
   engagementId?: string | null; // parent engagement (corp-to-corp agreement)
-  projectType?: string | null; // 'rfp' | 'pilot' | 'project' (Plan 077)
+  projectType?: 'rfp' | 'pilot' | 'project' | null; // Plan 077: type discriminator
+  promotedProjectId?: string | null; // Plan 77: linked project when pilot→project (inverse of promotedFromProjectId)
   startDate: string; // YYYY-MM-DD
   targetEndDate?: string | null; // YYYY-MM-DD
   createdAt: string; // ISO 8601
@@ -36,6 +37,7 @@ export interface CreateSmeMartProjectRequest {
   name: string;
   description?: string;
   status?: string;
+  projectType?: 'rfp' | 'pilot' | 'project';
   startDate?: string;
   targetEndDate?: string;
   // RFP fields
@@ -55,6 +57,7 @@ export interface UpdateSmeMartProjectRequest {
   name?: string;
   description?: string;
   status?: string;
+  projectType?: 'rfp' | 'pilot' | 'project';
   targetEndDate?: string;
   // RFP fields
   category?: string;
