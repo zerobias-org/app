@@ -33,17 +33,29 @@ const VIEW_PREF_KEY = 'sme-mart.project-list.viewMode';
     <div class="project-list-page">
       <div class="project-list-header">
         <h3>Projects</h3>
-        <mat-button-toggle-group
-          [value]="viewMode()"
-          (change)="setViewMode($event.value)"
-          hideSingleSelectionIndicator>
-          <mat-button-toggle value="table">
-            <mat-icon>table_rows</mat-icon>
-          </mat-button-toggle>
-          <mat-button-toggle value="cards">
-            <mat-icon>grid_view</mat-icon>
-          </mat-button-toggle>
-        </mat-button-toggle-group>
+        <div class="project-list-controls">
+          <mat-button-toggle-group
+            [value]="projectTypeFilter()"
+            (change)="setProjectTypeFilter($event.value)"
+            hideSingleSelectionIndicator>
+            <mat-button-toggle value="">All</mat-button-toggle>
+            <mat-button-toggle value="rfp">RFP</mat-button-toggle>
+            <mat-button-toggle value="pilot">Pilot</mat-button-toggle>
+            <mat-button-toggle value="project">Project</mat-button-toggle>
+          </mat-button-toggle-group>
+
+          <mat-button-toggle-group
+            [value]="viewMode()"
+            (change)="setViewMode($event.value)"
+            hideSingleSelectionIndicator>
+            <mat-button-toggle value="table">
+              <mat-icon>table_rows</mat-icon>
+            </mat-button-toggle>
+            <mat-button-toggle value="cards">
+              <mat-icon>grid_view</mat-icon>
+            </mat-button-toggle>
+          </mat-button-toggle-group>
+        </div>
       </div>
 
       @if (loading()) {
@@ -109,12 +121,21 @@ const VIEW_PREF_KEY = 'sme-mart.project-list.viewMode';
       align-items: center;
       justify-content: space-between;
       margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 1rem;
 
       h3 {
         margin: 0;
         font-size: 1.25rem;
         font-weight: 500;
+        flex: 1;
       }
+    }
+
+    .project-list-controls {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
     }
 
     .loading-container {
@@ -173,17 +194,29 @@ export class ProjectList implements OnInit {
   readonly loading = signal(true);
   readonly projects = signal<SmeMartProject[]>([]);
   readonly viewMode = signal<ViewMode>(this.loadViewPref());
+  readonly projectTypeFilter = signal<string>(''); // empty = 'All' projects
 
   readonly displayedColumns = ['name', 'status', 'startDate', 'targetEndDate'];
 
   async ngOnInit(): Promise<void> {
+    await this.loadProjects();
+  }
+
+  private async loadProjects(): Promise<void> {
     try {
+      this.loading.set(true);
       // Get engagement ID from parent route (engagements/:id/projects)
       const engagementId = this.route.parent?.snapshot.params['id'];
+      const options: any = { pageSize: 100 };
+
+      // Apply projectType filter if set
+      if (this.projectTypeFilter()) {
+        options.filters = { projectType: `.eq.${this.projectTypeFilter()}` };
+      }
 
       const result = engagementId
-        ? await this.projectService.listProjectsByEngagement(engagementId, { pageSize: 100 })
-        : await this.projectService.listProjects({ pageSize: 100 });
+        ? await this.projectService.listProjectsByEngagement(engagementId, options)
+        : await this.projectService.listProjects(options);
 
       this.projects.set(result.items);
     } catch (err) {
@@ -191,6 +224,11 @@ export class ProjectList implements OnInit {
     } finally {
       this.loading.set(false);
     }
+  }
+
+  async setProjectTypeFilter(filter: string): Promise<void> {
+    this.projectTypeFilter.set(filter);
+    await this.loadProjects();
   }
 
   openProject(proj: SmeMartProject): void {
