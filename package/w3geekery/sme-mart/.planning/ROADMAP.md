@@ -34,7 +34,7 @@
 
 ### v1.2 RFP Packages & Pilot Projects (Phases 13-17)
 
-- [ ] **Phase 13: Pilot Projects** (2/2 plans) — Enable buyer POC testing with projectType discriminator and promotion workflow
+- [x] **Phase 13: Pilot Projects** (2/2 plans) — Enable buyer POC testing with projectType discriminator and promotion workflow (completed 2026-04-02)
 - [ ] **Phase 14: Invitation Controls** — Close RFPs to invited vendors, add invitation management UI and access control gates
 - [ ] **Phase 15: Document Templates** — Org-level reusable templates with variable substitution for reusable docs
 - [ ] **Phase 16: Form Builder** — Buyer-defined structured forms with dynamic vendor submission
@@ -132,7 +132,7 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 13. Pilot Projects | 0/2 | In progress | — |
+| 13. Pilot Projects | 0/2 | Complete    | 2026-04-02 |
 | 14. Invitation Controls | 0/2 | Not started | — |
 | 15. Document Templates | 0/2 | Not started | — |
 | 16. Form Builder | 0/2 | Not started | — |
