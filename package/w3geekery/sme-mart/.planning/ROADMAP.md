@@ -35,7 +35,7 @@
 ### v1.2 RFP Packages & Pilot Projects (Phases 13-17)
 
 - [x] **Phase 13: Pilot Projects** (2/2 plans) — Enable buyer POC testing with projectType discriminator and promotion workflow (completed 2026-04-02)
-- [ ] **Phase 14: Invitation Controls** — Close RFPs to invited vendors, add invitation management UI and access control gates
+- [ ] **Phase 14: Invitation Controls** (3/3 plans) — Close RFPs to invited vendors, add invitation management UI and access control gates
 - [ ] **Phase 15: Document Templates** — Org-level reusable templates with variable substitution for reusable docs
 - [ ] **Phase 16: Form Builder** — Buyer-defined structured forms with dynamic vendor submission
 - [ ] **Phase 17: Demo Seed Scripts** — CLI scripts creating full RFP package flow for Friday demos with Brian
@@ -70,11 +70,15 @@
   4. Uninvited vendors cannot submit bids on invitation-only RFPs (access control gate)
   5. Vendor can view "My Invitations" feed showing only RFPs they've been invited to
   6. Invited vendors tab on RFP detail shows all invitations with response statuses
-**Plans**: TBD
-**Effort**: 12–16 hours (service + schema ~6-8 hrs, UI ~6-8 hrs)
-**Tech Stack**: Angular 21 + Pipeline + GraphQL + access control gate pattern
+**Plans**: 3 plans
+  - [ ] **Phase 14 Plan 00** (Wave 0) — Schema prerequisite: RfpInvitation class + SmeMartProject.isInvitationOnly field in zerobias-org/schema, dataloader validation, PR to zerobias-org/schema:dev — Requirements: (schema foundation, no direct req mapping)
+  - [ ] **Phase 14 Plan 01** (Wave 1) — Service layer: RfpInvitationService CRUD, SmeMartProject model update, field mappings, BidsService access control gate + comprehensive tests — Requirements: D1-01, D1-02, D1-03, D1-04
+  - [ ] **Phase 14 Plan 02** (Wave 2) — UI layer: My Invitations page, Invited Vendors tab, teaser view, RFP detail conditional rendering, inline acceptance banner, listing badge — Requirements: D1-01, D1-02, D1-03, D1-04, D1-05, D1-06
+**Effort**: 14–18 hours (schema ~2-3 hrs, service ~5-6 hrs, UI ~6-8 hrs)
+**Tech Stack**: Angular 21 + Pipeline + GraphQL + access control gate pattern + schema repo (zerobias-org/schema)
 **Critical Pitfall**: Access control gate (Pitfall #1) — BidsService must validate invitation status, expiration, and acceptance before allowing bid creation. Requires comprehensive test coverage for all gate paths (invited accepted, not invited, declined, expired).
 **UI hint**: yes
+**Schema Prerequisite**: Wave 0 (Plan 14-00) must complete before Waves 1-2. GQL schema reloads ~15 min after PR merge.
 
 ### Phase 15: Document Templates
 **Goal**: Enable org admins to create reusable document templates with variable substitution, and buyers to instantiate templates per-engagement
@@ -132,8 +136,8 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 13. Pilot Projects | 0/2 | Complete    | 2026-04-02 |
-| 14. Invitation Controls | 0/2 | Not started | — |
+| 13. Pilot Projects | 2/2 | Complete    | 2026-04-02 |
+| 14. Invitation Controls | 0/3 | Planning   | 2026-04-03 |
 | 15. Document Templates | 0/2 | Not started | — |
 | 16. Form Builder | 0/2 | Not started | — |
 | 17. Demo Seed Scripts | 0/1 | Not started | — |
@@ -141,4 +145,4 @@
 ---
 
 **Created:** 2026-03-17
-**Last Updated:** 2026-04-02 (v1.2 roadmap + Phase 13 plans created)
+**Last Updated:** 2026-04-03 (Phase 14 plans created: schema prerequisite + service + UI, 3-wave structure)
