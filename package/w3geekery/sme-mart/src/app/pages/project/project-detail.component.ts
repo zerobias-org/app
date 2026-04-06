@@ -63,6 +63,7 @@ const MORE_TAB_GROUPS: readonly TabGroup[] = [
     heading: 'Governance',
     tabs: [
       { path: 'parties', label: 'Parties', icon: 'group' },
+      { path: 'invited-vendors', label: 'Invited Vendors', icon: 'person_add' },
       { path: 'compliance', label: 'Compliance', icon: 'verified_user' },
       { path: 'reviews', label: 'Reviews', icon: 'rate_review' },
     ],
@@ -87,7 +88,6 @@ const ALL_MORE_TABS: readonly TabDef[] = MORE_TAB_GROUPS.flatMap(g => g.tabs);
     MatDividerModule,
     MatSnackBarModule,
     TitleCasePipe,
-    ProjectCompletionDialogComponent,
   ],
   templateUrl: './project-detail.component.html',
   styleUrl: './project-detail.component.scss',

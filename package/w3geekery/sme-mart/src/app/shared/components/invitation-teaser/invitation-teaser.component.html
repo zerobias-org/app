@@ -1,0 +1,47 @@
+<div class="teaser-container">
+  <mat-card class="teaser-card">
+    <mat-card-header>
+      <div class="header-content">
+        <h2>{{ project?.name || 'RFP' }}</h2>
+        <mat-chip-set>
+          <mat-chip disabled class="invitation-only-chip">
+            <mat-icon>lock</mat-icon>
+            Invitation Only
+          </mat-chip>
+        </mat-chip-set>
+      </div>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="teaser-content">
+        @if (project?.category) {
+          <p class="category">Category: {{ project.category }}</p>
+        }
+        <p class="description">
+          This RFP is invitation-only. To submit a bid, you must be invited by the buyer or request an invitation.
+        </p>
+
+        @if (project?.description) {
+          <div class="details">
+            <h4>About This RFP</h4>
+            <p>{{ project.description }}</p>
+          </div>
+        }
+      </div>
+    </mat-card-content>
+
+    <mat-card-actions>
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="openRequestDialog()"
+        [disabled]="isRequesting()">
+        @if (isRequesting()) {
+          Requesting...
+        } @else {
+          Request Invitation
+        }
+      </button>
+    </mat-card-actions>
+  </mat-card>
+</div>

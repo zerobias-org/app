@@ -9,6 +9,12 @@
         <mat-chip [class]="'status-' + status()">
           {{ status() | titlecase }}
         </mat-chip>
+        @if (isInvitationOnly()) {
+          <mat-chip class="invitation-only-chip">
+            <mat-icon matChipAvatar>lock</mat-icon>
+            Invitation Only
+          </mat-chip>
+        }
         @if (engagementTag()) {
           <mat-chip class="tag-chip">
             <code>{{ engagementTag() }}</code>

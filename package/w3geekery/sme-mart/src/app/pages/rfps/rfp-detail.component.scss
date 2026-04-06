@@ -115,3 +115,75 @@ h3 {
 .status-in_progress { --mdc-chip-label-text-color: var(--zb-color-warning); }
 .status-completed { --mdc-chip-label-text-color: var(--zb-color-info); }
 .status-cancelled { --mdc-chip-label-text-color: var(--zb-color-error); }
+
+// Response banners (Wave 1: Invitation Controls)
+.response-banner {
+  margin-bottom: 1.5rem;
+  border-radius: 8px;
+
+  mat-card-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+
+    mat-icon {
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+
+    p {
+      margin: 0;
+      font-size: 0.95rem;
+      flex: 1;
+    }
+
+    .banner-message {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex: 1;
+    }
+
+    .banner-actions {
+      display: flex;
+      gap: 0.5rem;
+      flex-shrink: 0;
+    }
+  }
+
+  &.success {
+    background-color: #f1f8f4;
+    border-left: 4px solid #4caf50;
+
+    mat-icon {
+      color: #4caf50;
+    }
+  }
+
+  &.pending {
+    background-color: #f3f5f9;
+    border-left: 4px solid #1976d2;
+
+    mat-icon {
+      color: #1976d2;
+    }
+  }
+
+  &.declined {
+    background-color: #fef5f3;
+    border-left: 4px solid #d32f2f;
+
+    mat-icon {
+      color: #d32f2f;
+    }
+  }
+}
+
+// Invitation-only chip
+.invitation-only-chip {
+  background-color: #eed5d1 !important;
+  color: #0f0f10 !important;
+}

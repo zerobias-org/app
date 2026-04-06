@@ -54,6 +54,11 @@ export const routes: Routes = [
           import('./pages/my-projects/my-projects.routes').then((m) => m.MY_PROJECTS_ROUTES),
       },
       {
+        path: 'my/invitations',
+        loadChildren: () =>
+          import('./pages/my-invitations/my-invitations.routes').then((m) => m.MY_INVITATIONS_ROUTES),
+      },
+      {
         path: 'my-profile',
         loadChildren: () =>
           import('./pages/my-profile/my-profile.routes').then((m) => m.MY_PROFILE_ROUTES),

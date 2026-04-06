@@ -171,6 +171,14 @@ export class OrgDetailComponent implements OnInit {
     }));
   });
 
+  // Load projects when orgId changes (must be field initializer for injection context)
+  private readonly loadProjectsEffect = effect(() => {
+    const id = this.orgId();
+    if (id) {
+      this.loadProjectsForOrg(id);
+    }
+  });
+
   ngOnInit(): void {
     try {
       const currentId = this.app.getCurrentOrgId();
@@ -178,14 +186,6 @@ export class OrgDetailComponent implements OnInit {
     } catch {
       this.currentOrgId.set(null);
     }
-
-    // Load projects when orgId changes
-    effect(() => {
-      const id = this.orgId();
-      if (id) {
-        this.loadProjectsForOrg(id);
-      }
-    });
   }
 
   private async loadProjectsForOrg(orgId: string): Promise<void> {

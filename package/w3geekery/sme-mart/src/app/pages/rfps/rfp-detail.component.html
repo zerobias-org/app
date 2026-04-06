@@ -8,26 +8,70 @@
       <mat-icon>arrow_back</mat-icon> Back to RFPs
     </button>
 
+    @if (isInvitationOnly() && vendorInvitation()) {
+      @switch (vendorInvitation()!.status) {
+        @case ('accepted') {
+          <mat-card class="response-banner success">
+            <mat-card-content>
+              <mat-icon>check_circle</mat-icon>
+              <p>You accepted this invitation. You can now submit a bid.</p>
+            </mat-card-content>
+          </mat-card>
+        }
+        @case ('pending') {
+          <mat-card class="response-banner pending">
+            <mat-card-content>
+              <div class="banner-message">
+                <mat-icon>hourglass_empty</mat-icon>
+                <p>Invitation pending your response.</p>
+              </div>
+              <div class="banner-actions">
+                <button mat-stroked-button color="primary" (click)="acceptInvitation()">Accept</button>
+                <button mat-stroked-button color="warn" (click)="declineInvitation()">Decline</button>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        }
+        @case ('declined') {
+          <mat-card class="response-banner declined">
+            <mat-card-content>
+              <mat-icon>cancel</mat-icon>
+              <p>You declined this invitation.</p>
+            </mat-card-content>
+          </mat-card>
+        }
+      }
+    }
+
     <div class="rfp-layout">
       <div class="rfp-main">
-        <mat-card>
-          <mat-card-header>
-            <div class="chip-row">
-              <mat-chip-set>
-                <mat-chip highlighted>RFP</mat-chip>
-                <mat-chip [class]="'status-' + status()">{{ status() | titlecase }}</mat-chip>
-                @if (rfp()!.category) {
-                  <mat-chip>{{ rfp()!.category }}</mat-chip>
-                }
-              </mat-chip-set>
-            </div>
-          </mat-card-header>
+        @if (isInvitationOnly() && !isInvited()) {
+          <app-invitation-teaser [project]="rfp()!" (requestInvitation)="requestInvitation($event.reason)" />
+        } @else {
+          <mat-card>
+            <mat-card-header>
+              <div class="chip-row">
+                <mat-chip-set>
+                  <mat-chip highlighted>RFP</mat-chip>
+                  <mat-chip [class]="'status-' + status()">{{ status() | titlecase }}</mat-chip>
+                  @if (rfp()!.isInvitationOnly) {
+                    <mat-chip class="invitation-only-chip">
+                      <mat-icon>lock</mat-icon>
+                      Invitation Only
+                    </mat-chip>
+                  }
+                  @if (rfp()!.category) {
+                    <mat-chip>{{ rfp()!.category }}</mat-chip>
+                  }
+                </mat-chip-set>
+              </div>
+            </mat-card-header>
 
-          <mat-card-content>
-            <h2>{{ rfp()!.name }}</h2>
-            @if (rfp()!.description) {
-              <p class="description">{{ rfp()!.description }}</p>
-            }
+            <mat-card-content>
+              <h2>{{ rfp()!.name }}</h2>
+              @if (rfp()!.description) {
+                <p class="description">{{ rfp()!.description }}</p>
+              }
 
             <div class="detail-grid">
               @if (rfp()!.budgetMin || rfp()!.budgetMax) {
@@ -87,8 +131,9 @@
                 </app-bid-card>
               }
             }
-          </mat-card-content>
-        </mat-card>
+            </mat-card-content>
+          </mat-card>
+        }
       </div>
 
       <!-- Actions sidebar -->

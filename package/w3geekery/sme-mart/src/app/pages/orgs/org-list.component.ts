@@ -135,19 +135,19 @@ export class OrgListComponent {
 
   private async loadOrgMetrics(orgId: string): Promise<void> {
     try {
-      // Query engagements for this org (with org filter - FLAG-2 fix)
+      // Query engagements (org scoping handled by dana-org-id header, not filter)
       const engagements = await this.graphqlRead.query<any>(
         'Engagement',
         ['id'],
-        { filters: { ownerId: `.eq.${orgId}` }, pageSize: 1, pageNumber: 1 }
+        { pageSize: 1, pageNumber: 1 }
       );
       const engagementCount = engagements.page.totalCount || 0;
 
-      // Query projects for this org (with org filter - FLAG-2 fix)
+      // Query projects (org scoping handled by dana-org-id header, not filter)
       const projects = await this.graphqlRead.query<any>(
         'SmeMartProject',
         ['id'],
-        { filters: { ownerId: `.eq.${orgId}` }, pageSize: 1, pageNumber: 1 }
+        { pageSize: 1, pageNumber: 1 }
       );
       const projectCount = projects.page.totalCount || 0;
 

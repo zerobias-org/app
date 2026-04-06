@@ -4,7 +4,7 @@
 
 **Flow:** Backlog item → `/gsd:new-milestone` → REQUIREMENTS.md → ROADMAP phases → plan → execute → archive
 
-**Last updated:** 2026-03-31
+**Last updated:** 2026-04-03
 
 ---
 
@@ -23,17 +23,13 @@ These can be selected for the next milestone. Ordered roughly by business value.
 
 | # | Plan | Description | Est. | Source |
 |---|------|-------------|------|--------|
-| **080** | Project-Centric Boundary Model | **CRITICAL (Brian edict 2026-03-31). Designed 2026-04-01.** Org = strictly legal entity (same email domain + IDP/2FA). External = user whose `ownerId` ≠ org `id`. **(1) My Orgs enhancement:** Internal/External badge on org cards (`whoAmI().ownerId` vs `org.id`), engagement/project count badges, `/orgs/:orgId` detail shows engagements + projects grouped with nav links. **(2) Project parties tab:** Replace `members` stub route → `parties`. Read-only boundary view: list boundaries from `boundaryIds`, show parties (`listBoundaryParties`), roles (`listBoundaryPartyRoles`), teams (`listBoundaryTeams`). Each party shows owning org + internal/external indicator. Boundary admin stays in ZB platform Governance. **(3) No engagement changes** (no stubs to replace). **Deferred:** project context switcher (replaces org switcher — needs UX design), sub-project nesting (Brian: stub, don't go deep), permission cascading, boundary admin in SME Mart. **APIs confirmed:** `listBoundaryParties`, `listBoundaryPartyRoles`, `listBoundaryTeams`, `getBoundaryParty`, `listBoundaryPartyRolesByBoundaryId`. | 10–15 hrs | Brian meeting 2026-03-31; design session 2026-04-01 |
-| **079** | My Organizations Refactor | **Designed 2026-03-30.** Three-tier org navigation: `/orgs` (card/table list from `listMyOrgs`, filter `hidden:true` + System Org + ops orgs), `/orgs/:orgId` (read-only overview: org info, members via `hydra.Org.listOrgMembers`, groups via `hydra.Org.listGroups`, boundaries — with "Go to Org Profile" action), `/org` (current active org's full profile with tabs — existing page, kept as-is). Org switching: `danaOld.Org.selectOrg` PUT endpoint exists but **stubbed/placeholder** until off API key auth. "Switch to this Org" button present but disabled with tooltip. Hydra APIs confirmed working cross-org (can query members/groups for non-current orgs). Nav: "My Organization" → "My Organizations" → `/orgs`. **Prereq for Plan 041.** | 8–12 hrs | Design session 2026-03-30 |
-| **041** | Supply-Side Vendor Profile (One-Time Load) | **Designed 2026-03-30.** Single `VendorProfileItem` GQL entity with `section` discriminator + JSON `data` field. Org-scoped (multiple org members contribute). 6 sections: corporate_identity, attestation, insurance, reference, personnel, financial. Engagement vetting items reference org profile items via `profile_item_id` (pointers, not copies). Expired items stay visible with indicator + auto-generate "updated version needed" checklist item. Pre-fill UX: vetting tab suggests matching profile items by section→vetting_type mapping, vendor selects which to attach. Profile management UI lives under My Orgs → [org] → Corporate Profile tab. **Depends on Plan 079.** Template→Instance workflow deferred to Plan 054. | ~16 hrs | Gap analysis S1, S5, S7; Brian; design session 2026-03-30 |
-| **054** | RFP Package Builder & Access Controls | Closed/invitation-only RFPs (D1), multi-document packages with templates/exhibits/forms (D2), form builder for structured submission requirements (D3), intent-to-bid/withdraw workflow with deadlines and destruction attestation (S2). **Template→Instance workflow:** org-level document templates (standard MSA, boilerplate NDA, SOW format) instantiated per-engagement with engagement-specific terms/signatures. Relates to Plan 041 org profile — templates are org-level profile items, instances are engagement-scoped. | 30–40 hrs | Gap analysis D1, D2, D3, S2; design session 2026-03-30 |
+| **054** | RFP Package Builder & Access Controls | **v1.2 IN PROGRESS (Phases 14-17).** D1 (invitation controls) = Phase 14. D2 (document templates) = Phase 15. D3 (form builder) = Phase 16. Demo scripts = Phase 17. S2 (intent-to-bid/destruction attestation) deferred to v1.3. | 30–40 hrs | Gap analysis D1, D2, D3, S2; design session 2026-03-30 |
 | **055** | Advanced Pricing & Evaluation | Complex pricing models: NRC/ARC, recurring/one-time, milestone payments, per-unit, multi-year (D4). Evaluation criteria builder with weighted scoring matrix (D5). Structured bid response templates (S3). Bid validity/expiration dates (S4). | 25–35 hrs | Gap analysis D4, D5, S3, S4 |
 | **056** | Engagement Roles & Communication | Third-party facilitator role (D7). Mediated communication channels (D6). NDA/confidentiality tracking with per-vendor status, access logging, destruction attestation (P2). | 20–25 hrs | Gap analysis D6, D7, P2 |
-| **077** | Pilot Projects | Test/POC projects during engagement vetting. `projectType` field: `rfp \| pilot \| project`. Pilot completion → conditional vetting item (Plan 063). Pilot → Real Project lifecycle transition. | 6–8 hrs | Brian "PILOTS" 2026-03-27 |
 | **065** | Message Center (Engagement-Scoped) | Engagement-level message center. Project-level messaging deferred to Project App. **Notes:** (1) Investigate [PromptQL](https://promptql.io) (Hasura) for pattern inspiration — thread-per-resource model, shared context, inline data refs, AI agent threads. 2026-04-01. (2) Slack API connector concept: create dedicated Slack channels per Project/Engagement, slurp conversations into SME Mart messaging center. Slack has full dev API (`api.slack.com`) — channel creation, webhooks, Slack Connect for cross-org. Could replace custom messaging UI entirely. 2026-04-02. | 8–12 hrs | Marketplace scope |
 | **066** | Engagement Dashboard | Configurable widgets for cross-project visibility at the engagement level. | 12–16 hrs | Marketplace scope |
 | **033 P5** | LLM-Assisted Bid Generation | Claude Agent SDK packaging, bundled ZB MCP tools, cost model (~$0.56/interaction). Phases 1–4 of Plan 033 complete. | ~8 hrs | Plan 033 |
-| **046 remaining** | Org Document Management (remaining phases) | Phase 6: org switcher (deferred). Phase 8: external storage imports (deferred). Phase 9 roadmap: folders, colors, tagging UI, archive browser, versioning, PDF conversion, preview, bulk ops, templates. Expand with 19 new document types from gap analysis (E1). | ~20 hrs | Gap analysis E1 |
+| **046 remaining** | Org Document Management (remaining phases) | Phase 6: org switcher (deferred). Phase 8: external storage imports (deferred). Phase 9 roadmap: folders, colors, tagging UI, archive browser, versioning, PDF conversion, preview, bulk ops, templates. Expand with 19 new document types from gap analysis (E1). **Note:** Phase 15 (v1.2) cherry-picks template→instance workflow from 046. | ~20 hrs | Gap analysis E1 |
 | **047** | Shared Notes & Versioning | Per-user sharing, note versioning (version browser/search/copy), Shared Notebook, timeline integration (share/pin events), pinned notes, task-linked checkboxes. 8 phases. | 32–40 hrs | Plan 047 |
 | **052** | Playwright E2E Smoke Tests | Full buyer/seller Playwright smoke tests. UAT validation, CI-capable. Supersedes Plan 044. | ~12 hrs | Meeting 2026-03-13 |
 | **053** | QA Skills & Cookie Import | Generic Claude Code skills (`/qa`, `/setup-cookies`) using Chrome DevTools MCP. Cookie decryption, systematic QA crawl with health scoring, regression tracking. | 16–21 hrs | Plan 053 |
@@ -44,8 +40,8 @@ These can be selected for the next milestone. Ordered roughly by business value.
 
 | # | Plan | What's Done | What Remains |
 |---|------|-------------|--------------|
-| **034** | GQL Schema Migration | Phases 1–4 done. Schema live in prod (8 classes), receiver pipeline created. | Phase 5: service layer. Blocked on PR #7 merge. |
-| **059** | AuditgraphDB Migration (Neon → Pipeline + GQL) | Planning complete. | Blocked on PR #7. 27–38 hrs across 3 waves. |
+| **054** | RFP Package Builder | v1.2 Phases 13 (pilot) complete, Phase 14 (invitations) in planning. | Phases 14-17 (invitations, templates, form builder, demo scripts). S2 deferred to v1.3. |
+| **034** | GQL Schema Migration | Phases 1–4 done. Schema live in prod (17 classes), receiver pipeline created. | Phase 5: service layer. |
 | **022** | Engagement → Project UI Restructuring | Phase 1 done (project shell + routes + My Projects). | Remaining phases deferred — project detail UI is Project App territory. |
 
 ## Deferred — Platform Project App (Kevin's Team)
@@ -94,7 +90,7 @@ Items deferred from the RFP gap analysis — revisit when Phase 1/2 plans are co
 
 | Item | Priority | Status | Notes |
 |------|----------|--------|-------|
-| GQL Schema Package | High | **Live** (17 classes on UAT + Prod) | Plan 034. Schema v1.0.9. |
+| GQL Schema Package | High | **Live** (17 classes on UAT + Prod) | Plan 034. RfpInvitation + isInvitationOnly pending (Phase 14). |
 | Task-backed Reviews | Medium | Planned | Reviews use ZB Task approval workflow instead of custom status field |
 | `@zerobias-org/types-core-js` — PagedResults\<T\> | Low | Evaluate | Replace custom pagination. Requires Node 22+ ESM — verify Angular 21 build compat. |
 | Document / Service Offering types | Pending | Blocked on Kevin | Are these existing ZB types or defined via GQL schema extension? |
@@ -108,6 +104,11 @@ Items deferred from the RFP gap analysis — revisit when Phase 1/2 plans are co
 
 | # | Plan | Completed |
 |---|------|-----------|
+| 079 | My Organizations Refactor (three-tier org nav) | ✅ v1.1 Phase 7 |
+| 080 | Project-Centric Boundary Model (Internal/External, parties) | ✅ v1.1 Phase 12 |
+| 041 | Supply-Side Vendor Profile (6-section, pointers, pre-fill) | ✅ v1.1 Phases 8-11 |
+| 077 | Pilot Projects (projectType, completion, promotion) | ✅ v1.2 Phase 13 |
+| 059 | AuditgraphDB Migration (Neon → Pipeline + GQL) | ✅ v1.0 Phases 1-6 |
 | 015 | Navigation & Taxonomy Restructuring | ✅ |
 | 017 | Engagement Tasks Tab | ✅ |
 | 018 | Engagement Activity Center (Timeline) | ✅ |

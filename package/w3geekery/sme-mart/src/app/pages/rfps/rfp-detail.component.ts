@@ -9,12 +9,14 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { DatePipe, TitleCasePipe, CurrencyPipe } from '@angular/common';
 import { BidCard, type BidCardData } from '../../shared/components/bid-card/bid-card.component';
+import { InvitationTeaserComponent } from '../../shared/components/invitation-teaser/invitation-teaser.component';
 import { SmeMartProjectService } from '../../core/services/sme-mart-project.service';
 import { BidsService } from '../../core/services/bids.service';
+import { RfpInvitationService } from '../../core/services/rfp-invitation.service';
 import { ProviderProfilesService } from '../../core/services/provider-profiles.service';
 import { EngagementLifecycleService } from '../../core/services/engagement-lifecycle.service';
 import { ImpersonationService } from '../../core/services/impersonation.service';
-import type { BidSummaryRow, ComplianceSummary, SmeMartProject } from '../../core/models';
+import type { BidSummaryRow, ComplianceSummary, SmeMartProject, RfpInvitation } from '../../core/models';
 
 @Component({
   selector: 'app-rfp-detail',
@@ -31,6 +33,7 @@ import type { BidSummaryRow, ComplianceSummary, SmeMartProject } from '../../cor
     TitleCasePipe,
     CurrencyPipe,
     BidCard,
+    InvitationTeaserComponent,
   ],
   templateUrl: './rfp-detail.component.html',
   styleUrl: './rfp-detail.component.scss',
@@ -43,6 +46,7 @@ export class RfpDetail implements OnInit {
   private readonly impersonation = inject(ImpersonationService);
   private readonly projects = inject(SmeMartProjectService);
   private readonly bids = inject(BidsService);
+  private readonly rfpInvitations = inject(RfpInvitationService);
   private readonly providerProfiles = inject(ProviderProfilesService);
   private readonly lifecycle = inject(EngagementLifecycleService);
 
@@ -52,8 +56,13 @@ export class RfpDetail implements OnInit {
   readonly bidSummaries = signal<BidSummaryRow[]>([]);
   readonly currentUserId = signal<string | null>(null);
   readonly currentProviderId = signal<string | null>(null);
+  readonly vendorInvitation = signal<RfpInvitation | null>(null);
 
   readonly status = computed(() => this.rfp()?.status || 'draft');
+
+  readonly isInvitationOnly = computed(() => this.rfp()?.isInvitationOnly ?? false);
+
+  readonly isInvited = computed(() => this.vendorInvitation()?.status === 'accepted');
 
   // TODO(Plan 075 Phase 4): SmeMartProject doesn't carry buyer ID yet.
   // Owner check needs platform context or a buyerUserId field on SmeMartProject.
@@ -122,6 +131,19 @@ export class RfpDetail implements OnInit {
         const provider = await this.providerProfiles.getProviderByUserId(userId);
         if (provider) {
           this.currentProviderId.set(provider.id);
+
+          // Check invitation status if this is an invitation-only RFP
+          if (project.isInvitationOnly) {
+            try {
+              const vendorOrgId = this.impersonation.effectiveOrgId();
+              if (vendorOrgId) {
+                const invitation = await this.rfpInvitations.findByProjectAndVendor(id, vendorOrgId);
+                this.vendorInvitation.set(invitation);
+              }
+            } catch {
+              // Invitation lookup failed, vendor is not invited
+            }
+          }
         }
       }
     } catch (err: any) {
@@ -211,6 +233,66 @@ export class RfpDetail implements OnInit {
 
   goBack(): void {
     this.router.navigate(['/rfps']);
+  }
+
+  // ===========================================================================
+  // Invitation Actions (Wave 1: Invitation Controls)
+  // ===========================================================================
+
+  async requestInvitation(reason: string): Promise<void> {
+    const project = this.rfp();
+    const vendorOrgId = this.impersonation.effectiveOrgId();
+
+    if (!project || !vendorOrgId) {
+      this.snackBar.open('Unable to request invitation', 'Dismiss', { duration: 3000 });
+      return;
+    }
+
+    try {
+      await this.rfpInvitations.requestInvitation({
+        projectId: project.id,
+        vendorOrgId,
+        requestReason: reason,
+      });
+      // TODO: Notification — request sent to buyer
+      this.snackBar.open('Request sent to buyer', 'OK', { duration: 3000 });
+    } catch (err: any) {
+      this.snackBar.open(`Failed: ${err.message}`, 'Dismiss', { duration: 5000 });
+    }
+  }
+
+  async acceptInvitation(): Promise<void> {
+    const inv = this.vendorInvitation();
+    if (!inv) {
+      this.snackBar.open('No invitation to accept', 'Dismiss', { duration: 3000 });
+      return;
+    }
+
+    try {
+      await this.rfpInvitations.acceptInvitation(inv.id);
+      // TODO: Notification — invitation accepted to buyer
+      this.snackBar.open('Invitation accepted', 'OK', { duration: 3000 });
+      this.vendorInvitation.set({ ...inv, status: 'accepted', respondedAt: new Date().toISOString() });
+    } catch (err: any) {
+      this.snackBar.open(`Failed: ${err.message}`, 'Dismiss', { duration: 5000 });
+    }
+  }
+
+  async declineInvitation(): Promise<void> {
+    const inv = this.vendorInvitation();
+    if (!inv) {
+      this.snackBar.open('No invitation to decline', 'Dismiss', { duration: 3000 });
+      return;
+    }
+
+    try {
+      await this.rfpInvitations.declineInvitation(inv.id);
+      // TODO: Notification — invitation declined to buyer
+      this.snackBar.open('Invitation declined', 'OK', { duration: 3000 });
+      this.vendorInvitation.set({ ...inv, status: 'declined', respondedAt: new Date().toISOString() });
+    } catch (err: any) {
+      this.snackBar.open(`Failed: ${err.message}`, 'Dismiss', { duration: 5000 });
+    }
   }
 
   // ===========================================================================

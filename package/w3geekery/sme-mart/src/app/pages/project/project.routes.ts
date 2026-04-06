@@ -3,6 +3,7 @@ import { ProjectDetail } from './project-detail.component';
 import { ProjectOverviewTab } from './tabs/project-overview-tab.component';
 import { ProjectComingSoonTab } from './tabs/project-coming-soon-tab.component';
 import { ProjectPartiesTabComponent } from './tabs/project-parties-tab.component';
+import { ProjectInvitedVendorsTabComponent } from './tabs/project-invited-vendors-tab.component';
 
 /**
  * Top-level project routes.
@@ -23,6 +24,7 @@ export const PROJECT_ROUTES: Routes = [
       { path: 'documents', component: ProjectComingSoonTab, data: { title: 'Documents' } },
       { path: 'timeline', component: ProjectComingSoonTab, data: { title: 'Timeline' } },
       { path: 'parties', component: ProjectPartiesTabComponent, data: { title: 'Parties' } },
+      { path: 'invited-vendors', component: ProjectInvitedVendorsTabComponent, data: { title: 'Invited Vendors' } },
       { path: 'messages', component: ProjectComingSoonTab, data: { title: 'Messages' } },
       { path: 'dashboard', component: ProjectComingSoonTab, data: { title: 'Dashboard' } },
       { path: 'financials', component: ProjectComingSoonTab, data: { title: 'Financials' } },

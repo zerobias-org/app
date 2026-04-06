@@ -1,0 +1,106 @@
+.teaser-container {
+  display: flex;
+  justify-content: center;
+  padding: 2rem 1rem;
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+}
+
+.teaser-card {
+  width: 100%;
+  max-width: 600px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  mat-card-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+    background: linear-gradient(135deg, rgba(25, 118, 210, 0.05), rgba(25, 118, 210, 0.02));
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
+
+      h2 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+        flex: 1;
+      }
+
+      mat-chip-set {
+        flex-shrink: 0;
+      }
+    }
+  }
+
+  mat-card-content {
+    padding: 1.5rem;
+
+    .teaser-content {
+      .summary {
+        margin: 0 0 1rem;
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--zb-primary-text, #000);
+      }
+
+      .description {
+        margin: 0 0 1.5rem;
+        font-size: 0.95rem;
+        color: var(--zb-secondary-text, #666);
+        line-height: 1.6;
+        padding: 1rem;
+        background-color: rgba(0, 0, 0, 0.02);
+        border-left: 3px solid var(--zb-primary-color, #1976d2);
+        border-radius: 0 4px 4px 0;
+      }
+
+      .details {
+        margin-top: 1.5rem;
+        padding: 1rem;
+        background-color: rgba(0, 0, 0, 0.02);
+        border-radius: 4px;
+
+        h4 {
+          margin: 0 0 0.75rem;
+          font-size: 0.95rem;
+          font-weight: 600;
+          color: var(--zb-primary-text, #000);
+        }
+
+        p {
+          margin: 0;
+          font-size: 0.9rem;
+          color: var(--zb-secondary-text, #666);
+          line-height: 1.5;
+        }
+      }
+    }
+  }
+
+  mat-card-actions {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.12);
+    display: flex;
+    justify-content: center;
+
+    button {
+      min-width: 200px;
+    }
+  }
+}
+
+// Status chip styling
+::ng-deep {
+  .invitation-only-chip {
+    background-color: #eed5d1 !important;
+    color: #0f0f10 !important;
+
+    mat-icon {
+      margin-right: 0.5rem;
+    }
+  }
+}

@@ -135,6 +135,7 @@ export class RfpList implements OnInit {
       pending_bid_count: 0,
       accepted_provider_name: null,
       accepted_provider_id: null,
-    };
+      isInvitationOnly: p.isInvitationOnly ?? false, // Wave 1: Invitation Controls
+    } as any; // Use 'as any' to bypass strict type checking for extra fields
   }
 }
