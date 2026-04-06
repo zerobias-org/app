@@ -2,6 +2,8 @@ import { Injectable, inject } from '@angular/core';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService, type GqlQueryOptions } from './graphql-read.service';
 import { NotificationService } from './notification.service';
+import { RfpInvitationService } from './rfp-invitation.service';
+import { SmeMartProjectService } from './sme-mart-project.service';
 import { BID_FIELD_MAPPING, mapNeonToGql, mapGqlToNeon } from '../field-mappings';
 import type { Bid, BidSummaryRow, BidWizardData } from '../models';
 import type { GqlBidResponse } from '../gql-types';
@@ -14,12 +16,17 @@ import type { GqlBidResponse } from '../gql-types';
  *
  * All writes go through PipelineWriteService (fire-and-forget async).
  * All reads go through GraphqlReadService (from AuditgraphDB).
+ *
+ * Plan 14 Wave 1: Invitation controls
+ * submitBid() includes access control gate for invitation-only projects.
  */
 @Injectable({ providedIn: 'root' })
 export class BidsService {
   private readonly pipelineWrite = inject(PipelineWriteService);
   private readonly graphqlRead = inject(GraphqlReadService);
   private readonly notifications = inject(NotificationService);
+  private readonly rfpInvitations = inject(RfpInvitationService);
+  private readonly smeMartProjects = inject(SmeMartProjectService);
 
   /** Scalar fields for standard queries (no link fields) */
   private readonly scalarBidFields = [
@@ -142,6 +149,13 @@ export class BidsService {
   /**
    * Submit a new bid (simple flow) with optimistic update.
    * Links bid to SmeMartProject via `project` link field.
+   *
+   * Plan 14 Wave 1: Validates access control for invitation-only projects.
+   * If project.isInvitationOnly is true, vendor must have an accepted invitation.
+   *
+   * Gate validation throws specific error messages:
+   * - 'not invited' — no invitation record exists
+   * - 'status {status}' — invitation exists but status is not 'accepted'
    */
   async submitBid(data: {
     project_id: string;
@@ -150,6 +164,29 @@ export class BidsService {
     proposed_price?: string;
     proposed_timeline?: string;
   }): Promise<Bid> {
+    // Load project and check invitation controls
+    const project = await this.smeMartProjects.getProject(data.project_id);
+    if (!project) {
+      throw new Error(`Project ${data.project_id} not found`);
+    }
+
+    // Validate access control gate for invitation-only projects
+    if (project.isInvitationOnly) {
+      // Fetch invitation for this vendor on this project
+      const invitation = await this.rfpInvitations.findByProjectAndVendor(
+        data.project_id,
+        data.provider_id
+      );
+
+      if (!invitation) {
+        throw new Error('not invited');
+      }
+
+      if (invitation.status !== 'accepted') {
+        throw new Error(`status ${invitation.status}`);
+      }
+    }
+
     const id = `bid-${Date.now()}-${Math.random().toString(36).substring(7)}`;
 
     const bid: Bid = {

@@ -265,6 +265,7 @@ export interface GqlSmeMartProjectResponse extends GqlBaseEntity {
   color?: string | null;
   notes?: string | null;
   title?: string | null;
+  isInvitationOnly?: boolean | null; // Plan 14 Wave 1: invitation controls
 }
 
 export interface GqlSmeMartBoardResponse extends GqlBaseEntity {
@@ -360,4 +361,20 @@ export interface GqlPlanMilestoneResponse extends GqlBaseEntity {
   targetDate?: string | null;
   sortOrder?: number | null;
   status?: string | null;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RfpInvitation Type (Plan 14 Wave 1 — Invitation Controls)
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type RfpInvitationStatus = 'pending' | 'accepted' | 'declined' | 'revoked' | 'expired' | 'requested';
+
+export interface GqlRfpInvitationResponse extends GqlBaseEntity {
+  projectId: string;
+  vendorOrgId: string;
+  status: RfpInvitationStatus;
+  invitedAt: string;
+  respondedAt?: string | null;
+  invitationMessage?: string | null;
+  requestReason?: string | null;
 }

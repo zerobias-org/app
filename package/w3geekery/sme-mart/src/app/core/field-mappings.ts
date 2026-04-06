@@ -509,6 +509,7 @@ export const SME_MART_PROJECT_FIELD_MAPPING = {
     evaluationCriteria: 'evaluationCriteria',
     wizardStep: 'wizardStep',
     wizardData: 'wizardData',
+    isInvitationOnly: 'isInvitationOnly', // Plan 14 Wave 1: invitation controls
     createdAt: 'dateCreated',
     updatedAt: 'dateLastModified',
   },
@@ -533,6 +534,7 @@ export const SME_MART_PROJECT_FIELD_MAPPING = {
     evaluationCriteria: 'evaluationCriteria',
     wizardStep: 'wizardStep',
     wizardData: 'wizardData',
+    isInvitationOnly: 'isInvitationOnly', // Plan 14 Wave 1: invitation controls
     dateCreated: 'createdAt',
     dateLastModified: 'updatedAt',
   },
@@ -915,6 +917,44 @@ export const MARKETPLACE_PROFILE_ITEM_FIELD_MAPPING = {
 } as const;
 
 /**
+ * RfpInvitation field mapping (greenfield — no Neon table)
+ *
+ * GQL entity: RfpInvitation (invitation to bid on an RFP)
+ * Model type: RfpInvitation (fields in camelCase)
+ * Status enum: 'pending' | 'accepted' | 'declined' | 'revoked' | 'expired' | 'requested'
+ *
+ * Plan 14 Wave 1: Invitation Controls
+ */
+export const RFP_INVITATION_FIELD_MAPPING = {
+  neonToGql: {
+    id: 'id',
+    projectId: 'projectId',
+    vendorOrgId: 'vendorOrgId',
+    status: 'status',
+    invitedAt: 'invitedAt',
+    respondedAt: 'respondedAt',
+    invitationMessage: 'invitationMessage',
+    requestReason: 'requestReason',
+    createdAt: 'dateCreated',
+    updatedAt: 'dateLastModified',
+  },
+  gqlToNeon: {
+    id: 'id',
+    projectId: 'projectId',
+    vendorOrgId: 'vendorOrgId',
+    status: 'status',
+    invitedAt: 'invitedAt',
+    respondedAt: 'respondedAt',
+    invitationMessage: 'invitationMessage',
+    requestReason: 'requestReason',
+    dateCreated: 'createdAt',
+    dateLastModified: 'updatedAt',
+  },
+  sourceSchema: 'zerobias-org/schema (Plan 14 Wave 1 — Invitation Controls)',
+  lastVerified: '2026-04-06',
+} as const;
+
+/**
  * All field mapping constants exported as a single object for easier iteration.
  */
 export const ALL_FIELD_MAPPINGS = {
@@ -937,4 +977,5 @@ export const ALL_FIELD_MAPPINGS = {
   PlanMilestone: PLAN_MILESTONE_FIELD_MAPPING,
   EngagementVettingItem: VETTING_ITEM_FIELD_MAPPING,
   MarketplaceProfileItem: MARKETPLACE_PROFILE_ITEM_FIELD_MAPPING,
+  RfpInvitation: RFP_INVITATION_FIELD_MAPPING,
 } as const;

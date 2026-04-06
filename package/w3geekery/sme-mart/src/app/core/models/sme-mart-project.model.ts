@@ -31,6 +31,9 @@ export interface SmeMartProject {
   evaluationCriteria?: Record<string, unknown> | null; // JSON scoring matrix
   wizardStep?: string | null; // RFP wizard progress
   wizardData?: Record<string, unknown> | null; // RFP wizard draft state
+
+  // Invitation controls (Plan 14 Wave 1)
+  isInvitationOnly?: boolean | null; // If true, only invited vendors can bid
 }
 
 export interface CreateSmeMartProjectRequest {
@@ -52,6 +55,8 @@ export interface CreateSmeMartProjectRequest {
   evaluationCriteria?: Record<string, unknown>;
   wizardStep?: string;
   wizardData?: Record<string, unknown>;
+  // Invitation controls (Plan 14 Wave 1)
+  isInvitationOnly?: boolean;
 }
 
 export interface UpdateSmeMartProjectRequest {
@@ -72,4 +77,6 @@ export interface UpdateSmeMartProjectRequest {
   evaluationCriteria?: Record<string, unknown>;
   wizardStep?: string;
   wizardData?: Record<string, unknown>;
+  // Invitation controls (Plan 14 Wave 1)
+  isInvitationOnly?: boolean;
 }
