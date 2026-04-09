@@ -25,9 +25,9 @@ selectValue(value) {
 
 **SME Mart uses the helper at `e2e/helpers/zb-autocomplete.ts`** — call that, don't patch `onAction` manually. See `.claude/notes/e2e-testing-guide.md` § "Form Interactions — Required Helpers" for usage.
 
-**Multi-select (`ZbSimpleMultiAutocompleteComponent`) is NOT yet fixed as of 0.2.30** — no `selectValue` method. For multi-selects, the patching workaround below still applies. File an upstream issue if you hit this in SME Mart.
+**Multi-select (`ZbSimpleMultiAutocompleteComponent`) is ALSO fixed as of `@zerobias-org/ngx-library@0.2.32`** — adds `selectValue(values[])` (replace) and `addValue(value)` (append, idempotent by `idKey`). The SME Mart helper at `e2e/helpers/zb-autocomplete.ts` wraps both. The legacy patching pattern below is kept for historical reference only; new specs should use the helpers.
 
-### Legacy workaround (pre-0.2.30, or for multi-select)
+### Legacy workaround (pre-0.2.30 single-select, or pre-0.2.32 multi-select)
 
 Use `ng.getComponent()` (Angular's dev-mode debug API) to:
 1. Call the component's `searchFn` directly to get the typed object

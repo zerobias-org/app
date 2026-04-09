@@ -132,10 +132,11 @@ npx playwright show-trace e2e/test-results/<test-dir>/trace.zip
 `@zerobias-org/ngx-library`'s autocomplete component has multi-layer race conditions under Playwright. Understand all three layers before trying to automate a form that uses it. Source: the zb/ui Claude session that debugged this into the ground.
 
 #### Layer 1 — `(optionSelected)` doesn't propagate to the parent form
-Playwright's `mat-option` click sets the autocomplete's internal `formControl` but `(optionSelected)` doesn't fire consistently. The parent form bound via `formControlName` stays `null`, causing action handlers to crash with `TypeError: Cannot read properties of null (reading 'id')`.
+Playwright's `mat-option` click sets the autocomplete's internal `formControl` but `(optionSelected)` doesn't fire consistently. The parent form bound via `formControlName` stays `null` (single-select) or empty (multi-select), causing action handlers to crash with `TypeError: Cannot read properties of null (reading 'id')` or submit forms with missing fields.
 
-**Fix:** Use `selectValue()` (added in `@zerobias-org/ngx-library@0.2.30`) via our helper `e2e/helpers/zb-autocomplete.ts`:
+**Fix — both single-select AND multi-select are fixed upstream.** `@zerobias-org/ngx-library@0.2.30` added `selectValue()` to single-select; `0.2.32` added `selectValue()` + `addValue()` to multi-select. Our shared helper file `e2e/helpers/zb-autocomplete.ts` wraps all four methods:
 
+**Single-select** (`zb-simple-autocomplete`):
 ```ts
 import {
   selectZbAutocompleteValue,
@@ -163,7 +164,41 @@ await selectZbAutocompleteBySearch(
 );
 ```
 
-`selectValue()` sets the internal `formControl` AND calls `onChange(value)` which propagates through `ControlValueAccessor` to the parent form. Read `e2e/helpers/zb-autocomplete.ts` for full API, prerequisites, and caveats.
+**Multi-select** (`zb-simple-multi-autocomplete`):
+```ts
+import {
+  selectZbMultiAutocompleteValues,
+  addZbMultiAutocompleteValue,
+  addZbMultiAutocompleteByProperty,
+  addZbMultiAutocompleteBySearch,
+} from '../helpers/zb-autocomplete';
+
+// Replace entire selection (pass [] to clear)
+await selectZbMultiAutocompleteValues(
+  page,
+  'zb-simple-multi-autocomplete[formControlName="tags"]',
+  [tag1, tag2, tag3],
+);
+
+// Append one (idempotent — skips duplicates matched by idKey)
+await addZbMultiAutocompleteValue(
+  page,
+  'zb-simple-multi-autocomplete[formControlName="tags"]',
+  newTag,
+);
+
+// Append one by display text — resolves via the component's own searchFn
+await addZbMultiAutocompleteByProperty(
+  page,
+  'zb-simple-multi-autocomplete[formControlName="tags"]',
+  'security',
+  'name',
+);
+```
+
+Both helpers call the component method via `ng.getComponent()` in `page.evaluate()`, which sets the internal state AND propagates through `ControlValueAccessor` to the parent form. Read `e2e/helpers/zb-autocomplete.ts` for full API, prerequisites, and caveats.
+
+**Single vs multi semantic note:** single-select's `selectValue(value)` takes one typed object and overwrites. Multi-select's `selectValue(values[])` takes an array and replaces the entire selection; `addValue(value)` appends one and is idempotent via `isSelected()` (matches by `idKey`, default `'id'`). If your objects lack the configured `idKey`, `addValue` won't deduplicate — align with the component's actual `idKey`.
 
 #### Layer 2 — `valueChanges` cascades wipe test state
 Many dialogs subscribe to form `valueChanges` and do destructive things on each emission: clear tree data, reset selections, fire dependent API calls. Example from zb/ui's boundary-standard dialog:
@@ -247,7 +282,7 @@ Only when the dialog interaction itself is the thing you're testing — scope tr
 3. Expect some investigation time for Layer 3 surprises
 4. Budget at least 2-3x the time you'd budget for a native Material form
 
-**Multi-select (`zb-simple-multi-autocomplete`):** does NOT yet expose `selectValue` as of 0.2.30. The REST API bypass is your only reliable option until the multi-select component gets the same API. See `.claude/notes/playwright-e2e-learnings-from-zb-ui.md` for the legacy `onSelectionChange` patching pattern if you absolutely must.
+**Multi-select (`zb-simple-multi-autocomplete`):** fixed as of `@zerobias-org/ngx-library@0.2.32`. Use `selectZbMultiAutocompleteValues` / `addZbMultiAutocompleteValue` from `e2e/helpers/zb-autocomplete.ts` the same way you'd use the single-select helpers. The REST API bypass remains valid for end-state-only tests, but driving the UX is now supported for dialog-specific tests. See the helper file for full API.
 
 ---
 
@@ -434,8 +469,8 @@ When you do drive the form, use the right tool per control:
 | Material `<mat-select>` | `locator.click()` then click `mat-option` — works normally |
 | Material `<mat-checkbox>` | `locator.check()` works; use `{ force: true }` if intercepted |
 | Material `<mat-datepicker>` | Fill the native input directly or use `evaluate_script` to set the value |
-| **`<zb-simple-autocomplete>`** | **Use `selectZbAutocompleteValue/BySearch/ByProperty` from `e2e/helpers/zb-autocomplete.ts`** — never click `mat-option` (Layer 1 fix) |
-| **`<zb-simple-multi-autocomplete>`** | Not yet supported by `selectValue`. **Use REST API bypass.** Manual `onSelectionChange` patching is possible but fragile — see learnings doc |
+| **`<zb-simple-autocomplete>`** | **Use `selectZbAutocompleteValue/BySearch/ByProperty` from `e2e/helpers/zb-autocomplete.ts`** — never click `mat-option` (Layer 1 fix, ngx-library 0.2.30+) |
+| **`<zb-simple-multi-autocomplete>`** | **Use `selectZbMultiAutocompleteValues` (replace) or `addZbMultiAutocompleteValue/BySearch/ByProperty` (append) from the same helper file** — never click `mat-option` (Layer 1 fix, ngx-library 0.2.32+). Clear with `selectZbMultiAutocompleteValues(page, selector, [])`. |
 | `<zb-search-input>` | Emits via RxJS debounce — fill the inner input, wait for the debounce window (~300ms) |
 
 **After any `zb-simple-autocomplete` interaction that triggers downstream API calls** (cascaded dropdowns, dependent tree loads, etc.), wait for the response explicitly, not for the UI element:
@@ -469,7 +504,7 @@ export class RfpBasicsFormPage extends BasePage {
 }
 ```
 
-**This helper will be reused across dozens of future specs** (any RFP/bid/engagement/profile form with typed dropdowns). Always go through the helper — don't copy-paste the `ng.getComponent()` evaluate block inline. Centralize the workaround so when ngx-library evolves (e.g., adds multi-select `selectValue`, or changes the API), we update one file instead of N specs.
+**This helper will be reused across dozens of future specs** (any RFP/bid/engagement/profile form with typed dropdowns or tag/category multi-pickers). Always go through the helper — don't copy-paste the `ng.getComponent()` evaluate block inline. Centralize the workaround so when ngx-library evolves (e.g., changes method signatures or adds new patterns), we update one file instead of N specs.
 
 ---
 
