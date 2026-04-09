@@ -29,6 +29,7 @@ SME Mart is a **marketplace for Subject Matter Experts** in compliance/cybersecu
 | **GQL Schema Extension (internals)** | [`.claude/notes/zb-graphql-schema-extension-guide.md`](.claude/notes/zb-graphql-schema-extension-guide.md) — platform internals: SchemaBuilder, catalog tables, source files |
 | **SME Mart Resource Types** | [`.claude/notes/sme-mart-resource-types-summary.md`](.claude/notes/sme-mart-resource-types-summary.md) — resource type inventory shared with Kevin |
 | **File Upload SDK** | [`.claude/notes/zb-file-upload-sdk-reference.md`](.claude/notes/zb-file-upload-sdk-reference.md) — FileService SDK, upload workflow, task attachments, preview, ZB UI reference |
+| **E2E Testing Guide** | [`.claude/notes/e2e-testing-guide.md`](.claude/notes/e2e-testing-guide.md) — **READ before writing Playwright tests.** Stack, auth model, gotchas, page object patterns, debugging playbook |
 | **Schema repo** | [`zerobias-org/schema`](https://github.com/zerobias-org/schema) — YAML schema packages (source of truth for GQL entities) |
 
 ## Skills

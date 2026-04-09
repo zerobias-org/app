@@ -47,17 +47,29 @@ SME Mart uses proxy-based auth in local dev:
 
 ## Known Issues
 
-### `zb-simple-autocomplete` is broken for Playwright
+### `zb-simple-autocomplete` — use the helper, never click mat-options
 
-The `zb-simple-autocomplete` component (from `@zerobias-org/ngx-library`) does
+The `zb-simple-autocomplete` component (`@zerobias-org/ngx-library`) does
 not fire `(selectionChange)` when Playwright clicks a `mat-option`. The visual
 text updates but the parent form's `formControlName` binding stays `null`.
 
-**Workaround:** Use `ng.getComponent()` (Angular's dev-mode debug API) to
-call the component's `searchFn` directly, store captured objects on the DOM,
-and patch the dialog's `onAction` method. See
-`~/Projects/zb/ui/e2e/page-objects/boundary-manager.page.ts` method
-`selectStandard()` for the full pattern.
+**Use `e2e/helpers/zb-autocomplete.ts`.** As of ngx-library 0.2.30 the
+component exposes a `selectValue()` method for E2E tests and the helper
+wraps it. Example:
+
+```ts
+import { selectZbAutocompleteByProperty } from '../helpers/zb-autocomplete';
+
+await selectZbAutocompleteByProperty(
+  page,
+  'zb-simple-autocomplete[formControlName="category"]',
+  'Security',
+  'name',
+);
+```
+
+Read `e2e/helpers/zb-autocomplete.ts` for full API and variants. Full
+context + other form component notes in `.claude/notes/e2e-testing-guide.md`.
 
 ### CDK Overlay Remnants
 
