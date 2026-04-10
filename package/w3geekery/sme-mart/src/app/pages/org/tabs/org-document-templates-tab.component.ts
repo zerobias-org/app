@@ -15,7 +15,6 @@ import { Subscription } from 'rxjs';
 import { ZerobiasClientApp } from '@zerobias-com/zerobias-client';
 import { DocumentTemplateService } from '@/core/services';
 import { DocumentTemplate } from '@/core/models';
-import { ZbSimplePanelComponent, ZbResourceStatusComponent } from '@zerobias-org/ngx-library';
 import { ConfirmDialogComponent } from '@/shared/components/confirm-dialog/confirm-dialog.component';
 
 @Component({
@@ -34,8 +33,6 @@ import { ConfirmDialogComponent } from '@/shared/components/confirm-dialog/confi
     MatMenuTrigger,
     MatProgressSpinner,
     MatDivider,
-    ZbSimplePanelComponent,
-    ZbResourceStatusComponent,
   ],
   templateUrl: './org-document-templates-tab.component.html',
   styleUrl: './org-document-templates-tab.component.scss',
