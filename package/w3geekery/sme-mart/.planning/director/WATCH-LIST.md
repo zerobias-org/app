@@ -76,6 +76,13 @@ Accumulated from RETROSPECTIVE.md v1.0 + v1.1 + WATCH-LIST-SEED.md.
 - [ ] Agent uses `npx vitest run` instead of `npm test` (must go through `ng test`)
 - [ ] Agent puts boundary CRUD in SME Mart (must be read-only — admin in ZB Governance)
 
+## Test Maintenance (v1.2 — learned from errata 005)
+
+- [ ] Agent modernizes component to inject() but doesn't update its spec — TestBed breaks
+- [ ] Agent uses `@/` path aliases in component imports — vitest can't resolve them, use relative paths
+- [ ] Specs using TestBed with Material components need `import '@angular/compiler'` for JIT
+- [ ] Test failures accumulate across phases without being fixed — run full suite after each phase
+
 ## From v1.0 Retrospective
 
 - [ ] REQUIREMENTS.md checkboxes stop being updated after Phase 2 (bookkeeping drift)

@@ -39,6 +39,10 @@ SME Mart is a **marketplace for Subject Matter Experts** in compliance/cybersecu
 - **`/meta:director`** — Architect/QA role alongside GSD. Modes: `design`, `review`, `checkpoint`, `watch`, `retro`. Project adapter at `.claude/commands/meta/director.md` (upstream: `zerobias-org/meta-harness`). Director state lives in `.planning/director/`.
 - **`/meta:sync`** — Sync meta-harness upstream and merge changes into the project adapter. Run periodically (start of milestone or when Kevin mentions updates).
 
+## Angular 21 Patterns
+
+**READ [`.claude/docs/MODERNIZATION_GUIDE.md`](.claude/docs/MODERNIZATION_GUIDE.md) before writing any component.** `@Input`/`@Output`/constructor injection are banned — use `input()`/`output()`/`inject()`. When modifying a file with old patterns, migrate what you touch.
+
 ## File Naming Convention
 
 Angular 21 dropped type suffixes from filenames (e.g., `foo.ts` instead of `foo.component.ts`). **This project keeps the traditional suffixed naming** — it's far easier to scan in a file tree.

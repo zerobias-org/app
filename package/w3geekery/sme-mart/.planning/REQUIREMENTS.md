@@ -9,20 +9,20 @@ Requirements for v1.2: RFP Packages & Pilot Projects. Each maps to roadmap phase
 
 ### RFP Access Controls (D1)
 
-- [ ] **D1-01**: Buyer can mark an RFP as invitation-only (boolean flag on project entity)
-- [ ] **D1-02**: Buyer can add vendors to an RFP invitation list with pending/accepted/declined status tracking
-- [ ] **D1-03**: Invited vendor can accept or decline an RFP invitation
-- [ ] **D1-04**: System blocks bid submission from uninvited vendors on invitation-only RFPs
-- [ ] **D1-05**: Vendor can view a dedicated "My Invitations" feed showing RFPs they've been invited to
-- [ ] **D1-06**: Buyer can view an "Invited Vendors" tab on RFP detail showing all invitations and their status
+- [x] **D1-01**: Buyer can mark an RFP as invitation-only (boolean flag on project entity) — Phase 14, UAT test 3
+- [x] **D1-02**: Buyer can add vendors to an RFP invitation list with pending/accepted/declined status tracking — Phase 14, UAT test 6
+- [x] **D1-03**: Invited vendor can accept or decline an RFP invitation — Phase 14, UAT test 5
+- [x] **D1-04**: System blocks bid submission from uninvited vendors on invitation-only RFPs — Phase 14, UAT test 2
+- [x] **D1-05**: Vendor can view a dedicated "My Invitations" feed showing RFPs they've been invited to — Phase 14, UAT test 5
+- [x] **D1-06**: Buyer can view an "Invited Vendors" tab on RFP detail showing all invitations and their status — Phase 14, UAT test 6
 
 ### Document Packages (D2)
 
-- [ ] **D2-01**: Buyer can attach multiple documents (templates, exhibits, attachments) to an RFP package
-- [ ] **D2-02**: Org admin can create, edit, and delete reusable document templates at the org level (MSA, NDA, SOW, etc.)
-- [ ] **D2-03**: Buyer can instantiate an org template per-engagement (copy-on-create, engagement-scoped instance)
-- [ ] **D2-04**: Template instances support variable substitution (buyer name, dates, engagement ID auto-filled)
-- [ ] **D2-05**: Buyer can preview a document template before instantiating it
+- [x] **D2-01**: Buyer can attach multiple documents (templates, exhibits, attachments) to an RFP package — Phase 15, plan 03 task 5
+- [x] **D2-02**: Org admin can create, edit, and delete reusable document templates at the org level (MSA, NDA, SOW, etc.) — Phase 15, plan 03 task 2
+- [x] **D2-03**: Buyer can instantiate an org template per-engagement (copy-on-create, engagement-scoped instance) — Phase 15, plan 03 task 4
+- [x] **D2-04**: Template instances support variable substitution (buyer name, dates, engagement ID auto-filled) — Phase 15, plan 02 task 1
+- [x] **D2-05**: Buyer can preview a document template before instantiating it — Phase 15, plan 03 task 1
 
 ### Form Builder (D3)
 
@@ -35,10 +35,10 @@ Requirements for v1.2: RFP Packages & Pilot Projects. Each maps to roadmap phase
 
 ### Pilot Projects (077)
 
-- [ ] **PLT-01**: SmeMartProject entity supports `projectType` discriminator (rfp | pilot | project)
-- [ ] **PLT-02**: Pilot completion creates a conditional vetting checklist item
-- [ ] **PLT-03**: Buyer can promote a completed pilot to a real project (new SmeMartProject linked to pilot)
-- [ ] **PLT-04**: Pilot projects display visual badges/labels distinguishing them in lists and detail views
+- [x] **PLT-01**: SmeMartProject entity supports `projectType` discriminator (rfp | pilot | project) — Phase 13
+- [x] **PLT-02**: Pilot completion creates a conditional vetting checklist item — Phase 13
+- [x] **PLT-03**: Buyer can promote a completed pilot to a real project (new SmeMartProject linked to pilot) — Phase 13
+- [x] **PLT-04**: Pilot projects display visual badges/labels distinguishing them in lists and detail views — Phase 13
 
 ### Demo Infrastructure (DEMO)
 

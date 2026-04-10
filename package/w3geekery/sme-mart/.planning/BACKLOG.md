@@ -186,7 +186,17 @@ External research drops from `#ai-*` Slack channels, mapped to plans. Full analy
 | Plan # | External Research Drops |
 |--------|-------------------------|
 | 033 P5 | 2026-04-09-pattern-skills-vs-mcp |
+| 065 | 2026-04-10-tool-promptql |
 | 074 | 2026-04-09-pattern-skills-vs-mcp |
+| 078 | 2026-04-10-tool-promptql |
+
+---
+
+## Scanner Spikes
+
+| # | Plan | Description | Est. | Source | Analysis |
+|---|------|-------------|------|--------|----------|
+| **999.1** | PromptQL Pattern Extraction for Plan 065 | Evaluate thread-per-resource, wiki-from-conversations, and permission-aware messaging patterns from PromptQL for engagement-scoped message center design | 4–6 hrs | spike from scanner | ~/.claude/slack-scanner/analysis/deep/promptql.md |
 
 ---
 
