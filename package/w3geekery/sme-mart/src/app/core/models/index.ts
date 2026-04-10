@@ -28,3 +28,7 @@ export * from './sme-mart-task.model';
 export * from './project-prd.model';
 export * from './project-plan.model';
 export * from './vetting-item.model';
+export * from './rfp-invitation.model';
+export * from './marketplace-profile-item.model';
+export * from './document-template.model';
+export * from './document-instance.model';
