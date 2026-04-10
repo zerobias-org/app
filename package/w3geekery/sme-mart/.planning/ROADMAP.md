@@ -36,7 +36,7 @@
 
 - [x] **Phase 13: Pilot Projects** (2/2 plans) — Enable buyer POC testing with projectType discriminator and promotion workflow (completed 2026-04-02)
 - [ ] **Phase 14: Invitation Controls** (3/3 plans) — Close RFPs to invited vendors, add invitation management UI and access control gates
-- [ ] **Phase 15: Document Templates** (3/3 plans) — Org-level reusable templates with variable substitution for reusable docs
+- [x] **Phase 15: Document Templates** (3/3 plans) — Org-level reusable templates with variable substitution for reusable docs (completed 2026-04-10)
 - [ ] **Phase 16: Form Builder** — Buyer-defined structured forms with dynamic vendor submission
 - [ ] **Phase 17: Demo Seed Scripts** — CLI scripts creating full RFP package flow for Friday demos with Brian
 
@@ -143,7 +143,7 @@
 |-------|----------------|--------|-----------|
 | 13. Pilot Projects | 2/2 | Complete    | 2026-04-02 |
 | 14. Invitation Controls | 0/3 | Planning   | 2026-04-03 |
-| 15. Document Templates | 0/3 | Planning   | 2026-04-10 |
+| 15. Document Templates | 0/3 | Complete    | 2026-04-10 |
 | 16. Form Builder | 0/2 | Not started | — |
 | 17. Demo Seed Scripts | 0/1 | Not started | — |
 
