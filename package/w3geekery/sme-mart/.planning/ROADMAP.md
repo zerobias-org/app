@@ -36,7 +36,7 @@
 
 - [x] **Phase 13: Pilot Projects** (2/2 plans) — Enable buyer POC testing with projectType discriminator and promotion workflow (completed 2026-04-02)
 - [ ] **Phase 14: Invitation Controls** (3/3 plans) — Close RFPs to invited vendors, add invitation management UI and access control gates
-- [ ] **Phase 15: Document Templates** — Org-level reusable templates with variable substitution for reusable docs
+- [ ] **Phase 15: Document Templates** (3/3 plans) — Org-level reusable templates with variable substitution for reusable docs
 - [ ] **Phase 16: Form Builder** — Buyer-defined structured forms with dynamic vendor submission
 - [ ] **Phase 17: Demo Seed Scripts** — CLI scripts creating full RFP package flow for Friday demos with Brian
 
@@ -91,12 +91,17 @@
   4. Template variables auto-fill with engagement context (buyer name, engagement ID, dates)
   5. Buyer can preview document template before instantiating it
   6. Org template library prevents duplicate instantiation (same template, same engagement → reuse existing document)
-**Plans**: TBD
-**Effort**: 14–18 hours (service + schema ~8-10 hrs, UI ~6-8 hrs)
-**Tech Stack**: Angular 21 + Pipeline + GraphQL + JSON templating (no external library)
-**Research Flag**: **NEEDS RESEARCH** — Template variable substitution syntax design ({{varName}} vs alternatives), escaping rules (\{\{ for literals), variable naming conventions (CamelCase), and fallback behavior for missing variables. Design doc required before Phase 15 execution.
-**Critical Pitfall**: Variable substitution syntax conflicts (Pitfall #2) — {{varName}} syntax must be finalized and documented before phase starts. Escaping rules must prevent unintended replacements (buyer writes "{{understanding}}" in template text, gets replaced).
+**Plans**: 3 plans
+  - [ ] **Phase 15 Plan 00** (Wave 0) — Schema prerequisite: DocumentTemplate + DocumentInstance YAML classes in zerobias-org/schema, dataloader validation, PR to zerobias-org/schema:dev, model interfaces in src/app/core/models — Requirements: (schema foundation)
+  - [ ] **Phase 15 Plan 01** (Wave 1) — Service layer: DocumentTemplateService CRUD, DocumentInstanceService instantiation + duplicate prevention, VariableSubstitutionService with escaping/validation/preview, GQL read methods, comprehensive tests (>80% coverage) — Requirements: D2-02, D2-03, D2-04
+  - [ ] **Phase 15 Plan 02** (Wave 2) — UI layer: org template library tab on /org, dedicated template editor at /templates/:id with Milkdown + variable panel + preview toggle, reusable chooser dialog for instantiation, documents tab integration (engagement/project mixed document listing), notes panel split button "From Template", markdown editor extension with variable insertion toolbar + slash command — Requirements: D2-01, D2-02, D2-03, D2-04, D2-05
+**Effort**: 16–20 hours (schema ~2-3 hrs, service ~6-8 hrs, UI ~8-10 hrs)
+**Tech Stack**: Angular 21 + Pipeline + GraphQL + Milkdown editor extension (no external library for substitution)
+**Research Flag**: RESEARCH COMPLETE — Template variable substitution syntax {{varName}}, escaping (\{{ for literals), variable registry (built-in + custom), missing var behavior (block required, blank optional), storage model (DocumentTemplate + DocumentInstance), all documented in 15-RESEARCH.md.
+**Critical Pitfall**: Variable substitution syntax conflicts (Pitfall #2) — {{varName}} syntax locked in research. Implementation must follow Decision 3 (escaping with backslash) exactly.
+**Critical Pitfall**: Edit history tracking (Pitfall #2b) — Instances are editable post-instantiation. Track changes with "Modified from template" indicator or separate edit history log.
 **UI hint**: yes
+**Schema Prerequisite**: Wave 0 (Plan 15-00) must complete before Waves 1-2. GQL schema reloads ~15 min after PR merge.
 
 ### Phase 16: Form Builder
 **Goal**: Enable buyers to define structured form requirements (6 field types) with dynamic vendor submission and buyer review UI
@@ -138,11 +143,11 @@
 |-------|----------------|--------|-----------|
 | 13. Pilot Projects | 2/2 | Complete    | 2026-04-02 |
 | 14. Invitation Controls | 0/3 | Planning   | 2026-04-03 |
-| 15. Document Templates | 0/2 | Not started | — |
+| 15. Document Templates | 0/3 | Planning   | 2026-04-10 |
 | 16. Form Builder | 0/2 | Not started | — |
 | 17. Demo Seed Scripts | 0/1 | Not started | — |
 
 ---
 
 **Created:** 2026-03-17
-**Last Updated:** 2026-04-03 (Phase 14 plans created: schema prerequisite + service + UI, 3-wave structure)
+**Last Updated:** 2026-04-10 (Phase 15 plans created: 3-plan structure with Wave 0/1/2, research complete, all 5 D2 requirements mapped)
