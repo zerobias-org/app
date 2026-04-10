@@ -3,29 +3,29 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: RFP Packages & Pilot Projects
 status: executing
-last_updated: "2026-04-03T21:28:59.024Z"
-last_activity: 2026-04-03 -- Phase 14 execution started
+last_updated: "2026-04-10T18:05:00Z"
+last_activity: 2026-04-10 -- Phase 15 execution started
 progress:
   total_phases: 5
   completed_phases: 1
-  total_plans: 5
-  completed_plans: 2
+  total_plans: 8
+  completed_plans: 5
 ---
 
 # STATE.md — Session Context
 
 **Session Name:** `gsd-plan`
 **Date Created:** 2026-04-02
-**Current Focus:** Phase 14 — invitation-controls
+**Current Focus:** Phase 15 — document-templates
 
 ---
 
 ## Current Position
 
-Phase: 14 (invitation-controls) — EXECUTING
-Plan: 1 of 3
-Status: Executing Phase 14
-Last activity: 2026-04-03 -- Phase 14 execution started
+Phase: 15 (document-templates) — EXECUTING
+Plan: 1 of 3 — COMPLETE
+Status: Phase 15 Plan 01 execution complete
+Last activity: 2026-04-10 -- Plan 01 schema foundation complete
 
 ---
 
@@ -95,6 +95,14 @@ From v1.1:
 - Vetting pre-fill suggestion panel with pointer attachments
 - Internal/External org badges, project parties tab
 
+From v1.2 Execution:
+
+- Phase 13 (Pilot Projects) complete — projectType discriminator, completion dialog, promotion workflow
+- Phase 14 (Invitation Controls) code complete — RfpInvitationService (11 methods), BidsService access gate, My Invitations page, Invited Vendors tab, teaser component, inline banners
+- RfpInvitation schema class live on UAT (class ID `941cf01b-d260-5e45-8c6a-50f07b23f196`)
+- ngx-library bumped to 0.2.29
+- Jasmine→vitest test migration complete (zero jasmine refs remaining)
+
 From v1.2 Research:
 
 - Phase order mandated by dependencies (pilot → invitation → template → form)
@@ -109,20 +117,20 @@ From v1.2 Research:
 **Resume this session:**
 
 ```bash
-claude --resume gsd-plan
+claude --resume poc/sme-mart
 ```
 
-**Next step:** Execute `/gsd:plan-phase 13` to begin Phase 13 planning
+**Next step:** Phase 14 complete. `/gsd:discuss-phase 15` for Document Templates.
 
 **If starting fresh:**
 
 - Read `.planning/PROJECT.md` for current state
-- Read `.planning/ROADMAP.md` for complete roadmap (phases 13-16)
+- Read `.planning/ROADMAP.md` for complete roadmap (phases 13-17)
 - Read `.planning/REQUIREMENTS.md` for traceability (all 24 requirements mapped)
 - Read `CLAUDE.md` for project conventions
-- Check `.planning/director/` for architecture review state (if director mode active)
+- Read `.planning/BACKLOG.md` for non-milestone work items
 
 ---
 
-**Last Updated:** 2026-04-02
-**Milestone v1.2:** Roadmap created. Ready for Phase 13 planning.
+**Last Updated:** 2026-04-08
+**Milestone v1.2:** Phase 13 complete. Phase 14 code complete, UAT pending. Phase 15 next.
