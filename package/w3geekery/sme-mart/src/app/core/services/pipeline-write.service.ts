@@ -37,6 +37,10 @@ const SME_MART_CLASS_IDS = {
 
   // Phase 14 — Invitation Controls
   RfpInvitation: '941cf01b-d260-5e45-8c6a-50f07b23f196',
+
+  // Phase 15 — Document Templates (TODO: populate after schema PR merge + dataloader verify)
+  DocumentTemplate: '00000000-0000-0000-0000-000000000001', // Placeholder
+  DocumentInstance: '00000000-0000-0000-0000-000000000002', // Placeholder
 } as const;
 
 export type SmeMartClassName = keyof typeof SME_MART_CLASS_IDS;
