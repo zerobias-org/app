@@ -1,0 +1,42 @@
+.variable-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  .panel-header {
+    padding: 16px;
+    border-bottom: 1px solid #e0e0e0;
+    background-color: #fafafa;
+    flex-shrink: 0;
+
+    h3 {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 500;
+      color: rgba(0, 0, 0, 0.87);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+  }
+
+  .panel-content {
+    flex: 1;
+    padding: 16px;
+    overflow-y: auto;
+
+    .info-text {
+      margin: 0;
+      padding: 8px 0;
+      font-size: 13px;
+      color: rgba(0, 0, 0, 0.7);
+    }
+
+    .empty-state {
+      margin: 0;
+      padding: 8px 0;
+      font-size: 13px;
+      color: rgba(0, 0, 0, 0.54);
+      font-style: italic;
+    }
+  }
+}

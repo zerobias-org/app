@@ -1,0 +1,13 @@
+<div class="variable-panel">
+  <div class="panel-header">
+    <h3>Custom Variables</h3>
+  </div>
+
+  <div class="panel-content">
+    @if (customVariables().length > 0) {
+      <p class="info-text">{{ customVariables().length }} custom variable(s) defined</p>
+    } @else {
+      <p class="empty-state">No custom variables yet. Add one to get started.</p>
+    }
+  </div>
+</div>
