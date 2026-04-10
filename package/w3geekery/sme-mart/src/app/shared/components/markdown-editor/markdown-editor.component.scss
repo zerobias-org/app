@@ -105,6 +105,96 @@ app-markdown-editor {
     flex-direction: column;
   }
 
+  .preview-container {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 8px 12px;
+    font-size: 14px;
+    color: var(--mat-sys-on-surface);
+
+    h1, h2, h3, h4, h5, h6 {
+      margin: 12px 0 8px;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+
+    h1 { font-size: 1.4em; }
+    h2 { font-size: 1.25em; }
+    h3 { font-size: 1.1em; }
+    h4 { font-size: 1em; }
+
+    p {
+      margin: 0 0 8px;
+      line-height: 1.5;
+    }
+
+    ul, ol {
+      margin: 8px 0;
+      padding-left: 20px;
+
+      li {
+        margin: 4px 0;
+        line-height: 1.5;
+      }
+    }
+
+    blockquote {
+      border-left: 3px solid var(--mat-sys-primary);
+      margin: 8px 0;
+      padding-left: 10px;
+      color: var(--mat-sys-on-surface-variant);
+    }
+
+    a {
+      color: var(--mat-sys-primary);
+      text-decoration: underline;
+    }
+
+    code {
+      background-color: var(--mat-sys-surface-container);
+      padding: 1px 4px;
+      border-radius: 2px;
+      font-family: monospace;
+      font-size: 0.9em;
+    }
+
+    pre {
+      background-color: var(--mat-sys-surface-container);
+      padding: 8px;
+      border-radius: 3px;
+      overflow-x: auto;
+      margin: 8px 0;
+
+      code {
+        background: none;
+        padding: 0;
+        font-size: 12px;
+      }
+    }
+
+    table {
+      border-collapse: collapse;
+      margin: 8px 0;
+      width: 100%;
+
+      th, td {
+        border: 1px solid var(--mat-sys-outline-variant);
+        padding: 4px 8px;
+        text-align: left;
+      }
+
+      th {
+        background-color: var(--mat-sys-surface-container);
+        font-weight: 600;
+      }
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+  }
+
   .milkdown {
     flex-grow: 1;
     height: 100%;
@@ -282,6 +372,46 @@ app-markdown-editor {
         max-width: 100%;
         height: auto;
       }
+    }
+  }
+
+  // Variable menu styling
+  ::ng-deep .variable-menu {
+    min-width: 200px;
+
+    .variable-search {
+      padding: 8px;
+      border-bottom: 1px solid var(--mat-sys-outline-variant);
+
+      input {
+        width: 100%;
+        padding: 4px 8px;
+        border: 1px solid var(--mat-sys-outline-variant);
+        border-radius: 3px;
+        font-size: 13px;
+
+        &:focus {
+          outline: none;
+          border-color: var(--mat-sys-primary);
+        }
+      }
+    }
+
+    .variable-chip {
+      display: inline-block;
+      padding: 2px 8px;
+      background-color: var(--mat-sys-primary-container);
+      color: var(--mat-sys-on-primary-container);
+      border-radius: 12px;
+      font-size: 13px;
+      font-family: monospace;
+    }
+
+    .no-variables {
+      padding: 8px 16px;
+      color: var(--mat-sys-on-surface-variant);
+      font-size: 13px;
+      text-align: center;
     }
   }
 }

@@ -41,3 +41,8 @@ export { SmeMartWorkflowService } from './sme-mart-workflow.service';
 export { SmeMartTaskService } from './sme-mart-task.service';
 export { ProjectPrdService } from './project-prd.service';
 export { ProjectPlanService } from './project-plan.service';
+
+// Document Templates (Phase 15)
+export { DocumentTemplateService } from './document-template.service';
+export { DocumentInstanceService } from './document-instance.service';
+export { VariableSubstitutionService } from './variable-substitution.service';

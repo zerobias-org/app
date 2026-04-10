@@ -78,9 +78,53 @@
         <mat-icon>integration_instructions</mat-icon>
       </button>
     </div>
+
+    <div class="toolbar-divider"></div>
+
+    <div class="toolbar-group">
+      @if (variableNames.length > 0) {
+        <button mat-icon-button matTooltip="Insert Variable"
+          [matMenuTriggerFor]="variableMenu"
+          [disabled]="loading()">
+          <mat-icon>tag</mat-icon>
+        </button>
+        <mat-menu #variableMenu="matMenu" class="variable-menu">
+          <div class="variable-search" (click)="$event.stopPropagation()">
+            <input type="text" placeholder="Search variables..."
+              #varFilter (keyup)="filterVariables(varFilter.value)" />
+          </div>
+          @for (varName of filteredVariables(); track varName) {
+            <button mat-menu-item (click)="insertVariable(varName)">
+              <span class="variable-chip">{{varName}}</span>
+            </button>
+          }
+          @if (filteredVariables().length === 0) {
+            <div class="no-variables">No variables found</div>
+          }
+        </mat-menu>
+      }
+      <button mat-icon-button matTooltip="Toggle preview" [matMenuTriggerFor]="previewMenu" [disabled]="loading()">
+        @if (previewMode()) {
+          <mat-icon>edit</mat-icon>
+        } @else {
+          <mat-icon>visibility</mat-icon>
+        }
+      </button>
+      <mat-menu #previewMenu="matMenu">
+        @if (previewMode()) {
+          <button mat-menu-item (click)="togglePreview()">
+            <mat-icon>edit</mat-icon> Edit
+          </button>
+        } @else {
+          <button mat-menu-item (click)="togglePreview()">
+            <mat-icon>visibility</mat-icon> Preview
+          </button>
+        }
+      </mat-menu>
+    </div>
   </div>
 
-  <!-- Editor -->
+  <!-- Editor/Preview -->
   <div class="editor-container">
     @if (loading()) {
       <div class="editor-loading">
@@ -88,6 +132,11 @@
         <span>Loading editor…</span>
       </div>
     }
-    <div #editorRef [hidden]="loading()" class="milkdown-editor"></div>
+    @if (!previewMode() && !loading()) {
+      <div #editorRef class="milkdown-editor"></div>
+    }
+    @if (previewMode() && !loading()) {
+      <div class="preview-container" [innerHTML]="previewContent()"></div>
+    }
   </div>
 </div>
