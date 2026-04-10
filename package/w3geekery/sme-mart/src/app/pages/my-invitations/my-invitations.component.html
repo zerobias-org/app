@@ -12,25 +12,25 @@
       <mat-chip-set>
         <button
           mat-chip
-          [selected]="statusFilter() === 'all'"
+          [class.selected]="statusFilter() === 'all'"
           (click)="setStatusFilter('all')">
           All
         </button>
         <button
           mat-chip
-          [selected]="statusFilter() === 'pending'"
+          [class.selected]="statusFilter() === 'pending'"
           (click)="setStatusFilter('pending')">
           Pending
         </button>
         <button
           mat-chip
-          [selected]="statusFilter() === 'accepted'"
+          [class.selected]="statusFilter() === 'accepted'"
           (click)="setStatusFilter('accepted')">
           Accepted
         </button>
         <button
           mat-chip
-          [selected]="statusFilter() === 'requested'"
+          [class.selected]="statusFilter() === 'requested'"
           (click)="setStatusFilter('requested')">
           Requested
         </button>
@@ -45,7 +45,7 @@
               <div class="card-header-content">
                 <h3>{{ getProjectTitle(invitation.id) }}</h3>
                 <mat-chip-set>
-                  <mat-chip [ngClass]="getStatusChipClass(invitation.status)" disabled>
+                  <mat-chip [class]="getStatusChipClass(invitation.status)" disabled>
                     {{ invitation.status | titlecase }}
                   </mat-chip>
                 </mat-chip-set>

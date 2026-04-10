@@ -1,0 +1,38 @@
+// Invitation status chip colors using MDC custom properties.
+// No !important, no ::ng-deep — custom properties cascade naturally.
+//
+// Usage: @use 'src/app/shared/styles/invitation-status-chips';
+// Then apply classes like `status-pending`, `status-accepted` on mat-chip elements.
+
+@mixin invitation-status-chips {
+  .status-pending {
+    --mdc-chip-elevated-container-color: #e9e9e9;
+    --mdc-chip-label-text-color: #0f0f10;
+  }
+
+  .status-accepted {
+    --mdc-chip-elevated-container-color: #d8ecba;
+    --mdc-chip-label-text-color: #0f0f10;
+  }
+
+  .status-declined,
+  .status-revoked {
+    --mdc-chip-elevated-container-color: #eed5d1;
+    --mdc-chip-label-text-color: #0f0f10;
+  }
+
+  .status-expired {
+    --mdc-chip-elevated-container-color: #e9e9e9;
+    --mdc-chip-label-text-color: #0f0f10;
+  }
+
+  .status-requested {
+    --mdc-chip-elevated-container-color: #d7e0ee;
+    --mdc-chip-label-text-color: #0f0f10;
+  }
+
+  .invitation-only-chip {
+    --mdc-chip-elevated-container-color: #eed5d1;
+    --mdc-chip-label-text-color: #0f0f10;
+  }
+}

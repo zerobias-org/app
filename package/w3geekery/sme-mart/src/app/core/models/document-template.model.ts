@@ -18,7 +18,7 @@
  * Schema class ID: (deterministic UUID v5 from YAML schema — populated after dataloader verification)
  */
 
-export type DocumentType = 'msa' | 'nda' | 'sow' | 'compliance' | 'other';
+export type TemplateDocumentType = 'msa' | 'nda' | 'sow' | 'compliance' | 'other';
 export type DocumentTemplateStatus = 'draft' | 'published' | 'archived';
 
 /**
@@ -37,7 +37,7 @@ export interface DocumentTemplate {
   id: string; // UUID assigned by Platform on creation
   name: string; // Template name (e.g., "MSA - Standard SOC2")
   description?: string | null; // Optional template description
-  documentType: DocumentType; // Classification: msa, nda, sow, compliance, other
+  documentType: TemplateDocumentType; // Classification: msa, nda, sow, compliance, other
   content: string; // Markdown with {{variableName}} placeholders
   variableSchema?: string | null; // JSON string of CustomVariable[] (null if no custom vars)
   version: number; // Increments on content/schema changes (starts at 1)
@@ -51,7 +51,7 @@ export interface DocumentTemplate {
 export interface CreateDocumentTemplateDto {
   name: string;
   description?: string;
-  documentType: DocumentType;
+  documentType: TemplateDocumentType;
   content: string;
   variableSchema?: CustomVariable[]; // Will be JSON-stringified for storage
   orgId: string; // Owner org UUID

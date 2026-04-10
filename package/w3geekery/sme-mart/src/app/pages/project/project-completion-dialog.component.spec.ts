@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { vi } from 'vitest';
 import { ProjectCompletionDialogComponent } from './project-completion-dialog.component';
 import { makeSmeMartProject } from '../../test-helpers/factories';
 
@@ -18,7 +19,7 @@ describe('ProjectCompletionDialogComponent', () => {
 
   beforeEach(async () => {
     mockDialogRef = {
-      close: jasmine.createSpy('close'),
+      close: vi.fn(),
     };
 
     await TestBed.configureTestingModule({
@@ -77,7 +78,7 @@ describe('ProjectCompletionDialogComponent', () => {
     it('should not render start date when not available', async () => {
       const projectWithoutDates = makeSmeMartProject({
         name: 'Test Pilot',
-        startDate: null,
+        startDate: undefined,
       });
 
       mockData.project = projectWithoutDates;

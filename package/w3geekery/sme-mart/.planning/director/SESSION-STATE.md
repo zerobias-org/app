@@ -1,39 +1,37 @@
 # Director Session State
-**Last updated:** 2026-04-02T10:30:00-07:00
-**Milestone:** v1.2 (RFP Packages & Pilot Projects) — designing
-**Phase focus:** Pre-milestone design complete. Ready for /gsd:new-milestone.
+**Last updated:** 2026-04-10T17:00:00-07:00
+**Milestone:** v1.2 (RFP Packages & Pilot Projects) — executing
+**Phase focus:** Phase 14 checkpoint complete. Phase 15 next.
 
 ## Mental Model
 
-v1.1 shipped (33/33 requirements). ORG-07 boundaries panel fixed via /gsd:fast. Retrospective complete. Process improvements landed (API dependency verification rule — director review BLOCK, verify-phase evidence requirement, WATCH-LIST-SEED updated).
+v1.2 milestone executing. 2/5 phases complete (13 Pilot Projects, 14 Invitation Controls). Phase 14 passed checkpoint with 2 medium-severity errata (001: @Input() decorator on teaser, 002: 26 !important in SCSS). Both are code quality issues, not functional — phase is shippable. 10/10 UAT tests pass. GQL boundary rebuilt, schema 1.0.14 live, demo data repushed.
 
-v1.2 is scoped:
-1. **Plan 054 MVP** — RFP Package Builder (D1: closed/invitation-only RFPs, D2: multi-document packages). Transforms RFPs from freeform postings into structured packages with attached documents, templates, and invitation controls. Form builder (D3) and destruction attestation (S2) deferred to v1.3.
-2. **Plan 046 partial** — Cherry-pick document templates + preview from remaining org document management phases. Provides the template→instance infrastructure 054 needs.
-3. **Plan 077** — Pilot Projects. Brian asked 2026-03-27. Quick win — projectType field (rfp/pilot/project), pilot completion → conditional vetting item.
+Plan 078 (Transparency Controls) is in active design — wireframes produced during this session at `.claude/sketches/078-transparency-wireframes.html`. This is pre-phase design work targeting v1.3+, running in parallel with v1.2 execution.
 
-Key architectural context established this session:
-- Platform Security Guide (kb9) read and saved to `.claude/docs/ZB_PLATFORM_SECURITY_GUIDE.md`
-- Brian's vision maps to existing platform constructs — no platform changes needed
-- Kevin confirmed: boundaries control operational permissions (tasks, data, hub modules), not a general policy engine
-- Design rule persisted: translate Brian's business language → platform concepts → verify API → build UI
+Key context:
+- Schema workflow validated: YAML → PR to zerobias-org/schema:dev → promote to main → 15min reload → live on UAT
+- Nic's "option #2" for GQL boundary rebuilds works (publish schema mod triggers dataloader)
+- ngx-library at 0.2.29, Jasmine→Vitest migration complete
 
 ## Open Items
-- v1.1 milestone archive in progress (gsd-execute running /gsd:complete-milestone)
-- Need to run /gsd:new-milestone with the three items above
-- 054 needs deeper design during discuss-phase: what does the RFP document package data model look like? New GQL schema entities? Or leverage existing SmeMartDocument + new fields?
-- 046 partial scope needs definition: which specific 046 phases to cherry-pick (templates, preview)
+- Errata 001 (teaser @Input) — quick fix, can be done as /gsd:fast
+- Errata 002 (!important in SCSS) — moderate fix, extract shared status chip mixin
+- Plan 078 wireframes awaiting Clark's review and open question resolution (8 questions)
+- Phase 15 (Document Templates) — research complete, needs /gsd:discuss-phase 15
 
 ## Recent Decisions
-- v1.2 scope: 054 MVP + 046 partial + 077 (see DECISIONS.md)
-- Brian→Platform mapping: cross-milestone design rule (see DECISIONS.md + PROJECT-CONTEXT.md)
-- API dependency verification: BLOCK-level director review check (see director.md, verify-phase.md, WATCH-LIST-SEED.md)
+- Phase 14 COMPLETE — 10/10 UAT, 0 BLOCKs, 2 FLAGs, 3 NOTEs
+- Transparency tab placement: recommending Governance group (not Tracking) — pending Clark's decision
+- Wireframe produced: segmented toggle (Unresolved | All Matched | All) per Clark's annotation
 
 ## Failure Patterns Seen This Session
-- ORG-07: unverified "platform dependency" claim propagated through research → plan → verification → milestone audit unchallenged. Fixed with mandatory API verification at 3 levels.
+- Executor used @Input() decorator instead of input() signal — WATCH-LIST item missed during execution
+- Executor used !important for Material chip overrides (26 instances) — common shortcut, but violates coding standards
+- Summary referenced `npx vitest run` instead of `npm test` — minor process discipline
 
 ## What to Do on Resume
-- If v1.1 archive complete: run /gsd:new-milestone with scope above
-- If v1.1 archive not complete: wait for gsd-execute to finish, then proceed
-- During discuss-phase for 054: verify all document-related APIs via zerobias_search before assuming any platform gaps
-- Review 046 PLAN.md phases to identify which are template/preview (cherry-pick targets)
+- If Clark approved errata fixes: run /gsd:fast for each (001 then 002)
+- If Clark wants Phase 15: run /gsd:discuss-phase 15
+- If Clark wants Plan 078 wireframe review: load .claude/sketches/078-transparency-wireframes.html and discuss open questions
+- WATCH-LIST update: add "agent uses !important for Material chip overrides" pattern

@@ -64,7 +64,13 @@ Both sides of the link must be defined. The format is `ClassName.id.reversePrope
 
 **`npm run validate` is NOT sufficient.** It only checks YAML structure/naming. The REAL validation requires running the actual dataloader against the scratch database.
 
-### Update dataloader to latest (REQUIRED)
+### ⚠️ RE-RUN AFTER ANY CHANGE — NO EXCEPTIONS
+
+Cherry-picks, rebases, amends, squashes — **ANY time the schema commit content changes, re-run the full dataloader from Step 3.** A previous validation is INVALID after modifying commits.
+
+> **Incident 2026-04-06:** Cherry-picked a commit adding `profileItemId` to a class without its field YAML. Skipped re-validation because "we already ran it." Broke prod/UAT dataloader for 60+ minutes.
+
+### Step 1: Update dataloader to latest (REQUIRED)
 
 **ALWAYS update dataloader before every validation run.** This is not optional. CI uses the latest version — older local versions may be more lenient and pass schemas that fail on CI. We learned this the hard way: v1.0.89 accepted nested `field:` indent that v1.0.92 correctly rejected.
 
@@ -150,6 +156,9 @@ gh pr create \
   --body "$(cat <<'EOF'
 ## Summary
 - bullet points of changes
+
+## Validation
+Dataloader {version from dataloader --version} — passed, exit code 0.
 
 ## Test plan
 - [x] Dataloader validated against scratch DB

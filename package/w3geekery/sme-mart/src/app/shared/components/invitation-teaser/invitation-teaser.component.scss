@@ -1,3 +1,5 @@
+@use 'app/shared/styles/invitation-status-chips' as chips;
+
 .teaser-container {
   display: flex;
   justify-content: center;
@@ -93,14 +95,8 @@
   }
 }
 
-// Status chip styling
-::ng-deep {
-  .invitation-only-chip {
-    background-color: #eed5d1 !important;
-    color: #0f0f10 !important;
+@include chips.invitation-status-chips;
 
-    mat-icon {
-      margin-right: 0.5rem;
-    }
-  }
+.invitation-only-chip mat-icon {
+  margin-right: 0.5rem;
 }

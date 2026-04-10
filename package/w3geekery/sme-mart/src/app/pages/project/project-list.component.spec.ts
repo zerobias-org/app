@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
+import { vi } from 'vitest';
 import { ProjectList } from './project-list.component';
 import { SmeMartProjectService } from '../../core/services/sme-mart-project.service';
 import { makeSmeMartProject } from '../../test-helpers/factories';
@@ -13,7 +14,7 @@ describe('ProjectList', () => {
 
   beforeEach(async () => {
     mockRouter = {
-      navigate: jasmine.createSpy('navigate'),
+      navigate: vi.fn(),
     };
 
     mockActivatedRoute = {
@@ -25,14 +26,14 @@ describe('ProjectList', () => {
     };
 
     mockProjectService = {
-      listProjects: jasmine.createSpy('listProjects').and.resolveTo({
+      listProjects: vi.fn().mockResolvedValue({
         items: [
           makeSmeMartProject({ name: 'RFP 1', projectType: 'rfp' }),
           makeSmeMartProject({ name: 'Pilot 1', projectType: 'pilot' }),
           makeSmeMartProject({ name: 'Project 1', projectType: 'project' }),
         ],
       }),
-      listProjectsByEngagement: jasmine.createSpy('listProjectsByEngagement').and.resolveTo({
+      listProjectsByEngagement: vi.fn().mockResolvedValue({
         items: [],
       }),
     };
@@ -86,15 +87,17 @@ describe('ProjectList', () => {
     it('should call listProjects with RFC4515 filter for pilot', async () => {
       await component.setProjectTypeFilter('pilot');
 
-      const call = mockProjectService.listProjects.calls.mostRecent();
-      expect(call.args[0].filters.projectType).toBe('.eq.pilot');
+      const calls = mockProjectService.listProjects.mock.calls;
+      const lastArgs = calls[calls.length - 1];
+      expect(lastArgs[0].filters.projectType).toBe('.eq.pilot');
     });
 
     it('should call listProjects without filter when set to empty string', async () => {
       await component.setProjectTypeFilter('');
 
-      const call = mockProjectService.listProjects.calls.mostRecent();
-      expect(call.args[0].filters).toBeUndefined();
+      const calls = mockProjectService.listProjects.mock.calls;
+      const lastArgs = calls[calls.length - 1];
+      expect(lastArgs[0].filters).toBeUndefined();
     });
 
     it('should update projects signal after loading', async () => {
@@ -124,7 +127,7 @@ describe('ProjectList', () => {
 
       await component.ngOnInit();
 
-      expect(mockProjectService.listProjectsByEngagement).toHaveBeenCalledWith('eng-123', jasmine.any(Object));
+      expect(mockProjectService.listProjectsByEngagement).toHaveBeenCalledWith('eng-123', expect.any(Object));
     });
   });
 
@@ -180,7 +183,7 @@ describe('ProjectList', () => {
 
   describe('error handling', () => {
     it('should set loading to false on error', async () => {
-      mockProjectService.listProjects = jasmine.createSpy('listProjects').and.rejectWith(new Error('API error'));
+      mockProjectService.listProjects = vi.fn().mockRejectedValue(new Error('API error'));
 
       await component.ngOnInit();
 

@@ -34,6 +34,9 @@ const SME_MART_CLASS_IDS = {
 
   // Plan 041 — Vendor Profile Service (deterministic UUID v5 from schema)
   MarketplaceProfileItem: 'ee1e68b7-f003-5f5f-a111-7ec93b37681c',
+
+  // Phase 14 — Invitation Controls
+  RfpInvitation: '941cf01b-d260-5e45-8c6a-50f07b23f196',
 } as const;
 
 export type SmeMartClassName = keyof typeof SME_MART_CLASS_IDS;

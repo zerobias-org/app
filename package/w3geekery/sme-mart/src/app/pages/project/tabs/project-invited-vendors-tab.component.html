@@ -65,7 +65,7 @@
                   <div class="vendor-details">
                     <span class="vendor-name">{{ inv.vendorOrgId }}</span>
                     <mat-chip-set>
-                      <mat-chip [ngClass]="getStatusChipClass(inv.status)" disabled>
+                      <mat-chip [class]="getStatusChipClass(inv.status)" disabled>
                         {{ inv.status }}
                       </mat-chip>
                     </mat-chip-set>

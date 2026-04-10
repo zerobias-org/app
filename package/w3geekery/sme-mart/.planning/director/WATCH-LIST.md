@@ -28,7 +28,11 @@ Accumulated from RETROSPECTIVE.md v1.0 + v1.1 + WATCH-LIST-SEED.md.
 
 ## CSS / Styling
 
-- [ ] Agent uses `!important` in CSS
+- [ ] Agent uses `!important` in CSS — use `--mdc-*` custom properties for Material overrides
+- [ ] Agent inlines status chip color blocks instead of shared mixin (`_invitation-status-chips.scss` for invitation statuses)
+- [ ] Agent creates new chip color classes when ngx-library `_chips.scss` already has them (`.zb-chip.task-status.*`, `.zb-chip.status.*`, `.zb-chip.severity.*`)
+- [ ] Agent uses `::ng-deep` when CSS custom properties would work without it
+- [ ] Agent duplicates identical SCSS blocks across components (extract to shared partial)
 - [ ] Agent builds custom component when ngx-library has an equivalent
 - [ ] Agent doesn't check `@zerobias-org/ngx-library` public-api.ts for available exports
 
@@ -65,6 +69,7 @@ Accumulated from RETROSPECTIVE.md v1.0 + v1.1 + WATCH-LIST-SEED.md.
 
 ## SME Mart Specific
 
+- [ ] Agent uses `@Input()` decorator instead of `input()` / `input.required()` signal function — caught in Phase 14 teaser
 - [ ] Agent uses "proposal" terminology instead of "bid"
 - [ ] Agent creates engagement-level features on project entities (or vice versa)
 - [ ] Agent doesn't handle Pipeline eventual consistency (5-10s delay needs optimistic updates)

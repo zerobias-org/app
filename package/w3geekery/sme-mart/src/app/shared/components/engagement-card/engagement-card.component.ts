@@ -41,8 +41,6 @@ export class EngagementCard {
   readonly timeline = computed(() => this._engagement()?.timeline);
   readonly buyerName = computed(() => this._engagement()?.buyer_display_name || 'Unknown');
   readonly acceptedProviderName = computed(() => this._engagement()?.accepted_provider_name || null);
-  readonly isInvitationOnly = computed(() => this._engagement()?.isInvitationOnly ?? false);
-
   readonly isRfp = computed(() => !this.engagementTag());
   readonly lifecycleLabel = computed(() => this.isRfp() ? 'RFP' : 'Engagement');
 

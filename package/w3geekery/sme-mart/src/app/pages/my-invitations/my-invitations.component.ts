@@ -132,7 +132,7 @@ export class MyInvitationsComponent implements OnInit {
     const inv = this.invitations().find(i => i.id === invitationId);
     if (!inv) return 'Unknown Project';
     const project = this.projects().get(inv.projectId);
-    return project?.title || 'Unknown Project';
+    return project?.name || 'Unknown Project';
   }
 
   getStatusChipClass(status: string): string {

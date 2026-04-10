@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { vi } from 'vitest';
 import { VettingSuggestionPanelComponent } from './vetting-suggestion-panel.component';
 import { VettingService } from '../../../core/services/vetting.service';
 import { VendorProfileService } from '../../../core/services/vendor-profile.service';
@@ -21,7 +22,7 @@ describe('VettingSuggestionPanelComponent', () => {
     name: 'SOC2 Report',
     description: 'Compliance report',
     category: 'always',
-    vetting_type: 'document',
+    vetting_type: 'documentation',
     evidence_type: 'document',
     status: 'not_started',
     direction: 'buyer_requires',
@@ -42,15 +43,15 @@ describe('VettingSuggestionPanelComponent', () => {
   beforeEach(async () => {
     mockVettingService = {
       pilotCompletionSuggestion: signal(null),
-      clearPilotCompletionSuggestion: jasmine.createSpy('clearPilotCompletionSuggestion'),
+      clearPilotCompletionSuggestion: vi.fn(),
     };
 
     mockVendorProfileService = {
-      listProfileItems: jasmine.createSpy('listProfileItems').and.resolveTo([]),
+      listProfileItems: vi.fn().mockResolvedValue([]),
     };
 
     mockEngagementContext = {
-      engagement: jasmine.createSpy('engagement').and.returnValue({
+      engagement: vi.fn().mockReturnValue({
         buyer_zerobias_org_id: 'org-123',
       }),
     };

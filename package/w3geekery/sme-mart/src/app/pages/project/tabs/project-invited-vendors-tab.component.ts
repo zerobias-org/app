@@ -56,7 +56,7 @@ export class ProjectInvitedVendorsTabComponent implements OnInit {
   private async loadInvitations(): Promise<void> {
     this.loading.set(true);
     try {
-      const projectId = this.ctx.projectId();
+      const projectId = this.ctx.project()?.id;
       if (!projectId) {
         this.snackBar.open('Project not found', 'Dismiss', { duration: 3000 });
         return;
@@ -72,7 +72,7 @@ export class ProjectInvitedVendorsTabComponent implements OnInit {
 
   async inviteVendor(): Promise<void> {
     const vendorOrgId = this.newVendorOrgId();
-    const projectId = this.ctx.projectId();
+    const projectId = this.ctx.project()?.id;
 
     if (!vendorOrgId) {
       this.snackBar.open('Please select a vendor', 'Dismiss', { duration: 3000 });

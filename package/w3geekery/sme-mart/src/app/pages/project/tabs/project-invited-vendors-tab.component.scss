@@ -1,3 +1,5 @@
+@use 'app/shared/styles/invitation-status-chips' as chips;
+
 .invited-vendors-tab {
   padding: 1.5rem;
 }
@@ -143,35 +145,4 @@
   }
 }
 
-// Status chip colors
-::ng-deep {
-  .status-pending {
-    background-color: #e9e9e9 !important;
-    color: #0f0f10 !important;
-  }
-
-  .status-accepted {
-    background-color: #d8ecba !important;
-    color: #0f0f10 !important;
-  }
-
-  .status-declined {
-    background-color: #eed5d1 !important;
-    color: #0f0f10 !important;
-  }
-
-  .status-revoked {
-    background-color: #eed5d1 !important;
-    color: #0f0f10 !important;
-  }
-
-  .status-expired {
-    background-color: #e9e9e9 !important;
-    color: #0f0f10 !important;
-  }
-
-  .status-requested {
-    background-color: #d7e0ee !important;
-    color: #0f0f10 !important;
-  }
-}
+@include chips.invitation-status-chips;

@@ -41,7 +41,8 @@
             ],
             "stylePreprocessorOptions": {
               "includePaths": [
-                "node_modules/@zerobias-org/ngx-library/src/styles"
+                "node_modules/@zerobias-org/ngx-library/src/styles",
+                "src"
               ]
             },
             "styles": [

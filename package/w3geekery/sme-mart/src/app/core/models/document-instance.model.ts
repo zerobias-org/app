@@ -23,7 +23,7 @@ export interface DocumentInstance {
   id: string; // UUID assigned by Platform on creation
   name: string; // Inherited from template at instantiation time
   description?: string | null; // Inherited from template
-  documentType: 'msa' | 'nda' | 'sow' | 'compliance' | 'other'; // Inherited from template
+  documentType: string; // Inherited from template (TemplateDocumentType)
   content: string; // Resolved content after variable substitution
   originalContent: string; // Content as generated from template (for diff tracking — D-03)
   templateId: string; // Reference to source DocumentTemplate

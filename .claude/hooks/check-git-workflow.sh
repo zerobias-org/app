@@ -97,14 +97,20 @@ if echo "$CMD" | grep -qE 'gh pr create'; then
   fi
 fi
 
-# ── Rule 5: Schema PRs must target dev branch (except dev→main promotes) ──
+# ── Rule 5: Schema PRs — feature work to dev, promotes to main via fork-side branch ──
+# Enforces the 3rd-party-developer workflow: no branch-to-branch PRs on upstream
+# (that requires write access we don't have). Promote PRs must source from the
+# w3geekery fork.
 if echo "$CMD" | grep -qE 'gh pr create'; then
   if echo "$CMD" | grep -q -- '--repo zerobias-org/schema'; then
-    # Allow dev→main promote PRs (--head dev --base main)
-    if ! echo "$CMD" | grep -qE -- '--head dev\b'; then
-      if ! echo "$CMD" | grep -qE -- '--base dev\b'; then
-        ERRORS+=("WRONG BASE BRANCH: Schema PRs must target zerobias-org:dev (only dev has the CI workflow check). Use --base dev. Exception: dev→main promote PRs use --head dev --base main.")
+    if echo "$CMD" | grep -qE -- '--base main\b'; then
+      # Promote to main: head must be w3geekery:dev (Variant A) or
+      # w3geekery:<branch-containing-'promote'> (Variant B, recommended).
+      if ! echo "$CMD" | grep -qE -- '--head w3geekery:(dev\b|[^ ]*promote[^ ]*)'; then
+        ERRORS+=("WRONG PROMOTE HEAD: dev→main promote PRs must source from the w3geekery fork. Use --head w3geekery:dev (Variant A) or --head w3geekery:<branch-with-'promote'-in-name> (Variant B, recommended). A 3rd-party developer cannot create branch-to-branch PRs on zerobias-org/schema directly — the head branch must live on the fork.")
       fi
+    elif ! echo "$CMD" | grep -qE -- '--base dev\b'; then
+      ERRORS+=("WRONG BASE BRANCH: Schema PRs must target --base dev for feature work, or --base main for dev→main promotes (with fork-side head branch). No other base branches allowed.")
     fi
   fi
 fi

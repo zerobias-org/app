@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { vi } from 'vitest';
 import { ProjectDetail } from './project-detail.component';
 import { SmeMartProjectService } from '../../core/services/sme-mart-project.service';
 import { SmeMartResourceService } from '../../core/services/sme-mart-resource.service';
@@ -29,7 +30,7 @@ describe('ProjectDetail', () => {
     refreshSubject = new Subject<void>();
 
     mockRouter = {
-      navigate: jasmine.createSpy('navigate'),
+      navigate: vi.fn(),
     };
 
     mockActivatedRoute = {
@@ -44,43 +45,43 @@ describe('ProjectDetail', () => {
     };
 
     mockProjectService = {
-      getProject: jasmine.createSpy('getProject').and.resolveTo(
+      getProject: vi.fn().mockResolvedValue(
         makeSmeMartProject({ id: 'proj-123', name: 'Test Project' })
       ),
-      updateProject: jasmine.createSpy('updateProject').and.resolveTo(
+      updateProject: vi.fn().mockResolvedValue(
         makeSmeMartProject({ id: 'proj-123', status: 'completed' })
       ),
-      createProject: jasmine.createSpy('createProject').and.resolveTo(
+      createProject: vi.fn().mockResolvedValue(
         makeSmeMartProject({ id: 'proj-456', name: 'Promoted Project', projectType: 'project', status: 'draft' })
       ),
     };
 
     mockResourceService = {
-      linkResources: jasmine.createSpy('linkResources').and.resolveTo(undefined),
+      linkResources: vi.fn().mockResolvedValue(undefined),
     };
 
     mockVettingService = {
-      pilotCompletionSuggestion: jasmine.createSpy('pilotCompletionSuggestion').and.returnValue(null),
-      setPilotCompletionSuggestion: jasmine.createSpy('setPilotCompletionSuggestion'),
-      clearPilotCompletionSuggestion: jasmine.createSpy('clearPilotCompletionSuggestion'),
+      pilotCompletionSuggestion: vi.fn().mockReturnValue(null),
+      setPilotCompletionSuggestion: vi.fn(),
+      clearPilotCompletionSuggestion: vi.fn(),
     };
 
     mockProjectContext = {
-      project: jasmine.createSpy('project').and.returnValue(
+      project: vi.fn().mockReturnValue(
         makeSmeMartProject({ id: 'proj-123', projectType: 'pilot', status: 'active' })
       ),
-      setProject: jasmine.createSpy('setProject'),
-      setCurrentUserId: jasmine.createSpy('setCurrentUserId'),
-      engagementId: jasmine.createSpy('engagementId').and.returnValue('eng-123'),
-      engagementName: jasmine.createSpy('engagementName').and.returnValue('Test Engagement'),
-      projectName: jasmine.createSpy('projectName').and.returnValue('Test Project'),
-      status: jasmine.createSpy('status').and.returnValue('active'),
-      clear: jasmine.createSpy('clear'),
+      setProject: vi.fn(),
+      setCurrentUserId: vi.fn(),
+      engagementId: vi.fn().mockReturnValue('eng-123'),
+      engagementName: vi.fn().mockReturnValue('Test Engagement'),
+      projectName: vi.fn().mockReturnValue('Test Project'),
+      status: vi.fn().mockReturnValue('active'),
+      clear: vi.fn(),
       refresh$: refreshSubject.asObservable(),
     };
 
     mockDialog = {
-      open: jasmine.createSpy('open').and.returnValue({
+      open: vi.fn().mockReturnValue({
         afterClosed: () => ({
           toPromise: () => Promise.resolve({ notes: 'Test completion' }),
         }),
@@ -88,11 +89,11 @@ describe('ProjectDetail', () => {
     };
 
     mockSnackBar = {
-      open: jasmine.createSpy('open'),
+      open: vi.fn(),
     };
 
     mockImpersonation = {
-      effectiveUserId: jasmine.createSpy('effectiveUserId').and.returnValue('user-123'),
+      effectiveUserId: vi.fn().mockReturnValue('user-123'),
     };
 
     await TestBed.configureTestingModule({
@@ -120,7 +121,7 @@ describe('ProjectDetail', () => {
 
   describe('canCompletePilot computed', () => {
     it('should return true when projectType=pilot and status!=completed', () => {
-      mockProjectContext.project = jasmine.createSpy('project').and.returnValue(
+      mockProjectContext.project = vi.fn().mockReturnValue(
         makeSmeMartProject({ projectType: 'pilot', status: 'active' })
       );
 
@@ -145,7 +146,7 @@ describe('ProjectDetail', () => {
     });
 
     it('should return false when projectType=rfp', () => {
-      mockProjectContext.project = jasmine.createSpy('project').and.returnValue(
+      mockProjectContext.project = vi.fn().mockReturnValue(
         makeSmeMartProject({ projectType: 'rfp', status: 'active' })
       );
 
@@ -169,7 +170,7 @@ describe('ProjectDetail', () => {
     });
 
     it('should return false when status=completed', () => {
-      mockProjectContext.project = jasmine.createSpy('project').and.returnValue(
+      mockProjectContext.project = vi.fn().mockReturnValue(
         makeSmeMartProject({ projectType: 'pilot', status: 'completed' })
       );
 
@@ -202,17 +203,17 @@ describe('ProjectDetail', () => {
 
     it('should pass project data to dialog', async () => {
       const project = makeSmeMartProject({ id: 'proj-123', projectType: 'pilot' });
-      mockProjectContext.project = jasmine.createSpy('project').and.returnValue(project);
+      mockProjectContext.project = vi.fn().mockReturnValue(project);
 
       await component.completePilot();
 
-      const callArgs = mockDialog.open.calls.mostRecent().args;
+      const callArgs = mockDialog.open.mock.lastCall;
       expect(callArgs[1].data.project).toEqual(project);
     });
 
     it('should set isCompletingPilot during completion', async () => {
       // Mock a delayed dialog close
-      mockDialog.open = jasmine.createSpy('open').and.returnValue({
+      mockDialog.open = vi.fn().mockReturnValue({
         afterClosed: () => ({
           toPromise: () => new Promise(resolve => setTimeout(() => resolve({ notes: 'Test' }), 10)),
         }),
@@ -227,7 +228,7 @@ describe('ProjectDetail', () => {
 
     it('should call updateProject with status=completed on dialog confirm', async () => {
       const project = makeSmeMartProject({ id: 'proj-123', projectType: 'pilot', status: 'active' });
-      mockProjectContext.project = jasmine.createSpy('project').and.returnValue(project);
+      mockProjectContext.project = vi.fn().mockReturnValue(project);
 
       await component.completePilot();
 
@@ -236,7 +237,7 @@ describe('ProjectDetail', () => {
 
     it('should update project context on successful completion', async () => {
       const project = makeSmeMartProject({ id: 'proj-123', projectType: 'pilot', status: 'active' });
-      mockProjectContext.project = jasmine.createSpy('project').and.returnValue(project);
+      mockProjectContext.project = vi.fn().mockReturnValue(project);
 
       await component.completePilot();
 
@@ -245,7 +246,7 @@ describe('ProjectDetail', () => {
 
     it('should show success snackbar on completion', async () => {
       const project = makeSmeMartProject({ id: 'proj-123', projectType: 'pilot', status: 'active' });
-      mockProjectContext.project = jasmine.createSpy('project').and.returnValue(project);
+      mockProjectContext.project = vi.fn().mockReturnValue(project);
 
       await component.completePilot();
 
@@ -253,14 +254,14 @@ describe('ProjectDetail', () => {
     });
 
     it('should handle dialog cancellation gracefully', async () => {
-      mockDialog.open = jasmine.createSpy('open').and.returnValue({
+      mockDialog.open = vi.fn().mockReturnValue({
         afterClosed: () => ({
           toPromise: () => Promise.resolve(undefined), // User cancelled
         }),
       });
 
       const project = makeSmeMartProject({ id: 'proj-123', projectType: 'pilot', status: 'active' });
-      mockProjectContext.project = jasmine.createSpy('project').and.returnValue(project);
+      mockProjectContext.project = vi.fn().mockReturnValue(project);
 
       await component.completePilot();
 
@@ -269,10 +270,10 @@ describe('ProjectDetail', () => {
     });
 
     it('should show error snackbar on failure', async () => {
-      mockProjectService.updateProject = jasmine.createSpy('updateProject').and.rejectWith(new Error('API error'));
+      mockProjectService.updateProject = vi.fn().mockRejectedValue(new Error('API error'));
 
       const project = makeSmeMartProject({ id: 'proj-123', projectType: 'pilot', status: 'active' });
-      mockProjectContext.project = jasmine.createSpy('project').and.returnValue(project);
+      mockProjectContext.project = vi.fn().mockReturnValue(project);
 
       await component.completePilot();
 
@@ -280,7 +281,7 @@ describe('ProjectDetail', () => {
     });
 
     it('should not proceed if projectType is not pilot', async () => {
-      mockProjectContext.project = jasmine.createSpy('project').and.returnValue(
+      mockProjectContext.project = vi.fn().mockReturnValue(
         makeSmeMartProject({ projectType: 'rfp' })
       );
 
@@ -290,7 +291,7 @@ describe('ProjectDetail', () => {
     });
 
     it('should not proceed if project is already completed', async () => {
-      mockProjectContext.project = jasmine.createSpy('project').and.returnValue(
+      mockProjectContext.project = vi.fn().mockReturnValue(
         makeSmeMartProject({ projectType: 'pilot', status: 'completed' })
       );
 
@@ -316,7 +317,7 @@ describe('ProjectDetail', () => {
     });
 
     it('should redirect if project not found', async () => {
-      mockProjectService.getProject = jasmine.createSpy('getProject').and.resolveTo(null);
+      mockProjectService.getProject = vi.fn().mockResolvedValue(null);
 
       await component.ngOnInit();
 
@@ -324,7 +325,7 @@ describe('ProjectDetail', () => {
     });
 
     it('should handle load error gracefully', async () => {
-      mockProjectService.getProject = jasmine.createSpy('getProject').and.rejectWith(new Error('API error'));
+      mockProjectService.getProject = vi.fn().mockRejectedValue(new Error('API error'));
 
       await component.ngOnInit();
 
@@ -341,7 +342,7 @@ describe('ProjectDetail', () => {
     });
 
     it('should navigate to engagements list if no engagementId', () => {
-      mockProjectContext.engagementId = jasmine.createSpy('engagementId').and.returnValue(null);
+      mockProjectContext.engagementId = vi.fn().mockReturnValue(null);
 
       component.goToEngagement();
 
@@ -351,7 +352,7 @@ describe('ProjectDetail', () => {
 
   describe('canPromote computed', () => {
     it('should return true when projectType=pilot and status=completed', () => {
-      mockProjectContext.project = jasmine.createSpy('project').and.returnValue(
+      mockProjectContext.project = vi.fn().mockReturnValue(
         makeSmeMartProject({ projectType: 'pilot', status: 'completed' })
       );
 
@@ -377,7 +378,7 @@ describe('ProjectDetail', () => {
     });
 
     it('should return false when status!=completed', () => {
-      mockProjectContext.project = jasmine.createSpy('project').and.returnValue(
+      mockProjectContext.project = vi.fn().mockReturnValue(
         makeSmeMartProject({ projectType: 'pilot', status: 'active' })
       );
 
@@ -403,7 +404,7 @@ describe('ProjectDetail', () => {
     });
 
     it('should return false when projectType!=pilot', () => {
-      mockProjectContext.project = jasmine.createSpy('project').and.returnValue(
+      mockProjectContext.project = vi.fn().mockReturnValue(
         makeSmeMartProject({ projectType: 'project', status: 'completed' })
       );
 
@@ -432,11 +433,11 @@ describe('ProjectDetail', () => {
   describe('promoteToProject', () => {
     it('should create new project with projectType=project and status=draft', async () => {
       const pilot = makeSmeMartProject({ id: 'pilot-1', projectType: 'pilot', status: 'completed', name: 'Test Pilot' });
-      mockProjectContext.project = jasmine.createSpy('project').and.returnValue(pilot);
+      mockProjectContext.project = vi.fn().mockReturnValue(pilot);
 
       await component.promoteToProject();
 
-      expect(mockProjectService.createProject).toHaveBeenCalledWith(jasmine.objectContaining({
+      expect(mockProjectService.createProject).toHaveBeenCalledWith(expect.objectContaining({
         projectType: 'project',
         status: 'draft',
         name: 'Test Pilot',
@@ -452,11 +453,11 @@ describe('ProjectDetail', () => {
         description: 'Test desc',
         category: 'test-cat',
       });
-      mockProjectContext.project = jasmine.createSpy('project').and.returnValue(pilot);
+      mockProjectContext.project = vi.fn().mockReturnValue(pilot);
 
       await component.promoteToProject();
 
-      const call = mockProjectService.createProject.calls.mostRecent().args[0];
+      const call = mockProjectService.createProject.mock.lastCall[0];
       expect(call.name).toBe('Test Pilot');
       expect(call.description).toBe('Test desc');
       expect(call.category).toBe('test-cat');
@@ -464,35 +465,35 @@ describe('ProjectDetail', () => {
 
     it('should link pilot to promoted project', async () => {
       const pilot = makeSmeMartProject({ id: 'pilot-1', projectType: 'pilot', status: 'completed' });
-      mockProjectContext.project = jasmine.createSpy('project').and.returnValue(pilot);
+      mockProjectContext.project = vi.fn().mockReturnValue(pilot);
 
       await component.promoteToProject();
 
       expect(mockResourceService.linkResources).toHaveBeenCalledWith(
         'pilot-1',
         'sme-mart:project',
-        jasmine.any(String),
+        expect.any(String),
         'sme-mart:project',
         'relates_to',
-        jasmine.objectContaining({ relationship: 'promoted_to' })
+        expect.objectContaining({ relationship: 'promoted_to' })
       );
     });
 
     it('should update pilot with promotedProjectId', async () => {
       const pilot = makeSmeMartProject({ id: 'pilot-1', projectType: 'pilot', status: 'completed' });
-      mockProjectContext.project = jasmine.createSpy('project').and.returnValue(pilot);
+      mockProjectContext.project = vi.fn().mockReturnValue(pilot);
 
       await component.promoteToProject();
 
-      const updateCall = mockProjectService.updateProject.calls.mostRecent();
-      expect(updateCall.args[0]).toBe('pilot-1');
-      expect(updateCall.args[1]).toEqual(jasmine.objectContaining({ promotedProjectId: 'proj-456' }));
+      const lastCall = mockProjectService.updateProject.mock.lastCall;
+      expect(lastCall[0]).toBe('pilot-1');
+      expect(lastCall[1]).toEqual(expect.objectContaining({ promotedProjectId: 'proj-456' }));
     });
 
     it('should navigate to new project after promotion', async () => {
       const pilot = makeSmeMartProject({ id: 'pilot-1', projectType: 'pilot', status: 'completed' });
-      mockProjectContext.project = jasmine.createSpy('project').and.returnValue(pilot);
-      mockRouter.navigate = jasmine.createSpy('navigate');
+      mockProjectContext.project = vi.fn().mockReturnValue(pilot);
+      mockRouter.navigate = vi.fn();
 
       await component.promoteToProject();
 
@@ -504,7 +505,7 @@ describe('ProjectDetail', () => {
 
     it('should set isPromoting during promotion', async () => {
       const pilot = makeSmeMartProject({ id: 'pilot-1', projectType: 'pilot', status: 'completed' });
-      mockProjectContext.project = jasmine.createSpy('project').and.returnValue(pilot);
+      mockProjectContext.project = vi.fn().mockReturnValue(pilot);
 
       const promotionPromise = component.promoteToProject();
       expect(component.isPromoting()).toBe(true);
@@ -515,9 +516,9 @@ describe('ProjectDetail', () => {
 
     it('should show success snackbar on promotion', async () => {
       const pilot = makeSmeMartProject({ id: 'pilot-1', projectType: 'pilot', status: 'completed' });
-      mockProjectContext.project = jasmine.createSpy('project').and.returnValue(pilot);
+      mockProjectContext.project = vi.fn().mockReturnValue(pilot);
 
-      mockSnackBar.open = jasmine.createSpy('open').and.returnValue({
+      mockSnackBar.open = vi.fn().mockReturnValue({
         onAction: () => ({ subscribe: () => {} }),
       });
 
@@ -527,10 +528,10 @@ describe('ProjectDetail', () => {
     });
 
     it('should show error snackbar on promotion failure', async () => {
-      mockProjectService.createProject = jasmine.createSpy('createProject').and.rejectWith(new Error('API error'));
+      mockProjectService.createProject = vi.fn().mockRejectedValue(new Error('API error'));
 
       const pilot = makeSmeMartProject({ id: 'pilot-1', projectType: 'pilot', status: 'completed' });
-      mockProjectContext.project = jasmine.createSpy('project').and.returnValue(pilot);
+      mockProjectContext.project = vi.fn().mockReturnValue(pilot);
 
       await component.promoteToProject();
 
@@ -538,7 +539,7 @@ describe('ProjectDetail', () => {
     });
 
     it('should not proceed if projectType is not pilot', async () => {
-      mockProjectContext.project = jasmine.createSpy('project').and.returnValue(
+      mockProjectContext.project = vi.fn().mockReturnValue(
         makeSmeMartProject({ projectType: 'project', status: 'completed' })
       );
 
@@ -548,7 +549,7 @@ describe('ProjectDetail', () => {
     });
 
     it('should not proceed if status is not completed', async () => {
-      mockProjectContext.project = jasmine.createSpy('project').and.returnValue(
+      mockProjectContext.project = vi.fn().mockReturnValue(
         makeSmeMartProject({ projectType: 'pilot', status: 'active' })
       );
 
@@ -561,11 +562,11 @@ describe('ProjectDetail', () => {
   describe('completePilot integration with vetting', () => {
     it('should call setPilotCompletionSuggestion after pilot completion', async () => {
       const pilot = makeSmeMartProject({ id: 'pilot-1', projectType: 'pilot', status: 'active', engagementId: 'eng-123', name: 'Test Pilot' });
-      mockProjectContext.project = jasmine.createSpy('project').and.returnValue(pilot);
+      mockProjectContext.project = vi.fn().mockReturnValue(pilot);
 
       await component.completePilot();
 
-      expect(mockVettingService.setPilotCompletionSuggestion).toHaveBeenCalledWith(jasmine.objectContaining({
+      expect(mockVettingService.setPilotCompletionSuggestion).toHaveBeenCalledWith(expect.objectContaining({
         pilotId: 'pilot-1',
         pilotName: 'Test Pilot',
         engagementId: 'eng-123',
@@ -574,9 +575,9 @@ describe('ProjectDetail', () => {
 
     it('should include completion notes in suggestion if provided', async () => {
       const pilot = makeSmeMartProject({ id: 'pilot-1', projectType: 'pilot', status: 'active', engagementId: 'eng-123', name: 'Test Pilot' });
-      mockProjectContext.project = jasmine.createSpy('project').and.returnValue(pilot);
+      mockProjectContext.project = vi.fn().mockReturnValue(pilot);
 
-      mockDialog.open = jasmine.createSpy('open').and.returnValue({
+      mockDialog.open = vi.fn().mockReturnValue({
         afterClosed: () => ({
           toPromise: () => Promise.resolve({ notes: 'Pilot completed successfully' }),
         }),
@@ -584,8 +585,8 @@ describe('ProjectDetail', () => {
 
       await component.completePilot();
 
-      const suggestionCall = mockVettingService.setPilotCompletionSuggestion.calls.mostRecent();
-      expect(suggestionCall.args[0].completionNotes).toBe('Pilot completed successfully');
+      const lastCall = mockVettingService.setPilotCompletionSuggestion.mock.lastCall;
+      expect(lastCall[0].completionNotes).toBe('Pilot completed successfully');
     });
   });
 });

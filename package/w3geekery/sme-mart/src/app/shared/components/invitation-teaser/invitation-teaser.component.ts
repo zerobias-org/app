@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, input, Output, EventEmitter, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -28,7 +28,7 @@ import { TeaserReasonDialogComponent } from './teaser-reason-dialog.component';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class InvitationTeaserComponent {
-  @Input() project!: SmeMartProject;
+  readonly project = input.required<SmeMartProject>();
   @Output() requestInvitation = new EventEmitter<{ reason: string }>();
 
   private readonly dialog = inject(MatDialog);
@@ -37,7 +37,7 @@ export class InvitationTeaserComponent {
   openRequestDialog(): void {
     const ref = this.dialog.open(TeaserReasonDialogComponent, {
       width: '400px',
-      data: { projectTitle: this.project?.name || 'RFP' },
+      data: { projectTitle: this.project()?.name || 'RFP' },
     });
 
     ref.afterClosed().subscribe((result) => {
