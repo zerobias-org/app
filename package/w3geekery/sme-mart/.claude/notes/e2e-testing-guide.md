@@ -485,6 +485,64 @@ await page.waitForTimeout(1000); // buffer for Angular to process
 
 This avoids Layer 2 cascades silently wiping your test state. See gotcha § 1 (Layer 2) for the full explanation.
 
+### When you hit a custom (non-zb) Material autocomplete
+
+SME Mart has several home-grown multi-select components built directly on Material primitives (`<mat-autocomplete>` + `<mat-chip-grid>` or `<mat-chip-set>`) instead of `zb-simple-multi-autocomplete`. They exist because their UX requirements exceed what ngx-library provides — free-text tag creation, protected/locked chips, chip colors, immediate API persistence, collapsible/removable section wrappers, "show all as chips" alternate modes, etc.
+
+**Known custom components (as of 2026-04-09):**
+
+| Component | Where | Why it's not zb |
+|---|---|---|
+| `app-catalog-filter-section` | RFP + services filter drawers | Collapsible/removable section UX, count badge, chip-mode toggle, `Set<string>` selection shape |
+| `app-resource-tag-autocomplete` | Engagement/project tag editing | Free-text creation, protected `ENG-*`/`PROJ-*` chips, chip colors, immediate persist |
+| `app-sme-resource-tag-editor` | SME Mart resource (Note, WorkRequest) tagging | Free-text creation, immediate persist via Neon |
+
+**Direction (per Clark):** standardize on ngx-library where it fits. When the UX truly needs more than zb provides, keep the custom component AND write per-component test helpers — don't try to migrate just for testability.
+
+**Watch for upstream contribution opportunities.** If we build a reusable component pattern that other ZeroBias apps would benefit from (e.g., the collapsible/removable filter-drawer wrapper, the chips+autocomplete+inline-create pattern, the protected-chip predicate), consider proposing it as an addition to `@zerobias-org/ngx-library` rather than keeping it SME-Mart-only. The single-select / multi-select `selectValue()` story (PR #5 / PR #6) is the model: identify the pattern, draft it for ngx-library, ship it upstream, then consume it back. Not every custom component is a candidate — only ones generic enough to live in a shared library — but keep the option in mind when reviewing or refactoring.
+
+**Decision process when a spec needs to interact with one of these:**
+
+1. **Spike first.** None of the three components above implement `ControlValueAccessor`, so the Layer 1 race condition (form binding stays null) does NOT apply to them. They might just work with native Playwright clicks. Write a 5-line spike — `await locator.click(); await mat-option.click(); expect(chip).toBeVisible()` — before assuming you need a helper.
+
+2. **If the spike works:** great, no helper needed. Just use Playwright's native `getByRole` / `click` API for that component.
+
+3. **If the spike flakes:** write a named helper in `e2e/helpers/` specific to that component. Don't put it in `zb-autocomplete.ts` — that file is for ngx-library components only. Create a sibling file (e.g., `catalog-filter.ts`, `resource-tag-editor.ts`).
+
+   The helper should reach the component instance via `ng.getComponent()` and call the actual handler method (e.g., `onAutocompleteSelect`, `toggleChip`, `onSelected`) — NOT simulate `mat-option` clicks. Pattern:
+
+   ```ts
+   export async function toggleCatalogFilterChip(
+     page: Page,
+     filterType: string,
+     itemId: string,
+   ): Promise<void> {
+     await page.evaluate(
+       ({ ft, id }) => {
+         const sections = document.querySelectorAll('app-catalog-filter-section');
+         for (const el of Array.from(sections)) {
+           const ng = (window as any).ng;
+           const comp = ng.getComponent(el);
+           if (comp?.filterType === ft) {
+             const item = comp._items().find((i: any) => i.id === id);
+             if (item) comp.toggleChip(item);
+             return;
+           }
+         }
+         throw new Error(`[catalog-filter] section not found: ${ft}`);
+       },
+       { ft: filterType, id: itemId },
+     );
+   }
+   ```
+
+4. **Document the new helper** in the "Form Interactions" table below (add a new row), with a one-line summary and a pointer to the helper file.
+
+**Don't:**
+- Don't migrate a custom component to `zb-simple-multi-autocomplete` *just* to gain Playwright testability. The migration cost (lost UX features) almost always exceeds the helper-writing cost.
+- Don't put non-ngx-library helpers in `zb-autocomplete.ts`. Keep that file scoped to its component family.
+- Don't skip the spike — half the time the component works without any helper at all.
+
 ### Where to put form helpers
 
 When your page object needs to fill a form with `zb-simple-autocomplete`, import the shared helper at the top:
