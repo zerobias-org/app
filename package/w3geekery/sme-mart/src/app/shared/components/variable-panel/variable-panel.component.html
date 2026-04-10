@@ -1,13 +1,81 @@
 <div class="variable-panel">
+  <!-- Header -->
   <div class="panel-header">
     <h3>Custom Variables</h3>
+    <button mat-icon-button (click)="toggleAddForm()" title="Add variable">
+      <mat-icon>add</mat-icon>
+    </button>
   </div>
 
+  <!-- Content -->
   <div class="panel-content">
+    <!-- Add/Edit Form -->
+    @if (showAddForm()) {
+      <form [formGroup]="form" class="variable-form">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Variable Name</mat-label>
+          <input matInput formControlName="name" placeholder="e.g., projectBudget">
+          @if (form.get('name')?.hasError('required')) {
+            <mat-error>Name is required</mat-error>
+          }
+          @if (form.get('name')?.hasError('pattern')) {
+            <mat-error>Must start with letter/underscore, contain only alphanumeric/underscore</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Display Label</mat-label>
+          <input matInput formControlName="label" placeholder="e.g., Project Budget">
+          @if (form.get('label')?.hasError('required')) {
+            <mat-error>Label is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Description</mat-label>
+          <textarea matInput formControlName="description" rows="2" placeholder="What does this variable represent?"></textarea>
+        </mat-form-field>
+
+        <div class="form-actions">
+          <button mat-stroked-button (click)="cancelEdit()" type="button">Cancel</button>
+          <button mat-raised-button color="primary" (click)="submitVariable()" [disabled]="!form.valid">
+            {{ editingIndex() !== null ? 'Update' : 'Add' }} Variable
+          </button>
+        </div>
+      </form>
+    }
+
+    <!-- Variables List -->
     @if (customVariables().length > 0) {
-      <p class="info-text">{{ customVariables().length }} custom variable(s) defined</p>
-    } @else {
-      <p class="empty-state">No custom variables yet. Add one to get started.</p>
+      <div class="variables-list">
+        @for (variable of customVariables(); track variable.name; let index = $index) {
+          <div class="variable-item">
+            <div class="item-content">
+              <div class="item-header">
+                <code class="var-name">{{ variable.name }}</code>
+                <span class="var-label">{{ variable.label }}</span>
+              </div>
+              @if (variable.description) {
+                <p class="var-description">{{ variable.description }}</p>
+              }
+            </div>
+            <div class="item-actions">
+              <button mat-icon-button (click)="startEditVariable(index, variable)" title="Edit">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button color="warn" (click)="deleteVariable(index)" title="Delete">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    } @else if (!showAddForm()) {
+      <div class="empty-state">
+        <mat-icon>info</mat-icon>
+        <p>No custom variables yet.</p>
+        <p class="hint">Click the + button to add one.</p>
+      </div>
     }
   </div>
 </div>
