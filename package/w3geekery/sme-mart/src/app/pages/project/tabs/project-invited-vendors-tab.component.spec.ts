@@ -1,12 +1,38 @@
+import '@angular/compiler';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { RfpInvitation } from '../../../core/models';
 import { ProjectInvitedVendorsTabComponent } from './project-invited-vendors-tab.component';
+import { ProjectContextService } from '../../../core/services/project-context.service';
+import { RfpInvitationService } from '../../../core/services/rfp-invitation.service';
+import { of } from 'rxjs';
 
 describe('ProjectInvitedVendorsTabComponent', () => {
   let component: ProjectInvitedVendorsTabComponent;
+  let fixture: ComponentFixture<ProjectInvitedVendorsTabComponent>;
+  let mockProjectContext: any;
+  let mockInvitationService: any;
 
-  beforeEach(() => {
-    component = new ProjectInvitedVendorsTabComponent();
+  beforeEach(async () => {
+    mockProjectContext = {
+      projectId: vi.fn().mockReturnValue('proj-123'),
+    };
+
+    mockInvitationService = {
+      getInvitationsByProject: vi.fn().mockResolvedValue([]),
+      sendInvitation: vi.fn().mockResolvedValue({}),
+    };
+
+    await TestBed.configureTestingModule({
+      imports: [ProjectInvitedVendorsTabComponent],
+      providers: [
+        { provide: ProjectContextService, useValue: mockProjectContext },
+        { provide: RfpInvitationService, useValue: mockInvitationService },
+      ],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(ProjectInvitedVendorsTabComponent);
+    component = fixture.componentInstance;
   });
 
   it('should create', () => {

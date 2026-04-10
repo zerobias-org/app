@@ -1,5 +1,5 @@
 import {
-  Component, input, output, signal, ChangeDetectionStrategy,
+  Component, input, output, signal, inject, ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -30,7 +30,7 @@ import { CustomVariable } from '@/core/models';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class VariablePanelComponent {
-  private readonly fb = FormBuilder;
+  private readonly fb = inject(FormBuilder);
 
   readonly customVariables = input<CustomVariable[]>([]);
   readonly addVariable = output<CustomVariable>();
@@ -39,15 +39,11 @@ export class VariablePanelComponent {
 
   readonly showAddForm = signal(false);
   readonly editingIndex = signal<number | null>(null);
-  readonly form!: FormGroup;
-
-  constructor(fb: FormBuilder) {
-    this.form = fb.group({
-      name: ['', [Validators.required, Validators.pattern(/^[a-zA-Z_][a-zA-Z0-9_]*$/)]],
-      label: ['', [Validators.required]],
-      description: [''],
-    });
-  }
+  readonly form = this.fb.group({
+    name: ['', [Validators.required, Validators.pattern(/^[a-zA-Z_][a-zA-Z0-9_]*$/)]],
+    label: ['', [Validators.required]],
+    description: [''],
+  });
 
   toggleAddForm(): void {
     this.showAddForm.set(!this.showAddForm());
@@ -79,9 +75,9 @@ export class VariablePanelComponent {
 
     const formValue = this.form.getRawValue();
     const variable: CustomVariable = {
-      name: formValue.name,
-      label: formValue.label,
-      description: formValue.description,
+      name: formValue.name!,
+      label: formValue.label!,
+      description: formValue.description || undefined,
     };
 
     const index = this.editingIndex();

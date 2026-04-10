@@ -1,14 +1,50 @@
+import '@angular/compiler';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { signal } from '@angular/core';
+import { of } from 'rxjs';
 import type { RfpInvitation } from '../../core/models';
 import { MyInvitationsComponent } from './my-invitations.component';
+import { RfpInvitationService } from '../../core/services/rfp-invitation.service';
+import { ZerobiasClientApi, ZerobiasClientApp } from '@zerobias-com/zerobias-client';
 
 describe('MyInvitationsComponent', () => {
   let component: MyInvitationsComponent;
+  let fixture: ComponentFixture<MyInvitationsComponent>;
+  let mockInvitationService: any;
+  let mockZerobiasClientApi: any;
+  let mockZerobiasClientApp: any;
 
-  beforeEach(() => {
-    // Create a minimal component instance for testing signals and methods
-    component = new MyInvitationsComponent();
+  beforeEach(async () => {
+    mockInvitationService = {
+      invitations: vi.fn().mockReturnValue([]),
+    };
+
+    mockZerobiasClientApi = {
+      platformClient: vi.fn().mockReturnValue({}),
+      hubClient: vi.fn().mockReturnValue({}),
+    };
+
+    mockZerobiasClientApp = {
+      zerobiasClientApi: mockZerobiasClientApi,
+      getWhoAmI: vi.fn().mockReturnValue(of({
+        id: 'user-1',
+        email: 'test@example.com',
+        name: 'Test User',
+      })),
+    };
+
+    await TestBed.configureTestingModule({
+      imports: [MyInvitationsComponent],
+      providers: [
+        { provide: RfpInvitationService, useValue: mockInvitationService },
+        { provide: ZerobiasClientApi, useValue: mockZerobiasClientApi },
+        { provide: ZerobiasClientApp, useValue: mockZerobiasClientApp },
+      ],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(MyInvitationsComponent);
+    component = fixture.componentInstance;
   });
 
   it('should create', () => {

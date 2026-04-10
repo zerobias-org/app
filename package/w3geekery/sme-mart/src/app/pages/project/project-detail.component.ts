@@ -9,7 +9,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { TitleCasePipe } from '@angular/common';
-import { Subscription } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { SmeMartProjectService } from '../../core/services/sme-mart-project.service';
 
 import { VettingService, PilotCompletionSuggestion } from '../../core/services/vetting.service';
@@ -178,9 +178,12 @@ export class ProjectDetail implements OnInit, OnDestroy {
 
   async completePilot(): Promise<void> {
     const project = this.ctx.project();
+    console.log('[ProjectDetail.completePilot] project:', project?.id, 'type:', project?.projectType, 'status:', project?.status);
     if (!project || project.projectType !== 'pilot' || project.status === 'completed') {
+      console.log('[ProjectDetail.completePilot] returning early');
       return;
     }
+    console.log('[ProjectDetail.completePilot] proceeding');
 
     this.isCompletingPilot.set(true);
     try {
@@ -189,19 +192,35 @@ export class ProjectDetail implements OnInit, OnDestroy {
         data: { project },
       });
 
-      const result = await dialogRef.afterClosed().toPromise();
-      if (!result) return; // User cancelled
+      console.log('[ProjectDetail.completePilot] dialogRef:', dialogRef);
+      let result: any;
+      try {
+        result = await firstValueFrom(dialogRef.afterClosed());
+        console.log('[ProjectDetail.completePilot] dialog result:', result);
+      } catch (err) {
+        console.error('[ProjectDetail.completePilot] firstValueFrom failed:', err);
+        throw err;
+      }
+      if (!result) {
+        console.log('[ProjectDetail.completePilot] user cancelled');
+        return;
+      }
 
       // Update project status to 'completed'
+      console.log('[ProjectDetail.completePilot] calling updateProject');
       const updated = await this.projectService.updateProject(project.id, {
         status: 'completed',
       });
+      console.log('[ProjectDetail.completePilot] updateProject returned:', updated);
 
       this.ctx.setProject(updated);
+      console.log('[ProjectDetail.completePilot] calling snackBar.open');
       this.snackBar.open('Pilot marked complete', 'Dismiss', { duration: 3000 });
+      console.log('[ProjectDetail.completePilot] snackBar.open called');
 
       // Trigger vetting suggestion (async, non-blocking)
       this.createPilotCompletionSuggestion(updated, result.notes);
+      console.log('[ProjectDetail.completePilot] createPilotCompletionSuggestion called');
     } catch (err) {
       console.error('[ProjectDetail] completePilot failed:', err);
       this.snackBar.open('Failed to mark pilot complete', 'Dismiss', { duration: 5000 });

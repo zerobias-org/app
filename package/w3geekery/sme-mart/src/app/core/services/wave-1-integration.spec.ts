@@ -5,6 +5,7 @@
  * Verifies services work together via mocked Pipeline/GraphQL.
  */
 
+import '@angular/compiler';
 import { TestBed } from '@angular/core/testing';
 import { SmeMartProjectService } from './sme-mart-project.service';
 import { BidsService } from './bids.service';
@@ -62,6 +63,19 @@ describe('Wave 1 Integration: SmeMartProject → Bid Flow (Plan 075)', () => {
       'SmeMartProject',
       expect.objectContaining({ name: 'HIPAA Compliance Audit' }),
     );
+
+    // Mock getById to return the created project (submitBid needs to fetch it)
+    graphqlRead.getById.mockResolvedValue({
+      id: project.id,
+      name: project.name,
+      description: project.description,
+      status: project.status,
+      category: project.category,
+      budgetMin: project.budgetMin,
+      budgetMax: project.budgetMax,
+      dateCreated: project.createdAt,
+      dateLastModified: project.updatedAt,
+    });
 
     // 2. Submit bid on project
     const submittedBid = await bidsService.submitBid({

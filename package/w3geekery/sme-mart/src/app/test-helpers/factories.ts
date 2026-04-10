@@ -96,6 +96,7 @@ export function makeSmeMartProject(overrides: Partial<SmeMartProject> = {}): Sme
     description: 'Full compliance review',
     status: 'draft',
     startDate: TEST_CREATED_AT,
+    targetEndDate: TEST_UPDATED_AT,
     createdAt: TEST_CREATED_AT,
     updatedAt: TEST_UPDATED_AT,
     category: 'compliance',

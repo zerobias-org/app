@@ -1,5 +1,5 @@
 import {
-  Component, Input, Output, EventEmitter,
+  Component, input, output,
   ChangeDetectionStrategy, NgZone, ViewChild, ElementRef,
   AfterViewInit, OnDestroy, inject, signal,
   ViewEncapsulation, computed,
@@ -41,12 +41,12 @@ export class MarkdownEditor implements AfterViewInit, OnDestroy {
 
   @ViewChild('editorRef') editorRef!: ElementRef;
 
-  @Input() content: string = '';
-  @Input() height: string = '200px';
-  @Input() placeholder: string = '';
-  @Input() variableNames: string[] = [];
+  readonly content = input('');
+  readonly height = input('200px');
+  readonly placeholder = input('');
+  readonly variableNames = input<string[]>([]);
 
-  @Output() contentChange = new EventEmitter<string>();
+  readonly contentChange = output<string>();
 
   readonly loading = signal(true);
   readonly previewMode = signal(false);
@@ -64,7 +64,7 @@ export class MarkdownEditor implements AfterViewInit, OnDestroy {
     [CrepeFeature.ImageBlock]: false,
     [CrepeFeature.BlockEdit]: false,
     [CrepeFeature.Toolbar]: false,
-    [CrepeFeature.Placeholder]: !!this.placeholder,
+    [CrepeFeature.Placeholder]: !!this.placeholder(),
     [CrepeFeature.Table]: true,
     [CrepeFeature.Latex]: false,
   };
@@ -87,9 +87,14 @@ export class MarkdownEditor implements AfterViewInit, OnDestroy {
   };
 
   async ngAfterViewInit(): Promise<void> {
+    // Guard against missing editorRef (e.g., in tests with stubbed component)
+    if (!this.editorRef) {
+      return;
+    }
+
     this.ngZone.runOutsideAngular(async () => {
       // Workaround: milkdown crepe won't render if value is empty string
-      const defaultValue = this.content || '\u200B';
+      const defaultValue = this.content() || '\u200B';
 
       this.crepe = new Crepe({
         root: this.editorRef.nativeElement,
@@ -139,18 +144,18 @@ export class MarkdownEditor implements AfterViewInit, OnDestroy {
   }
 
   openVariableMenu(): void {
-    this.filteredVariables.set(this.variableNames);
+    this.filteredVariables.set(this.variableNames());
     this.showVariableMenu.set(true);
   }
 
   filterVariables(filterText: string): void {
     if (!filterText.trim()) {
-      this.filteredVariables.set(this.variableNames);
+      this.filteredVariables.set(this.variableNames());
       return;
     }
     const lower = filterText.toLowerCase();
     this.filteredVariables.set(
-      this.variableNames.filter(v => v.toLowerCase().includes(lower))
+      this.variableNames().filter(v => v.toLowerCase().includes(lower))
     );
   }
 
@@ -257,7 +262,7 @@ export class MarkdownEditor implements AfterViewInit, OnDestroy {
   // ---- Public methods ----
 
   getMarkdown(): string {
-    if (!this.crepe) return this.content || '';
+    if (!this.crepe) return this.content() || '';
     try {
       let markdown = '';
       this.crepe.editor.action((ctx) => {
@@ -267,7 +272,7 @@ export class MarkdownEditor implements AfterViewInit, OnDestroy {
       });
       return markdown === '\u200B' ? '' : markdown.replace(/^\u200B/, '');
     } catch {
-      return this.content || '';
+      return this.content() || '';
     }
   }
 

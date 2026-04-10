@@ -23,11 +23,11 @@ describe('MarkdownEditor', () => {
   });
 
   it('should initialize with empty content', () => {
-    expect(component.content).toBe('');
+    expect(component.content()).toBe('');
   });
 
   it('should have empty variableNames by default', () => {
-    expect(component.variableNames).toEqual([]);
+    expect(component.variableNames()).toEqual([]);
   });
 
   it('should initialize previewMode as false', () => {
@@ -35,19 +35,19 @@ describe('MarkdownEditor', () => {
   });
 
   it('should filter variables by text', () => {
-    component.variableNames = ['buyerOrgName', 'vendorOrgName', 'customField'];
+    fixture.componentRef.setInput('variableNames', ['buyerOrgName', 'vendorOrgName', 'customField']);
     component.filterVariables('buyer');
     expect(component.filteredVariables()).toEqual(['buyerOrgName']);
   });
 
   it('should show all variables when filter is empty', () => {
-    component.variableNames = ['buyerOrgName', 'vendorOrgName'];
+    fixture.componentRef.setInput('variableNames', ['buyerOrgName', 'vendorOrgName']);
     component.filterVariables('');
     expect(component.filteredVariables()).toEqual(['buyerOrgName', 'vendorOrgName']);
   });
 
   it('should open variable menu', () => {
-    component.variableNames = ['buyerOrgName'];
+    fixture.componentRef.setInput('variableNames', ['buyerOrgName']);
     component.openVariableMenu();
     expect(component.showVariableMenu()).toBe(true);
     expect(component.filteredVariables()).toEqual(['buyerOrgName']);

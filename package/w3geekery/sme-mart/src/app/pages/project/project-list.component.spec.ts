@@ -1,3 +1,4 @@
+import '@angular/compiler';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { vi } from 'vitest';
@@ -174,6 +175,7 @@ describe('ProjectList', () => {
     it('should display projects in grid view when viewMode is cards', async () => {
       component.viewMode.set('cards');
       await component.ngOnInit();
+      await fixture.whenStable();
       fixture.detectChanges();
 
       const grid = fixture.debugElement.nativeElement.querySelector('.project-cards-grid');

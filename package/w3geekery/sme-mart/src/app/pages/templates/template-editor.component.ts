@@ -20,10 +20,10 @@ import {
 import { MatIcon } from '@angular/material/icon';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { Subscription } from 'rxjs';
-import { DocumentTemplateService, VariableSubstitutionService } from '@/core/services';
-import { DocumentTemplate, CustomVariable } from '@/core/models';
-import { MarkdownEditor } from '@/shared/components/markdown-editor/markdown-editor.component';
-import { VariablePanelComponent } from '@/shared/components/variable-panel/variable-panel.component';
+import { DocumentTemplateService, VariableSubstitutionService } from '../../core/services';
+import { DocumentTemplate, CustomVariable } from '../../core/models';
+import { MarkdownEditor } from '../../shared/components/markdown-editor/markdown-editor.component';
+import { VariablePanelComponent } from '../../shared/components/variable-panel/variable-panel.component';
 
 @Component({
   selector: 'app-template-editor',

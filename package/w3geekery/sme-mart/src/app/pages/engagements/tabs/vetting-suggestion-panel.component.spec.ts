@@ -1,3 +1,4 @@
+import '@angular/compiler';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
 import { VettingSuggestionPanelComponent } from './vetting-suggestion-panel.component';
@@ -205,9 +206,10 @@ describe('VettingSuggestionPanelComponent', () => {
 
       mockVettingService.pilotCompletionSuggestion.set(suggestion);
       fixture.detectChanges();
+      await fixture.whenStable();
 
       const compiled = fixture.nativeElement as HTMLElement;
-      const dismissBtn = compiled.querySelector('button[color="primary"]') as HTMLButtonElement;
+      const dismissBtn = compiled.querySelector('.dismiss-btn') as HTMLButtonElement;
 
       if (dismissBtn) {
         dismissBtn.click();

@@ -82,7 +82,7 @@
     <div class="toolbar-divider"></div>
 
     <div class="toolbar-group">
-      @if (variableNames.length > 0) {
+      @if (variableNames().length > 0) {
         <button mat-icon-button matTooltip="Insert Variable"
           [matMenuTriggerFor]="variableMenu"
           [disabled]="loading()">
