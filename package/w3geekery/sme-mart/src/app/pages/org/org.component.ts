@@ -66,6 +66,7 @@ export class OrgPage implements OnInit, OnDestroy {
 
   readonly tabs: OrgTab[] = [
     { label: 'Documents', icon: 'folder', path: 'documents' },
+    { label: 'Templates', icon: 'description', path: 'templates' },
     { label: 'Engagements', icon: 'work', path: 'engagements' },
     { label: 'Projects', icon: 'assignment', path: 'projects' },
     { label: 'Members', icon: 'people', path: 'members' },

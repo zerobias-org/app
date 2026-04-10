@@ -31,6 +31,11 @@ export const routes: Routes = [
       { path: 'rfps/:id/bid', component: BidWizard },
       { path: 'rfps/:id/bid/:bidId', component: BidWizard },
       { path: 'engagements/:id', component: EngagementDetail, children: ENGAGEMENT_TAB_ROUTES },
+      {
+        path: 'templates/:id',
+        loadComponent: () =>
+          import('./pages/templates/template-editor.component').then(m => m.TemplateEditorComponent),
+      },
       // Legacy redirects
       { path: 'engagements', redirectTo: 'rfps', pathMatch: 'full' },
       {
