@@ -1,0 +1,133 @@
+<div class="field-editor">
+  <form [formGroup]="formGroup" class="editor-form">
+    <!-- Basic fields -->
+    <mat-form-field appearance="outline">
+      <mat-label>Field Label</mat-label>
+      <input matInput formControlName="label" placeholder="e.g., Company Name">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Field Type</mat-label>
+      <mat-select formControlName="type">
+        @for (type of FORM_FIELD_TYPES; track type) {
+          <mat-option [value]="type">{{ type }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Description (Helper Text)</mat-label>
+      <input matInput formControlName="description" placeholder="Optional helper text for vendors">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Placeholder</mat-label>
+      <input matInput formControlName="placeholder" placeholder="Optional placeholder text">
+    </mat-form-field>
+
+    <mat-checkbox formControlName="required">
+      Required field
+    </mat-checkbox>
+
+    <!-- Type-specific validation -->
+    @switch (selectedType()) {
+      @case ('text') {
+        <div class="type-specific">
+          <h4>Text Validation</h4>
+          <mat-form-field appearance="outline">
+            <mat-label>Min Length</mat-label>
+            <input matInput type="number" formControlName="minLength">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Max Length</mat-label>
+            <input matInput type="number" formControlName="maxLength">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Pattern</mat-label>
+            <mat-select formControlName="pattern">
+              <mat-option value="">None</mat-option>
+              <mat-option value="email">Email</mat-option>
+              <mat-option value="phone">Phone</mat-option>
+              <mat-option value="url">URL</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      }
+
+      @case ('textarea') {
+        <div class="type-specific">
+          <h4>Textarea Validation</h4>
+          <mat-form-field appearance="outline">
+            <mat-label>Min Length</mat-label>
+            <input matInput type="number" formControlName="minLength">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Max Length</mat-label>
+            <input matInput type="number" formControlName="maxLength">
+          </mat-form-field>
+        </div>
+      }
+
+      @case ('number') {
+        <div class="type-specific">
+          <h4>Number Validation</h4>
+          <mat-form-field appearance="outline">
+            <mat-label>Min Value</mat-label>
+            <input matInput type="number" formControlName="min">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Max Value</mat-label>
+            <input matInput type="number" formControlName="max">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Step</mat-label>
+            <input matInput type="number" formControlName="step">
+          </mat-form-field>
+        </div>
+      }
+
+      @case ('dropdown') {
+        <div class="type-specific">
+          <h4>Dropdown Options</h4>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Options (one per line, format: value|label)</mat-label>
+            <textarea matInput formControlName="dropdownOptionsText" rows="4" placeholder="option1|Option 1&#10;option2|Option 2"></textarea>
+          </mat-form-field>
+        </div>
+      }
+
+      @case ('file') {
+        <div class="type-specific">
+          <h4>File Upload Config</h4>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Allowed MIME Types (comma-separated)</mat-label>
+            <input matInput formControlName="allowedMimeTypes" placeholder="e.g., application/pdf,image/*">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Max File Size (bytes)</mat-label>
+            <input matInput type="number" formControlName="maxFileSizeBytes" placeholder="e.g., 10485760 (10 MB)">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Max Files</mat-label>
+            <input matInput type="number" formControlName="maxFiles" placeholder="e.g., 1">
+          </mat-form-field>
+        </div>
+      }
+    }
+
+    <!-- Delete button -->
+    <div class="actions">
+      <button mat-stroked-button color="warn" type="button" (click)="deleteField()">
+        <mat-icon>delete</mat-icon>
+        Delete Field
+      </button>
+    </div>
+  </form>
+</div>
