@@ -35,9 +35,9 @@
 ### v1.2 RFP Packages & Pilot Projects (Phases 13-17)
 
 - [x] **Phase 13: Pilot Projects** (2/2 plans) — Enable buyer POC testing with projectType discriminator and promotion workflow (completed 2026-04-02)
-- [ ] **Phase 14: Invitation Controls** (3/3 plans) — Close RFPs to invited vendors, add invitation management UI and access control gates
+- [x] **Phase 14: Invitation Controls** (3/3 plans) — Close RFPs to invited vendors, add invitation management UI and access control gates (completed 2026-04-08)
 - [x] **Phase 15: Document Templates** (3/3 plans) — Org-level reusable templates with variable substitution for reusable docs (completed 2026-04-10)
-- [ ] **Phase 16: Form Builder** (3/3 plans) — Buyer-defined structured forms with dynamic vendor submission
+- 🚀 **Phase 16: Form Builder** (3/3 plans) — Buyer-defined structured forms with dynamic vendor submission (in progress: Plan 01 complete)
 - [ ] **Phase 17: Demo Seed Scripts** — CLI scripts creating full RFP package flow for Friday demos with Brian
 
 ---
@@ -148,12 +148,12 @@
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 13. Pilot Projects | 2/2 | Complete    | 2026-04-02 |
-| 14. Invitation Controls | 0/3 | Planning   | 2026-04-03 |
+| 14. Invitation Controls | 3/3 | Complete    | 2026-04-08 |
 | 15. Document Templates | 3/3 | Complete    | 2026-04-10 |
-| 16. Form Builder | 1/3 | Executing   | Plan 00: 2026-04-13 |
+| 16. Form Builder | 1/3 | Executing   | Plan 00: 2026-04-13, Plan 01: 2026-04-13 |
 | 17. Demo Seed Scripts | 0/1 | Not started | — |
 
 ---
 
 **Created:** 2026-03-17
-**Last Updated:** 2026-04-13 (Phase 16 plans created: 3-plan structure with Wave 0/1/2, research complete, all 6 D3 requirements mapped)
+**Last Updated:** 2026-04-13 (Phase 16 Plan 01 complete: FormSubmissionService with CRUD + form lock gate, 19 tests passing, director corrections applied)

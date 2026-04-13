@@ -23,9 +23,9 @@ progress:
 ## Current Position
 
 Phase: 16 (form-builder) — EXECUTING
-Plan: 1 of 5 (Plan 00 COMPLETE)
-Status: Plan 00 complete, Plan 01 ready (awaiting 15-min GQL reload window)
-Last activity: 2026-04-13 -- Plan 00 schema foundation complete, PR #42 merged to zerobias-org/schema:dev
+Plan: 2 of 5 (Plans 00 & 01 COMPLETE)
+Status: Plan 01 complete (FormSubmissionService), Plan 02 ready
+Last activity: 2026-04-13 -- Plan 01 complete: FormSubmissionService with 8 methods, 19 tests passing, form lock gate implemented
 
 ---
 
@@ -98,8 +98,12 @@ From v1.1:
 From v1.2 Execution:
 
 - Phase 13 (Pilot Projects) complete — projectType discriminator, completion dialog, promotion workflow
-- Phase 14 (Invitation Controls) code complete — RfpInvitationService (11 methods), BidsService access gate, My Invitations page, Invited Vendors tab, teaser component, inline banners
+- Phase 14 (Invitation Controls) complete — RfpInvitationService (11 methods), BidsService access gate, My Invitations page, Invited Vendors tab, teaser component, inline banners
+- Phase 15 (Document Templates) complete — DocumentTemplateService, DocumentInstanceService, VariableSubstitutionService, comprehensive UI
 - RfpInvitation schema class live on UAT (class ID `941cf01b-d260-5e45-8c6a-50f07b23f196`)
+- Phase 16 Plan 00 (Form Builder Schema) complete — FormSubmission class merged to zerobias-org/schema:dev, model interfaces created
+- Phase 16 Plan 01 (Form Submission Service) complete — FormSubmissionService with 8 methods, form lock gate, 19 tests passing
+- FormSubmission class ID: `af7eb14f-d2f0-59e3-8371-9e436b7a1bc2` (deterministic UUID v5)
 - ngx-library bumped to 0.2.29
 - Jasmine→vitest test migration complete (zero jasmine refs remaining)
 
@@ -132,5 +136,5 @@ claude --resume poc/sme-mart
 
 ---
 
-**Last Updated:** 2026-04-08
-**Milestone v1.2:** Phase 13 complete. Phase 14 code complete, UAT pending. Phase 15 next.
+**Last Updated:** 2026-04-13
+**Milestone v1.2:** Phases 13-15 complete. Phase 16 Plan 01 complete (FormSubmissionService). Phase 16 Plan 02 next.
