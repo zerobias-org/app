@@ -32,3 +32,4 @@ export * from './rfp-invitation.model';
 export * from './marketplace-profile-item.model';
 export * from './document-template.model';
 export * from './document-instance.model';
+export * from './form-builder.model';
