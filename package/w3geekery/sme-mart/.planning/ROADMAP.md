@@ -37,7 +37,7 @@
 - [x] **Phase 13: Pilot Projects** (2/2 plans) — Enable buyer POC testing with projectType discriminator and promotion workflow (completed 2026-04-02)
 - [ ] **Phase 14: Invitation Controls** (3/3 plans) — Close RFPs to invited vendors, add invitation management UI and access control gates
 - [x] **Phase 15: Document Templates** (3/3 plans) — Org-level reusable templates with variable substitution for reusable docs (completed 2026-04-10)
-- [ ] **Phase 16: Form Builder** — Buyer-defined structured forms with dynamic vendor submission
+- [ ] **Phase 16: Form Builder** (3/3 plans) — Buyer-defined structured forms with dynamic vendor submission
 - [ ] **Phase 17: Demo Seed Scripts** — CLI scripts creating full RFP package flow for Friday demos with Brian
 
 ---
@@ -108,20 +108,26 @@
 **Depends on**: Phase 15 (template entity pattern + schema integration proven)
 **Requirements**: D3-01, D3-02, D3-03, D3-04, D3-05, D3-06
 **Success Criteria** (what must be TRUE):
-  1. Form builder is a reusable shared component in `src/app/shared/` or `src/app/components/form-builder/` (not RFP-specific)
+  1. Form builder is a reusable shared component in `src/app/shared/components/form-builder/` (not RFP-specific)
   2. Buyer can define form fields via UI (6 types: text, textarea, dropdown, number, file upload, checkbox) stored as JSON schema config
   3. Dynamic form renderer displays buyer-defined fields using Angular Reactive Forms + Material validation
-  4. Buyer can preview the form before publishing the RFP
-  5. Vendor can fill and submit the buyer-defined form on an RFP
-  6. Buyer can review vendor's submitted form responses with audit trail (markReviewed status)
-**Plans**: TBD
-**Effort**: 16–20 hours (service + schema + component ~10-12 hrs, UI ~6-8 hrs)
-**Tech Stack**: Angular 21 + Reactive Forms (built-in) + Material + Pipeline + GraphQL
-**Research Flag**: **NEEDS RESEARCH** — JSON Schema subset definition (supported validators/keywords), DynamicFormComponent rendering strategy (simple grid vs drag-drop UI), and field type definitions (min/max for number, pattern for text, enum for select, required/optional flags). Design doc required before Phase 16 execution.
+  4. Buyer can preview the form before publishing the RFP (read-only DynamicFormRenderer in RFP wizard)
+  5. Vendor can fill and submit the buyer-defined form on project detail page
+  6. Buyer can review vendor's submitted form responses on bid detail with "Mark Reviewed" button
+**Plans**: 3 plans
+  - [ ] **Phase 16 Plan 00** (Wave 0) — Schema prerequisite: FormSubmission class + formConfig field on SmeMartProject in zerobias-org/schema, dataloader validation, PR to zerobias-org/schema:dev, model interfaces in src/app/core/models — Requirements: (schema foundation)
+  - [ ] **Phase 16 Plan 01** (Wave 1) — Service layer + components: FormSubmissionService CRUD with form lock gate, FormBuilderComponent (expansion panels + drag-drop), DynamicFormRenderer (preview/fill/review modes), FormFieldEditorComponent, comprehensive tests (>80% coverage) — Requirements: D3-01, D3-02, D3-03, D3-04
+  - [ ] **Phase 16 Plan 02** (Wave 2) — UI integration: RFP wizard form step (auto-persist config), project detail "Submission Form" tab for vendors, bid form gate (form required before submit bid), bid detail form review section with "Mark Reviewed" button — Requirements: D3-04, D3-05, D3-06
+**Effort**: 18–22 hours (schema ~2-3 hrs, service + components ~10-12 hrs, UI integration ~6-8 hrs)
+**Tech Stack**: Angular 21 + Reactive Forms (built-in) + Material + CDK DragDrop + Pipeline + GraphQL + ZB FileService SDK
+**Research Flag**: RESEARCH COMPLETE — JSON Schema subset (6 field types with type-specific validators), DynamicFormRenderer with three modes (preview/fill/review), field config storage as JSON on SmeMartProject, form lock on first submission, all documented in 16-RESEARCH.md.
 **Critical Pitfall**: Form validation missing server-side (Pitfall #3) — FormSubmission.submissionData must be validated server-side against FormBuilderConfig.schema. Client-side validation insufficient; server must reject invalid JSON, wrong types, missing required fields.
-**Critical Pitfall**: RFP wizard state loss (Pitfall #4) — Multi-step RFP creation must persist form config on save (draft), not just on publish. Buyer edits form, navigates away, returns → form state must be preserved. Warn on unsaved changes.
+**Critical Pitfall**: RFP wizard state loss (Pitfall #4) — Multi-step RFP creation must persist form config on save (draft), not just on publish. Buyer edits form, navigates away, returns → form state must be preserved.
 **Critical Pitfall**: Entity class IDs not deterministic (Pitfall #5) — New entity class IDs must be verified via `npm run verify` after schema PR merge. Copy exact ID to PipelineWriteService constant. Test roundtrip (Pipeline.receive → GraphQL.getById confirms match).
 **UI hint**: yes
+**Schema Prerequisite**: Wave 0 (Plan 16-00) must complete before Waves 1-2. GQL schema reloads ~15 min after PR merge.
+**Form Lock Pattern**: Editable while zero submissions exist. Locked after first submission (prevents config changes that would invalidate existing responses).
+**File Uploads**: Use existing ZB FileService SDK for file field uploads (no custom implementation).
 
 ### Phase 17: Demo Seed Scripts
 **Goal**: CLI scripts that create a realistic RFP package flow via ZB Platform APIs for Friday demos with Brian, plus cleanup
@@ -143,11 +149,11 @@
 |-------|----------------|--------|-----------|
 | 13. Pilot Projects | 2/2 | Complete    | 2026-04-02 |
 | 14. Invitation Controls | 0/3 | Planning   | 2026-04-03 |
-| 15. Document Templates | 0/3 | Complete    | 2026-04-10 |
-| 16. Form Builder | 0/2 | Not started | — |
+| 15. Document Templates | 3/3 | Complete    | 2026-04-10 |
+| 16. Form Builder | 3/3 | Planning   | 2026-04-13 |
 | 17. Demo Seed Scripts | 0/1 | Not started | — |
 
 ---
 
 **Created:** 2026-03-17
-**Last Updated:** 2026-04-10 (Phase 15 plans created: 3-plan structure with Wave 0/1/2, research complete, all 5 D2 requirements mapped)
+**Last Updated:** 2026-04-13 (Phase 16 plans created: 3-plan structure with Wave 0/1/2, research complete, all 6 D3 requirements mapped)
