@@ -6,6 +6,7 @@
  */
 
 import type { BudgetType } from './enums';
+import type { FormBuilderConfig } from './form-builder.model';
 
 export interface SmeMartProject {
   id: string;
@@ -31,6 +32,9 @@ export interface SmeMartProject {
   evaluationCriteria?: Record<string, unknown> | null; // JSON scoring matrix
   wizardStep?: string | null; // RFP wizard progress
   wizardData?: Record<string, unknown> | null; // RFP wizard draft state
+
+  // Form submission (Plan 16 — Form Builder)
+  formConfig?: FormBuilderConfig | null; // Buyer-defined form for vendor submissions
 
   // Invitation controls (Plan 14 Wave 1)
   isInvitationOnly?: boolean | null; // If true, only invited vendors can bid
