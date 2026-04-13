@@ -1,0 +1,106 @@
+.form-builder {
+  mat-card {
+    max-width: 100%;
+  }
+
+  .warning-banner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background-color: #fff3cd;
+    border-radius: 4px;
+    margin-bottom: 24px;
+    color: #856404;
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+
+    p {
+      margin: 0;
+      font-size: 14px;
+    }
+  }
+
+  .field-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 50px;
+    padding: 12px;
+    border-radius: 4px;
+    background-color: #fafafa;
+
+    .cdk-drop-list-dragging .field-item:last-child {
+      border-bottom: none;
+    }
+
+    .field-item {
+      margin: 0;
+
+      &.cdk-drag-preview {
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        border-radius: 4px;
+      }
+
+      mat-expansion-panel {
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+      }
+
+      .panel-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+
+        .drag-handle {
+          cursor: grab;
+          color: #999;
+          display: flex;
+          align-items: center;
+
+          &:active {
+            cursor: grabbing;
+          }
+        }
+
+        .field-info {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          flex: 1;
+
+          strong {
+            font-weight: 500;
+          }
+
+          .field-type {
+            background-color: #e0e0e0;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            color: #666;
+          }
+        }
+
+        .required-badge {
+          background-color: #ffebee;
+          color: #c62828;
+          padding: 2px 8px;
+          border-radius: 3px;
+          font-size: 12px;
+          font-weight: 500;
+        }
+      }
+    }
+  }
+
+  .add-field-button {
+    margin-top: 16px;
+  }
+}
+
+// TODO(v1.3): Replace hardcoded colors with Material 3 CSS custom properties (var(--mat-sys-surface-variant), var(--mat-sys-error), var(--mat-sys-outline-variant)) or ngx-library theme tokens for dark mode support.
