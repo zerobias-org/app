@@ -1,8 +1,9 @@
-import { Component, input, output, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
+import { Component, input, inject, signal, computed, ChangeDetectionStrategy, OnInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { ZbResourceStatusComponent } from '@zerobias-org/ngx-library';
 import { FormSubmissionService } from '../../core/services/form-submission.service';
 import { DynamicFormRendererComponent } from './form-builder/dynamic-form-renderer.component';
 import type { SmeMartProject, FormSubmission, FormBuilderConfig } from '../../core/models';
@@ -10,21 +11,42 @@ import type { SmeMartProject, FormSubmission, FormBuilderConfig } from '../../co
 /**
  * Form submission review section for bid review page.
  * Shows vendor's submitted form responses.
- * Allows buyer to mark responses as reviewed (with re-review detection for revised status).
+ * Allows buyer to mark responses as reviewed with re-review detection.
+ *
+ * Inputs:
+ * - project: SmeMartProject (required)
+ * - submission: FormSubmission | null (required)
+ * - currentUserId: Current user ID for review action
+ *
+ * Features:
+ * - Form config parsing from project
+ * - Dynamic form rendering in review mode
+ * - Status display: reviewed (ZbResourceStatusComponent), revised (alert badge), or Mark button
+ * - Mark Reviewed action: Updates submission.status='reviewed' with buyer identity
+ * - Re-review detection: Highlights revised status when vendor re-edited after review
  */
 @Component({
   selector: 'app-bid-form-review',
   standalone: true,
-  imports: [MatButtonModule, MatIconModule, MatDividerModule, DynamicFormRendererComponent],
+  imports: [
+    MatButtonModule,
+    MatIconModule,
+    MatDividerModule,
+    DynamicFormRendererComponent,
+    ZbResourceStatusComponent,
+  ],
   template: `
-    @if (formConfig() && formSubmission()) {
+    @if (formConfig() && submissionData()) {
       <section class="form-review-section">
         <div class="section-header">
           <h3>Submission Form Responses</h3>
           @if (isReviewed()) {
-            <span class="reviewed-badge">Reviewed</span>
+            <zb-resource-status [label]="'REVIEWED'"></zb-resource-status>
           } @else if (isRevised()) {
-            <span class="revised-badge">Revised - Needs Re-review</span>
+            <div class="revised-alert">
+              <mat-icon>warning</mat-icon>
+              <span>Vendor revised form - needs re-review</span>
+            </div>
           } @else {
             <button
               mat-raised-button
@@ -40,7 +62,7 @@ import type { SmeMartProject, FormSubmission, FormBuilderConfig } from '../../co
         <app-dynamic-form-renderer
           [config]="formConfig()!"
           mode="review"
-          [submission]="formSubmission()!"
+          [submission]="submissionData()!"
         ></app-dynamic-form-renderer>
       </section>
     }
@@ -63,27 +85,28 @@ import type { SmeMartProject, FormSubmission, FormBuilderConfig } from '../../co
       font-weight: 500;
     }
 
-    .reviewed-badge {
-      padding: 4px 12px;
-      background: #c8e6c9;
-      color: #2e7d32;
-      border-radius: 12px;
-      font-size: 12px;
+    .revised-alert {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: #fffbea;
+      border: 1px solid #ffe0b2;
+      border-radius: 4px;
+      color: #f57f17;
+      font-size: 13px;
       font-weight: 500;
     }
 
-    .revised-badge {
-      padding: 4px 12px;
-      background: #fff9c4;
-      color: #f57f17;
-      border-radius: 12px;
-      font-size: 12px;
-      font-weight: 500;
+    .revised-alert mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
     }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class BidFormReviewComponent {
+export class BidFormReviewComponent implements OnInit {
   private readonly formSubmission = inject(FormSubmissionService);
   private readonly snackBar = inject(MatSnackBar);
 
@@ -103,7 +126,7 @@ export class BidFormReviewComponent {
     }
   });
 
-  readonly formSubmission = computed(() => this.submission());
+  readonly submissionData = computed(() => this.submission());
 
   readonly isReviewed = computed(() => {
     const sub = this.submission();
@@ -117,6 +140,11 @@ export class BidFormReviewComponent {
 
   readonly isMarking = signal(false);
 
+  ngOnInit(): void {
+    // Component initializes with submission input
+    // No additional initialization needed
+  }
+
   async onMarkReviewed(): Promise<void> {
     const sub = this.submission();
     if (!sub || !this.currentUserId()) return;
@@ -126,7 +154,9 @@ export class BidFormReviewComponent {
       await this.formSubmission.markReviewed(sub.id, this.currentUserId() as any);
       this.snackBar.open('Form marked as reviewed', 'OK', { duration: 3000 });
     } catch (err: any) {
-      this.snackBar.open(`Failed to mark reviewed: ${err.message}`, 'Dismiss', { duration: 5000 });
+      this.snackBar.open(`Failed to mark reviewed: ${err.message}`, 'Dismiss', {
+        duration: 5000,
+      });
     } finally {
       this.isMarking.set(false);
     }
