@@ -41,6 +41,9 @@ const SME_MART_CLASS_IDS = {
   // Phase 15 — Document Templates (TODO: populate after schema PR merge + dataloader verify)
   DocumentTemplate: '00000000-0000-0000-0000-000000000001', // Placeholder
   DocumentInstance: '00000000-0000-0000-0000-000000000002', // Placeholder
+
+  // Phase 16 — Form Builder
+  FormSubmission: 'af7eb14f-d2f0-59e3-8371-9e436b7a1bc2',
 } as const;
 
 export type SmeMartClassName = keyof typeof SME_MART_CLASS_IDS;
