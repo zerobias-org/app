@@ -3,7 +3,8 @@ id: "007"
 severity: medium
 phase: 16
 found: 2026-04-14
-status: open
+status: fixed
+fixed_in: da8867e
 ---
 
 # Phase 16 — Post-close UX polish sitting uncommitted in working tree

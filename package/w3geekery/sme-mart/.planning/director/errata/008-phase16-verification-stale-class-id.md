@@ -3,7 +3,8 @@ id: "008"
 severity: low
 phase: 16
 found: 2026-04-14
-status: open
+status: fixed
+fixed_in: da8867e
 ---
 
 # Phase 16 — VERIFICATION.md references old FormSubmission class ID
