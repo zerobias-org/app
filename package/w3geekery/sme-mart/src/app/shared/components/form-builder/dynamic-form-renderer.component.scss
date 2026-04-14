@@ -2,11 +2,15 @@
   padding: 16px;
 
   &.mode-preview {
-    background-color: #f0f4f8;
+    background-color: var(--mat-sys-surface-container, transparent);
+    border: 1px solid var(--mat-sys-outline-variant, transparent);
+    border-radius: 4px;
   }
 
   &.mode-review {
-    background-color: #e8f5e9;
+    background-color: var(--mat-sys-surface-container, transparent);
+    border-left: 3px solid var(--mat-sys-tertiary, #2e7d32);
+    border-radius: 4px;
   }
 
   .error-banner {
@@ -14,10 +18,10 @@
     align-items: center;
     gap: 12px;
     padding: 12px 16px;
-    background-color: #ffebee;
+    background-color: var(--mat-sys-error-container, #ffebee);
     border-radius: 4px;
     margin-bottom: 16px;
-    color: #c62828;
+    color: var(--mat-sys-on-error-container, #c62828);
 
     mat-icon {
       font-size: 20px;
@@ -38,14 +42,14 @@
 
     .form-section {
       border: none;
-      border-top: 2px solid #e0e0e0;
+      border-top: 2px solid var(--mat-sys-outline-variant, #e0e0e0);
       padding-top: 16px;
       margin: 0;
 
       legend {
         font-size: 16px;
         font-weight: 500;
-        color: #333;
+        color: var(--mat-sys-on-surface, #333);
         margin-bottom: 12px;
       }
 
@@ -59,7 +63,7 @@
       gap: 12px;
       margin-top: 16px;
       padding-top: 16px;
-      border-top: 1px solid #e0e0e0;
+      border-top: 1px solid var(--mat-sys-outline-variant, #e0e0e0);
 
       button {
         min-width: 120px;

@@ -18,7 +18,7 @@
     .checkbox-description {
       margin: 8px 0 0 32px;
       font-size: 12px;
-      color: #666;
+      color: var(--mat-sys-on-surface-variant, #666);
     }
   }
 
@@ -38,15 +38,15 @@
     .file-name {
       margin: 8px 0;
       padding: 8px;
-      background-color: #e8f5e9;
+      background-color: var(--mat-sys-tertiary-container, #e8f5e9);
       border-radius: 4px;
-      color: #2e7d32;
+      color: var(--mat-sys-on-tertiary-container, #2e7d32);
       font-size: 14px;
     }
 
     .no-file {
       margin: 8px 0;
-      color: #999;
+      color: var(--mat-sys-on-surface-variant, #999);
       font-size: 14px;
       font-style: italic;
     }
@@ -54,7 +54,7 @@
     .file-description {
       margin: 8px 0 0 0;
       font-size: 12px;
-      color: #666;
+      color: var(--mat-sys-on-surface-variant, #666);
     }
   }
 }

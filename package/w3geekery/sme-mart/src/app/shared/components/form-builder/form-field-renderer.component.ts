@@ -39,7 +39,7 @@ export class FormFieldRendererComponent implements OnInit {
   control: any;
 
   ngOnInit(): void {
-    this.isReadOnly = this.mode() !== 'fill';
+    this.isReadOnly = this.mode() === 'review';
     this.control = this.formGroup().get(this.field().id);
   }
 
