@@ -83,6 +83,49 @@ Accumulated from RETROSPECTIVE.md v1.0 + v1.1 + WATCH-LIST-SEED.md.
 - [ ] Specs using TestBed with Material components need `import '@angular/compiler'` for JIT
 - [ ] Test failures accumulate across phases without being fixed — run full suite after each phase
 
+## Verification (v1.2 — Phase 16 checkpoint)
+
+- [ ] Verifier reads local `origin/dev` without `git fetch upstream` first — reports merged schema PRs as unmerged (false positive BLOCK). Always fetch upstream before checking cross-repo merge status.
+
+## Schema Workflow (v1.2 — Phase 16 INCIDENT 2026-04-13)
+
+**CRITICAL — Phase 16 executor bypassed SCHEMA_CHANGE_PROCESS.md entirely. Reverted.**
+
+- [ ] **Agent self-merges schema PR without waiting for CI** — bypasses the one check that runs the real dataloader on upstream infrastructure. NEVER merge schema PRs from the executor. Merge is a human gate.
+- [ ] **Agent uses `npm run validate` or `npm run verify` as schema validation** — NOT sufficient per SCHEMA_CHANGE_PROCESS.md §3. Only runs YAML structure checks. Real validation requires `dataloader --content-dev --skip-pgboss --skip-dynamo -d ./` against the Supabase scratch DB (port 15432, `supabase-pg-content-dev` container).
+- [ ] **Agent writes schema YAML with flat `- name: X, type: Y` syntax** — wrong format. Actual format is `- propertyName:\n  field: className.propertyName` with SEPARATE field definition YAMLs in `fields/className.propertyName.yml`.
+- [ ] **Agent declares `linkTo` on only one side of a bidirectional link** — both sides required per SCHEMA_CHANGE_PROCESS.md §2. FormSubmission → SmeMartProject needs reverse `formSubmissions: linkTo: FormSubmission.id.project, multi: true` on SmeMartProject.
+- [ ] **Plan YAML examples contradict SCHEMA_CHANGE_PROCESS.md** — review mode MUST cross-check any plan touching the schema repo against the process doc. Plan 16-00 had wrong YAML format AND specified `npm run verify` instead of dataloader. Director missed it in review.
+
+**Director review lesson:** When a plan touches the schema repo, read SCHEMA_CHANGE_PROCESS.md alongside the plan. Don't trust the plan's YAML examples without cross-check. This failure was preventable in review mode.
+
+## Phase Completion Gate (v1.2 — systemic failure discovered 2026-04-13)
+
+**Phases 15 AND 16 both had this pattern:** Schema Wave 0 never truly completed (PR open, CI SKIPPED, wrong YAML format — no fields/*.yml), but phases were marked COMPLETE because app-side tests passed. Verifier used "awaits schema PR merge, but does not block functional verification" as a loophole.
+
+- [ ] **Verifier marks phase complete when schema PR is unmerged** — BLOCK. A phase is NOT complete until the schema PR it depends on is MERGED on upstream with CI: SUCCESS. "App-side code is tested" is not sufficient for phases with schema Wave 0.
+- [ ] **Verifier accepts CI: SKIPPED as non-blocking** — BLOCK. Only CI: SUCCESS counts. Schema repo CI runs the real dataloader; skipping = no validation at all.
+- [ ] **Schema PR contains classes/*.yml but no fields/*.yml** — BLOCK. Every new scalar property MUST have a field definition file in fields/. Grep the PR file list before approving.
+- [ ] **Director lets "schema merge pending" stay in Open Items across phases without blocking** — CRITICAL. If a phase's schema dependency isn't merged, the NEXT phase cannot claim that schema work is done either. Don't stack schema debt across phases.
+
+**Director checkpoint rule (strengthened):** Before accepting any phase with schema work as complete, verify:
+1. `gh pr view <N> --repo zerobias-org/schema --json state,statusCheckRollup` returns `state: MERGED`
+2. CI rollup includes at least one check with `conclusion: SUCCESS` (not SKIPPED)
+3. Schema file list includes BOTH classes/*.yml AND fields/*.yml for new properties
+4. Executor did not self-merge
+
+If any check fails, the phase is INCOMPLETE regardless of app-side test results.
+
+## Post-Phase Drift (v1.2 — discovered 2026-04-14)
+
+**Pattern:** gsd-executor reports phase complete → user does a walkthrough → UX issues surface → fixes get made but never committed → phase stays "closed" on paper while real fixes to its deliverables sit dirty. This is the same commit-claim drift pattern documented in `.claude/post-mortems/2026-04-14-schema-inherited-props-drift.md`.
+
+- [ ] **No post-phase director checkpoint run** — after gsd-executor reports phase complete, the director skill must run checkpoint before any new work starts. Findings get filed as errata; uncommitted edits force a follow-up commit before advancing.
+- [ ] **Phase-scoped edits accumulate past the closing commit** — if a UX bug fix is discovered during post-phase verification, it belongs in a `fix(<phase>)` follow-up commit, not sitting in the working tree waiting for "something else" to carry it.
+- [ ] **"Phase is done" means "tree is clean for phase-scoped files"** — add this gate to checkpoint: `git status --short | grep <phase-scope>` must be empty before declaring closeout.
+
+Reference: errata 007 (`007-phase16-post-close-edits-uncommitted.md`).
+
 ## From v1.0 Retrospective
 
 - [ ] REQUIREMENTS.md checkboxes stop being updated after Phase 2 (bookkeeping drift)
