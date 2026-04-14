@@ -105,7 +105,9 @@ From v1.2 Execution:
 - Phase 16 Plan 01 (Form Submission Service) complete — FormSubmissionService with 8 methods, form lock gate, 19 tests passing
 - Phase 16 Plan 02 (Form Builder UI) complete — FormBuilderComponent (expansion panels + drag-drop), FormFieldEditorComponent (type-specific config), 34 tests passing (>80% coverage)
 - Phase 16 Plan 03 (Form Renderer & Submission) complete — DynamicFormRendererComponent (3 modes: preview/fill/review, 26 tests), FormFieldRendererComponent (6 field types: text/textarea/dropdown/number/checkbox/file, 35 tests), 61 total tests, >80% coverage, all 3 director corrections applied (FLAG-4 file upload stub, FLAG-5 binding conflicts, FLAG-7 hardcoded colors)
-- FormSubmission class ID: `af7eb14f-d2f0-59e3-8371-9e436b7a1bc2` (deterministic UUID v5)
+- FormSubmission class ID: `179bd4b1-d1b1-5afc-99be-a5465a662ec6` (from platform.Class.getClass 2026-04-14; prior executor value `af7eb14f-...` was incorrect)
+- DocumentTemplate class ID: `d2493bf7-f28d-5d26-8858-58062d402012`
+- DocumentInstance class ID: `3e1d232f-3105-535e-8ef5-70cb0f80d65f`
 - ngx-library bumped to 0.2.29
 - Jasmine→vitest test migration complete (zero jasmine refs remaining)
 - Director corrections applied: FLAG-3 (subscription cleanup with takeUntilDestroyed), FLAG-4 (file upload v1.2 stub with TODO for v1.3), FLAG-5 (form control binding conflicts), FLAG-7 (TODO comments for theme migration)

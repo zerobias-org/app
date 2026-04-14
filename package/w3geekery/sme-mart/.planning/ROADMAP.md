@@ -36,8 +36,8 @@
 
 - [x] **Phase 13: Pilot Projects** (2/2 plans) — Enable buyer POC testing with projectType discriminator and promotion workflow (completed 2026-04-02)
 - [x] **Phase 14: Invitation Controls** (3/3 plans) — Close RFPs to invited vendors, add invitation management UI and access control gates (completed 2026-04-08)
-- [x] **Phase 15: Document Templates** (3/3 plans) — Org-level reusable templates with variable substitution for reusable docs (completed 2026-04-10)
-- 🚀 **Phase 16: Form Builder** (3/3 plans) — Buyer-defined structured forms with dynamic vendor submission (in progress: Plan 01 complete)
+- [x] **Phase 15: Document Templates** (3/3 plans) — Org-level reusable templates with variable substitution. Schema live on UAT 2026-04-14 (DocumentTemplate `d2493bf7…`, DocumentInstance `3e1d232f…`).
+- [x] **Phase 16: Form Builder** (5/5 plans) — Buyer-defined structured forms with dynamic vendor submission. Schema live on UAT 2026-04-14 (FormSubmission class ID `179bd4b1…`; round-trip verified via Pipeline.receive → GQL). UAT: 4/4 UI tests passed; 4 vendor/buyer-account flows deferred to account-gated UAT.
 - [ ] **Phase 17: Demo Seed Scripts** — CLI scripts creating full RFP package flow for Friday demos with Brian
 
 ---

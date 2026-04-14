@@ -287,3 +287,32 @@ Phase 16 has successfully implemented ALL required form builder features on the 
 
 _Verified: 2026-04-13T11:30:00Z_  
 _Verifier: Claude (gsd-verifier)_
+
+---
+
+## Closeout Update — 2026-04-14
+
+**Status: COMPLETE**
+
+**Schema now live on UAT (2026-04-14):**
+- Schema PR #41 (combined with formConfig) merged to `zerobias-org/schema:dev` and promoted to main (PR #45)
+- Published: `@zerobias-org/schema-w3geekery-smemart@1.0.16`
+- Platform catalog + GQL live ~18:40Z 2026-04-14
+- **FormSubmission class ID:** `179bd4b1-d1b1-5afc-99be-a5465a662ec6` (retrieved via `platform.Class.getClass`; prior executor value `af7eb14f-...` was incorrect — fixed in `pipeline-write.service.ts`)
+
+**Round-trip verified via MCP:**
+- `platform.Pipeline.receive` → `graphql.Boundary.boundaryExecuteRawQuery` smoke test passed end-to-end. Push `smoke-test-form-submission-001`, read back with correct `status`, `submissionData`, `name`.
+
+**UAT: 4 passed, 4 deferred (account-gated)**
+- ✓ Test 1: Enable Form Step in RFP Wizard
+- ✓ Test 2: Add Form Fields with Drag-Drop Reorder
+- ✓ Test 3: Configure Field Validation
+- ✓ Test 4: Preview Form as Buyer (wizard preview + review step)
+- ⏸ Test 5: Vendor Fills and Submits Form — **deferred, requires UAT vendor account**
+- ⏸ Test 6: Bid Form Gate Blocks Submission Until Complete — **deferred, requires UAT vendor account**
+- ⏸ Test 7: Buyer Reviews Submission and Marks Reviewed — **deferred, requires UAT buyer account**
+- ⏸ Test 8: Form Lock After First Submission — **deferred, requires UAT vendor+buyer accounts (depends on Test 5)**
+
+Deferred flows are NOT code-gated — they require live UAT vendor/buyer principals to exercise. Code paths covered by unit tests (131 passing across 9 spec files). See `16-UAT.md` for details.
+
+_Closeout: 2026-04-14T18:56:00Z_

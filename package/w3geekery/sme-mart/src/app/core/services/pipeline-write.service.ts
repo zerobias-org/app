@@ -38,12 +38,12 @@ const SME_MART_CLASS_IDS = {
   // Phase 14 — Invitation Controls
   RfpInvitation: '941cf01b-d260-5e45-8c6a-50f07b23f196',
 
-  // Phase 15 — Document Templates (TODO: populate after schema PR merge + dataloader verify)
-  DocumentTemplate: '00000000-0000-0000-0000-000000000001', // Placeholder
-  DocumentInstance: '00000000-0000-0000-0000-000000000002', // Placeholder
+  // Phase 15 — Document Templates
+  DocumentTemplate: 'd2493bf7-f28d-5d26-8858-58062d402012',
+  DocumentInstance: '3e1d232f-3105-535e-8ef5-70cb0f80d65f',
 
   // Phase 16 — Form Builder
-  FormSubmission: 'af7eb14f-d2f0-59e3-8371-9e436b7a1bc2',
+  FormSubmission: '179bd4b1-d1b1-5afc-99be-a5465a662ec6',
 } as const;
 
 export type SmeMartClassName = keyof typeof SME_MART_CLASS_IDS;
