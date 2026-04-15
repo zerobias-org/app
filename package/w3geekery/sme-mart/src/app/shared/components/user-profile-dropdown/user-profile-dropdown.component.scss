@@ -44,3 +44,34 @@
   opacity: 0.7;
   cursor: default;
 }
+
+// Organization Switcher Submenu Styles
+::ng-deep .org-switcher-submenu {
+  max-width: 300px;
+  max-height: 400px;
+}
+
+.org-list {
+  min-width: 200px;
+  overflow-y: auto;
+}
+
+button[mat-menu-item] {
+  &.current-org {
+    font-weight: 500;
+  }
+
+  .current-marker {
+    margin-right: 8px;
+    color: var(--color-primary, #1976d2);
+  }
+
+  .spacer {
+    margin-right: 8px;
+    visibility: hidden;
+  }
+
+  .font-weight-bold {
+    font-weight: 600;
+  }
+}

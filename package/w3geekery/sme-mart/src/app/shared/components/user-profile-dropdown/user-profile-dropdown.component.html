@@ -1,6 +1,7 @@
 <div
   [matMenuTriggerFor]="userMenu"
   class="avatar-trigger"
+  data-testid="user-menu-trigger"
 >
   <div class="org-user">
     <h3 class="username">{{ userName() }}</h3>
@@ -45,6 +46,42 @@
     <mat-icon>settings</mat-icon>
     <span>Settings</span>
   </a>
+
+  <mat-divider />
+
+  <!-- Organization Switcher Submenu -->
+  <button
+    mat-menu-item
+    [matMenuTriggerFor]="orgSwitcherSubmenu"
+    (click)="$event.stopPropagation()"
+    data-testid="org-switcher-trigger"
+  >
+    <mat-icon>switch_account</mat-icon>
+    <span>Switch Organization</span>
+    <mat-icon matMenuTriggerIcon>arrow_right</mat-icon>
+  </button>
+
+  <mat-menu #orgSwitcherSubmenu="matMenu" class="org-switcher-submenu">
+    <div class="org-list">
+      @for (org of switchableOrgs(); track org.id) {
+        <button
+          mat-menu-item
+          [class.current-org]="`${org.id}` === currentOrgId()"
+          (click)="onSelectOrg(org)"
+          [attr.data-testid]="'org-item-' + org.id"
+        >
+          @if (`${org.id}` === currentOrgId()) {
+            <mat-icon class="current-marker">circle</mat-icon>
+          } @else {
+            <mat-icon class="spacer">circle</mat-icon>
+          }
+          <span [class.font-weight-bold]="`${org.id}` === currentOrgId()">
+            {{ org.name }}
+          </span>
+        </button>
+      }
+    </div>
+  </mat-menu>
 
   <mat-divider />
   <div class="menu-section-label">Browse</div>
