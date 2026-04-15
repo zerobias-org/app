@@ -8,7 +8,7 @@ if [ "$BRANCH" = "main" ] || [ "$BRANCH" = "master" ]; then
 fi
 
 echo "Running tests before push..."
-cd package/w3geekery/sme-mart && npm test 2>/dev/null
+cd package/w3geekery/sme-mart && npm test -- --watch=false 2>/dev/null
 EXIT_CODE=$?
 
 if [ $EXIT_CODE -ne 0 ]; then
