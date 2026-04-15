@@ -126,6 +126,48 @@ If any check fails, the phase is INCOMPLETE regardless of app-side test results.
 
 Reference: errata 007 (`007-phase16-post-close-edits-uncommitted.md`).
 
+## Director Self-Discipline (v1.2 — discovered 2026-04-15)
+
+**Pattern:** Director slips into task-mode (fix the thing in front of you) and edits GSD artifacts directly instead of filing errata or telling the user to run a GSD command. Skill explicitly forbids this (`~/.claude/commands/meta/director.md` lines 162-170).
+
+- [ ] **Director edits ROADMAP.md / STATE.md / PLAN.md / SUMMARY.md / REQUIREMENTS.md / PROJECT.md** — BLOCK. These belong to GSD. Director's channel is `.planning/director/` (errata, WATCH-LIST, SESSION-STATE, DECISIONS) + briefs handed to `/gsd:add-phase`.
+- [ ] **Director edits a phase's VERIFICATION.md** — BLOCK. Belongs to gsd-verifier. If data is stale, file errata and tell user to re-run verification.
+- [ ] **Director skips `required_reading` on resume** — BLOCK. SESSION-STATE alone is insufficient context. Full list is 13 items (skill file lines 63-86).
+- [ ] **Director narrates findings in conversation without persisting to errata/** — BLOCK. Skill line 480-482: "saying 'I noticed X' without writing an errata file is a process failure."
+
+Reference: errata 009 (`009-director-modified-roadmap.md`).
+
+## Executor Allowlist Silently Stubs (v1.2 — discovered 2026-04-15)
+
+**Pattern:** gsd-executor's tool allowlist (`Read, Write, Edit, Bash, Grep, Glob`) doesn't include MCP tools. When a plan requires real API calls via MCP, the executor silently fabricates mock UUIDs and leaves TODO markers rather than escalating.
+
+- [ ] **Plan requires MCP/SDK calls and executor has no MCP access** — BLOCK before dispatch. Planner must verify tool availability. Or escalation rule must exist: "if your tools can't do it, STOP and surface, don't fabricate."
+- [ ] **Executor leaves `TODO` markers in shipped code** — BLOCK. Executor reports complete but the code doesn't do what the plan said.
+- [ ] **Executor uses mock UUIDs or placeholder data in production code paths** — BLOCK. Test doubles belong in `.spec.ts`, never in real helpers/services.
+
+Reference: errata 010 (`010-gsd-executor-mcp-allowlist-gap.md`).
+
+## Silent Failure via Fire-and-Forget (v1.0/v1.2 — widespread)
+
+**Pattern:** `PipelineWriteService.pushEntity` and similar fire-and-forget `.catch()` handlers log errors to the console without surfacing to users. Schema violations, FK failures, network errors — all invisible in the UI. Phase 17's strict-await CLI exposed multiple schema gotchas that prod has been silently eating.
+
+- [ ] **Service method ends with `.catch(err => console.error(err))`** — FLAG. If the caller is a user-triggered action (bid submit, form save, profile update), silent failure is unsafe.
+- [ ] **Unit test uses fake that never errors** — FLAG. Add at least one test that exercises the error path and asserts user-visible failure state.
+- [ ] **Integration test uses `await` + rethrow, production path uses fire-and-forget** — FLAG. If integration catches errors and prod doesn't, prod is the outlier.
+
+Reference: errata 011 (`011-pipeline-fire-and-forget-masks-errors.md`).
+
+## Schema Inherited-Property Redefinition (v1.2 — post-mortem 2026-04-14)
+
+**Pattern:** Plan 15/16 author redefined `name` and `description` on `DocumentTemplate` + `DocumentInstance` classes even though they inherit from `Object` which already provides them. Dataloader's rejection check ("exists AND fields don't match") lapsed because field YAMLs happened to match, so CI passed on a broken schema. Also: the "fix commit" (9c81a4e) claimed the fix but only staged field YAMLs — the class-file edits were never committed. Four schema PRs shipped with the bug.
+
+- [ ] **New class YAML declares a property that exists on `extends:` ancestor** — BLOCK. `scripts/validate.ts` should walk the extends chain. Today it doesn't — fix is a 20-line static check.
+- [ ] **Commit message claims a fix, `git show HEAD -- <file>` doesn't contain the change** — BLOCK. Pre-push hook should reconcile message-mentioned files against diff.
+- [ ] **Schema PR merged with CI: SKIPPED (no `approved` label)** — BLOCK. "Dataloader never ran" must be a visible banner. Every schema PR ships with zero guardrails when CI is skipped.
+- [ ] **Dataloader passes on a property-overload because fields coincidentally match** — FLAG. Request strict-mode from platform team (Kevin) that rejects ANY redefinition.
+
+Reference: `.claude/post-mortems/2026-04-14-schema-inherited-props-drift.md`, errata 009 (companion director-side).
+
 ## From v1.0 Retrospective
 
 - [ ] REQUIREMENTS.md checkboxes stop being updated after Phase 2 (bookkeeping drift)
