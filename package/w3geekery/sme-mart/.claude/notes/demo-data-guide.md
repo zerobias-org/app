@@ -324,3 +324,48 @@ All engagements share boundary **"SME Marketplace"**: `e3871f0b-56f0-4e5e-87c6-6
 **Use:** `proj-002-pinnacle-type2` — draft status, no bids yet
 - Shows project planning phase before work begins
 - Under same engagement as an active project
+
+---
+
+## Agent Skills Catalog (UAT — 2026-04-14)
+
+Added as a second product on the SME Marketplace boundary to demo cross-product pipeline ingestion into AuditgraphDB.
+
+### Platform IDs (UAT `uat.zerobias.com`)
+
+| Field | Value |
+|---|---|
+| Boundary | SME Marketplace — `e3871f0b-56f0-4e5e-87c6-6ca196bf88c7` |
+| Product | Agent Skills (`@zerobias-org/product-zerobias-schemas-agentskills`) — `24fd77dd-bd66-490a-b6b6-3b1b5a875332` |
+| Boundary Product | `0447298c-6dc0-4c95-aca7-cbf8de327b69` |
+| Schema Package | `@zerobias-org/schema-zerobias-schemas-agentskills@1.0.6` |
+| Pipeline | Agent Skills Entity Pipeline — `45a6d8c8-15e1-4ee9-9dd0-239633297ae0` |
+| Pipeline mode | receiver / differential / dynamic / all, format=json |
+| Schema class | `AgentSkill` extends `Element` — fields: `name`, `description`, `license`, `compatibility`, `author`, `skillVersion`, `sourceRepo`, `sourcePath`, `allowedTools`, `bodyContent` |
+
+### Push Path
+```
+platform.Pipeline.receive({ pipelineId: "45a6d8c8-...", data: [ { /* AgentSkill instances */ } ], markDeleted: [] })
+```
+Full-replace semantics — every push must include ALL fields or they get nulled.
+
+### Demo Skill: `visual-explainer`
+
+Picked because its SKILL.md frontmatter has full agentskills.io metadata (license, compatibility, author, version) — one-to-one mapping to the AgentSkill schema. Published repo at `nicobailon/visual-explainer`.
+
+| AgentSkill field | Value |
+|---|---|
+| `name` | `visual-explainer` |
+| `description` | Generate beautiful, self-contained HTML pages that visually explain systems, code changes, plans, and data. |
+| `license` | MIT |
+| `compatibility` | Requires a browser to view generated HTML files. Optional surf-cli for AI image generation. |
+| `author` | nicobailon |
+| `skillVersion` | 0.1.1 |
+| `sourceRepo` | `https://github.com/nicobailon/visual-explainer` (TBD — confirm canonical URL) |
+| `sourcePath` | `SKILL.md` |
+| `allowedTools` | *(not specified in frontmatter)* |
+| `bodyContent` | Full SKILL.md markdown body |
+
+### Demo Scenarios
+- **Scenario I: Second-Product Pipeline.** Shows that one boundary can host multiple products, each with its own receiver pipeline writing to different class namespaces.
+- **Scenario J: AgentSkill Catalog Browse.** SME Mart UI queries `AgentSkill` class via GQL, renders a searchable list of installable skills (filter by `allowedTools`, `license`).
