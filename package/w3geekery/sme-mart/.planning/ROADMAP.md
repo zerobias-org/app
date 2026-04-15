@@ -38,7 +38,7 @@
 - [x] **Phase 14: Invitation Controls** (3/3 plans) — Close RFPs to invited vendors, add invitation management UI and access control gates (completed 2026-04-08)
 - [x] **Phase 15: Document Templates** (3/3 plans) — Org-level reusable templates with variable substitution. Schema live on UAT 2026-04-14 (DocumentTemplate `d2493bf7…`, DocumentInstance `3e1d232f…`).
 - [x] **Phase 16: Form Builder** (5/5 plans) — Buyer-defined structured forms with dynamic vendor submission. Schema live on UAT 2026-04-14 (FormSubmission class ID `179bd4b1…`; round-trip verified via Pipeline.receive → GQL). UAT: 4/4 UI tests passed; 4 vendor/buyer-account flows deferred to account-gated UAT.
-- [ ] **Phase 17: Demo Seed Scripts** — CLI scripts creating full RFP package flow for Friday demos with Brian
+- [ ] **Phase 17: Demo Seed Scripts** (1/1 plans) — CLI scripts creating full RFP package flow for Friday demos with Brian
 
 ---
 
@@ -114,10 +114,12 @@
   4. Buyer can preview the form before publishing the RFP (read-only DynamicFormRenderer in RFP wizard)
   5. Vendor can fill and submit the buyer-defined form on project detail page
   6. Buyer can review vendor's submitted form responses on bid detail with "Mark Reviewed" button
-**Plans**: 3 plans
-  - [ ] **Phase 16 Plan 00** (Wave 0) — Schema prerequisite: FormSubmission class + formConfig field on SmeMartProject in zerobias-org/schema, dataloader validation, PR to zerobias-org/schema:dev, model interfaces in src/app/core/models — Requirements: (schema foundation)
-  - [ ] **Phase 16 Plan 01** (Wave 1) — Service layer + components: FormSubmissionService CRUD with form lock gate, FormBuilderComponent (expansion panels + drag-drop), DynamicFormRenderer (preview/fill/review modes), FormFieldEditorComponent, comprehensive tests (>80% coverage) — Requirements: D3-01, D3-02, D3-03, D3-04
-  - [ ] **Phase 16 Plan 02** (Wave 2) — UI integration: RFP wizard form step (auto-persist config), project detail "Submission Form" tab for vendors, bid form gate (form required before submit bid), bid detail form review section with "Mark Reviewed" button — Requirements: D3-04, D3-05, D3-06
+**Plans**: 5 plans
+  - [x] **Phase 16 Plan 00** (Wave 0) — Schema prerequisite: FormSubmission class + formConfig field on SmeMartProject in zerobias-org/schema, dataloader validation, PR to zerobias-org/schema:dev, model interfaces in src/app/core/models — Requirements: (schema foundation)
+  - [x] **Phase 16 Plan 01** (Wave 1) — Service layer + components: FormSubmissionService CRUD with form lock gate, FormBuilderComponent (expansion panels + drag-drop), DynamicFormRenderer (preview/fill/review modes), FormFieldEditorComponent, comprehensive tests (>80% coverage) — Requirements: D3-01, D3-02, D3-03, D3-04
+  - [x] **Phase 16 Plan 02** (Wave 2) — UI integration: RFP wizard form step (auto-persist config), project detail "Submission Form" tab for vendors, bid form gate (form required before submit bid), bid detail form review section with "Mark Reviewed" button — Requirements: D3-04, D3-05, D3-06
+  - [x] **Phase 16 Plan 03** (Wave 3) — Dynamic form renderer + field renderer (text, textarea, dropdown, number, file, checkbox), per-field validators, file-upload stub (FileService deferred to v1.3), spec coverage — Requirements: D3-03
+  - [x] **Phase 16 Plan 04** (Wave 4) — Full RFP Wizard integration: rfp-step-form, rfp-step-review preview, project-detail submission tab, bid-form gate + bid review, end-to-end wiring — Requirements: D3-04, D3-05, D3-06
 **Effort**: 18–22 hours (schema ~2-3 hrs, service + components ~10-12 hrs, UI integration ~6-8 hrs)
 **Tech Stack**: Angular 21 + Reactive Forms (built-in) + Material + CDK DragDrop + Pipeline + GraphQL + ZB FileService SDK
 **Research Flag**: RESEARCH COMPLETE — JSON Schema subset (6 field types with type-specific validators), DynamicFormRenderer with three modes (preview/fill/review), field config storage as JSON on SmeMartProject, form lock on first submission, all documented in 16-RESEARCH.md.
@@ -137,7 +139,8 @@
   1. CLI seed script (node/ts) creates a complete RFP package flow — RFP with documents, invited vendor, submitted bid with form responses, pilot project
   2. CLI cleanup script tears down all demo-created data without affecting non-demo data
   3. Seed script exits non-zero on failure (doubles as integration test)
-**Plans**: TBD
+**Plans**: 1 plan
+  - [ ] **Phase 17 Plan 01** — Demo seed + cleanup CLI with step logging, marker tag strategy, idempotent cleanup, integration test exit discipline — Requirements: DEMO-01, DEMO-02, DEMO-03
 **Effort**: ~4 hours
 **Tech Stack**: Node.js + TypeScript + ZB MCP/Platform APIs (CLI, no Angular)
 
@@ -150,10 +153,10 @@
 | 13. Pilot Projects | 2/2 | Complete    | 2026-04-02 |
 | 14. Invitation Controls | 3/3 | Complete    | 2026-04-08 |
 | 15. Document Templates | 3/3 | Complete    | 2026-04-10 |
-| 16. Form Builder | 3/5 | In Progress|  |
-| 17. Demo Seed Scripts | 0/1 | Not started | — |
+| 16. Form Builder | 5/5 | Complete    | 2026-04-14 |
+| 17. Demo Seed Scripts | 0/1 | Planning    | — |
 
 ---
 
 **Created:** 2026-03-17
-**Last Updated:** 2026-04-13 (Phase 16 Plan 01 complete: FormSubmissionService with CRUD + form lock gate, 19 tests passing, director corrections applied)
+**Last Updated:** 2026-04-14 (Phase 17 planning complete: 1 plan for demo seed + cleanup CLI with marker tag cleanup strategy)
