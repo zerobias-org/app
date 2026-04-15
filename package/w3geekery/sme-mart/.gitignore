@@ -67,6 +67,10 @@ __screenshots__/
 # GSD planning — tracked in git (no secrets; verified 2026-03-30)
 # .planning/
 
+# Demo seed runtime artifacts (local-only)
+scripts/demo/.demo-state.json
+demo-seed-output.json
+
 # System files
 .DS_Store
 Thumbs.db

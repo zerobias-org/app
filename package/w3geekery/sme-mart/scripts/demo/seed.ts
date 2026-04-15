@@ -1,17 +1,24 @@
 #!/usr/bin/env ts-node
 /**
- * Demo seed script: Creates a realistic RFP package flow for Friday demos with Brian.
+ * Demo seed script — creates a realistic RFP package flow for Friday demos.
  *
  * Usage:
- *   npm run demo:seed
- *   npm run demo:seed -- --verbose
+ *   npm run demo:seed               # seed against default profile / env
+ *   npm run demo:seed -- --verbose  # also write demo-seed-output.json
  *   npm run demo:seed -- --allow-prod
+ *
+ * Env:
+ *   ZB_API_URL / ZB_API_KEY / ZB_ORG_ID   explicit credentials
+ *   ZB_PROFILE=<name>                     pick non-active profile from ~/.config/mcp-zb/credentials.json
+ *   ZB_PIPELINE_ID                        override per-env default
+ *   DEMO_VENDOR_ORG_ID                    vendor org ID (defaults to connected org)
  *
  * Exit codes:
  *   0 = success
  *   1 = failure
  */
 
+import { writeFileSync } from 'fs';
 import { DemoEntityIds, SeedStep } from './types';
 import {
   loadConfig,
@@ -24,15 +31,12 @@ import {
   createBid,
   createFormSubmission,
   createPilot,
-  tagResource,
+  appendDemoState,
 } from './helpers';
 
 const VERBOSE_MODE = process.argv.includes('--verbose');
 
-/**
- * Print the summary block with all created resource IDs.
- */
-function printSummary(entities: DemoEntityIds, steps: SeedStep[]): void {
+function printSummary(entities: DemoEntityIds): void {
   console.log('\n✓ Demo seed complete!\n');
   console.log('Resources created:');
   console.log(`  RFP:             ${entities.rfpId}`);
@@ -40,42 +44,15 @@ function printSummary(entities: DemoEntityIds, steps: SeedStep[]): void {
   console.log(`  Invited Vendor:  ${entities.vendorPartyId}`);
   console.log(`  Invitation:      ${entities.invitationId}`);
   console.log(`  Bid:             ${entities.bidId}`);
-  console.log(`  Form Responses:  ${entities.formSubmissionId}`);
-  console.log(`  Pilot Project:   ${entities.pilotId}`);
+  console.log(`  Form Submission: ${entities.formSubmissionId}`);
+  console.log(`  Pilot:           ${entities.pilotId}`);
 
-  const totalCount =
-    1 + // RFP
-    entities.documentIds.length +
-    1 + // invitation
-    1 + // bid
-    1 + // form submission
-    1; // pilot
-
-  console.log(`\nSummary: ${totalCount} resources created and tagged with 'w3geekery.sme-mart.demo-seed'\n`);
-  console.log('Run cleanup with: npm run demo:cleanup\n');
-
-  if (VERBOSE_MODE) {
-    // Write JSON output for programmatic follow-up
-    const output = {
-      timestamp: new Date().toISOString(),
-      environment: process.env['ZB_ENVIRONMENT'] || 'uat',
-      entities,
-      totalCount,
-      steps: steps.map(s => ({ name: s.name, status: s.status, error: s.error })),
-    };
-
-    try {
-      require('fs').writeFileSync('demo-seed-output.json', JSON.stringify(output, null, 2));
-      console.log('✓ Verbose output written to demo-seed-output.json\n');
-    } catch (err) {
-      console.warn('⚠ Failed to write verbose output:', (err as Error).message);
-    }
-  }
+  const total =
+    1 + entities.documentIds.length + 1 + 1 + 1 + 1; // rfp + docs + invite + bid + form + pilot
+  console.log(`\nSummary: ${total} resources created, tagged with 'w3geekery.sme-mart.demo-seed'`);
+  console.log('Cleanup: npm run demo:cleanup\n');
 }
 
-/**
- * Main seed orchestration.
- */
 async function main(): Promise<void> {
   const steps: SeedStep[] = [];
   const entities: DemoEntityIds = {
@@ -88,106 +65,113 @@ async function main(): Promise<void> {
     pilotId: '',
   };
 
+  const record = (name: string): SeedStep => {
+    const step: SeedStep = { name, status: 'pending' };
+    steps.push(step);
+    return step;
+  };
+  const done = (step: SeedStep) => { step.status = 'done'; };
+
+  console.log('\n🌱 Demo Seed');
+  console.log('Timestamp:', new Date().toISOString());
+
   try {
-    console.log('\n🌱 Demo Seed Script\n');
-    console.log('Timestamp:', new Date().toISOString());
-
-    // Step 1: Load config
+    const s1 = record('Load config');
     const config = await loadConfig();
-    steps.push({ name: 'Load config', status: 'done' });
+    done(s1);
 
-    // Step 2: Initialize context
+    const s2 = record('Connect SDK');
     const context = await initContext(config);
-    steps.push({ name: 'Initialize context', status: 'done' });
+    done(s2);
 
-    // Step 3: Ensure marker tag exists
-    const tagId = await ensureMarkerTag(context);
-    context.tagId = tagId;
-    steps.push({ name: 'Ensure marker tag', status: 'done' });
+    const s3 = record('Ensure marker tag');
+    context.tagId = await ensureMarkerTag(context);
+    done(s3);
 
-    // Step 4: Create RFP
-    console.log('\n--- Creating RFP package ---\n');
+    console.log('\n--- Creating RFP package ---');
+    const s4 = record('Create RFP');
     entities.rfpId = await createRfp(context);
-    if (context.tagId) {
-      await tagResource(context, entities.rfpId, context.tagId);
-    }
-    steps.push({ name: 'Create RFP', status: 'done' });
+    done(s4);
 
-    // Step 5: Attach documents (2+)
-    console.log('\nAttaching documents...\n');
-    const doc1Id = await createDocument(context, entities.rfpId);
-    if (context.tagId) {
-      await tagResource(context, doc1Id, context.tagId);
-    }
-    entities.documentIds.push(doc1Id);
+    const s5 = record('Attach documents');
+    entities.documentIds.push(await createDocument(context, entities.rfpId, 1));
+    entities.documentIds.push(await createDocument(context, entities.rfpId, 2));
+    done(s5);
 
-    const doc2Id = await createDocument(context, entities.rfpId);
-    if (context.tagId) {
-      await tagResource(context, doc2Id, context.tagId);
-    }
-    entities.documentIds.push(doc2Id);
-
-    steps.push({ name: 'Attach documents (2)', status: 'done' });
-
-    // Step 6: Resolve vendor
-    console.log('\n--- Creating vendor relationship ---\n');
+    console.log('\n--- Inviting vendor and capturing bid ---');
+    const s6 = record('Resolve vendor');
     entities.vendorPartyId = await resolveVendor(context);
-    steps.push({ name: 'Resolve vendor', status: 'done' });
+    done(s6);
 
-    // Step 7: Invite vendor
+    const s7 = record('Invite vendor');
     entities.invitationId = await inviteVendor(context, entities.rfpId, entities.vendorPartyId);
-    if (context.tagId) {
-      await tagResource(context, entities.invitationId, context.tagId);
-    }
-    steps.push({ name: 'Invite vendor', status: 'done' });
+    done(s7);
 
-    // Step 8: Create bid
-    console.log('\n--- Submitting bid and responses ---\n');
+    const s8 = record('Create bid');
     entities.bidId = await createBid(context, entities.rfpId, entities.vendorPartyId);
-    if (context.tagId) {
-      await tagResource(context, entities.bidId, context.tagId);
-    }
-    steps.push({ name: 'Submit bid', status: 'done' });
+    done(s8);
 
-    // Step 9: Create form submission
-    entities.formSubmissionId = await createFormSubmission(context, entities.bidId);
-    if (context.tagId) {
-      await tagResource(context, entities.formSubmissionId, context.tagId);
-    }
-    steps.push({ name: 'Submit form responses', status: 'done' });
+    const s9 = record('Submit form responses');
+    entities.formSubmissionId = await createFormSubmission(context, entities.rfpId, entities.bidId);
+    done(s9);
 
-    // Step 10: Create pilot project
-    console.log('\n--- Creating pilot project ---\n');
+    console.log('\n--- Creating pilot project ---');
+    const s10 = record('Create pilot');
     entities.pilotId = await createPilot(context, entities.rfpId);
-    if (context.tagId) {
-      await tagResource(context, entities.pilotId, context.tagId);
-    }
-    steps.push({ name: 'Create pilot project', status: 'done' });
+    done(s10);
 
-    // Print summary and exit successfully
-    printSummary(entities, steps);
+    // Persist state so `npm run demo:cleanup` can reverse this run.
+    appendDemoState(context, {
+      ids: {
+        SmeMartProject: [entities.rfpId, entities.pilotId],
+        SmeMartDocument: entities.documentIds,
+        RfpInvitation: [entities.invitationId],
+        Bid: [entities.bidId],
+        FormSubmission: [entities.formSubmissionId],
+      },
+    });
+
+    printSummary(entities);
+
+    if (VERBOSE_MODE) {
+      const output = {
+        timestamp: new Date().toISOString(),
+        environment: context.config.environment,
+        url: context.config.url,
+        orgId: context.config.orgId,
+        pipelineId: context.config.pipelineId,
+        tagId: context.tagId,
+        entities,
+        steps,
+      };
+      writeFileSync('demo-seed-output.json', JSON.stringify(output, null, 2));
+      console.log('✓ Verbose output written to demo-seed-output.json\n');
+    }
+
     process.exit(0);
   } catch (err) {
-    const errorMsg = (err as Error).message;
-    console.error(`\n❌ Seed failed at step: ${steps[steps.length - 1]?.name || 'unknown'}`);
-    console.error(`Error: ${errorMsg}\n`);
+    const lastStep = steps[steps.length - 1];
+    if (lastStep) {
+      lastStep.status = 'error';
+      lastStep.error = (err as Error).message;
+    }
+    console.error(`\n❌ Seed failed at step: ${lastStep?.name ?? 'unknown'}`);
+    console.error(`Error: ${(err as Error).message}\n`);
 
     if (entities.rfpId) {
-      console.error('Partially created resources (safe for manual cleanup):');
+      console.error('Partial resources created (run demo:cleanup to remove):');
       if (entities.rfpId) console.error(`  RFP: ${entities.rfpId}`);
-      if (entities.documentIds.length > 0) console.error(`  Documents: ${entities.documentIds.join(', ')}`);
-      if (entities.vendorPartyId) console.error(`  Vendor: ${entities.vendorPartyId}`);
+      if (entities.documentIds.length) console.error(`  Documents: ${entities.documentIds.join(', ')}`);
+      if (entities.invitationId) console.error(`  Invitation: ${entities.invitationId}`);
       if (entities.bidId) console.error(`  Bid: ${entities.bidId}`);
       if (entities.formSubmissionId) console.error(`  Form Submission: ${entities.formSubmissionId}`);
       if (entities.pilotId) console.error(`  Pilot: ${entities.pilotId}`);
-      console.error('\nRun: npm run demo:cleanup\n');
     }
 
     process.exit(1);
   }
 }
 
-// Run main and handle any unhandled promise rejections
 main().catch(err => {
   console.error('Unhandled error:', err);
   process.exit(1);
