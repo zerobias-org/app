@@ -164,7 +164,9 @@ describe('FormFieldRendererComponent', () => {
   });
 
   describe('Mode Behavior', () => {
-    it('should be read-only in preview mode', () => {
+    it('should be interactive (not read-only) in preview mode', () => {
+      // Preview mode is interactive so buyers can click dropdowns/checkboxes
+      // to see what they'll look like for vendors. Only review mode is read-only.
       const field: FormFieldConfig = {
         id: 'name',
         type: 'text',
@@ -180,7 +182,7 @@ describe('FormFieldRendererComponent', () => {
       fixture.componentRef.setInput('submission', {});
       fixture.detectChanges();
 
-      expect(component.isReadOnly).toBe(true);
+      expect(component.isReadOnly).toBe(false);
     });
 
     it('should show sample data in preview mode', () => {

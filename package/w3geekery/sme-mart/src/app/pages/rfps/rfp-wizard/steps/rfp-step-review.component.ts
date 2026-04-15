@@ -58,12 +58,12 @@ import type { FormBuilderConfig } from '../../../../core/models/form-builder.mod
         <mat-divider />
 
         <!-- Submission Form -->
-        @if (rfpData.formConfig) {
+        @if (parsedFormConfig(); as formConfig) {
           <section class="review-section">
             <h4>Submission Form Preview</h4>
             <p class="section-description">Vendors will see this form when submitting bids</p>
             <app-dynamic-form-renderer
-              [config]="parsedFormConfig()"
+              [config]="formConfig"
               mode="preview"
               [submission]="{ submissionData: {} }"
             ></app-dynamic-form-renderer>
