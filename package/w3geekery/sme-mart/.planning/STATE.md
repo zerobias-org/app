@@ -2,30 +2,32 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: RFP Packages & Pilot Projects
-status: executing
-last_updated: "2026-04-13T17:19:44.432Z"
-last_activity: 2026-04-13
+status: complete
+last_updated: "2026-04-15T18:30:00.000Z"
+last_activity: 2026-04-15
 progress:
   total_phases: 5
-  completed_phases: 2
-  total_plans: 13
-  completed_plans: 11
+  completed_phases: 5
+  total_plans: 14
+  completed_plans: 14
 ---
 
 # STATE.md — Session Context
 
-**Session Name:** `gsd-plan`
+**Session Name:** `gsd-execute`
 **Date Created:** 2026-04-02
-**Current Focus:** Phase 16 — form-builder
+**Current Focus:** v1.2 milestone complete — ready for retro
 
 ---
 
 ## Current Position
 
-Phase: 16 (form-builder) — EXECUTING
-Plan: 3 of 5 (Plans 00, 01, 02, & 03 COMPLETE)
-Status: Plan 03 complete (DynamicFormRenderer + FormFieldRendererComponent, 61 tests, 3 director corrections applied). Plan 04 ready.
-Last activity: 2026-04-13 -- Plan 03 complete: Form Renderer & Submission with DynamicFormRenderer (3 modes), FormFieldRendererComponent (6 field types), 61 tests passing, >80% coverage
+Milestone: v1.2 RFP Packages & Pilot Projects — **COMPLETE**
+Phases: 5 of 5 (13, 14, 15, 16, 17 all complete)
+Plans: 14 of 14
+Last activity: 2026-04-15 — Phase 17 (Demo Seed Scripts) closed. Real ZeroBias SDK wiring shipped (commit `249e3df`); stubs from prior executor replaced with `Pipeline.receive` + `hydra.Tag` integration, state-file-driven cleanup, end-to-end verified on UAT.
+
+Next: `/meta:director retro` in the director pane to close v1.2.
 
 ---
 
@@ -34,47 +36,34 @@ Last activity: 2026-04-13 -- Plan 03 complete: Form Renderer & Submission with D
 See: .planning/PROJECT.md (updated 2026-04-02)
 
 **Core value:** Transparent, task-gated marketplace with demand/supply/transparency partitions
-**Current focus:** v1.2 RFP Packages & Pilot Projects
-**Roadmap phases:** 13-17
+**Current focus:** v1.2 closeout → retro → v1.3 planning
+**Roadmap phases:** 13-17 (all complete)
 
 ---
 
-## Roadmap Summary
+## Roadmap Summary — v1.2 Final
 
-**Phase 13: Pilot Projects** (6–8 hrs)
+**Phase 13: Pilot Projects** — Complete 2026-04-02 (2/2 plans)
 
-- Goal: Enable POC testing with projectType discriminator and promotion workflow
-- Requirements: PLT-01, PLT-02, PLT-03, PLT-04
-- Dependencies: None (v1.1 complete)
+- projectType discriminator, completion workflow, promotion workflow
 
-**Phase 14: Invitation Controls** (12–16 hrs)
+**Phase 14: Invitation Controls** — Complete 2026-04-08 (3/3 plans)
 
-- Goal: Close RFPs to invited vendors with access control gates
-- Requirements: D1-01 through D1-06
-- Dependencies: Phase 13
+- Schema (RfpInvitation class `941cf01b…`), RfpInvitationService (11 methods), BidsService access gate, My Invitations page, Invited Vendors tab
 
-**Phase 15: Document Templates** (14–18 hrs)
+**Phase 15: Document Templates** — Complete 2026-04-10 (3/3 plans)
 
-- Goal: Org-level reusable templates with variable substitution
-- Requirements: D2-01 through D2-05
-- Dependencies: Phase 14
-- Research flag: Template variable substitution syntax design (needs design doc before execution)
+- Schema (DocumentTemplate `d2493bf7…`, DocumentInstance `3e1d232f…`), DocumentTemplateService, DocumentInstanceService, VariableSubstitutionService, Milkdown editor extension
 
-**Phase 16: Form Builder** (16–20 hrs)
+**Phase 16: Form Builder** — Complete 2026-04-14 (5/5 plans)
 
-- Goal: Buyer-defined structured forms with dynamic vendor submission
-- Requirements: D3-01 through D3-06, DEMO-01, DEMO-02, DEMO-03
-- Dependencies: Phase 15
-- Research flag: JSON Schema subset + DynamicFormComponent rendering strategy (needs design doc before execution)
+- Schema (FormSubmission `179bd4b1…`), FormSubmissionService + form lock, FormBuilderComponent (drag-drop), DynamicFormRenderer (3 modes), 6 field types, RFP wizard + bid review integration. 4/4 UAT UI tests passed; 4 vendor/buyer-account flows deferred (errata 006).
 
-**Phase 17: Demo Seed Scripts** (~4 hrs)
+**Phase 17: Demo Seed Scripts** — Complete 2026-04-15 (1/1 plans)
 
-- Goal: CLI scripts creating full RFP package flow for Friday Brian demos
-- Requirements: DEMO-01, DEMO-02, DEMO-03
-- Dependencies: Phases 13-16
+- Node + TypeScript CLI (`scripts/demo/{seed,cleanup,helpers,types}.ts`), real ZeroBias SDK wiring, state-file-driven cleanup, end-to-end verified on UAT, schema gotchas documented (date-only fields, SmeMartDocument base class fields, Pipeline.receive empty-data rejection). Requirements DEMO-01, DEMO-02, DEMO-03 satisfied.
 
-**Total budget:** ~40–44 hours (2.7–2.9 weeks at 15 hrs/week)
-**Requirement coverage:** 24/24 (100%)
+**Total shipped:** 14/14 plans, ~40 hrs budget, 24/24 requirements covered.
 
 ---
 
@@ -100,24 +89,23 @@ From v1.2 Execution:
 - Phase 13 (Pilot Projects) complete — projectType discriminator, completion dialog, promotion workflow
 - Phase 14 (Invitation Controls) complete — RfpInvitationService (11 methods), BidsService access gate, My Invitations page, Invited Vendors tab, teaser component, inline banners
 - Phase 15 (Document Templates) complete — DocumentTemplateService, DocumentInstanceService, VariableSubstitutionService, comprehensive UI
-- RfpInvitation schema class live on UAT (class ID `941cf01b-d260-5e45-8c6a-50f07b23f196`)
-- Phase 16 Plan 00 (Form Builder Schema) complete — FormSubmission class merged to zerobias-org/schema:dev, model interfaces created
-- Phase 16 Plan 01 (Form Submission Service) complete — FormSubmissionService with 8 methods, form lock gate, 19 tests passing
-- Phase 16 Plan 02 (Form Builder UI) complete — FormBuilderComponent (expansion panels + drag-drop), FormFieldEditorComponent (type-specific config), 34 tests passing (>80% coverage)
-- Phase 16 Plan 03 (Form Renderer & Submission) complete — DynamicFormRendererComponent (3 modes: preview/fill/review, 26 tests), FormFieldRendererComponent (6 field types: text/textarea/dropdown/number/checkbox/file, 35 tests), 61 total tests, >80% coverage, all 3 director corrections applied (FLAG-4 file upload stub, FLAG-5 binding conflicts, FLAG-7 hardcoded colors)
-- FormSubmission class ID: `179bd4b1-d1b1-5afc-99be-a5465a662ec6` (from platform.Class.getClass 2026-04-14; prior executor value `af7eb14f-...` was incorrect)
-- DocumentTemplate class ID: `d2493bf7-f28d-5d26-8858-58062d402012`
-- DocumentInstance class ID: `3e1d232f-3105-535e-8ef5-70cb0f80d65f`
-- ngx-library bumped to 0.2.29
-- Jasmine→vitest test migration complete (zero jasmine refs remaining)
-- Director corrections applied: FLAG-3 (subscription cleanup with takeUntilDestroyed), FLAG-4 (file upload v1.2 stub with TODO for v1.3), FLAG-5 (form control binding conflicts), FLAG-7 (TODO comments for theme migration)
+- Phase 16 (Form Builder) complete — FormSubmissionService, FormBuilderComponent, DynamicFormRenderer (preview/fill/review), 6 field types, RFP wizard + bid review integration
+- Phase 17 (Demo Seed Scripts) complete — standalone CLI, real SDK wiring, state-file cleanup
 
-From v1.2 Research:
+From v1.2 Schema Catalog (UAT):
 
-- Phase order mandated by dependencies (pilot → invitation → template → form)
-- Two research phases needed (15 & 16) — template variable syntax + JSON Schema subset before execution
-- Five critical pitfalls identified with clear prevention patterns (documented in ROADMAP.md Phase Details)
-- No platform blockers or stack changes required (Pipeline + GQL + Angular 21 only)
+- RfpInvitation: `941cf01b-d260-5e45-8c6a-50f07b23f196`
+- DocumentTemplate: `d2493bf7-f28d-5d26-8858-58062d402012`
+- DocumentInstance: `3e1d232f-3105-535e-8ef5-70cb0f80d65f`
+- FormSubmission: `179bd4b1-d1b1-5afc-99be-a5465a662ec6`
+- Pipeline (SME Marketplace, UAT): `f6d1f579-fe02-4158-b99e-a55113fd70cb`
+
+From v1.2 Phase 17 Platform Observations:
+
+- Pipeline-created AuditgraphDB objects do NOT materialize as hydra Resource rows — `tagResource` fails with FK violation, `listTaggedResources` returns 0 even after successful Pipeline.receive. Worth flagging to Kevin.
+- `Pipeline.receive` rejects empty `data[]` arrays even when `markDeleted` is populated — must include stub `{id, name}` per deletion.
+- Several SME Mart classes have date-only fields (`dateCreated`, `dateLastModified`, `startDate`, `targetEndDate`) that reject full ISO timestamps; the Angular app likely fails silently via fire-and-forget `pushEntity`.
+- `SmeMartDocument` requires `fileVersionId` + `size` (File base class) in addition to Neon-mapped `zbFileVersionId` + `fileSizeBytes`.
 
 ---
 
@@ -126,20 +114,20 @@ From v1.2 Research:
 **Resume this session:**
 
 ```bash
-claude --resume poc/sme-mart
+claude --resume gsd-execute
 ```
 
-**Next step:** Phase 14 complete. `/gsd:discuss-phase 15` for Document Templates.
+**Next step:** Run `/meta:director retro` in the director pane to close v1.2. v1.3 scoping begins after retro.
 
 **If starting fresh:**
 
 - Read `.planning/PROJECT.md` for current state
-- Read `.planning/ROADMAP.md` for complete roadmap (phases 13-17)
-- Read `.planning/REQUIREMENTS.md` for traceability (all 24 requirements mapped)
+- Read `.planning/ROADMAP.md` for v1.2 archive
+- Read `.planning/REQUIREMENTS.md` for traceability (24/24)
 - Read `CLAUDE.md` for project conventions
-- Read `.planning/BACKLOG.md` for non-milestone work items
+- Read `.planning/BACKLOG.md` for candidates for v1.3
 
 ---
 
-**Last Updated:** 2026-04-13
-**Milestone v1.2:** Phases 13-15 complete. Phase 16 Plan 03 complete (Form Renderer & Submission: DynamicFormRenderer + FormFieldRendererComponent, 61 tests, >80% coverage, all 3 director corrections applied). Phase 16 Plan 04 next (RFP Wizard Integration).
+**Last Updated:** 2026-04-15
+**Milestone v1.2:** COMPLETE — 5/5 phases, 14/14 plans. Phase 17 closed with real SDK wiring (commit `249e3df`). Director errata 006, 009-012 staged for retro audit trail. Ready for `/meta:director retro`.

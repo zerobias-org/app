@@ -4,7 +4,7 @@
 
 - ✅ **v1.0 AuditgraphDB Migration** — Phases 1-6 (shipped 2026-03-19) | [Archive](milestones/v1.0-ROADMAP.md)
 - ✅ **v1.1 Org Navigation & Vendor Profile** — Phases 7-12 (shipped 2026-04-02) | [Archive](milestones/v1.1-ROADMAP.md)
-- 🚀 **v1.2 RFP Packages & Pilot Projects** — Phases 13-17 (in progress) — Multi-document packages, invitation controls, form builder, pilot project lifecycle, demo scripts
+- ✅ **v1.2 RFP Packages & Pilot Projects** — Phases 13-17 (complete 2026-04-15) — Multi-document packages, invitation controls, form builder, pilot project lifecycle, demo scripts
 
 ## Phases
 
@@ -38,7 +38,7 @@
 - [x] **Phase 14: Invitation Controls** (3/3 plans) — Close RFPs to invited vendors, add invitation management UI and access control gates (completed 2026-04-08)
 - [x] **Phase 15: Document Templates** (3/3 plans) — Org-level reusable templates with variable substitution. Schema live on UAT 2026-04-14 (DocumentTemplate `d2493bf7…`, DocumentInstance `3e1d232f…`).
 - [x] **Phase 16: Form Builder** (5/5 plans) — Buyer-defined structured forms with dynamic vendor submission. Schema live on UAT 2026-04-14 (FormSubmission class ID `179bd4b1…`; round-trip verified via Pipeline.receive → GQL). UAT: 4/4 UI tests passed; 4 vendor/buyer-account flows deferred to account-gated UAT.
-- [ ] **Phase 17: Demo Seed Scripts** (1/1 plans) — CLI scripts creating full RFP package flow for Friday demos with Brian
+- [x] **Phase 17: Demo Seed Scripts** (1/1 plans) — CLI scripts creating full RFP package flow for Friday demos with Brian. Real ZeroBias SDK wiring (`Pipeline.receive` + `hydra.Tag`), state-file-driven cleanup (pipeline-created objects don't materialize as hydra Resources), end-to-end verified on UAT 2026-04-15 (commit `249e3df`).
 
 ---
 
@@ -140,7 +140,7 @@
   2. CLI cleanup script tears down all demo-created data without affecting non-demo data
   3. Seed script exits non-zero on failure (doubles as integration test)
 **Plans**: 1 plan
-  - [ ] **Phase 17 Plan 01** — Demo seed + cleanup CLI with step logging, marker tag strategy, idempotent cleanup, integration test exit discipline — Requirements: DEMO-01, DEMO-02, DEMO-03
+  - [x] **Phase 17 Plan 01** — Demo seed + cleanup CLI with step logging, marker tag strategy, idempotent cleanup, integration test exit discipline — Requirements: DEMO-01, DEMO-02, DEMO-03 (completed 2026-04-15, commit `249e3df`)
 **Effort**: ~4 hours
 **Tech Stack**: Node.js + TypeScript + ZB MCP/Platform APIs (CLI, no Angular)
 
@@ -154,9 +154,11 @@
 | 14. Invitation Controls | 3/3 | Complete    | 2026-04-08 |
 | 15. Document Templates | 3/3 | Complete    | 2026-04-10 |
 | 16. Form Builder | 5/5 | Complete    | 2026-04-14 |
-| 17. Demo Seed Scripts | 0/1 | Planning    | — |
+| 17. Demo Seed Scripts | 1/1 | Complete    | 2026-04-15 |
+
+**v1.2 Milestone:** 5/5 phases complete, 14/14 plans complete (closed 2026-04-15).
 
 ---
 
 **Created:** 2026-03-17
-**Last Updated:** 2026-04-14 (Phase 17 planning complete: 1 plan for demo seed + cleanup CLI with marker tag cleanup strategy)
+**Last Updated:** 2026-04-15 (Phase 17 closeout: v1.2 milestone complete, 5/5 phases, 14/14 plans)
