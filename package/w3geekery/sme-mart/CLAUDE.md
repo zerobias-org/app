@@ -31,6 +31,7 @@ SME Mart is a **marketplace for Subject Matter Experts** in compliance/cybersecu
 | **File Upload SDK** | [`.claude/notes/zb-file-upload-sdk-reference.md`](.claude/notes/zb-file-upload-sdk-reference.md) — FileService SDK, upload workflow, task attachments, preview, ZB UI reference |
 | **E2E Testing Guide** | [`.claude/notes/e2e-testing-guide.md`](.claude/notes/e2e-testing-guide.md) — **READ before writing Playwright tests.** Stack, auth model, gotchas, page object patterns, debugging playbook |
 | **Schema repo** | [`zerobias-org/schema`](https://github.com/zerobias-org/schema) — YAML schema packages (source of truth for GQL entities) |
+| **Post-mortems** | [`.claude/post-mortems/`](.claude/post-mortems/) — failure reports (see [`INDEX.md`](.claude/post-mortems/INDEX.md)). **Read before starting any schema change.** |
 
 ## Skills
 
