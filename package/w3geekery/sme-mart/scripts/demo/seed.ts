@@ -58,7 +58,7 @@ function printSummary(entities: DemoEntityIds, steps: SeedStep[]): void {
     // Write JSON output for programmatic follow-up
     const output = {
       timestamp: new Date().toISOString(),
-      environment: process.env.ZB_ENVIRONMENT || 'uat',
+      environment: process.env['ZB_ENVIRONMENT'] || 'uat',
       entities,
       totalCount,
       steps: steps.map(s => ({ name: s.name, status: s.status, error: s.error })),

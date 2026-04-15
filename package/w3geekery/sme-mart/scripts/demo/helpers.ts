@@ -28,9 +28,9 @@ const PIPELINE_ID = 'f6d1f579-fe02-4158-b99e-a55113fd70cb';
  * Throws if required variables are missing or environment is prod without --allow-prod flag.
  */
 export async function loadConfig(): Promise<DemoConfig> {
-  const apiKey = process.env.ZB_API_KEY;
-  const orgId = process.env.ZB_ORG_ID;
-  const token = process.env.ZB_TOKEN;
+  const apiKey = process.env['ZB_API_KEY'];
+  const orgId = process.env['ZB_ORG_ID'];
+  const token = process.env['ZB_TOKEN'];
 
   if (!apiKey || !orgId || !token) {
     throw new Error(
@@ -41,8 +41,8 @@ export async function loadConfig(): Promise<DemoConfig> {
 
   // Detect environment from hostname or env var
   let environment: 'uat' | 'qa' | 'prod' = 'uat';
-  if (process.env.ZB_ENVIRONMENT) {
-    const env = process.env.ZB_ENVIRONMENT.toLowerCase();
+  if (process.env['ZB_ENVIRONMENT']) {
+    const env = process.env['ZB_ENVIRONMENT'].toLowerCase();
     if (env === 'prod') environment = 'prod';
     else if (env === 'qa') environment = 'qa';
   }
@@ -316,9 +316,9 @@ export async function cleanupByMarkerTag(context: DemoContext): Promise<DemoEnti
  */
 export async function resolveVendor(context: DemoContext): Promise<string> {
   // Check env var first
-  if (process.env.DEMO_VENDOR_PARTY_ID) {
-    console.info('Using vendor from DEMO_VENDOR_PARTY_ID: ' + process.env.DEMO_VENDOR_PARTY_ID);
-    return process.env.DEMO_VENDOR_PARTY_ID;
+  if (process.env['DEMO_VENDOR_PARTY_ID']) {
+    console.info('Using vendor from DEMO_VENDOR_PARTY_ID: ' + process.env['DEMO_VENDOR_PARTY_ID']);
+    return process.env['DEMO_VENDOR_PARTY_ID'];
   }
 
   // TODO: Query for existing vendor party by tag or fixture name
