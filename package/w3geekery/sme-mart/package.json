@@ -27,7 +27,9 @@
     "test:report": "node scripts/test-report.js",
     "e2e": "playwright test --config e2e/playwright.config.ts",
     "e2e:debug": "playwright test --config e2e/playwright.config.ts --debug",
-    "e2e:report": "playwright show-report e2e/e2e-results"
+    "e2e:report": "playwright show-report e2e/e2e-results",
+    "demo:seed": "dotenv -e .env.local -- npx ts-node scripts/demo/seed.ts",
+    "demo:cleanup": "dotenv -e .env.local -- npx ts-node scripts/demo/cleanup.ts"
   },
   "prettier": {
     "printWidth": 100,
@@ -90,6 +92,7 @@
     "dotenv": "^16.6.1",
     "dotenv-cli": "^11.0.0",
     "jsdom": "^27.1.0",
+    "ts-node": "^10.9.2",
     "typescript": "~5.9.2",
     "vitest": "^4.0.8"
   }
