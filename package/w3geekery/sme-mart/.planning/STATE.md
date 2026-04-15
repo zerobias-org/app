@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Dev Experience, Hardening & Transparency
-status: executing
-last_updated: "2026-04-15T23:23:03.315Z"
-last_activity: 2026-04-15 -- Phase 18 execution started
+status: verifying
+last_updated: "2026-04-15T23:34:32.972Z"
+last_activity: 2026-04-15
 progress:
   total_phases: 11
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 16
-  completed_plans: 13
+  completed_plans: 14
 ---
 
 # STATE.md — Session Context
@@ -23,12 +23,12 @@ progress:
 ## Current Position
 
 Milestone: v1.3 Dev Experience, Hardening & Transparency
-Phase: 18 (org-switcher) — EXECUTING
-Plan: 1 of 1
-Status: Executing Phase 18
-Last activity: 2026-04-15 -- Phase 18 execution started
+Phase: 18 (org-switcher) — COMPLETE
+Plan: 1 of 1 — Complete
+Status: All tasks complete, SUMMARY.md written, ready for verification
+Last activity: 2026-04-15 — Phase 18, Plan 01 execution complete (185 min)
 
-Next: `/gsd:plan-phase 18` (Org Switcher) or `/gsd:discuss-phase 18` for review.
+Next: Phase 19 (zbb Local Dev Stacks) or `/gsd:verify-work` to validate Phase 18
 
 ---
 
@@ -85,6 +85,18 @@ From v1.2 Phase 17 Platform Observations (carry-forward):
 - `Pipeline.receive` rejects empty `data[]` even with `markDeleted` populated
 - Date-only fields reject full ISO timestamps; Angular likely silently eats these via fire-and-forget (P20 addresses)
 - `SmeMartDocument` requires `fileVersionId` + `size` base-class fields in addition to Neon-mapped ones
+
+From v1.3 Phase 18 (Org Switcher) — COMPLETE:
+
+- OrgSwitcherService with computed `orgs$` signal filters hidden/System Org, sorts by name
+- User profile dropdown org switcher submenu in Material mat-menu
+- SwitchingOrgDialog for UX feedback during org switch (spinner + title)
+- UUID→string conversion for type safety in currentOrgId signal/comparisons
+- Hard reload via window.location.reload() post-switch (SDK cache clearing)
+- 20 unit tests (9 service + 11 component) + 5 E2E tests, all passing
+- E2E page object with 19 helper methods, page.on('request') for header capture
+- 5 auto-fixed issues: UUID type mismatch, attribute binding, Vitest framework, error logging, component mocking
+- Commits: ac8e994, 0421d7a, 22bede4, ec441d0, 6a9c87a, bd951c0 (6 commits total, ~185 min execution)
 
 ---
 
