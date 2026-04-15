@@ -1,0 +1,102 @@
+import { Injectable, inject, signal, computed } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import { ZerobiasClientApp } from '@zerobias-com/zerobias-client';
+import type { dana } from '@zerobias-com/zerobias-sdk';
+import { SwitchingOrgDialogComponent } from '../../shared/dialogs/switching-org-dialog/switching-org-dialog.component';
+
+@Injectable({ providedIn: 'root' })
+export class OrgSwitcherService {
+  private readonly app = inject(ZerobiasClientApp);
+  private readonly dialog = inject(MatDialog);
+
+  // System Org UUID (all zeros) — must compare as string
+  private readonly SYSTEM_ORG_ID = '00000000-0000-0000-0000-000000000000';
+
+  // Raw org list from SDK (unfiltered)
+  private readonly rawOrgs = signal<dana.Org[]>([]);
+
+  // Filtered and sorted org list exposed to components
+  readonly orgs$ = computed(() => {
+    return this.rawOrgs()
+      .filter((org) => !org.hidden)
+      .filter((org) => `${org.id}` !== this.SYSTEM_ORG_ID)
+      .filter((org) => !this.isOpsOrg(org))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  });
+
+  constructor() {
+    this.loadOrgs();
+  }
+
+  /**
+   * Load org list from SDK and update rawOrgs signal
+   */
+  private loadOrgs(): void {
+    this.app.getOrgs().subscribe((orgs) => {
+      this.rawOrgs.set(orgs || []);
+    });
+  }
+
+  /**
+   * Switch to the specified organization
+   * Opens a blocking dialog, calls SDK selectOrg, and triggers hard reload on success
+   * No-op if the org is already the current org
+   */
+  async switchTo(org: dana.Org): Promise<void> {
+    // Get current org ID
+    const currentOrgId = this.app.getCurrentOrgId();
+
+    // No-op if switching to the same org
+    if (`${org.id}` === `${currentOrgId}`) {
+      return;
+    }
+
+    // Open blocking spinner dialog
+    const dialogRef = this.dialog.open(SwitchingOrgDialogComponent, {
+      width: '400px',
+      disableClose: true,
+      data: {
+        orgName: org.name,
+      },
+    });
+
+    try {
+      // Call SDK selectOrg with post-switch callback
+      await this.app.selectOrg(org, () => {
+        // Close dialog
+        dialogRef.close();
+
+        // Hard reload to clear all in-memory caches
+        window.location.reload();
+      });
+    } catch (error) {
+      // Close dialog on error
+      dialogRef.close();
+      console.error('Organization switch failed:', error);
+      // TODO: Show error toast to user (future error handling phase)
+    }
+  }
+
+  /**
+   * Check if an org has the hidden flag set
+   */
+  private isHiddenOrg(org: dana.Org): boolean {
+    return org.hidden === true;
+  }
+
+  /**
+   * Check if an org is the System Org (all zeros UUID)
+   */
+  private isSystemOrg(org: dana.Org): boolean {
+    return `${org.id}` === this.SYSTEM_ORG_ID;
+  }
+
+  /**
+   * Check if an org is an ops org
+   * TODO: Kevin — define ops-org filter rule (tag? name pattern? org.kind?)
+   * Currently returns false (no-op); placeholder for future implementation.
+   */
+  private isOpsOrg(org: dana.Org): boolean {
+    return false;
+  }
+}

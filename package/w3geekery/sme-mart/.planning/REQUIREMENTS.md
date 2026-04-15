@@ -1,123 +1,140 @@
-# Requirements: SME Mart v1.2
+# Requirements: SME Mart v1.3
 
-**Defined:** 2026-04-02
+**Defined:** 2026-04-15
 **Core Value:** A transparent, task-gated marketplace where every boundary API operation requires task/subtask approval — demand/supply/transparency partitions at every level of the hierarchy.
 
-## v1.2 Requirements
+**Source:** Phase briefs in `.planning/director/phase-{18..23}-brief.md` (staged by `/meta:director design` during v1.2 retrospective).
 
-Requirements for v1.2: RFP Packages & Pilot Projects. Each maps to roadmap phases.
+## v1.3 Requirements
 
-### RFP Access Controls (D1)
+Requirements for v1.3: Dev Experience, Hardening & Transparency. Each maps to roadmap phases 18-23.
 
-- [x] **D1-01**: Buyer can mark an RFP as invitation-only (boolean flag on project entity) — Phase 14, UAT test 3
-- [x] **D1-02**: Buyer can add vendors to an RFP invitation list with pending/accepted/declined status tracking — Phase 14, UAT test 6
-- [x] **D1-03**: Invited vendor can accept or decline an RFP invitation — Phase 14, UAT test 5
-- [x] **D1-04**: System blocks bid submission from uninvited vendors on invitation-only RFPs — Phase 14, UAT test 2
-- [x] **D1-05**: Vendor can view a dedicated "My Invitations" feed showing RFPs they've been invited to — Phase 14, UAT test 5
-- [x] **D1-06**: Buyer can view an "Invited Vendors" tab on RFP detail showing all invitations and their status — Phase 14, UAT test 6
+### Org Switcher (OS) — Phase 18
 
-### Document Packages (D2)
+- [ ] **OS-01**: User menu in SME Mart header surfaces an "Organization" section listing all orgs the user can switch to
+- [ ] **OS-02**: Clicking an org in the list calls `app.selectOrg(org)`, which updates Dana cookie + `zb-current-dana-org-id` sessionStorage via the SDK
+- [ ] **OS-03**: Current org is visually distinguished in the dropdown (checkmark or "current" pill)
+- [ ] **OS-04**: Orgs are filtered per existing rules (hide `hidden: true`, System Org `00000000-...`, ops orgs)
+- [ ] **OS-05**: Switch triggers a UI refresh sufficient to pick up the new org context (page reload or router-level refresh — match zb/ui behavior)
 
-- [x] **D2-01**: Buyer can attach multiple documents (templates, exhibits, attachments) to an RFP package — Phase 15, plan 03 task 5
-- [x] **D2-02**: Org admin can create, edit, and delete reusable document templates at the org level (MSA, NDA, SOW, etc.) — Phase 15, plan 03 task 2
-- [x] **D2-03**: Buyer can instantiate an org template per-engagement (copy-on-create, engagement-scoped instance) — Phase 15, plan 03 task 4
-- [x] **D2-04**: Template instances support variable substitution (buyer name, dates, engagement ID auto-filled) — Phase 15, plan 02 task 1
-- [x] **D2-05**: Buyer can preview a document template before instantiating it — Phase 15, plan 03 task 1
+### Local Dev Stacks (LS) — Phase 19
 
-### Form Builder (D3)
+- [ ] **LS-01**: `zbb up <stack>` brings SME Mart SPA + Hub module online locally with Neon/S3/Registry stand-ins, serving from a CloudFront-shaped URL (path fallback, basePath-aware)
+- [ ] **LS-02**: Unmerged SME Mart Hub module builds + publishes to local Verdaccio; local `hub-server` consumes it — no upstream PR dependency for iteration
+- [ ] **LS-03**: `login/` repo can be served alongside the SPA via the same `cloudfront-sim` stack; session handoff from login → SPA verified locally
+- [ ] **LS-04**: Custom `cloudfront-sim` stack is reusable (not SME Mart-specific — both SPA and login use it)
+- [ ] **LS-05**: Env var import/export between stacks works per zbb conventions (e.g., SPA stack imports `HUB_URL` from hub-server stack)
+- [ ] **LS-06**: README documents how to bring the stack up, tear it down, and iterate (change Hub module → rebuild → SPA picks it up)
 
-- [ ] **D3-01**: Form builder is a reusable shared component (not RFP-specific) — lives in `src/app/shared/` or `src/app/components/form-builder/`
-- [ ] **D3-02**: Buyer can define form fields via UI — 6 types: text, textarea, dropdown, number, file upload, checkbox — stored as JSON config (ngx-formly's JSON-based config pattern as reference, not dependency)
-- [ ] **D3-03**: Dynamic form renderer displays buyer-defined fields using Angular Reactive Forms + Material
-- [ ] **D3-04**: Buyer can preview the form before publishing the RFP
-- [ ] **D3-05**: Vendor can fill and submit the buyer-defined form on an RFP
-- [ ] **D3-06**: Buyer can review vendor's submitted form responses
+### Fire-and-Forget Audit (FF) — Phase 20
 
-### Pilot Projects (077)
+- [ ] **FF-01**: AUDIT.md exists with 100% of `pushEntity` call sites cataloged, each rated for risk + complexity
+- [ ] **FF-02**: Telemetry ships — every `.catch()` fires a counted event in addition to the current console.error
+- [ ] **FF-03**: All CRITICAL+SIMPLE call sites have fire-and-forget removed and error state surfaced to users; each has at least one spec covering the error path
+- [ ] **FF-04**: CRITICAL+MEDIUM and CRITICAL+COMPLEX call sites have individual backlog entries with proposed remediations
+- [ ] **FF-05**: WATCH-LIST pattern updated: "Service method ends with `.catch(err => console.error(err))`" is a BLOCK for user-triggered actions going forward
 
-- [x] **PLT-01**: SmeMartProject entity supports `projectType` discriminator (rfp | pilot | project) — Phase 13
-- [x] **PLT-02**: Pilot completion creates a conditional vetting checklist item — Phase 13
-- [x] **PLT-03**: Buyer can promote a completed pilot to a real project (new SmeMartProject linked to pilot) — Phase 13
-- [x] **PLT-04**: Pilot projects display visual badges/labels distinguishing them in lists and detail views — Phase 13
+### Org Documents Center (OD) — Phase 21
 
-### Demo Infrastructure (DEMO)
+Loose, time-boxed (~20 hrs). Scope trims when creep emerges.
 
-- [ ] **DEMO-01**: CLI seed script (node/ts) creates a realistic RFP package flow via ZB Platform APIs (RFP with documents, invited vendor, submitted bid with form responses)
-- [ ] **DEMO-02**: CLI cleanup script tears down all demo-created data
-- [ ] **DEMO-03**: Seed script doubles as integration test (exits non-zero on failure)
+- [ ] **OD-01**: Folders are user-creatable and nestable in the Org Documents Center
+- [ ] **OD-02**: Color + Tag affordances visible and functional on documents
+- [ ] **OD-03**: DocumentTemplate (v1.2) entities appear in the Org Documents Center, not only in the RFP wizard
+- [ ] **OD-04**: Document preview works for at least the common content types already supported by the File SDK
+- [ ] **OD-05**: Additional deliverables (archive browser, versioning UI, bulk ops, etc.) added as they land; each gets a satisfying requirement in this section, OR a defer-to-v1.4 note when creep triggers
+
+### Form Template Library (FT) — Phase 22
+
+- [ ] **FT-01**: Users can save a FormBuilderConfig as a named, org-scoped template
+- [ ] **FT-02**: Creating a new form auto-creates a draft FormTemplate; no explicit Save action required to persist in-progress work
+- [ ] **FT-03**: Buyers can pick a published template in the RFP wizard Step 2.5, pre-filling the form
+- [ ] **FT-04**: `/forms/templates` lists drafts (pinned), published, and archived templates with search/filter
+- [ ] **FT-05**: Editing a published template prompts Save-as-New-Version vs Overwrite; Overwrite is owner-only + blocked when other RFPs reference the version
+- [ ] **FT-06**: Forking preserves a `parentTemplateId` pointer
+- [ ] **FT-07**: Usage count increments when a template is selected in the RFP wizard
+- [ ] **FT-08**: Org Documents Center exposes a recent-templates surface linking back to `/forms/templates`
+- [ ] **FT-09**: Schema PR merged to `zerobias-org/schema:dev` with CI SUCCESS (not SKIPPED), both classes/*.yml and fields/*.yml present, no self-merge
+
+### Transparency Controls (TC) — Phase 23
+
+- [ ] **TC-01**: UI-SPEC.md for Transparency Controls is locked — no open questions remaining
+- [ ] **TC-02**: Low-fi wireframes produced for all 5 concept views from the sketches
+- [ ] **TC-03**: Research report documents which backend capabilities TC depends on and which exist today
+- [ ] **TC-04**: If implementation is doable this phase, at least one Transparency Control surface ships on an existing view (e.g., Engagement detail or Project detail)
+- [ ] **TC-05**: Backlog entry added (or 078 updated) with the implementation plan if deferred
 
 ## Future Requirements
 
-Deferred to v1.3 or later. Tracked but not in current roadmap.
+Deferred to v1.4+:
 
-### Form Builder Enhancements
-
-- **D3-07**: Conditional form logic (if/then field visibility)
-- **D3-08**: Repeating form sections
-- **D3-09**: Vendor resource requirements form (reuses shared form builder component in engagement context)
-
-### RFP Enhancements
-
-- **S2-01**: Intent-to-bid/withdraw workflow with deadlines and destruction attestation
-- **S3-01**: Structured bid response templates
-- **S4-01**: Bid validity/expiration dates
-
-### AI Integration
-
-- **AI-01**: LLM-assisted bid generation (Plan 033 P5)
+- Task/subtask partitioning into demand/supply/transparency (CEO P0, carries from v1.2)
+- Tasks as runtime access control — boundary API gating via task approval
+- Hard requirements (1-5) / soft requirements (6-10) approval model
+- Supply-side explicit resource requirements (ARN, IAM, data objects, schedule)
+- Project Bloom UI (boards, tasks, activities, workflows)
+- Transparency Center (aggregated rollups from subtask → project) — dependent on Phase 23 spec lock
+- Neon table archival (scheduled 2026-04-02, pending execution)
+- Fire-and-forget CRITICAL+MEDIUM / CRITICAL+COMPLEX remediations (individual BACKLOG entries added in P20)
 
 ## Out of Scope
 
-Explicitly excluded. Documented to prevent scope creep.
-
-| Feature | Reason |
-|---------|--------|
-| Conditional form logic (if/then field visibility) | Complexity — deferred to v1.3 |
-| Repeating form sections | Complexity — deferred to v1.3 |
-| S2 destruction attestation | Deferred to v1.3 |
-| 033 P5 AI bid generation | Depends on 054, deferred to v1.3 |
-| Document versioning | Copy-on-instantiation only, no version history for v1.2 |
-| Structured security questionnaires (CAIQ/SIG) | Future differentiator |
-| Complex pricing models (NRC/ARC, milestone payments) | Plan 055, separate milestone |
-| Engagement roles & communication (facilitator, mediation) | Plan 056, separate milestone |
+- Auth flow / login — ZeroBias platform handles this
+- LLM-assisted bid generation — separate initiative
+- Scoring app — separate ZB platform app
+- Billing app — separate ZB platform app
+- E2E Playwright tests — separate initiative
+- Project switcher UI — deferred (needs UX design; DECISIONS.md 2026-04-01)
+- Production `zbb` stack configuration (P19 is local-dev only)
+- Full CE4 / N-party entanglement implementation (platform-dependent, TC out-of-scope)
+- Marketplace / public template sharing across orgs (FT out-of-scope)
+- Split-screen / WYSIWYG form builder redesign (Plan 088 — separate v1.3+ phase)
+- Internal Marketplace (BU-to-BU) — future concept
+- Reverse Bid Flow — future concept
 
 ## Traceability
 
-Which phases cover which requirements. Updated during roadmap creation.
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| D1-01 | 14 | Pending |
-| D1-02 | 14 | Pending |
-| D1-03 | 14 | Pending |
-| D1-04 | 14 | Pending |
-| D1-05 | 14 | Pending |
-| D1-06 | 14 | Pending |
-| D2-01 | 15 | Pending |
-| D2-02 | 15 | Pending |
-| D2-03 | 15 | Pending |
-| D2-04 | 15 | Pending |
-| D2-05 | 15 | Pending |
-| D3-01 | 16 | Pending |
-| D3-02 | 16 | Pending |
-| D3-03 | 16 | Pending |
-| D3-04 | 16 | Pending |
-| D3-05 | 16 | Pending |
-| D3-06 | 16 | Pending |
-| PLT-01 | 13 | Pending |
-| PLT-02 | 13 | Pending |
-| PLT-03 | 13 | Pending |
-| PLT-04 | 13 | Pending |
-| DEMO-01 | 17 | Pending |
-| DEMO-02 | 17 | Pending |
-| DEMO-03 | 17 | Pending |
+| OS-01 | 18 | Pending |
+| OS-02 | 18 | Pending |
+| OS-03 | 18 | Pending |
+| OS-04 | 18 | Pending |
+| OS-05 | 18 | Pending |
+| LS-01 | 19 | Pending |
+| LS-02 | 19 | Pending |
+| LS-03 | 19 | Pending |
+| LS-04 | 19 | Pending |
+| LS-05 | 19 | Pending |
+| LS-06 | 19 | Pending |
+| FF-01 | 20 | Pending |
+| FF-02 | 20 | Pending |
+| FF-03 | 20 | Pending |
+| FF-04 | 20 | Pending |
+| FF-05 | 20 | Pending |
+| OD-01 | 21 | Pending |
+| OD-02 | 21 | Pending |
+| OD-03 | 21 | Pending |
+| OD-04 | 21 | Pending |
+| OD-05 | 21 | Pending |
+| FT-01 | 22 | Pending |
+| FT-02 | 22 | Pending |
+| FT-03 | 22 | Pending |
+| FT-04 | 22 | Pending |
+| FT-05 | 22 | Pending |
+| FT-06 | 22 | Pending |
+| FT-07 | 22 | Pending |
+| FT-08 | 22 | Pending |
+| FT-09 | 22 | Pending |
+| TC-01 | 23 | Pending |
+| TC-02 | 23 | Pending |
+| TC-03 | 23 | Pending |
+| TC-04 | 23 | Pending |
+| TC-05 | 23 | Pending |
 
-**Coverage:**
-- v1.2 requirements: 24 total
-- Mapped to phases: 24
-- Unmapped: 0 ✓
+**Coverage:** 35/35 requirements mapped ✓
 
 ---
 
-*Requirements defined: 2026-04-02*
-*Last updated: 2026-04-02 after roadmap creation*
+**Last Updated:** 2026-04-15
+**Milestone:** v1.3 — Dev Experience, Hardening & Transparency

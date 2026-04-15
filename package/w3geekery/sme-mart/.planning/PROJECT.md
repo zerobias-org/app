@@ -8,17 +8,17 @@ SME Mart is a marketplace for Subject Matter Experts in compliance and cybersecu
 
 A transparent, task-gated marketplace where every boundary API operation requires task/subtask approval — demand/supply/transparency partitions at every level of the hierarchy.
 
-## Current Milestone: v1.2 RFP Packages & Pilot Projects
+## Current Milestone: v1.3 Dev Experience, Hardening & Transparency
 
-**Goal:** Transform RFPs into structured multi-document packages with invitation controls, a simple form builder for structured submission requirements, document templates, and pilot project lifecycle.
+**Goal:** Ship buyer/vendor productivity polish (org switcher, form templates, org docs completion) while hardening the write path (fire-and-forget audit) and standing up local dev stacks to unblock Hub module + SPA iteration — plus lock the Transparency Controls UI spec.
 
 **Target features:**
-- Closed/invitation-only RFPs (D1)
-- Multi-document packages with templates/exhibits (D2)
-- Simple form builder — buyer-defined fields as JSON config, vendor dynamic renderer (D3)
-- Document templates + preview (046 partial — enables template→instance workflow)
-- Pilot Projects — projectType field, pilot→vetting item, pilot→real project lifecycle (077)
-- Demo seed scripts — CLI for Friday Brian demos + cleanup
+- Org switcher user-menu dropdown — replaces the DevTools sessionStorage hack (P18)
+- zbb local dev stacks — SPA + Hub module + reusable CloudFront-sim stack for SPA and login (P19)
+- Fire-and-forget `pushEntity` audit + telemetry + opportunistic remediation (P20)
+- Org Documents Center completion — folders, color/tag, template surfacing, preview, time-boxed (P21)
+- Form Template Library — save/reuse/fork form templates, new `FormTemplate` schema class (P22)
+- Transparency Controls UI-SPEC lock + opportunistic implementation (P23)
 
 ## Current State (after v1.1)
 
@@ -113,4 +113,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-02 after v1.2 milestone started*
+*Last updated: 2026-04-15 after v1.3 milestone started*
