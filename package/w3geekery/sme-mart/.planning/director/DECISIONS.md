@@ -1,5 +1,29 @@
 # Director Decisions
 
+## Phase 17 Wired via Parent-Session MCP (Option B over A)
+**Date:** 2026-04-15
+**Decision:** When gsd-executor returned Phase 17 code with stubbed MCP calls, chose Option B (rewrite helpers to use real ZeroBias SDK, standalone CLI) over Option A (execute seed one-shot via parent-session MCP, leave CLI as scaffolding).
+**Why:** Plan 17-01's must-haves say `npm run demo:seed` exits non-zero on API failure — that's a standalone-CLI promise. Option A would close Phase 17 with an inert CLI + commit message claiming it works. Same commit-claim drift pattern as today's schema post-mortem. Time cost 1-2hr was acceptable; the reproducibility and future reusability made it cheaper than reopening Phase 17 later.
+**Anti-pattern:** Agent may be tempted to take Option A "just for the demo data" when the schedule feels tight. Resist — the CLI existence is the long-term artifact, the demo data is incidental.
+
+## Separate Code and Closeout Commits for Phase 16/17
+**Date:** 2026-04-15
+**Decision:** Phase 16 closeout (`da8867e`) and Phase 17 closeout (pending, owned by gsd-execute) split the "code works" fix commit from the "ROADMAP/STATE marked complete" commit. Each phase gets two commits, not one.
+**Why:** Today's schema post-mortem documented a failure mode where a commit message claimed work was done but the actual edits weren't staged (9c81a4e in schema repo). If code and closeout are in one commit and the code gets reverted, the closeout lies. Separating them lets a revert of just the code leave the closeout's "complete" claim as a false positive that's easy to audit. Separation is cheap insurance.
+**Anti-pattern:** Agent will want to bundle everything into one commit for conciseness. That saves 30 seconds and adds real audit risk.
+
+## Plans 087 (Template Library) and 088 (Split-screen Builder) as Separate v1.3 Phases
+**Date:** 2026-04-14
+**Decision:** Form Template Library (save → reuse → fork-on-edit) and Split-screen Form Builder (+ 'info' field type) are both new phases, not inline extensions of Phase 16. Added to `.planning/BACKLOG.md` with `/gsd:plan-phase` prompts ready.
+**Why:** Phase 16 is already 5 plans / 18-22 hrs. Adding template library (20-30 hrs — schema + service + library page + wizard integration + Org Documents integration) or split-screen redesign (18-24 hrs — two-pane layout + new field type + preview simplification + split-button add-field) would double the phase. Separate phases also allow template library to ship before split-screen redesign, or vice versa, based on business priority.
+**Anti-pattern:** Agent may want to cram "small UX improvements" into Phase 16 post-ship. The post-UAT walkthrough surfaced 5+ ideas; each must stand alone or go into a new phase, not backfill the closed one.
+
+## Director Does Not Edit GSD Artifacts (Skill Boundary Enforcement)
+**Date:** 2026-04-15
+**Decision:** Reaffirmed: director MUST NOT write to ROADMAP.md, STATE.md, PLAN.md, SUMMARY.md, REQUIREMENTS.md, PROJECT.md, VERIFICATION.md. Skill line 164-167 is explicit. Channel for communicating state changes is `.planning/director/errata/` + briefs to `/gsd:add-phase` + clear instructions to the user.
+**Why:** The boundary protects GSD's state machine. If the director edits ROADMAP, gsd-verify/gsd-next/gsd-check may disagree and overwrite, causing lost work or inconsistent state that blocks commands. Also: the director's lack of GSD context (e.g., how gsd-verifier formats VERIFICATION.md) means director edits risk breaking downstream GSD parsing.
+**Anti-pattern:** Director slips into "just fix the stale text" task-mode and edits directly. Errata 009 documents this session's two violations (c6fbb6b ROADMAP, da8867e VERIFICATION). Fix: always file errata, tell user the GSD command, never touch the file.
+
 ## v1.2 Milestone Scope: RFP Packages + Document Templates + Pilot Projects
 **Date:** 2026-04-02
 **Decision:** v1.2 focuses on three items: (1) Plan 054 MVP — closed/invitation-only RFPs + multi-document packages (D1, D2). Form builder (D3) and destruction attestation (S2) deferred to v1.3. (2) Plan 046 partial — cherry-pick document templates + preview from remaining phases to enable 054's template→instance workflow. (3) Plan 077 — Pilot Projects (Brian asked 2026-03-27). LLM-assisted bid generation (033 P5) deferred to v1.3 as it builds on 054.
