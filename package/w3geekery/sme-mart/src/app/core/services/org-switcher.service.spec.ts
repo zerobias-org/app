@@ -1,17 +1,17 @@
 import { TestBed } from '@angular/core/testing';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { of, BehaviorSubject } from 'rxjs';
 import { OrgSwitcherService } from './org-switcher.service';
-import { ZerobiasClientApp } from '@zerobias-com/zerobias-client';
+import { ZerobiasClientApp, ZerobiasClientApi } from '@zerobias-com/zerobias-client';
 import type { dana } from '@zerobias-com/zerobias-sdk';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 
 describe('OrgSwitcherService', () => {
   let service: OrgSwitcherService;
-  let mockZerobiasApp: Partial<ZerobiasClientApp>;
+  let mockZerobiasApp: any;
+  let mockZerobiasClientApi: any;
   let mockMatDialog: Partial<MatDialog>;
   let mockDialogRef: Partial<MatDialogRef<any>>;
-  let getOrgsSpy: any;
+  let listMyOrgsSpy: any;
   let selectOrgSpy: any;
 
   const createMockOrg = (
@@ -36,11 +36,18 @@ describe('OrgSwitcherService', () => {
       open: vi.fn(() => mockDialogRef as MatDialogRef<any>),
     };
 
-    getOrgsSpy = vi.fn(() => of([]));
+    listMyOrgsSpy = vi.fn(() => Promise.resolve([]));
     selectOrgSpy = vi.fn(() => Promise.resolve());
 
+    mockZerobiasClientApi = {
+      danaClient: {
+        getMeApi: vi.fn(() => ({
+          listMyOrgs: listMyOrgsSpy,
+        })),
+      },
+    };
+
     mockZerobiasApp = {
-      getOrgs: getOrgsSpy,
       getCurrentOrgId: vi.fn(() => 'org-1' as any),
       selectOrg: selectOrgSpy,
     };
@@ -49,6 +56,7 @@ describe('OrgSwitcherService', () => {
       providers: [
         OrgSwitcherService,
         { provide: ZerobiasClientApp, useValue: mockZerobiasApp },
+        { provide: ZerobiasClientApi, useValue: mockZerobiasClientApi },
         { provide: MatDialog, useValue: mockMatDialog },
       ],
     });
@@ -56,69 +64,106 @@ describe('OrgSwitcherService', () => {
     service = TestBed.inject(OrgSwitcherService);
   });
 
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
   describe('Filter Rules', () => {
-    it('should filter out hidden orgs', () => {
+    it('should filter out hidden orgs', async () => {
       const visibleOrg = createMockOrg('org-1', 'Visible Org', false);
       const hiddenOrg = createMockOrg('org-2', 'Hidden Org', true);
 
-      getOrgsSpy.mockReturnValue(of([visibleOrg, hiddenOrg]));
-
-      // Recreate service to trigger loadOrgs with new mock data
+      // Create a new service instance with custom mock
       TestBed.resetTestingModule();
+      listMyOrgsSpy = vi.fn(() => Promise.resolve([visibleOrg, hiddenOrg]));
+      mockZerobiasClientApi = {
+        danaClient: {
+          getMeApi: vi.fn(() => ({
+            listMyOrgs: listMyOrgsSpy,
+          })),
+        },
+      };
+
       TestBed.configureTestingModule({
         providers: [
           OrgSwitcherService,
           { provide: ZerobiasClientApp, useValue: mockZerobiasApp },
+          { provide: ZerobiasClientApi, useValue: mockZerobiasClientApi },
           { provide: MatDialog, useValue: mockMatDialog },
         ],
       });
 
       service = TestBed.inject(OrgSwitcherService);
 
+      // Give async loadOrgs time to complete
+      await new Promise((resolve) => setTimeout(resolve, 20));
+
       expect(service.orgs$().length).toBe(1);
       expect(`${service.orgs$()[0].id}`).toBe('org-1');
     });
 
-    it('should filter out System Org (all zeros UUID)', () => {
+    it('should filter out System Org (all zeros UUID)', async () => {
       const normalOrg = createMockOrg('org-1', 'Normal Org');
       const systemOrg = createMockOrg(
         '00000000-0000-0000-0000-000000000000',
         'System Org',
       );
 
-      getOrgsSpy.mockReturnValue(of([normalOrg, systemOrg]));
-
       TestBed.resetTestingModule();
+      listMyOrgsSpy = vi.fn(() => Promise.resolve([normalOrg, systemOrg]));
+      mockZerobiasClientApi = {
+        danaClient: {
+          getMeApi: vi.fn(() => ({
+            listMyOrgs: listMyOrgsSpy,
+          })),
+        },
+      };
+
       TestBed.configureTestingModule({
         providers: [
           OrgSwitcherService,
           { provide: ZerobiasClientApp, useValue: mockZerobiasApp },
+          { provide: ZerobiasClientApi, useValue: mockZerobiasClientApi },
           { provide: MatDialog, useValue: mockMatDialog },
         ],
       });
 
       service = TestBed.inject(OrgSwitcherService);
+
+      // Give async loadOrgs time to complete
+      await new Promise((resolve) => setTimeout(resolve, 20));
 
       expect(service.orgs$().length).toBe(1);
       expect(`${service.orgs$()[0].id}`).toBe('org-1');
     });
 
-    it('should filter out ops orgs (placeholder returns false)', () => {
+    it('should filter out ops orgs (placeholder returns false)', async () => {
       const org1 = createMockOrg('org-1', 'Alpha Org');
       const org2 = createMockOrg('org-2', 'Beta Org');
 
-      getOrgsSpy.mockReturnValue(of([org1, org2]));
-
       TestBed.resetTestingModule();
+      listMyOrgsSpy = vi.fn(() => Promise.resolve([org1, org2]));
+      mockZerobiasClientApi = {
+        danaClient: {
+          getMeApi: vi.fn(() => ({
+            listMyOrgs: listMyOrgsSpy,
+          })),
+        },
+      };
+
       TestBed.configureTestingModule({
         providers: [
           OrgSwitcherService,
           { provide: ZerobiasClientApp, useValue: mockZerobiasApp },
+          { provide: ZerobiasClientApi, useValue: mockZerobiasClientApi },
           { provide: MatDialog, useValue: mockMatDialog },
         ],
       });
 
       service = TestBed.inject(OrgSwitcherService);
+
+      // Give async loadOrgs time to complete
+      await new Promise((resolve) => setTimeout(resolve, 20));
 
       // Currently isOpsOrg returns false, so all orgs pass through
       expect(service.orgs$().length).toBe(2);
@@ -126,29 +171,106 @@ describe('OrgSwitcherService', () => {
   });
 
   describe('orgs$ signal', () => {
-    it('should emit filtered and sorted org list', () => {
+    it('should emit filtered and sorted org list', async () => {
       const orgC = createMockOrg('org-3', 'Charlie');
       const orgA = createMockOrg('org-1', 'Alpha');
       const orgB = createMockOrg('org-2', 'Bravo');
 
-      getOrgsSpy.mockReturnValue(of([orgC, orgA, orgB]));
-
       TestBed.resetTestingModule();
+      listMyOrgsSpy = vi.fn(() => Promise.resolve([orgC, orgA, orgB]));
+      mockZerobiasClientApi = {
+        danaClient: {
+          getMeApi: vi.fn(() => ({
+            listMyOrgs: listMyOrgsSpy,
+          })),
+        },
+      };
+
       TestBed.configureTestingModule({
         providers: [
           OrgSwitcherService,
           { provide: ZerobiasClientApp, useValue: mockZerobiasApp },
+          { provide: ZerobiasClientApi, useValue: mockZerobiasClientApi },
           { provide: MatDialog, useValue: mockMatDialog },
         ],
       });
 
       service = TestBed.inject(OrgSwitcherService);
 
+      // Give async loadOrgs time to complete
+      await new Promise((resolve) => setTimeout(resolve, 20));
+
       const orgs = service.orgs$();
       expect(orgs.length).toBe(3);
       expect(orgs[0].name).toBe('Alpha');
       expect(orgs[1].name).toBe('Bravo');
       expect(orgs[2].name).toBe('Charlie');
+    });
+  });
+
+  describe('loadOrgs regression tests', () => {
+    it('should handle empty array response gracefully (regression: empty submenu bug)', async () => {
+      TestBed.resetTestingModule();
+      listMyOrgsSpy = vi.fn(() => Promise.resolve([]));
+      mockZerobiasClientApi = {
+        danaClient: {
+          getMeApi: vi.fn(() => ({
+            listMyOrgs: listMyOrgsSpy,
+          })),
+        },
+      };
+
+      TestBed.configureTestingModule({
+        providers: [
+          OrgSwitcherService,
+          { provide: ZerobiasClientApp, useValue: mockZerobiasApp },
+          { provide: ZerobiasClientApi, useValue: mockZerobiasClientApi },
+          { provide: MatDialog, useValue: mockMatDialog },
+        ],
+      });
+
+      service = TestBed.inject(OrgSwitcherService);
+
+      // Give async loadOrgs time to complete
+      await new Promise((resolve) => setTimeout(resolve, 20));
+
+      // orgs$ should emit empty array with no errors
+      expect(service.orgs$().length).toBe(0);
+    });
+
+    it('should handle listMyOrgs error gracefully', async () => {
+      const testError = new Error('API error');
+      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+      TestBed.resetTestingModule();
+      listMyOrgsSpy = vi.fn(() => Promise.reject(testError));
+      mockZerobiasClientApi = {
+        danaClient: {
+          getMeApi: vi.fn(() => ({
+            listMyOrgs: listMyOrgsSpy,
+          })),
+        },
+      };
+
+      TestBed.configureTestingModule({
+        providers: [
+          OrgSwitcherService,
+          { provide: ZerobiasClientApp, useValue: mockZerobiasApp },
+          { provide: ZerobiasClientApi, useValue: mockZerobiasClientApi },
+          { provide: MatDialog, useValue: mockMatDialog },
+        ],
+      });
+
+      service = TestBed.inject(OrgSwitcherService);
+
+      // Give async loadOrgs time to complete
+      await new Promise((resolve) => setTimeout(resolve, 20));
+
+      // Should log error and set empty orgs
+      expect(errorSpy).toHaveBeenCalled();
+      expect(service.orgs$().length).toBe(0);
+
+      errorSpy.mockRestore();
     });
   });
 
@@ -223,6 +345,8 @@ describe('OrgSwitcherService', () => {
         'Organization switch failed:',
         testError,
       );
+
+      errorSpy.mockRestore();
     });
   });
 });

@@ -1,12 +1,13 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { ZerobiasClientApp } from '@zerobias-com/zerobias-client';
+import { ZerobiasClientApp, ZerobiasClientApi } from '@zerobias-com/zerobias-client';
 import type { dana } from '@zerobias-com/zerobias-sdk';
 import { SwitchingOrgDialogComponent } from '../../shared/dialogs/switching-org-dialog/switching-org-dialog.component';
 
 @Injectable({ providedIn: 'root' })
 export class OrgSwitcherService {
   private readonly app = inject(ZerobiasClientApp);
+  private readonly clientApi = inject(ZerobiasClientApi);
   private readonly dialog = inject(MatDialog);
 
   // System Org UUID (all zeros) — must compare as string
@@ -30,11 +31,16 @@ export class OrgSwitcherService {
 
   /**
    * Load org list from SDK and update rawOrgs signal
+   * Uses listMyOrgs() which returns the orgs the current user is a member of
    */
-  private loadOrgs(): void {
-    this.app.getOrgs().subscribe((orgs) => {
+  private async loadOrgs(): Promise<void> {
+    try {
+      const orgs = await this.clientApi.danaClient.getMeApi().listMyOrgs();
       this.rawOrgs.set(orgs || []);
-    });
+    } catch (error) {
+      console.error('[OrgSwitcherService] Failed to load orgs:', error);
+      this.rawOrgs.set([]);
+    }
   }
 
   /**
