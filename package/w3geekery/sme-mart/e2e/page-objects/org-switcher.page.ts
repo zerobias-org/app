@@ -223,4 +223,37 @@ export class OrgSwitcherPage extends BasePage {
   async expectSwitchingDialogHidden(options?: { timeout?: number }): Promise<void> {
     await expect(this.switchingDialog).not.toBeVisible(options);
   }
+
+  /**
+   * Assert that the org switcher trigger appears above My Organizations in DOM source order.
+   * This verifies the placement fix for errata 013.
+   */
+  async assertSubmenuAboveMyOrganizations(): Promise<void> {
+    const triggerElement = await this.page.locator('[data-testid="org-switcher-trigger"]').elementHandle();
+    const myOrgsElement = await this.page.locator('a[routerLink="/orgs"]').elementHandle();
+
+    if (!triggerElement || !myOrgsElement) {
+      throw new Error('Could not find org switcher trigger or My Organizations element');
+    }
+
+    // Get the position of both elements in the DOM
+    const triggerInfo = await triggerElement.boundingBox();
+    const myOrgsInfo = await myOrgsElement.boundingBox();
+
+    // The trigger should appear before My Organizations in the menu
+    // We verify this by checking the visual Y position (trigger Y < myOrgs Y)
+    if (!triggerInfo || !myOrgsInfo) {
+      throw new Error('Could not get bounding box for elements');
+    }
+
+    expect(triggerInfo.y).toBeLessThan(myOrgsInfo.y);
+  }
+
+  /**
+   * Verify that the submenu contains at least N visible orgs (regression test for empty-array bug).
+   */
+  async expectSubmenuPopulated(minOrgCount: number = 1): Promise<void> {
+    const count = await this.getOrgCount();
+    expect(count).toBeGreaterThanOrEqual(minOrgCount);
+  }
 }

@@ -123,4 +123,26 @@ test.describe('@org-switcher @smoke — User profile dropdown org switch', () =>
     const stillCurrentOrgId = await switcher.getCurrentOrgId();
     expect(stillCurrentOrgId).toEqual(currentOrgId);
   });
+
+  test('should populate submenu with at least one org on real session (errata 013 regression)', async ({ page }) => {
+    // This test runs against a real UAT session to verify the empty-array bug is fixed
+    // The listMyOrgs() method should return at least the current org
+    const switcher = new OrgSwitcherPage(page);
+    await switcher.goto('/');
+    await switcher.openUserMenu();
+    await switcher.openOrgSwitcherSubmenu();
+
+    // Assert at least 1 org is visible (regression: previous bug showed 0 orgs)
+    await switcher.expectSubmenuPopulated(1);
+  });
+
+  test('should position org switcher trigger above My Organizations (errata 013 placement fix)', async ({ page }) => {
+    // This test verifies the placement fix: Switch Organization should appear before My Organizations
+    const switcher = new OrgSwitcherPage(page);
+    await switcher.goto('/');
+    await switcher.openUserMenu();
+
+    // Assert visual positioning: trigger should appear before My Organizations in the DOM
+    await switcher.assertSubmenuAboveMyOrganizations();
+  });
 });
