@@ -321,7 +321,7 @@
 | 15. Document Templates | 3/3 | Complete    | 2026-04-10 |
 | 16. Form Builder | 5/5 | Complete    | 2026-04-14 |
 | 17. Demo Seed Scripts | 1/1 | Complete    | 2026-04-15 |
-| 18. Org Switcher | 0/? | Not started | — |
+| 18. Org Switcher | 3/3 | Complete   | 2026-04-16 |
 | 19. zbb Local Dev Stacks | 0/? | Not started | — |
 | 20. Fire-and-Forget Audit | 0/? | Not started | — |
 | 21. Org Documents Center | 0/? | Not started | — |

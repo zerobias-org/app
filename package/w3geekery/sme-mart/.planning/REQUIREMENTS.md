@@ -11,10 +11,10 @@ Requirements for v1.3: Dev Experience, Hardening & Transparency. Each maps to ro
 
 ### Org Switcher (OS) — Phase 18
 
-- [ ] **OS-01**: User menu in SME Mart header surfaces an "Organization" section listing all orgs the user can switch to
+- [x] **OS-01**: User menu in SME Mart header surfaces an "Organization" section listing all orgs the user can switch to
 - [ ] **OS-02**: Clicking an org in the list calls `app.selectOrg(org)`, which updates Dana cookie + `zb-current-dana-org-id` sessionStorage via the SDK
 - [ ] **OS-03**: Current org is visually distinguished in the dropdown (checkmark or "current" pill)
-- [ ] **OS-04**: Orgs are filtered per existing rules (hide `hidden: true`, System Org `00000000-...`, ops orgs)
+- [x] **OS-04**: Orgs are filtered per existing rules (hide `hidden: true`, System Org `00000000-...`, ops orgs)
 - [ ] **OS-05**: Switch triggers a UI refresh sufficient to pick up the new org context (page reload or router-level refresh — match zb/ui behavior)
 
 ### Local Dev Stacks (LS) — Phase 19
@@ -96,10 +96,10 @@ Deferred to v1.4+:
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| OS-01 | 18 | Pending |
+| OS-01 | 18 | Complete |
 | OS-02 | 18 | Pending |
 | OS-03 | 18 | Pending |
-| OS-04 | 18 | Pending |
+| OS-04 | 18 | Complete |
 | OS-05 | 18 | Pending |
 | LS-01 | 19 | Pending |
 | LS-02 | 19 | Pending |
