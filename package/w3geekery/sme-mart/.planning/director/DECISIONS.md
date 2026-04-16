@@ -96,6 +96,8 @@
 **Why:** System Org and Ops orgs are platform internals, not SME Mart user-facing. `hidden: true` is the platform's own visibility flag. SME Mart users shouldn't see infrastructure orgs.
 **Anti-pattern:** Agent may show all orgs from `listMyOrgs` unfiltered. Must apply these filters.
 
+**Update 2026-04-15:** As of Phase 18 Plan 18-03, **no filtering is applied** in SME Mart. Platform `hidden: true` flag is effectively useless (universal `true` on UAT orgs), System Org and ops-org exclusions are not worth the code for admin-only marketplace usage. `OrgSwitcherService.orgs$` and `org-list.component.ts` both surface the full `listMyOrgs()` result (alphabetical). Revisit when Kevin/Chris clarify platform `hidden` semantics — tracking **errata 014** + Chris Slack thread.
+
 ## Internal vs External Org Membership (Plan 080)
 **Date:** 2026-04-01
 **Decision:** `whoAmI().ownerId === org.id` → internal member. `whoAmI().ownerId !== org.id` → external party (invited via boundary/project). Display as badge on org cards.
