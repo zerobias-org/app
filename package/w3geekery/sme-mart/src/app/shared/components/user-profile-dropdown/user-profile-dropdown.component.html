@@ -26,6 +26,20 @@
 
   <mat-divider />
 
+  <!-- Organization Switcher Submenu -->
+  <button
+    mat-menu-item
+    [matMenuTriggerFor]="orgSwitcherSubmenu"
+    (click)="$event.stopPropagation()"
+    data-testid="org-switcher-trigger"
+  >
+    <mat-icon>switch_account</mat-icon>
+    <span>Switch Organization</span>
+    <mat-icon matMenuTriggerIcon>arrow_right</mat-icon>
+  </button>
+
+  <mat-divider />
+
   <a mat-menu-item routerLink="/orgs">
     <mat-icon>business</mat-icon>
     <span>My Organizations</span>
@@ -48,18 +62,6 @@
   </a>
 
   <mat-divider />
-
-  <!-- Organization Switcher Submenu -->
-  <button
-    mat-menu-item
-    [matMenuTriggerFor]="orgSwitcherSubmenu"
-    (click)="$event.stopPropagation()"
-    data-testid="org-switcher-trigger"
-  >
-    <mat-icon>switch_account</mat-icon>
-    <span>Switch Organization</span>
-    <mat-icon matMenuTriggerIcon>arrow_right</mat-icon>
-  </button>
 
   <mat-menu #orgSwitcherSubmenu="matMenu" class="org-switcher-submenu">
     <div class="org-list">
