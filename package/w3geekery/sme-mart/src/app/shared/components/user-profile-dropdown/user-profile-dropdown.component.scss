@@ -61,17 +61,20 @@ button[mat-menu-item] {
     font-weight: 500;
   }
 
-  .current-marker {
-    margin-right: 8px;
-    color: var(--color-primary, #1976d2);
-  }
-
-  .spacer {
-    margin-right: 8px;
-    visibility: hidden;
-  }
-
   .font-weight-bold {
     font-weight: 600;
   }
+}
+
+.org-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0; // allow ellipsis to work inside flex
+}
+
+.ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
