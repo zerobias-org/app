@@ -69,8 +69,9 @@ function detectEnvironment(url: string): DemoConfig['environment'] {
 
 // Pipeline IDs keyed by environment.
 // Keep in sync with src/environments/environment.{uat,ci,prod}.ts.
+// UAT pipeline migrated 2026-04-16 from ZeroBias-org (f6d1f579-...) to W3Geekery-org boundary.
 const PIPELINE_IDS: Record<DemoConfig['environment'], string> = {
-  uat:  'f6d1f579-fe02-4158-b99e-a55113fd70cb',
+  uat:  '43f08afd-7ab9-4e99-a93c-619c46adaabe',
   ci:   '',   // fill in if CI seeding is needed
   qa:   '',
   prod: '',

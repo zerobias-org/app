@@ -1,10 +1,16 @@
-# UAT Migration Tracker — ✅ COMPLETE (2026-03-30)
+# UAT Migration Tracker — ✅ COMPLETE (2026-03-30) → 🚧 W3Geekery cutover IN PROGRESS (2026-04-16)
 
-CI/dev (`ci.zerobias.com`) was nuked and rebuilt with hydra. UAT (`uat.zerobias.com`) is our temporary CI/dev replacement. All migration steps verified complete 2026-03-30.
+**Status:** first UAT migration (CI→UAT under ZeroBias org) completed 2026-03-30. Now migrating **ZeroBias org → W3Geekery org** on UAT — new SME Marketplace DEV boundary owned by W3Geekery, mirrors 3rd-party-developer posture.
 
 **UAT Credentials (Clark Stacer):**
-- API Key: `660e553e-b2b4-4972-b8e3-c9cd9617f101`
+- API Key: `660e553e-b2b4-4972-b8e3-c9cd9617f101` (ZB Operations profile — legacy, may deprecate)
 - Org: Zerobias Operations (`d2216703-f63b-5281-87c0-5eaa892fbec5`)
+
+**New UAT Credentials (W3Geekery):**
+- API Key: (stored in `.env.local` as `ZEROBIAS_UAT_API_KEY`, also in `~/.config/mcp-zb/credentials.json` profile `uat-clark@w3geekery`)
+- User: `clark@w3geekery.com`
+- Org: **W3Geekery** (`cd7105df-523d-5392-9f9a-3f83d3f30107`) — same UUID as prod (deterministic)
+- Boundary: **SME Marketplace DEV** (`c15fb2dc-4f8c-48b5-b27a-707bd516b005`)
 
 ---
 
@@ -152,3 +158,40 @@ Old pipeline ID (Platform boundary): `591861da-0eac-45b3-ad1c-eb4e46734402` — 
 - Tag creation on UAT should use `hydraClient.getTagApi().createTag()` — no more `danaOld` path
 - Task→Tag linking uses `hydraClient.getResourceApi()` for resource tagging
 - Neon `work_requests` rows updated with UAT tag/task IDs ✅ (all 5 verified 2026-03-30)
+
+---
+
+## ZeroBias-org → W3Geekery-org Cutover (2026-04-16, in progress)
+
+W3Geekery org was added to UAT 2026-04-16. Moving SME Mart infrastructure out of the ZeroBias org (`57c741cf-...` / boundary `e3871f0b-...`) and into the new W3Geekery org boundary to match the 3rd-party-developer posture.
+
+### New IDs (W3Geekery UAT)
+
+| Entity | Old (ZeroBias org UAT) | New (W3Geekery org UAT) | Status |
+|---|---|---|---|
+| Org | Zerobias (`57c741cf-a58e-5efc-bf2f-93c4f6cf76ec`) | **W3Geekery** (`cd7105df-523d-5392-9f9a-3f83d3f30107`) | ✅ Provisioned |
+| Boundary | SME Marketplace (`e3871f0b-56f0-4e5e-87c6-6ca196bf88c7`) | **SME Marketplace DEV** (`c15fb2dc-4f8c-48b5-b27a-707bd516b005`) | ✅ Created 2026-04-16 |
+| Boundary-Product: Zerobias | `626180fd-5483-4f67-b74a-efe59e6f838f` | `d0064b84-bdf9-4469-8a59-705a6893c2c2` | ✅ Attached |
+| Boundary-Product: SME Mart | `4927da5d-86b2-4ab8-a1b2-9ffa9ce2a341` | `b3e3a5e1-3a41-4658-8a50-f77313fb9c12` | ✅ Attached |
+| Boundary-Product: Agent Skills | `0447298c-6dc0-4c95-aca7-cbf8de327b69` | `b487b25b-4117-4747-a89b-06e6f972c1ce` | ✅ Attached |
+| SME Mart Entity Pipeline | `f6d1f579-fe02-4158-b99e-a55113fd70cb` | **`43f08afd-7ab9-4e99-a93c-619c46adaabe`** | ✅ Created 2026-04-16 |
+| Agent Skills Entity Pipeline | `45a6d8c8-15e1-4ee9-9dd0-239633297ae0` | **`5fe14796-6cfe-4932-8005-46328a74c79d`** | ✅ Created 2026-04-16 |
+| AgentSkill: visual-explainer | pushed to old pipeline | pushed to new pipeline (job 1 ✅) | ⚠️ Body abbreviated — repush full SKILL.md if demo needs it |
+| MCP profile | `uat-zb` | **`uat-clark@w3geekery`** | ✅ Active |
+
+### Remaining work (checklist)
+
+- [ ] **.env.local** — swap `ZEROBIAS_UAT_API_KEY` to the W3Geekery key; swap `ZEROBIAS_UAT_ORG_ID` to `cd7105df-523d-5392-9f9a-3f83d3f30107`
+- [ ] **src/environments/environment.ts** — update `boundaryId` to `c15fb2dc-...` and `pipelineId` to `43f08afd-...` (SME Mart pipeline)
+- [ ] **ZB Tasks** — recreate all 5 SME Mart engagement tasks in the new boundary (CI→UAT mapping in section 4 above). Current ZeroBias-org tasks become orphaned.
+- [ ] **Tags (hydra)** — tags are org-scoped; recreate all 5 `sme-mart.eng.*` tags under W3Geekery org (`cd7105df-...`). Current ZeroBias-org tag IDs become stale.
+- [ ] **Neon `work_requests`** — update tag + task FK columns to new W3Geekery-org IDs (5 rows)
+- [ ] **`demo-data-guide.md`** — update agentskills section + add W3Geekery-org section
+- [ ] **Memory entries** — `project_sme_mart_prod_pipeline.md` (is project entry — may or may not apply since that covers *prod*; check), `project_sme_mart_schema_live.md`, `feedback_w3geekery_task_ownerid.md` — update as needed to reflect UAT uses W3Geekery org going forward
+- [ ] **AgentSkill full body repush** — push the full 19KB `visual-explainer` SKILL.md body to new pipeline if demo requires it (current record has abbreviated body)
+
+### Notes / gotchas
+
+- Org UUID `cd7105df-...` is **identical across prod and UAT** — UUIDv5 from slug. Simplifies some code paths (same `ownerId` works in both envs) but be careful: a script running on the wrong env could still land in the wrong boundary.
+- `bodyContent` on the AgentSkill record was abbreviated during MCP push (context cost); full body available at `/tmp/agentskill-payload.json` or directly from `~/.claude/skills/visual-explainer/SKILL.md`.
+- Old ZeroBias-org SME Marketplace boundary (`e3871f0b-...`) should be decommissioned after cutover verification. Current pipeline + tasks there will be orphaned until archived.

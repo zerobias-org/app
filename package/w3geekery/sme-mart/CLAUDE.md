@@ -32,6 +32,38 @@ SME Mart is a **marketplace for Subject Matter Experts** in compliance/cybersecu
 | **E2E Testing Guide** | [`.claude/notes/e2e-testing-guide.md`](.claude/notes/e2e-testing-guide.md) — **READ before writing Playwright tests.** Stack, auth model, gotchas, page object patterns, debugging playbook |
 | **Schema repo** | [`zerobias-org/schema`](https://github.com/zerobias-org/schema) — YAML schema packages (source of truth for GQL entities) |
 | **Post-mortems** | [`.claude/post-mortems/`](.claude/post-mortems/) — failure reports (see [`INDEX.md`](.claude/post-mortems/INDEX.md)). **Read before starting any schema change.** |
+| **zb-dx (Developer Experience)** | `~/Projects/zb/zerobias-org/zb-dx` — shared knowledge base for all ZB platform developers. **File friction with `/friction`, browse patterns, find integration guides.** See below. |
+
+## zb-dx — ZeroBias Developer Experience
+
+**Repo:** `~/Projects/zb/zerobias-org/zb-dx` | **Slack:** `#zb-dx` (zerobias.org workspace)
+
+A shared knowledge base for any developer building on `zerobias-sdk` / `zerobias-client` / `zerobias-angular-client`. Patterns, guides, skills, and friction logs contributed by the community. The best artifacts graduate into customer-facing KB articles, dev guides, and LLM skills.
+
+**Use this repo as part of daily workflow:**
+
+| When... | Do... |
+|---|---|
+| You hit a ZB SDK/API pain point | `/friction new <title> -s high -a sme-mart` -- creates a friction-log entry |
+| Another dev reports the same issue | `/friction confirm <slug>` -- bumps to confirmed |
+| You want to escalate to ZB platform team | `/friction task <slug> --notify` -- creates ZB Task, notifies `#zb-dx` |
+| You solved something non-obvious | Write a `patterns/` or `guides/` entry (check IDEAS.md for open items) |
+| You find a reusable agent/Claude pattern | Propose it as a `skills/` entry |
+
+**What lives there:**
+
+| Directory | Contents |
+|---|---|
+| `friction-log/` | 10+ pain-point reports (auth, SDK, hub module, PKV, CDN) with lifecycle tracking (`draft -> confirmed -> task-created -> resolved -> promoted`) |
+| `patterns/` | 8 Multica-derived integration patterns (workspace hierarchy, flat projects, boundaries, activity log, agent-skill junction, etc.) |
+| `guides/` | How-to walkthroughs born from real friction (growing) |
+| `skills/` | `/friction` (log manager) + `/zb-dx-register` (participant onboarding) |
+| `participants/` | Developer profiles: Clark (W3Geekery/SME Mart), Dan (SDI/Readiness Center), Joe (Work Worlds) |
+| `IDEAS.md` | Running board of patterns/guides/skills/tools worth building -- add freely |
+
+**Existing friction relevant to SME Mart:** SDK whoAmI field mismatch, hub-module unavailable on UAT/QA, PKV API 500s, CDN KB articles require auth, no formal project construct (pre-CE14), file attachments on shared S3.
+
+**Self-registration:** new devs run `/zb-dx-register` after joining `#zb-dx`.
 
 ## Skills
 

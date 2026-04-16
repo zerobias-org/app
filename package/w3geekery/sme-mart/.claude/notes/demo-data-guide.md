@@ -327,25 +327,36 @@ All engagements share boundary **"SME Marketplace"**: `e3871f0b-56f0-4e5e-87c6-6
 
 ---
 
-## Agent Skills Catalog (UAT — 2026-04-14)
+## Agent Skills Catalog (UAT — migrated 2026-04-16 to W3Geekery org)
 
 Added as a second product on the SME Marketplace boundary to demo cross-product pipeline ingestion into AuditgraphDB.
 
-### Platform IDs (UAT `uat.zerobias.com`)
+### Platform IDs (UAT `uat.zerobias.com`) — W3Geekery org (current)
 
 | Field | Value |
 |---|---|
-| Boundary | SME Marketplace — `e3871f0b-56f0-4e5e-87c6-6ca196bf88c7` |
+| Org | **W3Geekery** (`cd7105df-523d-5392-9f9a-3f83d3f30107`) |
+| Boundary | **SME Marketplace DEV** — `c15fb2dc-4f8c-48b5-b27a-707bd516b005` |
 | Product | Agent Skills (`@zerobias-org/product-zerobias-schemas-agentskills`) — `24fd77dd-bd66-490a-b6b6-3b1b5a875332` |
-| Boundary Product | `0447298c-6dc0-4c95-aca7-cbf8de327b69` |
+| Boundary Product | `b487b25b-4117-4747-a89b-06e6f972c1ce` |
 | Schema Package | `@zerobias-org/schema-zerobias-schemas-agentskills@1.0.6` |
-| Pipeline | Agent Skills Entity Pipeline — `45a6d8c8-15e1-4ee9-9dd0-239633297ae0` |
+| Pipeline | **Agent Skills Entity Pipeline** — `5fe14796-6cfe-4932-8005-46328a74c79d` |
 | Pipeline mode | receiver / differential / dynamic / all, format=json |
 | Schema class | `AgentSkill` extends `Element` — fields: `name`, `description`, `license`, `compatibility`, `author`, `skillVersion`, `sourceRepo`, `sourcePath`, `allowedTools`, `bodyContent` |
+| MCP profile | `uat-clark@w3geekery` |
+
+### Superseded IDs (ZeroBias org boundary — decommission after verification)
+
+| Field | Value |
+|---|---|
+| Org | Zerobias (`57c741cf-a58e-5efc-bf2f-93c4f6cf76ec`) |
+| Boundary | SME Marketplace (`e3871f0b-56f0-4e5e-87c6-6ca196bf88c7`) |
+| Boundary Product | `0447298c-6dc0-4c95-aca7-cbf8de327b69` |
+| Pipeline | `45a6d8c8-15e1-4ee9-9dd0-239633297ae0` |
 
 ### Push Path
 ```
-platform.Pipeline.receive({ pipelineId: "45a6d8c8-...", data: [ { /* AgentSkill instances */ } ], markDeleted: [] })
+platform.Pipeline.receive({ pipelineId: "5fe14796-...", data: [ { /* AgentSkill instances */ } ], markDeleted: [] })
 ```
 Full-replace semantics — every push must include ALL fields or they get nulled.
 

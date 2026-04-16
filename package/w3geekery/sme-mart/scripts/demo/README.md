@@ -86,7 +86,7 @@ error is thrown. This lets `demo:seed` double as an integration test in CI.
 
 | Env | URL | Pipeline id |
 |-----|-----|-------------|
-| UAT | `https://uat.zerobias.com` | `f6d1f579-fe02-4158-b99e-a55113fd70cb` |
+| UAT | `https://uat.zerobias.com` | `43f08afd-7ab9-4e99-a93c-619c46adaabe` (W3Geekery-org boundary, since 2026-04-16) |
 | CI / QA / Prod | — | set `ZB_PIPELINE_ID` explicitly |
 
 Keep these in sync with `src/environments/environment.*.ts`.
