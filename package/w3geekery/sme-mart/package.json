@@ -8,6 +8,10 @@
   },
   "scripts": {
     "ng": "ng",
+    "prebuild": "dotenv -e .env.local -- node scripts/gen-neon-env.mjs",
+    "prebuild:prod": "dotenv -e .env.local -- node scripts/gen-neon-env.mjs",
+    "prebuild:uat": "dotenv -e .env.local -- node scripts/gen-neon-env.mjs",
+    "prebuild:vercel": "dotenv -e .env.local -- node scripts/gen-neon-env.mjs",
     "predev": "dotenv -e .env.local -- node scripts/gen-neon-env.mjs",
     "dev": "dotenv -e .env.local -- ng serve --proxy-config proxy-uat.conf.js",
     "predev:uat": "dotenv -e .env.local -- node scripts/gen-neon-env.mjs",
