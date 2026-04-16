@@ -10,19 +10,12 @@ export class OrgSwitcherService {
   private readonly clientApi = inject(ZerobiasClientApi);
   private readonly dialog = inject(MatDialog);
 
-  // System Org UUID (all zeros) — must compare as string
-  private readonly SYSTEM_ORG_ID = '00000000-0000-0000-0000-000000000000';
-
   // Raw org list from SDK (unfiltered)
   private readonly rawOrgs = signal<dana.Org[]>([]);
 
-  // Filtered and sorted org list exposed to components
+  // Alphabetically sorted org list exposed to components
   readonly orgs$ = computed(() => {
-    return this.rawOrgs()
-      .filter((org) => !org.hidden)
-      .filter((org) => `${org.id}` !== this.SYSTEM_ORG_ID)
-      .filter((org) => !this.isOpsOrg(org))
-      .sort((a, b) => a.name.localeCompare(b.name));
+    return this.rawOrgs().sort((a, b) => a.name.localeCompare(b.name));
   });
 
   constructor() {
@@ -83,26 +76,4 @@ export class OrgSwitcherService {
     }
   }
 
-  /**
-   * Check if an org has the hidden flag set
-   */
-  private isHiddenOrg(org: dana.Org): boolean {
-    return org.hidden === true;
-  }
-
-  /**
-   * Check if an org is the System Org (all zeros UUID)
-   */
-  private isSystemOrg(org: dana.Org): boolean {
-    return `${org.id}` === this.SYSTEM_ORG_ID;
-  }
-
-  /**
-   * Check if an org is an ops org
-   * TODO: Kevin — define ops-org filter rule (tag? name pattern? org.kind?)
-   * Currently returns false (no-op); placeholder for future implementation.
-   */
-  private isOpsOrg(org: dana.Org): boolean {
-    return false;
-  }
 }
