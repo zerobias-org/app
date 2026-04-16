@@ -6,7 +6,7 @@ import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
 import { Subscription } from 'rxjs';
 import { ZerobiasClientApp } from '@zerobias-com/zerobias-client';
-import { ZbAvatarLabelComponent } from '@zerobias-org/ngx-library';
+import { ZbAvatarLabelComponent, ZbStaticImageUrlPipe, ZbImgDefaultDirective } from '@zerobias-org/ngx-library';
 import { ImpersonationService } from '../../../core/services/impersonation.service';
 import { OrgSwitcherService } from '../../../core/services/org-switcher.service';
 import type { dana } from '@zerobias-com/zerobias-sdk';
@@ -21,6 +21,8 @@ import type { dana } from '@zerobias-com/zerobias-sdk';
     MatMenuModule,
     MatDividerModule,
     ZbAvatarLabelComponent,
+    ZbStaticImageUrlPipe,
+    ZbImgDefaultDirective,
   ],
   templateUrl: './user-profile-dropdown.component.html',
   styleUrl: './user-profile-dropdown.component.scss',
