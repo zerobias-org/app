@@ -71,14 +71,18 @@
           (click)="onSelectOrg(org)"
           [attr.data-testid]="'org-item-' + org.id"
         >
-          @if (`${org.id}` === currentOrgId()) {
-            <mat-icon class="current-marker">circle</mat-icon>
-          } @else {
-            <mat-icon class="spacer">circle</mat-icon>
-          }
-          <span [class.font-weight-bold]="`${org.id}` === currentOrgId()">
-            {{ org.name }}
-          </span>
+          <div class="org-row">
+            <img
+              [src]="org.avatarUrl | staticImageUrl"
+              class="zb-ui-resource-image s20"
+              imgDefault
+              [default]="'./assets/unknown-company.svg'"
+              alt=""
+            />
+            <span class="ellipsis" [class.font-weight-bold]="`${org.id}` === currentOrgId()">
+              {{ org.name }}
+            </span>
+          </div>
         </button>
       }
     </div>
