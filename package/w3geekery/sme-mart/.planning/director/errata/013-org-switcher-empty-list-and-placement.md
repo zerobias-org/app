@@ -3,7 +3,9 @@ id: "013"
 severity: high
 phase: 18
 found: 2026-04-15
-status: open
+status: resolved
+resolved: 2026-04-16
+resolution: "Plan 18-02 hotfix: swap getOrgs→listMyOrgs, reposition trigger, add regression tests"
 ---
 
 # Phase 18 Org Switcher — submenu renders empty + placement buried below Settings

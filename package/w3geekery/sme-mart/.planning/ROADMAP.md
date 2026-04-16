@@ -46,7 +46,7 @@
 
 ### v1.3 Dev Experience, Hardening & Transparency (Phases 18-23)
 
-- [ ] **Phase 18: Org Switcher** (TBD plans) — User-menu dropdown to switch active ZB org without DevTools sessionStorage hacks (est. 4–8 hrs)
+- 🔄 **Phase 18: Org Switcher** (2/2 plans, executing) — User-menu dropdown to switch active ZB org without DevTools sessionStorage hacks (est. 4–8 hrs)
 - [ ] **Phase 19: zbb Local Dev Stacks** (TBD sub-plans 19.1 + 19.2) — Local dev environment for SPA + Hub module + login via `zbb` with CloudFront-sim (est. 7–10 hrs)
 - [ ] **Phase 20: Fire-and-Forget Audit** (TBD plans) — Audit all `pushEntity` call sites, add telemetry, remediate CRITICAL+SIMPLE, defer complex to v1.4 (est. ~8 hrs)
 - [ ] **Phase 21: Org Documents Center Completion** (TBD plans) — Folders, colors, tags, templates, preview (est. ~20 hrs, time-boxed, scope trims on creep)
@@ -174,11 +174,14 @@
   4. Page reloads or router refreshes post-switch to pick up new org context
   5. Subsequent API calls use the new org's `dana-org-id` header (verified in DevTools Network tab)
 
-**Plans**: TBD
+**Plans**: 2
+  - [x] **Phase 18 Plan 01** — OrgSwitcherService + SwitchingOrgDialog + UserProfileDropdown integration + E2E tests (executed 2026-04-15, landed)
+  - [x] **Phase 18 Plan 02** — Hotfix for Errata 013 (empty submenu + placement) — swap SDK method, reposition trigger, add regression tests (executed 2026-04-16)
 
-**Effort**: 4–8 hours
+**Effort**: 4–8 hours (Plan 01: 3h 5m, Plan 02: 45m)
 **Tech Stack**: Angular 21 + ZeroBias SDK (no new dependencies)
 **References**: `~/Projects/zb/ui/` portal user-menu component (read, don't copy)
+**Status**: Phase 18 feature-complete. Awaiting UAT verification before closing phase.
 
 ---
 
