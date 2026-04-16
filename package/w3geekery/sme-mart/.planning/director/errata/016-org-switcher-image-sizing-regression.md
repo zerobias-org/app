@@ -3,7 +3,9 @@ id: "016"
 severity: high
 phase: 18
 found: 2026-04-16
-status: open
+status: resolved
+resolved: 2026-04-16
+resolution: "Plan 18-05: ported zb-ui-resource-image CSS block (with s16/s20/s32 size modifiers and float utilities) from zb-ui-lib/components.scss:2085-2193 into SME Mart's src/styles.scss. Plan 18-04 markup left exactly as-is — root-cause fix instead of swapping to zb-avatar-label. When SME Mart merges into zb/ui, the ported block drops out seamlessly. Director UAT 2026-04-16 confirmed 5-6 equal-height rows with small avatars."
 ---
 
 # Phase 18 Plan 18-04 regressed submenu visibility — unconstrained `<img>` from wrong-library reference

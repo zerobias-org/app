@@ -3,7 +3,9 @@ id: "014"
 severity: high
 phase: 18
 found: 2026-04-15
-status: open
+status: resolved
+resolved: 2026-04-16
+resolution: "Plan 18-03: dropped all client-side org filters (admin-only usage + platform hidden:true universal on UAT made filter useless) and removed explicit <mat-icon matMenuTriggerIcon>arrow_right</mat-icon> line so only Material's default submenu caret renders. DECISIONS.md updated with 2026-04-15 no-filter addendum. Director UAT 2026-04-16 confirmed populated list + single chevron."
 origin:
   errata_chain: "013 → 014 (post-hotfix defects discovered)"
 ---

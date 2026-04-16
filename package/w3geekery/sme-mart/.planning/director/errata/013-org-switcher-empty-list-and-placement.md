@@ -5,7 +5,7 @@ phase: 18
 found: 2026-04-15
 status: resolved
 resolved: 2026-04-16
-resolution: "Plan 18-02 hotfix: swap getOrgs→listMyOrgs, reposition trigger, add regression tests"
+resolution: "Plans 18-02 + 18-03 combined: 18-02 swapped getOrgs→listMyOrgs (SDK method fix) and repositioned trigger above My Organizations (placement fix); 18-03 followed up by dropping the residual over-filtering that still masked the list. Director UAT 2026-04-16 confirmed populated, correctly-placed submenu."
 ---
 
 # Phase 18 Org Switcher — submenu renders empty + placement buried below Settings

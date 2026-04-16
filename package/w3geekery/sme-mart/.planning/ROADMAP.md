@@ -46,7 +46,7 @@
 
 ### v1.3 Dev Experience, Hardening & Transparency (Phases 18-23)
 
-- 🔄 **Phase 18: Org Switcher** (5/5 plans, awaiting Director UAT screenshot review) — User-menu dropdown to switch active ZB org without DevTools sessionStorage hacks, CSS fixes for org logo sizing (est. 4–8 hrs + 12m hotfix)
+- ✅ **Phase 18: Org Switcher** (5/5 plans, complete 2026-04-16) — User-menu dropdown switches active ZB org; Director UAT-approved (W3Geekery switch confirmed real org-context swap). Resolved errata 013/014/016 in-phase.
 - [ ] **Phase 19: zbb Local Dev Stacks** (TBD sub-plans 19.1 + 19.2) — Local dev environment for SPA + Hub module + login via `zbb` with CloudFront-sim (est. 7–10 hrs)
 - [ ] **Phase 20: Fire-and-Forget Audit** (TBD plans) — Audit all `pushEntity` call sites, add telemetry, remediate CRITICAL+SIMPLE, defer complex to v1.4 (est. ~8 hrs)
 - [ ] **Phase 21: Org Documents Center Completion** (TBD plans) — Folders, colors, tags, templates, preview (est. ~20 hrs, time-boxed, scope trims on creep)
@@ -184,7 +184,7 @@
 **Effort**: 4–8 hours (Plan 01: 3h 5m, Plan 02: 45m, Plan 03: ~30m, Plan 04: 45m, Plan 05: 12m)
 **Tech Stack**: Angular 21 + ZeroBias SDK (no new dependencies)
 **References**: `~/Projects/zb/ui/` portal user-menu component (read, don't copy)
-**Status**: Phase 18 feature-complete. Awaiting UAT verification before closing phase.
+**Status**: Complete 2026-04-16. Director UAT-approved — W3Geekery switch confirmed real org-context swap (AuditgraphDB empty-data response pattern proved header actually changed). Errata 013/014/016 all resolved in-phase; errata 015 (credential rotation) left for follow-up.
 
 ---
 
@@ -324,7 +324,7 @@
 | 15. Document Templates | 3/3 | Complete    | 2026-04-10 |
 | 16. Form Builder | 5/5 | Complete    | 2026-04-14 |
 | 17. Demo Seed Scripts | 1/1 | Complete    | 2026-04-15 |
-| 18. Org Switcher | 4/4 | Complete   | 2026-04-16 |
+| 18. Org Switcher | 5/5 | Complete    | 2026-04-16 |
 | 19. zbb Local Dev Stacks | 0/? | Not started | — |
 | 20. Fire-and-Forget Audit | 0/? | Not started | — |
 | 21. Org Documents Center | 0/? | Not started | — |
