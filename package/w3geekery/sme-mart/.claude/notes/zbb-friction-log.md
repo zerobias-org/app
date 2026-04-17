@@ -204,6 +204,72 @@ nginx.conf.template used `upstream minio { server ${AWS_ENDPOINT}; }` where `AWS
 
 ---
 
+### 010 — `zbb env` imports directive silently ignored when nested inside `env.<var>.imports`
+
+**Category:** Tooling ergonomics / docs gap
+**Date:** 2026-04-17
+**Phase:** 19 v2 execution
+
+**What happened:**
+Plans wrote the following pattern to express "this stack's `CLOUDFRONT_SIM_PORT` should be inherited from cloudfront-sim":
+
+```yaml
+env:
+  CLOUDFRONT_SIM_PORT:
+    type: port
+    imports: ["cloudfront-sim.CLOUDFRONT_SIM_PORT"]
+```
+
+zbb saw `type: port` and auto-allocated a fresh port (15101) for each consuming stack, **silently ignoring the nested `imports:` directive**. The correct pattern is a top-level `imports:` block (as shown in `zb/hub/zbb.yaml`):
+
+```yaml
+imports:
+  cloudfront-sim:
+    - CLOUDFRONT_SIM_PORT
+    - CLOUDFRONT_SIM_URL
+```
+
+**Impact:**
+- All three Phase 19 stacks ended up with independent port allocations for a var meant to be shared.
+- Workaround: `zbb env set CLOUDFRONT_SIM_PORT 15002 --stack <name>` on every consuming stack (repetitive, error-prone).
+- Director + planner both missed the pattern — not obvious from docs that the two forms aren't interchangeable.
+
+**Suggested improvement:**
+- `zbb stack add` should **warn** when `env.<var>.imports:` appears inside the env block (unsupported schema; user probably meant top-level `imports:`).
+- stacks-spec.md should explicitly document: "`imports:` is a top-level directive only. Do NOT nest it inside `env.<var>`." Include a bad-vs-good example.
+- Consider honoring the nested form as syntactic sugar (either is valid) — would remove the ambiguity entirely.
+
+---
+
+### 011 — `zbb build <stack>` hardcoded to Gradle; ignores `lifecycle.build:` from stack manifest
+
+**Category:** Tooling gap / feature request
+**Date:** 2026-04-17
+**Phase:** 19 v2 execution
+
+**What happened:**
+Phase 19 stack manifests defined `lifecycle.build: bash setup.sh build` (for Angular SPA: invokes `npm run build:stack`; for login: invokes `npm run build`). Running `zbb build sme-mart-spa` errored with:
+
+```
+zbb: requires a Gradle project. Run from a directory with gradlew
+```
+
+So `zbb build` is hardcoded to `./gradlew monorepoBuild` regardless of what the stack's `lifecycle.build:` hook declares. Forced consumers to bypass zbb entirely and run `npm run build:stack` directly from the app root — which means `zbb build` is misleading for non-Gradle stacks (people will reach for it and get an unhelpful error).
+
+**Impact:**
+- zbb CLI's build command is effectively broken for any stack not built with Gradle.
+- Stack manifests' `lifecycle.build:` declarations become documentation-only, not invocable.
+- Consumers must know to bypass zbb for build and run their own toolchain directly.
+
+**Suggested improvement (feature request):**
+- `zbb build <stack>` should honor `lifecycle.build:` from the stack manifest when present. Fall back to Gradle only if no lifecycle hook defined.
+- Alternatively: rename the Gradle-only command to `zbb gradle-build` or similar, and make `zbb build` the lifecycle-driven entrypoint.
+- stacks-guide.md should clarify: "Today `zbb build` is Gradle-specific; use your stack's toolchain directly for non-Gradle builds."
+
+This affects any third-party dev building an app (Angular, React, Next.js, etc.) as a zbb stack — the module-authoring path is Gradle-centric but consumer apps aren't.
+
+---
+
 ## Open Invitations
 
 If any of these findings feel ready to escalate as `/friction` entries in `zb-dx`, Clark can promote them individually. This doc is the working scratchpad; `zb-dx` is the shared knowledge base.
