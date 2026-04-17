@@ -2,11 +2,11 @@
 phase: 19
 slug: zbb-local-dev-stacks
 reviewed: 2026-04-17
-verdict: CONDITIONAL PASS
-blocks: 2
-flags: 3
+verdict: PASS (after fix-pass)
+blocks: 0
+flags: 1
 notes: 2
-condition: "B1 (cross-stack docker exec container name) + B2 (nginx upstream scheme syntax) must fix before execute"
+sign_off: "2026-04-17 — B1, B2, F-NEW-1, F-NEW-3 all verified landed. F-NEW-2 deferred non-blocking."
 ---
 
 # Director Review — Phase 19 v2 (Replan after Errata 017)
@@ -101,3 +101,18 @@ See B2 fix — remove or use.
 Execution can dispatch after B1 + B2 fixes in Plans 19-01/19-02/19-03. FLAGs and NOTES can ride along as polish during execution or go to a follow-up pass.
 
 **One more Director-discipline note:** these BLOCKs are exactly the kind of "runtime path tracing" errors my review process should catch every time. The architectural review bar (errata 017 lesson) is met; the execution-bug bar also needs attention. Keeping it on the radar for v1.3 retro.
+
+---
+
+## Sign-off (2026-04-17, iteration 2/3)
+
+Re-verified all 4 Director-required fixes landed correctly in the plan files:
+
+| Fix | Verified at | Evidence |
+|-----|-------------|----------|
+| **B1** — literal `cloudfront-sim-nginx` | 19-02-PLAN.md L176, L350; 19-03-PLAN.md L174, L365 | `docker exec cloudfront-sim-nginx nginx -s reload` (no `${STACK_NAME}-*`); silent `\|\| echo` replaced with `exit 1` on reload failure in setup.sh |
+| **B2** — nginx upstream host:port | 19-01-PLAN.md L452 (template), L561-568 (entrypoint) | Two-step extraction `MINIO_HOST="${AWS_ENDPOINT#*://}"` then `"${MINIO_HOST%%:*}"` → just `minio`/`localhost`; `MINIO_PORT` extracted separately; `upstream minio { server ${MINIO_HOST}:${MINIO_PORT}; }` → valid host:port form. Dead `upstream uat_backend` removed. |
+| **F-NEW-1** — dynamic PORT | 19-04-PLAN.md L455, L556, L604, L654 | `PORT="${CLOUDFRONT_SIM_PORT:-15002}"` in smoke-all.sh; `PORT="${PORT:-15002}"` in each per-stack smoke.sh; propagation via `PORT="$PORT" bash "$SMOKE_SCRIPT"` |
+| **F-NEW-3** — remove .conf before reload | 19-02-PLAN.md L176; 19-03-PLAN.md L174 | `docker run --rm -v cloudfront-sim-conf:/mnt alpine:latest rm -f /mnt/<stack>.conf && docker exec cloudfront-sim-nginx nginx -s reload \|\| true` — ordering preserved (`&&`) |
+
+**Verdict: PASS.** F-NEW-2 (STACKS.md troubleshooting gaps) and N-NEW-1/N-NEW-2 remain as deferred polish — non-blocking. Ready for `/gsd:execute-phase 19`.
