@@ -1,0 +1,96 @@
+# Unified-origin reverse proxy for SME Mart SPA + login + UAT API
+# Variables substituted by docker-entrypoint.sh via: envsubst '${CLOUDFRONT_SIM_PORT},${MINIO_HOST},${MINIO_PORT},${AWS_ENDPOINT},${UAT_ORIGIN}' < nginx.conf.template
+
+user nginx;
+worker_processes auto;
+error_log /var/log/nginx/error.log warn;
+pid /var/run/nginx.pid;
+
+events {
+  worker_connections 1024;
+}
+
+http {
+  include /etc/nginx/mime.types;
+  default_type application/octet-stream;
+
+  log_format main '$remote_addr - $remote_user [$time_local] "$request" '
+                  '$status $body_bytes_sent "$http_referer" '
+                  '"$http_user_agent" "$http_x_forwarded_for"';
+
+  access_log /var/log/nginx/access.log main;
+  sendfile on;
+  tcp_nopush on;
+  tcp_nodelay on;
+  keepalive_timeout 65;
+  types_hash_max_size 2048;
+
+  # Upstream: MinIO bucket server (S3-compatible static serving)
+  upstream minio {
+    server ${MINIO_HOST}:${MINIO_PORT};
+  }
+
+  server {
+    listen ${CLOUDFRONT_SIM_PORT};
+    server_name localhost;
+
+    # Static location blocks for SPA and login (written by app stacks to /etc/nginx/conf.d/apps/*.conf)
+    # Each app stack writes its own location block during lifecycle.start
+    # Placeholder for app-injected configs:
+    include /etc/nginx/conf.d/apps/*.conf;
+
+    # API reverse-proxy location (D-02: proxy directives)
+    location /api/ {
+      proxy_pass https://uat.zerobias.com/api/;
+      proxy_http_version 1.1;
+      proxy_set_header Host uat.zerobias.com;
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header X-Forwarded-Proto https;
+      proxy_ssl_server_name on;
+      proxy_ssl_verify off;  # UAT cert may not match localhost
+      proxy_cookie_domain uat.zerobias.com localhost;
+      proxy_cookie_flags ~ nosecure;
+      proxy_redirect off;
+    }
+
+    # Dana/auth reverse-proxy location (D-02)
+    location /dana/ {
+      proxy_pass https://uat.zerobias.com/dana/;
+      proxy_http_version 1.1;
+      proxy_set_header Host uat.zerobias.com;
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header X-Forwarded-Proto https;
+      proxy_ssl_server_name on;
+      proxy_ssl_verify off;
+      proxy_cookie_domain uat.zerobias.com localhost;
+      proxy_cookie_flags ~ nosecure;
+      proxy_redirect off;
+    }
+
+    # WebSocket session location (D-02: ws upgrade)
+    location /app/session {
+      proxy_pass https://uat.zerobias.com/app/session;
+      proxy_http_version 1.1;
+      proxy_set_header Upgrade $http_upgrade;
+      proxy_set_header Connection "upgrade";
+      proxy_set_header Host uat.zerobias.com;
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header X-Forwarded-Proto https;
+      proxy_ssl_server_name on;
+      proxy_ssl_verify off;
+      proxy_cookie_domain uat.zerobias.com localhost;
+      proxy_cookie_flags ~ nosecure;
+      proxy_read_timeout 3600s;
+      proxy_send_timeout 3600s;
+    }
+
+    # Catch-all 404
+    error_page 404 /404.html;
+    location = /404.html {
+      internal;
+    }
+  }
+}
