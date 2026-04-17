@@ -1,81 +1,132 @@
 # Director Session State
-**Last updated:** 2026-04-16T12:00:00-07:00
+**Last updated:** 2026-04-17T19:00:00-07:00
 **Session name:** `Director Parks`
-**Milestone:** v1.3 — **Phase 18 CLOSED. Phase 19 next.**
+**Milestone:** v1.3 — **Phase 19 live-running; final UAT paused mid-stream.**
 
 ## FIRST — Read This on Resume
 
-**Skill drift warning:** prior-session me (pre-clear) was running the director role from context accumulated at the top of the session, not re-reading the skill file on each mode invocation. Clark caught this. On resume, before doing ANYTHING else:
-
-1. **Re-invoke `/meta:director`** (or let the skill auto-resume). Read the actual skill text at `~/.claude/commands/meta/director.md`, don't rely on what "feels right" from this file.
-2. **Execute `required_reading` fully** — the 13-item list (SESSION-STATE, WATCH-LIST, DECISIONS, all errata, all backlog, RETROSPECTIVE, REQUIREMENTS, ROADMAP, STATE, PROJECT, canonical specs, referenced memory files, target CLAUDE.md files). Full pass, not a skim. This is how errata 009 happened.
-3. **Declare mode explicitly** when one is invoked. Prior session slid between review / checkpoint / design without explicit mode entry. Skill expects per-mode posture.
-4. **Use `Tell gsd-X:` handoff blocks** — copy-pastable, no quotes, no wrapping. Per memory `feedback_checkpoint_handoff_format.md`. Clark called me out earlier today for skipping this.
+**Next session: no heavy skill-drift risk.** We parked at a CLEAN point — the SPA is running against UAT through the local zbb stack, and the only remaining work is one rebuild + browser UAT + phase-close. Resume plan at the end of this file.
 
 ## Mental Model
 
-v1.3 design complete. 6 phase briefs at `.planning/director/phase-{18..23}-brief.md`. GSD roadmap locked, 35 requirements mapped.
+Phase 19 v2 (post-errata-017 replan) went through full execution + most of UAT today. Architecture is sound — **unified-origin reverse proxy with cookie-domain rewriting works end-to-end**. Browser loaded the SPA at `http://localhost:15100/sme-mart/` with valid session cookies auto-rewriting from `uat.zerobias.com` → `localhost`. API calls (`/api/dana/me`, `/api/dana/orgs`, `/api/platform/*`, `/api/hydra/tags`) all returning 200 against UAT.
 
-**Phase 18 (Org Switcher) — CLOSED 2026-04-16** after a rough 5-plan / 3-errata ride:
-- 18-01 ✓ shipped broken (wrong SDK method `getOrgs` vs `listMyOrgs`; errata 013)
-- 18-02 ✓ hotfix (SDK method + placement)
-- 18-03 ✓ dropped all filters (universal `hidden:true` on UAT made filter useless; errata 014) + removed duplicate chevron
-- 18-04 ✓ avatar enhancement (inadvertently regressed submenu; errata 016 — markup used `zb-ui-resource-image.s20` CSS from wrong library)
-- 18-05 ✓ ported `zb-ui-resource-image` CSS from zb-ui-lib `components.scss` into SME Mart's `styles.scss`. Matches target architecture — when SME Mart merges into zb/ui the port drops out seamlessly.
+**The core architectural thesis is proven.** Errata 017 was the right call — this WOULD NOT have worked under the original "two static-serving stacks" design. Clark's UAT session is transparently flowing through to localhost via `proxy_cookie_domain`.
 
-Director UAT 2026-04-16 confirmed populated org list (W3Geekery, Roughnecks, etc.), single chevron, small avatars, current-org bold, expected AuditgraphDB failures on org switch (indirect proof switch worked). ROADMAP checkbox flipped. Closeout commit `917d452`.
-
-**Phase 19 (zbb Local Dev Stacks) is next.** Brief at `.planning/director/phase-19-brief.md` unchanged. Two sub-phases — SPA+Hub Module stack (19.1), Login stack (19.2) — sharing a custom `cloudfront-sim` nginx stack. Kevin confirmed feasibility 2026-04-13 Slack. Wait for `/gsd:plan-phase 19` in gsd-plan pane, then run review mode here.
-
-**Errata 015 infrastructure fix landed this session.** `environment.neon.ts` was committed with a live Neon password in Feb 2026 (`68abe4d`), got wiped by Phase 18 Plan 18-01 executor (`ac8e994`) running `predev` without `.env.local`, broke impersonation silently for ~18 hours. Fixed: `.env.local` created (gitignored) with Neon URL, file untracked via `git rm --cached`, added to `.gitignore`, `prebuild` hooks added. Credential `npg_NjsYRTy2U6re` was on origin ~7 weeks — **rotation still owed**, platform-side task for Clark when he has time.
+**Phase 19 is NOT closed.** One more build + redeploy + final browser check remaining. See "What to Do on Resume."
 
 ## Open Items
 
-### Active errata (4 open)
-- **006** — UAT vendor/buyer accounts (v1.2 carry; blocks Phase 16 UAT tests 5–8)
-- **010** — gsd-executor MCP allowlist gap (v1.2 carry; harness-level)
-- **011** — fire-and-forget `pushEntity` audit (v1.2 carry — this IS Phase 20)
-- **012** — pipeline→hydra Resource FK gap (Kevin escalation)
-- **015** — environment.neon.ts credential leak — remediated in code, **credential rotation pending** (not phase-blocking)
+### Phase 19 — pending ONE rebuild cycle before close
 
-### Resolved this session
-- 013 — empty list + placement (18-02 + 18-03)
-- 014 — hidden filter + double chevron (18-03)
-- 016 — image sizing regression (18-05)
+**Last config change was in-flight when we paused:**
+- `environment.stack.ts`: `dbMode: 'neon'` restored (Generic SQL Hub Module not working in platform per Clark; Neon-direct is the only path today)
+- `neonConnectionString: NEON_DATABASE_URL` imported from `environment.neon` (same pattern as `environment.ts`)
+- `package.json`: added `prebuild:stack` hook (runs `gen-neon-env.mjs`)
 
-### Backlog updates this session
-- Plan 088 research-complete addendum (Form Builder WYSIWYG + grouping, research doc at `.planning/research/internal/2026-04-15-form-builder-refactor-research.md`)
+**To complete Phase 19:**
+1. `npm run build:stack && zbb stack stop sme-mart-spa && zbb stack start sme-mart-spa`
+2. Browser hard-refresh `http://localhost:15100/sme-mart/` — SPA should load with Neon-backed features working (notes hierarchy, other 7 Neon-only tables)
+3. Spot-check: cookies on localhost (already confirmed working via MCP browser), deep-route refresh, login flow in Incognito (optional — we already verified the machinery)
+4. If green → Director flips `REVIEW-19-v2.md` to full close, mark phase complete in ROADMAP (GSD's job)
 
-### Minor tooling note (not errata-worthy)
-- `/gsd:progress` init report lists Phase 14 + 15 as `in_progress` despite both shipping in v1.2. Filename mismatch with what the tool expects. Non-blocking. If Clark wants to file a GSD tooling cleanup backlog item, fine; otherwise ignore.
+### Uncommitted session state (to clean up on resume, or leave for gsd-execute)
 
-### Phases 19–23 status
-All briefed, none started. Order: 18 ✓ → 19 (zbb stacks) → 20 (fire-and-forget) → 21 (org docs) → 22 (form templates) → 23 (transparency UI-SPEC).
+**Code changes (valuable, keep):**
+- `package.json` — added `prebuild:stack` hook
+- `environment.stack.ts` — dbMode:neon + NEON_DATABASE_URL import + apiHostname:15100 (zbb allocated, not locked 15002)
+- `environment.ts` — (need to verify what's modified)
+- `zbb-stacks/cloudfront-sim/compose.yml` — MINIO_PORT/HOST removed from env (entrypoint extracts), depends_on:minio removed
+- `zbb-stacks/sme-mart-spa/setup.sh` — single-mc-container pattern, browser/ subdir upload, correct container name, correct volume name, exact-match /sme-mart/ location
+- `zbb-stacks/sme-mart-spa/sme-mart-spa.conf` — (verify)
+- `zbb-stacks/sme-mart-spa/zbb.yaml` — lifecycle.stop + health.command fixed
+- `zbb-stacks/sme-mart-login/setup.sh` — same fixes + redirect to /login/en_us/login.html
+- `zbb-stacks/sme-mart-login/sme-mart-login.conf` — redirect to en_us/login.html
+- `zbb-stacks/sme-mart-login/zbb.yaml` — health.command + lifecycle.stop fixed
+- `.claude/notes/zbb-friction-log.md` — findings 010-012 added
 
-## Recent Decisions (details in DECISIONS.md)
+**Debris (can clean up):**
+- `zbb-stacks/sme-mart-spa/setup.log`
+- `zbb-stacks/sme-mart-login/setup.log`
 
-- **2026-04-15**: Org List Filtering Rules changed to "no filter" — admin exposure acceptable, platform `hidden:true` universal. Chris Slack thread pending.
-- **2026-04-15**: Plan 18-04 avatar enhancement approved as non-gap-closure enhancement — WRONG CALL. Caused errata 016. Lesson: verify CSS infrastructure exists in target app before cargo-culting markup from a reference app in a different library.
-- **2026-04-16**: `environment.neon.ts` removed from git tracking + gitignored + `prebuild*` hooks added. Errata 015 documents.
-- **2026-04-16**: Plan 18-05 — port `zb-ui-resource-image` CSS from zb-ui-lib instead of swapping to `zb-avatar-label`. Matches target-architecture (future SME Mart merge into zb/ui).
-- **2026-04-15**: Form Builder 088 confirmed as v1.4 scope. Research complete; Discuss phase can skip research step.
+**Plan files have stale content vs reality:**
+- `19-01-PLAN.md` / `19-02-PLAN.md` / `19-03-PLAN.md` / `19-04-PLAN.md` — show the ORIGINAL planned content; the actual shipped code diverged significantly due to the 10+ execution bugs we fixed. These plan modifications from the B1/B2/F-NEW-1/F-NEW-3 fix pass aren't committed. Either commit them as "plan updated during execution" OR accept that the committed plans don't match reality and lean on SUMMARY.md for what actually shipped.
 
-## Failure Patterns New This Session (WATCH-LIST candidates for v1.3 retro)
+### Active errata (5 open across milestones)
 
-1. **Tests verify code, not feature.** Phase 18 shipped four defects across 20+ unit + 5 E2E tests. Mocks returned ideal data every time; real UAT data (universal `hidden:true`, 14687×1558 px logos) was never exercised. Director's visual UAT screenshot is the only check that catches this.
-2. **Cross-library markup assumptions.** Plan 18-04 copied `<img class="zb-ui-resource-image s20">` from zb/ui portal. That app uses `zb-ui-lib`; SME Mart uses `@zerobias-org/ngx-library`. Different libraries, different CSS surfaces. Markup ported fine, CSS didn't come with it.
-3. **Plan UAT self-certification.** Executors flipped errata to `resolved` multiple times before Director screenshot review. WATCH-LIST: executor cannot mark errata resolved; only Director does that.
-4. **Executor stages auto-generated files.** STATE.md phase counts drifted repeatedly. `environment.neon.ts` had live credentials wiped. Both via executor's atomic-commit pattern sweeping in files it shouldn't touch.
+- **006** — UAT vendor/buyer accounts (v1.2 carry)
+- **010** — gsd-executor MCP allowlist gap (v1.2 carry, harness-level)
+- **011** — fire-and-forget `pushEntity` audit (THIS IS Phase 20 — still pending)
+- **012** — pipeline → hydra Resource FK gap (Kevin escalation)
+- **015** — environment.neon.ts credential leak (remediated; Neon password rotation still owed, credential `npg_NjsYRTy2U6re` was on origin ~7 weeks)
+- **017** — Phase 19 missed reverse-proxy pattern (filed during v1 → v2 revert)
+- **018** — Plan 19-03 path drift + latent path-default bugs (filed during execution)
+
+### Phase 19 execution bugs NOT yet written up as errata
+
+Worth consolidating into a single errata or a follow-up plan-quality review entry at v1.3 retro:
+- Nested `env.<var>.imports` silently ignored by zbb (not an errata — documented in friction log 010)
+- `dependencies:` vs `depends:` key name
+- Angular `--base-href=/sme-mart` needs trailing slash
+- Angular 17+ outputs to `browser/` subdir (plan assumed flat dist/)
+- `process.env` in Angular environment (doesn't work in browser)
+- Port allocation doesn't honor `value:` in `type: port` env declarations
+- Port overrides get wiped across `stack stop/start`
+- docker-compose can't do bash `${VAR##*:}` expansion
+- Login repo is Lerna legacy (not npm workspaces) — `npm install` at root doesn't recurse
+- Login `.npmrc` was missing `@zerobias-com` scope mapping
+- `minio/minio:latest mc` vs `minio/mc:latest` image confusion
+- mc container needs `--network` + volume mount for uploads
+- `mc policy set` → `mc anonymous set` deprecation
+- Stale slot containers fool zbb health checks on shared ports
+
+## Recent Decisions (details in DECISIONS.md — not all captured there yet)
+
+- **2026-04-17**: Phase 19 v2 replanned + executed against UAT backend with unified-origin reverse proxy. Architecture validated in live browser.
+- **2026-04-17**: `dbMode: 'neon'` is load-bearing for now — Generic SQL Hub Module doesn't work in platform yet (per Clark). Neon URL is visible in client bundle; accepted trade-off until the Hub path actually works.
+- **2026-04-17**: Backlog 089 (custom Hub Module local hosting) analyzed and likely unnecessary given Pipeline+GQL direction. 089 stays in backlog with "re-evaluate need first" framing.
+- **2026-04-17**: Port override pattern didn't work reliably across `zbb stack stop/start` — surrendered to zbb's allocated port (15100) and updated `environment.stack.ts` to match. Fighting zbb allocation was a dead end.
+
+## Friction Patterns New This Session
+
+1. **Nested schema directives silently ignored.** zbb saw `env.<var>.imports:` and auto-allocated; the intended import was dropped. No warning. Logged as friction 010.
+2. **CLI command renames break muscle memory.** `zbb up` → `zbb stack start`. Friction 012.
+3. **Build system assumes Gradle.** `zbb build <stack>` hardcoded to `./gradlew`, ignores `lifecycle.build:` from manifest. Friction 011.
+4. **Cascade of plan bugs exposed incrementally at runtime.** Each fix revealed the next one. 10+ execution bugs caught by Director + fixed in-place. Root cause for most: plans were authored from canonical docs without a working reference app to copy from.
+5. **zbb example library absence is expensive.** A single working reference app (Angular SPA + login + API proxy) in `zbb/stacks/examples/` would have compressed Phase 19 execution by ~70%. Logged as friction meta-finding.
 
 ## What to Do on Resume
 
-1. **Skill refresh pass** (see FIRST section above).
-2. **Check if `/gsd:plan-phase 19` has produced artifacts** at `.planning/phases/19-*/`. If yes → `/meta:director review 19`. If no → park.
-3. **Verify working tree is clean** — `git status` should show no uncommitted session work. If dirty, investigate before starting new review.
-4. **Remind Clark about the Neon credential rotation** (errata 015 remediation) if it's come up — not urgent but non-zero exposure since credential was on origin for ~7 weeks.
+### Immediate (5 min)
+1. Skill refresh: re-read `~/.claude/commands/meta/director.md` — the usual required-reading pass.
+2. Read this SESSION-STATE fully before doing anything else.
+3. Verify stacks are still up: `docker ps | grep -E 'sme-mart-local|nginx|minio'`. If they're down, bring back up: `zbb slot load sme-mart-local && zbb stack start minio && zbb stack start cloudfront-sim && zbb stack start sme-mart-spa && zbb stack start sme-mart-login`.
 
-## Session housekeeping (non-director context)
+### Close Phase 19 (30–60 min)
+1. Finish the in-flight rebuild:
+   ```
+   npm run build:stack && zbb stack stop sme-mart-spa && zbb stack start sme-mart-spa
+   ```
+2. Browser UAT: Clark opens `http://localhost:15100/sme-mart/`. Verifies:
+   - SPA loads with session (or redirects through `/login/` → Microsoft OAuth → back)
+   - Notes hierarchy and other Neon-backed features work (proves `dbMode: 'neon'` path)
+   - Cookies at `Domain=localhost` in DevTools
+   - Deep-route refresh (`/sme-mart/rfps/test-route`) returns index.html
+3. If green: update REVIEW-19-v2.md sign-off to "UAT PASSED", tell gsd-execute to mark phase complete + close in ROADMAP.
+4. Commit the uncommitted stack/setup.sh fixes under a single commit: `fix(phase-19): resolve 10+ execution bugs from UAT` with the friction-log findings linked.
 
-- **eza one_dark palette** active in `~/.zshrc` via hand-ported `EZA_COLORS` (gruvbox-dark alternate commented below). ngx `theme.yml` support doesn't exist in any eza release; cargo-installed eza removed. Non-project matter.
-- **cargo installed eza** earlier this session — `cargo uninstall eza` if you want to clean up; Homebrew version is sufficient.
-- **`.env.local` now exists** at project root with `NEON_DATABASE_URL` only. If other env vars (ZB API keys) are needed locally, they're being supplied via shell exports or not needed for proxy-mode auth — don't add them unless something breaks.
+### Housekeeping
+5. Clean up `setup.log` files (gitignore or just delete).
+6. Consider: should the updated plan files be committed too (plans-match-reality) or should a post-execution SUMMARY.md be the record of truth? Director default: keep plans as-planned, rely on SUMMARY.md for actual.
+
+### Before v1.3 retrospective
+7. Consolidate the 10+ execution bugs into a single process-level errata — there's a pattern here (planner can't know what it can't see; zbb example library absence) that's worth a first-class retro finding, not scattered across the friction log.
+
+## Session housekeeping (non-Director context)
+
+- Docker Swarm is initialized on Clark's machine (`docker swarm init` ran today). Persistent.
+- zbb slot `sme-mart-local` is created and currently loaded in his terminal. All 4 stacks registered: minio, cloudfront-sim, sme-mart-spa, sme-mart-login.
+- Old orphan slot `sme-mart-dev` was deleted (had stale containers from Phase 19 v1 run).
+- Pane layout on tmux: I (Director) got moved to be immediately-left of Clark's bash terminal. Not relevant for tmux on resume but noted.
+- `.env.local` at project root has `NEON_DATABASE_URL`. `environment.neon.ts` is gitignored.
+- Errata 015 Neon credential rotation still owed.
