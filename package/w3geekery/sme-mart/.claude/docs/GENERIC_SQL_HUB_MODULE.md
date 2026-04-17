@@ -1,3 +1,7 @@
+> **⚠ STALENESS WARNING (2026-04-17):** Dated 2026-02-02. Current SME Mart uses Pipeline + GQL + Neon-direct and may not need any Hub Module locally. The "publishing path not currently working" claim is stale — verify current state before making decisions.
+>
+> **Authoritative Hub Module docs:** `~/Projects/zb/zerobias/HubModules.md` (meta-repo). The generic-sql module is covered there as `@auditmation/module-generic-sql` in the Connector Modules section.
+
 # Generic SQL Hub Module — Can We Use It?
 
 **Package:** `@auditlogic/module-auditmation-generic-sql-client-ts` (v0.5.0)
