@@ -1,0 +1,55 @@
+version: "3.9"
+
+services:
+  login-upload:
+    image: node:20-alpine
+    container_name: "${STACK_NAME}-login-upload"
+    working_dir: /login/package/w3geekery
+    volumes:
+      - ${LOGIN_REPO_PATH}:/login:ro
+      - ./upload.sh:/upload.sh:ro
+    environment:
+      # MinIO connection (from cloudfront-sim imports)
+      AWS_ENDPOINT: ${AWS_ENDPOINT}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      # Login build configuration
+      MINIO_BUCKET: ${MINIO_BUCKET}
+      LOGIN_BUILD_DIR: ${LOGIN_BUILD_DIR}
+      STACK_NAME: ${STACK_NAME}
+    command:
+      - /bin/sh
+      - -c
+      - |
+        set -e
+        echo "[login-upload] Starting build + asset upload..."
+
+        # Build login (npm already in working dir)
+        echo "[login-upload] Building login repo..."
+        npm run build
+
+        # Wait for MinIO to be ready
+        echo "[login-upload] Waiting for MinIO (${AWS_ENDPOINT})..."
+        counter=0
+        while ! curl -sf "${AWS_ENDPOINT}/minio/health/live" >/dev/null 2>&1 && [ $counter -lt 30 ]; do
+          counter=$((counter + 1))
+          sleep 1
+        done
+
+        if [ $counter -eq 30 ]; then
+          echo "[login-upload] ERROR: MinIO not ready after 30 seconds"
+          exit 1
+        fi
+
+        # Create bucket if needed + upload assets
+        echo "[login-upload] Creating MinIO bucket ${MINIO_BUCKET}..."
+        aws s3 mb "s3://${MINIO_BUCKET}" --endpoint-url "${AWS_ENDPOINT}" 2>/dev/null || true
+
+        echo "[login-upload] Uploading assets from ${LOGIN_BUILD_DIR} to s3://${MINIO_BUCKET}/auth/..."
+        if [ -d "${LOGIN_BUILD_DIR}" ]; then
+          aws s3 sync "${LOGIN_BUILD_DIR}/" "s3://${MINIO_BUCKET}/auth/" --endpoint-url "${AWS_ENDPOINT}" --delete
+        else
+          echo "[login-upload] WARNING: Build directory ${LOGIN_BUILD_DIR} not found"
+        fi
+
+        echo "[login-upload] Complete. Login assets available at ${MINIO_BUCKET}/auth/"
