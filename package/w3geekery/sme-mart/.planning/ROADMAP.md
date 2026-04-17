@@ -47,7 +47,11 @@
 ### v1.3 Dev Experience, Hardening & Transparency (Phases 18-23)
 
 - ✅ **Phase 18: Org Switcher** (5/5 plans, complete 2026-04-16) — User-menu dropdown switches active ZB org; Director UAT-approved (W3Geekery switch confirmed real org-context swap). Resolved errata 013/014/016 in-phase.
-- [ ] **Phase 19: zbb Local Dev Stacks** (TBD sub-plans 19.1 + 19.2) — Local dev environment for SPA + Hub module + login via `zbb` with CloudFront-sim (est. 7–10 hrs)
+- 📋 **Phase 19: zbb Local Dev Stacks** (4/4 plans, planning complete 2026-04-17) — Unified-origin reverse-proxy local dev environment for SPA + login via `zbb` with CloudFront-sim + nginx. Real UAT auth, real cookies, multi-user testing. (LS-01..LS-06; 10–14 hrs est.)
+  - [ ] **Plan 01 (Wave 1)** — Angular env + cloudfront-sim stack manifest + nginx config + entrypoint
+  - [ ] **Plan 02 (Wave 2)** — sme-mart-spa stack: build + upload + location block injection
+  - [ ] **Plan 03 (Wave 2)** — sme-mart-login stack: build + upload + location block injection (parallel to Plan 02)
+  - [ ] **Plan 04 (Wave 3)** — STACKS.md documentation + smoke test suite (master + per-stack)
 - [ ] **Phase 20: Fire-and-Forget Audit** (TBD plans) — Audit all `pushEntity` call sites, add telemetry, remediate CRITICAL+SIMPLE, defer complex to v1.4 (est. ~8 hrs)
 - [ ] **Phase 21: Org Documents Center Completion** (TBD plans) — Folders, colors, tags, templates, preview (est. ~20 hrs, time-boxed, scope trims on creep)
 - [ ] **Phase 22: Form Template Library** (TBD plans) — Save/reuse/fork form templates, library page, RFP wizard integration, new FormTemplate schema class (est. 22–32 hrs)
@@ -190,31 +194,45 @@
 
 ### Phase 19: zbb Local Dev Stacks
 
-**Goal**: Stand up reproducible local development stacks (SPA + Hub module + login) using the `zbb` tool, enabling iteration without waiting for upstream Hub module PR review.
+**Goal**: Stand up reproducible local development stacks (SPA + login) using the `zbb` tool with unified-origin reverse-proxy, enabling iteration without waiting for upstream Hub module PR review or CI/CD deployment. Real authentication, real cookies, multi-user testing locally.
 
 **Depends on**: None (infrastructure setup)
 
-**Requirements**: LS-01, LS-02, LS-03, LS-04, LS-05, LS-06
+**Requirements**: LS-01, LS-03, LS-04, LS-05, LS-06
 
 **Sub-phases**:
-  - **19.1** SPA + Hub Module — `zbb up` brings SME Mart SPA + local Hub module online with postgres/minio/registry/cloudfront-sim stacks
-  - **19.2** Login Stack — `login/` served alongside SPA via cloudfront-sim; session handoff to SPA verified locally
+  - **19.1 (Waves 1-2)** Unified-origin reverse-proxy architecture + SPA + login stacks
+  - **19.2 (Wave 3)** Documentation + smoke test suite
 
 **Success Criteria** (what must be TRUE):
-  1. `zbb up sme-mart-spa` brings all services online; `curl localhost:<port>/<basePath>/` returns SPA index.html
-  2. Unmerged SME Mart Hub module builds + publishes to local Verdaccio; local hub-server consumes it (no upstream PR dependency)
-  3. Deep-route navigation (e.g., `/rfps/abc123`) refreshes without 404 (SPA `try_files` fallback via cloudfront-sim)
-  4. Hub module API calls from SPA succeed against local hub-server
-  5. `login/` repo served via cloudfront-sim; session handoff from login → SPA works end-to-end locally
-  6. Custom `cloudfront-sim` stack is reusable across SPA, login, and future repos (not SME Mart-specific)
-  7. Env var import/export between stacks follows zbb conventions (e.g., SPA imports `HUB_URL` from hub-server)
-  8. README documents setup, teardown, and iteration workflow (change Hub module → rebuild → SPA picks it up)
+  1. `zbb up sme-mart-spa` brings all services online; `curl localhost:15002/sme-mart/` returns SPA index.html
+  2. SPA deep-route refresh (e.g., `/rfps/abc123`) returns index.html (try_files fallback via cloudfront-sim) — no 404
+  3. Login served at `localhost:15002/login/`; user logs in with real UAT credentials; cookies land on `localhost` domain (not `uat.zerobias.com`)
+  4. After login, SPA navigation shows valid session (whoAmI populates user context)
+  5. `cloudfront-sim` stack is reusable (location blocks and backend targets parameterized, not SME Mart-specific)
+  6. Env var import/export between stacks follows zbb conventions (e.g., SPA imports `HUB_URL` from hub-server)
+  7. STACKS.md documents setup, real auth flow, iteration workflow, teardown, troubleshooting
 
-**Plans**: TBD (19.1 + 19.2 sub-plans)
+**Plans**: 4 plans
+  - [ ] **Phase 19 Plan 01 (Wave 1)** — Angular env (environment.stack.ts) + cloudfront-sim stack manifest (zbb.yaml, compose.yml, nginx.conf.template, docker-entrypoint.sh) — Requirements: LS-01, LS-04, LS-05
+  - [ ] **Phase 19 Plan 02 (Wave 2)** — sme-mart-spa stack: build (npm run build:stack) + upload (mc cp) + location block injection — Requirements: LS-01, LS-04, LS-05
+  - [ ] **Phase 19 Plan 03 (Wave 2)** — sme-mart-login stack: build (npm run build, not --local) + upload (mc cp) + location block injection — Requirements: LS-03, LS-04, LS-05, LS-06
+  - [ ] **Phase 19 Plan 04 (Wave 3)** — STACKS.md operator guide + smoke test suite (master + per-stack scripts) — Requirements: LS-01, LS-03, LS-04, LS-05, LS-06
 
-**Effort**: 7–10 hours (SPA stack 4–6h + login stack 3–4h)
-**Tech Stack**: `zbb` CLI + Docker + nginx (cloudfront-sim) + Verdaccio + local postgres/minio/registry
-**References**: `.claude/projects/*/memory/reference_zbb_local_stack.md`, zbb design docs in `~/Projects/zb/zerobias-org/util/packages/zbb/design/`
+**Effort**: 10–14 hours (Wave 1: 3–4h, Wave 2: 4–5h parallel, Wave 3: 2–3h; estimate revised after errata 017 reverse-proxy discovery)
+**Tech Stack**: `zbb` CLI + Docker + nginx (cloudfront-sim) + minio (static serving) + Angular + Metalsmith (login)
+**Architecture**: Unified-origin reverse-proxy pattern (reference: `~/Projects/zb/ui/scripts/gateway.js`). Single nginx at localhost:15002 serves SPA + login from minio buckets, proxies /api/, /dana/, /app/session to uat.zerobias.com with cookie rewriting (Domain: uat.zerobias.com → Domain: localhost).
+**Key Decisions** (locked in brief):
+  - D-01: Reverse-proxy + unified origin (not static-only serving)
+  - D-02: Critical nginx directives (proxy_cookie_domain, proxy_cookie_flags, ws upgrade)
+  - D-03: No API key injection, no dana-org-id cookie injection — real login flow via SDK's redirectLogin()
+  - D-04: Angular env `src/environments/environment.stack.ts` with `isLocalDev: false` (critical for real login)
+  - D-05: Login built with `npm run build` (NOT `--local`)
+  - D-06: 4 stacks (minio shared, cloudfront-sim, sme-mart-spa, sme-mart-login); hub-spoke pattern
+  - D-10: CLOUDFRONT_SIM_PORT=15002 (fixed, not zbb-allocated)
+  - D-12/D-13: App stacks write nginx location blocks to shared volume; cloudfront-sim includes via `include /etc/nginx/conf.d/apps/*.conf`
+  - D-14: Reload trigger: `docker exec <container> nginx -s reload` after app stack start
+**Deferred** (backlog 089): Hub module + Verdaccio local hosting (LS-02 deferred per D-06, requires Kevin clarification on hub-server runtime)
 
 ---
 
@@ -325,16 +343,16 @@
 | 16. Form Builder | 5/5 | Complete    | 2026-04-14 |
 | 17. Demo Seed Scripts | 1/1 | Complete    | 2026-04-15 |
 | 18. Org Switcher | 5/5 | Complete    | 2026-04-16 |
-| 19. zbb Local Dev Stacks | 2 plans created | Planning complete | 2026-04-16 |
+| 19. zbb Local Dev Stacks | 4 plans created | Planning complete | 2026-04-17 |
 | 20. Fire-and-Forget Audit | 0/? | Not started | — |
 | 21. Org Documents Center | 0/? | Not started | — |
 | 22. Form Template Library | 0/? | Not started | — |
 | 23. Transparency Controls UI-SPEC | 0/? | Not started | — |
 
 **v1.2 Milestone:** 5/5 phases complete, 14/14 plans complete (closed 2026-04-15).
-**v1.3 Milestone:** 6 phases pending (18-23), 35 requirements, ~80–90 hrs estimated.
+**v1.3 Milestone:** 6 phases total (18-23), 35 requirements, ~80–90 hrs estimated. Phase 18 complete (2026-04-16), Phase 19 planning complete (2026-04-17).
 
 ---
 
 **Created:** 2026-03-17
-**Last Updated:** 2026-04-15 (Phase 18-23 added for v1.3 milestone)
+**Last Updated:** 2026-04-17 (Phase 19 planning complete, 4 plans created)
