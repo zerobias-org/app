@@ -162,6 +162,48 @@ Docker supports both `docker-compose.yml` (legacy) and `compose.yml` (modern spe
 
 ---
 
+### 008 — No canonical way for one stack to refer to another stack's container by name
+
+**Category:** Tooling gap
+**Date:** 2026-04-17
+**Phase:** 19 v2 (review BLOCK B1)
+
+**What happened:**
+The Phase 19 architecture has app stacks (sme-mart-spa, sme-mart-login) invoking `docker exec <cloudfront-sim-container> nginx -s reload` during their `lifecycle.start` to pick up newly-written location blocks. But there's no canonical zbb mechanism for one stack to refer to another stack's container by name. Planner attempted `${STACK_NAME}-cloudfront-sim` (which expands to the CURRENT stack's name prefix, not the target) — a runtime bug that silently swallowed via `|| echo` fallback, leaving nginx never actually reloading.
+
+**Impact:**
+- BLOCK-level bug during Director review.
+- Easy to miss in testing because the `|| echo` fallback makes the failure silent.
+- Forces a brittle convention (each stack "knows" `cloudfront-sim-nginx` is the target name) or external env var injection.
+
+**Suggested improvement:**
+- zbb could provide `zbb exec <stack> <command>` as a first-class interface that resolves the container name from the stack registry. App stacks would call `zbb exec cloudfront-sim nginx -s reload` — readable, decoupled from docker naming conventions.
+- Alternatively, a stack could export `CONTAINER_NAME` in its env exports so dependents can import it by name.
+- Or: a `zbb.yaml` directive `on_dependency_start: <command>` that fires when a downstream stack starts.
+
+---
+
+### 009 — nginx upstream + envsubst interaction breaks silently with URL-shaped env vars
+
+**Category:** Tooling gap
+**Date:** 2026-04-17
+**Phase:** 19 v2 (review BLOCK B2)
+
+**What happened:**
+nginx.conf.template used `upstream minio { server ${AWS_ENDPOINT}; }` where `AWS_ENDPOINT` is `http://minio:9000` (URL-shaped). After envsubst, nginx sees `server http://minio:9000;` which is invalid syntax (upstream `server` directive expects `host:port` WITHOUT scheme). nginx fails to start with an unhelpful error, and debugging requires pulling up nginx logs inside the container.
+
+**Impact:**
+- BLOCK-level bug caught in review. Would have been a runtime start failure for the cloudfront-sim container.
+- The shape of `AWS_ENDPOINT` (scheme-included) is reasonable for most consumers (curl, aws-cli, most SDKs) but wrong for nginx upstream directives.
+- Every nginx-based stack that proxies to minio will re-solve this parsing problem.
+
+**Suggested improvement:**
+- `@zerobias-com/nginx-base` stack providing a documented envsubst helper that parses URL-shaped env vars into `${*_HOST}` / `${*_PORT}` components before template substitution.
+- Alternative: minio stack exports BOTH `AWS_ENDPOINT` (URL form) AND `MINIO_HOST` + `MINIO_PORT` (parsed components) so consumers can pick the right shape for their tool.
+- Document the gotcha in zbb stacks-guide.md under "Common nginx integration mistakes."
+
+---
+
 ## Open Invitations
 
 If any of these findings feel ready to escalate as `/friction` entries in `zb-dx`, Clark can promote them individually. This doc is the working scratchpad; `zb-dx` is the shared knowledge base.
