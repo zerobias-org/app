@@ -2,42 +2,7 @@ version: "3.9"
 
 services:
   # ────────────────────────────────────────────────────────────────
-  # Hub Server: SME Mart Hub module service
-  # ────────────────────────────────────────────────────────────────
-  hub-server:
-    image: ${HUB_SERVER_IMAGE}
-    container_name: "${STACK_NAME}-hub-server"
-    ports:
-      - "${HUB_SERVER_PORT}:8080"
-    environment:
-      # Database connection
-      PGHOST: ${PGHOST}
-      PGPORT: ${PGPORT}
-      PGUSER: ${PGUSER}
-      PGPASSWORD: ${PGPASSWORD}
-      PGDATABASE: ${PGDATABASE}
-
-      # Registry (for resolving npm packages)
-      REGISTRY_URL: ${REGISTRY_INTERNAL_URL}
-
-      # Hub module configuration
-      HUB_MODULE_VERSION: ${HUB_MODULE_VERSION}
-      HUB_MODULE_NAME: ${HUB_MODULE_NAME}
-    healthcheck:
-      test: ["CMD", "curl", "-sf", "http://localhost:8080/health"]
-      interval: 2s
-      timeout: 10s
-      retries: 3
-    depends_on:
-      postgres:
-        condition: service_healthy
-      registry:
-        condition: service_healthy
-    networks:
-      - default
-
-  # ────────────────────────────────────────────────────────────────
-  # SPA Upload: One-shot container that builds and uploads SPA assets
+  # SPA Upload: One-shot container that uploads built SPA assets to minio
   # ────────────────────────────────────────────────────────────────
   spa-upload:
     image: busybox:latest
@@ -63,12 +28,8 @@ services:
 
         echo "[setup] MinIO assets preparation complete";
       '
-    depends_on:
-      minio:
-        condition: service_healthy
     networks:
       - default
-    # Exit after completion (no restart policy)
     restart: "no"
 
 networks:
