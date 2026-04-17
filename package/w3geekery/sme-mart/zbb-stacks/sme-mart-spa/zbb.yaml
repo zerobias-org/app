@@ -1,0 +1,204 @@
+# ──────────────────────────────────────────────────────────────────────
+# SME Mart SPA Stack Manifest
+# ──────────────────────────────────────────────────────────────────────
+
+name: "sme-mart-spa"
+version: "1.0.0"
+
+# ── Dependencies ─────────────────────────────────────────────────────
+# SME Mart SPA depends on postgres (for hub-server), minio (for SPA assets),
+# registry (for local npm package publishing), and cloudfront-sim (reverse proxy).
+# zbb starts: postgres → (minio + registry) → hub-server → cloudfront-sim
+depends:
+  postgres:
+    package: "@zerobias-com/postgres@^17.0.0"
+    ready_when:
+      status: healthy
+  minio:
+    package: "@zerobias-com/minio@^1.0.0"
+    ready_when:
+      status: healthy
+  registry:
+    package: "@zerobias-com/registry@^1.0.0"
+    ready_when:
+      status: healthy
+  cloudfront-sim:
+    package: "./cloudfront-sim"
+    ready_when:
+      status: healthy
+
+# ── What SME Mart SPA exports to consumers ───────────────────────────
+exports:
+  - HUB_SERVER_URL
+  - HUB_SERVER_PORT
+  - CLOUDFRONT_SIM_URL
+  - CLOUDFRONT_SIM_PORT
+
+# ── What SME Mart SPA imports from dependencies ──────────────────────
+imports:
+  postgres:
+    - PGHOST
+    - PGPORT
+    - PGUSER
+    - PGPASSWORD
+    - PGDATABASE
+  minio:
+    - AWS_ENDPOINT
+    - AWS_ACCESS_KEY_ID
+    - AWS_SECRET_ACCESS_KEY
+  registry:
+    - REGISTRY_URL
+    - REGISTRY_INTERNAL_URL
+  cloudfront-sim:
+    - CLOUDFRONT_SIM_PORT as PROXY_PORT
+    - CLOUDFRONT_SIM_URL
+
+# ── Sub-stacks ───────────────────────────────────────────────────────
+substacks:
+  hub-server:
+    compose: docker-compose.yml
+    services: [hub-server]
+    depends: [postgres, registry]
+    exports: [HUB_SERVER_URL, HUB_SERVER_PORT]
+
+  spa-assets:
+    compose: docker-compose.yml
+    services: [spa-upload]
+    depends: [minio]
+    description: "One-shot SPA asset upload container (exits after completion)"
+
+# ── Environment schema ───────────────────────────────────────────────
+env:
+  # ── Service Ports ──────────────────────────────────────────
+  HUB_SERVER_PORT:
+    type: port
+    description: Hub Server API host port
+
+  CLOUDFRONT_SIM_PORT:
+    type: port
+    description: CloudFront-sim reverse proxy host port
+
+  # ── Derived URLs ───────────────────────────────────────────
+  HUB_SERVER_URL:
+    type: string
+    value: "http://localhost:${HUB_SERVER_PORT}"
+    description: Hub Server API gateway URL
+
+  CLOUDFRONT_SIM_URL:
+    type: string
+    value: "http://localhost:${PROXY_PORT}"
+    description: CloudFront-sim reverse proxy URL (aliased from CLOUDFRONT_SIM_PORT)
+
+  # ── SPA Build Configuration ────────────────────────────────
+  SPA_BUILD_DIR:
+    type: string
+    default: "dist/"
+    description: SPA build output directory (relative to sme-mart app root)
+
+  MINIO_BUCKET:
+    type: string
+    default: "sme-mart-app"
+    description: MinIO bucket name for SPA assets
+
+  # ── Hub Module Configuration ───────────────────────────────
+  HUB_MODULE_VERSION:
+    type: string
+    default: "1.0.0"
+    description: SME Mart Hub module version (must match package.json in module/)
+
+  HUB_MODULE_NAME:
+    type: string
+    default: "@zerobias-org/sme-mart-hub-module"
+    description: SME Mart Hub module npm package name
+
+  # ── Docker Image ───────────────────────────────────────────
+  HUB_SERVER_IMAGE:
+    type: string
+    default: "sme-mart-hub-server:latest"
+    description: Hub Server Docker image (built from Dockerfile or fetched from registry)
+
+  # ── Imported from dependencies ────────────────────────────
+  # Postgres variables
+  PGHOST:
+    type: string
+    default: localhost
+
+  PGPORT:
+    type: port
+    description: PostgreSQL host port (imported from postgres stack)
+
+  PGUSER:
+    type: string
+    default: postgres
+
+  PGPASSWORD:
+    type: secret
+    description: PostgreSQL password (imported from postgres stack)
+
+  PGDATABASE:
+    type: string
+    default: zerobias
+
+  # Minio variables
+  AWS_ENDPOINT:
+    type: string
+    description: MinIO endpoint URL (imported from minio stack)
+
+  AWS_ACCESS_KEY_ID:
+    type: secret
+    description: MinIO access key (imported from minio stack)
+
+  AWS_SECRET_ACCESS_KEY:
+    type: secret
+    description: MinIO secret key (imported from minio stack)
+
+  # Registry variables
+  REGISTRY_URL:
+    type: string
+    description: Registry external URL (imported from registry stack)
+
+  REGISTRY_INTERNAL_URL:
+    type: string
+    description: Registry internal URL (imported from registry stack)
+
+# ── State ────────────────────────────────────────────────────────────
+state:
+  status:
+    type: enum
+    values: [starting, healthy, degraded, stopped, error]
+  services:
+    hub-server:
+      type: string
+      description: Hub Server service status
+    minio:
+      type: string
+      description: MinIO service status
+    registry:
+      type: string
+      description: Registry service status
+    cloudfront-sim:
+      type: string
+      description: CloudFront simulator service status
+
+# ── Lifecycle ────────────────────────────────────────────────────────
+lifecycle:
+  build: "cd /Users/cstacer/Projects/w3geekery/zerobias-org-forks/app/package/w3geekery/sme-mart && npm run build"
+  start: "bash setup.sh && docker compose -f docker-compose.yml -p ${STACK_NAME} up -d"
+  stop: "docker stop ${STACK_NAME}-hub-server ${STACK_NAME}-spa-upload 2>/dev/null; docker rm ${STACK_NAME}-hub-server ${STACK_NAME}-spa-upload 2>/dev/null; true"
+  health:
+    command: "curl -sf http://localhost:${HUB_SERVER_PORT}/health >/dev/null && [ -d ${MINIO_BUCKET} ] || true"
+    interval: 3
+    timeout: 30
+  cleanup:
+    - "docker stop ${STACK_NAME}-hub-server ${STACK_NAME}-spa-upload 2>/dev/null; docker rm ${STACK_NAME}-hub-server ${STACK_NAME}-spa-upload 2>/dev/null; true"
+    - "docker volume rm ${STACK_NAME}_postgres-data 2>/dev/null; true"
+    - "rm -rf ${SPA_BUILD_DIR}"
+
+# ── Logs routing ─────────────────────────────────────────────────────
+logs:
+  hub-server:
+    source: docker
+    container: "${STACK_NAME}-hub-server"
+  spa-upload:
+    source: docker
+    container: "${STACK_NAME}-spa-upload"

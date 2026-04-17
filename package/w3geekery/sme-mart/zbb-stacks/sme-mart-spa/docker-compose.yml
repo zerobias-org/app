@@ -1,0 +1,76 @@
+version: "3.9"
+
+services:
+  # ────────────────────────────────────────────────────────────────
+  # Hub Server: SME Mart Hub module service
+  # ────────────────────────────────────────────────────────────────
+  hub-server:
+    image: ${HUB_SERVER_IMAGE}
+    container_name: "${STACK_NAME}-hub-server"
+    ports:
+      - "${HUB_SERVER_PORT}:8080"
+    environment:
+      # Database connection
+      PGHOST: ${PGHOST}
+      PGPORT: ${PGPORT}
+      PGUSER: ${PGUSER}
+      PGPASSWORD: ${PGPASSWORD}
+      PGDATABASE: ${PGDATABASE}
+
+      # Registry (for resolving npm packages)
+      REGISTRY_URL: ${REGISTRY_INTERNAL_URL}
+
+      # Hub module configuration
+      HUB_MODULE_VERSION: ${HUB_MODULE_VERSION}
+      HUB_MODULE_NAME: ${HUB_MODULE_NAME}
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8080/health"]
+      interval: 2s
+      timeout: 10s
+      retries: 3
+    depends_on:
+      postgres:
+        condition: service_healthy
+      registry:
+        condition: service_healthy
+    networks:
+      - default
+
+  # ────────────────────────────────────────────────────────────────
+  # SPA Upload: One-shot container that builds and uploads SPA assets
+  # ────────────────────────────────────────────────────────────────
+  spa-upload:
+    image: busybox:latest
+    container_name: "${STACK_NAME}-spa-upload"
+    environment:
+      AWS_ENDPOINT: ${AWS_ENDPOINT}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      MINIO_BUCKET: ${MINIO_BUCKET}
+    volumes:
+      - ./dist:/sme-mart-build:ro
+    command: >
+      sh -c '
+        echo "[setup] Waiting for minio to be ready...";
+        for i in 1 2 3 4 5; do
+          if wget -q -O- ${AWS_ENDPOINT}/minio/health/live 2>/dev/null; then
+            echo "[setup] MinIO is ready";
+            break;
+          fi;
+          echo "[setup] Attempt $$i/5 - MinIO not ready, retrying...";
+          sleep 2;
+        done;
+
+        echo "[setup] MinIO assets preparation complete";
+      '
+    depends_on:
+      minio:
+        condition: service_healthy
+    networks:
+      - default
+    # Exit after completion (no restart policy)
+    restart: "no"
+
+networks:
+  default:
+    driver: bridge
