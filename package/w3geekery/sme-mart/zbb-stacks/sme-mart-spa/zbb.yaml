@@ -11,7 +11,7 @@ env:
   # Can be overridden via: zbb env set SPA_REPO_PATH /absolute/path/...
   SPA_REPO_PATH:
     type: string
-    value: "../../../"  # Relative from zbb-stacks/ to app/ repo root
+    value: "../../"  # Relative from zbb-stacks/sme-mart-spa/ to sme-mart root (2 levels up)
     description: "Path to SME Mart app repo for npm run build:stack"
 
   # Imported from cloudfront-sim stack (dependency below)

@@ -8,11 +8,12 @@ exports:
 
 env:
   # Path to the login repo (relative or absolute, can be overridden)
-  # login/ is a sibling to app/; zbb-stacks/ is inside app/
-  # So relative path is: ../../../login/ (from zbb-stacks/sme-mart-login/)
+  # login/ is a sibling to app/ under zerobias-org-forks/.
+  # zbb-stacks/sme-mart-login/ lives at app/package/w3geekery/sme-mart/zbb-stacks/sme-mart-login/,
+  # so ../../../../../../ walks up: sme-mart-login -> zbb-stacks -> sme-mart -> w3geekery -> package -> app -> zerobias-org-forks
   LOGIN_REPO_PATH:
     type: string
-    value: "../../../login"  # sibling login repo
+    value: "../../../../../../login"  # sibling login repo (6 levels up)
     description: "Path to login repo for npm run build"
 
   # Imported from cloudfront-sim stack (dependency below)

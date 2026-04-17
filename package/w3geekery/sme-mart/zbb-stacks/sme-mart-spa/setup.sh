@@ -10,7 +10,7 @@ exec 1> >(tee -a "$LOG_FILE")
 exec 2>&1
 
 # Environment vars injected by zbb (from zbb.yaml env layer)
-SPA_REPO_PATH="${SPA_REPO_PATH:-./../../../}"
+SPA_REPO_PATH="${SPA_REPO_PATH:-./../../}"
 AWS_ENDPOINT="${AWS_ENDPOINT:-http://localhost:9000}"
 AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID:-minioadmin}"
 AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-minioadmin}"

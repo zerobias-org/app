@@ -147,6 +147,16 @@ Reference: errata 009 (`009-director-modified-roadmap.md`).
 
 Reference: errata 010 (`010-gsd-executor-mcp-allowlist-gap.md`).
 
+## Path-Default Arithmetic (v1.3 — discovered 2026-04-17)
+
+**Pattern:** Plan/design/review all approved relative-path defaults (`SPA_REPO_PATH`, `LOGIN_REPO_PATH`) in `zbb.yaml` + `setup.sh` without mentally tracing resolution from the script's actual runtime location. Off-by-one and off-by-four errors shipped past Director v2 SIGN-OFF and plan-checker. Surfaced only when an unrelated CWD drift during execution forced a manual re-trace.
+
+- [ ] **Plan specifies relative `../` path defaults** — BLOCK until plan-checker runs `(cd <script-dir> && cd <default> && pwd)` on paper and asserts the expected absolute result. Do not approve by counting segments.
+- [ ] **Monorepo subtree repo depth** — repos inside `package/<org>/<pkg>/` are 4+ levels deeper than a top-level repo. Default paths inherited from a shallower reference pattern (e.g., `zb/ui`) will be wrong.
+- [ ] **setup.sh fallback vs zbb.yaml default divergence** — both must use the same path; review diffs side-by-side.
+
+Reference: errata 018 (`018-phase19-path-default-arithmetic.md`).
+
 ## Silent Failure via Fire-and-Forget (v1.0/v1.2 — widespread)
 
 **Pattern:** `PipelineWriteService.pushEntity` and similar fire-and-forget `.catch()` handlers log errors to the console without surfacing to users. Schema violations, FK failures, network errors — all invisible in the UI. Phase 17's strict-await CLI exposed multiple schema gotchas that prod has been silently eating.

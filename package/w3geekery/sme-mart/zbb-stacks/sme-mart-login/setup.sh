@@ -13,7 +13,7 @@ exec 1> >(tee -a "$LOG_FILE")
 exec 2>&1
 
 # Environment vars injected by zbb (from zbb.yaml env layer)
-LOGIN_REPO_PATH="${LOGIN_REPO_PATH:-./../../../login}"
+LOGIN_REPO_PATH="${LOGIN_REPO_PATH:-./../../../../../../login}"
 AWS_ENDPOINT="${AWS_ENDPOINT:-http://localhost:9000}"
 AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID:-minioadmin}"
 AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-minioadmin}"
@@ -88,7 +88,7 @@ case "${1:-start}" in
     echo "✓ Bucket policy set: public"
 
     # Upload login build
-    # Path: zbb-stacks/sme-mart-login/../../../login/package/w3geekery/dist/
+    # Path: zbb-stacks/sme-mart-login/../../../../../../login/package/w3geekery/dist/
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     PARENT_REPO="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
