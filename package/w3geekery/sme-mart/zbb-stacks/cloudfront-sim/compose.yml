@@ -1,0 +1,63 @@
+version: "3.8"
+
+services:
+  nginx:
+    image: "nginx:alpine"
+    container_name: "${STACK_NAME}-nginx"
+    ports:
+      - "${CLOUDFRONT_SIM_PORT}:${CLOUDFRONT_SIM_PORT}"
+    environment:
+      # Pass variables to entrypoint for envsubst
+      CLOUDFRONT_SIM_PORT: "${CLOUDFRONT_SIM_PORT}"
+      MINIO_PORT: "${AWS_ENDPOINT##*:}"  # Extract port from AWS_ENDPOINT URL
+      MINIO_HOST: "${AWS_ENDPOINT#*://}"  # Strip scheme, will further strip port in entrypoint
+      AWS_ENDPOINT: "${AWS_ENDPOINT}"
+      UAT_ORIGIN: "${UAT_ORIGIN}"
+    volumes:
+      # nginx.conf.template -> /etc/nginx/nginx.conf (via entrypoint envsubst)
+      - ./nginx.conf.template:/etc/nginx/nginx.conf.template:ro
+      # Shared location blocks from app stacks (D-12, D-13)
+      - cloudfront-sim-conf:/etc/nginx/conf.d/apps:ro
+      # Entrypoint script
+      - ./docker-entrypoint.sh:/docker-entrypoint.sh:ro
+    entrypoint: /bin/sh /docker-entrypoint.sh
+    command: []  # entrypoint handles nginx -g 'daemon off;'
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:${CLOUDFRONT_SIM_PORT}/"]
+      interval: 2s
+      timeout: 5s
+      retries: 10
+      start_period: 2s
+    labels:
+      zerobias.slot: "${STACK_NAME}"
+    depends_on:
+      - minio  # (placeholder; actual minio runs in separate stack)
+
+  # NOTE: minio service runs in @zerobias-com/minio stack, not here.
+  # This compose file references minio via AWS_ENDPOINT env var.
+  # If standalone testing needed, uncomment below:
+  #
+  # minio:
+  #   image: minio/minio:latest
+  #   container_name: "${STACK_NAME}-minio-local"
+  #   command: server /data --console-address ":9001"
+  #   environment:
+  #     MINIO_ROOT_USER: minioadmin
+  #     MINIO_ROOT_PASSWORD: minioadmin
+  #   ports:
+  #     - "9000:9000"
+  #   volumes:
+  #     - minio-data:/data
+  #   labels:
+  #     zerobias.slot: "${STACK_NAME}"
+
+volumes:
+  cloudfront-sim-conf:
+    # Shared named volume for app stacks to write location blocks (D-12, D-13)
+    # If zbb slot-dir bind mount preferred, replace with:
+    # cloudfront-sim-conf:
+    #   driver: local
+    #   driver_opts:
+    #     type: none
+    #     o: bind
+    #     device: ${ZB_SLOT_ROOT}/cloudfront-sim/conf
