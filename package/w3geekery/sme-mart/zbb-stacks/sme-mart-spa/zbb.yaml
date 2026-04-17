@@ -1,0 +1,89 @@
+name: "sme-mart-spa"
+version: "1.0.0"
+
+description: "SME Mart Angular SPA: build with stack config, upload to minio sme-mart-app bucket, inject nginx location block"
+
+exports:
+  - SPA_URL
+
+env:
+  # Path to the SME Mart app repo (relative to zbb slot root, or absolute)
+  # Can be overridden via: zbb env set SPA_REPO_PATH /absolute/path/...
+  SPA_REPO_PATH:
+    type: string
+    value: "../../../"  # Relative from zbb-stacks/ to app/ repo root
+    description: "Path to SME Mart app repo for npm run build:stack"
+
+  # Imported from cloudfront-sim stack (dependency below)
+  CLOUDFRONT_SIM_PORT:
+    type: port
+    imports: ["cloudfront-sim.CLOUDFRONT_SIM_PORT"]
+
+  CLOUDFRONT_SIM_URL:
+    type: string
+    imports: ["cloudfront-sim.CLOUDFRONT_SIM_URL"]
+
+  # Imported from minio stack (via cloudfront-sim)
+  AWS_ENDPOINT:
+    type: string
+    imports: ["@zerobias-com/minio.AWS_ENDPOINT"]
+
+  AWS_ACCESS_KEY_ID:
+    type: string
+    imports: ["@zerobias-com/minio.AWS_ACCESS_KEY_ID"]
+
+  AWS_SECRET_ACCESS_KEY:
+    type: string
+    imports: ["@zerobias-com/minio.AWS_SECRET_ACCESS_KEY"]
+
+  # SPA configuration
+  SPA_BUILD_OUTPUT:
+    type: string
+    value: "dist/sme-mart"
+    description: "Output directory from ng build --configuration stack"
+
+  MINIO_BUCKET:
+    type: string
+    value: "sme-mart-app"
+    description: "minio bucket name for SPA files"
+
+  SPA_BASE_PATH:
+    type: string
+    value: "/sme-mart"
+    description: "URL base path in cloudfront-sim (for location block)"
+
+  SPA_URL:
+    type: string
+    value: "${CLOUDFRONT_SIM_URL}${SPA_BASE_PATH}/"
+    description: "Full URL to access SPA"
+
+state:
+  status:
+    type: enum
+    values: [starting, building, uploading, healthy, stopped, error]
+
+lifecycle:
+  # D-07: build is separate from start; user runs zbb build sme-mart-spa
+  build: |
+    bash setup.sh build
+
+  # D-08: start only uploads to bucket (does not rebuild)
+  start: |
+    bash setup.sh start
+
+  stop: |
+    docker run --rm -v cloudfront-sim-conf:/mnt alpine:latest rm -f /mnt/sme-mart-spa.conf && docker exec cloudfront-sim-nginx nginx -s reload || true
+
+  health:
+    command: "curl -sf ${CLOUDFRONT_SIM_URL}${SPA_BASE_PATH}/ | grep -q '<html>'"
+    interval: 2
+    timeout: 30
+    retries: 10
+
+logs:
+  source: file
+  path: "./setup.log"
+
+dependencies:
+  - "cloudfront-sim"
+  - "@zerobias-com/minio"
