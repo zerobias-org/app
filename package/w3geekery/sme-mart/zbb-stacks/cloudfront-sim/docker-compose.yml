@@ -1,0 +1,45 @@
+version: "3.9"
+
+services:
+  # ────────────────────────────────────────────────────────────────
+  # CloudFront Simulator: nginx reverse proxy to minio with SPA fallback
+  # ────────────────────────────────────────────────────────────────
+  cloudfront-sim:
+    image: nginx:latest-alpine
+    container_name: "${STACK_NAME}-cloudfront-sim"
+    ports:
+      - "${CLOUDFRONT_SIM_PORT}:80"
+    volumes:
+      # Mount nginx template and entrypoint script
+      - ./nginx.conf.template:/etc/nginx/nginx.conf.template:ro
+      - ./docker-entrypoint.sh:/docker-entrypoint.sh:ro
+    environment:
+      # MinIO connection (from minio stack)
+      AWS_ENDPOINT: ${AWS_ENDPOINT}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+
+      # MinIO bucket and consumer configuration
+      MINIO_BUCKET: ${MINIO_BUCKET}
+      BASE_PATH: ${BASE_PATH}
+
+      # MinIO host/port for nginx config
+      MINIO_HOST: ${MINIO_HOST}
+      MINIO_PORT: ${MINIO_PORT}
+      LISTEN_PORT: ${LISTEN_PORT}
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:80/"]
+      interval: 2s
+      timeout: 10s
+      retries: 3
+    depends_on:
+      minio:
+        condition: service_healthy
+    networks:
+      - default
+    # Run docker-entrypoint.sh to resolve env vars in nginx.conf template
+    entrypoint: ["/bin/sh", "/docker-entrypoint.sh"]
+
+networks:
+  default:
+    driver: bridge

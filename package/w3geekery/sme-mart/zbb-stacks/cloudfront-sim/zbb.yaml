@@ -1,0 +1,115 @@
+# ──────────────────────────────────────────────────────────────────────
+# CloudFront Simulator Stack Manifest (Reusable)
+# ──────────────────────────────────────────────────────────────────────
+#
+# This is a generic, reusable stack that serves any S3-like bucket via
+# nginx with SPA fallback logic (try_files for deep routing).
+#
+# Can be consumed by:
+# - sme-mart-spa (19.1) — serves SPA from MINIO_BUCKET=sme-mart-app
+# - sme-mart-login (19.2) — serves login UI from MINIO_BUCKET=sme-mart-login
+# - Future stacks — custom MINIO_BUCKET values
+#
+# No SME Mart-specific logic. All app paths come from ${BASE_PATH} env var.
+
+name: "cloudfront-sim"
+version: "1.0.0"
+description: "CloudFront-shaped nginx reverse proxy for S3 bucket with SPA fallback (reusable)"
+
+# ── Dependencies ─────────────────────────────────────────────────────
+# CloudFront-sim only depends on minio (for the bucket to serve)
+depends:
+  minio:
+    package: "@zerobias-com/minio@^1.0.0"
+    ready_when:
+      status: healthy
+
+# ── What CloudFront-sim exports to consumers ─────────────────────────
+exports:
+  - CLOUDFRONT_SIM_PORT
+  - CLOUDFRONT_SIM_URL
+
+# ── What CloudFront-sim imports from dependencies ────────────────────
+imports:
+  minio:
+    - AWS_ENDPOINT
+    - AWS_ACCESS_KEY_ID
+    - AWS_SECRET_ACCESS_KEY
+
+# ── Environment schema ───────────────────────────────────────────────
+env:
+  # ── Service Port ───────────────────────────────────────────
+  CLOUDFRONT_SIM_PORT:
+    type: port
+    description: "nginx reverse proxy host port (HTTP)"
+
+  # ── Derived URL ────────────────────────────────────────────
+  CLOUDFRONT_SIM_URL:
+    type: string
+    value: "http://localhost:${CLOUDFRONT_SIM_PORT}"
+    description: "CloudFront-sim reverse proxy URL"
+
+  # ── Bucket Configuration (Configurable per Consumer) ──────
+  MINIO_BUCKET:
+    type: string
+    default: "app"
+    description: "S3 bucket to serve (configurable per consumer stack; e.g., sme-mart-app, sme-mart-login)"
+
+  BASE_PATH:
+    type: string
+    default: "/"
+    description: "URL path prefix for the SPA (e.g., sme-mart, auth). Set by consumer stack."
+
+  # ── MinIO Connection (Imported from minio stack) ──────────
+  AWS_ENDPOINT:
+    type: string
+    description: "MinIO endpoint URL (imported from minio stack)"
+
+  AWS_ACCESS_KEY_ID:
+    type: secret
+    description: "MinIO access key (imported from minio stack)"
+
+  AWS_SECRET_ACCESS_KEY:
+    type: secret
+    description: "MinIO secret key (imported from minio stack)"
+
+  # ── MinIO Host/Port (Derived) ──────────────────────────────
+  # These are derived from AWS_ENDPOINT for nginx use
+  MINIO_HOST:
+    type: string
+    default: "minio"
+    description: "MinIO hostname (Docker network name)"
+
+  MINIO_PORT:
+    type: port
+    default: 9000
+    description: "MinIO port (internal Docker port, not host port)"
+
+  LISTEN_PORT:
+    type: port
+    default: 80
+    description: "nginx internal listen port (not mapped directly)"
+
+# ── State ────────────────────────────────────────────────────────────
+state:
+  status:
+    type: enum
+    values: [starting, healthy, degraded, stopped, error]
+
+# ── Lifecycle ────────────────────────────────────────────────────────
+lifecycle:
+  start: "docker compose -f docker-compose.yml -p ${STACK_NAME} up -d"
+  stop: "docker stop ${STACK_NAME}-cloudfront-sim 2>/dev/null; docker rm ${STACK_NAME}-cloudfront-sim 2>/dev/null; true"
+  health:
+    command: "curl -sf http://localhost:${CLOUDFRONT_SIM_PORT}/ >/dev/null"
+    interval: 2
+    timeout: 10
+  cleanup:
+    - "docker stop ${STACK_NAME}-cloudfront-sim 2>/dev/null; docker rm ${STACK_NAME}-cloudfront-sim 2>/dev/null; true"
+    - "docker image rm nginx:latest-alpine 2>/dev/null; true"
+
+# ── Logs routing ─────────────────────────────────────────────────────
+logs:
+  nginx:
+    source: docker
+    container: "${STACK_NAME}-cloudfront-sim"
