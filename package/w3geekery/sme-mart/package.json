@@ -24,6 +24,7 @@
     "dev:prod": "dotenv -e .env.local -- ng serve --proxy-config proxy-prod.conf.js",
     "build": "ng build",
     "build:prod": "ng build --configuration production",
+    "build:stack": "ng build --configuration stack --base-href=/sme-mart --output-path=dist/sme-mart",
     "build:uat": "ng build --configuration uat",
     "build:vercel": "ng build --configuration vercel",
     "watch": "ng build --watch --configuration development",
