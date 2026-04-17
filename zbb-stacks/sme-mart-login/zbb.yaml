@@ -1,0 +1,90 @@
+name: "sme-mart-login"
+version: "1.0.0"
+
+description: "SME Mart white-label login: build with npm run build, upload to minio sme-mart-login bucket, inject nginx location block"
+
+exports:
+  - LOGIN_URL
+
+env:
+  # Path to the login repo (relative or absolute, can be overridden)
+  # login/ is a sibling to app/; zbb-stacks/ is inside app/
+  # So relative path is: ../../../login/ (from zbb-stacks/sme-mart-login/)
+  LOGIN_REPO_PATH:
+    type: string
+    value: "../../../login"  # sibling login repo
+    description: "Path to login repo for npm run build"
+
+  # Imported from cloudfront-sim stack (dependency below)
+  CLOUDFRONT_SIM_PORT:
+    type: port
+    imports: ["cloudfront-sim.CLOUDFRONT_SIM_PORT"]
+
+  CLOUDFRONT_SIM_URL:
+    type: string
+    imports: ["cloudfront-sim.CLOUDFRONT_SIM_URL"]
+
+  # Imported from minio stack (via cloudfront-sim)
+  AWS_ENDPOINT:
+    type: string
+    imports: ["@zerobias-com/minio.AWS_ENDPOINT"]
+
+  AWS_ACCESS_KEY_ID:
+    type: string
+    imports: ["@zerobias-com/minio.AWS_ACCESS_KEY_ID"]
+
+  AWS_SECRET_ACCESS_KEY:
+    type: string
+    imports: ["@zerobias-com/minio.AWS_SECRET_ACCESS_KEY"]
+
+  # Login configuration
+  LOGIN_BUILD_OUTPUT:
+    type: string
+    value: "dist"  # Metalsmith outputs to dist/ (per package.json start script)
+    description: "Output directory from npm run build"
+
+  MINIO_BUCKET:
+    type: string
+    value: "sme-mart-login"
+    description: "minio bucket name for login files"
+
+  LOGIN_BASE_PATH:
+    type: string
+    value: "/login"
+    description: "URL base path in cloudfront-sim (for location block)"
+
+  LOGIN_URL:
+    type: string
+    value: "${CLOUDFRONT_SIM_URL}${LOGIN_BASE_PATH}/"
+    description: "Full URL to access login page"
+
+state:
+  status:
+    type: enum
+    values: [starting, building, uploading, healthy, stopped, error]
+
+lifecycle:
+  # D-05: build via npm run build (NOT --local per D-05)
+  build: |
+    bash setup.sh build
+
+  # D-08: start only uploads (does not rebuild)
+  start: |
+    bash setup.sh start
+
+  stop: |
+    docker run --rm -v cloudfront-sim-conf:/mnt alpine:latest rm -f /mnt/sme-mart-login.conf && docker exec cloudfront-sim-nginx nginx -s reload || true
+
+  health:
+    command: "curl -sf ${CLOUDFRONT_SIM_URL}${LOGIN_BASE_PATH}/ | grep -q -i login"
+    interval: 2
+    timeout: 30
+    retries: 10
+
+logs:
+  source: file
+  path: "./setup.log"
+
+dependencies:
+  - "cloudfront-sim"
+  - "@zerobias-com/minio"
