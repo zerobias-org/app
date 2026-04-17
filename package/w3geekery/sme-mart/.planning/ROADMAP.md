@@ -48,8 +48,8 @@
 
 - ✅ **Phase 18: Org Switcher** (5/5 plans, complete 2026-04-16) — User-menu dropdown switches active ZB org; Director UAT-approved (W3Geekery switch confirmed real org-context swap). Resolved errata 013/014/016 in-phase.
 - 📋 **Phase 19: zbb Local Dev Stacks** (4/4 plans, planning complete 2026-04-17) — Unified-origin reverse-proxy local dev environment for SPA + login via `zbb` with CloudFront-sim + nginx. Real UAT auth, real cookies, multi-user testing. (LS-01..LS-06; 10–14 hrs est.)
-  - [ ] **Plan 01 (Wave 1)** — Angular env + cloudfront-sim stack manifest + nginx config + entrypoint
-  - [ ] **Plan 02 (Wave 2)** — sme-mart-spa stack: build + upload + location block injection
+  - [x] **Plan 01 (Wave 1)** — Angular env + cloudfront-sim stack manifest + nginx config + entrypoint (completed 2026-04-17)
+  - [x] **Plan 02 (Wave 2)** — sme-mart-spa stack: build + upload + location block injection (completed 2026-04-17)
   - [ ] **Plan 03 (Wave 2)** — sme-mart-login stack: build + upload + location block injection (parallel to Plan 02)
   - [ ] **Plan 04 (Wave 3)** — STACKS.md documentation + smoke test suite (master + per-stack)
 - [ ] **Phase 20: Fire-and-Forget Audit** (TBD plans) — Audit all `pushEntity` call sites, add telemetry, remediate CRITICAL+SIMPLE, defer complex to v1.4 (est. ~8 hrs)
@@ -343,16 +343,16 @@
 | 16. Form Builder | 5/5 | Complete    | 2026-04-14 |
 | 17. Demo Seed Scripts | 1/1 | Complete    | 2026-04-15 |
 | 18. Org Switcher | 5/5 | Complete    | 2026-04-16 |
-| 19. zbb Local Dev Stacks | 4 plans created | Planning complete | 2026-04-17 |
+| 19. zbb Local Dev Stacks | 2/4 | Wave 2 executing (19-02 complete, 19-03 in parallel) | 2026-04-17 |
 | 20. Fire-and-Forget Audit | 0/? | Not started | — |
 | 21. Org Documents Center | 0/? | Not started | — |
 | 22. Form Template Library | 0/? | Not started | — |
 | 23. Transparency Controls UI-SPEC | 0/? | Not started | — |
 
 **v1.2 Milestone:** 5/5 phases complete, 14/14 plans complete (closed 2026-04-15).
-**v1.3 Milestone:** 6 phases total (18-23), 35 requirements, ~80–90 hrs estimated. Phase 18 complete (2026-04-16), Phase 19 planning complete (2026-04-17).
+**v1.3 Milestone:** 6 phases total (18-23), 35 requirements, ~80–90 hrs estimated. Phase 18 complete (2026-04-16), Phase 19 Wave 1-2 in progress (19-01 + 19-02 complete, 19-03 parallel, 19-04 pending Wave 3).
 
 ---
 
 **Created:** 2026-03-17
-**Last Updated:** 2026-04-17 (Phase 19 planning complete, 4 plans created)
+**Last Updated:** 2026-04-17 (Phase 19 Wave 2 executing: Plan 02 complete, Plan 03 in parallel)
