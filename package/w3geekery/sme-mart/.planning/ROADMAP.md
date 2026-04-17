@@ -47,11 +47,11 @@
 ### v1.3 Dev Experience, Hardening & Transparency (Phases 18-23)
 
 - ✅ **Phase 18: Org Switcher** (5/5 plans, complete 2026-04-16) — User-menu dropdown switches active ZB org; Director UAT-approved (W3Geekery switch confirmed real org-context swap). Resolved errata 013/014/016 in-phase.
-- 📋 **Phase 19: zbb Local Dev Stacks** (4/4 plans, planning complete 2026-04-17) — Unified-origin reverse-proxy local dev environment for SPA + login via `zbb` with CloudFront-sim + nginx. Real UAT auth, real cookies, multi-user testing. (LS-01..LS-06; 10–14 hrs est.)
+- ✅ **Phase 19: zbb Local Dev Stacks** (4/4 plans, complete 2026-04-17) — Unified-origin reverse-proxy local dev environment for SPA + login via `zbb` with CloudFront-sim + nginx. Real UAT auth, real cookies, multi-user testing. Director UAT ready.
   - [x] **Plan 01 (Wave 1)** — Angular env + cloudfront-sim stack manifest + nginx config + entrypoint (completed 2026-04-17)
   - [x] **Plan 02 (Wave 2)** — sme-mart-spa stack: build + upload + location block injection (completed 2026-04-17)
-  - [ ] **Plan 03 (Wave 2)** — sme-mart-login stack: build + upload + location block injection (parallel to Plan 02)
-  - [ ] **Plan 04 (Wave 3)** — STACKS.md documentation + smoke test suite (master + per-stack)
+  - [x] **Plan 03 (Wave 2)** — sme-mart-login stack: build + upload + location block injection (completed 2026-04-17)
+  - [x] **Plan 04 (Wave 3)** — STACKS.md documentation + smoke test suite (completed 2026-04-17)
 - [ ] **Phase 20: Fire-and-Forget Audit** (TBD plans) — Audit all `pushEntity` call sites, add telemetry, remediate CRITICAL+SIMPLE, defer complex to v1.4 (est. ~8 hrs)
 - [ ] **Phase 21: Org Documents Center Completion** (TBD plans) — Folders, colors, tags, templates, preview (est. ~20 hrs, time-boxed, scope trims on creep)
 - [ ] **Phase 22: Form Template Library** (TBD plans) — Save/reuse/fork form templates, library page, RFP wizard integration, new FormTemplate schema class (est. 22–32 hrs)
