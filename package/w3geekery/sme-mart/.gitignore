@@ -62,6 +62,7 @@ src/environments/environment.neon.ts
 .claude/diagrams/
 .claude/proposals/
 .claude/plans-archive/
+.claude/notes/plans/
 .claude/notes/meetings/**/*.docx
 .claude/notes/meetings/**/*.txt
 
