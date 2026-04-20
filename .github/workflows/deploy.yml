@@ -34,7 +34,6 @@ jobs:
     env:
       AWS_REGION: us-east-1
       ZB_TOKEN: ${{ secrets.ZB_TOKEN }}
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
       - name: Set environment variables
@@ -55,6 +54,7 @@ jobs:
           role: publishing-role
           path: gh-actions
           secrets: |
+            operations-kv/data/ci/github readPackagesToken | READ_TOKEN ;
             operations-kv/data/ci/slack releasesWebhook | SLACK_RELEASES_WEBHOOK ;
 
       - name: Checkout source code
@@ -81,6 +81,9 @@ jobs:
 
       - name: Deploy app to S3
         uses: zerobias-org/devops/actions/static-s3-app-release@main
+        env:
+          GITHUB_TOKEN: ${{ env.READ_TOKEN }}
+          NPM_TOKEN: ${{ env.READ_TOKEN }}
         with:
           app-name: ${{ env.APP_NAME }}
           app-base-path: ${{ env.APP_PATH }}
