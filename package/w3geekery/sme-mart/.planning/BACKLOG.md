@@ -1,10 +1,19 @@
 # SME Mart — Backlog
 
-**Source of truth for all pending work.** New ideas, meeting-driven stubs, and gap analysis items live here. When starting a new GSD milestone, pull items from this backlog into REQUIREMENTS.md.
+**Source of truth for FEATURE WORK pending milestone planning.** New feature ideas, meeting-driven stubs, and gap analysis items live here. When starting a new GSD milestone, pull items from this backlog into REQUIREMENTS.md.
 
 **Flow:** Backlog item → `/gsd:new-milestone` → REQUIREMENTS.md → ROADMAP phases → plan → execute → archive
 
-**Last updated:** 2026-04-08
+**Last updated:** 2026-04-20
+
+## Two backlog systems — know the difference
+
+| System | Where | For | Tooling |
+|---|---|---|---|
+| **GSD backlog** (this file) | `.planning/BACKLOG.md` — single-file table | Feature work awaiting milestone planning. Items become phases. | `/gsd:add-backlog`, `/gsd:review-backlog`, `/gsd:plan-milestone-gaps` |
+| **Director backlog** | `.planning/director/backlog/{NNN}-{slug}.md` — per-item files | Architecture decisions, cross-milestone observations, patterns to revisit. May or may not become feature work. | `/meta:backlog`, reviewed in `/meta:director design` |
+
+**Rule of thumb:** "this might become code" → here. "architectural decision / observation / pattern concern" → director backlog.
 
 ---
 
