@@ -1,0 +1,78 @@
+<div class="template-chooser-dialog">
+  <!-- Loading overlay -->
+  @if (loading()) {
+    <div class="loading-overlay">
+      <mat-spinner></mat-spinner>
+    </div>
+  }
+
+  <!-- Header -->
+  <div class="dialog-header">
+    <h2>Choose a Template</h2>
+    <p class="scope-info">Instantiate template for this {{ data.scope }}</p>
+  </div>
+
+  <!-- Template Selection -->
+  <div class="template-section">
+    <h3>Available Templates</h3>
+
+    @if (templates().length > 0) {
+      <div class="template-list">
+        @for (template of templates(); track template.id) {
+          <div
+            class="template-card"
+            [class.selected]="selectedTemplate()?.id === template.id"
+            (click)="selectTemplate(template)"
+          >
+            <div class="card-header">
+              <h4>{{ template.name }}</h4>
+              <span class="document-type">{{ getDocumentTypeLabel(template.documentType) }}</span>
+            </div>
+            <p class="description">{{ template.description || 'No description' }}</p>
+            <div class="card-footer">
+              <span class="status-badge">{{ template.status }}</span>
+              @if (selectedTemplate()?.id === template.id) {
+                <mat-icon class="check-icon">check_circle</mat-icon>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="empty-state">
+        <mat-icon>description</mat-icon>
+        <p>No templates available</p>
+      </div>
+    }
+  </div>
+
+  <!-- Instance Form -->
+  @if (selectedTemplate()) {
+    <form [formGroup]="form" class="instance-form">
+      <h3>Instance Details</h3>
+
+      <!-- Title field -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Document Title</mat-label>
+        <input matInput formControlName="title" placeholder="Name for this document">
+        @if (form.get('title')?.hasError('required')) {
+          <mat-error>Title is required</mat-error>
+        }
+      </mat-form-field>
+
+      <!-- Description field -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Description</mat-label>
+        <textarea matInput formControlName="description" rows="2" placeholder="Additional notes"></textarea>
+      </mat-form-field>
+    </form>
+  }
+
+  <!-- Dialog actions -->
+  <div class="dialog-actions">
+    <button mat-button (click)="cancel()">Cancel</button>
+    <button mat-raised-button color="primary" (click)="instantiate()" [disabled]="!form.valid || !selectedTemplate()">
+      Instantiate
+    </button>
+  </div>
+</div>

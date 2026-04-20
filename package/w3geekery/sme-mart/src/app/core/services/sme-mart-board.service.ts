@@ -121,7 +121,11 @@ export class SmeMartBoardService {
     id: string,
     changes: UpdateSmeMartBoardRequest,
   ): Promise<SmeMartBoard> {
-    const existing = await this.getBoard(id);
+    // Check write-through cache first (avoids GQL round-trip on rapid edits)
+    const cached = this.pipelineWrite.getCached('SmeMartBoard', id);
+    const existing = cached
+      ? mapGqlToNeon<SmeMartBoard>(cached, SME_MART_BOARD_FIELD_MAPPING.gqlToNeon)
+      : await this.getBoard(id);
     if (!existing) {
       throw new Error(`Board ${id} not found`);
     }

@@ -22,8 +22,8 @@ describe('NotesService', () => {
     // Default GQL fixtures
     const noteFixture: GqlNoteResponse = {
       id: 'note-001',
-      title: 'Test Note',
-      body: 'Test Content',
+      name: 'Test Note',
+      content: 'Test Content',
       engagementId: 'wr-001',
       folderId: null,
       authorZerobiasUserId: 'u-100',
@@ -61,9 +61,8 @@ describe('NotesService', () => {
       await service.createNote('wr-001', { title: 'New Note', body: 'Content' });
       expect(mockPipeline.pushEntity).toHaveBeenCalledWith('Note', expect.objectContaining({
         engagementId: 'wr-001',
-        authorZerobiasUserId: 'u-100',
-        title: 'New Note',
-        body: 'Content',
+        name: 'New Note',
+        content: 'Content',
       }));
     });
 
@@ -72,8 +71,7 @@ describe('NotesService', () => {
       const call = mockPipeline.pushEntity.mock.calls[0][1];
       expect(call.folderId).toBeNull();
       expect(call.accessLevel).toBe('boundary');
-      expect(call.isMeetingMinutes).toBe(false);
-      expect(call.meetingDate).toBeNull();
+      expect(call.archived).toBe(false);
     });
 
     it('should return optimistically before Pipeline completes', async () => {
@@ -101,7 +99,7 @@ describe('NotesService', () => {
       await service.updateNote('note-001', { title: 'Revised' });
       expect(mockPipeline.pushEntity).toHaveBeenCalledWith('Note', expect.objectContaining({
         id: 'note-001',
-        title: 'Revised',
+        name: 'Revised', // neonToGql maps title → name (GQL Object base class)
       }));
     });
 
@@ -210,7 +208,7 @@ describe('NotesService', () => {
         expect.any(Array),
         expect.objectContaining({
           filters: expect.objectContaining({
-            title: '.ilike.%HIPAA%',
+            name: '.ilike.%HIPAA%',
           }),
         }),
       );
@@ -254,14 +252,14 @@ describe('NotesService', () => {
   // ---------------------------------------------------------------------------
 
   describe('searchNotesByDocumentLink', () => {
-    it('should search for sme-doc:// links in body', async () => {
+    it('should search for sme-doc:// links in content', async () => {
       await service.searchNotesByDocumentLink('wr-001', 'doc-abc');
       expect(mockGql.query).toHaveBeenCalledWith(
         'Note',
         expect.any(Array),
         expect.objectContaining({
           filters: expect.objectContaining({
-            body: '.ilike.%sme-doc://doc-abc%',
+            content: '.ilike.%sme-doc://doc-abc%',
           }),
         }),
       );

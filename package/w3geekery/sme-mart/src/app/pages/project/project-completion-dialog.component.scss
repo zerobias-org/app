@@ -1,0 +1,21 @@
+.completion-summary {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background-color: rgba(0, 0, 0, 0.02);
+  border-radius: 4px;
+
+  p {
+    margin: 0.5rem 0;
+    font-size: 14px;
+    color: var(--zb-text-secondary, #666);
+
+    strong {
+      font-weight: 600;
+      color: var(--zb-text-primary, #000);
+    }
+  }
+}
+
+.full-width {
+  width: 100%;
+}

@@ -1,0 +1,109 @@
+<div class="suggestion-panel">
+  <!-- Pilot Completion Suggestion Card (Plan 077 Task 3) -->
+  @if (pilotSuggestion()) {
+    <mat-card class="suggestion-card pilot-suggestion-card">
+      <mat-card-header>
+        <mat-card-title>Pilot Completion Suggestion</mat-card-title>
+        <button mat-icon-button (click)="dismissPilotSuggestion()" class="dismiss-btn">
+          <mat-icon>close</mat-icon>
+        </button>
+      </mat-card-header>
+      <mat-card-content>
+        <p><strong>Pilot:</strong> {{ pilotSuggestion()!.pilotName }}</p>
+        <p><strong>Completed:</strong> {{ pilotSuggestion()!.completionDate | date:'mediumDate' }}</p>
+        @if (pilotSuggestion()!.completionNotes) {
+          <p><strong>Notes:</strong> {{ pilotSuggestion()!.completionNotes }}</p>
+        }
+        <p class="suggestion-text">This pilot is ready for vetting. Consider adding a vetting checklist item to the engagement.</p>
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-button (click)="dismissPilotSuggestion()">Dismiss</button>
+        <button mat-raised-button color="primary">Add Vetting Item</button>
+      </mat-card-actions>
+    </mat-card>
+  }
+
+  <!-- Suggestion Chip (shows when not attached and suggestions available) -->
+  @if (!isAttached() && canSuggest()) {
+    <button
+      mat-icon-button
+      (click)="toggleExpanded()"
+      matTooltip="Suggested profile items from Corporate Profile"
+      class="suggestion-chip"
+    >
+      <mat-icon>lightbulb_outline</mat-icon>
+      <span class="label">Suggested from Profile</span>
+    </button>
+  }
+
+  <!-- Linked to Profile Chip (shows when attached) -->
+  @if (isAttached() && attachedItem()) {
+    <div class="linked-chip">
+      <zb-resource-status
+        [label]="'PROFILE_LINKED'"
+        [pill]="true"
+        [showDot]="false"
+        size="small"
+      />
+      <span class="item-name">{{ attachedItem()!.name }}</span>
+      @if (attachedItemExpired()) {
+        <span class="expired-warning">⚠ EXPIRED</span>
+      }
+      <button
+        mat-icon-button
+        matTooltip="Detach profile item"
+        (click)="onLinkedItemDetach()"
+        [disabled]="detachInProgress()"
+      >
+        <mat-icon>clear</mat-icon>
+      </button>
+    </div>
+  }
+
+  <!-- Suggestion Mini-Panel (expandable, shows matching profile items) -->
+  @if (expanded() && canSuggest()) {
+    <div class="suggestion-mini-panel">
+      @if (loading()) {
+        <mat-spinner diameter="30" class="spinner" />
+      } @else {
+        @if (suggestedItems().length === 0) {
+          <p class="no-items">No profile items match this vetting type.</p>
+        } @else {
+          <div class="items-list">
+            @for (item of suggestedItems(); track item.id) {
+              <div class="item-row">
+                <div class="item-info">
+                  <span class="item-name">{{ item.name }}</span>
+                  @if (isExpiredStatus(item)) {
+                    <zb-resource-status
+                      [label]="'EXPIRED'"
+                      [pill]="true"
+                      [showDot]="false"
+                      size="small"
+                    />
+                    <span class="warning-text">Update your profile first</span>
+                  } @else if (isExpiringSoonStatus(item)) {
+                    <zb-resource-status
+                      [label]="'EXPIRING_SOON'"
+                      [pill]="true"
+                      [showDot]="false"
+                      size="small"
+                    />
+                  }
+                </div>
+                <button
+                  mat-raised-button
+                  color="primary"
+                  (click)="onSuggestionItemAttach(item)"
+                  [disabled]="attachInProgress()"
+                >
+                  Attach
+                </button>
+              </div>
+            }
+          </div>
+        }
+      }
+    </div>
+  }
+</div>

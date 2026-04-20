@@ -1,0 +1,240 @@
+@use 'tab-shared';
+
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.vetting-tab {
+  padding: 1.5rem 0;
+}
+
+.loading-message {
+  color: var(--zb-secondary-text);
+  padding: 2rem 0;
+}
+
+// ── Section ──
+
+.vetting-section {
+  margin-bottom: 2rem;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+
+  h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  .progress-label {
+    font-size: 0.85rem;
+    color: var(--zb-secondary-text);
+  }
+}
+
+.progress-bar {
+  margin-bottom: 1rem;
+  border-radius: 4px;
+}
+
+// ── Expansion panel items ──
+
+.vetting-item {
+  margin-bottom: 2px;
+
+  &.resolved {
+    opacity: 0.75;
+  }
+
+  .status-icon {
+    margin-right: 0.5rem;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+
+    &.status-verified { color: var(--zb-color-success, #4caf50); }
+    &.status-waived { color: var(--zb-secondary-text); }
+    &.status-rejected { color: var(--zb-color-error, #f44336); }
+    &.status-expired { color: var(--zb-color-warn, #ff9800); }
+    &.status-submitted { color: var(--zb-color-primary, #1976d2); }
+    &.status-under_review { color: var(--zb-color-primary, #1976d2); }
+    &.status-not_started { color: var(--zb-secondary-text); }
+  }
+
+  .item-name {
+    font-weight: 500;
+  }
+
+  mat-panel-description {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    justify-content: flex-end;
+  }
+
+  .meta-date {
+    font-size: 0.8rem;
+    color: var(--zb-secondary-text);
+
+    &.expires {
+      color: var(--zb-color-warn, #ff9800);
+    }
+  }
+}
+
+// ── Item details (expanded) ──
+
+.item-details {
+  padding: 0.5rem 0;
+
+  .description {
+    color: var(--zb-secondary-text);
+    line-height: 1.6;
+    margin: 0 0 1rem;
+  }
+
+  .detail-row {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.35rem;
+    font-size: 0.9rem;
+
+    .detail-label {
+      color: var(--zb-secondary-text);
+      min-width: 120px;
+    }
+
+    .detail-value {
+      font-weight: 500;
+    }
+
+    &.rejection .detail-value {
+      color: var(--zb-color-error, #f44336);
+    }
+  }
+}
+
+.item-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--zb-divider, rgba(0, 0, 0, 0.08));
+}
+
+// ── Gate banner ──
+
+.gate-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+
+  > mat-icon {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+  }
+
+  .gate-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+
+    strong { font-size: 0.95rem; }
+    span { font-size: 0.85rem; opacity: 0.85; }
+  }
+
+  &.gate-verified {
+    background: rgba(76, 175, 80, 0.1);
+    color: var(--zb-color-success, #2e7d32);
+  }
+
+  &.gate-blocked {
+    background: rgba(244, 67, 54, 0.1);
+    color: var(--zb-color-error, #c62828);
+  }
+
+  &.gate-progress {
+    background: rgba(255, 152, 0, 0.1);
+    color: var(--zb-color-warn, #e65100);
+  }
+}
+
+// ── Expired attachments checklist (D-09) ──
+
+.expired-attachments-alert {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+  background-color: #eed5d1;  // Red alert background per D-08
+  border-left: 4px solid #d32f2f;
+  border-radius: 4px;
+  margin-bottom: 1.5rem;
+
+  .alert-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    color: #c62828;
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+
+    .title {
+      font-size: 0.95rem;
+    }
+  }
+
+  .alert-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .alert-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.5rem 0;
+    font-size: 0.9rem;
+
+    .item-label {
+      flex: 1;
+      font-weight: 500;
+      color: #b71c1c;
+    }
+
+    .action-button {
+      flex-shrink: 0;
+      font-size: 0.8rem;
+      padding: 4px 12px;
+      height: auto;
+    }
+  }
+}
+
+// ── Empty state ──
+
+.empty-state {
+  color: var(--zb-secondary-text);
+  font-style: italic;
+  padding: 1rem 0;
+}

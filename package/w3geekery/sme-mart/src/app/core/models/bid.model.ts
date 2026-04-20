@@ -2,7 +2,8 @@ import { BidStatus } from './enums';
 
 export interface Bid {
   id: string;
-  request_id: string | null;
+  request_id: string | null; // Legacy — being replaced by project_id (Plan 075)
+  project_id?: string | null; // SmeMartProject reference (Plan 075)
   provider_id: string | null;
   cover_letter: string | null;
   proposed_price: string | null;
@@ -23,6 +24,10 @@ export interface Bid {
   ai_assisted?: boolean | null;
   ai_model?: string | null;
   ai_generated_at?: string | null;
+
+  // Advanced pricing (Plan 055)
+  pricing_model?: string | null; // 'fixed' | 'hourly' | 'milestone' | 'nrc_arc'
+  bid_valid_until?: string | null; // ISO date — bid expiration
 }
 
 export interface TaskTypePricing {

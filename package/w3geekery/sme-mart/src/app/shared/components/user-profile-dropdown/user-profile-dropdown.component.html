@@ -1,6 +1,7 @@
 <div
   [matMenuTriggerFor]="userMenu"
   class="avatar-trigger"
+  data-testid="user-menu-trigger"
 >
   <div class="org-user">
     <h3 class="username">{{ userName() }}</h3>
@@ -25,13 +26,30 @@
 
   <mat-divider />
 
-  <a mat-menu-item routerLink="/org">
+  <!-- Organization Switcher Submenu -->
+  <button
+    mat-menu-item
+    [matMenuTriggerFor]="orgSwitcherSubmenu"
+    (click)="$event.stopPropagation()"
+    data-testid="org-switcher-trigger"
+  >
+    <mat-icon>switch_account</mat-icon>
+    <span>Switch Organization</span>
+  </button>
+
+  <mat-divider />
+
+  <a mat-menu-item routerLink="/orgs">
     <mat-icon>business</mat-icon>
     <span>My Organizations</span>
   </a>
   <a mat-menu-item routerLink="/my/engagements">
     <mat-icon>work</mat-icon>
     <span>My Engagements</span>
+  </a>
+  <a mat-menu-item routerLink="/my/projects">
+    <mat-icon>folder_special</mat-icon>
+    <span>My Projects</span>
   </a>
   <a mat-menu-item routerLink="/my-profile">
     <mat-icon>person</mat-icon>
@@ -41,6 +59,34 @@
     <mat-icon>settings</mat-icon>
     <span>Settings</span>
   </a>
+
+  <mat-divider />
+
+  <mat-menu #orgSwitcherSubmenu="matMenu" class="org-switcher-submenu">
+    <div class="org-list">
+      @for (org of switchableOrgs(); track org.id) {
+        <button
+          mat-menu-item
+          [class.current-org]="`${org.id}` === currentOrgId()"
+          (click)="onSelectOrg(org)"
+          [attr.data-testid]="'org-item-' + org.id"
+        >
+          <div class="org-row">
+            <img
+              [src]="org.avatarUrl | staticImageUrl"
+              class="zb-ui-resource-image s20"
+              imgDefault
+              [default]="'./assets/unknown-company.svg'"
+              alt=""
+            />
+            <span class="ellipsis" [class.font-weight-bold]="`${org.id}` === currentOrgId()">
+              {{ org.name }}
+            </span>
+          </div>
+        </button>
+      }
+    </div>
+  </mat-menu>
 
   <mat-divider />
   <div class="menu-section-label">Browse</div>

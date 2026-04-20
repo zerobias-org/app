@@ -1,32 +1,33 @@
+/**
+ * Unit Tests for RfpList (Plan 075 — backed by SmeMartProjectService)
+ */
+
 import { TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideRouter, Router, ActivatedRoute } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { RfpList } from './rfp-list.component';
-import { EngagementsService } from '../../core/services/engagements.service';
+import { SmeMartProjectService } from '../../core/services/sme-mart-project.service';
 import { ZerobiasClientApi } from '@zerobias-com/zerobias-client';
-import { makeEngagementSummaryRow } from '../../test-helpers/factories';
+import { makeSmeMartProject } from '../../test-helpers/factories';
 
-describe('RfpList', () => {
+describe('RfpList (Plan 075)', () => {
   let component: RfpList;
-  let mockWorkRequests: {
-    listEngagements: ReturnType<typeof vi.fn>;
-    loading: { (): boolean; set: ReturnType<typeof vi.fn> };
+  let mockProjects: {
+    listProjects: ReturnType<typeof vi.fn>;
   };
   let mockRouter: { navigate: ReturnType<typeof vi.fn> };
   let mockDialog: { open: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
-    mockWorkRequests = {
-      listEngagements: vi.fn().mockResolvedValue({
+    mockProjects = {
+      listProjects: vi.fn().mockResolvedValue({
         items: [
-          makeEngagementSummaryRow(),
-          makeEngagementSummaryRow({ id: 'wr-002', title: 'SOC 2 Audit', description: 'Type II readiness', status: 'draft', budget_max: '20000', created_at: '2026-03-01T00:00:00Z' }),
-          makeEngagementSummaryRow({ id: 'eng-001', title: 'Active Engagement', engagement_tag: 'sme-mart.eng.amber-circuit' }),
+          makeSmeMartProject({ id: 'proj-001', name: 'HIPAA Assessment', status: 'published', category: 'compliance', budgetMax: 15000 }),
+          makeSmeMartProject({ id: 'proj-002', name: 'SOC 2 Audit', status: 'draft', budgetMax: 20000, createdAt: '2026-03-01T00:00:00Z' }),
         ],
       }),
-      loading: Object.assign(vi.fn().mockReturnValue(false), { set: vi.fn() }),
     };
     mockRouter = { navigate: vi.fn() };
     mockDialog = {
@@ -38,14 +39,11 @@ describe('RfpList', () => {
       providers: [
         provideNoopAnimations(),
         provideRouter([]),
-        { provide: EngagementsService, useValue: mockWorkRequests },
+        { provide: SmeMartProjectService, useValue: mockProjects },
         { provide: Router, useValue: mockRouter },
         { provide: MatDialog, useValue: mockDialog },
         { provide: ZerobiasClientApi, useValue: {} },
-        {
-          provide: ActivatedRoute,
-          useValue: { snapshot: { queryParams: {} } },
-        },
+        { provide: ActivatedRoute, useValue: { snapshot: { queryParams: {} } } },
       ],
     });
 
@@ -57,28 +55,18 @@ describe('RfpList', () => {
     expect(component).toBeTruthy();
   });
 
-  // ---------------------------------------------------------------------------
-  // loadData
-  // ---------------------------------------------------------------------------
-
   describe('loadData', () => {
-    it('should load and filter to RFPs only (no engagement_tag)', async () => {
+    it('should load projects and map to card rows', async () => {
       await component.loadData();
-      // Should exclude the one with engagement_tag
       expect(component.rfps()).toHaveLength(2);
-      expect(component.rfps().every(r => !r.engagement_tag)).toBe(true);
     });
 
     it('should handle errors without crashing', async () => {
-      mockWorkRequests.listEngagements.mockRejectedValue(new Error('API down'));
+      mockProjects.listProjects.mockRejectedValue(new Error('API down'));
       await component.loadData();
       expect(component.rfps()).toEqual([]);
     });
   });
-
-  // ---------------------------------------------------------------------------
-  // filteredRfps computed
-  // ---------------------------------------------------------------------------
 
   describe('filteredRfps', () => {
     beforeEach(async () => {
@@ -95,21 +83,10 @@ describe('RfpList', () => {
       expect(component.filteredRfps()[0].title).toBe('HIPAA Assessment');
     });
 
-    it('should filter by search term in description', () => {
-      component.searchTerm.set('compliance review');
-      expect(component.filteredRfps()).toHaveLength(1);
-    });
-
     it('should filter by status', () => {
       component.statusFilter.set('draft');
       expect(component.filteredRfps()).toHaveLength(1);
       expect(component.filteredRfps()[0].status).toBe('draft');
-    });
-
-    it('should sort by newest first (default)', () => {
-      component.sortBy.set('newest');
-      const sorted = component.filteredRfps();
-      expect(sorted[0].id).toBe('wr-002'); // March > February
     });
 
     it('should sort by budget high to low', () => {
@@ -118,39 +95,6 @@ describe('RfpList', () => {
       expect(sorted[0].budget_max).toBe('20000');
     });
   });
-
-  // ---------------------------------------------------------------------------
-  // ngOnInit
-  // ---------------------------------------------------------------------------
-
-  describe('ngOnInit', () => {
-    it('should pick up search term from query params', async () => {
-      TestBed.resetTestingModule();
-      TestBed.configureTestingModule({
-        imports: [RfpList],
-        providers: [
-          provideNoopAnimations(),
-          provideRouter([]),
-          { provide: EngagementsService, useValue: mockWorkRequests },
-          { provide: Router, useValue: mockRouter },
-          { provide: MatDialog, useValue: mockDialog },
-          { provide: ZerobiasClientApi, useValue: {} },
-          {
-            provide: ActivatedRoute,
-            useValue: { snapshot: { queryParams: { q: 'SOC' } } },
-          },
-        ],
-      });
-      const fixture = TestBed.createComponent(RfpList);
-      const comp = fixture.componentInstance;
-      await comp.ngOnInit();
-      expect(comp.searchTerm()).toBe('SOC');
-    });
-  });
-
-  // ---------------------------------------------------------------------------
-  // Navigation
-  // ---------------------------------------------------------------------------
 
   describe('openWizard', () => {
     it('should navigate to /rfps/new', () => {

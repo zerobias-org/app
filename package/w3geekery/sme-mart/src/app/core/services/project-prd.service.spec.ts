@@ -14,7 +14,7 @@ import type { GqlProjectPrdResponse, GqlPrdSectionResponse } from '../gql-types/
 
 describe('ProjectPrdService', () => {
   let service: ProjectPrdService;
-  let mockPipelineWrite: { pushEntity: ReturnType<typeof vi.fn>; pushEntities: ReturnType<typeof vi.fn>; deleteEntity: ReturnType<typeof vi.fn>; deleteEntities: ReturnType<typeof vi.fn> };
+  let mockPipelineWrite: { pushEntity: ReturnType<typeof vi.fn>; pushEntities: ReturnType<typeof vi.fn>; deleteEntity: ReturnType<typeof vi.fn>; deleteEntities: ReturnType<typeof vi.fn>; getCached: ReturnType<typeof vi.fn>; seedCache: ReturnType<typeof vi.fn> };
   let mockGraphqlRead: { query: ReturnType<typeof vi.fn>; getById: ReturnType<typeof vi.fn> };
   let mockImpersonation: { effectiveUserId: ReturnType<typeof vi.fn> };
 
@@ -24,6 +24,8 @@ describe('ProjectPrdService', () => {
       pushEntities: vi.fn().mockResolvedValue(undefined),
       deleteEntity: vi.fn().mockResolvedValue(undefined),
       deleteEntities: vi.fn().mockResolvedValue(undefined),
+      getCached: vi.fn().mockReturnValue(null),
+      seedCache: vi.fn(),
     };
     mockGraphqlRead = {
       query: vi.fn().mockResolvedValue({ items: [] }),

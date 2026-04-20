@@ -1,0 +1,192 @@
+<div class="vendor-profile-container">
+  <!-- Welcome Card (D-14) -->
+  @if (showWelcomeCard()) {
+    <mat-card class="welcome-card">
+      <mat-card-header>
+        <mat-card-title>Welcome to Corporate Profile</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>Build your marketplace profile to attract quality engagements. Update these 6 sections:</p>
+        <ul>
+          <li><strong>Corporate Identity:</strong> Legal name, business type, certifications</li>
+          <li><strong>Attestation:</strong> Service expertise, experience, client references</li>
+          <li><strong>Insurance:</strong> Coverage details and policy information</li>
+          <li><strong>Personnel:</strong> Key team members and credentials</li>
+          <li><strong>Reference:</strong> Client testimonials and project outcomes</li>
+          <li><strong>Financial:</strong> Business financials and stability indicators</li>
+        </ul>
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-raised-button color="primary" (click)="onWelcomeCardGetStarted()">Get Started</button>
+      </mat-card-actions>
+    </mat-card>
+  }
+
+  <!-- Loading Spinner -->
+  @if (isLoading()) {
+    <mat-spinner></mat-spinner>
+  }
+
+  <!-- Items Needing Renewal Card -->
+  @if ((expiredItems().length > 0 || expiringSoonItems().length > 0) && !dismissedRenewalCard()) {
+    <mat-card class="renewal-card">
+      <mat-card-header class="renewal-card-header">
+        <mat-card-title>Items Needing Attention</mat-card-title>
+        <button mat-icon-button (click)="dismissRenewalCard()" class="close-btn" type="button">
+          <mat-icon>close</mat-icon>
+        </button>
+      </mat-card-header>
+      <mat-card-content>
+        @if (expiredItems().length > 0) {
+          <div class="renewal-section">
+            <p class="renewal-title"><strong>Expired items:</strong></p>
+            <ul>
+              @for (item of expiredItems(); track item.id) {
+                <li class="renewal-item">
+                  <span>{{ item.name }} ({{ item.section | titlecase }})</span>
+                  <button mat-stroked-button (click)="openEditForm(item); dismissRenewalCard()" type="button">
+                    Update Now
+                  </button>
+                </li>
+              }
+            </ul>
+          </div>
+        }
+        @if (expiringSoonItems().length > 0) {
+          <div class="renewal-section">
+            <p class="renewal-title"><strong>Expiring soon (within 30 days):</strong></p>
+            <ul>
+              @for (item of expiringSoonItems(); track item.id) {
+                <li class="renewal-item">
+                  <span>{{ item.name }} ({{ item.section | titlecase }}) — Expires: {{ item.expires_at | date }}</span>
+                  <button mat-stroked-button (click)="openEditForm(item); dismissRenewalCard()" type="button">
+                    Renew Soon
+                  </button>
+                </li>
+              }
+            </ul>
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <!-- Main Content with Sidenav -->
+  <mat-sidenav-container class="sidenav-container">
+    <!-- Side Drawer for Form -->
+    <mat-sidenav
+      #drawer
+      position="end"
+      [opened]="sidenavOpen()">
+      <app-vendor-profile-form
+        [mode]="formMode()"
+        [section]="selectedSection()"
+        [item]="editingItem()"
+        (save)="onFormSave($event)"
+        (close)="onFormClose()">
+      </app-vendor-profile-form>
+    </mat-sidenav>
+
+    <!-- Main Content -->
+    <mat-sidenav-content class="sidenav-content">
+      <!-- Accordion Panels -->
+      <mat-accordion class="accordion" multi="true">
+        @for (section of sections; track section) {
+          <mat-expansion-panel class="section-panel">
+            <mat-expansion-panel-header class="section-header">
+              <div class="section-summary">
+                <span class="section-name">{{ section | titlecase }}</span>
+                <span class="item-count">{{ getItemsBySection(section).length }} items</span>
+                @if (getExpiredCount(section) > 0) {
+                  <mat-chip class="expired-badge" disabled="true">
+                    ⚠ {{ getExpiredCount(section) }} expired
+                  </mat-chip>
+                }
+              </div>
+              <button
+                mat-icon-button
+                (click)="openAddForm(section); $event.stopPropagation()"
+                [title]="'Add ' + section + ' Item'"
+                type="button">
+                <mat-icon>add</mat-icon>
+              </button>
+            </mat-expansion-panel-header>
+
+            <ng-template matExpansionPanelContent>
+              @if (getItemsBySection(section).length === 0) {
+                <p class="no-items-message">No items in this section. Click + to add one.</p>
+              } @else {
+                <div class="items-list">
+                  @for (item of getItemsBySection(section); track item.id) {
+                    @if (deletingItemId() === item.id) {
+                      <!-- Delete Confirmation Row -->
+                      <div class="item-row confirming">
+                        <div class="confirmation-content">
+                          <span>{{ item.name }} — Are you sure?</span>
+                        </div>
+                        <div class="confirmation-buttons">
+                          <button mat-stroked-button (click)="cancelDelete()" type="button">
+                            Cancel
+                          </button>
+                          <button mat-stroked-button class="delete-btn" (click)="confirmDelete(item)" type="button">
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    } @else {
+                      <!-- Normal Item Row -->
+                      <div class="item-row">
+                        <div class="item-main">
+                          <div class="item-name">{{ item.name }}</div>
+                          @if (getItemDetail(item)) {
+                            <div class="item-detail">{{ getItemDetail(item) }}</div>
+                          }
+                        </div>
+
+                        <div class="item-actions-group">
+                          <!-- Status Chip -->
+                          <zb-resource-status
+                            [label]="getStatusLabel(item)"
+                            [pill]="true"
+                            size="small"
+                            class="item-status">
+                          </zb-resource-status>
+
+                          <!-- Per-item Renewal Button -->
+                          @if (isExpired(item)) {
+                            <button mat-stroked-button class="renew-btn" (click)="openEditForm(item)" type="button">
+                              Update Now
+                            </button>
+                          } @else if (isExpiringSoon(item)) {
+                            <button mat-stroked-button class="renew-soon-btn" (click)="openEditForm(item)" type="button">
+                              Renew Soon
+                            </button>
+                          }
+
+                          <!-- Action Menu -->
+                          <button mat-icon-button [matMenuTriggerFor]="itemMenu" type="button">
+                            <mat-icon>more_vert</mat-icon>
+                          </button>
+                          <mat-menu #itemMenu="matMenu">
+                            <button mat-menu-item (click)="openEditForm(item)" type="button">
+                              <mat-icon>edit</mat-icon>
+                              <span>Edit</span>
+                            </button>
+                            <button mat-menu-item (click)="onDeleteItem(item)" type="button">
+                              <mat-icon>delete</mat-icon>
+                              <span>Delete</span>
+                            </button>
+                          </mat-menu>
+                        </div>
+                      </div>
+                    }
+                  }
+                </div>
+              }
+            </ng-template>
+          </mat-expansion-panel>
+        }
+      </mat-accordion>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+</div>

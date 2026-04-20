@@ -10,6 +10,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { RfpWizardService } from '../../../core/services/rfp-wizard.service';
 import { RfpStepBasics } from './steps/rfp-step-basics.component';
 import { RfpStepDocuments } from './steps/rfp-step-documents.component';
+import { RfpStepFormComponent } from './steps/rfp-step-form.component';
 import { RfpStepRequirements } from './steps/rfp-step-requirements.component';
 import { RfpStepTerms } from './steps/rfp-step-terms.component';
 import { RfpStepReview } from './steps/rfp-step-review.component';
@@ -27,6 +28,7 @@ export type RfpCreationMethod = 'manual' | 'ai';
     MatSnackBarModule,
     RfpStepBasics,
     RfpStepDocuments,
+    RfpStepFormComponent,
     RfpStepRequirements,
     RfpStepTerms,
     RfpStepReview,
@@ -85,6 +87,12 @@ export class RfpWizard implements OnInit {
 
   async onDocumentsSaved(): Promise<void> {
     await this.wizard.saveDocuments();
+    this.stepper.next();
+  }
+
+  async onFormSaved(): Promise<void> {
+    // Form config is persisted automatically in the component via rfpData.update()
+    // Just advance to next step
     this.stepper.next();
   }
 

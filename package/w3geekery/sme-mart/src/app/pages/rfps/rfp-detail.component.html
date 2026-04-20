@@ -8,46 +8,90 @@
       <mat-icon>arrow_back</mat-icon> Back to RFPs
     </button>
 
+    @if (isInvitationOnly() && vendorInvitation()) {
+      @switch (vendorInvitation()!.status) {
+        @case ('accepted') {
+          <mat-card class="response-banner success">
+            <mat-card-content>
+              <mat-icon>check_circle</mat-icon>
+              <p>You accepted this invitation. You can now submit a bid.</p>
+            </mat-card-content>
+          </mat-card>
+        }
+        @case ('pending') {
+          <mat-card class="response-banner pending">
+            <mat-card-content>
+              <div class="banner-message">
+                <mat-icon>hourglass_empty</mat-icon>
+                <p>Invitation pending your response.</p>
+              </div>
+              <div class="banner-actions">
+                <button mat-stroked-button color="primary" (click)="acceptInvitation()">Accept</button>
+                <button mat-stroked-button color="warn" (click)="declineInvitation()">Decline</button>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        }
+        @case ('declined') {
+          <mat-card class="response-banner declined">
+            <mat-card-content>
+              <mat-icon>cancel</mat-icon>
+              <p>You declined this invitation.</p>
+            </mat-card-content>
+          </mat-card>
+        }
+      }
+    }
+
     <div class="rfp-layout">
       <div class="rfp-main">
-        <mat-card>
-          <mat-card-header>
-            <div class="chip-row">
-              <mat-chip-set>
-                <mat-chip highlighted>RFP</mat-chip>
-                <mat-chip [class]="'status-' + status()">{{ status() | titlecase }}</mat-chip>
-                @if (rfp()!.category) {
-                  <mat-chip>{{ rfp()!.category }}</mat-chip>
-                }
-              </mat-chip-set>
-            </div>
-          </mat-card-header>
+        @if (isInvitationOnly() && !isInvited()) {
+          <app-invitation-teaser [project]="rfp()!" (requestInvitation)="requestInvitation($event.reason)" />
+        } @else {
+          <mat-card>
+            <mat-card-header>
+              <div class="chip-row">
+                <mat-chip-set>
+                  <mat-chip highlighted>RFP</mat-chip>
+                  <mat-chip [class]="'status-' + status()">{{ status() | titlecase }}</mat-chip>
+                  @if (rfp()!.isInvitationOnly) {
+                    <mat-chip class="invitation-only-chip">
+                      <mat-icon>lock</mat-icon>
+                      Invitation Only
+                    </mat-chip>
+                  }
+                  @if (rfp()!.category) {
+                    <mat-chip>{{ rfp()!.category }}</mat-chip>
+                  }
+                </mat-chip-set>
+              </div>
+            </mat-card-header>
 
-          <mat-card-content>
-            <h2>{{ rfp()!.title }}</h2>
-            @if (rfp()!.description) {
-              <p class="description">{{ rfp()!.description }}</p>
-            }
+            <mat-card-content>
+              <h2>{{ rfp()!.name }}</h2>
+              @if (rfp()!.description) {
+                <p class="description">{{ rfp()!.description }}</p>
+              }
 
             <div class="detail-grid">
-              @if (rfp()!.budget_min || rfp()!.budget_max) {
+              @if (rfp()!.budgetMin || rfp()!.budgetMax) {
                 <div class="detail-item">
                   <span class="label">Budget</span>
                   <span class="value">
-                    @if (rfp()!.budget_min && rfp()!.budget_max) {
-                      {{ rfp()!.budget_min | currency:'USD':'symbol':'1.0-0' }} – {{ rfp()!.budget_max | currency:'USD':'symbol':'1.0-0' }}
-                    } @else if (rfp()!.budget_max) {
-                      Up to {{ rfp()!.budget_max | currency:'USD':'symbol':'1.0-0' }}
+                    @if (rfp()!.budgetMin && rfp()!.budgetMax) {
+                      {{ rfp()!.budgetMin | currency:'USD':'symbol':'1.0-0' }} – {{ rfp()!.budgetMax | currency:'USD':'symbol':'1.0-0' }}
+                    } @else if (rfp()!.budgetMax) {
+                      Up to {{ rfp()!.budgetMax | currency:'USD':'symbol':'1.0-0' }}
                     } @else {
-                      From {{ rfp()!.budget_min | currency:'USD':'symbol':'1.0-0' }}
+                      From {{ rfp()!.budgetMin | currency:'USD':'symbol':'1.0-0' }}
                     }
                   </span>
                 </div>
               }
-              @if (rfp()!.budget_type) {
+              @if (rfp()!.budgetType) {
                 <div class="detail-item">
                   <span class="label">Budget Type</span>
-                  <span class="value">{{ rfp()!.budget_type | titlecase }}</span>
+                  <span class="value">{{ rfp()!.budgetType | titlecase }}</span>
                 </div>
               }
               @if (rfp()!.timeline) {
@@ -58,11 +102,7 @@
               }
               <div class="detail-item">
                 <span class="label">Posted</span>
-                <span class="value">{{ rfp()!.created_at | date:'mediumDate' }}</span>
-              </div>
-              <div class="detail-item">
-                <span class="label">By</span>
-                <span class="value">{{ rfp()!.buyer_display_name || 'Unknown' }}</span>
+                <span class="value">{{ rfp()!.createdAt | date:'mediumDate' }}</span>
               </div>
             </div>
 
@@ -91,8 +131,9 @@
                 </app-bid-card>
               }
             }
-          </mat-card-content>
-        </mat-card>
+            </mat-card-content>
+          </mat-card>
+        }
       </div>
 
       <!-- Actions sidebar -->
@@ -111,7 +152,7 @@
                   <mat-icon>edit</mat-icon> Edit
                 </button>
               }
-              @if (status() === 'open') {
+              @if (status() === 'published') {
                 <button mat-stroked-button (click)="editRfp()" class="action-btn">
                   <mat-icon>edit</mat-icon> Edit
                 </button>
@@ -124,7 +165,7 @@
                 <p class="status-msg">
                   <mat-icon>check_circle</mat-icon> You've submitted a bid
                 </p>
-              } @else if (status() === 'open') {
+              } @else if (status() === 'published') {
                 <button mat-flat-button color="primary" (click)="startBidWizard()" class="action-btn">
                   <mat-icon>rate_review</mat-icon> Start Bid
                 </button>

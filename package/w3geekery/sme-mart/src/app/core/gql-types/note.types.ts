@@ -23,11 +23,9 @@ export type NoteAccessLevel = 'personal' | 'boundary' | 'project';
 export interface GqlNoteResponse {
   // Object inherited fields
   id: string;
-  description?: string; // Reuses Object description field
-
-  // Note-specific fields
-  title: string; // Note title/heading
-  body: string; // Rich-text content
+  name: string;          // Object base class — used as note title
+  description?: string;
+  content: string;       // Custom property — rich-text note body
   engagementId: string; // Foreign key to Engagement
   folderId?: string | null; // Foreign key to NoteFolder (optional)
   authorZerobiasUserId: string;

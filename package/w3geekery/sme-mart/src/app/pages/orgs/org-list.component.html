@@ -1,0 +1,109 @@
+<div class="org-list-page">
+  <!-- Header -->
+  <header class="org-list-header">
+    <div>
+      <h1>My Organizations</h1>
+      <p class="subtitle">View all organizations you belong to</p>
+    </div>
+  </header>
+
+  <!-- Toolbar -->
+  <div class="org-list-toolbar">
+    <div class="search-container">
+      <zb-search-input
+        [value]="searchTerm()"
+        (searchChange)="searchTerm.set($event)"
+        placeholder="Search organizations..."
+        message=""
+      />
+    </div>
+    <button
+      mat-icon-button
+      [matTooltip]="viewMode() === 'cards' ? 'Switch to table view' : 'Switch to card view'"
+      (click)="toggleViewMode()"
+      class="view-toggle-btn"
+    >
+      <mat-icon>{{ viewMode() === 'cards' ? 'view_list' : 'dashboard' }}</mat-icon>
+    </button>
+  </div>
+
+  <!-- Loading -->
+  @if (isLoading()) {
+    <p class="loading-text">Loading organizations...</p>
+  }
+
+  <!-- Empty State -->
+  @if (!isLoading() && filteredOrgs().length === 0) {
+    <zb-empty-state-container />
+  }
+
+  <!-- Cards View -->
+  @if (viewMode() === 'cards' && filteredOrgs().length > 0) {
+    <div class="org-cards-grid">
+      @for (org of filteredOrgs(); track org.id) {
+        <div
+          [routerLink]="['/orgs', org.id]"
+          class="org-card"
+          [class.active]="isActive(org.id)"
+        >
+          <div class="card-header">
+            <h3 class="org-name">{{ org.name }}</h3>
+            <zb-resource-status [label]="org.badgeLabel" />
+          </div>
+
+          @if (org.description) {
+            <p class="org-description">{{ org.description }}</p>
+          }
+
+          <div class="metrics-row">
+            <span>{{ org.metrics.engagementCount }} Engagements</span>
+            <span>·</span>
+            <span>{{ org.metrics.projectCount }} Projects</span>
+          </div>
+
+          <div class="card-footer">
+            <div class="member-count">
+              <mat-icon>people</mat-icon>
+              <span>{{ getMemberCount(org) }} members</span>
+            </div>
+            <mat-icon class="arrow">arrow_forward</mat-icon>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Table View -->
+  @if (viewMode() === 'table' && filteredOrgs().length > 0) {
+    <div class="org-table-container">
+      <table class="org-table">
+        <thead>
+          <tr>
+            <th class="col-name">Organization Name</th>
+            <th class="col-badge">Type</th>
+            <th class="col-metrics">Metrics</th>
+            <th class="col-members">Members</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (org of filteredOrgs(); track org.id) {
+            <tr
+              [routerLink]="['/orgs', org.id]"
+              class="org-row"
+              [class.active-row]="isActive(org.id)"
+            >
+              <td class="col-name">{{ org.name }}</td>
+              <td class="col-badge">
+                <zb-resource-status [label]="org.badgeLabel" />
+              </td>
+              <td class="col-metrics">
+                {{ org.metrics.engagementCount }} E · {{ org.metrics.projectCount }} P
+              </td>
+              <td class="col-members">{{ getMemberCount(org) }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

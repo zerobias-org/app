@@ -31,7 +31,8 @@ export interface GqlBidResponse {
   description?: string;
 
   // Bid-specific fields
-  engagementId: string; // Foreign key to Engagement
+  engagementId?: string; // Legacy — removed from schema in Plan 075
+  project?: string | { id: string }; // Link to SmeMartProject (scalar ID or nested object)
   providerId: string;
   coverLetter?: string;
   proposedPrice?: string | number;

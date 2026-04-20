@@ -1,0 +1,116 @@
+<div class="template-editor-container">
+  <!-- Loading overlay -->
+  @if (loading()) {
+    <div class="loading-overlay">
+      <mat-spinner></mat-spinner>
+    </div>
+  }
+
+  <!-- Toolbar -->
+  <mat-toolbar color="primary" class="editor-toolbar">
+    <mat-toolbar-row>
+      <h1>{{ isCreateMode() ? 'Create Template' : 'Edit Template' }}</h1>
+      <span class="spacer"></span>
+      <button mat-button (click)="cancel()">Cancel</button>
+      <button mat-raised-button color="accent" (click)="save()">Save</button>
+      @if (!isCreateMode()) {
+        <button mat-button (click)="publish()">Publish</button>
+        <button mat-button color="warn" (click)="archive()">Archive</button>
+      }
+    </mat-toolbar-row>
+  </mat-toolbar>
+
+  <!-- Main content -->
+  <div class="editor-layout">
+    <!-- Left panel: Form fields -->
+    <div class="form-panel">
+      <div class="form-section">
+        <h2>Template Details</h2>
+
+        <form [formGroup]="form">
+          <!-- Name field -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Template Name</mat-label>
+            <input matInput formControlName="name" placeholder="e.g., Master Service Agreement">
+            @if (form.get('name')?.hasError('required')) {
+              <mat-error>Template name is required</mat-error>
+            }
+            @if (form.get('name')?.hasError('minlength')) {
+              <mat-error>Template name must be at least 3 characters</mat-error>
+            }
+          </mat-form-field>
+
+          <!-- Description field -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Description</mat-label>
+            <textarea matInput formControlName="description" rows="3" placeholder="Template purpose and notes"></textarea>
+          </mat-form-field>
+
+          <!-- Document Type dropdown -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Document Type</mat-label>
+            <mat-select formControlName="documentType">
+              <mat-option value="msa">Master Service Agreement</mat-option>
+              <mat-option value="nda">Non-Disclosure Agreement</mat-option>
+              <mat-option value="sow">Statement of Work</mat-option>
+              <mat-option value="compliance">Compliance Document</mat-option>
+              <mat-option value="other">Other</mat-option>
+            </mat-select>
+            @if (form.get('documentType')?.hasError('required')) {
+              <mat-error>Document type is required</mat-error>
+            }
+          </mat-form-field>
+
+          <!-- Custom variables section -->
+          <div class="variables-section">
+            <h3>Custom Variables</h3>
+            @if (customVariables().length > 0) {
+              <div class="variables-list">
+                @for (variable of customVariables(); track $index) {
+                  <div class="variable-item">
+                    <span class="variable-name">{{ variable.name }}</span>
+                    <span class="variable-description">{{ variable.description }}</span>
+                    <div class="variable-actions">
+                      <button mat-icon-button (click)="updateVariable($index, variable)" title="Edit">
+                        <mat-icon>edit</mat-icon>
+                      </button>
+                      <button mat-icon-button color="warn" (click)="removeVariable($index)" title="Remove">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </div>
+                  </div>
+                }
+              </div>
+            } @else {
+              <p class="no-variables">No custom variables. Add one using the panel on the right.</p>
+            }
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Right panel: Editor and variable management -->
+    <div class="editor-panel">
+      <!-- Editor section -->
+      <div class="editor-section">
+        <h2>Template Content</h2>
+        <app-markdown-editor
+          [variableNames]="allVariableNames()"
+        ></app-markdown-editor>
+        @if (form.get('content')?.hasError('required')) {
+          <mat-error class="required-error">Template content is required</mat-error>
+        }
+      </div>
+
+      <!-- Variable panel -->
+      <div class="variable-panel-section">
+        <app-variable-panel
+          [customVariables]="customVariables()"
+          (addVariable)="addVariable($event)"
+          (updateVariable)="updateVariable($event.index, $event.variable)"
+          (removeVariable)="removeVariable($event)"
+        ></app-variable-panel>
+      </div>
+    </div>
+  </div>
+</div>

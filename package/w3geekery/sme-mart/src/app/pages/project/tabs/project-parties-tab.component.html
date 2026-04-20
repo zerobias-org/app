@@ -1,0 +1,32 @@
+@if (partiesLoading()) {
+  <div class="loading-container">
+    <mat-spinner diameter="40" />
+  </div>
+} @else if (boundaryGroups().length === 0) {
+  <div class="empty-state">
+    <p>No boundary information available for this project.</p>
+  </div>
+} @else {
+  <div class="parties-container">
+    @for (group of boundaryGroups(); track group.boundaryId) {
+      <mat-expansion-panel [expanded]="boundaryGroups().length === 1">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            {{ group.boundaryName }}
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+
+        @if (group.parties.length === 0) {
+          <div class="no-parties">No parties in this boundary.</div>
+        } @else {
+          <zb-customizable-table
+            [data]="group.parties"
+            [columns]="['name', 'roles']"
+          >
+            <!-- Table will auto-render name and roles columns -->
+          </zb-customizable-table>
+        }
+      </mat-expansion-panel>
+    }
+  </div>
+}

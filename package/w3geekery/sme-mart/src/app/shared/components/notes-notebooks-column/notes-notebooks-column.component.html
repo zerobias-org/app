@@ -63,6 +63,9 @@
             <mat-icon>more_vert</mat-icon>
           </span>
           <mat-menu #notebookMenu="matMenu">
+            <button mat-menu-item (click)="notebookInfo.emit(node.folder.id)">
+              <mat-icon>info_outline</mat-icon> Info
+            </button>
             <button mat-menu-item (click)="openEditDialog(node, $event)">
               <mat-icon>edit</mat-icon> Rename
             </button>

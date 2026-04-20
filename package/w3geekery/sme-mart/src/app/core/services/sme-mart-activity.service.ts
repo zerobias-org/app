@@ -117,7 +117,11 @@ export class SmeMartActivityService {
     id: string,
     changes: UpdateSmeMartActivityRequest,
   ): Promise<SmeMartActivity> {
-    const existing = await this.getActivity(id);
+    // Check write-through cache first (avoids GQL round-trip on rapid edits)
+    const cached = this.pipelineWrite.getCached('SmeMartActivity', id);
+    const existing = cached
+      ? mapGqlToNeon<SmeMartActivity>(cached, SME_MART_ACTIVITY_FIELD_MAPPING.gqlToNeon)
+      : await this.getActivity(id);
     if (!existing) {
       throw new Error(`Activity ${id} not found`);
     }

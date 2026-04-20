@@ -1,7 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService, type GqlQueryOptions } from './graphql-read.service';
-import { NotificationService } from './notification.service';
+import { Memoize } from '../../shared/utils/memoize.decorator';
 import { ENGAGEMENT_FIELD_MAPPING, mapNeonToGql, mapGqlToNeon } from '../field-mappings';
 import type { QueryOptions } from '@zerobias-org/data-utils';
 import { PagedResults } from '@zerobias-org/types-core-js';
@@ -9,24 +9,22 @@ import type {
   Engagement,
   EngagementSummaryRow,
   EngagementDetailRow,
-  BudgetType,
 } from '../models';
 import type { GqlEngagementResponse } from '../gql-types';
 
 /**
- * EngagementsService - FULLY MIGRATED TO PIPELINE (Phase 5)
+ * EngagementsService — Plan 075 Phase 2 cleanup
+ *
+ * Engagements are now corp-to-corp agreements (buyer org ↔ provider org).
+ * RFP creation/management has moved to SmeMartProjectService.
  *
  * All writes go through PipelineWriteService (fire-and-forget async).
  * All reads go through GraphqlReadService (from AuditgraphDB).
- *
- * Neon work_requests table archived 2 weeks after Phase 5 completion (2026-04-02).
- * 2-week observation period for production stability verification.
  */
 @Injectable({ providedIn: 'root' })
 export class EngagementsService {
   private readonly pipelineWrite = inject(PipelineWriteService);
   private readonly graphqlRead = inject(GraphqlReadService);
-  private readonly notifications = inject(NotificationService);
 
   readonly engagements = signal<EngagementSummaryRow[]>([]);
   readonly loading = signal(false);
@@ -102,8 +100,9 @@ export class EngagementsService {
   }
 
   /**
-   * Fetch a single engagement with full details and related bid data.
+   * Fetch a single engagement with full details and related bid data. Cached for 30s.
    */
+  @Memoize(30000)
   async getEngagement(id: string): Promise<EngagementDetailRow | null> {
     const engagement = await this.graphqlRead.getById<GqlEngagementResponse>(
       'Engagement',
@@ -135,25 +134,19 @@ export class EngagementsService {
   }
 
   /**
-   * Create a new RFP (engagement) and push to Pipeline.
-   * Returns optimistic Engagement immediately (doesn't wait for GQL indexing).
+   * Create an engagement (corp-to-corp agreement between buyer and provider).
+   * Called from EngagementLifecycleService when a bid is accepted.
    */
-  async createRfp(data: {
+  async createEngagement(data: {
     buyer_zerobias_user_id: string;
     buyer_zerobias_org_id?: string;
     title: string;
     description?: string;
-    category: string;
-    budget_type?: BudgetType;
-    budget_min?: string;
-    budget_max?: string;
-    timeline?: string;
-    status?: 'draft' | 'open';
+    engagement_tag: string;
+    zerobias_tag_id?: string;
   }): Promise<Engagement> {
-    // Generate ID for new engagement
     const id = `eng-${Date.now()}-${Math.random().toString(36).substring(7)}`;
 
-    // Prepare Engagement object with defaults
     const engagement: Engagement = {
       id,
       buyer_user_id: null,
@@ -161,87 +154,61 @@ export class EngagementsService {
       buyer_zerobias_org_id: data.buyer_zerobias_org_id || null,
       title: data.title,
       description: data.description || null,
-      category: data.category,
-      budget_type: data.budget_type || null,
-      budget_min: data.budget_min || null,
-      budget_max: data.budget_max || null,
-      timeline: data.timeline || null,
-      status: (data.status || 'open') as 'draft' | 'open',
-      engagement_tag: null,
-      zerobias_tag_id: null,
+      category: '', // Engagements no longer carry RFP fields (moved to SmeMartProject)
+      budget_type: null,
+      budget_min: null,
+      budget_max: null,
+      timeline: null,
+      status: 'in_progress' as any,
+      engagement_tag: data.engagement_tag,
+      zerobias_tag_id: data.zerobias_tag_id || null,
       zerobias_boundary_id: null,
       zerobias_task_id: null,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
 
-    // Transform to GQL shape and push to Pipeline (fire-and-forget)
     const gqlData = mapNeonToGql<GqlEngagementResponse>(engagement, ENGAGEMENT_FIELD_MAPPING.neonToGql);
     this.pipelineWrite.pushEntity('Engagement', gqlData as unknown as Record<string, unknown>).catch(err => {
       console.error('Failed to push engagement to Pipeline:', err);
     });
 
-    // Fire-and-forget notification
-    if (engagement.status === 'open') {
-      this.notifications.create({
-        recipient_id: data.buyer_zerobias_user_id,
-        type: 'rfp_published',
-        severity: 'info',
-        title: 'RFP published',
-        description: `Your RFP "${data.title}" is now live on the marketplace.`,
-        resource_id: engagement.id,
-        resource_type: 'rfp',
-      }).catch(() => {});
-    }
-
-    // Return optimistic response immediately
     return engagement;
   }
 
   /**
-   * Update an existing RFP/engagement and push updates to Pipeline.
-   * Returns optimistic Engagement immediately.
+   * Update an engagement and push changes to Pipeline.
    */
-  async updateRfp(id: string, data: Partial<Engagement>): Promise<Engagement> {
-    // Fetch current engagement to merge updates
-    const current = await this.getEngagementRaw(id);
+  async updateEngagement(id: string, data: Partial<Engagement>): Promise<Engagement> {
+    // Check write-through cache first, fall back to GQL fetch
+    const cached = this.pipelineWrite.getCached('Engagement', id);
+    const current = cached
+      ? mapGqlToNeon<Engagement>(cached, ENGAGEMENT_FIELD_MAPPING.gqlToNeon)
+      : await this.getEngagementRaw(id);
     if (!current) throw new Error(`Engagement ${id} not found`);
 
     const updated: Engagement = { ...current, ...data, updated_at: new Date().toISOString() };
 
-    // Transform to GQL and push to Pipeline
     const gqlData = mapNeonToGql<GqlEngagementResponse>(updated, ENGAGEMENT_FIELD_MAPPING.neonToGql);
     this.pipelineWrite.pushEntity('Engagement', gqlData as unknown as Record<string, unknown>).catch(err => {
       console.error('Failed to update engagement in Pipeline:', err);
     });
 
-    // Return optimistic response
     return updated;
-  }
-
-  /**
-   * Graduate an RFP to in-progress engagement status (when a provider is selected).
-   */
-  async graduateToEngagement(id: string, engagementTag: string, zerobiasTagId?: string): Promise<Engagement> {
-    return this.updateRfp(id, {
-      engagement_tag: engagementTag,
-      zerobias_tag_id: zerobiasTagId || null,
-      status: 'in_progress' as any,
-    });
   }
 
   /**
    * Cancel an engagement.
    */
   async cancelEngagement(id: string): Promise<Engagement> {
-    return this.updateRfp(id, { status: 'cancelled' as any });
+    return this.updateEngagement(id, { status: 'cancelled' as any });
   }
 
   /**
    * Mark engagement as completed.
    */
   async completeEngagement(id: string): Promise<Engagement> {
-    return this.updateRfp(id, { status: 'completed' as any });
+    return this.updateEngagement(id, { status: 'completed' as any });
   }
 
   /**
@@ -251,15 +218,14 @@ export class EngagementsService {
     // Only fields that exist in the GQL Engagement schema (Object base + custom properties)
     // Object inherited: id, name, description, dateCreated, dateLastModified
     // Custom (from Engagement.yml): all camelCase field names
+    // Fields removed from schema 2026-03-24 (PR #20): category, budgetType,
+    // budgetMin, budgetMax, timeline, responseDeadline, questionsDeadline,
+    // evaluationCriteria, wizardStep, wizardData, zerobiasBoundaryId
     return [
       'id',
       'name',
       'description',
-      'category',
       'status',
-      'budgetMin',
-      'budgetMax',
-      'timeline',
       'engagementTag',
       'zerobiasTaskId',
       'zerobiasTagId',

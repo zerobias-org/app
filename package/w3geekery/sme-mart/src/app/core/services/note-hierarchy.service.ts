@@ -30,6 +30,18 @@ export class NoteHierarchyService {
   private readonly graphqlRead = inject(GraphqlReadService);
   private readonly impersonation = inject(ImpersonationService);
 
+  /**
+   * Tracks folder names currently being created per engagement.
+   * Prevents duplicate "General" folders when multiple calls fire before
+   * the pipeline push is queryable via GQL.
+   * Key format: `engagementId:folderName`
+   */
+  private readonly pendingCreations = new Set<string>();
+
+  private pendingKey(engagementId: string, name: string): string {
+    return `${engagementId}:${name}`;
+  }
+
   // ── Folder CRUD ──
 
   async createFolder(
@@ -65,15 +77,24 @@ export class NoteHierarchyService {
    * working yet (schema PR pending).
    */
   async ensureDefaultFolder(engagementId: string, notebookId: string): Promise<NoteFolder | null> {
+    const key = this.pendingKey(engagementId, notebookId);
+
+    // Guard: another call is already creating a folder for this notebook
+    if (this.pendingCreations.has(key)) return null;
+
     const tree = await this.getFolderTree(engagementId);
 
-    // Guard: don't create if a "General" folder already exists anywhere in the tree
-    const hasGeneral = this.findNodeByName(tree, 'General');
-    if (hasGeneral) return null;
-
-    // Find the notebook node and check if it has children
+    // Find the notebook node
     const notebook = this.findNodeById(tree, notebookId);
+
+    // Guard: if notebook has ANY children, don't create — use what exists
     if (notebook && notebook.children.length > 0) return null;
+
+    // Guard: notebook not found in tree (might be newly created, not yet in GQL)
+    if (!notebook) return null;
+
+    // Mark as pending before creating (cleared on next successful tree load)
+    this.pendingCreations.add(key);
     return this.createFolder(engagementId, 'General', notebookId);
   }
 
@@ -85,6 +106,11 @@ export class NoteHierarchyService {
       this.folderService.getNoteFolderTree(engagementId),
       this.notesService.getNoteCounts(engagementId),
     ]);
+
+    // Clear pending creations for folders that now appear in the GQL tree.
+    // This means the pipeline push has been ingested and is queryable.
+    this.clearResolvedPending(engagementId, gqlTree);
+
     return this.transformTree(gqlTree, 0, noteCounts);
   }
 
@@ -205,6 +231,20 @@ export class NoteHierarchyService {
   }
 
   // ── Private helpers ──
+
+  /**
+   * Remove pending entries for folders that now exist in the GQL tree.
+   * Walks the tree collecting all folder names, then removes matching pending keys.
+   */
+  private clearResolvedPending(engagementId: string, tree: NoteFolderTreeNode[]): void {
+    const collectNames = (nodes: NoteFolderTreeNode[]): void => {
+      for (const node of nodes) {
+        this.pendingCreations.delete(this.pendingKey(engagementId, node.name));
+        if (node.children) collectNames(node.children);
+      }
+    };
+    collectNames(tree);
+  }
 
   private findNodeByName(nodes: FolderTreeNode[], name: string): FolderTreeNode | null {
     for (const n of nodes) {

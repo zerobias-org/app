@@ -1,0 +1,126 @@
+<div class="invited-vendors-tab">
+  @if (loading()) {
+    <div class="loading-container">
+      <mat-spinner diameter="32"></mat-spinner>
+    </div>
+  } @else {
+    @if (isProjectOwner) {
+      <div class="add-vendor-section">
+        <mat-card>
+          <mat-card-header>
+            <h3>Invite Vendor</h3>
+          </mat-card-header>
+          <mat-card-content>
+            <form>
+              <mat-form-field class="full-width">
+                <mat-label>Vendor Organization ID</mat-label>
+                <input
+                  matInput
+                  type="text"
+                  [(ngModel)]="newVendorOrgId"
+                  name="vendorOrgId"
+                  placeholder="Enter vendor org ID"
+                />
+              </mat-form-field>
+
+              <mat-form-field class="full-width">
+                <mat-label>Message (optional)</mat-label>
+                <textarea
+                  matInput
+                  [(ngModel)]="invitationMessage"
+                  name="message"
+                  rows="3"
+                  placeholder="Why are we inviting this vendor?">
+                </textarea>
+              </mat-form-field>
+            </form>
+          </mat-card-content>
+          <mat-card-actions>
+            <button
+              mat-raised-button
+              color="primary"
+              (click)="inviteVendor()"
+              [disabled]="sendingInvite()">
+              @if (sendingInvite()) {
+                <mat-spinner diameter="20"></mat-spinner>
+                Sending...
+              } @else {
+                Send Invitation
+              }
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      </div>
+    }
+
+    <div class="invitations-section">
+      <h3>Invitations</h3>
+
+      @if (invitations().length > 0) {
+        <div class="invitations-list">
+          @for (inv of invitations(); track inv.id) {
+            <mat-card class="invitation-row">
+              <mat-card-content>
+                <div class="vendor-info">
+                  <div class="vendor-details">
+                    <span class="vendor-name">{{ inv.vendorOrgId }}</span>
+                    <mat-chip-set>
+                      <mat-chip [class]="getStatusChipClass(inv.status)" disabled>
+                        {{ inv.status }}
+                      </mat-chip>
+                    </mat-chip-set>
+                  </div>
+                </div>
+
+                <div class="dates-info">
+                  <p class="date-line">
+                    <mat-icon>calendar_today</mat-icon>
+                    Invited: {{ inv.invitedAt | date: 'short' }}
+                  </p>
+                  @if (inv.respondedAt) {
+                    <p class="date-line">
+                      <mat-icon>done_all</mat-icon>
+                      Responded: {{ inv.respondedAt | date: 'short' }}
+                    </p>
+                  }
+                </div>
+
+                @if (inv.invitationMessage) {
+                  <p class="invitation-message">{{ inv.invitationMessage }}</p>
+                }
+              </mat-card-content>
+
+              @if (isProjectOwner) {
+                <mat-card-actions>
+                  @if (inv.status === 'pending') {
+                    <button
+                      mat-icon-button
+                      (click)="revokeInvitation(inv.id)"
+                      matTooltip="Revoke invitation">
+                      <mat-icon>clear</mat-icon>
+                    </button>
+                  } @else if (inv.status === 'requested') {
+                    <button
+                      mat-stroked-button
+                      color="primary"
+                      (click)="approveRequest(inv.id)">
+                      Approve
+                    </button>
+                    <button
+                      mat-stroked-button
+                      color="warn"
+                      (click)="declineRequest(inv.id)">
+                      Decline
+                    </button>
+                  }
+                </mat-card-actions>
+              }
+            </mat-card>
+          }
+        </div>
+      } @else {
+        <p class="no-invitations">No invitations sent yet.</p>
+      }
+    </div>
+  }
+</div>

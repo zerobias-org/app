@@ -1,6 +1,21 @@
 # Kevin's Board / Project / Scoped Roles Spec
 
 **Source:** Kevin McCarthy, 2026-03-17 (Slack/doc shared with Clark)
+**Updated:** 2026-03-25 — additional context from standup
+
+### Additional context (Kevin, 2026-03-25 standup)
+
+> "That is still accurate. If we have Engagements it would be a similar construct."
+> "Engagements could link to Projects but not own them or be owned by them."
+> "Projects probably would be their own app like Boundary Manager. They won't likely need space in Governance if we can avoid it."
+
+**Key implications:**
+- Engagements are a similar Resource+RoleScope construct to Projects
+- Projects will be a **standalone ZB platform app** (like Boundary Manager)
+- SME Mart handles the marketplace/engagement side; Project management is a separate app
+- Everything must have an owner traceable to an Org
+- Project ↔ Engagement is `relates_to` (many-to-many), neither owns the other
+- Project owners: Org or Boundary (per this doc). Standup also mentioned User for private projects — needs clarification.
 
 ---
 

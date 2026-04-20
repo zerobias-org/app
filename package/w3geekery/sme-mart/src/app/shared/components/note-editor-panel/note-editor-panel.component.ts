@@ -103,7 +103,7 @@ export class NoteEditorPanel {
       if (n.id === this.loadedNoteId) return;
       this.loadedNoteId = n.id;
 
-      const isNew = n.title === 'Untitled' && !n.body;
+      const isNew = (n.title === 'Untitled' || n.title === 'Untitled Note') && !n.body;
       this.editing.set(isNew);
       this.editingTitle.set(isNew);
       this.editingAccess.set(false);

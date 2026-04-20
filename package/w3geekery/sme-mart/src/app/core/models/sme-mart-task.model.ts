@@ -18,6 +18,7 @@ export interface SmeMartTask {
   dueDate?: string | null;
   activityId?: string | null;
   customFields?: Record<string, unknown>[];
+  transparencyConfig?: string | null; // JSON publish/private controls (Plan 078)
   createdAt: string;
   updatedAt: string;
 }

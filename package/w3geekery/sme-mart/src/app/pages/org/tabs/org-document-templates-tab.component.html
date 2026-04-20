@@ -1,0 +1,91 @@
+<div class="templates-container">
+  @if (loading()) {
+    <div class="loading-state">
+      <mat-spinner diameter="32"></mat-spinner>
+      <span>Loading templates…</span>
+    </div>
+  } @else if (templates().length === 0) {
+    <div class="empty-state">
+      <mat-icon class="empty-icon">description</mat-icon>
+      <p>No document templates yet</p>
+      <p class="hint">Create reusable templates with variable placeholders for your organization.</p>
+      <button mat-raised-button color="primary" (click)="createNewTemplate()">
+        <mat-icon>add</mat-icon> Create Template
+      </button>
+    </div>
+  } @else {
+    <div class="toolbar">
+      <h3>Document Templates</h3>
+      <button mat-raised-button color="primary" (click)="createNewTemplate()">
+        <mat-icon>add</mat-icon> Create Template
+      </button>
+    </div>
+
+    <div class="card-grid">
+      @for (template of templates(); track template.id) {
+        <mat-card class="template-card" [class.archived]="template.status === 'archived'">
+          <mat-card-header>
+            <div class="header-row">
+              <div class="title-section">
+                <h3>{{ template.name }}</h3>
+                <p class="description">{{ template.description || 'No description' }}</p>
+              </div>
+              <button mat-icon-button [matMenuTriggerFor]="menu" class="menu-button">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #menu="matMenu">
+                <button mat-menu-item (click)="editTemplate(template)">
+                  <mat-icon>edit</mat-icon> Edit
+                </button>
+                @if (template.status === 'draft') {
+                  <button mat-menu-item (click)="publishTemplate(template)">
+                    <mat-icon>publish</mat-icon> Publish
+                  </button>
+                }
+                @if (template.status !== 'archived') {
+                  <button mat-menu-item (click)="archiveTemplate(template)">
+                    <mat-icon>archive</mat-icon> Archive
+                  </button>
+                }
+                <mat-divider></mat-divider>
+                <button mat-menu-item (click)="deleteTemplate(template)" class="delete-option">
+                  <mat-icon>delete</mat-icon> Delete
+                </button>
+              </mat-menu>
+            </div>
+          </mat-card-header>
+
+          <mat-card-content>
+            <div class="metadata">
+              <div class="chips-row">
+                <mat-chip-set>
+                  <mat-chip class="type-chip">{{ template.documentType }}</mat-chip>
+                  <mat-chip [class]="'status-chip status-' + template.status">
+                    {{ getStatusLabel(template.status) }}
+                  </mat-chip>
+                </mat-chip-set>
+              </div>
+
+              <div class="stats-row">
+                <div class="stat">
+                  <mat-icon class="stat-icon">tag</mat-icon>
+                  <span class="stat-label">{{ getVariableCount(template.variableSchema) }} variables</span>
+                </div>
+                <div class="stat">
+                  <mat-icon class="stat-icon">access_time</mat-icon>
+                  <span class="stat-label">{{ formatDate(template.updatedAt) }}</span>
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
+
+          <mat-card-actions>
+            <button mat-button (click)="editTemplate(template)">
+              <mat-icon>edit</mat-icon> Edit
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      }
+    </div>
+  }
+</div>

@@ -154,14 +154,16 @@ export class ReviewsService {
    * Returns optimistic updated Review.
    */
   async approveReview(reviewId: string, approvedBy: string): Promise<Review> {
-    // Fetch current review to merge updates
-    const current = await this.graphqlRead.getById<GqlReviewResponse>(
-      'Review',
-      reviewId,
-      this.getReviewFields(),
-    );
-
-    if (!current) throw new Error(`Review ${reviewId} not found`);
+    // Check write-through cache first, fall back to GQL fetch
+    let current = this.pipelineWrite.getCached('Review', reviewId) as GqlReviewResponse | null;
+    if (!current) {
+      current = await this.graphqlRead.getById<GqlReviewResponse>(
+        'Review',
+        reviewId,
+        this.getReviewFields(),
+      );
+      if (!current) throw new Error(`Review ${reviewId} not found`);
+    }
 
     // Transform current GQL to Neon, merge approval updates
     const neonCurrent = mapGqlToNeon<Review>(current, REVIEW_FIELD_MAPPING.gqlToNeon);
@@ -188,14 +190,16 @@ export class ReviewsService {
    * Returns optimistic updated Review.
    */
   async rejectReview(reviewId: string, approvedBy: string): Promise<Review> {
-    // Fetch current review to merge updates
-    const current = await this.graphqlRead.getById<GqlReviewResponse>(
-      'Review',
-      reviewId,
-      this.getReviewFields(),
-    );
-
-    if (!current) throw new Error(`Review ${reviewId} not found`);
+    // Check write-through cache first, fall back to GQL fetch
+    let current = this.pipelineWrite.getCached('Review', reviewId) as GqlReviewResponse | null;
+    if (!current) {
+      current = await this.graphqlRead.getById<GqlReviewResponse>(
+        'Review',
+        reviewId,
+        this.getReviewFields(),
+      );
+      if (!current) throw new Error(`Review ${reviewId} not found`);
+    }
 
     // Transform current GQL to Neon, merge rejection updates
     const neonCurrent = mapGqlToNeon<Review>(current, REVIEW_FIELD_MAPPING.gqlToNeon);

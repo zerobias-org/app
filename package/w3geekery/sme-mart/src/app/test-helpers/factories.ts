@@ -11,6 +11,7 @@ import type {
   Engagement,
   EngagementSummaryRow,
   EngagementDetailRow,
+  SmeMartProject,
   Note,
   NoteWithTags,
   Notification,
@@ -82,6 +83,29 @@ export function makeEngagementDetailRow(overrides: Partial<EngagementDetailRow> 
     created_at: TEST_CREATED_AT,
     ...overrides,
   } as EngagementDetailRow;
+}
+
+// ---------------------------------------------------------------------------
+// SmeMartProject (Plan 075 — RFP + Project container)
+// ---------------------------------------------------------------------------
+
+export function makeSmeMartProject(overrides: Partial<SmeMartProject> = {}): SmeMartProject {
+  return {
+    id: TEST_ENG_ID,
+    name: 'HIPAA Assessment',
+    description: 'Full compliance review',
+    status: 'draft',
+    startDate: TEST_CREATED_AT,
+    targetEndDate: TEST_UPDATED_AT,
+    createdAt: TEST_CREATED_AT,
+    updatedAt: TEST_UPDATED_AT,
+    category: 'compliance',
+    budgetType: 'fixed',
+    budgetMin: 5000,
+    budgetMax: 15000,
+    timeline: '4 weeks',
+    ...overrides,
+  };
 }
 
 // ---------------------------------------------------------------------------

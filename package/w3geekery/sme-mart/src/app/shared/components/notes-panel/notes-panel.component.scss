@@ -297,5 +297,27 @@
     font-size: 0.95rem;
     margin: 0;
   }
+
+  &.no-notebooks-state {
+    opacity: 1;
+    gap: 1rem;
+    padding: 2rem;
+
+    h3 {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--mat-sys-on-surface);
+    }
+
+    p {
+      color: var(--mat-sys-on-surface-variant);
+    }
+
+    mat-icon {
+      color: var(--zb-color-primary, #1976d2);
+      opacity: 0.6;
+    }
+  }
 }
 

@@ -15,7 +15,7 @@ import { CurrencyPipe, DecimalPipe } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { BidsService } from '../../../core/services/bids.service';
 import { BidAiService } from '../../../core/services/bid-ai.service';
-import { EngagementsService } from '../../../core/services/engagements.service';
+import { SmeMartProjectService } from '../../../core/services/sme-mart-project.service';
 import { ImpersonationService } from '../../../core/services/impersonation.service';
 import { ProviderProfilesService } from '../../../core/services/provider-profiles.service';
 import { BidResponseService } from '../../../core/services/bid-response.service';
@@ -51,7 +51,7 @@ export class BidWizard implements OnInit, OnDestroy {
   private readonly snackBar = inject(MatSnackBar);
   private readonly bids = inject(BidsService);
   private readonly bidAi = inject(BidAiService);
-  private readonly engagements = inject(EngagementsService);
+  private readonly projects = inject(SmeMartProjectService);
   private readonly impersonation = inject(ImpersonationService);
   private readonly providerProfiles = inject(ProviderProfilesService);
   private readonly bidResponses = inject(BidResponseService);
@@ -102,19 +102,18 @@ export class BidWizard implements OnInit, OnDestroy {
     const bidId = this.route.snapshot.paramMap.get('bidId');
 
     try {
-      // Load RFP context
-      const rfp = await this.engagements.getEngagement(this.rfpId);
-      if (!rfp) {
+      // Load RFP context (SmeMartProject)
+      const project = await this.projects.getProject(this.rfpId);
+      if (!project) {
         this.snackBar.open('RFP not found', 'Dismiss', { duration: 3000 });
         this.router.navigate(['/rfps']);
         return;
       }
-      this.rfpTitle.set(rfp.title || '');
-      this.rfpDescription.set(rfp.description || '');
+      this.rfpTitle.set(project.name || '');
+      this.rfpDescription.set(project.description || '');
 
-      // Load RFP requirements from wizard data
-      const rawWr = await this.engagements.getEngagementRaw(this.rfpId);
-      const rfpData = (rawWr as any)?.rfp_wizard_data as RfpData | undefined;
+      // Load RFP requirements from wizardData field
+      const rfpData = project.wizardData as RfpData | undefined;
       if (rfpData?.taskGroups) {
         this.taskGroups.set(rfpData.taskGroups);
       }

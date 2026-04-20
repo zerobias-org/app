@@ -29,6 +29,11 @@
           (next)="onDocumentsSaved()" />
       </mat-step>
 
+      <!-- Step 2.5: Submission Form (Plan 16) -->
+      <mat-step [editable]="true" label="Submission Form" [optional]="true">
+        <app-rfp-step-form />
+      </mat-step>
+
       <!-- Step 3: Requirements -->
       <mat-step [editable]="true" label="Requirements">
         <app-rfp-step-requirements

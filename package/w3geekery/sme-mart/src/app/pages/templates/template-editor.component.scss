@@ -1,0 +1,269 @@
+.template-editor-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: #fafafa;
+  position: relative;
+}
+
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.3);
+  z-index: 100;
+}
+
+.editor-toolbar {
+  flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  h1 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 500;
+  }
+
+  .spacer {
+    flex: 1 1 auto;
+  }
+
+  button {
+    margin-left: 8px;
+  }
+}
+
+.editor-layout {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.form-panel {
+  flex: 0 0 35%;
+  padding: 24px;
+  overflow-y: auto;
+  background-color: white;
+  border-right: 1px solid #e0e0e0;
+  box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.08);
+
+  .form-section {
+    h2 {
+      margin: 0 0 16px 0;
+      font-size: 16px;
+      font-weight: 500;
+      color: rgba(0, 0, 0, 0.87);
+    }
+  }
+
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .full-width {
+    width: 100%;
+  }
+
+  .variables-section {
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid #e0e0e0;
+
+    h3 {
+      margin: 0 0 12px 0;
+      font-size: 14px;
+      font-weight: 500;
+      color: rgba(0, 0, 0, 0.87);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .no-variables {
+      margin: 0;
+      padding: 8px 0;
+      font-size: 13px;
+      color: rgba(0, 0, 0, 0.54);
+      font-style: italic;
+    }
+  }
+
+  .variables-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    .variable-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px;
+      border-radius: 4px;
+      background-color: #f5f5f5;
+      border-left: 3px solid #1976d2;
+
+      .variable-name {
+        flex: 0 0 auto;
+        font-family: monospace;
+        font-size: 12px;
+        font-weight: 600;
+        color: #d32f2f;
+        background-color: white;
+        padding: 2px 6px;
+        border-radius: 2px;
+      }
+
+      .variable-description {
+        flex: 1 1 auto;
+        font-size: 12px;
+        color: rgba(0, 0, 0, 0.54);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .variable-actions {
+        flex: 0 0 auto;
+        display: flex;
+        gap: 4px;
+
+        button {
+          width: 32px;
+          height: 32px;
+          padding: 0;
+        }
+      }
+    }
+  }
+
+  mat-error.required-error {
+    display: block;
+    margin-top: 4px;
+  }
+}
+
+.editor-panel {
+  flex: 1 1 65%;
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  overflow: hidden;
+  gap: 16px;
+
+  .editor-section {
+    flex: 1 1 60%;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+
+    h2 {
+      margin: 0 0 12px 0;
+      font-size: 16px;
+      font-weight: 500;
+      color: rgba(0, 0, 0, 0.87);
+    }
+
+    app-markdown-editor {
+      flex: 1;
+      border: 1px solid #e0e0e0;
+      border-radius: 4px;
+      overflow: hidden;
+      background-color: white;
+    }
+
+    mat-error.required-error {
+      display: block;
+      margin-top: 4px;
+      color: #d32f2f;
+      font-size: 12px;
+    }
+  }
+
+  .variable-panel-section {
+    flex: 0 0 35%;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    overflow: hidden;
+    background-color: white;
+
+    app-variable-panel {
+      height: 100%;
+    }
+  }
+}
+
+/* Responsive layout for smaller screens */
+@media (max-width: 1200px) {
+  .editor-layout {
+    flex-direction: column;
+  }
+
+  .form-panel {
+    flex: 0 0 auto;
+    border-right: none;
+    border-bottom: 1px solid #e0e0e0;
+    max-height: 40%;
+    padding: 16px;
+
+    .form-section {
+      h2 {
+        font-size: 14px;
+      }
+    }
+  }
+
+  .editor-panel {
+    flex: 1;
+    padding: 16px;
+
+    .editor-section {
+      flex: 1 1 50%;
+    }
+
+    .variable-panel-section {
+      flex: 0 0 auto;
+      max-height: 40%;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .editor-toolbar {
+    h1 {
+      font-size: 16px;
+    }
+
+    button {
+      padding: 4px 8px;
+      font-size: 12px;
+      margin-left: 4px;
+    }
+  }
+
+  .form-panel {
+    padding: 12px;
+    max-height: 50%;
+
+    form {
+      gap: 12px;
+    }
+  }
+
+  .editor-panel {
+    padding: 12px;
+    gap: 12px;
+
+    .editor-section h2,
+    .variable-panel-section h2 {
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+  }
+}

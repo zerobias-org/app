@@ -266,9 +266,11 @@ The dataloader reads your YAML files, validates them against the catalog schema,
 
 After dataloader verification:
 1. Push your branch and open a PR against `zerobias-org/schema`
-2. **Daniel** reviews the schema PR
-3. If approved, Daniel adds an approve tag and merges
-4. On merge to `dev`/`qa`/`main`, the platform dataloader auto-imports your schema into the target environment
+2. **Default target:** `--base dev` (dev has the CI dataloader check)
+3. **Fallback:** If dev CI is broken (e.g., `nfa_test` DB missing on Actions runner), target `--base qa` instead to avoid blocking schema work
+4. **Daniel** reviews the schema PR
+5. If approved, Daniel adds an approve tag and merges
+6. On merge to `dev`/`qa`/`main`, the platform dataloader auto-imports your schema into the target environment
 
 **Deployment:** Merge your branch to `dev`, `qa`, or `main` in the schema repo. The dataloader auto-imports your schema and the GraphQL API regenerates for that environment. No manual publish step needed.
 

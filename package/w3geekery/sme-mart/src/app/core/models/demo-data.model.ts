@@ -37,7 +37,8 @@ export interface DemoEngagement {
 export interface DemoBid {
   id: string;
   name: string;
-  engagementId: string;
+  engagementId?: string; // Legacy — being replaced by project
+  project: string; // GQL link field to SmeMartProject (Plan 075)
   providerId: string;
   coverLetter: string;
   proposedPrice: number;
@@ -166,6 +167,31 @@ export interface DemoServiceOffering {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+}
+
+/**
+ * Demo SmeMartProject payload.
+ * Corresponds to GQL SmeMartProject entity.
+ * Serves as both project container AND RFP entity (Plan 075).
+ */
+export interface DemoSmeMartProject {
+  id: string;
+  name: string;
+  description: string;
+  status: string; // 'draft', 'published', 'active', 'completed', 'archived'
+  engagement?: string; // GQL link field name — only for active projects under engagements
+  startDate: string;  // YYYY-MM-DD
+  targetEndDate?: string; // YYYY-MM-DD
+  // RFP fields (Plan 075)
+  category?: string;
+  budgetType?: 'fixed' | 'hourly' | 'negotiable';
+  budgetMin?: number;
+  budgetMax?: number;
+  timeline?: string;
+  responseDeadline?: string; // ISO 8601
+  questionsDeadline?: string; // ISO 8601
+  buyerZerobiasUserId?: string; // for RFP ownership display
+  buyerZerobiasOrgId?: string;
 }
 
 /**
