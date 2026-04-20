@@ -4,6 +4,11 @@
 
 "Upwork meets Whop" for ZeroBias platform users: buyers post engagements, SMEs bid, work flows through ZB Tasks with proper RACI and Boundaries.
 
+## Status
+
+- **UAT:** initial deploy validating the publish pipeline (`zerobias-org/app:uat` → `app-uat-zerobias.com` S3 bucket → CloudFront)
+- **Prod:** not yet published — pending UAT verification and platform enrollment
+
 ## Architecture
 
 - **Framework:** Angular 21, standalone components, no NgModules, no Nx
