@@ -34,6 +34,7 @@ jobs:
     env:
       AWS_REGION: us-east-1
       ZB_TOKEN: ${{ secrets.ZB_TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
       - name: Set environment variables
