@@ -1,0 +1,159 @@
+.admin-dashboard {
+  padding: 1.5rem;
+
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0 0 1.5rem;
+  }
+}
+
+// Stats row
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.stat-card {
+  text-align: center;
+  padding: 1.25rem;
+
+  mat-icon {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+    color: var(--zb-primary);
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  .stat-label {
+    font-size: 0.8rem;
+    color: var(--zb-secondary-text);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+}
+
+// Tab content
+.tab-content {
+  padding: 1.5rem 0;
+}
+
+.tab-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+
+  .spacer {
+    flex: 1;
+  }
+
+  .filter-field {
+    width: 160px;
+  }
+}
+
+.full-width {
+  width: 100%;
+}
+
+// Categories
+.category-list {
+  border: 1px solid var(--zb-divider);
+  border-radius: var(--zb-radius-md);
+  overflow: hidden;
+}
+
+.category-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover {
+    background: var(--zb-hover-overlay);
+  }
+
+  .expand-icon {
+    cursor: pointer;
+  }
+
+  .expand-placeholder {
+    width: 24px;
+    display: inline-block;
+  }
+
+  .cat-name {
+    font-weight: 500;
+  }
+
+  .cat-desc {
+    font-size: 0.8rem;
+    color: var(--zb-secondary-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 300px;
+  }
+
+  .count-chip {
+    font-size: 0.75rem;
+  }
+
+  .spacer {
+    flex: 1;
+  }
+}
+
+.child-row {
+  padding-left: 2.5rem;
+}
+
+.children {
+  border-top: 1px solid var(--zb-divider);
+}
+
+// Reviews
+.review-text-cell {
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.status-pending { --mdc-chip-label-text-color: var(--zb-color-warning); }
+.status-approved { --mdc-chip-label-text-color: var(--zb-color-success); }
+.status-rejected { --mdc-chip-label-text-color: var(--zb-color-error); }
+
+// Settings
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 1rem;
+
+  mat-card {
+    mat-slide-toggle {
+      display: block;
+      margin-bottom: 0.75rem;
+    }
+  }
+}
+
+.setting-note {
+  font-size: 0.8rem;
+  color: var(--zb-secondary-text);
+  font-style: italic;
+  margin: 0.5rem 0 0;
+}

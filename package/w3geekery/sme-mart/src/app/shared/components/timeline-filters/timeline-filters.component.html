@@ -1,0 +1,93 @@
+<div class="timeline-filters">
+  <div class="filters-header">
+    <h3 class="filters-title">Filters</h3>
+    <app-timeline-filter-enabler
+      [enabledFilters]="currentEnabled"
+      (enabledChange)="onEnabledChange($event)"
+    />
+    @if (hasActiveFilters) {
+      <button mat-button class="clear-btn" (click)="clearAll()">
+        Clear all
+      </button>
+    }
+  </div>
+
+  <!-- Event Type section (chip grid) -->
+  @if (currentEnabled.eventType) {
+    <app-timeline-filter-section
+      title="Event Type"
+      filterType="eventType"
+      [items]="eventTypeItems$()"
+      [selectedIds]="selectedEventTypes()"
+      [showAllAsChips]="true"
+      [collapsible]="true"
+      [removable]="true"
+      (selectionChange)="onSectionChange($event)"
+      (removeSection)="onRemoveSection($event)"
+    />
+  }
+
+  <!-- Date Range section (custom) -->
+  @if (currentEnabled.dateRange) {
+    <div class="filter-section">
+      <div class="section-header" (click)="toggleDateRangeCollapse()">
+        <mat-icon class="collapse-icon" [class.collapsed]="dateRangeCollapsed()">expand_more</mat-icon>
+        <span class="section-title">Date Range</span>
+        @if (dateRangeCount) {
+          <span class="count-badge">{{ dateRangeCount }}</span>
+        }
+        <span class="spacer"></span>
+        <button mat-icon-button class="remove-btn" (click)="onRemoveSection('dateRange'); $event.stopPropagation()" aria-label="Remove date range filter"
+          matTooltip="Remove section" [matTooltipShowDelay]="300">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      @if (!dateRangeCollapsed()) {
+        <div class="section-body date-range-body">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>From</mat-label>
+            <input matInput [matDatepicker]="fromPicker" [value]="dateFrom()" (dateChange)="onDateFromChange($event)">
+            <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
+            <mat-datepicker #fromPicker></mat-datepicker>
+          </mat-form-field>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>To</mat-label>
+            <input matInput [matDatepicker]="toPicker" [value]="dateTo()" (dateChange)="onDateToChange($event)">
+            <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
+            <mat-datepicker #toPicker></mat-datepicker>
+          </mat-form-field>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Actor section (autocomplete) -->
+  @if (currentEnabled.actor) {
+    <app-timeline-filter-section
+      title="Actor"
+      filterType="actor"
+      [items]="actorItems$()"
+      [selectedIds]="selectedActorIds()"
+      [showAllAsChips]="false"
+      [collapsible]="true"
+      [removable]="true"
+      (selectionChange)="onSectionChange($event)"
+      (removeSection)="onRemoveSection($event)"
+    />
+  }
+
+  <!-- Tag / Source section (autocomplete) -->
+  @if (currentEnabled.tag) {
+    <app-timeline-filter-section
+      title="Tag / Source"
+      filterType="tag"
+      [items]="tagItems$()"
+      [selectedIds]="selectedTags()"
+      [showAllAsChips]="false"
+      [collapsible]="true"
+      [removable]="true"
+      (selectionChange)="onSectionChange($event)"
+      (removeSection)="onRemoveSection($event)"
+    />
+  }
+</div>

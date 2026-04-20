@@ -1,0 +1,159 @@
+import { Injectable, inject } from '@angular/core';
+import { ZerobiasClientApi } from '@zerobias-com/zerobias-client';
+import { SimpleBatch } from '@zerobias-com/platform-sdk';
+import { UUID } from '@zerobias-org/types-core-js';
+import { environment } from '../../../environments/environment';
+
+// ---------------------------------------------------------------------------
+// SME Mart AuditgraphDB class IDs (deterministic — same across all environments)
+// ---------------------------------------------------------------------------
+const SME_MART_CLASS_IDS = {
+  // Original 8 entities (migrated from Neon in Phases 2-4)
+  Engagement:      '7711aa41-e55b-5cda-9b7a-35844a2006a1',
+  Bid:             'ccddd2e5-e455-585e-9bb7-902903228b0d',
+  BidResponse:     'a024a0b5-50df-59cc-ba8e-25fcd82f69c3',
+  ServiceOffering: 'ff689173-4787-52c5-808b-6b2435a625a7',
+  Note:            'fe7c58a9-c13b-5a4b-817f-5c4b419ed28c',
+  NoteFolder:      '4d50975e-d4dc-5654-8e43-f3c5da01f49d',
+  Review:          'ef5d821a-46f5-5f44-8e59-0854777d803c',
+  SmeMartDocument: 'e1497ca8-a621-57f6-9263-f9a19fea3c34',
+
+  // Phase 6 Bloom entities (greenfield — built directly on Pipeline+GQL)
+  SmeMartProject:  'c66114a2-48e2-5b93-b7d6-7ccd6ef45a03',
+  SmeMartBoard:    '20be589b-194e-5227-ba6e-c7edae42f34b',
+  SmeMartActivity: '36405d75-76f1-5f4b-ab3b-22c562d41e07',
+  SmeMartWorkflow: '295938d2-5c63-5140-a945-2ba28b88b268',
+  SmeMartTask:     'e15f1e0a-1bc9-5002-b4bc-3482d4499561',
+  ProjectPrd:      '920fca70-4dcf-5d9e-ba16-1dfd0f8061f0',
+  PrdSection:      'd30445f3-e26d-5153-83be-fe810f63220c',
+  ProjectPlan:     'bc6159da-19a3-51d0-89a8-f2147078c760',
+  PlanMilestone:   'ac1a1cc8-db44-5c1d-b359-5fb02e3d381d',
+} as const;
+
+export type SmeMartClassName = keyof typeof SME_MART_CLASS_IDS;
+
+// ---------------------------------------------------------------------------
+// Pipeline ID (from environment — per-environment, NOT deterministic)
+// ---------------------------------------------------------------------------
+const PIPELINE_ID = environment.pipelineId;
+
+/**
+ * Pushes SME Mart entity data into AuditgraphDB via the Receiver Pipeline.
+ *
+ * Uses `platform.Pipeline.receive` — a single-call shortcut that wraps
+ * job creation, batch creation, item ingestion, and job completion.
+ *
+ * All objects must conform to their class schema (id, name required;
+ * custom fields as defined in w3geekery.sme-mart.schema YAML).
+ */
+interface CacheEntry {
+  data: Record<string, unknown>;
+}
+
+@Injectable({ providedIn: 'root' })
+export class PipelineWriteService {
+  private readonly clientApi = inject(ZerobiasClientApi);
+
+  /**
+   * Write-through cache for pipeline objects.
+   * Pipeline receive is full-replace — partial pushes null unmentioned fields.
+   * This cache lets services skip the GQL fetch on rapid successive edits
+   * (e.g., color → rename → move) by reusing the last-pushed full object.
+   */
+  private readonly cache = new Map<string, CacheEntry>();
+
+  private cacheKey(className: string, id: string): string {
+    return `${className}:${id}`;
+  }
+
+  /**
+   * Get a cached object if fresh (within TTL).
+   * Services should use: `cache.getCached(...) ?? await gqlRead.getById(...)`
+   */
+  getCached(className: SmeMartClassName, id: string): Record<string, unknown> | null {
+    const entry = this.cache.get(this.cacheKey(className, id));
+    if (!entry) return null;
+    return { ...entry.data };
+  }
+
+  /**
+   * Push one or more objects of a given class into AuditgraphDB.
+   * Objects are created or updated based on their `id` field (upsert).
+   */
+  async pushEntities(
+    className: SmeMartClassName,
+    data: object[],
+    tagIds: string[] = [],
+  ): Promise<void> {
+    const classId = SME_MART_CLASS_IDS[className];
+    const pipelineApi = this.clientApi.platformClient.getPipelineApi();
+
+    // Ensure every object has `name` (required by AuditgraphDB Object base class).
+    // If not provided, derive from common fields or use className + id as fallback.
+    const ensured = (data as Record<string, unknown>[]).map(obj => {
+      if (obj['name']) return obj;
+      const name = obj['title'] || obj['coverLetter']?.toString().substring(0, 100)
+        || obj['reviewText']?.toString().substring(0, 100)
+        || obj['displayName'] || obj['category']
+        || `${className}-${obj['id'] ?? 'unknown'}`;
+      return { ...obj, name };
+    });
+
+    const batch = new SimpleBatch(
+      new UUID(classId),
+      ensured,
+      tagIds.map(id => new UUID(id)),
+    );
+    await pipelineApi.receive(new UUID(PIPELINE_ID), batch);
+
+    // Update cache with pushed objects (write-through)
+    for (const obj of ensured) {
+      const id = obj['id'] as string;
+      if (id) {
+        this.cache.set(this.cacheKey(className, id), {
+          data: { ...obj },
+        });
+      }
+    }
+  }
+
+  /**
+   * Push a single entity. Convenience wrapper around pushEntities.
+   */
+  async pushEntity(
+    className: SmeMartClassName,
+    data: Record<string, unknown>,
+    tagIds: string[] = [],
+  ): Promise<void> {
+    await this.pushEntities(className, [data], tagIds);
+  }
+
+  /**
+   * Mark entities as deleted in AuditgraphDB (differential mode).
+   * Removes objects by their external IDs.
+   */
+  async deleteEntities(
+    className: SmeMartClassName,
+    ids: string[],
+  ): Promise<void> {
+    const classId = SME_MART_CLASS_IDS[className];
+    const pipelineApi = this.clientApi.platformClient.getPipelineApi();
+    const batch = new SimpleBatch(
+      new UUID(classId),
+      [],       // no data to add
+      [],       // no tags
+      ids,      // markDeleted
+    );
+    await pipelineApi.receive(new UUID(PIPELINE_ID), batch);
+  }
+
+  /**
+   * Mark a single entity as deleted. Convenience wrapper.
+   */
+  async deleteEntity(
+    className: SmeMartClassName,
+    id: string,
+  ): Promise<void> {
+    await this.deleteEntities(className, [id]);
+  }
+}

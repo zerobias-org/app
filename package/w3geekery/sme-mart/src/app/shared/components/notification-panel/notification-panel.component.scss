@@ -1,0 +1,82 @@
+.bell-trigger {
+  color: inherit;
+}
+
+// Panel menu styles (use ::ng-deep since mat-menu renders outside component)
+::ng-deep .notification-panel-menu {
+  min-width: 360px;
+  max-width: 420px;
+
+  .mat-mdc-menu-content {
+    padding: 0;
+  }
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+
+  .panel-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--mat-sys-on-surface, rgba(0, 0, 0, 0.87));
+  }
+
+  .unread-badge {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--mat-sys-primary, #1976d2);
+    background: var(--mat-sys-primary-container, rgba(25, 118, 210, 0.1));
+    padding: 0.125rem 0.5rem;
+    border-radius: 999px;
+  }
+}
+
+.panel-filter {
+  padding: 0.5rem 1rem;
+
+  mat-select {
+    font-size: 0.8125rem;
+  }
+}
+
+.panel-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.panel-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 2rem 1rem;
+  color: var(--mat-sys-on-surface-variant, rgba(0, 0, 0, 0.5));
+  font-size: 0.875rem;
+
+  mat-icon {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+    opacity: 0.5;
+  }
+}
+
+.panel-footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem;
+
+  button {
+    font-size: 0.8125rem;
+
+    mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+      margin-right: 0.25rem;
+    }
+  }
+}

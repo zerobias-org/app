@@ -1,0 +1,106 @@
+<div class="notebooks-column" [class.collapsed]="isCollapsed()">
+  <!-- Column header -->
+  <div class="col-header">
+    @if (isCollapsed()) {
+      <mat-icon class="col-header-icon col-header-toggle collapsed"
+                (click)="toggleCollapse.emit()"
+                matTooltip="Show notebooks" [matTooltipShowDelay]="300" [matTooltipDisabled]="isDragging()">auto_stories</mat-icon>
+    } @else {
+      <mat-icon class="col-header-icon col-header-toggle"
+                (click)="toggleCollapse.emit()"
+                matTooltip="Hide notebooks" [matTooltipShowDelay]="300" [matTooltipDisabled]="isDragging()">auto_stories</mat-icon>
+      <span class="col-header-title col-header-toggle"
+            (click)="toggleCollapse.emit()">Notebooks</span>
+      <span class="col-header-add"
+            (click)="openCreateDialog()"
+            matTooltip="New Notebook" [matTooltipShowDelay]="300" [matTooltipDisabled]="isDragging()"
+            aria-label="Create new notebook">
+        <mat-icon>add</mat-icon>
+      </span>
+    }
+  </div>
+
+  <!-- Notebook items -->
+  @if (isCollapsed()) {
+    <!-- Collapsed: icon strip -->
+    <div class="icon-strip">
+      @for (node of topLevelFolders(); track node.folder.id) {
+        @let fc = resolveColor(node);
+        <span class="icon-strip-item"
+              [class.selected]="selectedId() === node.folder.id"
+              [class.drop-target]="dropTargetId() === node.folder.id"
+              (click)="selectFolder(node.folder.id)"
+              (dragover)="onDragOver($event, node)"
+              (dragleave)="onDragLeave($event)"
+              (drop)="onDrop($event, node)"
+              [matTooltip]="node.folder.name" [matTooltipShowDelay]="300" matTooltipPosition="above" [matTooltipDisabled]="isDragging()">
+          <mat-icon class="tab-icon" [style.color]="fc">auto_stories</mat-icon>
+        </span>
+      }
+    </div>
+  } @else {
+    <!-- Expanded: full tabs -->
+    @for (node of topLevelFolders(); track node.folder.id) {
+      @let fc = resolveColor(node);
+      <div class="notebook-tab"
+           [class.selected]="selectedId() === node.folder.id"
+           [class.drop-target]="dropTargetId() === node.folder.id"
+           (click)="selectFolder(node.folder.id)"
+           (dragover)="onDragOver($event, node)"
+           (dragleave)="onDragLeave($event)"
+           (drop)="onDrop($event, node)"
+           >
+        <div class="tab-row">
+          <mat-icon class="tab-icon" [style.color]="fc">auto_stories</mat-icon>
+          <span class="tab-title" #tabTitleEl
+                [matTooltip]="node.folder.name" [matTooltipShowDelay]="300" matTooltipPosition="above"
+                [matTooltipDisabled]="isDragging() || tabTitleEl.scrollWidth <= tabTitleEl.clientWidth">{{ node.folder.name }}</span>
+          <span class="tab-count" [matTooltip]="totalNoteCount(node) + ' notes'" [matTooltipShowDelay]="500">{{ node.folder.subfolder_count }}</span>
+
+          <!-- Context menu -->
+          <span class="menu-btn" [matMenuTriggerFor]="notebookMenu"
+                (click)="$event.stopPropagation()" aria-label="Notebook actions">
+            <mat-icon>more_vert</mat-icon>
+          </span>
+          <mat-menu #notebookMenu="matMenu">
+            <button mat-menu-item (click)="openEditDialog(node, $event)">
+              <mat-icon>edit</mat-icon> Rename
+            </button>
+            <button mat-menu-item [matMenuTriggerFor]="nbColorMenu">
+              <mat-icon>palette</mat-icon> Color
+            </button>
+            <button mat-menu-item (click)="onDeleteFolder(node, $event)">
+              <mat-icon>delete</mat-icon> Delete
+            </button>
+          </mat-menu>
+          <mat-menu #nbColorMenu="matMenu" class="color-swatch-menu">
+            <div class="swatch-grid" (click)="$event.stopPropagation()">
+              <button class="swatch swatch-none"
+                      [class.active]="!fc"
+                      (click)="onColorChange(node, null)">
+                @if (!fc) { <span class="check">✓</span> }
+              </button>
+              @for (c of colors; track c.value) {
+                <button class="swatch"
+                        [style.background]="c.value"
+                        [class.active]="fc === c.value"
+                        [matTooltip]="c.label" [matTooltipShowDelay]="200"
+                        (click)="onColorChange(node, c.value)">
+                  @if (fc === c.value) { <span class="check">✓</span> }
+                </button>
+              }
+            </div>
+          </mat-menu>
+        </div>
+        @if (selectedId() === node.folder.id) {
+          <div class="tab-details">
+            <span class="tab-access">{{ accessLabel(node.folder.access_level) }}</span>
+            @if (node.folder.subfolder_count > 0) {
+              <span class="tab-sub-count">{{ node.folder.subfolder_count }} sub</span>
+            }
+          </div>
+        }
+      </div>
+    }
+  }
+</div>

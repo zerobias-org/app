@@ -1,0 +1,45 @@
+:host {
+  display: block;
+}
+
+
+.tag-type-chip {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.scope-chip {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  background-color: var(--mat-sys-surface-container);
+  color: var(--mat-sys-on-surface-variant);
+  white-space: nowrap;
+}
+
+.description-cell {
+  color: var(--mat-sys-on-surface-variant);
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
+}
+
+.actions-cell {
+  text-align: right;
+  width: 48px;
+}
+
+.protected-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: var(--mat-sys-on-surface-variant);
+  opacity: 0.5;
+}

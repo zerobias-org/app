@@ -1,0 +1,83 @@
+<div class="upload-container" [class.drag-over]="dragOver()">
+
+  <!-- Drop zone -->
+  <div class="drop-zone" (click)="fileInput.click()">
+    <mat-icon class="drop-icon">cloud_upload</mat-icon>
+    <p>Drag files here or <strong>browse</strong></p>
+    <p class="hint">PDF, DOCX, XLSX, images — up to 50MB</p>
+    <input #fileInput type="file" hidden multiple (change)="onFileSelected($event)">
+  </div>
+
+  <!-- Metadata fields -->
+  @if (files().length > 0) {
+    <div class="metadata-fields">
+      <mat-form-field appearance="outline">
+        <mat-label>Document Type</mat-label>
+        <mat-select [(ngModel)]="documentType">
+          @for (opt of typeOptions; track opt.value) {
+            <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Display Name (optional)</mat-label>
+        <input matInput [(ngModel)]="displayName" placeholder="e.g. Exhibit F v5.5">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Description (optional)</mat-label>
+        <textarea matInput [(ngModel)]="description" rows="2"
+          placeholder="Brief description of the document"></textarea>
+      </mat-form-field>
+    </div>
+  }
+
+  <!-- File list -->
+  @if (files().length > 0) {
+    <div class="file-list">
+      @for (entry of files(); track entry.file.name; let i = $index) {
+        <div class="file-entry" [class.error]="entry.error" [class.done]="entry.done && !entry.error">
+          <mat-icon class="file-icon">description</mat-icon>
+          <div class="file-info">
+            <span class="file-name">{{ entry.file.name }}</span>
+            <span class="file-size">{{ formatSize(entry.file.size) }}</span>
+          </div>
+          @if (!entry.done) {
+            <mat-progress-bar
+              mode="determinate"
+              [value]="entry.progress"
+              class="file-progress">
+            </mat-progress-bar>
+          }
+          @if (entry.done && !entry.error) {
+            <mat-icon class="status-icon done">check_circle</mat-icon>
+          }
+          @if (entry.error) {
+            <span class="error-text">{{ entry.error }}</span>
+          }
+          @if (!uploading()) {
+            <button mat-icon-button (click)="removeFile(i)" class="remove-btn">
+              <mat-icon>close</mat-icon>
+            </button>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Actions -->
+  @if (files().length > 0) {
+    <div class="actions">
+      <button mat-button (click)="cancel()" [disabled]="uploading()">Cancel</button>
+      <button mat-flat-button color="primary" (click)="upload()"
+        [disabled]="uploading() || files().length === 0">
+        @if (uploading()) {
+          Uploading...
+        } @else {
+          Upload
+        }
+      </button>
+    </div>
+  }
+</div>

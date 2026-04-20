@@ -1,0 +1,348 @@
+=== Sheet: Information ===
+Department of General Services - Procurement Division |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+BU 4265, Event ID: 0000037498, Hospital Bed and Emergency Medical Services Data System (HBEDS) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+Exhibit A2 - HBEDS CDC-NHSN Required Data Elements |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+NHSN Connectivity Initiative: Hospital Bed Capacity Project |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+National Center for Emerging and Zoonotic Infectious Diseases (NCEZID)  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+Division of Healthcare Quality Promotion (DHQP) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+Surveillance Branch (SB) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+ |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+Data dictionary |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+Version 4 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+Updated October 8, 2024 (changes made in this version are highlighted in orange). |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+Please contact NHSNBedConnectivity@CDC.gov with any questions or concerns related to this data dictionary. |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+ |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+78 total data elements, the majority of which capture information on bed censuses (occupied beds) and availability (unoccupied beds) across a variety of bed types, should be collected and transmitted to NHSN as part of the Connectivity Initiative.
+All bed censuses (occupied beds) and availability (unoccupied beds) captured represent facility-level aggregate values for the specified date and time.
+No pathogen-specific data elements (such as number of beds occupied by patients with COVID-19) or any data specific to operational status, supplies, staffing shortages etc. are included in this initiative at this time. |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+ |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+Additional clarifications and criteria: |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+Unit vs bed-level data collection and descriptions |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+All bed censuses and counts should not be limited to specific units or locations within the hospital when applying criteria and definitions listed below. Some unit or location-specific information is included for many of the bed fields listed in the data elements table as a means of providing more detailed definitions and context for these fields (and where such beds may be found in a given hospital). Therefore, censuses and counts should represent totals across any/all units where a given bed type may be present at the point of data collection. |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+ |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+Staffed beds |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+Staffed bed counts should represent the available inpatient beds for current staffing at a single point in time; licensed beds should not be used in place of staffed beds, as licensed beds likely do not represent the facility’s actual capacity at any point in time. Staffed beds represent the number of physically available beds with hospital staff on-hand to attend to patients that could potentially occupy the bed. |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+ |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+Bed inclusion criteria |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+For all bed censuses and counts, the following bed types should be included: |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+1.      All inpatient staffed and unblocked beds |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+ |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+Bed exclusion criteria |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+For all bed censuses and counts, the following bed types should be excluded: |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+1.      Virtual beds or locations in the EMR that are not physical spaces (i.e., beds used for interoperative phase of care or in certain operative settings or virtual staging areas for admissions.) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+2.      Beds no longer in use, even in case of surge |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+3.      Blocked beds (i.e., beds blocked due to logistical or maintenance challenges, staffing restrictions, isolation, etc.)  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+ |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+Differentiating zero, null, and not applicable bed counts |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+Please use the following scenarios below to ensure bed counts of zero can be differentiated from not applicable bed counts.  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+ |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+Scenario |  |  |  | Value captured |  |  |  |  |  | intentionally left blank |  |  |  |  |  |  |  |  | 
+Service/bed type available or offered at hospital, no beds occupied or unoccupied (zero really means zero) |  |  |  | Zero    |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+Service/bed type available or offered at hospital, but no data (null) reported |  |  |  | Null (field left completely blank or empty); recommend jurisdiction/vendors coordinate with hospitals to ensure resolution as a 0 or non-null value is captured d if the service/bed type is available.  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+ |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+Service/bed type not available or offered at hospital (not applicable) |  |  |  | 9999    |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+End of Page |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+=== Sheet: List of abbreviations ===
+Department of General Services - Procurement Division |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+BU 4265, Event ID: 0000037498, Hospital Bed and Emergency Medical Services Data System (HBEDS) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+Exhibit A2 - HBEDS CDC-NHSN Required Data Elements |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+Abbreviation | Definition |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+ED | Emergency department |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+ICU | Intensive care unit |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+LOC | Level of care |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+MT/MS | Medicine telemetry/medicine surgery acute care bed |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+NICU | Neonatal intensive care unit |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+NP | Negative pressure |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+OB | Obstetrics |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+OBS | Observation |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+PCU | Progressive care unit |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+Peds | Pediatric  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+PICU | Pediatric intensive care unit |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+Psych | Psychiatric |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+Rehab | Rehabilitation |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+End of Page |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+=== Sheet: Data element table ===
+Department of General Services - Procurement Division |  |  |  |  |  | 
+BU 4265, Event ID: 0000037498, Hospital Bed and Emergency Medical Services Data System (HBEDS) |  |  |  |  |  | 
+Exhibit A2 - HBEDS CDC-NHSN Required Data Elements |  |  |  |  |  | 
+Category | Column Description or Label | Column Name | Column Format | Definition |  | 
+Facility Information | NHSN Org ID | orgID | Integer | Organization ID number; unique facility identifier assigned by NHSN |  | 
+Datetime | Collection Date | collectionDate | Datetime | Date and time of record for bed capacity |  | 
+Datetime | Extraction Date | ExtractionDate | Datetime | Date and time record was extracted from the source system |  | 
+Facility Information  | Hospital or facility-within-facility or 
+subunit of facility for which record applies | Context | Character | Context for which the record applies for a hospital, reporting for the entire hospital:
+-HOSP (hospital)
+-Context for which the record applies for one of the following facility-within-facility scenarios:
+-IRF (inpatient rehabilitation)
+-IPF (inpatient psychiatric)
+-CHLD (children's or pediatric)
+-OTH (other facility-within-facility or subunit)
+
+Additional details on use of context field for NHSN hospital reporting: https://www.cdc.gov/nhsn/pdfs/covid19/reporting-context-guidance-508.pdf |  | 
+Facility Information  | Status for each facility at the time of record submission | ReportingStatus | Character | Status for each facility at the time of record submission to allow for data linkage with additional Hospital Respiratory Data reported to NHSN outside of bed capacity collection:
+
+-ActiveCMS: facility has been onboarded and passed vendor and NHSN testing/validation, would like to use record to meet additional CMS hospital reporting requirements (if one is in place)
+-ActiveNoCMS: facility has been onboarded and passed vendor and NHSN testing/validation, but record should NOT be used to meet CMS requirements (if one is in place) 
+-Test: facility is onboarding, and data/record represents testing/validation data, should not be used for production-level analytics or to fulfill CMS hospital reporting requirements, if one is in place
+-Inactive: facility is no longer actively participating |  | 
+All Beds | All Beds Census | AllBedsOccupied | Integer | Census across all beds, including all specialty beds
+(i.e.,  CMS-certified rehabilitation, CMS-certified psychiatric, obstetrics, NICU [all levels], and nursery beds). |  | 
+All Beds | All Beds Unoccupied | AllBedsUnoccupied | Integer | Count of unoccupied staffed and unblocked beds across all beds, including specialty beds 
+(i.e., CMS-certified rehabilitation, CMS-certified psychiatric, obstetrics, NICU [all levels], and nursery). |  | 
+Adult Beds | Adult Total Census | AdultTotalOccupied | Integer | Census across all adult beds (Adult ICU, Adult PCU, Adult MT/MS and Adult OBS), 
+excluding CMS-certified rehabilitation, CMS-certified psychiatric, and obstetrics beds. |  | 
+Adult Beds | Adult Total Unoccupied | AdultTotalUnoccupied | Integer | Count of unoccupied staffed and unblocked beds across all adult beds (Adult ICU, Adult PCU, Adult MT/MS and Adult OBS), excluding CMS-certified rehabilitation, CMS-certified psychiatric, and obstetrics beds.  |  | 
+Adult Beds | Adult ICU Census | AdultICUOccupied | Integer | Census across all adult intensive care or critical care beds. Adult Critical Care Units provide care and treatment for the highest acuity patients. Interventions may include ventilators, hemodynamic monitoring, IV drug therapies and a variety of procedures. |  | 
+Adult Beds | Adult ICU Unoccupied | AdultICUUnoccupied | Integer | Count of unoccupied staffed and unblocked beds across all adult intensive care or critical care beds. 
+Adult Critical Care Units provide care and treatment for the highest acuity patients. Interventions may include ventilators, hemodynamic monitoring, IV drug therapies, and a variety of procedures. |  | 
+Adult Beds | Adult ICU-LOC Census | AdultICULOCOccupied | Integer | Census of all patients meeting the admission criteria for critical care 
+(i.e., require ICU level of care) across all adult intensive care or critical care beds. Excludes patients in these beds that do not meet ICU criteria. |  | 
+Adult Beds | Adult Non- ICU Census | AdultNonICUOccupied | Integer | Census across all adult PCU, MT/MS, and OBS beds. |  | 
+Adult Beds | Adult Non- ICU Unoccupied | AdultNonICUUnoccupied | Integer | Count of unoccupied staffed and unblocked beds across all adult PCU, MT, MS, and OBS beds. |  | 
+Adult Beds | Adult PCU Census | AdultPCUOccupied | Integer | Important note for PCU beds: if adult PCU bed census is unable to be separately collected, 
+please make sure the adult PCU census is included in the adult MT/MS census, adult non-ICU census, and adult total bed census.
+
+Census across all adult progressive care, intermediate care, or step-down beds. 
+
+Units that provide care for adult moderate severity of illness and comorbid patients. |  | 
+Adult Beds | Adult PCU Unoccupied | AdultPCUUnoccupied | Integer | Important note for PCU beds: if adult PCU unoccupied bed count is unable to be separately collected, please make sure the adult PCU unoccupied bed count is included in the adult MT/MS unoccupied bed count, adult non-ICU unoccupied bed count, and adult total unoccupied bed count.
+
+Count of unoccupied staffed and unblocked beds across all adult progressive care, intermediate care or step-down beds. 
+Units that provide care for adult moderate severity of illness and comorbid patients. |  | 
+Adult Beds | Adult MT/MS Census | AdultMTMSOccupied | Integer | Census across all adult telemetry and general medicine/surgery/acute care beds. 
+
+Telemetry units provide continuous electrocardiographic (ECG) monitoring of the adult patient’s heart rhythm using specialized technology and equipment. 
+
+General medicine units, surgery units, or units with combination of both medical and surgical adult patients. Also known as general care or acute care units. Provides care for the least acute patients. Patient assessment and monitoring can range from 4-8 hours, floors have higher patient to nurse ratio than PCU/ICU.
+ |  | 
+Adult Beds | Adult MT/MS Unoccupied | AdultMTMSUnoccupied | Integer | Count of unoccupied staffed and unblocked beds across all adult telemetry and general medicine/surgery/acute care beds. 
+
+Telemetry units provide continuous electrocardiographic (ECG) monitoring of the adult patient’s heart rhythm using specialized technology and equipment. 
+
+General medicine units, surgery units or units with combination of both medical and surgical adult patients. Also known as general care or acute care units. Provides care for the least acute patients. Patient assessment and monitoring can range from 4-8 hours, floors have higher patient to nurse ratio than PCU/ICU. |  | 
+Adult Beds | Adult OBS Census | AdultObsOccupied | Integer | Census across all adult observation beds. 
+
+Adult patient status is observation (outpatient status) and may be housed on an observation unit. |  | 
+Adult Beds | Adult OBS Unoccupied | AdultObsUnoccupied | Integer | Count of unoccupied staffed and unblocked beds across all adult observation beds. 
+
+Adult patient status is observation (outpatient status) and may be housed on an observation unit.  |  | 
+Pediatric Beds | Peds Total Census | PedsTotalOccupied | Integer | Census across all pediatric beds (Peds ICU, Peds PCU, Peds MT/MS, and Peds OBS), 
+excluding specialty nursery and NICU [all levels] specialty beds. |  | 
+Pediatric Beds | Peds Total Unoccupied | PedsTotalUnoccupied | Integer | Count of unoccupied staffed and unblocked beds across all pediatric beds 
+(Peds ICU, Peds PCU, Peds MT/MS, and Peds OBS), excluding  specialty nursery and NICU [all levels] specialty beds. |  | 
+Pediatric Beds | Peds ICU Census | PedsICUOccupied | Integer | Census across all pediatric intensive care or critical care beds. 
+
+Pediatric Intensive Care Unit (PICU) also known as Pediatric Critical Care Unit. Interventions may include ventilators, hemodynamic monitoring, IV drug therapies, and a variety of procedures. |  | 
+Pediatric Beds | Peds ICU Unoccupied | PedsICUUnoccupied | Integer | Count of unoccupied staffed and unblocked beds across all pediatric intensive care or critical care beds. 
+
+Pediatric Intensive Care Unit (PICU) also known as Pediatric Critical Care Unit. Interventions may include ventilators, hemodynamic monitoring, IV drug therapies, and a variety of procedures |  | 
+Pediatric Beds | Peds ICU- LOC Census | PedsICULOCOccupied | Integer | Census of all patients meeting the admission criteria for critical care
+(i.e., require ICU level of care) across all pediatric intensive care or critical care beds. Excludes patients in these beds that do not meet ICU criteria. |  | 
+Pediatric Beds | Peds Non- ICU Census | PedsNonICUOccupied | Integer | Census across all pediatric PCU, MT/MS, and OBS beds. |  | 
+Pediatric Beds | Peds Non- ICU Unoccupied | PedsNonICUUnoccupied | Integer | Count of unoccupied staffed and unblocked beds across all pediatric PCU, MT, MS, and OBS beds. |  | 
+Pediatric Beds | Peds PCU Census | PedsPCUOccupied | Integer | Important note for PCU beds: if pediatric PCU bed census is unable to be separately collected, please make sure the pediatric PCU census is included in the both the pediatric MT/MS census, pediatric non-ICU census, and pediatric total bed census.
+
+Census across all pediatric progressive care, intermediate care or step-down beds. 
+
+Units that provide care for pediatric moderate severity of illness and comorbid patients. |  | 
+Pediatric Beds | Peds PCU Unoccupied | PedsPCUUnoccupied | Integer | Important note for PCU beds: if pediatric PCU unoccupied bed count is unable to be separately collected, please make sure the pediatric PCU unoccupied bed count is included in the pediatric MT/MS unoccupied bed count, pediatric non-ICU unoccupied bed count, and pediatric total unoccupied bed count.
+
+Count of unoccupied staffed and unblocked beds across all pediatric progressive care, intermediate care, or step-down beds. 
+
+Units that provide care for pediatric moderate severity of illness and comorbid patients. |  | 
+Pediatric Beds | Peds MT/MS Census | PedsMTMSOccupied | Integer | Census across all pediatric telemetry and general medicine/surgery/acute care beds. 
+
+Pediatric telemetry units provide continuous electrocardiographic (ECG) monitoring of the patient’s heart rhythm using specialized technology and equipment. 
+
+Pediatric general medicine units, surgery units, or units with combination of both medical and surgical patients. Also known as general care or acute care units. Provides care for the least acute patients. Patient assessment and monitoring can range from 4-8 hours, floors have higher patient to nurse ratio than PCU/ICU. |  | 
+Pediatric Beds | Peds MT/MS Unoccupied | PedsMTMSUnoccupied | Integer | Count of unoccupied staffed and unblocked beds across all pediatric telemetry and general medicine/surgery/acute care beds. 
+
+Pediatric telemetry units provide continuous electrocardiographic (ECG) monitoring of the patient’s heart rhythm using specialized technology and equipment. 
+
+Pediatric general medicine units, surgery units, or units with combination of both medical and surgical patients. Also known as general care or acute care units. Provides care for the least acute patients. Patient assessment and monitoring can range from 4-8 hours, floors have higher patient to nurse ratio than PCU/ICU. |  | 
+Pediatric Beds | Peds OBS Census | PedsObsOccupied | Integer | Census across all pediatric observation beds. 
+
+Pediatric patient status is observation (outpatient status) and may be housed on observation unit.  |  | 
+Pediatric Beds | Peds OBS Unoccupied | PedsObsUnoccupied | Integer | Count of unoccupied staffed and unblocked beds across all pediatric observation beds. 
+
+Pediatric patient status is observation (outpatient status) and may be housed on observation unit.  |  | 
+Specialty Beds | Specialty Total Census | SpecialtyTotalOccupied | Integer | Census across all specialty beds (i.e., CMS-certified rehabilitation, CMS-certified psychiatric, obstetrics, NICU [all levels], and nursery beds).
+ |  | 
+Specialty Beds | Specialty Total Unoccupied | SpecialtyTotalUnoccupied | Integer | Count of unoccupied staffed and unblocked beds across all specialty beds (i.e., CMS-certified rehabilitation, CMS-certified psychiatric, obstetrics, NICU [all levels], and nursery beds).
+ |  | 
+Specialty Beds | Specialty (Non-Crib) Census | SpecialtyNonCribOccupied | Integer | Census across non-crib specialty beds (i.e., obstetrics, CMS-certified psychiatric, and CMS-certified rehabilitation specialty beds), excluding NICU (all levels) and nursery specialty beds.
+ |  | 
+Specialty Beds | Specialty (Non-Crib) Unoccupied | SpecialtyNonCribUnoccupied | Integer | Count of unoccupied staffed and unblocked beds across non-crib specialty beds (i.e., obstetrics, CMS-certified psychiatric, and CMS-certified rehabilitation specialty beds), excluding NICU (all levels) and nursery specialty beds.
+ |  | 
+Specialty Beds | Specialty OB Census | OBOccupied | Integer | Census across all obstetric beds. 
+
+Obstetrical or post-partum units provide care to low- and high-risk pregnant women.  |  | 
+Specialty Beds | Specialty OB Unoccupied | OBUnoccupied | Integer | Count of unoccupied staffed and unblocked beds across all obstetric beds. Obstetrical or postpartum units provide care to low and high-risk pregnant women. 
+ |  | 
+Specialty Beds | Specialty NICU Census | NICUOccupied | Integer | Census across all NICU beds (includes all levels: level 1, level 2, level 3, level 3 Plus, and level 4). 
+
+Neonatal Intensive Care Units - specializes in the care of ill or premature newborn infants.  |  | 
+Specialty Beds | Specialty NICU Unoccupied | NICUUnoccupied | Integer | Count of unoccupied staffed and unblocked beds across all NICU beds (includes all levels: level 1, level 2, level 3, level 3 Plus, and level 4). 
+
+Neonatal Intensive Care Units - specializes in the care of ill or premature newborn infants.  |  | 
+Specialty Beds | Specialty NICU 1 Census | NICU1Occupied | Integer | Important note for level 1 NICU beds: this field should only be used if you have newborn or well-baby nursery beds with additional level of care that does not meet the criteria of level 2 NICU beds.  
+
+ 
+
+Census across all level 1 NICU beds.  
+
+ 
+
+Level 1: facilities provide a basic level of care to neonates who are low risk. They have the capability to perform neonatal resuscitation at every delivery and to evaluate and provide routine postnatal care for healthy newborn infants.  |  | 
+Specialty Beds | Specialty NICU 1 Unoccupied | NICU1Unoccupied | Integer | Important note for level 1 NICU beds: this field should only be used if you have newborn or well-baby nursery beds with additional level of care that does not meet the criteria of level 2 NICU beds. 
+
+ 
+
+Count of unoccupied staffed and unblocked beds across all level 1 NICU beds.  
+
+ 
+
+Level 1: facilities provide a basic level of care to neonates who are low risk. They have the capability to perform neonatal resuscitation at every delivery and to evaluate and provide routine postnatal care for healthy newborn infants.  |  | 
+Specialty Beds | Specialty NICU 2 Census | NICU2Occupied | Integer | Census across all level 2 NICU beds.  
+
+ 
+
+Level 2: should be reserved for stable or moderately ill newborn infants who are born at ≥32 weeks’ gestation or who weigh ≥1500g at birth with problems that are expected to resolve rapidly and who would not be anticipated to need subspecialty-level services on an urgent basis.  |  | 
+Specialty Beds | Specialty NICU 2 Unoccupied | NICU2Unoccupied | Integer | Count of unoccupied staffed and unblocked beds across all level 2 NICU beds.  
+
+ 
+
+Level 2: should be reserved for stable or moderately ill newborn infants who are born at ≥32 weeks’ gestation or who weigh ≥1500g at birth with problems that are expected to resolve rapidly and who would not be anticipated to need subspecialty-level services on an urgent basis.  |  | 
+Specialty Beds | Specialty NICU 3 Census | NICU3Occupied | Integer | Census across all level 3 NICU beds.  
+
+ 
+
+Level 3: should be reserved for infants who are born at <32 weeks’ gestation, weigh <1500g at birth, or have medical or surgical conditions, regardless of gestational age.  |  | 
+Specialty Beds | Specialty NICU 3 Unoccupied | NICU3Unoccupied | Integer | Count of unoccupied staffed and unblocked beds across all level 3 NICU beds.  
+
+ 
+
+Level 3: should be reserved for infants who are born at <32 weeks’ gestation, weigh <1500g at birth, or have medical or surgical conditions, regardless of gestational age.  |  | 
+Specialty Beds | Specialty NICU 3 Plus Census | NICU3PlusOccupied | Integer | Census across all level 3 Plus NICU beds.  
+
+ 
+
+Level 3 Plus: includes level 3 care with general pediatric surgery.  |  | 
+Specialty Beds | Specialty NICU 3 Plus Unoccupied | NICU3PlusUnoccupied | Integer | Count of unoccupied staffed and unblocked beds across all level 3 Plus NICU beds.  
+
+ 
+
+Level 3 Plus: includes level 3 care with general pediatric surgery.  |  | 
+Specialty Beds | Specialty NICU 4 Census | NICU4Occupied | Integer | Census across all level 4 NICU beds. 
+
+Level 4: units include the capabilities of level 3 Plus with additional capabilities and considerable experience in the care of the most complex and critically ill newborn infants and should have pediatric medical and pediatric surgical specialty consultants continuously available 24 hours a day. |  | 
+Specialty Beds | Specialty NICU4 Unoccupied | NICU4Unoccupied | Integer | Count of unoccupied staffed and unblocked beds across all level 4 NICU beds. 
+
+Level 4: units include the capabilities of level 3 Plus with additional capabilities and considerable experience in the care of the most complex and critically ill newborn infants and should have pediatric medical and pediatric surgical specialty consultants continuously available 24 hours a day. |  | 
+Specialty Beds | Specialty Nursery Census | NurseryOccupied | Integer | Census across all nursery beds. Also called a newborn or a well-baby nursery. Goal is to examine, treat and monitor the health of the newborn. Well-baby nursery includes any room housing newborns who do not need continuing care or special care of intensive care newborn services. |  | 
+Specialty Beds | Specialty Nursery Unoccupied | NurseryUnoccupied | Integer | Count of unoccupied staffed and unblocked beds across all nursery beds. Also called a newborn or a well-baby nursery. Goal is to examine, treat and monitor the health of the newborn. Well-baby nursery includes any room housing newborns who do not need continuing care or special care of intensive care newborn services.
+
+The nursery houses healthy babies that do not have any complications. |  | 
+Specialty Beds | Specialty Adult Psych Census | AdultPsychOccupied | Integer | Census across all CMS-certified adult psychiatric beds.  
+
+ 
+
+Psychiatric units specialize in the treatment of serious mental disorders. Care includes monitoring and providing appropriate interventions for behavioral or psychosocial issues.  |  | 
+Specialty Beds | Specialty Adult Psych Unoccupied | AdultPsychUnoccupied | Integer | Count of unoccupied staffed and unblocked beds across all CMS-certified adult psychiatric beds. 
+
+Psychiatric units specialize in the treatment of serious mental disorders. Care includes monitoring and providing appropriate interventions for behavioral or psychosocial issues. |  | 
+Specialty Beds | Specialty Peds Psych Census | PedsPsychOccupied | Integer | Census across all CMS-certified pediatric psychiatric beds. 
+
+Specialize in the treatment of serious mental disorders. Care includes monitoring and providing appropriate interventions for behavioral or psychosocial issues. |  | 
+Specialty Beds | Specialty Peds Psych Unoccupied | PedsPsychUnoccupied | Integer | Count of unoccupied staffed and unblocked beds across all CMS-certified pediatric psychiatric beds. 
+
+Specialize in the treatment of serious mental disorders. Care includes monitoring and providing appropriate interventions for behavioral or psychosocial issues. |  | 
+Specialty Beds | Specialty Rehab Census | RehabOccupied | Integer | Census across all CMS-certified rehabilitation beds. 
+
+Inpatient rehabilitation units provide services to people who have had an acute illness, injury, or accident resulting in significant functional decline. Intensive physical medicine therapies and treatment regimens are delivered by a multidisciplinary team of nurses, PT, OT, and specially trained physicians. |  | 
+Specialty Beds | Specialty Rehab Unoccupied | RehabUnoccupied | Integer | Count of unoccupied staffed and unblocked beds across all CMS-certified rehabilitation beds. 
+
+Inpatient rehabilitation units provide services to people who have had an acute illness, injury, or accident resulting in significant functional decline. Intensive physical medicine therapies and treatment regimens are delivered by a multidisciplinary team of nurses, PT, OT, and specially trained physicians. |  | 
+Surge Beds | Surge Total Active Census | SurgeActiveTotalOccupied | Integer | Census across all activated surge beds. 
+
+Active surge beds are any non-licensed beds that can be utilized in an emergency for surge locations and are currently in use or available for use as ICU, PCU, MT/MS, or OBS beds. |  | 
+Surge Beds | Surge Total Active Unoccupied | SurgeActiveTotalUnoccupied | Integer | Count of unoccupied activated surge beds across all levels of care. 
+
+Active surge beds are any non-licensed beds that can be utilized in an emergency for surge locations and are currently in use or available for use as ICU, PCU, MT/MS, or OBS beds. |  | 
+Surge Beds | Surge Total Inactive Unoccupied | SurgeInactiveTotalUnoccupied | Integer | Count of unoccupied inactive surge beds across all levels of care. 
+
+Inactive surge beds are any non-licensed beds that can be utilized in an emergency for surge locations for use as ICU, PCU, MT/MS, or OBS beds but are not currently in use or active. |  | 
+Surge Beds | Surge ICU Active Census | SurgeActiveICUOccupied | Integer | Census across all activated intensive care or critical care surge beds. 
+
+Active ICU surge beds are any non-licensed beds that can be utilized in an emergency for surge locations and are currently in use or available for use for intensive or critical care patients. |  | 
+Surge Beds | Surge ICU Active Unoccupied | SurgeActiveICUUnoccupied | Integer | Count of unoccupied activated intensive or critical care surge beds. 
+
+Active ICU surge beds are any non-licensed beds that can be utilized in an emergency for surge locations and are currently in use or available for use for intensive or critical care patients. |  | 
+Surge Beds | Surge ICU Inactive Unoccupied | SurgeInactiveICUUnoccupied | Integer | Count of unoccupied inactive intensive or critical care surge beds. 
+
+Inactive ICU surge beds are any non-licensed beds that can be utilized in an emergency for surge locations for use for intensive or critical care patients but are not currently in use or active. |  | 
+Surge Beds | Surge Non- ICU Active Census | SurgeActiveNonICUOccupied | Integer | Census across all activated PCU, MT, MS, and OBS surge beds. 
+
+Active Non-ICU surge beds are any non-licensed beds that can be utilized in an emergency for surge locations and are currently in use or available for use as PCU, MT/MS, or OBS beds. |  | 
+Surge Beds | Surge Non- ICU Active Unoccupied | SurgeActiveNonICUUnoccupied | Integer | Count of unoccupied activated PCU, MT, MS, and OBS surge beds. 
+
+Active Non-ICU surge beds are any non-licensed beds that can be utilized in an emergency for surge locations and are currently in use or available for use as PCU, MT/MS, or OBS beds. |  | 
+Surge Beds | Surge Non- ICU Inactive Unoccupied | SurgeInactiveNonICUUnoccupied | Integer | Count of unoccupied inactive PCU, MT, MS, and OBS surge beds. 
+
+Inactive Non-ICU surge beds are any non-licensed beds that can be utilized in an emergency for surge locations for use as PCU, MT/MS, or OBS beds but are not currently in use or active. |  | 
+Additional Beds | Burn Bed Census | BurnOccupied | Integer | Census across all burn unit beds. |  | 
+Additional Beds | Burn Bed Unoccupied | BurnUnoccupied | Integer | Count of unoccupied burn unit beds. |  | 
+Additional Beds | Neg Pressure Bed Census | NegativePressureOccupied | Integer | Census across all negative pressure beds. |  | 
+Additional Beds | Neg Pressure Unoccupied | NegativePressureUnoccupied | Integer | Count of unoccupied negative pressure beds. |  | 
+Emergency department | Adult ED Total Census | AdultEDCensus | Integer | Census of all adult patients in the emergency department. This includes all adult patients registered in the emergency department regardless of physical location within the department. |  | 
+Emergency department | Adult ED Admitted Census | AdultEDAdmittedCensus | Integer | Census of all adult patients in the emergency department that have an admit to inpatient or observation order. |  | 
+Emergency department | Peds ED Census | PedsEDCensus | Integer | Census of all pediatric patients in the emergency department. This includes all pediatric patients registered in the emergency department regardless of physical location within the department. |  | 
+Emergency department | Peds ED Admitted Census | PedsEDAdmittedCensus | Integer | Census of all pediatric patients in the emergency department that have an admit to inpatient or observation order. |  | 
+Emergency department | Total ED Census | TotalEDCensus | Integer | Census of all patients in the emergency department. This includes all patients registered in the emergency department regardless of physical location within the department. |  | 
+Emergency department | Total ED Admitted Census | TotalEDAdmittedCensus | Integer | Census of all patients in the emergency department that have an admit to inpatient or observation order. |  | 
+Respiratory | Total COVID-19 Adult Census | numConfC19HospPatsAdult | Integer | All Hospitalized adult patients with laboratory-confirmed COVID-19  |  | 
+Respiratory | Total COVID-19 Pediatric Census | numConfC19HospPatsPed | Integer | All Hospitalized pediatric patients with laboratory-confirmed COVID-19  |  | 
+Respiratory | Total COVID-19 Adult ICU Census | numConfC19ICUPatsAdult | Integer | Adult ICU patients with laboratory-confirmed COVID-19 |  | 
+Respiratory | Total COVID-19 Pediatric ICU Census | numConfC19ICUPatsPed | Integer | Pediatric ICU patients with laboratory-confirmed COVID-19 |  | 
+Respiratory | Total Influenza Adult Census | numConfFluHospPatsAdult | Integer | All hospitalized adult patients with laboratory-confirmed influenza  |  | 
+Respiratory | Total Influenza Pediatric Census | numConfFluHospPatsPed | Integer | All hospitalized pediatric patients with laboratory-confirmed influenza  |  | 
+Respiratory | Total Influenza Adult ICU Census | numConfFluICUPatsAdult  | Integer | Adult ICU patients with laboratory-confirmed influenza |  | 
+Respiratory | Total Influenza Pediatric ICU Census | numConfFluICUPatsPed | Integer | Pediatric ICU patients with laboratory-confirmed influenza |  | 
+Respiratory | Total RSV Adult Census | numConfRSVHospPatsAdult | Integer | All Hospitalized adult patients with laboratory-confirmed RSV  |  | 
+Respiratory | Total RSV Pediatric Census | numConfRSVHospPatsPed | Integer | All Hospitalized pediatric patients with laboratory-confirmed RSV  |  | 
+Respiratory | Total RSV Adult ICU Census | numConfRSVICUPatsAdult | Integer | Adult ICU patients with laboratory-confirmed RSV |  | 
+Respiratory | Total RSV Pediatric ICU Census | numConfRSVICUPatsPed | Integer | Pediatric ICU patients with laboratory-confirmed RSV |  | 
+Respiratory | New COVID-19 0-4 Admission | numConfC19NewAdmPed0to4 | Integer | Number of new admissions of patients with laboratory-confirmed COVID-19, 0-4 years of age |  | 
+Respiratory | New COVID-19 5-17 Admission | numConfC19NewAdmPed5to17 | Integer | Number of new admissions of patients with laboratory-confirmed COVID-19, 5-17 years of age |  | 
+Respiratory | New COVID-19 18-49 Admission | numConfC19NewAdmAdult18to49 | Integer | Number of new admissions of patients with laboratory-confirmed COVID-19, 18-49 years of age |  | 
+Respiratory | New COVID-19 50-64 Admission | numConfC19NewAdmAdult50to64 | Integer | Number of new admissions of patients with laboratory-confirmed COVID-19, 50-64 years of age |  | 
+Respiratory | New COVID-19 65 to 74 Admission | numConfC19NewAdmAdult65to74 | Integer | Number of new admissions of patients with laboratory-confirmed COVID-19, 65-74 years of age |  | 
+Respiratory | New COVID-19 75 plus Admission | numConfC19NewAdmAdult75plus | Integer | Number of new admissions of patients with laboratory-confirmed COVID-19, 75+ years of age |  | 
+Respiratory | New COVID-19 Unknown Age Admission | numConfC19NewAdmUnk | Integer | Number of new admissions of patients with laboratory-confirmed COVID-19, unknown age |  | 
+Respiratory | New Influenza 0-4 Admission | numConfFluNewAdmPed0to4 | Integer | Number of new admissions of patients with laboratory-confirmed influenza, 0-4 years of age* |  | 
+Respiratory | New Influenza 5-17 Admission | numConfFluNewAdmPed5to17 | Integer | Number of new admissions of patients with laboratory-confirmed influenza, 5-17 years of age* |  | 
+Respiratory | New Influenza 18-49 Admission | numConfFluNewAdmAdult18to49 | Integer | Number of new admissions of patients with laboratory-confirmed influenza, 18-49 years of age* |  | 
+Respiratory | New Influenza 50-64 Admission | numConfFlufNewAdmAdult50to64 | Integer | Number of new admissions of patients with laboratory-confirmed influenza, 50-64 years of age* |  | 
+Respiratory | New Influenza 65 to 74 Admission | numConfFluNewAdmAdult65to74 | Integer | Number of new admissions of patients with laboratory-confirmed influenza, 65-74 years of age* |  | 
+Respiratory | New Influenza 75 plus Admission | numConfFluNewAdmAdult75plus | Integer | Number of new admissions of patients with laboratory-confirmed influenza, 75+ years of age* |  | 
+Respiratory | New Influenza Unknown Age Admission | numConfFluNewAdmUnk | Integer | Number of new admissions of patients with laboratory-confirmed influenza, unknown age |  | 
+Respiratory | New RSV 0-4 Admission | numConfRSVNewAdmPed0to4 | Integer | Number of new admissions of patients with laboratory-confirmed RSV, 0-4 years of age* |  | 
+Respiratory | New RSV 5-17 Admission | numConfRSVNewAdmPed5to17 | Integer | Number of new admissions of patients with laboratory-confirmed RSV, 5-17 years of age* |  | 
+Respiratory | New RSV 18-49 Admission | numConfRSVNewAdmAdult18to49 | Integer | Number of new admissions of patients with laboratory-confirmed RSV, 18-49 years of age* |  | 
+Respiratory | New RSV 50-64 Admission | numConfRSVNewAdmAdult50to64 | Integer | Number of new admissions of patients with laboratory-confirmed RSV, 50-64 years of age* |  | 
+Respiratory | New RSV 65 to 74 Admission | numConfRSVNewAdmAdult65to74 | Integer | Number of new admissions of patients with laboratory-confirmed RSV, 65-74 years of age* |  | 
+Respiratory | New RSV 75 plus Admission | numConfRSVNewAdmAdult75plus | Integer | Number of new admissions of patients with laboratory-confirmed RSV, 75+ years of age* |  | 
+Respiratory | New RSV Unknown Age Admission | numConfRSVNewAdmUnk | Integer | Number of new admissions of patients with laboratory-confirmed RSV, unknown age |  | 
+End of Page |  |  |  |  |  | 
+
+=== Sheet: Change log ===
+Department of General Services - Procurement Division |  |  |  | 
+BU 4265, Event ID: 0000037498, Hospital Bed and Emergency Medical Services Data System (HBEDS) |  |  |  | 
+Exhibit A2 - HBEDS CDC-NHSN Required Data Elements |  |  |  | 
+Version | Date | Changes |  | 
+Version 2 | 2024-06-24 00:00:00 | Added notes to READ ME tab regarding differentiation between zero, not applicable, and null reporting. |  | 
+Version 3 | 2024-08-16 00:00:00 | Added new data element ReportingStatus and clarifications to definitions for emergency department census data elements. |  | 
+Version 4 | 2024-10-08 00:00:00 | Added IDs and sub IDs (e.g., 1a, 1b, 1c, etc.) to all data elements; status indicator (i.e., required or optional) added to data element table; ExtractionDate column name updated to match sample JSON; additional clarification on collectionDate variable added |  | 
+End of page |  |  |  | 

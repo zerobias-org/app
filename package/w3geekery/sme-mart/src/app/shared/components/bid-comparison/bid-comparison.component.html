@@ -1,0 +1,152 @@
+<div class="bid-comparison">
+  <div class="comparison-header">
+    <h3>
+      <mat-icon>compare_arrows</mat-icon>
+      Bid Comparison
+    </h3>
+    <span class="bid-count">{{ bidCount() }} bids received</span>
+  </div>
+
+  @if (bidList().length === 0) {
+    <p class="no-bids">No bids to compare.</p>
+  } @else {
+    <div class="comparison-table" [style.--bid-count]="bidList().length">
+      <!-- Header row: vendor names -->
+      <div class="table-row header-row">
+        <div class="label-cell"></div>
+        @for (bid of bidList(); track bid.id) {
+          <div class="bid-cell vendor-cell">
+            <div class="vendor-avatar">{{ getInitials(bid.provider_display_name) }}</div>
+            <span class="vendor-name">{{ bid.provider_display_name }}</span>
+            @if (bid.provider_headline) {
+              <span class="vendor-headline">{{ bid.provider_headline }}</span>
+            }
+            <mat-chip-set>
+              <mat-chip [class]="'status-' + bid.status">
+                {{ bid.status | titlecase }}
+              </mat-chip>
+            </mat-chip-set>
+          </div>
+        }
+      </div>
+
+      <!-- Price row -->
+      <div class="table-row">
+        <div class="label-cell">
+          <mat-icon>payments</mat-icon> Price
+        </div>
+        @for (bid of bidList(); track bid.id) {
+          <div class="bid-cell"
+               [class.best-value]="bid.id === bestPriceBidId()">
+            @if (bid.proposed_price) {
+              {{ bid.proposed_price | currency:'USD':'symbol':'1.0-0' }}
+            } @else {
+              <span class="no-data">—</span>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Timeline row -->
+      <div class="table-row">
+        <div class="label-cell">
+          <mat-icon>schedule</mat-icon> Timeline
+        </div>
+        @for (bid of bidList(); track bid.id) {
+          <div class="bid-cell">
+            {{ bid.proposed_timeline || '—' }}
+          </div>
+        }
+      </div>
+
+      <!-- Estimated Hours row -->
+      <div class="table-row">
+        <div class="label-cell">
+          <mat-icon>timer</mat-icon> Est. Hours
+        </div>
+        @for (bid of bidList(); track bid.id) {
+          <div class="bid-cell">
+            @if (bid.total_estimated_hours) {
+              {{ bid.total_estimated_hours | number:'1.0-0' }}
+            } @else {
+              <span class="no-data">—</span>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Total Cost (from responses) -->
+      <div class="table-row">
+        <div class="label-cell">
+          <mat-icon>receipt_long</mat-icon> Response Total
+        </div>
+        @for (bid of bidList(); track bid.id) {
+          <div class="bid-cell">
+            @if (bid.sum_estimated_cost) {
+              {{ bid.sum_estimated_cost | currency:'USD':'symbol':'1.0-0' }}
+            } @else {
+              <span class="no-data">—</span>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Overall Compliance row -->
+      <div class="table-row compliance-row">
+        <div class="label-cell">
+          <mat-icon>verified</mat-icon> Compliance
+        </div>
+        @for (bid of bidList(); track bid.id) {
+          <div class="bid-cell"
+               [class.best-value]="bid.id === bestComplianceBidId()">
+            @if (bid.compliance) {
+              <span class="compliance-count">
+                {{ bid.compliance.met }}/{{ bid.compliance.total }} met
+              </span>
+              <app-compliance-progress
+                [summary]="bid.compliance"
+                [compact]="true"
+                [showLabel]="false" />
+            } @else {
+              <span class="no-data">No responses</span>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Per-category compliance rows -->
+      @for (cat of categories(); track cat) {
+        <div class="table-row category-row">
+          <div class="label-cell category-label">{{ cat }}</div>
+          @for (bid of bidList(); track bid.id) {
+            <div class="bid-cell">
+              {{ getCategoryCompliance(bid, cat) }}
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Action row -->
+      <div class="table-row action-row">
+        <div class="label-cell"></div>
+        @for (bid of bidList(); track bid.id) {
+          <div class="bid-cell action-cell">
+            <button mat-stroked-button (click)="onView(bid.id)"
+                    matTooltip="View full bid details">
+              <mat-icon>visibility</mat-icon> View
+            </button>
+            @if (bid.status === 'pending') {
+              <button mat-flat-button color="primary" (click)="onAccept(bid.id)"
+                      matTooltip="Accept this bid and create engagement">
+                Accept
+              </button>
+              <button mat-button color="warn" (click)="onReject(bid.id)">
+                Reject
+              </button>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

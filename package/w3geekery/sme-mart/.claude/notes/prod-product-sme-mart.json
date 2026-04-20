@@ -1,0 +1,40 @@
+{
+  "id": "9e177cd2-6320-46f0-a55d-a5ed6bdab233",
+  "name": "SME Mart",
+  "type": "product",
+  "ownerId": "57c741cf-a58e-5efc-bf2f-93c4f6cf76ec",
+  "created": "2026-03-16T16:09:46.491Z",
+  "updated": "2026-03-16T16:09:46.491Z",
+  "status": "draft",
+  "code": "smemart",
+  "description": "Marketplace for Compliance Subject Matter Experts",
+  "imageUrl": "https://raw.githubusercontent.com/w3geekery/assets/main/sme-mart-logo.svg",
+  "parentId": "3f27ee94-8cb2-4477-aefe-3df92edd7b1a",
+  "vendorId": "3f27ee94-8cb2-4477-aefe-3df92edd7b1a",
+  "vendorName": "W3Geekery",
+  "vendorCode": "w3geekery",
+  "aliases": ["SME Mart", "smemart"],
+  "segmentIds": [
+    "87d10f57-0c76-4445-bd3f-1f17da456c67",
+    "acbec4ca-9b20-47c6-8d83-17b6819cca87",
+    "0e13cb35-5ae9-4e26-b93d-2b6781e0d097",
+    "06ded8ce-224e-4c5f-b21f-49558641a3c5"
+  ],
+  "factoryTypes": ["software"],
+  "hostingTypes": ["saas"],
+  "cpeProducts": {},
+  "productEditions": [
+    {
+      "id": "b5ca0905-1270-4275-9dff-bc66b661a1c4",
+      "name": "Standard",
+      "code": "standard",
+      "description": "Standard edition encompassing the entire product (Auto-generated)."
+    }
+  ],
+  "latestVersion": {
+    "id": "1a993722-268a-5845-aede-019549bc4582",
+    "code": "smemart",
+    "versionSemver": "1.0.0-rc57c741cfa58e5efcbf2f93c4f6cf76ec",
+    "taskId": "b233adad-df0a-4738-a51b-74e3a3e15a29"
+  }
+}

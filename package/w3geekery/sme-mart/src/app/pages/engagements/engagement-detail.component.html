@@ -1,0 +1,42 @@
+<div class="engagement-detail-page">
+  @if (loading()) {
+    <p class="loading-message">Loading engagement...</p>
+  } @else if (!ctx.engagement()) {
+    <p>Engagement not found.</p>
+  } @else {
+    <button mat-button (click)="goBack()" class="back-btn">
+      <mat-icon>arrow_back</mat-icon> Back to Engagements
+    </button>
+
+    @if (breadcrumbs().length > 0) {
+      <app-hierarchy-breadcrumbs
+        [crumbs]="breadcrumbs()"
+        (navigate)="onBreadcrumbNavigate($event)">
+      </app-hierarchy-breadcrumbs>
+    }
+
+    <div class="tc-header">
+      <h2>{{ ctx.engagement()!.title }}</h2>
+      <mat-chip-set>
+        <mat-chip class="tag-chip"><code>{{ ctx.engagementTag() }}</code></mat-chip>
+        <mat-chip [class]="'status-' + ctx.status()">{{ ctx.status() | titlecase }}</mat-chip>
+      </mat-chip-set>
+    </div>
+
+    <nav mat-tab-nav-bar [tabPanel]="tabPanel" animationDuration="200ms">
+      @for (tab of tabs; track tab.path) {
+        <a mat-tab-link
+          [routerLink]="tab.path"
+          routerLinkActive
+          #rla="routerLinkActive"
+          [active]="rla.isActive">
+          {{ tab.label }}
+        </a>
+      }
+    </nav>
+
+    <mat-tab-nav-panel #tabPanel>
+      <router-outlet />
+    </mat-tab-nav-panel>
+  }
+</div>

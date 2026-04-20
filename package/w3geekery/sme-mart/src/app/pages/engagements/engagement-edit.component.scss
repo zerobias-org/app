@@ -1,0 +1,17 @@
+.engagement-edit-page {
+  padding: 1.5rem;
+  max-width: 720px;
+  margin: 0 auto;
+
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0 0 1.5rem;
+  }
+
+  .loading-message {
+    text-align: center;
+    padding: 3rem;
+    color: var(--zb-secondary-text);
+  }
+}

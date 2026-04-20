@@ -1,0 +1,28 @@
+<div class="engagement-edit-page">
+  @if (loading()) {
+    <p class="loading-message">Loading...</p>
+  } @else if (!authorized()) {
+    <h2>Not Authorized</h2>
+    <p>You can only edit RFPs that you created and that are still in draft or open status.</p>
+    <button mat-flat-button (click)="cancel()">Back to Engagements</button>
+  } @else if (engagement()) {
+    <h2>Edit RFP</h2>
+
+    <mat-card>
+      <mat-card-content>
+        <app-engagement-form
+          [initialValues]="engagement()!"
+          (valuesChange)="onValuesChange($event)">
+        </app-engagement-form>
+      </mat-card-content>
+
+      <mat-card-actions align="end">
+        <button mat-button (click)="cancel()" [disabled]="saving()">Cancel</button>
+        <button mat-flat-button color="primary" (click)="save()" [disabled]="saving()">
+          <mat-icon>save</mat-icon>
+          {{ saving() ? 'Saving...' : 'Save Changes' }}
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  }
+</div>

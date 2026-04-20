@@ -1,0 +1,44 @@
+<h2 mat-dialog-title>
+  <mat-icon class="dialog-title-icon">attach_file</mat-icon>
+  Link a Document
+</h2>
+
+<mat-dialog-content>
+  @if (loading()) {
+    <div class="loading-container">
+      <mat-spinner diameter="36"></mat-spinner>
+      <span>Loading documents…</span>
+    </div>
+  } @else if (documents().length === 0) {
+    <div class="empty-state">
+      <mat-icon>folder_open</mat-icon>
+      <p>No documents uploaded to this engagement yet.</p>
+      <p class="hint">Upload documents from the Documents tab first.</p>
+    </div>
+  } @else {
+    <mat-selection-list [multiple]="false">
+      @for (doc of documents(); track doc.id) {
+        <mat-list-option
+          [value]="doc.id"
+          [selected]="selectedDocId() === doc.id"
+          (click)="selectDoc(doc)">
+          <mat-icon matListItemIcon>{{ fileIcon(doc.mime_type) }}</mat-icon>
+          <div matListItemTitle class="doc-title">{{ displayName(doc) }}</div>
+          <div matListItemLine class="doc-meta">
+            <span class="doc-type-chip">{{ typeLabel(doc.document_type) }}</span>
+            <span class="doc-size">{{ fileSize(doc.file_size_bytes) }}</span>
+          </div>
+        </mat-list-option>
+      }
+    </mat-selection-list>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()">Cancel</button>
+  <button mat-flat-button color="primary"
+          (click)="confirm()"
+          [disabled]="!selectedDocId()">
+    Insert Link
+  </button>
+</mat-dialog-actions>

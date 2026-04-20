@@ -1,0 +1,46 @@
+<div class="settings-page">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Role</mat-card-title>
+      <mat-card-subtitle>How you use SME Mart</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <mat-button-toggle-group
+        [value]="userRole()"
+        (change)="onRoleChange($event.value)"
+        hideSingleSelectionIndicator
+      >
+        <mat-button-toggle value="buyer">Buyer</mat-button-toggle>
+        <mat-button-toggle value="provider">Provider</mat-button-toggle>
+        <mat-button-toggle value="both">Both</mat-button-toggle>
+      </mat-button-toggle-group>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Theme</mat-card-title>
+      <mat-card-subtitle>Appearance preference</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <mat-button-toggle-group
+        [value]="themePref()"
+        (change)="onThemeChange($event.value)"
+        hideSingleSelectionIndicator
+      >
+        <mat-button-toggle value="light">
+          <mat-icon>light_mode</mat-icon>
+          Light
+        </mat-button-toggle>
+        <mat-button-toggle value="dark">
+          <mat-icon>dark_mode</mat-icon>
+          Dark
+        </mat-button-toggle>
+        <mat-button-toggle value="system">
+          <mat-icon>contrast</mat-icon>
+          System
+        </mat-button-toggle>
+      </mat-button-toggle-group>
+    </mat-card-content>
+  </mat-card>
+</div>

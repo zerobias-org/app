@@ -1,0 +1,49 @@
+@if (isLoading()) {
+  <div class="timeline-loading">
+    <mat-spinner diameter="36"></mat-spinner>
+    <span>Loading timeline…</span>
+  </div>
+}
+
+@if (isEmpty()) {
+  <zb-empty-state-container
+    icon="timeline"
+    title="No Timeline Events"
+    description="Comments, bids, and other events will appear here as the engagement progresses.">
+  </zb-empty-state-container>
+}
+
+@if (hasEvents()) {
+  <div class="timeline-controls">
+    <span class="event-count">{{ timelineEvents().length }} events</span>
+    <button mat-button (click)="toggleAll()" class="toggle-all-btn">
+      <mat-icon>{{ allExpanded() ? 'unfold_less' : 'unfold_more' }}</mat-icon>
+      {{ allExpanded() ? 'Collapse All' : 'Expand All' }}
+    </button>
+  </div>
+
+  <div class="engagement-timeline">
+    @for (event of timelineEvents(); track event.id; let i = $index) {
+      @if (getMonthDivider(i); as monthLabel) {
+        <div class="timeline-month-divider">
+          <div class="divider-line"></div>
+          <h2 class="divider-label">{{ monthLabel }}</h2>
+          <div class="divider-line"></div>
+        </div>
+      }
+      <div class="timeline-event" [class]="getSide(i)">
+        <div class="timeline-node" [class]="'node-' + event.type">
+          <mat-icon class="node-icon">{{ getNodeIcon(event.type) }}</mat-icon>
+        </div>
+        <div class="timeline-card">
+          <app-timeline-event-card
+            [event]="event"
+            [expanded]="isExpanded(event.id)"
+            (toggleExpand)="toggleEvent($event)"
+            (drillDown)="drillDown.emit($event)">
+          </app-timeline-event-card>
+        </div>
+      </div>
+    }
+  </div>
+}

@@ -1,0 +1,58 @@
+<mat-card appearance="outlined" class="service-card" (click)="onClick()" tabindex="0" role="button">
+  <mat-card-header>
+    <mat-card-title>{{ title() }}</mat-card-title>
+    <mat-chip-set class="category-chip">
+      <mat-chip>{{ category() | titlecase }}</mat-chip>
+    </mat-chip-set>
+  </mat-card-header>
+
+  <mat-card-content>
+    <p class="description">{{ description() }}</p>
+  </mat-card-content>
+
+  <mat-card-footer>
+    <div class="meta-row">
+      @if (price()) {
+        <span class="meta-item">
+          <mat-icon class="meta-icon">payments</mat-icon>
+          {{ price() }}
+          @if (pricingType()) {
+            <span class="pricing-type">/ {{ pricingType() }}</span>
+          }
+        </span>
+      }
+      @if (deliveryTime()) {
+        <span class="meta-item">
+          <mat-icon class="meta-icon">schedule</mat-icon>
+          {{ deliveryTime() }}
+        </span>
+      }
+      @if (providerId()) {
+        <span class="provider-section">
+          <button
+            mat-icon-button
+            [matMenuTriggerFor]="providerMenu"
+            (click)="$event.stopPropagation()"
+            class="provider-menu-trigger"
+            aria-label="Provider options"
+          >
+            <mat-icon class="meta-icon">person</mat-icon>
+            @if (providerName()) {
+              <span class="provider-name">{{ providerName() }}</span>
+            }
+          </button>
+          <mat-menu #providerMenu="matMenu">
+            <button mat-menu-item (click)="onViewProviderServices($event)">
+              <mat-icon>storefront</mat-icon>
+              <span>Services by this Provider</span>
+            </button>
+            <button mat-menu-item (click)="onViewProviderProfile($event)">
+              <mat-icon>person</mat-icon>
+              <span>View Provider Profile</span>
+            </button>
+          </mat-menu>
+        </span>
+      }
+    </div>
+  </mat-card-footer>
+</mat-card>

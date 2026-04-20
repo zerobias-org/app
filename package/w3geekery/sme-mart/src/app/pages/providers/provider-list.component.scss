@@ -1,0 +1,11 @@
+.results-count {
+  font-size: 0.875rem;
+  color: var(--zb-secondary-text);
+  margin-bottom: 0.75rem;
+}
+
+.provider-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+}

@@ -1,0 +1,72 @@
+<div class="filter-section">
+  <!-- Header -->
+  <div class="section-header" (click)="toggleCollapse()">
+    @if (collapsible) {
+      <mat-icon class="collapse-icon" [class.collapsed]="collapsed()">expand_more</mat-icon>
+    }
+    <span class="section-title">{{ title }}</span>
+    @if (selectedCount()) {
+      <span class="count-badge">{{ selectedCount() }}</span>
+    }
+    <span class="spacer"></span>
+    @if (removable) {
+      <button mat-icon-button class="remove-btn" (click)="onRemove(); $event.stopPropagation()" aria-label="Remove filter section"
+        matTooltip="Remove section" [matTooltipShowDelay]="300">
+        <mat-icon>close</mat-icon>
+      </button>
+    }
+  </div>
+
+  <!-- Body -->
+  @if (!collapsed()) {
+    <div class="section-body">
+      @if (showAllAsChips) {
+        <!-- Chips mode: show all items as toggleable chips -->
+        <mat-chip-set class="chip-grid">
+          @for (item of filteredItems(); track item.id) {
+            <mat-chip
+              [class.selected]="isSelected(item.id)"
+              (click)="toggleChip(item)"
+            >
+              {{ item.name }}
+            </mat-chip>
+          }
+        </mat-chip-set>
+      } @else {
+        <!-- Autocomplete mode -->
+        <mat-form-field class="filter-search" appearance="outline" subscriptSizing="dynamic">
+          <mat-icon matPrefix>search</mat-icon>
+          <input
+            matInput
+            [formControl]="searchControl"
+            [matAutocomplete]="auto"
+            placeholder="Search {{ title }}..."
+          />
+          <mat-autocomplete
+            #auto="matAutocomplete"
+            (optionSelected)="onAutocompleteSelect($event)"
+            [displayWith]="displayFn"
+          >
+            @for (item of filteredItems(); track item.id) {
+              @if (!isSelected(item.id)) {
+                <mat-option [value]="item">{{ item.name }}</mat-option>
+              }
+            }
+          </mat-autocomplete>
+        </mat-form-field>
+
+        <!-- Selected chips -->
+        @if (selectedItems().length) {
+          <mat-chip-set class="selected-chips">
+            @for (item of selectedItems(); track item.id) {
+              <mat-chip (removed)="removeSelected(item)">
+                {{ item.name }}
+                <mat-icon matChipRemove>cancel</mat-icon>
+              </mat-chip>
+            }
+          </mat-chip-set>
+        }
+      }
+    </div>
+  }
+</div>

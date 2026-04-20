@@ -1,0 +1,87 @@
+<mat-card appearance="outlined" class="bid-card">
+  <mat-card-header>
+    <div class="avatar" mat-card-avatar>{{ initials() }}</div>
+    <mat-card-title>{{ displayName() }}</mat-card-title>
+    @if (headline()) {
+      <mat-card-subtitle>{{ headline() }}</mat-card-subtitle>
+    }
+    <mat-chip-set class="status-chips">
+      <mat-chip [class]="'status-' + status()">
+        {{ status() | titlecase }}
+      </mat-chip>
+    </mat-chip-set>
+  </mat-card-header>
+
+  <mat-card-content>
+    <div class="bid-meta">
+      @if (proposedPrice()) {
+        <span class="meta-item">
+          <mat-icon>payments</mat-icon>
+          {{ proposedPrice() | currency:'USD':'symbol':'1.0-0' }}
+        </span>
+      }
+      @if (proposedTimeline()) {
+        <span class="meta-item">
+          <mat-icon>schedule</mat-icon>
+          {{ proposedTimeline() }}
+        </span>
+      }
+      @if (totalEstimatedHours()) {
+        <span class="meta-item">
+          <mat-icon>timer</mat-icon>
+          {{ totalEstimatedHours() | number:'1.0-1' }} hrs
+        </span>
+      }
+      @if (rating()) {
+        <span class="meta-item">
+          <mat-icon>star</mat-icon>
+          {{ rating() | number:'1.1-1' }}
+        </span>
+      }
+    </div>
+
+    @if (executiveSummary()) {
+      <div class="bid-section">
+        <span class="section-label">Executive Summary</span>
+        <p class="section-text">{{ executiveSummary() }}</p>
+      </div>
+    }
+
+    @if (coverLetter()) {
+      <p class="cover-letter">{{ coverLetter() }}</p>
+    }
+
+    @if (teamDescription()) {
+      <div class="bid-section">
+        <span class="section-label">Team</span>
+        <p class="section-text">{{ teamDescription() }}</p>
+      </div>
+    }
+
+    @if (compliance(); as comp) {
+      <div class="bid-compliance">
+        <span class="section-label">Compliance</span>
+        <app-compliance-progress [summary]="comp" [compact]="true" [showLabel]="false" />
+        <span class="compliance-inline">
+          {{ comp.responded }}/{{ comp.total }} responded
+        </span>
+      </div>
+    }
+
+    <div class="submitted-date">
+      {{ isDraft() ? 'Draft started' : 'Submitted' }} {{ createdAt() | date:'mediumDate' }}
+    </div>
+  </mat-card-content>
+
+  @if (showBuyerActions() || showWithdraw()) {
+    <mat-card-actions align="end">
+      @if (showBuyerActions()) {
+        <button mat-button color="warn" (click)="onReject()">Reject</button>
+        <button mat-flat-button color="primary" (click)="onAccept()">Accept</button>
+      }
+      @if (showWithdraw()) {
+        <button mat-button color="warn" (click)="onWithdraw()">Withdraw</button>
+      }
+    </mat-card-actions>
+  }
+</mat-card>

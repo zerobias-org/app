@@ -1,0 +1,117 @@
+.rfp-detail-page {
+  padding: 1.5rem;
+}
+
+.back-btn {
+  margin-bottom: 1rem;
+}
+
+.loading-message {
+  text-align: center;
+  padding: 3rem;
+  color: var(--zb-secondary-text);
+}
+
+.rfp-layout {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 1.5rem;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.chip-row {
+  margin-bottom: 0.5rem;
+}
+
+h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0.5rem 0 0.75rem;
+}
+
+h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 1.25rem 0 0.75rem;
+}
+
+.bids-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+
+  h3 {
+    margin: 0;
+  }
+}
+
+.description {
+  color: var(--zb-secondary-text);
+  line-height: 1.7;
+  white-space: pre-wrap;
+  margin: 0 0 1rem;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.75rem;
+  margin: 1rem 0;
+
+  .detail-item {
+    .label {
+      display: block;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--zb-secondary-text);
+      margin-bottom: 0.25rem;
+    }
+
+    .value {
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+  }
+}
+
+.no-bids {
+  color: var(--zb-secondary-text);
+  font-style: italic;
+}
+
+// Sidebar
+.rfp-sidebar {
+  .action-btn {
+    display: block;
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  .status-msg {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--zb-secondary-text);
+
+    mat-icon {
+      color: var(--zb-primary);
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
+
+// Status colors
+.status-open { --mdc-chip-label-text-color: var(--zb-color-success); }
+.status-draft { --mdc-chip-label-text-color: var(--zb-color-gray); }
+.status-in_progress { --mdc-chip-label-text-color: var(--zb-color-warning); }
+.status-completed { --mdc-chip-label-text-color: var(--zb-color-info); }
+.status-cancelled { --mdc-chip-label-text-color: var(--zb-color-error); }

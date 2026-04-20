@@ -1,0 +1,96 @@
+.timeline-filters {
+  display: flex;
+  flex-direction: column;
+}
+
+.filters-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+
+  .filters-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .clear-btn {
+    margin-left: auto;
+    font-size: 0.8125rem;
+  }
+}
+
+// Date range custom section (mirrors timeline-filter-section styles)
+.filter-section {
+  margin-bottom: 0.5rem;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  cursor: pointer;
+  user-select: none;
+
+  .collapse-icon {
+    transition: transform 0.2s ease;
+    font-size: 1.25rem;
+    width: 1.25rem;
+    height: 1.25rem;
+
+    &.collapsed {
+      transform: rotate(-90deg);
+    }
+  }
+
+  .section-title {
+    font-weight: 500;
+    font-size: 0.875rem;
+  }
+
+  .count-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 0.625rem;
+    background: var(--zb-primary);
+    color: var(--zb-primary-contrast-text-color);
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0 0.375rem;
+  }
+
+  .spacer {
+    flex: 1;
+  }
+
+  .remove-btn {
+    width: 24px;
+    height: 24px;
+    line-height: 24px;
+
+    mat-icon {
+      font-size: 1rem;
+      width: 1rem;
+      height: 1rem;
+    }
+  }
+}
+
+.section-body {
+  padding: 0.25rem 0 0.5rem;
+}
+
+.date-range-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  mat-form-field {
+    width: 100%;
+  }
+}

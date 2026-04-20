@@ -1,0 +1,42 @@
+<app-list-page
+  title="RFPs"
+  description="Post a Request for Project to find the right expert for your compliance or security needs."
+  searchPlaceholder="Search RFPs..."
+  [(searchValue)]="searchTerm"
+  [sortOptions]="sortOptions"
+  [(sortValue)]="sortBy"
+  [items]="filteredRfps()"
+  [loading]="loading()"
+  emptyText="No RFPs found. Try adjusting your filters or post an RFP to get started."
+>
+  <!-- Header actions -->
+  <ng-container listPageHeaderActions>
+    <button mat-flat-button color="primary" (click)="openWizard()">
+      <mat-icon>add</mat-icon>
+      Create RFP
+    </button>
+    <button mat-stroked-button (click)="openNewRfpDialog()">
+      Quick Post
+    </button>
+  </ng-container>
+
+  <!-- Extra toolbar control: status filter -->
+  <mat-form-field listPageToolbarExtras appearance="outline" class="filter-field" subscriptSizing="dynamic">
+    <mat-label>Status</mat-label>
+    <mat-select [value]="statusFilter()" (selectionChange)="statusFilter.set($event.value)">
+      <mat-option value="all">All Statuses</mat-option>
+      <mat-option value="open">Open</mat-option>
+      <mat-option value="in_progress">In Progress</mat-option>
+      <mat-option value="draft">Draft</mat-option>
+      <mat-option value="completed">Completed</mat-option>
+      <mat-option value="cancelled">Cancelled</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <!-- Results grid -->
+  <div listPageResults class="rfp-grid">
+    @for (rfp of filteredRfps(); track rfp.id) {
+      <app-engagement-card [engagement]="rfp"></app-engagement-card>
+    }
+  </div>
+</app-list-page>

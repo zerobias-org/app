@@ -1,0 +1,21 @@
+<app-list-page
+  title="Providers"
+  description="Browse subject matter experts by specialty, skill, or certification."
+  searchPlaceholder="Search providers..."
+  [(searchValue)]="searchTerm"
+  [sortOptions]="sortOptions"
+  [(sortValue)]="sortBy"
+  [items]="filteredProviders()"
+  [loading]="loading()"
+  emptyText="No providers match your filters."
+>
+  <!-- Results -->
+  <div listPageResults>
+    <div class="results-count">{{ filteredProviders().length }} providers found</div>
+    <div class="provider-grid">
+      @for (provider of filteredProviders(); track provider.id) {
+        <app-provider-card [provider]="provider" />
+      }
+    </div>
+  </div>
+</app-list-page>

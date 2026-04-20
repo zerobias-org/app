@@ -1,0 +1,11 @@
+.filter-field {
+  width: 160px;
+  flex-shrink: 0;
+}
+
+.rfp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 1rem;
+  padding: 12px;
+}

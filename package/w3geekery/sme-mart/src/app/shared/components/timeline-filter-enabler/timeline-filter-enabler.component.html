@@ -1,0 +1,17 @@
+<button mat-icon-button [matMenuTriggerFor]="filterMenu" aria-label="Configure timeline filters"
+  matTooltip="Configure filter sections" [matTooltipShowDelay]="300">
+  <mat-icon>tune</mat-icon>
+</button>
+
+<mat-menu #filterMenu="matMenu">
+  @for (option of options; track option.type) {
+    <div mat-menu-item (click)="$event.stopPropagation()">
+      <mat-checkbox
+        [checked]="isEnabled(option.type)"
+        (change)="onToggle(option.type, $event)"
+      >
+        {{ option.label }}
+      </mat-checkbox>
+    </div>
+  }
+</mat-menu>

@@ -1,0 +1,166 @@
+// Loading state
+.timeline-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 2rem;
+  justify-content: center;
+  color: var(--zb-secondary-text, #666);
+}
+
+// Controls bar
+.timeline-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+
+  .event-count {
+    font-size: 0.8125rem;
+    color: var(--zb-secondary-text, #666);
+  }
+
+  .toggle-all-btn {
+    font-size: 0.8125rem;
+  }
+}
+
+// Timeline container with central spine
+.engagement-timeline {
+  position: relative;
+  padding: 1rem 0;
+
+  // Central spine line
+  &::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--mat-sys-outline-variant, rgba(0, 0, 0, 0.12));
+    transform: translateX(-50%);
+  }
+}
+
+// Individual timeline event row
+.timeline-event {
+  position: relative;
+  display: flex;
+  width: 100%;
+  margin-bottom: 1.25rem;
+
+  &.left {
+    justify-content: flex-start;
+
+    .timeline-card {
+      padding-right: calc(50% + 2rem);
+    }
+  }
+
+  &.right {
+    justify-content: flex-end;
+
+    .timeline-card {
+      padding-left: calc(50% + 2rem);
+    }
+  }
+}
+
+.timeline-card {
+  width: 100%;
+}
+
+// Timeline node (icon on spine)
+.timeline-node {
+  position: absolute;
+  left: 50%;
+  top: 0.5rem;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--mat-sys-primary, #03aff0);
+  border: 2px solid var(--mat-sys-surface, #fff);
+  transform: translateX(-50%);
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .node-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    line-height: 16px;
+    color: var(--mat-sys-on-primary, #fff);
+  }
+
+  &.node-comment {
+    background: var(--mat-sys-primary, #03aff0);
+  }
+
+  &.node-attachment {
+    background: var(--mat-sys-secondary, #6c757d);
+  }
+
+  &.node-bid_submitted {
+    background: var(--mat-sys-tertiary, #6aa84f);
+  }
+
+  &.node-bid_accepted {
+    background: #4caf50;
+
+    .node-icon { color: #fff; }
+  }
+}
+
+// Month divider — centered label with lines
+.timeline-month-divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 1.5rem 0 1rem;
+  position: relative;
+  z-index: 2;
+
+  .divider-line {
+    flex: 1;
+    height: 1px;
+    background: var(--mat-sys-outline-variant, rgba(0, 0, 0, 0.12));
+  }
+
+  .divider-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--mat-sys-on-surface-variant, #666);
+    margin: 0;
+    padding: 0.25rem 0.75rem;
+    background: var(--mat-sys-surface, #fff);
+    border-radius: 12px;
+    white-space: nowrap;
+  }
+}
+
+// Responsive: single-column on narrow screens
+@media (max-width: 768px) {
+  .engagement-timeline::before {
+    left: 1rem;
+  }
+
+  .timeline-event,
+  .timeline-event.left,
+  .timeline-event.right {
+    justify-content: flex-start;
+
+    .timeline-card {
+      padding-left: 2.5rem;
+      padding-right: 0;
+    }
+  }
+
+  .timeline-node {
+    left: 1rem;
+  }
+}

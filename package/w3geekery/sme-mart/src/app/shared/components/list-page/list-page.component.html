@@ -1,0 +1,77 @@
+<div class="list-page">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-left">
+      <h2>{{ title() }}</h2>
+      @if (description()) {
+        <p class="page-description">{{ description() }}</p>
+      }
+    </div>
+    <div class="header-right">
+      <ng-content select="[listPageHeaderActions]" />
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="list-toolbar">
+    <button mat-icon-button (click)="toggleDrawer()" aria-label="Toggle filters"
+      [matBadge]="activeFilterCount()" matBadgeColor="primary" matBadgeSize="small"
+      [matBadgeHidden]="activeFilterCount() === 0">
+      <mat-icon>filter_alt</mat-icon>
+    </button>
+
+    <zb-search-input
+      class="search-input"
+      [placeholder]="searchPlaceholder()"
+      message=""
+      [value]="searchValue()"
+      (search)="onSearch($event)">
+    </zb-search-input>
+
+    <ng-content select="[listPageToolbarExtras]" />
+
+    <mat-form-field appearance="outline" class="sort-field" subscriptSizing="dynamic">
+      <mat-label>Sort</mat-label>
+      <mat-select [value]="sortValue()" (selectionChange)="onSortChange($event.value)">
+        @for (opt of sortOptions(); track opt.value) {
+          <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <!-- Optional filter bar (e.g. provider chip) -->
+  <ng-content select="[listPageFilterBar]" />
+
+  <!-- Content with filter drawer -->
+  <mat-sidenav-container class="content-container">
+    <mat-sidenav
+      #filterDrawer
+      appResizableDrawer
+      mode="side"
+      [opened]="drawerOpen()"
+      position="start"
+      class="filter-sidebar"
+    >
+      <app-catalog-filters
+        [selectedFilters]="catalogFilters()"
+        [enabledFilters]="enabledFilters()"
+        (filtersChange)="onFiltersChange($event)"
+        (enabledChange)="onEnabledChange($event)">
+      </app-catalog-filters>
+    </mat-sidenav>
+
+    <mat-sidenav-content class="main-content">
+      @if (loading()) {
+        <zb-empty-state-container [loading]="true" />
+      } @else if (items().length === 0) {
+        <zb-empty-state-container
+          [loading]="false"
+          [emptyText]="emptyText()">
+        </zb-empty-state-container>
+      } @else {
+        <ng-content select="[listPageResults]" />
+      }
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+</div>

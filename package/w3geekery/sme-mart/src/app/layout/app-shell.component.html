@@ -1,0 +1,83 @@
+@if (impersonation.isImpersonating()) {
+  <div class="impersonation-banner">
+    <mat-icon>switch_account</mat-icon>
+    <span>Viewing as <strong>{{ impersonation.effectiveUserName() }}</strong></span>
+    <button mat-button (click)="impersonation.stopImpersonating()">
+      <mat-icon>person_off</mat-icon>
+      Stop
+    </button>
+  </div>
+}
+
+<mat-toolbar color="primary" class="app-toolbar">
+  @if (isMobile()) {
+    <button mat-icon-button (click)="toggleMobileMenu()" aria-label="Toggle menu">
+      <mat-icon>menu</mat-icon>
+    </button>
+  }
+
+  <a routerLink="/" class="app-brand">
+    <span class="brand-icon"><mat-icon>storefront</mat-icon></span>
+    <span class="app-title">SME Mart</span>
+  </a>
+
+  @if (!isMobile()) {
+    <nav class="app-nav">
+      @for (item of navItems; track item.path) {
+        <a
+          mat-button
+          [routerLink]="item.path"
+          routerLinkActive="active-link"
+        >
+          {{ item.label }}
+        </a>
+      }
+    </nav>
+  }
+
+  <span class="spacer"></span>
+
+  <app-notification-panel />
+  <app-user-profile-dropdown />
+</mat-toolbar>
+
+<!-- Mobile nav drawer -->
+@if (isMobile()) {
+  <mat-sidenav-container class="mobile-nav-container">
+    <mat-sidenav
+      #mobileNav
+      [opened]="mobileMenuOpen()"
+      mode="over"
+      (closedStart)="mobileMenuOpen.set(false)"
+    >
+      <nav class="mobile-nav">
+        @for (item of navItems; track item.path) {
+          <a
+            mat-button
+            class="mobile-nav-link"
+            [routerLink]="item.path"
+            routerLinkActive="active-link"
+            (click)="mobileMenuOpen.set(false)"
+          >
+            <mat-icon>{{ item.icon }}</mat-icon>
+            {{ item.label }}
+          </a>
+        }
+      </nav>
+    </mat-sidenav>
+
+    <mat-sidenav-content>
+      <main class="app-content">
+        <router-outlet />
+      </main>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+}
+
+@if (!isMobile()) {
+  <main class="app-content">
+    <router-outlet />
+  </main>
+}
+
+<app-impersonation-switcher />

@@ -1,0 +1,28 @@
+<div class="catalog-filters">
+  <div class="filters-header">
+    <h3 class="filters-title">Filters</h3>
+    <app-filter-enabler
+      [enabledFilters]="currentEnabled"
+      (enabledChange)="onEnabledChange($event)"
+    />
+    @if (hasActiveFilters) {
+      <button mat-button class="clear-btn" (click)="clearAll()">
+        Clear all
+      </button>
+    }
+  </div>
+
+  @for (section of activeSections(); track section.type) {
+    <app-catalog-filter-section
+      [title]="section.title"
+      [filterType]="section.type"
+      [items]="getItems(section.type)"
+      [selectedIds]="getSelectedIds(section.type)"
+      [showAllAsChips]="section.showAllAsChips"
+      [collapsible]="true"
+      [removable]="true"
+      (selectionChange)="onSelectionChange($event)"
+      (removeSection)="onRemoveSection($event)"
+    />
+  }
+</div>

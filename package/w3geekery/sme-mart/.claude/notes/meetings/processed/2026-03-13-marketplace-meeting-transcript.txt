@@ -1,0 +1,149 @@
+Transcript
+March 13, 2026, 8:22PM
+ Clark Stacer started transcription
+ Clark Stacer   0:03 Well, today, a lot of today has been working with Daniel on the schema, the Graph QL schema, yeah.
+ Brian Hierholzer   0:10 On on me schema me schema or whatever you wanted to call call it.
+ Clark Stacer   0:13 Yeah. Yeah, yeah. So he's, he's, he's still working out the publishing pipeline for that in GitHub actions, but that should be, that should be done soon.
+ Brian Hierholzer   0:16 OK. Yeah.
+ Clark Stacer   0:31 And then then I've been, you know, repointing all of the my local dev environments to the new UAT. So. Um.
+ Brian Hierholzer   0:45 Now, are you actually on the on the Guild side of that equation or are you on the?
+ Clark Stacer   0:55 Oh for UAT this is this is the 0 bias platform side. So so the all the tasks and the tags and the boundary and the orgs like all of that stuff lives in platform.
+ Brian Hierholzer   1:07 But is that as a customer side or as a platform side? Sorry, are you trying to, you know what I mean? Are you an outsider or is this Clark ZB or is this, is this geekery? That's what I don't understand.
+ Clark Stacer   1:19 This is W3 geekery. So yeah, like if I were if I'm W3 geekery and and I and I have.
+ Brian Hierholzer   1:24 OK. So you're trying to do the same thing. You're trying to do the same thing that you were doing at prod, but just to UAT as a as a customer of UAT, the same is is that is that right? Yeah. OK, gotcha.
+ Clark Stacer   1:34 Yes, yeah, yes. Yep. Since you know they're gonna be, they're gonna be nuking all those environments soon. So UAT is the one that they've got up now. So I'm gonna start building on that for now.
+ Brian Hierholzer   1:44 Yes, yes. Yeah, just to harden it and see what's breaking and all that good ****. Yep. OK, cool.
+ Clark Stacer   1:53 Exactly, Yep. And then yeah, next like I said, I mentioned that I have all, I have tests written for everything, including I've been, I've been playing around a little bit with using Playwright to do end to end testing.
+ Brian Hierholzer   2:11 Yeah, I'm curious on that, that MCPB too, that MCP browser or whatever that is too. You know, I know that there's playwright as well. I don't know if you know if both of them are worth it, but on the channel on the zerobias.org, I think I put there's that MCPB or MCP browser.
+ Clark Stacer   2:12 So we'll be able to do like full smoke tests. Uh huh.
+ Brian Hierholzer   2:30 But again, don't know. I think we would have to support it on our app side too as a publisher of our web app, right. I think, I think it's a supply side thing. I don't know if it's a supply side or if it's a demand side option where you know the the.
+ Clark Stacer   2:40 Yeah.
+ Brian Hierholzer   2:48 Demand side can just use it or if it has to be like supply side similar to like the MCP, you know what I mean? I don't know. I assume it's supply.
+ Clark Stacer   2:55 Yeah, what I think, what I think where that comes in like once we have our our zero bias hosted MCP server that Catalin's building, I think that's where that, yeah.
+ Brian Hierholzer   3:07 Yeah, we could do an MCP browser thing. Yeah, yeah, yeah, yeah. I because because like Cloudflare right now, you know, all these scrapers are going out there and they're hitting all these websites and it's just crushing the Cloudflare CDN stuff, you know what I mean? So.
+ Clark Stacer   3:10 Where that comes in. Yes.
+ Brian Hierholzer   3:22 Like Cloudflare just published a new set of tools I think that allow for, you know, that they're kind of like gonna gonna publish on everybody's website that allow for, you know, a way just to offload all that. Agentic traffic and scraping ****, I think from a just a a volume standpoint. So everybody's dealing with this ****, you know what I mean? Yeah.
+ Clark Stacer   3:44 Yes, I've been noticing that a lot lately. Like I get a lot more, um, human checks like verify that you're human like.
+ Brian Hierholzer   3:53 Yeah, exactly. Yeah. Which is killing all the humans. Now they just need an alternate path for the agents. Yeah. Yeah, it's. Yeah, exactly. Yeah.
+ Clark Stacer   4:00 Right, right, exactly. There needs to be a, you know, different, yeah, different infrastructure for that. Yeah, yeah. And that's eventually what, you know, like like I mentioned earlier in in stand up where I'm building the agentic, you know.
+ Brian Hierholzer   4:07 Yeah.
+ Clark Stacer   4:17 Assistance for making RF PS and and bids like that like a lot of that will be like just API infrastructure that will be in place that will accept their their LLM input and. You know, have have a, you know, a back door for agents basically, but only with like give them just very specific things they can do and then basically tell them.
+ Brian Hierholzer   4:39 Yeah. Yeah, is that just a whole bunch of MCP tools and SDKS and and they, you know, I don't know how we package all that ****, right? But anyway.
+ Clark Stacer   4:53 Yeah, yeah, that's a great question. We could like right now I'll I'll the like at this phase, I'm just making an LLM prompt, but there are lots of options that we have moving forward, like for example we could create.
+ Brian Hierholzer   5:04 Yeah.
+ Clark Stacer   5:11 Using the Cloud agent SDK, we could create a standalone agent that we hand to our customer and just say here use this. It has our ZBMCP like.
+ Brian Hierholzer   5:26 Yeah, these are like plugins, right? It's it's got all the MCP, all the tools, the agent, all the documentation. Yeah, exactly. Yep. I I look at those as a plugin, kind of as that wrapper that kind of packages all that ****, I think is kind of the way they're kind of defining a plugin at this stage.
+ Clark Stacer   5:26 Compiled into it. Everything they need. Yep. And you know, it could. Yep. Yeah, yeah. And yeah, so that's an option. It just costs money. It costs a little, there's a little bit of overhead, like I think Claude said it would be something like $0.56, you know, per interaction.
+ Brian Hierholzer   5:45 I think.
+ Clark Stacer   6:01 With if you have a bundled agent running so so you know it it might cost like 10 or 20 or 30 bucks to to like generate an RFP or whatever but like we can in the end we can charge them for it you know so.
+ Brian Hierholzer   6:04 Yeah, yeah.
+ Clark Stacer   6:17 Yeah, we we can figure that out as we go. Yeah, yeah, there'll once we have all of this running, I can give you like upgrade path options from there, so.
+ Brian Hierholzer   6:20 OK. Yeah, yeah. Just all the I I'm more worried about kind of all of the functional requirements of, you know, I I want these legal requirements, I want these an MSA in place. I want you, you know what I mean? All of the all of the details there and then we'll package it after. But to that point we do.
+ Clark Stacer   6:44 Yes.
+ Brian Hierholzer   6:51 We have to get it packaged, you know on this is the buy side, but you know the other side of this is the supply side is going to have to form fit to those. But then the supply is also going to potentially bring projects to the table that have to be reviewed and you know we want. The the supply side also to have all these templates to where the supply side and the demand side kind of all intersect, right. We you know if if we want the demand side to be create all these templates and the supply side to meet them then the same thing you know we'll go do an exercise later around OK. This is the supply side and that even might be even an internal project by one team that is trying to say this is what I want to do and will you accept it right? Just like you know a team member saying this is my project and you know can I get approval and this is all the explicit stuff.
+ Clark Stacer   7:38 Yeah.
+ Brian Hierholzer   7:44 You know and and and it's the same thing, right. So you got you two parties here that may originate a project. It may not always be on the demand side. It may very well be an internal team. You know it's still supply side with an idea.
+ Clark Stacer   7:45 Oh. Yeah.
+ Brian Hierholzer   8:02 And they're going to have to go win approval for that project and they're still going to have to package that project and you know.
+ Clark Stacer   8:10 So it's a it's like it's an RFP within the same organization from like, yeah.
+ Brian Hierholzer   8:15 Yeah, it it could be external, it could be internal. It it, it, it does, it doesn't matter. These things happen no matter what. Supply and demand can be an internal project. Those are the things that we may need to like encounter here and document right, which is this is one company to another of.
+ Clark Stacer   8:18 Yeah.
+ Brian Hierholzer   8:35 Supply and demand or demand and supply and A1 company that has an engagement they they may propose another project even though the demand side didn't ask for it and. You know, they may submit it forward and say here's a request for project which is from the supply side and then the the the demand side would have to review that and deny it or accept it. You know, it doesn't mean that the demand side's the only originator. Right. So this can originate from the network owner or a supplier, or it could originate from a supplier to a network owner. Should there be an existing line of communication or a relationship where there's an engagement in place, if that kind of makes sense. An engagement has to be in place, right? It can't be unsolicited.
+ Clark Stacer   9:27 Yeah.
+ Brian Hierholzer   9:30 Solicited, let's say, right? So anyway, but but the same thing applies on is this a org to org which is one company to another company project and is there an engagement in place or is this an open one which is putting out for bids?
+ Clark Stacer   9:32 Yeah.
+ Brian Hierholzer   9:46 Right. And that may even still go the other direction from supply side saying hey please, please accept this you know proposal and it's the reverse bid if that makes sense the and then the other scenarios should be.
+ Clark Stacer   9:46 Yeah. Yeah.
+ Brian Hierholzer   10:01 Is this an internal or business unit to, you know, supply and demand scenario right of of an internal project but one team to another, right? Because a lot of times within big companies you have one group. That, you know, is is like they're like vendors. They're service providers to large companies inside their own companies, if that makes sense too. So the same thing applies.
+ Clark Stacer   10:24 Yeah, yeah, yeah. OK, yeah, so there. So there would be like a separate view for or, you know, a way to view a list, yeah.
+ Brian Hierholzer   10:34 A. A quote, UN quote, internal RFP and in internal bid through different BU's within an organization. It's still supply and demand, but it's still within the same, you know, parent company, let's say, right? It's yes, same construct.
+ Clark Stacer   10:39 Exactly. Yeah.
+ Brian Hierholzer   10:53 All we do is delineate it different.
+ Clark Stacer   10:55 OK. And I that just made me think of the the the thought of like inviting bid, inviting bidders that you know like if you're aiming for a specific bidder that you know you already want to hire this this team. To do a thing to actually send the the RFP to their notification center or their inbox or something and say, hey, we've got a new project that we think you're just right for here. Here's the link to it.
+ Brian Hierholzer   11:25 Yeah, that that's an internal team member, right? And like literally like I'm doing right now, like I went internal to the team and if this, you know, this construct didn't exist within our platform, but technically me as CEO of ZB went internal to the team.
+ Clark Stacer   11:28 Yeah.
+ Brian Hierholzer   11:42 And I am doing projects internal to the team and you're a supply side of that and I would have built out what I want to do. I would have built out SME Mart from a general concept standpoint of these are the things that I want and then I would have put an internal bid to the team and.
+ Clark Stacer   11:49 Yeah.
+ Brian Hierholzer   12:02 Said. And who's available and who fits the bill? And and Clark showed up and said I'm in. I want a new project. I'd love to do this on the side. Is this full time? How do I? How are we working through this ****? Whatever that is. Same thing. Same thing with Dan.
+ Clark Stacer   12:05 Yeah. Yeah. Yeah, yeah. OK. Yeah.
+ Brian Hierholzer   12:19 Same thing with with Andre. He's going to be building out an entire DevSecOps offering, right, that will go into our our platform. He's going to start as an external app because we want to drill, you know, we want to refine us, right? And that's why you guys are all doing it. We're throwing everybody on the outside to force them to build apps.
+ Clark Stacer   12:26 Yeah. Yep.
+ Brian Hierholzer   12:39 The platform to harden the offering, but you know, nine chances out of 10, we pull all those things internal, but it hardens our external app templates and the process. But but this project was technically internal. I just said it was external.
+ Clark Stacer   12:49 Exactly, yeah. Yeah. Yeah, yeah.
+ Brian Hierholzer   12:59 So you have in, so SME Mart could work internal to companies just the same as it could work from companies they don't know that are truly in the marketplace. So it's almost like our marketplace is the global marketplace of ZB, but then there's also an internal marketplace that may be. A construct where you shot rojects internal to an internal marketplace where?
+ Clark Stacer   13:25 Yeah. Yep, Yep.
+ Brian Hierholzer   13:31 Cool idea.
+ Clark Stacer   13:31 Yeah, I yeah, it's. I don't. It is. Yeah, it's just.
+ Brian Hierholzer   13:33 Same constructs, same construct. Yeah, maybe a little bit less legal ****, you know what I mean? But but still same, same kind, same construct.
+ Clark Stacer   13:43 Right. Still you're gonna have like requirements that need to be met and a checkbox saying is this done? Is this not done, you know?
+ Brian Hierholzer   13:46 Yep, Yep. And hours, billable hours, legal, these, you know, there's still **** there, just the same.
+ Clark Stacer   13:54 Yep. Yeah.
+ Brian Hierholzer   13:56 It may not be as extensive, but it'll follow very similar arameters.
+ Clark Stacer   14:01 Yeah. All right, cool.
+ Brian Hierholzer   14:04 So in so internal SME mark.
+ Clark Stacer   14:07 Yep. I'm I'm recording this but or you know the transcription by the way and I'll I'll feed this back into cloud when we get done and we'll we'll add this to the road map and plan out next steps for for this feature.
+ Brian Hierholzer   14:13 Yep, Yep, Yep.
+ Clark Stacer   14:25 Yeah, yeah, that's that's exciting. This is fun, man. It's like playing with Legos.
+ Brian Hierholzer   14:33 Yep, Yep. OK. I don't know. Any questions for me other than let's just keep going?
+ Clark Stacer   14:43 No, I think that's, I think we're at a good spot. Unless there's anything else you want to, any other refinements you want to throw into the mix right now, but yeah.
+ Brian Hierholzer   14:55 Can't wait to see it here in the next couple weeks. I'll start digging in. I just figured I won't look yet until you kind of, you know, we're getting to ground, right? You're going to go over the UAT **** dealing with this, the the schema stuff, you know, I know that they're, you know, just kind of getting the the. Your bearings right for now.
+ Clark Stacer   15:12 Yep, Yep. And then, yeah, I'll have a full, I'll have a full like smoke test path end to end for for like a buyer, a seller, you know, so we can kind of just walk through and. Have have the browser fill in all the things and watch what happens.
+ Brian Hierholzer   15:32 Yeah. And I know that we're, I know that we're still, you know, we on the task system, you know, kind of the the three parts of a task, which is demand, supply and then transparency component. I know that there's, you know, a lot of that shit's missing, right. And I don't even know that we have a project per SE construct yet, right. I don't, I just don't know where they're at. Yeah, so.
+ Clark Stacer   15:49 Not yet, no.
+ Brian Hierholzer   15:52 So I know there's a lot of things that we're that we need that, you know, are not there yet for you to build out. But my question is, is do you take the task system and do you, you know, kind of extend the tasks to to accommodate, you know, our vision of what a task needs to be from a multi-party standpoint, you know, I don't know.
+ Clark Stacer   16:10 Yeah, yeah, Claude knows where we're going. I mean, there's a road map that says, you know, eventually there's going to be this project thing. Right now we're just going to use tags for that as just like a generic container. And maybe it's maybe it's a 0 bias task is a project, you know, like that's probably.
+ Brian Hierholzer   16:18 Yeah.
+ Clark Stacer   16:30 Probably what it'll end up being just to have some container that is trackable, you know, for for each of these things, you know, so yeah.
+ Brian Hierholzer   16:30 Yeah. Yeah, OK. Yeah, because I will say that everybody that I am seeing and there is no scenario where I'm not seeing, you know, as a task and a subtask level, a demand side and a supply side with the transparency middle.
+ Clark Stacer   16:42 Yeah.
+ Brian Hierholzer   16:59 There are so many use cases. I'll I'll give you one example. Joe's building something where you know they're in a boundary, there's a tool set that's installed in the boundary and it's showing and it's throwing off a whole bunch of problems. It's a it's like a cyber security tool set and it creates a whole bunch of tickets, right? So those tickets would map right into tasks.
+ Clark Stacer   17:13 Yeah.
+ Brian Hierholzer   17:19 Right, so it would be a one to one mapping of ticket by type. It's like this VM configuration, this AWS config, whatever those may be, right? And this is the service provider application. Well that application, so it creates tickets from the network owner which is the.
+ Clark Stacer   17:26 Yeah.
+ Brian Hierholzer   17:38 Demand side, it's my network and I'm running this app and it's creating all these events which is gonna go into tasks, right? So then the service provider that I am contracting with is the supplier. And I want and they are going to have their portion of that task, which is the remediation or the fix. I need to see that what their remediation is. I need to approve that remediation. So they're going to have their portion of the task. I'm going to, I want to see how they're solving it. I want to see the security of their. Their environment that they're doing this context and cloud development with, I want to review it and then I want to assess it. Is it meeting my legal requirement? Is it meeting the security requirement of their environment? So it is my task originally. They they picked it up now. So there's another component to this. There's a task system that then goes into a queue and I may have three or four contractors that are on the the supply side and there may be a matching process. Of based on their talent or their capabilities, which supplier or the person within a group is going to be assigned to that right? And I may put multiple suppliers there. I may pick one supplier, but the one supplier may have different talent within his team.
+ Clark Stacer   19:00 Yeah.
+ Brian Hierholzer   19:07 And then that that ticket or that task has to be assigned based on some sort of matching process of credentials and capabilities within, you know, the supplier team or multiple suppliers. So there has to be. A supplier side of that task that is relevant to the supplier that the the the demand side of that task really may or may not care about. Does that make sense? So a task started in my network, it went into my task system and now I have suppliers that are going to go, you know, I have those. In a project and and I have multiple parties in a project on the supply side based on the matching process of talent or capabilities, those different tasks will be assigned to different supply side team members and those team members have to do things and I want to see it in a transparency center. Center of that task, but they have stuff that they need to do on that side of the task that I don't really give a **** about. That's their job, that's their function. So do you see how I've got a task that is a demand side task, a supply side task through some sort of assignment process?
+    20:12 Yeah, yeah.
+ Brian Hierholzer   20:22 You know, and that may be a broader assignment across multiple vendors back to this project rules and capabilities. We may have rules within the project that says, you know, put four different suppliers on this project and based on my task system, on the demand side of my task system, I want to make sure I round Robin these. 4 tasks to four different suppliers. It's a round Robin rule or it's a first in, first out or a last in, first out or based on technical capabilities. Put this type with this group, this type with that group. Does that make sense? So it's still going to be demand side tasks to supply side fulfillment.
+ Clark Stacer   20:54 Yeah, yeah.
+ Brian Hierholzer   21:02 And those may be different parties based on different roles and they're going to have to do their ****. So I don't see how a task doesn't break into a transparency middle, a supply side portion and a demand side portion of.
+ Clark Stacer   21:16 Yeah.
+ Brian Hierholzer   21:17 Demand side of the requirements. Transparency is how those requirements are met. Supply side does whatever they need to do to make sure that they transparently fulfill the the demand side requirements, right? Wrong. Yes. No.
+ Clark Stacer   21:29 Yeah, yeah. Yeah, there I I'm, I'm thinking there's like, you know, there's a a central task that's the shared task and then there's it's a tree. It's a it's branches of a tree, but like certain branches are only visible from the supply side. Certain branches are only visible from the demand side.
+ Brian Hierholzer   21:45 Yep.
+ Clark Stacer   21:53 Certain branches are visible from both. So yeah, yeah.
+ Brian Hierholzer   21:55 Exactly. Yep. And the the the the transparency middle is all of the requirements that the demand side requires that they have transparency too, right. And that may be narrow, it may be extremely deep of what the supply side and that applies at the subtask, it applies at the task and it's.
+ Clark Stacer   22:06 No.
+ Brian Hierholzer   22:15 Applies to the project and all that you're doing is rolling these things up in bigger and bigger summaries, let's say.
+ Clark Stacer   22:22 Yeah, yeah. Yeah, like maybe the, yeah, the the demand side is only seeing just the summary of like 800 other tasks that are that are on the supply side, you know?
+ Brian Hierholzer   22:31 Yeah, there's all going to be all these different summary things. Now, if you need to go in and get into the weeds, you can go task by task or subtask by subtask to look at the true weeds, let's say, right? It's all there because it has a full audit capability. That's what the transparency is, is if you drill into any one subtask.
+ Clark Stacer   22:42 Yeah.
+ Brian Hierholzer   22:51 You have a full audit and full, you know, data of everything. But at the end of the day, just like all things over time, you want to just be high level things that all of the low level things provide you. Now if I do want the low level, it's there, right? Plausibly.
+ Clark Stacer   23:02 Yeah. Right. Yeah. Yeah, with as much granularity as possible, you know, to capture as much of it as possible.
+ Brian Hierholzer   23:11 Yes, yes, yeah. The subtask may be very, very fine detail, fine print. I may never go there, but if I have to, it's there. And all we're doing is summarizing and aggregating and packaging subtasks into groups or into the tasks and multiple tasks.
+ Clark Stacer   23:20 Yeah.
+ Brian Hierholzer   23:29 You know, into a runbook, let's say that roll into a project, I don't know.
+ Clark Stacer   23:33 Yeah, yeah. Yeah, and with with that in mind in the in the notes in the notes feature, I just created some check boxes that you can wire up that are read only and you can wire them up to a task status so. It just shows you like has have these. So you can just at a glance know like which parts, which branches of your project tree are done and which ones and what status they're at. Like are they? Is it still in progress? Is it like blocked, you know? So if you're the project manager you have.
+ Brian Hierholzer   24:08 Yeah.
+ Clark Stacer   24:10 Like a an, you know, a global view of the whole, you know, of the whole giant spaghetti tree, you know, but.
+ Brian Hierholzer   24:19 Yeah, and I kind of look at those similar to JIRA with epochs, right? Like, OK, is, you know, 10 of the 32 of the tasks or subtasks that are relative to an epoch, right? Is the epoch. And do those epochs live forever? You know, I know that projects may be persistent, they may be forever, or they may come and go, right? Epochs.
+ Clark Stacer   24:23 Yes.
+ Brian Hierholzer   24:38 May similar, you know, depending on how you build that internally to a team, but it may be similar, right? And Epic can may may last for six months and then it may die, right? But same point, right? Same thing.
+ Clark Stacer   24:50 Right. Yep. Yeah, exactly. Yeah. An aggregate and like a container for a whole bunch of subtasks that. Yeah, yeah.
+ Brian Hierholzer   24:58 Yeah. Yeah, we may need a, you know, a a concept similar to the epic which is even, you know, because at the project at the very high level, right. It may be where where like nothing really escapes that project, you know in a given thing or you know you have multiple projects within an engagement which could be similar to your epic. Or you could have a project and then you could have a playbook within a project or an epic within a project, and then you have tasks and then subtasks. There's all these nesting scenarios. We just need to have, you know, some sort of semblance on. Do we have another layer of nesting, you know, and what is it called, right? So is there something?
+ Clark Stacer   25:36 Yeah.
+ Brian Hierholzer   25:40 Between project and sub and task and subtask, you know I I we don't know, but I'm sure it wouldn't be that hard to insert something if if that comes up, let's say.
+ Clark Stacer   25:44 Right. Well, I know, yeah, I know Chris has already talked about there being the the concept of a board and a board can be at any level. There can be a board that contains any combination of tasks or projects or whatever. I guess they would probably be.
+ Brian Hierholzer   25:57 Yes. Yeah, and I and my board, I I'm probably splitting 5 projects and I'm across 20 boundaries plausibly, right. So yeah, exactly. As a service provider, I have to have a board across all my projects, right? And across however many boundaries live within those projects, a project.
+ Clark Stacer   26:12 Right. So you want a board? Yeah. Ready.
+ Brian Hierholzer   26:25 In one company may have three different boundaries that I still am traversing right in tasks. But to your point, next thing you know I have a I have a project over here through this engagement again as a service provider. So I may have 30 projects across five different engagements.
+ Clark Stacer   26:30 Right. Yep.
+ Brian Hierholzer   26:44 And you know, each of those projects has three boundaries.
+ Clark Stacer   26:49 Yep. And you need to be able to see all of them. You know, you need to have a a way to to have visibility into all of those things. Yeah, yeah.
+ Brian Hierholzer   26:52 Exactly, yes. Yes. Yeah. Yeah. Yep. Cool. OK, bud.
+ Clark Stacer   27:01 So yeah, I think, you know, that's common.
+ Brian Hierholzer   27:04 Yep, Yep, Yep. All good. OK, well, I'll shoot you over the the the an the notes and you you have a great weekend.
+ Clark Stacer   27:13 All right, man. Thank you. You too.
+ Brian Hierholzer   27:15 OK, bud. OK, we'll see you. Bye, bye.
+ Clark Stacer   27:17 Bye.
+ Clark Stacer stopped transcription

@@ -1,0 +1,71 @@
+@if (ctx.engagement(); as eng) {
+  <div class="tab-content">
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Engagement Summary</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        @if (eng.description) {
+          <p>{{ eng.description }}</p>
+        }
+        <div class="detail-grid">
+          <div class="detail-item">
+            <span class="label">Category</span>
+            <span class="value">{{ eng.category }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Status</span>
+            <span class="value">{{ ctx.status() | titlecase }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Created</span>
+            <span class="value">{{ eng.created_at | date:'mediumDate' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Buyer</span>
+            <span class="value">{{ eng.buyer_display_name || 'Unknown' }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    @if (ctx.acceptedBid(); as accepted) {
+      <h3>Accepted Provider</h3>
+      <app-bid-card
+        [bid]="accepted"
+        [isBuyer]="false"
+        [isOwnBid]="false">
+      </app-bid-card>
+    }
+
+    @if (eng.zerobias_tag_id) {
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>ZeroBias Integration</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <span class="label">Tag ID</span>
+              <span class="value"><code>{{ eng.zerobias_tag_id }}</code></span>
+            </div>
+            @if (eng.zerobias_task_id) {
+              <div class="detail-item">
+                <span class="label">Task ID</span>
+                <span class="value"><code>{{ eng.zerobias_task_id }}</code></span>
+              </div>
+            }
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
+
+    @if (ctx.isOwner() && ctx.status() === 'in_progress') {
+      <div class="tc-actions">
+        <button mat-button color="warn" (click)="cancelEngagement()">
+          <mat-icon>cancel</mat-icon> Cancel Engagement
+        </button>
+      </div>
+    }
+  </div>
+}
