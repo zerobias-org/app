@@ -31,6 +31,11 @@ export const routes: Routes = [
       { path: 'rfps/:id/bid', component: BidWizard },
       { path: 'rfps/:id/bid/:bidId', component: BidWizard },
       { path: 'engagements/:id', component: EngagementDetail, children: ENGAGEMENT_TAB_ROUTES },
+      {
+        path: 'templates/:id',
+        loadComponent: () =>
+          import('./pages/templates/template-editor.component').then(m => m.TemplateEditorComponent),
+      },
       // Legacy redirects
       { path: 'engagements', redirectTo: 'rfps', pathMatch: 'full' },
       {
@@ -39,9 +44,24 @@ export const routes: Routes = [
           import('./pages/org/org.routes').then((m) => m.ORG_ROUTES),
       },
       {
+        path: 'orgs',
+        loadChildren: () =>
+          import('./pages/orgs/orgs.routes').then((m) => m.ORGS_ROUTES),
+      },
+      {
         path: 'my/engagements',
         loadChildren: () =>
           import('./pages/my-engagements/my-engagements.routes').then((m) => m.MY_ENGAGEMENTS_ROUTES),
+      },
+      {
+        path: 'my/projects',
+        loadChildren: () =>
+          import('./pages/my-projects/my-projects.routes').then((m) => m.MY_PROJECTS_ROUTES),
+      },
+      {
+        path: 'my/invitations',
+        loadChildren: () =>
+          import('./pages/my-invitations/my-invitations.routes').then((m) => m.MY_INVITATIONS_ROUTES),
       },
       {
         path: 'my-profile',
@@ -55,6 +75,11 @@ export const routes: Routes = [
         path: 'admin',
         loadChildren: () =>
           import('./pages/admin/admin.routes').then((m) => m.ADMIN_ROUTES),
+      },
+      {
+        path: 'project',
+        loadChildren: () =>
+          import('./pages/project/project.routes').then((m) => m.PROJECT_ROUTES),
       },
     ],
   },

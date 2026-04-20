@@ -27,15 +27,10 @@ export const ENGAGEMENT_GQL_FIXTURE: GqlEngagementResponse = {
   id: 'eng-001-uuid-hipaa-assessment',
   name: 'HIPAA Compliance Assessment for Regional Healthcare Provider',
   description: 'Comprehensive HIPAA compliance review including audit, documentation, and remediation plan.',
-  category: 'compliance',
   buyerZerobiasUserId: 'user-buyer-001-uuid',
   buyerZerobiasOrgId: '28efd6b5-fd17-5b56-a45e-fe3263189666',
-  budgetType: 'fixed',
-  budgetMin: '10000',
-  budgetMax: '25000',
-  timeline: '30 days',
-  status: 'PUBLISHED',
-  engagementTag: 'sme-mart.engagement.hipaa-assessment-2026',
+  status: 'in_progress',
+  engagementTag: 'sme-mart.eng.hipaa-assessment-2026',
   zerobiasTagId: 'tag-uuid-001',
   zerobiasTaskId: 'task-uuid-001',
   createdAt: '2026-03-18T10:00:00Z',
@@ -135,6 +130,7 @@ export const BID_RESPONSE_GQL_FIXTURE: GqlBidResponseResponse = {
   certificationRef: 'SOC2_Type2_2025',
   readyDate: '2026-03-18',
   respondedAt: '2026-03-18T11:30:00Z',
+  createdAt: '2026-03-18T11:30:00Z',
   updatedAt: '2026-03-18T11:30:00Z',
 };
 
@@ -158,8 +154,8 @@ export const NOTE_FOLDER_GQL_FIXTURE: GqlNoteFolderResponse = {
 
 export const NOTE_GQL_FIXTURE: GqlNoteResponse = {
   id: 'note-001-uuid-kickoff-call',
-  title: 'Kickoff Call Notes',
-  body: '**Attendees:** Buyer team, Provider team lead\n\n**Key Findings:**\n- Organization has 250+ employees\n- Current systems: Epic EHR, MEDIDATA clinical trial management\n- Previous audits: SOC2 Type 2 in 2024\n\n**Next Steps:**\n1. Schedule technical deep-dives with IT team\n2. Collect documentation on data handling procedures\n3. Review current security policies',
+  name: 'Kickoff Call Notes',
+  content: '**Attendees:** Buyer team, Provider team lead\n\n**Key Findings:**\n- Organization has 250+ employees\n- Current systems: Epic EHR, MEDIDATA clinical trial management\n- Previous audits: SOC2 Type 2 in 2024\n\n**Next Steps:**\n1. Schedule technical deep-dives with IT team\n2. Collect documentation on data handling procedures\n3. Review current security policies',
   engagementId: 'eng-001-uuid-hipaa-assessment',
   folderId: 'folder-001-uuid-assessment-phase',
   authorZerobiasUserId: 'user-buyer-001-uuid',
@@ -181,8 +177,8 @@ export const NOTE_GQL_FIXTURE: GqlNoteResponse = {
 
 export const NOTE_GQL_FIXTURE_PERSONAL: GqlNoteResponse = {
   id: 'note-002-uuid-provider-questions',
-  title: 'Questions for Provider',
-  body: '**Review Comments from Ben:**\n- Need clarification on incident response procedures (page 3)\n- Encryption key management - ask about HSM implementation\n- Backup testing frequency and documentation\n\n**Follow-up Items:**\n1. Schedule call with provider security team\n2. Request additional documentation on disaster recovery',
+  name: 'Questions for Provider',
+  content: '**Review Comments from Ben:**\n- Need clarification on incident response procedures (page 3)\n- Encryption key management - ask about HSM implementation\n- Backup testing frequency and documentation\n\n**Follow-up Items:**\n1. Schedule call with provider security team\n2. Request additional documentation on disaster recovery',
   engagementId: 'eng-001-uuid-hipaa-assessment',
   folderId: 'folder-001-uuid-assessment-phase',
   authorZerobiasUserId: 'user-buyer-001-uuid',
@@ -299,11 +295,11 @@ export const DOCUMENT_GQL_FIXTURE_SOW: GqlDocumentResponse = {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Engagement with nested bids array (simulates querying with relationships)
+ * Engagement with nested relationships (bids moved to SmeMartProject in Plan 075)
  */
-export const ENGAGEMENT_WITH_BIDS_GQL_FIXTURE: GqlEngagementResponse = {
+export const ENGAGEMENT_WITH_NOTES_GQL_FIXTURE: GqlEngagementResponse = {
   ...ENGAGEMENT_GQL_FIXTURE,
-  bids: [BID_GQL_FIXTURE, BID_GQL_FIXTURE_DRAFT],
+  notes: [NOTE_GQL_FIXTURE, NOTE_GQL_FIXTURE_PERSONAL],
 };
 
 /**

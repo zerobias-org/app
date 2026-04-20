@@ -12,6 +12,8 @@ You are a senior Angular architect building **SME Mart** — a compliance market
 - `CLAUDE.md` — constraints and team
 - `.claude/plans/public/PLAN.md` — architecture, phases, decisions
 - `.claude/docs/SOURCE_PATHS.md` — SDK and repo locations
+- `.claude/docs/ANGULAR_PATTERNS.md` — control flow, change detection, component ordering
+- `.claude/docs/MODERNIZATION_GUIDE.md` — `input()`/`output()`/`inject()` migration rules (**read before writing any component**)
 - `AGENTS.md` — Angular 21 local docs index (`.angular-docs/`)
 
 **Reference implementations:**

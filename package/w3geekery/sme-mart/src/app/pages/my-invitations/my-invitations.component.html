@@ -1,0 +1,114 @@
+<div class="my-invitations-page">
+  <div class="page-header">
+    <h2>My Invitations</h2>
+  </div>
+
+  @if (loading()) {
+    <div class="loading-container">
+      <mat-spinner diameter="32"></mat-spinner>
+    </div>
+  } @else {
+    <div class="filter-chips">
+      <mat-chip-set>
+        <button
+          mat-chip
+          [class.selected]="statusFilter() === 'all'"
+          (click)="setStatusFilter('all')">
+          All
+        </button>
+        <button
+          mat-chip
+          [class.selected]="statusFilter() === 'pending'"
+          (click)="setStatusFilter('pending')">
+          Pending
+        </button>
+        <button
+          mat-chip
+          [class.selected]="statusFilter() === 'accepted'"
+          (click)="setStatusFilter('accepted')">
+          Accepted
+        </button>
+        <button
+          mat-chip
+          [class.selected]="statusFilter() === 'requested'"
+          (click)="setStatusFilter('requested')">
+          Requested
+        </button>
+      </mat-chip-set>
+    </div>
+
+    @if (filteredInvitations().length > 0) {
+      <div class="invitations-grid">
+        @for (invitation of filteredInvitations(); track invitation.id) {
+          <mat-card class="invitation-card">
+            <mat-card-header>
+              <div class="card-header-content">
+                <h3>{{ getProjectTitle(invitation.id) }}</h3>
+                <mat-chip-set>
+                  <mat-chip [class]="getStatusChipClass(invitation.status)" disabled>
+                    {{ invitation.status | titlecase }}
+                  </mat-chip>
+                </mat-chip-set>
+              </div>
+            </mat-card-header>
+
+            <mat-card-content>
+              @if (invitation.invitationMessage) {
+                <div class="message-section">
+                  <p class="message-label">Message from Buyer:</p>
+                  <p class="message-text">{{ invitation.invitationMessage }}</p>
+                </div>
+              }
+
+              <div class="dates-section">
+                <p class="date-info">
+                  <mat-icon>calendar_today</mat-icon>
+                  Invited: {{ invitation.invitedAt | date: 'short' }}
+                </p>
+                @if (invitation.respondedAt) {
+                  <p class="date-info">
+                    <mat-icon>done_all</mat-icon>
+                    Responded: {{ invitation.respondedAt | date: 'short' }}
+                  </p>
+                }
+              </div>
+            </mat-card-content>
+
+            <mat-card-actions>
+              @if (invitation.status === 'pending') {
+                <button
+                  mat-stroked-button
+                  color="primary"
+                  (click)="acceptInvitation(invitation.id)">
+                  Accept
+                </button>
+                <button
+                  mat-stroked-button
+                  color="warn"
+                  (click)="openDeclineDialog(invitation)">
+                  Decline
+                </button>
+              } @else if (invitation.status === 'accepted') {
+                <a
+                  mat-stroked-button
+                  [routerLink]="['/rfps', invitation.projectId]">
+                  View RFP
+                </a>
+              } @else if (invitation.status === 'requested') {
+                <p class="status-text">Awaiting approval from buyer</p>
+              } @else if (invitation.status === 'declined' || invitation.status === 'revoked') {
+                <p class="status-text">{{ invitation.status | titlecase }}</p>
+              }
+            </mat-card-actions>
+          </mat-card>
+        }
+      </div>
+    } @else {
+      <div class="empty-state">
+        <mat-icon>inbox</mat-icon>
+        <h3>No Invitations</h3>
+        <p>You haven't been invited to any RFPs yet.</p>
+      </div>
+    }
+  }
+</div>

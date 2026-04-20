@@ -20,6 +20,15 @@
       <mat-chip-set>
         <mat-chip class="tag-chip"><code>{{ ctx.engagementTag() }}</code></mat-chip>
         <mat-chip [class]="'status-' + ctx.status()">{{ ctx.status() | titlecase }}</mat-chip>
+        @if (vettingGate(); as gate) {
+          <mat-chip [class]="'vetting-' + gate" [matTooltip]="gate === 'verified' ? 'All vetting requirements met' : gate === 'blocked' ? 'Vetting has rejected/expired items' : 'Vetting in progress'">
+            @switch (gate) {
+              @case ('verified') { ✓ Vetted }
+              @case ('blocked') { ⚠ Vetting Blocked }
+              @case ('in_progress') { Vetting }
+            }
+          </mat-chip>
+        }
       </mat-chip-set>
     </div>
 

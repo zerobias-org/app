@@ -20,8 +20,9 @@ import { ResizableDrawerDirective } from '../../directives/resizable-drawer.dire
 import { NoteEditorPanel } from '../note-editor-panel/note-editor-panel.component';
 import { NoteFolderTree } from '../note-folder-tree/note-folder-tree.component';
 import { NotesNotebooksColumn } from '../notes-notebooks-column/notes-notebooks-column.component';
+import { NotebookOverview } from '../notebook-overview/notebook-overview.component';
 import { NotesService } from '../../../core/services/notes.service';
-import { NoteHierarchyService } from '../../../core/services/note-hierarchy.service';
+import { NoteHierarchyService, type FolderTreeNode } from '../../../core/services/note-hierarchy.service';
 import { UserPreferencesService } from '../../../core/services/user-preferences.service';
 import type { NoteWithTags } from '../../../core/models';
 
@@ -34,7 +35,7 @@ import type { NoteWithTags } from '../../../core/models';
     MatProgressSpinnerModule, MatSnackBarModule,
     MatTooltipModule, MatSidenavModule, MatDialogModule, MatMenuModule,
     ResizableDrawerDirective,
-    NoteEditorPanel, NoteFolderTree, NotesNotebooksColumn,
+    NoteEditorPanel, NoteFolderTree, NotesNotebooksColumn, NotebookOverview,
   ],
   templateUrl: './notes-panel.component.html',
   styleUrl: './notes-panel.component.scss',
@@ -77,6 +78,13 @@ export class NotesPanel implements OnInit {
 
   /** Active document-link filter (set via @Input or cleared by user). */
   readonly _docFilter = signal<string | null>(null);
+
+  /** When set, shows notebook overview instead of note editor (Plan 062). */
+  readonly overviewNotebookNode = signal<FolderTreeNode | null>(null);
+  readonly showOverview = computed(() => this.overviewNotebookNode() !== null);
+
+  /** True when no notebooks exist yet — shows "Create a Notebook" prompt. */
+  readonly hasNoNotebooks = signal(false);
 
   readonly noteCount = computed(() => this.notes().length);
   readonly engId = this._engagementId;
@@ -161,14 +169,48 @@ export class NotesPanel implements OnInit {
         this.folderTree?.loadTree();
         this.notebooksCol?.loadTree();
       }
+
+      // Show notebook overview when selecting a notebook (Plan 062)
+      await this.onNotebookInfo(notebookId);
+    } else {
+      this.overviewNotebookNode.set(null);
     }
   }
 
   onFolderSelected(folderId: string | null): void {
     this.selectedFolderId.set(folderId);
     this.selectedNoteId.set(null);
+    this.overviewNotebookNode.set(null); // close overview when folder is selected
     this.searchQuery.set('');
     this.loadNotes();
+  }
+
+  onNotebookCountChanged(count: number): void {
+    this.hasNoNotebooks.set(count === 0);
+  }
+
+  /** Show notebook overview panel (Plan 062). */
+  async onNotebookInfo(notebookId: string): Promise<void> {
+    const tree = await this.hierarchy.getFolderTree(this._engagementId());
+    const node = tree.find(n => n.folder.id === notebookId) ?? null;
+    this.overviewNotebookNode.set(node);
+    this.selectedNoteId.set(null); // clear note selection
+  }
+
+  /** Close overview and return to note editing. */
+  closeOverview(): void {
+    this.overviewNotebookNode.set(null);
+  }
+
+  /** Navigate to a note from the overview's "Recent Notes" list. */
+  onOverviewNavigateToNote(noteId: string): void {
+    this.overviewNotebookNode.set(null);
+    this.selectedNoteId.set(noteId);
+    // Ensure the note is in our loaded list
+    const existingNote = this.notes().find(n => n.id === noteId);
+    if (!existingNote) {
+      this.loadNotes();
+    }
   }
 
   onFolderTreeChanged(): void {
@@ -208,22 +250,61 @@ export class NotesPanel implements OnInit {
 
   selectNote(note: NoteWithTags): void {
     this.selectedNoteId.set(note.id);
+    this.overviewNotebookNode.set(null); // close overview when note selected
   }
 
   async createNewNote(): Promise<void> {
     const engId = this._engagementId();
-    const folderId = this.selectedFolderId();
     if (!engId) return;
+
+    let targetFolderId = this.selectedFolderId();
+
+    // If no folder selected, auto-resolve or ask user to pick one
+    if (!targetFolderId) {
+      const tree = await this.hierarchy.getFolderTree(engId);
+      const notebookId = this.selectedNotebookId();
+      const notebook = tree.find(n => n.folder.id === notebookId);
+      const folders = notebook?.children ?? [];
+
+      if (folders.length === 0) {
+        this.snackBar.open('Create a folder first — notes must live in a folder', 'OK', { duration: 4000 });
+        return;
+      }
+
+      if (folders.length === 1) {
+        // Auto-select the only folder
+        targetFolderId = folders[0].folder.id;
+        this.selectedFolderId.set(targetFolderId);
+        this.loadNotes();
+      } else {
+        // Multiple folders — open picker dialog (reuse MoveItemDialog as folder picker)
+        const dialogRef = this.dialog.open(MoveItemDialog, {
+          data: {
+            engagementId: engId,
+            itemType: 'note',
+            currentFolderId: null,
+            currentNotebookId: notebookId,
+            itemName: 'New Note',
+          } as MoveItemDialogData,
+          width: '440px',
+        });
+
+        const result: MoveItemDialogResult | undefined = await dialogRef.afterClosed().toPromise();
+        if (!result?.targetFolderId) return; // cancelled
+        targetFolderId = result.targetFolderId;
+        this.selectedFolderId.set(targetFolderId);
+        this.loadNotes();
+      }
+    }
 
     try {
       const created = await this.notesService.createNote(engId, {
         title: 'Untitled',
         body: '',
-        folder_id: folderId,
+        folder_id: targetFolderId,
         access_level: 'boundary',
       });
 
-      // Build a NoteWithTags from the raw Note so the editor panel can use it
       const newNote: NoteWithTags = {
         ...created,
         tags: null,
@@ -234,6 +315,7 @@ export class NotesPanel implements OnInit {
 
       this.notes.update(list => [newNote, ...list]);
       this.selectedNoteId.set(newNote.id);
+      this.overviewNotebookNode.set(null); // switch to editor
       this.folderTree?.loadTree();
     } catch (err: any) {
       this.snackBar.open(`Failed to create note: ${err.message}`, 'Dismiss', { duration: 5000 });

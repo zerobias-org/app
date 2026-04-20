@@ -50,7 +50,7 @@ describe('BidForm', () => {
       await component.onSubmit();
 
       expect(mockBidsService.submitBid).toHaveBeenCalledWith({
-        request_id: TEST_WR_ID,
+        project_id: TEST_WR_ID,
         provider_id: TEST_PROVIDER_USER_ID,
         cover_letter: 'Our team is ready.',
         proposed_price: '5000',
@@ -67,7 +67,7 @@ describe('BidForm', () => {
       await component.onSubmit();
       expect(mockBidsService.submitBid).toHaveBeenCalledWith(
         expect.objectContaining({
-          request_id: TEST_WR_ID,
+          project_id: TEST_WR_ID,
           provider_id: TEST_PROVIDER_USER_ID,
         }),
       );

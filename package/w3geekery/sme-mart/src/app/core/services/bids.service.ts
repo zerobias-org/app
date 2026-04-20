@@ -2,97 +2,197 @@ import { Injectable, inject } from '@angular/core';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService, type GqlQueryOptions } from './graphql-read.service';
 import { NotificationService } from './notification.service';
-import { BID_FIELD_MAPPING, BID_RESPONSE_FIELD_MAPPING, mapNeonToGql, mapGqlToNeon } from '../field-mappings';
-import type { Bid, BidSummaryRow, BidWizardData, BidResponse } from '../models';
-import type { GqlBidResponse, GqlBidResponseResponse } from '../gql-types';
+import { RfpInvitationService } from './rfp-invitation.service';
+import { SmeMartProjectService } from './sme-mart-project.service';
+import { BID_FIELD_MAPPING, mapNeonToGql, mapGqlToNeon } from '../field-mappings';
+import type { Bid, BidSummaryRow, BidWizardData } from '../models';
+import type { GqlBidResponse } from '../gql-types';
 
 /**
- * BidsService - FULLY MIGRATED TO PIPELINE (Phase 5)
+ * BidsService — Plan 075 Phase 2 refactor
+ *
+ * Bids now link to SmeMartProject (via `project` link field) instead of Engagement.
+ * The `project` field is a GQL link — queries use rawQuery with `project { id }` syntax.
  *
  * All writes go through PipelineWriteService (fire-and-forget async).
  * All reads go through GraphqlReadService (from AuditgraphDB).
  *
- * Neon bids table archived 2 weeks after Phase 5 completion (2026-04-02).
- * 2-week observation period for production stability verification.
+ * Plan 14 Wave 1: Invitation controls
+ * submitBid() includes access control gate for invitation-only projects.
  */
 @Injectable({ providedIn: 'root' })
 export class BidsService {
   private readonly pipelineWrite = inject(PipelineWriteService);
   private readonly graphqlRead = inject(GraphqlReadService);
   private readonly notifications = inject(NotificationService);
+  private readonly rfpInvitations = inject(RfpInvitationService);
+  private readonly smeMartProjects = inject(SmeMartProjectService);
+
+  /** Scalar fields for standard queries (no link fields) */
+  private readonly scalarBidFields = [
+    'id',
+    'name',
+    'description',
+    'providerId',
+    'coverLetter',
+    'price',
+    'status',
+    'timeline',
+    'executiveSummary',
+    'teamDescription',
+    'totalEstimatedHours',
+    'pricingBreakdown',
+    'wizardData',
+    'wizardStep',
+    'dateCreated',
+    'dateLastModified',
+  ];
+
+  /** Fields including project link expansion — for rawQuery only */
+  private readonly allBidFields = [
+    ...this.scalarBidFields,
+    'project { id }',
+  ];
+
+  // ---------------------------------------------------------------------------
+  // Query by Project (Plan 075 — replaces query-by-engagement)
+  // ---------------------------------------------------------------------------
 
   /**
-   * List all bids for a given engagement (request).
-   * Queries GQL with filter on engagementId, transforms to Bid[].
+   * List all bids for a given project (RFP).
+   * Uses rawQuery because `project` is a link field requiring nested filter.
+   */
+  async listBidsByProject(projectId: string): Promise<Bid[]> {
+    const fieldStr = this.allBidFields.join(' ');
+    const query = `{ Bid(project: { id: ".eq.${projectId}" }) { ${fieldStr} } }`;
+
+    const data = await this.graphqlRead.rawQuery(query, 1, 100);
+    const rawItems = (data['Bid'] as Record<string, unknown>[]) ?? [];
+
+    return rawItems.map(gql => this.flattenAndMap(gql));
+  }
+
+  /**
+   * Load bids with compliance summaries for a project.
+   */
+  async listBidSummaries(projectId: string): Promise<BidSummaryRow[]> {
+    const bids = await this.listBidsByProject(projectId);
+    return bids.map(bid => this.toBidSummary(bid));
+  }
+
+  /**
+   * Find an existing draft bid for a provider on a project.
+   * Uses rawQuery with compound filter on project link + providerId + status.
+   */
+  async findDraft(projectId: string, providerId: string): Promise<Bid | null> {
+    const fieldStr = this.allBidFields.join(' ');
+    const query = `{ Bid(project: { id: ".eq.${projectId}" }, providerId: ".eq.${providerId}", status: ".eq.draft") { ${fieldStr} } }`;
+
+    const data = await this.graphqlRead.rawQuery(query, 1, 1);
+    const rawItems = (data['Bid'] as Record<string, unknown>[]) ?? [];
+
+    if (!rawItems.length) return null;
+    return this.flattenAndMap(rawItems[0]);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Legacy query by engagement (backward compatibility during migration)
+  // ---------------------------------------------------------------------------
+
+  /**
+   * @deprecated Use listBidsByProject() instead. Kept for components not yet migrated.
    */
   async listBidsByRequest(requestId: string): Promise<Bid[]> {
     const gqlOptions: GqlQueryOptions = {
-      filters: {
-        engagementId: `.eq.${requestId}`,
-      },
+      filters: { engagementId: `.eq.${requestId}` },
       pageSize: 100,
     };
 
     const result = await this.graphqlRead.query<GqlBidResponse>(
       'Bid',
-      this.getBidFields(),
+      this.scalarBidFields,
       gqlOptions,
     );
 
     return result.items.map(gql => mapGqlToNeon<Bid>(gql, BID_FIELD_MAPPING.gqlToNeon));
   }
 
-  /**
-   * Load bids with compliance summaries and bid response rollups.
-   * Queries GQL with nested bidResponses for compliance calculation.
-   */
-  async listBidSummaries(requestId: string): Promise<BidSummaryRow[]> {
-    const gqlOptions: GqlQueryOptions = {
-      filters: {
-        engagementId: `.eq.${requestId}`,
-      },
-      pageSize: 100,
-    };
-
-    const result = await this.graphqlRead.query<GqlBidResponse>(
-      'Bid',
-      this.getBidFields(),
-      gqlOptions,
-    );
-
-    return result.items.map(gql => this.transformGqlToBidSummary(gql));
-  }
+  // ---------------------------------------------------------------------------
+  // Single bid operations
+  // ---------------------------------------------------------------------------
 
   /**
    * Fetch a single bid by ID.
    */
   async getBid(id: string): Promise<Bid | null> {
+    // Check write-through cache first (avoids GQL round-trip on rapid edits)
+    const cached = this.pipelineWrite.getCached('Bid', id);
+    if (cached) {
+      return mapGqlToNeon<Bid>(cached, BID_FIELD_MAPPING.gqlToNeon);
+    }
+
     const bid = await this.graphqlRead.getById<GqlBidResponse>(
       'Bid',
       id,
-      this.getBidFields(),
+      this.scalarBidFields,
     );
     if (!bid) return null;
 
+    this.pipelineWrite.seedCache('Bid', id, bid as unknown as Record<string, unknown>);
     return mapGqlToNeon<Bid>(bid, BID_FIELD_MAPPING.gqlToNeon);
   }
 
+  // ---------------------------------------------------------------------------
+  // Create / Submit
+  // ---------------------------------------------------------------------------
+
   /**
    * Submit a new bid (simple flow) with optimistic update.
-   * Generates ID, pushes to Pipeline in background.
+   * Links bid to SmeMartProject via `project` link field.
+   *
+   * Plan 14 Wave 1: Validates access control for invitation-only projects.
+   * If project.isInvitationOnly is true, vendor must have an accepted invitation.
+   *
+   * Gate validation throws specific error messages:
+   * - 'not invited' — no invitation record exists
+   * - 'status {status}' — invitation exists but status is not 'accepted'
    */
   async submitBid(data: {
-    request_id: string;
+    project_id: string;
     provider_id: string;
     cover_letter?: string;
     proposed_price?: string;
     proposed_timeline?: string;
   }): Promise<Bid> {
+    // Load project and check invitation controls
+    const project = await this.smeMartProjects.getProject(data.project_id);
+    if (!project) {
+      throw new Error(`Project ${data.project_id} not found`);
+    }
+
+    // Validate access control gate for invitation-only projects
+    if (project.isInvitationOnly) {
+      // Fetch invitation for this vendor on this project
+      const invitation = await this.rfpInvitations.findByProjectAndVendor(
+        data.project_id,
+        data.provider_id
+      );
+
+      if (!invitation) {
+        throw new Error('not invited');
+      }
+
+      if (invitation.status !== 'accepted') {
+        throw new Error(`status ${invitation.status}`);
+      }
+    }
+
     const id = `bid-${Date.now()}-${Math.random().toString(36).substring(7)}`;
 
     const bid: Bid = {
       id,
-      request_id: data.request_id,
+      request_id: null, // Legacy — no longer used
+      project_id: data.project_id,
       provider_id: data.provider_id,
       cover_letter: data.cover_letter || null,
       proposed_price: data.proposed_price || null,
@@ -102,25 +202,21 @@ export class BidsService {
       updated_at: new Date().toISOString(),
     };
 
-    // Push to Pipeline in background
-    const gqlData = mapNeonToGql<GqlBidResponse>(bid, BID_FIELD_MAPPING.neonToGql);
-    this.pipelineWrite.pushEntity('Bid', gqlData as unknown as Record<string, unknown>).catch(err => {
-      console.error('Failed to push bid to Pipeline:', err);
-    });
-
-    // Return optimistic response immediately
+    this.pushBid(bid);
     return bid;
   }
 
   /**
    * Create a draft bid for the wizard flow.
+   * Links to SmeMartProject (the RFP).
    */
-  async createDraft(requestId: string, providerId: string): Promise<Bid> {
+  async createDraft(projectId: string, providerId: string): Promise<Bid> {
     const id = `bid-${Date.now()}-${Math.random().toString(36).substring(7)}`;
 
     const bid: Bid = {
       id,
-      request_id: requestId,
+      request_id: null,
+      project_id: projectId,
       provider_id: providerId,
       cover_letter: null,
       proposed_price: null,
@@ -131,26 +227,18 @@ export class BidsService {
       updated_at: new Date().toISOString(),
     };
 
-    // Push to Pipeline in background
-    const gqlData = mapNeonToGql<GqlBidResponse>(bid, BID_FIELD_MAPPING.neonToGql);
-    this.pipelineWrite.pushEntity('Bid', gqlData as unknown as Record<string, unknown>).catch(err => {
-      console.error('Failed to push draft bid to Pipeline:', err);
-    });
-
-    // Return optimistic response
+    this.pushBid(bid);
     return bid;
   }
 
   /**
    * Save wizard progress (partial update).
-   * Flattens nested wizard_data to individual bid columns, preserves JSON serialization.
+   * Flattens nested wizard_data to individual bid columns.
    */
   async saveDraft(id: string, wizardData: BidWizardData, step: number): Promise<Bid> {
-    // Fetch current bid to merge updates
     const current = await this.getBid(id);
     if (!current) throw new Error(`Bid ${id} not found`);
 
-    // Flatten wizard_data into bid columns
     const updated: Partial<Bid> = {
       wizard_data: wizardData as unknown as Record<string, unknown>,
       wizard_step: step,
@@ -185,13 +273,7 @@ export class BidsService {
     }
 
     const merged: Bid = { ...current, ...updated } as Bid;
-
-    // Push to Pipeline
-    const gqlData = mapNeonToGql<GqlBidResponse>(merged, BID_FIELD_MAPPING.neonToGql);
-    this.pipelineWrite.pushEntity('Bid', gqlData as unknown as Record<string, unknown>).catch(err => {
-      console.error('Failed to save draft bid to Pipeline:', err);
-    });
-
+    this.pushBid(merged);
     return merged;
   }
 
@@ -203,7 +285,6 @@ export class BidsService {
     context?: { buyerId: string; rfpTitle: string },
     aiMetadata?: { ai_assisted: boolean; ai_model: string; ai_generated_at: string },
   ): Promise<Bid> {
-    // Fetch current bid
     const current = await this.getBid(id);
     if (!current) throw new Error(`Bid ${id} not found`);
 
@@ -217,169 +298,109 @@ export class BidsService {
       updated_at: new Date().toISOString(),
     };
 
-    // Push to Pipeline
-    const gqlData = mapNeonToGql<GqlBidResponse>(updated, BID_FIELD_MAPPING.neonToGql);
-    this.pipelineWrite.pushEntity('Bid', gqlData as unknown as Record<string, unknown>).catch(err => {
-      console.error('Failed to submit draft bid to Pipeline:', err);
-    });
+    this.pushBid(updated);
 
     // Fire-and-forget notification
-    if (context && updated.request_id) {
+    const resourceId = updated.project_id || updated.request_id;
+    if (context && resourceId) {
       this.notifications.create({
         recipient_id: context.buyerId,
         type: 'bid_received',
         severity: 'medium',
         title: 'New bid received',
         description: `A new bid was submitted on "${context.rfpTitle}".`,
-        resource_id: updated.request_id,
+        resource_id: resourceId,
         resource_type: 'rfp',
-        payload: { parent_id: updated.request_id },
+        payload: { parent_id: resourceId },
       }).catch(() => {});
     }
 
     return updated;
   }
 
-  /**
-   * Find an existing draft bid for a provider on a request.
-   * Uses AND filter: engagementId AND providerId AND status.
-   */
-  async findDraft(requestId: string, providerId: string): Promise<Bid | null> {
-    const gqlOptions: GqlQueryOptions = {
-      filters: {
-        engagementId: `.eq.${requestId}`,
-        providerId: `.eq.${providerId}`,
-        status: '.eq.draft',
-      },
-      pageSize: 1,
-    };
+  // ---------------------------------------------------------------------------
+  // Status transitions
+  // ---------------------------------------------------------------------------
 
-    const result = await this.graphqlRead.query<GqlBidResponse>(
-      'Bid',
-      this.getBidFields(),
-      gqlOptions,
-    );
-
-    if (!result.items.length) return null;
-
-    return mapGqlToNeon<Bid>(result.items[0], BID_FIELD_MAPPING.gqlToNeon);
-  }
-
-  /**
-   * Accept a bid (mark as accepted).
-   */
   async acceptBid(id: string): Promise<Bid> {
-    const current = await this.getBid(id);
-    if (!current) throw new Error(`Bid ${id} not found`);
-
-    const updated: Bid = { ...current, status: 'accepted', updated_at: new Date().toISOString() };
-
-    const gqlData = mapNeonToGql<GqlBidResponse>(updated, BID_FIELD_MAPPING.neonToGql);
-    this.pipelineWrite.pushEntity('Bid', gqlData as unknown as Record<string, unknown>).catch(err => {
-      console.error('Failed to accept bid in Pipeline:', err);
-    });
-
-    return updated;
+    return this.updateBidStatus(id, 'accepted');
   }
 
-  /**
-   * Reject a bid (mark as rejected).
-   */
   async rejectBid(id: string, context?: { providerId: string; rfpTitle: string }): Promise<Bid> {
-    const current = await this.getBid(id);
-    if (!current) throw new Error(`Bid ${id} not found`);
+    const bid = await this.updateBidStatus(id, 'rejected');
 
-    const updated: Bid = { ...current, status: 'rejected', updated_at: new Date().toISOString() };
-
-    const gqlData = mapNeonToGql<GqlBidResponse>(updated, BID_FIELD_MAPPING.neonToGql);
-    this.pipelineWrite.pushEntity('Bid', gqlData as unknown as Record<string, unknown>).catch(err => {
-      console.error('Failed to reject bid in Pipeline:', err);
-    });
-
-    // Fire-and-forget notification
-    if (context && updated.request_id) {
+    const resourceId = bid.project_id || bid.request_id;
+    if (context && resourceId) {
       this.notifications.create({
         recipient_id: context.providerId,
         type: 'bid_rejected',
         severity: 'info',
         title: 'Your bid was not selected',
         description: `Your bid on "${context.rfpTitle}" was not selected.`,
-        resource_id: updated.request_id,
+        resource_id: resourceId,
         resource_type: 'rfp',
-        payload: { parent_id: updated.request_id },
+        payload: { parent_id: resourceId },
       }).catch(() => {});
     }
 
-    return updated;
+    return bid;
   }
 
-  /**
-   * Withdraw a bid (mark as withdrawn).
-   */
   async withdrawBid(id: string): Promise<Bid> {
+    return this.updateBidStatus(id, 'withdrawn');
+  }
+
+  // ---------------------------------------------------------------------------
+  // Internal
+  // ---------------------------------------------------------------------------
+
+  private async updateBidStatus(id: string, status: string): Promise<Bid> {
     const current = await this.getBid(id);
     if (!current) throw new Error(`Bid ${id} not found`);
 
-    const updated: Bid = { ...current, status: 'withdrawn', updated_at: new Date().toISOString() };
-
-    const gqlData = mapNeonToGql<GqlBidResponse>(updated, BID_FIELD_MAPPING.neonToGql);
-    this.pipelineWrite.pushEntity('Bid', gqlData as unknown as Record<string, unknown>).catch(err => {
-      console.error('Failed to withdraw bid in Pipeline:', err);
-    });
-
+    const updated: Bid = { ...current, status: status as Bid['status'], updated_at: new Date().toISOString() };
+    this.pushBid(updated);
     return updated;
   }
 
-  /**
-   * Get standard field list for Bid GQL queries.
-   * Includes nested bidResponses for compliance calculation.
-   */
-  private getBidFields(): string[] {
-    return [
-      'id',
-      'name',
-      'description',
-      'engagementId',
-      'providerId',
-      'coverLetter',
-      'price',
-      'status',
-      'timeline',
-      'executiveSummary',
-      'teamDescription',
-      'totalEstimatedHours',
-      'pricingBreakdown',
-      'wizardData',
-      'wizardStep',
-      'dateCreated',
-      'dateLastModified',
-    ];
+  private pushBid(bid: Bid): void {
+    const gqlData = mapNeonToGql<Record<string, unknown>>(bid, BID_FIELD_MAPPING.neonToGql);
+    this.pipelineWrite.pushEntity('Bid', gqlData).catch(err => {
+      console.error('[BidsService] Failed to push bid:', err);
+    });
   }
 
   /**
-   * Transform GQL bid response to BidSummaryRow.
-   * For now, compliance counts are 0 (would require nested bidResponses query).
+   * Flatten GQL link field { project: { id: "..." } } → project_id
+   * then map to Neon model.
    */
-  private transformGqlToBidSummary(gql: GqlBidResponse): BidSummaryRow {
-    const bid = mapGqlToNeon<Bid>(gql, BID_FIELD_MAPPING.gqlToNeon);
+  private flattenAndMap(gql: Record<string, unknown>): Bid {
+    const flat = { ...gql };
+    if (flat['project'] && typeof flat['project'] === 'object') {
+      flat['project'] = (flat['project'] as Record<string, unknown>)['id'];
+    }
+    return mapGqlToNeon<Bid>(flat as any, BID_FIELD_MAPPING.gqlToNeon);
+  }
+
+  private toBidSummary(bid: Bid): BidSummaryRow {
     return {
       ...bid,
-      rfp_title: null,               // Would come from nested engagement query
-      category: null,                // Would come from nested engagement query
-      budget_type: null,             // Would come from nested engagement query
-      budget_min: null,              // Would come from nested engagement query
-      budget_max: null,              // Would come from nested engagement query
-      total_responses: 0,            // Would require separate query
-      met_count: 0,                  // Would come from nested bidResponses
-      partial_count: 0,              // Would come from nested bidResponses
-      not_met_count: 0,              // Would come from nested bidResponses
-      na_count: 0,                   // Would come from nested bidResponses
-      planned_count: 0,              // Would come from nested bidResponses
+      rfp_title: null,
+      category: null,
+      budget_type: null,
+      budget_min: null,
+      budget_max: null,
+      total_responses: 0,
+      met_count: 0,
+      partial_count: 0,
+      not_met_count: 0,
+      na_count: 0,
+      planned_count: 0,
       sum_estimated_hours: bid.total_estimated_hours ?? 0,
-      sum_estimated_cost: 0,         // Would calculate from pricing_breakdown
-      provider_display_name: null,   // Would come from provider lookup
-      provider_headline: null,        // Would come from provider lookup
-      provider_rating: null,          // Would come from provider lookup
+      sum_estimated_cost: 0,
+      provider_display_name: null,
+      provider_headline: null,
+      provider_rating: null,
     };
   }
 }

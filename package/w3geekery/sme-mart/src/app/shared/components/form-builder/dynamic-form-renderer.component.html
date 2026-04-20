@@ -1,0 +1,71 @@
+<div
+  class="dynamic-form-renderer"
+  [class.mode-preview]="mode() === 'preview'"
+  [class.mode-review]="mode() === 'review'"
+>
+  @if (submitError()) {
+    <div class="error-banner">
+      <mat-icon>error</mat-icon>
+      <p>{{ submitError() }}</p>
+    </div>
+  }
+
+  <form [formGroup]="formGroup" (ngSubmit)="onSubmit()" class="form-container">
+    @if (config().sections && config().sections!.length > 0) {
+      @for (section of config().sections; track section.id) {
+        <fieldset class="form-section">
+          <legend>{{ section.label }}</legend>
+          @for (field of section.fields; track field.id) {
+            <app-form-field-renderer
+              [field]="field"
+              [mode]="mode()"
+              [formGroup]="formGroup"
+              [submission]="submission()"
+            ></app-form-field-renderer>
+          }
+        </fieldset>
+      }
+    }
+
+    @for (field of config().fields; track field.id) {
+      @if (!field.sectionId) {
+        <app-form-field-renderer
+          [field]="field"
+          [mode]="mode()"
+          [formGroup]="formGroup"
+          [submission]="submission()"
+        ></app-form-field-renderer>
+      }
+    }
+
+    @if (mode() === 'fill') {
+      <div class="form-actions">
+        <button
+          mat-raised-button
+          color="primary"
+          type="submit"
+          [disabled]="!formGroup.valid || isSubmitting()"
+        >
+          @if (!isSubmitting()) {
+            <ng-container>
+              <mat-icon>check</mat-icon>
+              Submit
+            </ng-container>
+          } @else {
+            <mat-spinner diameter="20"></mat-spinner>
+          }
+        </button>
+
+        <button
+          mat-stroked-button
+          type="button"
+          (click)="onSaveDraft()"
+          [disabled]="isSubmitting()"
+        >
+          <mat-icon>save</mat-icon>
+          Save Draft
+        </button>
+      </div>
+    }
+  </form>
+</div>

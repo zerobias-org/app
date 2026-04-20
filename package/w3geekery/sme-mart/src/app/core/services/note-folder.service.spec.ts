@@ -235,12 +235,12 @@ describe('NoteFolderService', () => {
 
     await service.deleteFolder(folderId);
 
-    // Verify Pipeline was called with archived: true
+    // Verify Pipeline was called with dateDeleted set
     expect(mockPipeline.pushEntity).toHaveBeenCalledWith(
       'NoteFolder',
       expect.objectContaining({
         id: folderId,
-        archived: true,
+        dateDeleted: expect.any(String),
       }),
     );
   });

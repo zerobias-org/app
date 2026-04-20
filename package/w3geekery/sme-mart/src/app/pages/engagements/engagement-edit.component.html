@@ -10,8 +10,9 @@
 
     <mat-card>
       <mat-card-content>
+        <!-- TODO(Plan 075 Phase 3): Update EngagementForm to accept SmeMartProject -->
         <app-engagement-form
-          [initialValues]="engagement()!"
+          [initialValues]="$any(engagement())"
           (valuesChange)="onValuesChange($event)">
         </app-engagement-form>
       </mat-card-content>

@@ -22,6 +22,7 @@ interface MockDocService {
 }
 
 interface MockOrgDocService {
+  listDocuments: MockFn;
   shareDocument: MockFn;
 }
 
@@ -43,6 +44,7 @@ describe('DocumentListComponent', () => {
     };
 
     mockOrgDocService = {
+      listDocuments: vi.fn().mockResolvedValue([makeEngagementDocument()]),
       shareDocument: vi.fn().mockResolvedValue({}),
     };
 
@@ -83,13 +85,13 @@ describe('DocumentListComponent', () => {
     it('should fetch documents for the engagement', async () => {
       await component.loadDocuments();
 
-      expect(mockDocService.listDocuments).toHaveBeenCalledWith('eng-001');
+      expect(mockOrgDocService.listDocuments).toHaveBeenCalledWith('eng-001');
       expect(component.documents()).toHaveLength(1);
       expect(component.loading()).toBe(false);
     });
 
     it('should set loading=false even on error', async () => {
-      mockDocService.listDocuments.mockRejectedValue(new Error('Network error'));
+      mockOrgDocService.listDocuments.mockRejectedValue(new Error('Network error'));
 
       await component.loadDocuments();
 
@@ -157,7 +159,7 @@ describe('DocumentListComponent', () => {
       component.onDocumentUploaded(makeEngagementDocument());
 
       // loadDocuments was called
-      expect(mockDocService.listDocuments).toHaveBeenCalled();
+      expect(mockOrgDocService.listDocuments).toHaveBeenCalled();
       expect(component.showUpload()).toBe(false);
     });
   });
@@ -169,7 +171,7 @@ describe('DocumentListComponent', () => {
 
       expect(mockDocService.archiveDocument).toHaveBeenCalledWith('doc-001');
       // Reloaded after archive
-      expect(mockDocService.listDocuments).toHaveBeenCalled();
+      expect(mockOrgDocService.listDocuments).toHaveBeenCalled();
     });
 
     it('should not crash on archive error', async () => {

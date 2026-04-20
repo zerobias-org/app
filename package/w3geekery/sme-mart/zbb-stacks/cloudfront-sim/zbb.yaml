@@ -1,0 +1,70 @@
+name: "cloudfront-sim"
+version: "1.0.0"
+
+description: "Unified-origin nginx reverse-proxy with location-block injection for SPA + login + API proxy to UAT backend"
+
+# Exports publish these to dependent stacks (sme-mart-spa, sme-mart-login)
+exports:
+  - CLOUDFRONT_SIM_URL
+  - CLOUDFRONT_SIM_PORT
+
+# Environment: three-layer model per zbb stacks-spec
+env:
+  # Port is FIXED (not zbb-allocated) to keep URL stable across sessions (D-10, D-11)
+  CLOUDFRONT_SIM_PORT:
+    type: port
+    value: "15002"
+    description: "Fixed port for nginx listen; matches D-10 constant"
+
+  CLOUDFRONT_SIM_URL:
+    type: string
+    value: "http://localhost:${CLOUDFRONT_SIM_PORT}"
+    description: "Unified origin URL for browser access"
+
+  # Import minio credentials from @zerobias-com/minio stack dependency
+  AWS_ENDPOINT:
+    type: string
+    imports: ["@zerobias-com/minio.AWS_ENDPOINT"]
+    description: "MinIO S3 endpoint URL, e.g., http://localhost:15000"
+
+  AWS_ACCESS_KEY_ID:
+    type: string
+    imports: ["@zerobias-com/minio.AWS_ACCESS_KEY_ID"]
+
+  AWS_SECRET_ACCESS_KEY:
+    type: string
+    imports: ["@zerobias-com/minio.AWS_SECRET_ACCESS_KEY"]
+
+  # Reverse-proxy target
+  UAT_ORIGIN:
+    type: string
+    value: "https://uat.zerobias.com"
+    description: "UAT backend target for /api/, /dana/, /app/session locations"
+
+# State: runtime status tracking
+state:
+  status:
+    type: enum
+    values: [starting, healthy, stopped, error]
+
+# Lifecycle: boot, health, teardown
+lifecycle:
+  start: |
+    docker compose -f compose.yml -p ${STACK_NAME} up -d
+
+  stop: |
+    docker compose -f compose.yml -p ${STACK_NAME} down
+
+  health:
+    command: "curl -sf http://localhost:${CLOUDFRONT_SIM_PORT}/ && curl -sf http://localhost:${CLOUDFRONT_SIM_PORT}/api/health 2>/dev/null || echo 'API endpoint not yet up (expected)'"
+    interval: 2
+    timeout: 30
+    retries: 10
+
+# Logs
+logs:
+  source: docker
+  container: "${STACK_NAME}-nginx"
+
+dependencies:
+  - "@zerobias-com/minio"

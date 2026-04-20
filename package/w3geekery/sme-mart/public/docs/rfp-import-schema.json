@@ -1,0 +1,157 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "sme-mart-rfp-import-v1.0",
+  "title": "SME Mart RFP Import",
+  "description": "Schema for importing RFP requirements into the SME Mart wizard. Produce this JSON from an RFP document using an LLM, then paste it into the wizard's Import dialog.",
+  "type": "object",
+  "required": ["schemaVersion", "taskGroups"],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0",
+      "description": "Must be '1.0'"
+    },
+    "source": {
+      "type": "object",
+      "description": "Metadata about the source document (optional, for traceability)",
+      "properties": {
+        "filename": { "type": "string", "description": "Original filename of the RFP document" },
+        "documentType": { "type": "string", "description": "Type of document (e.g., 'RFP', 'RFQ', 'SOW')" },
+        "organization": { "type": "string", "description": "Issuing organization name" },
+        "dateExtracted": { "type": "string", "format": "date", "description": "ISO date when extraction was performed" },
+        "parserTier": {
+          "type": "string",
+          "enum": ["llm-prompt", "in-app", "mcp-task"],
+          "description": "Which tier produced this import"
+        }
+      }
+    },
+    "basics": {
+      "type": "object",
+      "description": "Pre-fills wizard Step 1 (Basics). All fields optional — user can edit in wizard.",
+      "properties": {
+        "title": { "type": "string", "description": "Short RFP title (max ~120 chars)" },
+        "description": { "type": "string", "description": "Summary paragraph describing the engagement scope" },
+        "category": { "type": "string", "description": "Domain category (e.g., 'Cybersecurity', 'Compliance', 'IT Audit')" },
+        "budgetType": {
+          "type": "string",
+          "enum": ["fixed", "hourly", "negotiable"],
+          "description": "Pricing model"
+        },
+        "budgetMin": { "type": "number", "minimum": 0, "description": "Minimum budget in USD" },
+        "budgetMax": { "type": "number", "minimum": 0, "description": "Maximum budget in USD" },
+        "timeline": { "type": "string", "description": "Expected timeline (e.g., '90 days', 'Q3 2026')" }
+      }
+    },
+    "taskGroups": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Grouped requirements. Each group becomes a parent Task; each requirement becomes a subtask.",
+      "items": {
+        "type": "object",
+        "required": ["taskType", "displayName", "requirements"],
+        "properties": {
+          "taskType": {
+            "type": "string",
+            "enum": ["SECURITY", "COMPLIANCE", "LEGAL", "FUNCTIONAL", "FINANCIAL", "SOW"],
+            "description": "Category tag for the task group"
+          },
+          "displayName": {
+            "type": "string",
+            "description": "Human-readable group name (e.g., 'Security Requirements', 'Statement of Work')"
+          },
+          "requirements": {
+            "type": "array",
+            "minItems": 1,
+            "description": "Individual requirements within this group",
+            "items": {
+              "type": "object",
+              "required": ["title"],
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "description": "Concise requirement title (max ~200 chars)"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Detailed description of the requirement. Markdown is supported."
+                },
+                "standardReference": {
+                  "type": "string",
+                  "description": "Regulatory/standard reference (e.g., 'NIST SP800-53 AC-2', 'SOC 2 CC6.1', 'HIPAA §164.312(a)')"
+                },
+                "evidenceType": {
+                  "type": "string",
+                  "enum": ["document", "certification", "attestation", "demo", "na"],
+                  "description": "What type of evidence satisfies this requirement",
+                  "default": "document"
+                },
+                "priority": {
+                  "type": "string",
+                  "enum": ["critical", "high", "normal", "low"],
+                  "description": "Requirement priority",
+                  "default": "normal"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "schemaVersion": "1.0",
+      "source": {
+        "filename": "CDPH-RFP-2026-001.pdf",
+        "documentType": "RFP",
+        "organization": "California Department of Public Health",
+        "dateExtracted": "2026-03-10",
+        "parserTier": "llm-prompt"
+      },
+      "basics": {
+        "title": "CDPH Cybersecurity Assessment Services",
+        "description": "Comprehensive security assessment of CDPH healthcare IT systems including vulnerability scanning, penetration testing, and compliance gap analysis.",
+        "category": "Cybersecurity",
+        "budgetType": "fixed",
+        "budgetMin": 150000,
+        "budgetMax": 300000,
+        "timeline": "180 days"
+      },
+      "taskGroups": [
+        {
+          "taskType": "SECURITY",
+          "displayName": "Security Requirements",
+          "requirements": [
+            {
+              "title": "Vulnerability Assessment of External-Facing Systems",
+              "description": "Conduct comprehensive vulnerability scanning of all internet-facing systems including web applications, APIs, and network infrastructure.",
+              "standardReference": "NIST SP800-53 RA-5",
+              "evidenceType": "document",
+              "priority": "critical"
+            },
+            {
+              "title": "Penetration Testing",
+              "description": "Perform authorized penetration testing of production and staging environments with documented findings and remediation guidance.",
+              "standardReference": "NIST SP800-115",
+              "evidenceType": "document",
+              "priority": "high"
+            }
+          ]
+        },
+        {
+          "taskType": "COMPLIANCE",
+          "displayName": "Compliance Requirements",
+          "requirements": [
+            {
+              "title": "HIPAA Security Rule Gap Analysis",
+              "description": "Assess compliance with HIPAA Security Rule administrative, physical, and technical safeguards.",
+              "standardReference": "HIPAA §164.312",
+              "evidenceType": "attestation",
+              "priority": "critical"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

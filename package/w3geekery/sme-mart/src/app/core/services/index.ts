@@ -33,6 +33,7 @@ export { DocumentService } from './document.service';
 export { SmeDocLinkService } from './sme-doc-link.service';
 
 // Project Bloom services (Phase 6)
+export { ProjectContextService } from './project-context.service';
 export { SmeMartProjectService } from './sme-mart-project.service';
 export { SmeMartBoardService } from './sme-mart-board.service';
 export { SmeMartActivityService } from './sme-mart-activity.service';
@@ -40,3 +41,8 @@ export { SmeMartWorkflowService } from './sme-mart-workflow.service';
 export { SmeMartTaskService } from './sme-mart-task.service';
 export { ProjectPrdService } from './project-prd.service';
 export { ProjectPlanService } from './project-plan.service';
+
+// Document Templates (Phase 15)
+export { DocumentTemplateService } from './document-template.service';
+export { DocumentInstanceService } from './document-instance.service';
+export { VariableSubstitutionService } from './variable-substitution.service';

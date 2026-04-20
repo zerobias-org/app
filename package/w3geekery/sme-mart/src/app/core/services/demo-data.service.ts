@@ -1,20 +1,21 @@
 /**
- * Demo Data Service — Pipeline-Based Seeding for All 8 Migrated Entities
+ * Demo Data Service — Pipeline-Based Seeding
  *
- * Migrated from Neon SQL inserts to AuditgraphDB Pipeline writes in Phase 5.
- * Seeds all 8 migrated entity types via PipelineWriteService.
+ * Seeds demo data via PipelineWriteService for all entity types:
+ * - Engagements (corp-to-corp agreements)
+ * - SmeMartProjects (scoped work under engagements)
+ * - Bids, BidResponses, Notes, NoteFolders, Documents, ServiceOfferings, Reviews
  *
- * This aligns demo data seeding with production data flow and ensures consistency
- * across environments (dev, staging, prod).
- *
- * Neon tables for migrated entities will be archived 2 weeks after Phase 5 completion
- * (observation period: 2026-03-19 to 2026-04-02).
+ * Data model updated 2026-03-24: Engagements are now corp-to-corp agreements.
+ * Former "engagements" (crystal-harbor, etc.) are now SmeMartProjects.
+ * Pinnacle Corp has 2 projects to demonstrate 1:many.
  */
 
 import { Injectable, inject } from '@angular/core';
 import { PipelineWriteService } from './pipeline-write.service';
 import {
   DEMO_ENGAGEMENTS,
+  DEMO_PROJECTS,
   DEMO_BIDS,
   DEMO_BID_RESPONSES,
   DEMO_NOTES,
@@ -29,232 +30,243 @@ import {
   seedDemoDocuments,
   seedDemoServiceOfferings,
   seedDemoReviews,
+  seedDemoProjects,
 } from '../../test-helpers/demo-data-seeder';
 
-/**
- * DemoDataService — Centralized demo data seeding via Pipeline.
- *
- * Provides methods to seed all 8 migrated entity types. Each seeder method:
- * - Calls PipelineWriteService.pushEntities() with demo data
- * - Logs success/failure (continues on error, doesn't throw)
- * - Supports filtering by related entity IDs for fine-grained seeding
- *
- * Typical usage:
- * ```typescript
- * const demoService = inject(DemoDataService);
- * await demoService.seedAllDemoData();  // Seeds all 8 entities
- * ```
- */
 @Injectable({ providedIn: 'root' })
 export class DemoDataService {
   private readonly pipelineWrite = inject(PipelineWriteService);
 
   /**
-   * Master seeding function: Seeds all 8 migrated entity types in sequence.
+   * Master seeding function: Seeds all entity types in dependency order.
    *
    * Flow:
-   * 1. Engagements (root entity)
-   * 2. Bids (linked to engagements)
-   * 3. BidResponses (linked to bids)
-   * 4. ServiceOfferings (provider catalog)
-   * 5. Notes (linked to engagements)
-   * 6. NoteFolders (linked to engagements)
-   * 7. Documents (linked to engagements)
-   * 8. Reviews (linked to engagements)
-   *
-   * Each step awaits completion before proceeding. If a step fails, logs the error
-   * and continues to the next step.
+   * 1. Engagements (corp-to-corp agreements — root entity)
+   * 2. SmeMartProjects (scoped work under engagements)
+   * 3. Bids (linked to projects via engagementId field)
+   * 4. BidResponses (linked to bids)
+   * 5. ServiceOfferings (provider catalog, no dependencies)
+   * 6. Notes (linked to projects via engagementId field)
+   * 7. NoteFolders (linked to projects via engagementId field)
+   * 8. Documents (linked to projects via engagementId field)
+   * 9. Reviews (linked to projects via engagementId field)
    */
   async seedAllDemoData(): Promise<void> {
-    console.info('⚡ Starting demo data seeding (Phase 5 migration: Neon → Pipeline)');
+    console.info('⚡ Starting demo data seeding');
 
-    // Step 1: Engagements (root entities — must seed first)
+    // Step 1: Engagements (corp-to-corp agreements)
     await this.seedDemoEngagements();
 
-    // Extract engagement IDs for downstream seeders
-    const engagementIds = DEMO_ENGAGEMENTS.map(e => e.id);
-    const bidIds = seedDemoBids(engagementIds).map(b => b.id);
+    // Step 2: Projects (scoped work under engagements)
+    await this.seedDemoProjects();
 
-    // Step 2: Bids (linked to engagements)
-    await this.seedDemoBids(engagementIds);
+    // Extract project IDs for downstream seeders
+    // (downstream entities reference project IDs via the engagementId field)
+    const projectIds = DEMO_PROJECTS.map(p => p.id);
+    const bidIds = seedDemoBids(projectIds).map(b => b.id);
 
-    // Step 3: BidResponses (linked to bids)
+    // Step 3: Bids (linked to projects)
+    await this.seedDemoBids(projectIds);
+
+    // Step 4: BidResponses (linked to bids)
     await this.seedDemoBidResponses(bidIds);
 
-    // Step 4: ServiceOfferings (no dependencies, provider catalog)
+    // Step 5: ServiceOfferings (no dependencies)
     await this.seedDemoServiceOfferings();
 
-    // Step 5: Notes (linked to engagements)
-    await this.seedDemoNotes(engagementIds);
+    // Step 6: Notes (linked to projects)
+    await this.seedDemoNotes(projectIds);
 
-    // Step 6: NoteFolders (linked to engagements)
-    await this.seedDemoNoteFolders(engagementIds);
+    // Step 7: NoteFolders (linked to projects)
+    await this.seedDemoNoteFolders(projectIds);
 
-    // Step 7: Documents (linked to engagements)
-    await this.seedDemoDocuments(engagementIds);
+    // Step 8: Documents (linked to projects)
+    await this.seedDemoDocuments(projectIds);
 
-    // Step 8: Reviews (linked to engagements)
+    // Step 9: Reviews (linked to projects)
     await this.seedDemoReviews();
 
-    console.info('✓ Demo data seeding complete. All 8 entity types pushed to Pipeline.');
+    console.info('✓ Demo data seeding complete.');
   }
 
   /**
-   * Seed demo engagements.
-   *
-   * Phase 5 Migration Note:
-   * Demo data now seeded via Pipeline instead of Neon SQL.
-   * This aligns demo seeding with production data flow.
-   * Neon tables for migrated entities will be archived 2 weeks after Phase 5 completion.
+   * Remove old demo data that used the pre-2026-03-24 model
+   * (engagements that were actually projects: eng-001-crystal-harbor, etc.)
    */
+  async removeOldDemoData(): Promise<void> {
+    console.info('🧹 Removing old demo data (pre-Engagement/Project split)...');
+
+    const oldEngagementIds = [
+      'eng-001-crystal-harbor',
+      'eng-002-velvet-summit',
+      'eng-003-amber-circuit',
+      'eng-004-silver-bridge',
+      'eng-005-coral-meadow',
+    ];
+
+    // Old entities referenced old engagement IDs — these are now stale
+    const oldBidIds = [
+      'bid-001-gina-crystal',
+      'bid-002-marcus-crystal',
+      'bid-003-james-velvet',
+      'bid-004-bob-amber',
+      'bid-005-carlos-amber',
+      'bid-006-alex-silver',
+      'bid-007-gina-coral',
+    ];
+
+    const oldBidResponseIds = [
+      'bidr-001-gina-crystal-req1',
+      'bidr-002-gina-crystal-req2',
+      'bidr-003-james-velvet-req1',
+    ];
+
+    const oldNoteIds = [
+      'note-001-crystal-kickoff',
+      'note-002-crystal-progress',
+      'note-003-velvet-strategy',
+      'note-004-silver-agenda',
+      'note-005-coral-findings',
+    ];
+
+    const oldNoteFolderIds = [
+      'folder-001-crystal',
+      'folder-001-crystal-general',
+      'folder-002-velvet',
+      'folder-002-velvet-general',
+      'folder-005-coral',
+      'folder-005-coral-general',
+    ];
+
+    const oldDocIds = [
+      'doc-001-crystal-scope',
+      'doc-002-crystal-wip',
+      'doc-003-velvet-plan',
+    ];
+
+    const oldReviewIds = [
+      'review-001-gina-by-pinnacle',
+      'review-002-james-by-fintech',
+    ];
+
+    const deletions: [string, string[]][] = [
+      ['Review', oldReviewIds],
+      ['SmeMartDocument', oldDocIds],
+      ['NoteFolder', oldNoteFolderIds],
+      ['Note', oldNoteIds],
+      ['BidResponse', oldBidResponseIds],
+      ['Bid', oldBidIds],
+      ['Engagement', oldEngagementIds],
+    ];
+
+    for (const [className, ids] of deletions) {
+      try {
+        await this.pipelineWrite.deleteEntities(className as any, ids);
+        console.info(`✓ Deleted ${ids.length} old ${className} entities`);
+      } catch (err) {
+        console.error(`Failed to delete old ${className} entities:`, err);
+      }
+    }
+
+    console.info('🧹 Old demo data cleanup complete.');
+  }
+
   async seedDemoEngagements(): Promise<void> {
     try {
       const data = DEMO_ENGAGEMENTS || [];
-      if (data.length === 0) {
-        console.info('No demo engagements to seed');
-        return;
-      }
+      if (data.length === 0) return;
       await this.pipelineWrite.pushEntities('Engagement', data, []);
-      console.info(`✓ Seeded ${data.length} demo engagements via Pipeline`);
+      console.info(`✓ Seeded ${data.length} demo engagements (corp-to-corp agreements)`);
     } catch (err) {
       console.error('Failed to seed demo engagements:', err);
-      // Continue to next seeder; don't throw
     }
   }
 
-  /**
-   * Seed demo bids linked to specific engagements.
-   *
-   * @param engagementIds Optional list of engagement IDs to filter bids
-   */
-  async seedDemoBids(engagementIds?: string[]): Promise<void> {
+  async seedDemoProjects(): Promise<void> {
     try {
-      const data = seedDemoBids(engagementIds) || [];
-      if (data.length === 0) {
-        console.info('No demo bids to seed');
-        return;
-      }
+      const data = seedDemoProjects() || [];
+      if (data.length === 0) return;
+      await this.pipelineWrite.pushEntities('SmeMartProject', data, []);
+      console.info(`✓ Seeded ${data.length} demo projects (scoped work)`);
+    } catch (err) {
+      console.error('Failed to seed demo projects:', err);
+    }
+  }
+
+  async seedDemoBids(projectIds?: string[]): Promise<void> {
+    try {
+      const data = seedDemoBids(projectIds) || [];
+      if (data.length === 0) return;
       await this.pipelineWrite.pushEntities('Bid', data, []);
-      console.info(`✓ Seeded ${data.length} demo bids via Pipeline`);
+      console.info(`✓ Seeded ${data.length} demo bids`);
     } catch (err) {
       console.error('Failed to seed demo bids:', err);
-      // Continue to next seeder; don't throw
     }
   }
 
-  /**
-   * Seed demo bid responses linked to specific bids.
-   *
-   * @param bidIds Optional list of bid IDs to filter responses
-   */
   async seedDemoBidResponses(bidIds?: string[]): Promise<void> {
     try {
       const data = seedDemoBidResponses(bidIds) || [];
-      if (data.length === 0) {
-        console.info('No demo bid responses to seed');
-        return;
-      }
+      if (data.length === 0) return;
       await this.pipelineWrite.pushEntities('BidResponse', data, []);
-      console.info(`✓ Seeded ${data.length} demo bid responses via Pipeline`);
+      console.info(`✓ Seeded ${data.length} demo bid responses`);
     } catch (err) {
       console.error('Failed to seed demo bid responses:', err);
-      // Continue to next seeder; don't throw
     }
   }
 
-  /**
-   * Seed demo notes linked to specific engagements.
-   *
-   * @param engagementIds Optional list of engagement IDs to filter notes
-   */
-  async seedDemoNotes(engagementIds?: string[]): Promise<void> {
+  async seedDemoNotes(projectIds?: string[]): Promise<void> {
     try {
-      const data = seedDemoNotes(engagementIds) || [];
-      if (data.length === 0) {
-        console.info('No demo notes to seed');
-        return;
-      }
+      const data = seedDemoNotes(projectIds) || [];
+      if (data.length === 0) return;
       await this.pipelineWrite.pushEntities('Note', data, []);
-      console.info(`✓ Seeded ${data.length} demo notes via Pipeline`);
+      console.info(`✓ Seeded ${data.length} demo notes`);
     } catch (err) {
       console.error('Failed to seed demo notes:', err);
-      // Continue to next seeder; don't throw
     }
   }
 
-  /**
-   * Seed demo note folders linked to specific engagements.
-   *
-   * @param engagementIds Optional list of engagement IDs to filter folders
-   */
-  async seedDemoNoteFolders(engagementIds?: string[]): Promise<void> {
+  async seedDemoNoteFolders(projectIds?: string[]): Promise<void> {
     try {
-      const data = seedDemoNoteFolders(engagementIds) || [];
-      if (data.length === 0) {
-        console.info('No demo note folders to seed');
-        return;
-      }
+      const data = seedDemoNoteFolders(projectIds) || [];
+      if (data.length === 0) return;
       await this.pipelineWrite.pushEntities('NoteFolder', data, []);
-      console.info(`✓ Seeded ${data.length} demo note folders via Pipeline`);
+      console.info(`✓ Seeded ${data.length} demo note folders`);
     } catch (err) {
       console.error('Failed to seed demo note folders:', err);
-      // Continue to next seeder; don't throw
     }
   }
 
-  /**
-   * Seed demo documents linked to specific engagements.
-   *
-   * @param engagementIds Optional list of engagement IDs to filter documents
-   */
-  async seedDemoDocuments(engagementIds?: string[]): Promise<void> {
+  async seedDemoDocuments(projectIds?: string[]): Promise<void> {
     try {
-      const data = seedDemoDocuments(engagementIds) || [];
-      if (data.length === 0) {
-        console.info('No demo documents to seed');
-        return;
-      }
+      const data = seedDemoDocuments(projectIds) || [];
+      if (data.length === 0) return;
       await this.pipelineWrite.pushEntities('SmeMartDocument', data, []);
-      console.info(`✓ Seeded ${data.length} demo documents via Pipeline`);
+      console.info(`✓ Seeded ${data.length} demo documents`);
     } catch (err) {
       console.error('Failed to seed demo documents:', err);
-      // Continue to next seeder; don't throw
     }
   }
 
-  /**
-   * Seed demo service offerings.
-   */
   async seedDemoServiceOfferings(): Promise<void> {
     try {
       const data = seedDemoServiceOfferings() || [];
-      if (data.length === 0) {
-        console.info('No demo service offerings to seed');
-        return;
-      }
+      if (data.length === 0) return;
       await this.pipelineWrite.pushEntities('ServiceOffering', data, []);
-      console.info(`✓ Seeded ${data.length} demo service offerings via Pipeline`);
+      console.info(`✓ Seeded ${data.length} demo service offerings`);
     } catch (err) {
       console.error('Failed to seed demo service offerings:', err);
-      // Continue to next seeder; don't throw
     }
   }
 
-  /**
-   * Seed demo reviews.
-   */
   async seedDemoReviews(): Promise<void> {
     try {
       const data = seedDemoReviews() || [];
-      if (data.length === 0) {
-        console.info('No demo reviews to seed');
-        return;
-      }
+      if (data.length === 0) return;
       await this.pipelineWrite.pushEntities('Review', data, []);
-      console.info(`✓ Seeded ${data.length} demo reviews via Pipeline`);
+      console.info(`✓ Seeded ${data.length} demo reviews`);
     } catch (err) {
       console.error('Failed to seed demo reviews:', err);
-      // Continue to next seeder; don't throw
     }
   }
 }

@@ -346,11 +346,23 @@ export class NoteFolderTree implements OnInit {
       if (this._selectedFolderId() === node.folder.id) {
         this.selectFolder(null);
       }
-      this.loadTree();
+      // Optimistically remove from local tree (pipeline soft-delete is async,
+      // GQL won't reflect the deletion immediately)
+      this._fullTree.update(nodes => this.removeNodeById(nodes, node.folder.id));
       this.treeChanged.emit();
     } catch (err: any) {
       this.snackBar.open(`Failed to delete: ${err.message}`, 'Dismiss', { duration: 5000 });
     }
+  }
+
+  /** Recursively remove a node by ID from the tree (immutable). */
+  private removeNodeById(nodes: FolderTreeNode[], id: string): FolderTreeNode[] {
+    return nodes
+      .filter(n => n.folder.id !== id)
+      .map(n => ({
+        ...n,
+        children: this.removeNodeById(n.children, id),
+      }));
   }
 
   // ── localStorage persistence for expanded state ──

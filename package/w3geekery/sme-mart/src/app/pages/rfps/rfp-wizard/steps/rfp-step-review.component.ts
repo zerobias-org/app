@@ -1,6 +1,6 @@
 import {
   Component, Input, Output, EventEmitter, inject,
-  ChangeDetectionStrategy,
+  ChangeDetectionStrategy, computed,
 } from '@angular/core';
 import { TitleCasePipe, DecimalPipe } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
@@ -8,12 +8,14 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatChipsModule } from '@angular/material/chips';
 import { RfpWizardService } from '../../../../core/services/rfp-wizard.service';
+import { DynamicFormRendererComponent } from '../../../../shared/components/form-builder/dynamic-form-renderer.component';
 import type { RfpData, EngagementDocument } from '../../../../core/models';
+import type { FormBuilderConfig } from '../../../../core/models/form-builder.model';
 
 @Component({
   selector: 'app-rfp-step-review',
   standalone: true,
-  imports: [MatButtonModule, MatIconModule, MatDividerModule, MatChipsModule, TitleCasePipe, DecimalPipe],
+  imports: [MatButtonModule, MatIconModule, MatDividerModule, MatChipsModule, TitleCasePipe, DecimalPipe, DynamicFormRendererComponent],
   template: `
     <div class="step-content">
       <h3>Review & Publish</h3>
@@ -54,6 +56,20 @@ import type { RfpData, EngagementDocument } from '../../../../core/models';
         </section>
 
         <mat-divider />
+
+        <!-- Submission Form -->
+        @if (parsedFormConfig(); as formConfig) {
+          <section class="review-section">
+            <h4>Submission Form Preview</h4>
+            <p class="section-description">Vendors will see this form when submitting bids</p>
+            <app-dynamic-form-renderer
+              [config]="formConfig"
+              mode="preview"
+              [submission]="{ submissionData: {} }"
+            ></app-dynamic-form-renderer>
+          </section>
+          <mat-divider />
+        }
 
         <!-- Documents -->
         <section class="review-section">
@@ -157,6 +173,7 @@ import type { RfpData, EngagementDocument } from '../../../../core/models';
     .step-content { max-width: 720px; }
     .review-section { padding: 16px 0; }
     h4 { margin: 0 0 12px; font-weight: 500; }
+    .section-description { color: var(--mat-sys-on-surface-variant, #666); font-size: 13px; margin: 0 0 12px; }
     .review-field {
       display: flex;
       align-items: center;
@@ -221,6 +238,16 @@ export class RfpStepReview {
   @Input() documents: EngagementDocument[] = [];
   @Output() publish = new EventEmitter<void>();
   @Output() saveDraft = new EventEmitter<void>();
+
+  readonly parsedFormConfig = computed(() => {
+    if (!this.rfpData?.formConfig) return null;
+    try {
+      // formConfig is already a FormBuilderConfig object
+      return this.rfpData.formConfig as FormBuilderConfig;
+    } catch {
+      return null;
+    }
+  });
 
   get totalRequirements(): number {
     return this.rfpData?.taskGroups.reduce((sum, g) => sum + g.requirements.length, 0) ?? 0;

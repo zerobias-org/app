@@ -9,7 +9,7 @@ import { BidsService } from '../../../core/services/bids.service';
 import type { Bid } from '../../../core/models';
 
 export interface BidFormData {
-  requestId: string;
+  requestId: string; // Now refers to SmeMartProject ID (Plan 075)
   providerId: string;
 }
 
@@ -50,7 +50,7 @@ export class BidForm {
     try {
       const v = this.form.getRawValue();
       const bid = await this.bids.submitBid({
-        request_id: this.data.requestId,
+        project_id: this.data.requestId,
         provider_id: this.data.providerId,
         cover_letter: v.cover_letter || undefined,
         proposed_price: v.proposed_price || undefined,

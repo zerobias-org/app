@@ -75,3 +75,7 @@ export type {
   GqlProjectPlanResponse,
   GqlPlanMilestoneResponse,
 } from './project-plan.types';
+
+export type {
+  GqlVettingItemResponse,
+} from './vetting-item.types';

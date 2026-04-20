@@ -1,3 +1,7 @@
+> **⚠ STALENESS WARNING (2026-04-17):** This doc is from the POC-era when SME Mart was Next.js with 16 API routes. Current SME Mart is Angular 21 with Pipeline + GQL + Neon-direct (`dbMode: 'neon'`), and may not need a Hub Module at all.
+>
+> **Authoritative Hub Module documentation lives at `~/Projects/zb/zerobias/HubModules.md`** (meta-repo). See also `~/Projects/zb/hub/` for hub-server implementation. Treat this doc as "what we thought in early 2026" context, not as current design direction.
+
 # Why SME Mart Needs a Hub Module
 
 ## The Core Constraint

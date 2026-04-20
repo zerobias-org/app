@@ -25,11 +25,11 @@
     <mat-label>Status</mat-label>
     <mat-select [value]="statusFilter()" (selectionChange)="statusFilter.set($event.value)">
       <mat-option value="all">All Statuses</mat-option>
-      <mat-option value="open">Open</mat-option>
-      <mat-option value="in_progress">In Progress</mat-option>
+      <mat-option value="published">Published</mat-option>
+      <mat-option value="active">Active</mat-option>
       <mat-option value="draft">Draft</mat-option>
       <mat-option value="completed">Completed</mat-option>
-      <mat-option value="cancelled">Cancelled</mat-option>
+      <mat-option value="archived">Archived</mat-option>
     </mat-select>
   </mat-form-field>
 

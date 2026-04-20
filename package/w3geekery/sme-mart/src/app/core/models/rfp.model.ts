@@ -7,6 +7,7 @@
 
 import type { BudgetType } from './enums';
 import type { DocumentType } from './document.model';
+import type { FormBuilderConfig } from './form-builder.model';
 
 // ---------------------------------------------------------------------------
 // Evidence & evaluation types
@@ -68,6 +69,9 @@ export interface RfpData {
 
   // Step 2 — Documents (IDs only; full docs loaded separately)
   documentIds: string[];
+
+  // Step 2.5 — Submission Form (Plan 16)
+  formConfig?: FormBuilderConfig | null;
 
   // Step 3 — Requirements
   taskGroups: RfpTaskGroup[];

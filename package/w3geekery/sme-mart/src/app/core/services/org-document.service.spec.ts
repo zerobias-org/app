@@ -205,14 +205,14 @@ describe('OrgDocumentService', () => {
 
   describe('listDocuments', () => {
     it('should query GQL with engagementId and archived filters', async () => {
-      await service.listDocuments(TEST_ORG_ID);
+      await service.listDocuments(TEST_ORG_ID, { engagementId: TEST_ENG_ID });
 
       expect(mockGql.query).toHaveBeenCalledWith(
         'SmeMartDocument',
         expect.any(Array),
         expect.objectContaining({
           filters: {
-            engagementId: `.eq.${TEST_ORG_ID}`,
+            engagementId: `.eq.${TEST_ENG_ID}`,
             archived: '.eq.false',
           },
         }),

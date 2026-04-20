@@ -1,14 +1,15 @@
 import {
-  Component, Input, Output, EventEmitter,
+  Component, input, output,
   ChangeDetectionStrategy, NgZone, ViewChild, ElementRef,
   AfterViewInit, OnDestroy, inject, signal,
-  ViewEncapsulation,
+  ViewEncapsulation, computed,
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { CommonModule } from '@angular/common';
 import { Crepe, CrepeFeature } from '@milkdown/crepe';
 import { listener, listenerCtx } from '@milkdown/kit/plugin/listener';
 import { editorViewCtx, serializerCtx, schemaCtx } from '@milkdown/kit/core';
@@ -20,12 +21,13 @@ import {
 import { toggleStrikethroughCommand } from '@milkdown/kit/preset/gfm';
 import { callCommand } from '@milkdown/kit/utils';
 import { LanguageDescription } from '@codemirror/language';
+import { VariableSubstitutionService } from '@/core/services';
 
 @Component({
   selector: 'app-markdown-editor',
   standalone: true,
   imports: [
-    MatButtonModule, MatIconModule, MatMenuModule,
+    CommonModule, MatButtonModule, MatIconModule, MatMenuModule,
     MatTooltipModule, MatProgressSpinnerModule,
   ],
   templateUrl: './markdown-editor.component.html',
@@ -35,16 +37,23 @@ import { LanguageDescription } from '@codemirror/language';
 })
 export class MarkdownEditor implements AfterViewInit, OnDestroy {
   private readonly ngZone = inject(NgZone);
+  private readonly variableSubstitution: VariableSubstitutionService = inject(VariableSubstitutionService);
 
   @ViewChild('editorRef') editorRef!: ElementRef;
 
-  @Input() content: string = '';
-  @Input() height: string = '200px';
-  @Input() placeholder: string = '';
+  readonly content = input('');
+  readonly height = input('200px');
+  readonly placeholder = input('');
+  readonly variableNames = input<string[]>([]);
 
-  @Output() contentChange = new EventEmitter<string>();
+  readonly contentChange = output<string>();
 
   readonly loading = signal(true);
+  readonly previewMode = signal(false);
+  readonly previewContent = signal('');
+  readonly filteredVariables = signal<string[]>([]);
+  readonly showVariableMenu = signal(false);
+
   private crepe: Crepe | null = null;
 
   private readonly features: Partial<Record<CrepeFeature, boolean>> = {
@@ -55,7 +64,7 @@ export class MarkdownEditor implements AfterViewInit, OnDestroy {
     [CrepeFeature.ImageBlock]: false,
     [CrepeFeature.BlockEdit]: false,
     [CrepeFeature.Toolbar]: false,
-    [CrepeFeature.Placeholder]: !!this.placeholder,
+    [CrepeFeature.Placeholder]: !!this.placeholder(),
     [CrepeFeature.Table]: true,
     [CrepeFeature.Latex]: false,
   };
@@ -78,9 +87,14 @@ export class MarkdownEditor implements AfterViewInit, OnDestroy {
   };
 
   async ngAfterViewInit(): Promise<void> {
+    // Guard against missing editorRef (e.g., in tests with stubbed component)
+    if (!this.editorRef) {
+      return;
+    }
+
     this.ngZone.runOutsideAngular(async () => {
       // Workaround: milkdown crepe won't render if value is empty string
-      const defaultValue = this.content || '\u200B';
+      const defaultValue = this.content() || '\u200B';
 
       this.crepe = new Crepe({
         root: this.editorRef.nativeElement,
@@ -108,6 +122,41 @@ export class MarkdownEditor implements AfterViewInit, OnDestroy {
 
   async ngOnDestroy(): Promise<void> {
     await this.crepe?.destroy();
+  }
+
+  // ---- Preview & Variables ----
+
+  togglePreview(): void {
+    if (this.previewMode()) {
+      this.previewMode.set(false);
+    } else {
+      const markdown = this.getMarkdown();
+      const previewVars = this.variableSubstitution.generatePreviewVariables([]);
+      const result = this.variableSubstitution.substitute(markdown, previewVars, []);
+      this.previewContent.set(result.content);
+      this.previewMode.set(true);
+    }
+  }
+
+  insertVariable(varName: string): void {
+    this.insertTextAtCursor(`{{${varName}}}`);
+    this.showVariableMenu.set(false);
+  }
+
+  openVariableMenu(): void {
+    this.filteredVariables.set(this.variableNames());
+    this.showVariableMenu.set(true);
+  }
+
+  filterVariables(filterText: string): void {
+    if (!filterText.trim()) {
+      this.filteredVariables.set(this.variableNames());
+      return;
+    }
+    const lower = filterText.toLowerCase();
+    this.filteredVariables.set(
+      this.variableNames().filter(v => v.toLowerCase().includes(lower))
+    );
   }
 
   // ---- Toolbar actions ----
@@ -213,7 +262,7 @@ export class MarkdownEditor implements AfterViewInit, OnDestroy {
   // ---- Public methods ----
 
   getMarkdown(): string {
-    if (!this.crepe) return this.content || '';
+    if (!this.crepe) return this.content() || '';
     try {
       let markdown = '';
       this.crepe.editor.action((ctx) => {
@@ -223,7 +272,7 @@ export class MarkdownEditor implements AfterViewInit, OnDestroy {
       });
       return markdown === '\u200B' ? '' : markdown.replace(/^\u200B/, '');
     } catch {
-      return this.content || '';
+      return this.content() || '';
     }
   }
 

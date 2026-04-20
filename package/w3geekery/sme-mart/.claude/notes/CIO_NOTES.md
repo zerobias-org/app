@@ -44,3 +44,29 @@ Context: Clark checking in about upcoming Project entity, Brian's directive to d
 3. **Org = vendor** — vendor identity is an Org in the platform. Vendors authenticate as Org members, not as a special "vendor" role.
 
 4. **Principal-based ownership** — don't hardcode "vendor owns project". The owner is a principal (could be org, could be user). Keep the model flexible.
+
+## 2026-03-27 — GQL Entities vs Resources (Messaging)
+
+Context: Clark asking about SmeMartMessage GQL entity for messaging center (Plan 065). Multi-level: Org, Engagement, Project, Task.
+
+### Kevin's Key Points
+
+**GQL entities are NOT resources:**
+- GQL entities are available to queries but not to platform UI (Tasks, Board, etc.)
+- They work fine for SME Mart's custom screens
+- "The stuff that hits my radar is when we make things resources — that is what makes something part of the platform"
+
+**Custom/extensible resources:**
+- Kevin suggested a **custom/extensible resource** type would work better
+- This would make messages "part of the platform" — visible in Tasks, searchable, linkable
+- Not available yet — future platform feature
+
+**Attachments:**
+- Message attachments would be scoped at the same level as the dialog (Org, Engagement, Project, Task)
+- Similar to Task Comments with attachments
+
+### Decision
+
+- **For now:** Build SmeMartMessage as GQL entity. Works for custom screens, fastest path.
+- **Future:** When Kevin ships extensible resources, migrate messages to that. The GQL entity structure (content, visibility, threading) maps cleanly to a resource model.
+- **Action:** Clark to write up a feature request for custom/extensible resource type.

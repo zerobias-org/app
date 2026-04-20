@@ -6,7 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { BidsService } from '../../core/services/bids.service';
 import { BidResponseService } from '../../core/services/bid-response.service';
-import { EngagementsService } from '../../core/services/engagements.service';
+import { SmeMartProjectService } from '../../core/services/sme-mart-project.service';
 import { EngagementLifecycleService } from '../../core/services/engagement-lifecycle.service';
 import {
   BidComparison, type ComparisonBid, type CategoryCompliance,
@@ -86,7 +86,7 @@ export class BidComparisonPage implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly bids = inject(BidsService);
   private readonly bidResponses = inject(BidResponseService);
-  private readonly engagements = inject(EngagementsService);
+  private readonly projects = inject(SmeMartProjectService);
   private readonly lifecycle = inject(EngagementLifecycleService);
 
   readonly loading = signal(true);
@@ -144,18 +144,17 @@ export class BidComparisonPage implements OnInit {
     this.rfpId = this.route.snapshot.paramMap.get('id') || '';
 
     try {
-      // Load RFP
-      const rfp = await this.engagements.getEngagement(this.rfpId);
-      if (!rfp) {
+      // Load RFP (SmeMartProject)
+      const project = await this.projects.getProject(this.rfpId);
+      if (!project) {
         this.snackBar.open('RFP not found', 'Dismiss', { duration: 3000 });
         this.router.navigate(['/rfps']);
         return;
       }
-      this.rfpTitle.set(rfp.title || '');
+      this.rfpTitle.set(project.name || '');
 
-      // Load requirements from wizard data
-      const rawWr = await this.engagements.getEngagementRaw(this.rfpId);
-      const rfpData = (rawWr as any)?.rfp_wizard_data as RfpData | undefined;
+      // Load requirements from wizardData field
+      const rfpData = project.wizardData as RfpData | undefined;
       if (rfpData?.taskGroups) {
         this.taskGroups.set(rfpData.taskGroups);
       }
@@ -226,7 +225,7 @@ export class BidComparisonPage implements OnInit {
       // Accept the selected bid → creates engagement
       const acceptResult = await this.lifecycle.acceptBid(bidId, this.rfpId);
       this.snackBar.open('Bid accepted — engagement created', 'OK', { duration: 4000 });
-      this.router.navigate(['/engagements', this.rfpId, 'overview']);
+      this.router.navigate(['/engagements', acceptResult.workRequest.id, 'overview']);
     } catch (err: any) {
       this.snackBar.open(`Failed: ${err.message}`, 'Dismiss', { duration: 5000 });
     }

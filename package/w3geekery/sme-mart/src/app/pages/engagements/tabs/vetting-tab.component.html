@@ -1,0 +1,252 @@
+<div class="vetting-tab">
+  @if (loading()) {
+    <p class="loading-message">Loading vetting checklist...</p>
+  } @else {
+
+    <!-- Vetting gate banner -->
+    @switch (gateStatus()) {
+      @case ('verified') {
+        <div class="gate-banner gate-verified">
+          <mat-icon>verified</mat-icon>
+          <div class="gate-text">
+            <strong>Vetting Complete</strong>
+            <span>All required items have been verified. Project work can begin.</span>
+          </div>
+        </div>
+      }
+      @case ('blocked') {
+        <div class="gate-banner gate-blocked">
+          <mat-icon>block</mat-icon>
+          <div class="gate-text">
+            <strong>Vetting Blocked</strong>
+            <span>{{ rejectedOrExpiredCount() }} item(s) rejected or expired — resolve before proceeding.</span>
+          </div>
+        </div>
+      }
+      @case ('in_progress') {
+        <div class="gate-banner gate-progress">
+          <mat-icon>hourglass_top</mat-icon>
+          <div class="gate-text">
+            <strong>Vetting In Progress</strong>
+            <span>{{ requiredRemaining() }} required item(s) remaining.</span>
+          </div>
+        </div>
+      }
+      @default {
+        <!-- not_started — no banner needed, the empty checklist speaks for itself -->
+      }
+    }
+
+    <!-- Expired attachments checklist (D-09) — auto-generated for expired profile items -->
+    @if (expiredAttachments().length > 0) {
+      <div class="expired-attachments-alert">
+        <div class="alert-header">
+          <mat-icon>warning</mat-icon>
+          <span class="title">Items Needing Renewal</span>
+        </div>
+        <div class="alert-body">
+          @for (item of expiredAttachments(); track item.itemId) {
+            <div class="alert-item">
+              <span class="item-label">⚠ {{ item.name }} is expired</span>
+              <button
+                mat-stroked-button
+                routerLink="/org"
+                fragment="profile"
+                class="action-button"
+              >
+                Update in Corporate Profile
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Requirements FOR Provider (buyer's requirements) -->
+    <section class="vetting-section">
+      <div class="section-header">
+        <h3>Requirements for Provider</h3>
+        <span class="progress-label">{{ buyerProgress().done }}/{{ buyerProgress().total }} verified</span>
+        <button mat-icon-button (click)="openAddDialog('buyer_requires')" matTooltip="Add requirement">
+          <mat-icon>add</mat-icon>
+        </button>
+      </div>
+
+      @if (buyerProgress().total > 0) {
+        <mat-progress-bar
+          mode="determinate"
+          [value]="buyerProgress().percent"
+          class="progress-bar">
+        </mat-progress-bar>
+      }
+
+      <mat-accordion multi>
+        @for (item of buyerRequires(); track item.id) {
+          <mat-expansion-panel class="vetting-item" [class.resolved]="isResolved(item.status)">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <mat-icon class="status-icon" [class]="'status-' + item.status">
+                  {{ statusIcon(item.status) }}
+                </mat-icon>
+                <span class="item-name">{{ item.name }}</span>
+              </mat-panel-title>
+              <mat-panel-description>
+                <zb-resource-status [label]="normalizeStatus(item.status)" [pill]="true" [showDot]="false" size="small" />
+                @if (item.verified_at) {
+                  <span class="meta-date">{{ item.verified_at | date:'mediumDate' }}</span>
+                }
+                @if (item.expires_at) {
+                  <span class="meta-date expires">Exp: {{ item.expires_at | date:'mediumDate' }}</span>
+                }
+              </mat-panel-description>
+            </mat-expansion-panel-header>
+
+            <div class="item-details">
+              @if (item.description) {
+                <p class="description">{{ item.description }}</p>
+              }
+
+              <div class="detail-row">
+                <span class="detail-label">Evidence type:</span>
+                <span class="detail-value">{{ item.evidence_type | titlecase }}</span>
+              </div>
+
+              <div class="detail-row">
+                <span class="detail-label">Category:</span>
+                <span class="detail-value">{{ formatStatus(item.category) | titlecase }}</span>
+              </div>
+
+              @if (item.verified_by) {
+                <div class="detail-row">
+                  <span class="detail-label">Verified by:</span>
+                  <span class="detail-value">{{ item.verified_by }}</span>
+                </div>
+              }
+
+              @if (item.rejection_reason) {
+                <div class="detail-row rejection">
+                  <span class="detail-label">Rejection reason:</span>
+                  <span class="detail-value">{{ item.rejection_reason }}</span>
+                </div>
+              }
+
+              @if (item.waived_reason) {
+                <div class="detail-row">
+                  <span class="detail-label">Waiver reason:</span>
+                  <span class="detail-value">{{ item.waived_reason }}</span>
+                </div>
+              }
+
+              @if (item.notes) {
+                <div class="detail-row">
+                  <span class="detail-label">Notes:</span>
+                  <span class="detail-value">{{ item.notes }}</span>
+                </div>
+              }
+
+              @if (item.document_ids.length > 0) {
+                <div class="detail-row">
+                  <span class="detail-label">Documents:</span>
+                  <span class="detail-value">{{ item.document_ids.length }} attached</span>
+                </div>
+              }
+
+              <!-- Suggestion panel for profile item linking (D-04) -->
+              <app-vetting-suggestion-panel
+                [vettingItem]="item"
+                [onAttach]="getAttachCallback(item.id)"
+                [onDetach]="getDetachCallback(item.id)"
+              />
+
+              <div class="item-actions">
+                @if (getNextStatuses(item).length > 0) {
+                  <button mat-stroked-button [matMenuTriggerFor]="statusMenu">
+                    <mat-icon>swap_horiz</mat-icon> Change Status
+                  </button>
+                  <mat-menu #statusMenu="matMenu">
+                    @for (s of getNextStatuses(item); track s) {
+                      <button mat-menu-item (click)="onStatusChange(item, s)">
+                        {{ formatStatus(s) | titlecase }}
+                      </button>
+                    }
+                  </mat-menu>
+                }
+
+                <button mat-icon-button color="warn" (click)="onDelete(item)" matTooltip="Remove item">
+                  <mat-icon>delete_outline</mat-icon>
+                </button>
+              </div>
+            </div>
+          </mat-expansion-panel>
+        } @empty {
+          <p class="empty-state">No requirements added yet.</p>
+        }
+      </mat-accordion>
+    </section>
+
+    <!-- Requirements FROM Provider (provider's requirements of buyer) -->
+    <section class="vetting-section">
+      <div class="section-header">
+        <h3>Requirements from Provider</h3>
+        <span class="progress-label">{{ providerProgress().done }}/{{ providerProgress().total }}</span>
+        <button mat-icon-button (click)="openAddDialog('provider_requires')" matTooltip="Add requirement">
+          <mat-icon>add</mat-icon>
+        </button>
+      </div>
+
+      @if (providerProgress().total > 0) {
+        <mat-progress-bar
+          mode="determinate"
+          [value]="providerProgress().percent"
+          class="progress-bar">
+        </mat-progress-bar>
+      }
+
+      <mat-accordion multi>
+        @for (item of providerRequires(); track item.id) {
+          <mat-expansion-panel class="vetting-item" [class.resolved]="isResolved(item.status)">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <mat-icon class="status-icon" [class]="'status-' + item.status">
+                  {{ statusIcon(item.status) }}
+                </mat-icon>
+                <span class="item-name">{{ item.name }}</span>
+              </mat-panel-title>
+              <mat-panel-description>
+                <zb-resource-status [label]="normalizeStatus(item.status)" [pill]="true" [showDot]="false" size="small" />
+              </mat-panel-description>
+            </mat-expansion-panel-header>
+
+            <div class="item-details">
+              @if (item.description) {
+                <p class="description">{{ item.description }}</p>
+              }
+
+              <div class="item-actions">
+                @if (getNextStatuses(item).length > 0) {
+                  <button mat-stroked-button [matMenuTriggerFor]="provStatusMenu">
+                    <mat-icon>swap_horiz</mat-icon> Change Status
+                  </button>
+                  <mat-menu #provStatusMenu="matMenu">
+                    @for (s of getNextStatuses(item); track s) {
+                      <button mat-menu-item (click)="onStatusChange(item, s)">
+                        {{ formatStatus(s) | titlecase }}
+                      </button>
+                    }
+                  </mat-menu>
+                }
+
+                <button mat-icon-button color="warn" (click)="onDelete(item)" matTooltip="Remove item">
+                  <mat-icon>delete_outline</mat-icon>
+                </button>
+              </div>
+            </div>
+          </mat-expansion-panel>
+        } @empty {
+          <p class="empty-state">No requirements added. Providers can request documentation from buyers here.</p>
+        }
+      </mat-accordion>
+    </section>
+
+  }
+</div>

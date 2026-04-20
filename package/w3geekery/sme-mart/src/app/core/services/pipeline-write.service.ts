@@ -28,6 +28,22 @@ const SME_MART_CLASS_IDS = {
   PrdSection:      'd30445f3-e26d-5153-83be-fe810f63220c',
   ProjectPlan:     'bc6159da-19a3-51d0-89a8-f2147078c760',
   PlanMilestone:   'ac1a1cc8-db44-5c1d-b359-5fb02e3d381d',
+
+  // Plan 063 — Corporate Vetting (update after schema PR merge + dataloader verify)
+  EngagementVettingItem: '66fa174f-86b2-5854-b7c1-7ffe26fcaa46',
+
+  // Plan 041 — Vendor Profile Service (deterministic UUID v5 from schema)
+  MarketplaceProfileItem: 'ee1e68b7-f003-5f5f-a111-7ec93b37681c',
+
+  // Phase 14 — Invitation Controls
+  RfpInvitation: '941cf01b-d260-5e45-8c6a-50f07b23f196',
+
+  // Phase 15 — Document Templates
+  DocumentTemplate: 'd2493bf7-f28d-5d26-8858-58062d402012',
+  DocumentInstance: '3e1d232f-3105-535e-8ef5-70cb0f80d65f',
+
+  // Phase 16 — Form Builder
+  FormSubmission: '179bd4b1-d1b1-5afc-99be-a5465a662ec6',
 } as const;
 
 export type SmeMartClassName = keyof typeof SME_MART_CLASS_IDS;
@@ -46,8 +62,12 @@ const PIPELINE_ID = environment.pipelineId;
  * All objects must conform to their class schema (id, name required;
  * custom fields as defined in w3geekery.sme-mart.schema YAML).
  */
+/** Cache TTL in milliseconds (60 seconds). */
+const CACHE_TTL_MS = 60_000;
+
 interface CacheEntry {
   data: Record<string, unknown>;
+  timestamp: number;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -59,6 +79,10 @@ export class PipelineWriteService {
    * Pipeline receive is full-replace — partial pushes null unmentioned fields.
    * This cache lets services skip the GQL fetch on rapid successive edits
    * (e.g., color → rename → move) by reusing the last-pushed full object.
+   *
+   * Entries expire after 60s. Partial pushes merge into existing entries
+   * rather than replacing them (prevents data loss from fire-and-forget
+   * operations like moveNote that only send {id, folderId, updatedAt}).
    */
   private readonly cache = new Map<string, CacheEntry>();
 
@@ -68,12 +92,32 @@ export class PipelineWriteService {
 
   /**
    * Get a cached object if fresh (within TTL).
-   * Services should use: `cache.getCached(...) ?? await gqlRead.getById(...)`
+   * Services should use: `getCached(...) ?? await gqlRead.getById(...)`
    */
   getCached(className: SmeMartClassName, id: string): Record<string, unknown> | null {
-    const entry = this.cache.get(this.cacheKey(className, id));
+    const key = this.cacheKey(className, id);
+    const entry = this.cache.get(key);
     if (!entry) return null;
+
+    // Evict stale entries
+    if (Date.now() - entry.timestamp > CACHE_TTL_MS) {
+      this.cache.delete(key);
+      return null;
+    }
+
     return { ...entry.data };
+  }
+
+  /**
+   * Seed the cache from a GQL fetch (e.g., after a getById).
+   * Services that fetch before pushing should call this so subsequent
+   * operations within the TTL window can skip the GQL round-trip.
+   */
+  seedCache(className: SmeMartClassName, id: string, data: Record<string, unknown>): void {
+    this.cache.set(this.cacheKey(className, id), {
+      data: { ...data },
+      timestamp: Date.now(),
+    });
   }
 
   /**
@@ -106,12 +150,19 @@ export class PipelineWriteService {
     );
     await pipelineApi.receive(new UUID(PIPELINE_ID), batch);
 
-    // Update cache with pushed objects (write-through)
+    // Update cache with pushed objects (write-through, merge into existing)
     for (const obj of ensured) {
       const id = obj['id'] as string;
       if (id) {
-        this.cache.set(this.cacheKey(className, id), {
-          data: { ...obj },
+        const key = this.cacheKey(className, id);
+        const existing = this.cache.get(key);
+        // Merge: overlay new fields onto existing cached data.
+        // This prevents partial pushes (e.g., moveNote with {id, folderId})
+        // from wiping out other fields in the cache.
+        const merged = existing ? { ...existing.data, ...obj } : { ...obj };
+        this.cache.set(key, {
+          data: merged,
+          timestamp: Date.now(),
         });
       }
     }

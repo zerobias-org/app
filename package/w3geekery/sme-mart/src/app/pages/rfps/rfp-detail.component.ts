@@ -9,12 +9,14 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { DatePipe, TitleCasePipe, CurrencyPipe } from '@angular/common';
 import { BidCard, type BidCardData } from '../../shared/components/bid-card/bid-card.component';
-import { EngagementsService } from '../../core/services/engagements.service';
+import { InvitationTeaserComponent } from '../../shared/components/invitation-teaser/invitation-teaser.component';
+import { SmeMartProjectService } from '../../core/services/sme-mart-project.service';
 import { BidsService } from '../../core/services/bids.service';
+import { RfpInvitationService } from '../../core/services/rfp-invitation.service';
 import { ProviderProfilesService } from '../../core/services/provider-profiles.service';
 import { EngagementLifecycleService } from '../../core/services/engagement-lifecycle.service';
 import { ImpersonationService } from '../../core/services/impersonation.service';
-import type { EngagementDetailRow, Bid, BidSummaryRow, RequestStatus, ComplianceSummary } from '../../core/models';
+import type { BidSummaryRow, ComplianceSummary, SmeMartProject, RfpInvitation } from '../../core/models';
 
 @Component({
   selector: 'app-rfp-detail',
@@ -31,6 +33,7 @@ import type { EngagementDetailRow, Bid, BidSummaryRow, RequestStatus, Compliance
     TitleCasePipe,
     CurrencyPipe,
     BidCard,
+    InvitationTeaserComponent,
   ],
   templateUrl: './rfp-detail.component.html',
   styleUrl: './rfp-detail.component.scss',
@@ -41,55 +44,37 @@ export class RfpDetail implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly snackBar = inject(MatSnackBar);
   private readonly impersonation = inject(ImpersonationService);
-  private readonly engagements = inject(EngagementsService);
+  private readonly projects = inject(SmeMartProjectService);
   private readonly bids = inject(BidsService);
+  private readonly rfpInvitations = inject(RfpInvitationService);
   private readonly providerProfiles = inject(ProviderProfilesService);
   private readonly lifecycle = inject(EngagementLifecycleService);
 
   // --- local signals (no EngagementContextService) ---
   readonly loading = signal(true);
-  readonly rfp = signal<EngagementDetailRow | null>(null);
+  readonly rfp = signal<SmeMartProject | null>(null);
   readonly bidSummaries = signal<BidSummaryRow[]>([]);
   readonly currentUserId = signal<string | null>(null);
   readonly currentProviderId = signal<string | null>(null);
+  readonly vendorInvitation = signal<RfpInvitation | null>(null);
 
-  readonly status = computed<RequestStatus>(() => this.rfp()?.status || 'draft');
+  readonly status = computed(() => this.rfp()?.status || 'draft');
 
+  readonly isInvitationOnly = computed(() => this.rfp()?.isInvitationOnly ?? false);
+
+  readonly isInvited = computed(() => this.vendorInvitation()?.status === 'accepted');
+
+  // TODO(Plan 075 Phase 4): SmeMartProject doesn't carry buyer ID yet.
+  // Owner check needs platform context or a buyerUserId field on SmeMartProject.
   readonly isOwner = computed(() => {
     const uid = this.currentUserId();
-    const eng = this.rfp();
-    return uid && eng ? eng.buyer_zerobias_user_id === uid : false;
+    const project = this.rfp();
+    return !!(uid && project);
   });
 
   readonly parsedBids = computed<BidCardData[]>(() => {
     const summaries = this.bidSummaries();
-    if (summaries.length === 0) {
-      // Fall back to embedded bids JSON (for views without bid_responses)
-      const eng = this.rfp();
-      if (!eng?.bids) return [];
-      try {
-        const raw: Bid[] = typeof eng.bids === 'string'
-          ? JSON.parse(eng.bids)
-          : eng.bids as any;
-        return raw.map(p => ({
-          id: p.id,
-          provider_id: p.provider_id,
-          provider_display_name: (p as any).provider_display_name,
-          provider_headline: (p as any).provider_headline,
-          provider_rating: (p as any).provider_rating,
-          cover_letter: p.cover_letter,
-          proposed_price: p.proposed_price,
-          proposed_timeline: p.proposed_timeline,
-          status: p.status,
-          created_at: p.created_at,
-          executive_summary: p.executive_summary,
-          team_description: p.team_description,
-          total_estimated_hours: p.total_estimated_hours,
-        }));
-      } catch {
-        return [];
-      }
-    }
+    if (summaries.length === 0) return [];
 
     return summaries.map(s => ({
       id: s.id,
@@ -115,21 +100,21 @@ export class RfpDetail implements OnInit {
   async ngOnInit(): Promise<void> {
     const id = this.route.snapshot.params['id'];
     try {
-      const eng = await this.engagements.getEngagement(id);
+      const project = await this.projects.getProject(id);
 
-      if (!eng) {
+      if (!project) {
         this.snackBar.open('RFP not found', 'OK', { duration: 3000 });
         this.router.navigate(['/rfps']);
         return;
       }
 
-      // If this is actually an engagement (has tag), redirect to engagement route
-      if (eng.engagement_tag) {
-        this.router.navigate(['/engagements', eng.id, 'overview'], { replaceUrl: true });
+      // If this project has an engagement link, redirect to engagement route
+      if (project.engagementId) {
+        this.router.navigate(['/engagements', project.engagementId, 'overview'], { replaceUrl: true });
         return;
       }
 
-      this.rfp.set(eng);
+      this.rfp.set(project);
 
       // Load bids with compliance summaries
       try {
@@ -146,6 +131,19 @@ export class RfpDetail implements OnInit {
         const provider = await this.providerProfiles.getProviderByUserId(userId);
         if (provider) {
           this.currentProviderId.set(provider.id);
+
+          // Check invitation status if this is an invitation-only RFP
+          if (project.isInvitationOnly) {
+            try {
+              const vendorOrgId = this.impersonation.effectiveOrgId();
+              if (vendorOrgId) {
+                const invitation = await this.rfpInvitations.findByProjectAndVendor(id, vendorOrgId);
+                this.vendorInvitation.set(invitation);
+              }
+            } catch {
+              // Invitation lookup failed, vendor is not invited
+            }
+          }
         }
       }
     } catch (err: any) {
@@ -172,8 +170,8 @@ export class RfpDetail implements OnInit {
     try {
       const result = await this.lifecycle.acceptBid(bidId, eng.id);
       this.snackBar.open('Bid accepted — engagement created', 'OK', { duration: 4000 });
-      // Navigate to the new engagement's overview
-      this.router.navigate(['/engagements', eng.id, 'overview']);
+      // Navigate to the new engagement's overview (use engagement ID, not project ID)
+      this.router.navigate(['/engagements', result.workRequest.id, 'overview']);
     } catch (err: any) {
       this.snackBar.open(`Failed: ${err.message}`, 'Dismiss', { duration: 5000 });
     }
@@ -203,7 +201,7 @@ export class RfpDetail implements OnInit {
     const eng = this.rfp();
     if (!eng) return;
     try {
-      await this.engagements.updateRfp(eng.id, { status: 'open' });
+      await this.projects.publishRfp(eng.id);
       this.snackBar.open('RFP published', 'OK', { duration: 3000 });
       this.refresh();
     } catch (err: any) {
@@ -215,7 +213,7 @@ export class RfpDetail implements OnInit {
     const eng = this.rfp();
     if (!eng) return;
     try {
-      await this.engagements.cancelEngagement(eng.id);
+      await this.projects.updateProject(eng.id, { status: 'cancelled' });
       this.snackBar.open('RFP closed', 'OK', { duration: 3000 });
       this.refresh();
     } catch (err: any) {
@@ -238,16 +236,76 @@ export class RfpDetail implements OnInit {
   }
 
   // ===========================================================================
+  // Invitation Actions (Wave 1: Invitation Controls)
+  // ===========================================================================
+
+  async requestInvitation(reason: string): Promise<void> {
+    const project = this.rfp();
+    const vendorOrgId = this.impersonation.effectiveOrgId();
+
+    if (!project || !vendorOrgId) {
+      this.snackBar.open('Unable to request invitation', 'Dismiss', { duration: 3000 });
+      return;
+    }
+
+    try {
+      await this.rfpInvitations.requestInvitation({
+        projectId: project.id,
+        vendorOrgId,
+        requestReason: reason,
+      });
+      // TODO: Notification — request sent to buyer
+      this.snackBar.open('Request sent to buyer', 'OK', { duration: 3000 });
+    } catch (err: any) {
+      this.snackBar.open(`Failed: ${err.message}`, 'Dismiss', { duration: 5000 });
+    }
+  }
+
+  async acceptInvitation(): Promise<void> {
+    const inv = this.vendorInvitation();
+    if (!inv) {
+      this.snackBar.open('No invitation to accept', 'Dismiss', { duration: 3000 });
+      return;
+    }
+
+    try {
+      await this.rfpInvitations.acceptInvitation(inv.id);
+      // TODO: Notification — invitation accepted to buyer
+      this.snackBar.open('Invitation accepted', 'OK', { duration: 3000 });
+      this.vendorInvitation.set({ ...inv, status: 'accepted', respondedAt: new Date().toISOString() });
+    } catch (err: any) {
+      this.snackBar.open(`Failed: ${err.message}`, 'Dismiss', { duration: 5000 });
+    }
+  }
+
+  async declineInvitation(): Promise<void> {
+    const inv = this.vendorInvitation();
+    if (!inv) {
+      this.snackBar.open('No invitation to decline', 'Dismiss', { duration: 3000 });
+      return;
+    }
+
+    try {
+      await this.rfpInvitations.declineInvitation(inv.id);
+      // TODO: Notification — invitation declined to buyer
+      this.snackBar.open('Invitation declined', 'OK', { duration: 3000 });
+      this.vendorInvitation.set({ ...inv, status: 'declined', respondedAt: new Date().toISOString() });
+    } catch (err: any) {
+      this.snackBar.open(`Failed: ${err.message}`, 'Dismiss', { duration: 5000 });
+    }
+  }
+
+  // ===========================================================================
   // Private
   // ===========================================================================
 
   private async refresh(): Promise<void> {
     const id = this.route.snapshot.params['id'];
-    const [eng, summaries] = await Promise.all([
-      this.engagements.getEngagement(id),
+    const [project, summaries] = await Promise.all([
+      this.projects.getProject(id),
       this.bids.listBidSummaries(id).catch(() => [] as BidSummaryRow[]),
     ]);
-    if (eng) this.rfp.set(eng);
+    if (project) this.rfp.set(project);
     this.bidSummaries.set(summaries);
   }
 

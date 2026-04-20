@@ -208,3 +208,94 @@ app-resource-tags-panel zb-empty-state-container .fill {
     flex-shrink: 0;
   }
 }
+
+// =============================================================================
+// Resource image sizing classes — ported from zb-ui-lib components.scss:2085-2193
+// Used wherever <img> renders a resource logo/avatar at a constrained size.
+// See .planning/director/errata/016-org-switcher-image-sizing-regression.md
+// =============================================================================
+
+img.zb-ui-product-logo {
+  max-height: 24px;
+  max-width: 24px;
+  width: auto;
+  height: auto;
+  vertical-align: middle;
+}
+
+img.zb-ui-resource-image {
+  max-width: 24px;
+  min-width: 24px;
+  max-height: 24px;
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  vertical-align: middle;
+
+  &.s16 {
+    max-width: 16px;
+    min-width: 16px;
+    max-height: 16px;
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+    vertical-align: middle;
+
+    &.maintain-aspect {
+      min-width: unset;
+      width: auto;
+      max-width: 100%;
+    }
+  }
+
+  &.s20 {
+    max-width: 20px;
+    min-width: 20px;
+    max-height: 20px;
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    vertical-align: middle;
+
+    &.maintain-aspect {
+      min-width: unset;
+      width: auto;
+      max-width: 100%;
+    }
+  }
+
+  &.s32 {
+    max-width: 32px;
+    min-width: 32px;
+    max-height: 32px;
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    vertical-align: middle;
+
+    &.maintain-aspect {
+      min-width: unset;
+      width: auto;
+      max-width: 100%;
+    }
+  }
+
+  &.float {
+    &.left {
+      float: left;
+
+      &.margin,
+      &.margin4 {
+        margin-right: 4px;
+      }
+
+      &.margin8 {
+        margin-right: 8px;
+      }
+
+      &.margin16 {
+        margin-right: 16px;
+      }
+    }
+  }
+}

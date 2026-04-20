@@ -1,0 +1,62 @@
+.field-editor {
+  padding: 16px;
+  background-color: var(--mat-sys-surface-container, #fafafa);
+
+  .editor-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+
+    mat-form-field {
+      grid-column: span 1;
+
+      &.full-width {
+        grid-column: 1 / -1;
+      }
+    }
+
+    mat-checkbox {
+      grid-column: 1 / -1;
+      margin: 8px 0;
+    }
+
+    .type-specific {
+      grid-column: 1 / -1;
+      padding: 12px;
+      background-color: var(--mat-sys-surface, white);
+      border-left: 3px solid var(--mat-sys-primary, #2196f3);
+      border-radius: 2px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+
+      h4 {
+        margin: 0 0 12px 0;
+        font-size: 14px;
+        color: var(--mat-sys-on-surface, #333);
+        grid-column: 1 / -1;
+      }
+
+      mat-form-field {
+        grid-column: span 1;
+
+        &.full-width {
+          grid-column: 1 / -1;
+        }
+      }
+
+      textarea {
+        font-family: monospace;
+        font-size: 12px;
+      }
+    }
+
+    .actions {
+      grid-column: 1 / -1;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 8px;
+    }
+  }
+}

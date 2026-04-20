@@ -1,8 +1,8 @@
 # CLAUDE.md - SME Mart
 
-> **On Startup:** Read `.claude/plans/public/PLAN.md` — source of truth for architecture, phases, and decisions.
+> **On Startup:** Read `.planning/BACKLOG.md` — source of truth for all pending work. Read `.planning/PROJECT.md` + `.planning/ROADMAP.md` for current milestone state.
 
-> **⚠️ UAT Migration In Progress:** CI/dev is being rebuilt with hydra. UAT is our temporary dev environment. See [`.claude/notes/uat-migration-tracker.md`](.claude/notes/uat-migration-tracker.md) for checklist and ID mapping. `npm run dev` now targets UAT.
+> **UAT Environment:** CI/dev was rebuilt with hydra. UAT (`uat.zerobias.com`) is the active dev environment. Migration complete 2026-03-30 — see [`.claude/notes/uat-migration-tracker.md`](.claude/notes/uat-migration-tracker.md) for ID mapping reference. `npm run dev` targets UAT.
 
 > **⚠️ ALWAYS prefer `~/Projects/w3geekery/zerobias-org-forks/` over `~/Projects/zb/` for every repo that exists in zerobias-org-forks (app, login, module, schema, etc.).** We are a 3rd-party developer — work from the w3geekery fork, push to the fork, and create cross-fork PRs to zerobias-org. Only use `~/Projects/zb/` for read-only reference unless specifically asked otherwise.
 
@@ -14,8 +14,10 @@ SME Mart is a **marketplace for Subject Matter Experts** in compliance/cybersecu
 
 | What | Where |
 |------|-------|
-| **⚠️ UAT Migration Tracker** | [`.claude/notes/uat-migration-tracker.md`](.claude/notes/uat-migration-tracker.md) — CI→UAT ID mapping, checklist, config updates |
-| **Architecture & Plan** | [`.claude/plans/public/PLAN.md`](.claude/plans/public/PLAN.md) |
+| **UAT ID Reference** | [`.claude/notes/uat-migration-tracker.md`](.claude/notes/uat-migration-tracker.md) — CI→UAT ID mapping (migration complete) |
+| **Backlog (all pending work)** | [`.planning/BACKLOG.md`](.planning/BACKLOG.md) — select items for next GSD milestone |
+| **Project & Milestone State** | [`.planning/PROJECT.md`](.planning/PROJECT.md), [`.planning/ROADMAP.md`](.planning/ROADMAP.md) |
+| **Plan Archive (historical)** | `.claude/plans-archive/` — old PLAN.md + 55 plan files (local-only, gitignored) |
 | **Source Paths (SDKs, repos)** | [`.claude/docs/SOURCE_PATHS.md`](.claude/docs/SOURCE_PATHS.md) |
 | **Angular 21 Docs** | [`AGENTS.md`](AGENTS.md) — local docs index in `.angular-docs/` (refresh: `npx angular-agents-md`) |
 | **Next.js prototype** (archived) | `../sme-mart-nextjs-deprecated/` |
@@ -27,12 +29,52 @@ SME Mart is a **marketplace for Subject Matter Experts** in compliance/cybersecu
 | **GQL Schema Extension (internals)** | [`.claude/notes/zb-graphql-schema-extension-guide.md`](.claude/notes/zb-graphql-schema-extension-guide.md) — platform internals: SchemaBuilder, catalog tables, source files |
 | **SME Mart Resource Types** | [`.claude/notes/sme-mart-resource-types-summary.md`](.claude/notes/sme-mart-resource-types-summary.md) — resource type inventory shared with Kevin |
 | **File Upload SDK** | [`.claude/notes/zb-file-upload-sdk-reference.md`](.claude/notes/zb-file-upload-sdk-reference.md) — FileService SDK, upload workflow, task attachments, preview, ZB UI reference |
+| **E2E Testing Guide** | [`.claude/notes/e2e-testing-guide.md`](.claude/notes/e2e-testing-guide.md) — **READ before writing Playwright tests.** Stack, auth model, gotchas, page object patterns, debugging playbook |
 | **Schema repo** | [`zerobias-org/schema`](https://github.com/zerobias-org/schema) — YAML schema packages (source of truth for GQL entities) |
+| **Post-mortems** | [`.claude/post-mortems/`](.claude/post-mortems/) — failure reports (see [`INDEX.md`](.claude/post-mortems/INDEX.md)). **Read before starting any schema change.** |
+| **zb-dx (Developer Experience)** | `~/Projects/zb/zerobias-org/zb-dx` — shared knowledge base for all ZB platform developers. **File friction with `/friction`, browse patterns, find integration guides.** See below. |
+
+## zb-dx — ZeroBias Developer Experience
+
+**Repo:** `~/Projects/zb/zerobias-org/zb-dx` | **Slack:** `#zb-dx` (zerobias.org workspace)
+
+A shared knowledge base for any developer building on `zerobias-sdk` / `zerobias-client` / `zerobias-angular-client`. Patterns, guides, skills, and friction logs contributed by the community. The best artifacts graduate into customer-facing KB articles, dev guides, and LLM skills.
+
+**Use this repo as part of daily workflow:**
+
+| When... | Do... |
+|---|---|
+| You hit a ZB SDK/API pain point | `/friction new <title> -s high -a sme-mart` -- creates a friction-log entry |
+| Another dev reports the same issue | `/friction confirm <slug>` -- bumps to confirmed |
+| You want to escalate to ZB platform team | `/friction task <slug> --notify` -- creates ZB Task, notifies `#zb-dx` |
+| You solved something non-obvious | Write a `patterns/` or `guides/` entry (check IDEAS.md for open items) |
+| You find a reusable agent/Claude pattern | Propose it as a `skills/` entry |
+
+**What lives there:**
+
+| Directory | Contents |
+|---|---|
+| `friction-log/` | 10+ pain-point reports (auth, SDK, hub module, PKV, CDN) with lifecycle tracking (`draft -> confirmed -> task-created -> resolved -> promoted`) |
+| `patterns/` | 8 Multica-derived integration patterns (workspace hierarchy, flat projects, boundaries, activity log, agent-skill junction, etc.) |
+| `guides/` | How-to walkthroughs born from real friction (growing) |
+| `skills/` | `/friction` (log manager) + `/zb-dx-register` (participant onboarding) |
+| `participants/` | Developer profiles: Clark (W3Geekery/SME Mart), Dan (SDI/Readiness Center), Joe (Work Worlds) |
+| `IDEAS.md` | Running board of patterns/guides/skills/tools worth building -- add freely |
+
+**Existing friction relevant to SME Mart:** SDK whoAmI field mismatch, hub-module unavailable on UAT/QA, PKV API 500s, CDN KB articles require auth, no formal project construct (pre-CE14), file attachments on shared S3.
+
+**Self-registration:** new devs run `/zb-dx-register` after joining `#zb-dx`.
 
 ## Skills
 
 - **`/angular-architect`** — invoke the global skill for general Angular 21 architecture questions
 - **`sme-mart-architect`** — project-level skill (`.claude/skills/`) with SME Mart-specific patterns: ngx-library, DataProducer, standalone components, no Nx. Invoke for implementation work.
+- **`/meta:director`** — Architect/QA role alongside GSD. Modes: `design`, `review`, `checkpoint`, `watch`, `retro`. Project adapter at `.claude/commands/meta/director.md` (upstream: `zerobias-org/meta-harness`). Director state lives in `.planning/director/`.
+- **`/meta:sync`** — Sync meta-harness upstream and merge changes into the project adapter. Run periodically (start of milestone or when Kevin mentions updates).
+
+## Angular 21 Patterns
+
+**READ [`.claude/docs/MODERNIZATION_GUIDE.md`](.claude/docs/MODERNIZATION_GUIDE.md) before writing any component.** `@Input`/`@Output`/constructor injection are banned — use `input()`/`output()`/`inject()`. When modifying a file with old patterns, migrate what you touch.
 
 ## File Naming Convention
 

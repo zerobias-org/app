@@ -1,0 +1,30 @@
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+}
+
+.empty-state {
+  text-align: center;
+  color: var(--mdc-theme-text-secondary, #666);
+  padding: 2rem;
+}
+
+.parties-container {
+  padding: 1rem 0;
+}
+
+mat-expansion-panel {
+  margin-bottom: 0.5rem;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.no-parties {
+  padding: 1rem;
+  color: var(--mdc-theme-text-secondary, #666);
+  font-style: italic;
+}

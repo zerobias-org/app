@@ -1,0 +1,100 @@
+<div class="project-detail-page">
+  @if (loading()) {
+    <p class="loading-message">Loading project...</p>
+  } @else if (!ctx.project()) {
+    <p>Project not found.</p>
+  } @else {
+    <div class="project-header">
+      <div class="project-header__top">
+        <button mat-button (click)="goToEngagement()" class="back-btn">
+          <mat-icon>arrow_back</mat-icon>
+          @if (ctx.engagementName()) {
+            Engagement: {{ ctx.engagementName() }}
+          } @else {
+            Back to Engagements
+          }
+        </button>
+
+        <button mat-icon-button [matMenuTriggerFor]="projectActions">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+
+        <mat-menu #projectActions="matMenu">
+          @if (canCompletePilot()) {
+            <button mat-menu-item (click)="completePilot()">
+              <mat-icon>done</mat-icon>
+              <span>Mark Pilot Complete</span>
+            </button>
+          }
+          @if (canPromote()) {
+            <button mat-menu-item (click)="promoteToProject()" [disabled]="isPromoting()">
+              <mat-icon>{{ isPromoting() ? 'hourglass_empty' : 'arrow_upward' }}</mat-icon>
+              <span>{{ isPromoting() ? 'Promoting...' : 'Promote to Project' }}</span>
+            </button>
+          }
+        </mat-menu>
+      </div>
+
+      <div class="project-header__title">
+        <h2>{{ ctx.projectName() }}</h2>
+        <mat-chip-set>
+          <mat-chip [class]="'status-' + ctx.status()">{{ ctx.status() | titlecase }}</mat-chip>
+        </mat-chip-set>
+      </div>
+
+      @if (ctx.project()?.description) {
+        <p class="project-description">{{ ctx.project()!.description }}</p>
+      }
+    </div>
+
+    <!-- Navigation: primary tabs + "More" dropdown -->
+    <nav mat-tab-nav-bar [tabPanel]="tabPanel" animationDuration="200ms">
+      @for (tab of primaryTabs; track tab.path) {
+        <a mat-tab-link
+          [routerLink]="tab.path"
+          routerLinkActive
+          #rla="routerLinkActive"
+          [active]="rla.isActive">
+          <mat-icon class="tab-icon">{{ tab.icon }}</mat-icon>
+          {{ tab.label }}
+        </a>
+      }
+
+      <!-- "More" dropdown tab -->
+      <a mat-tab-link
+        [matMenuTriggerFor]="moreMenu"
+        [active]="isMoreActive()"
+        class="more-tab">
+        <mat-icon class="tab-icon">more_horiz</mat-icon>
+        @if (activeMoreLabel()) {
+          {{ activeMoreLabel() }}
+        } @else {
+          More
+        }
+        <mat-icon class="more-chevron">expand_more</mat-icon>
+      </a>
+    </nav>
+
+    <!-- More dropdown menu with grouped sections -->
+    <mat-menu #moreMenu="matMenu" class="project-more-menu">
+      @for (group of moreTabGroups; track group.heading; let isFirst = $first) {
+        @if (!isFirst) {
+          <mat-divider></mat-divider>
+        }
+        <div class="menu-group-heading">{{ group.heading }}</div>
+        @for (tab of group.tabs; track tab.path) {
+          <button mat-menu-item
+            [routerLink]="tab.path"
+            routerLinkActive="active-menu-item">
+            <mat-icon>{{ tab.icon }}</mat-icon>
+            <span>{{ tab.label }}</span>
+          </button>
+        }
+      }
+    </mat-menu>
+
+    <mat-tab-nav-panel #tabPanel>
+      <router-outlet />
+    </mat-tab-nav-panel>
+  }
+</div>

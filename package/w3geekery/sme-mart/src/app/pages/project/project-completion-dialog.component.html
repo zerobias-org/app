@@ -1,0 +1,28 @@
+<h2 mat-dialog-title>Mark Pilot Complete</h2>
+
+<mat-dialog-content>
+  <div class="completion-summary">
+    <p><strong>{{ data.project.name }}</strong></p>
+    @if (data.project.startDate) {
+      <p>Started: {{ data.project.startDate | date:'mediumDate' }}</p>
+    }
+    @if (data.project.targetEndDate) {
+      <p>Target End: {{ data.project.targetEndDate | date:'mediumDate' }}</p>
+    }
+  </div>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Completion Notes (Optional)</mat-label>
+    <textarea
+      matInput
+      [ngModel]="notes()"
+      (ngModelChange)="notes.set($event)"
+      rows="4"
+      placeholder="Document any key findings or next steps"></textarea>
+  </mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Cancel</button>
+  <button mat-raised-button color="primary" (click)="onComplete()">Complete Pilot</button>
+</mat-dialog-actions>
