@@ -9,9 +9,9 @@ export const environment = {
   smeMartConnectionId: '', // Hub Module not active yet — set when Phase 3 completes
   dbMode: 'neon' as 'hub' | 'neon', // Switch to 'hub' when Hub Module connection is ready
   neonConnectionString: '', // NEVER embed credentials in deployed builds
-  // AuditgraphDB Pipeline + Boundary (UAT — SME Marketplace boundary, Zerobias org)
+  // AuditgraphDB Pipeline + Boundary (UAT — SME Marketplace DEV boundary, W3Geekery org)
   pipelineId: 'f6d1f579-fe02-4158-b99e-a55113fd70cb',
-  boundaryId: 'e3871f0b-56f0-4e5e-87c6-6ca196bf88c7',
+  boundaryId: 'c15fb2dc-4f8c-48b5-b27a-707bd516b005',
   featureFlags: {
     prefsBackend: 'localStorage' as 'localStorage' | 'pkv',
   },

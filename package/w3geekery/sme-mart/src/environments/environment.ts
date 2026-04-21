@@ -16,9 +16,9 @@ export const environment = {
   // Neon connection string (only used when dbMode='neon')
   // Generated from NEON_DATABASE_URL in .env.local via scripts/gen-neon-env.mjs
   neonConnectionString: NEON_DATABASE_URL,
-  // AuditgraphDB Pipeline + Boundary (UAT — SME Marketplace boundary, Zerobias org)
+  // AuditgraphDB Pipeline + Boundary (UAT — SME Marketplace DEV boundary, W3Geekery org)
   pipelineId: 'f6d1f579-fe02-4158-b99e-a55113fd70cb',
-  boundaryId: 'e3871f0b-56f0-4e5e-87c6-6ca196bf88c7',
+  boundaryId: 'c15fb2dc-4f8c-48b5-b27a-707bd516b005',
   // Feature flags
   featureFlags: {
     /** User prefs backend: 'localStorage' (fast, no network) or 'pkv' (cross-device sync via ZB API).
