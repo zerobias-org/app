@@ -6,7 +6,7 @@
 
 ## Status
 
-- **UAT:** initial deploy validating the publish pipeline (`zerobias-org/app:uat` → `app-uat-zerobias.com` S3 bucket → CloudFront)
+- **UAT:** initial deploy validating the publish pipeline (`zerobias-org/app:uat` → `app-uat-zerobias.com` S3 bucket → CloudFront). IAM role updated 2026-04-21 (Andrey) — retrying end-to-end publish.
 - **Prod:** not yet published — pending UAT verification and platform enrollment
 
 ## Architecture
