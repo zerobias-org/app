@@ -2,6 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { ZerobiasClientApp } from '@zerobias-com/zerobias-client';
 import { TranslateService } from '@ngx-translate/core';
 import { SmeMartDbService } from './services/sme-mart-db.service';
+import { environment } from '../../environments/environment';
 
 /**
  * Handles app initialization: i18n setup + ZeroBias auth bootstrap + DB connection.
@@ -19,6 +20,22 @@ export class AppInitService {
   async init(): Promise<boolean> {
     this.translate.setDefaultLang('en');
     this.translate.use('en');
+
+    // Stack-mode (localhost unified-origin) workaround for platform bug:
+    // Dana's /api/dana/me/session/login?next=... responds 307 Location: /login/ with `next` stripped.
+    // The client SDK's redirectLogin() passes `next` correctly; Dana discards it.
+    // We pre-empt by probing whoAmI ourselves and redirecting straight to the static login
+    // page with `next` intact (login.js honors ?next= via URLSearchParams).
+    // Remove once Dana preserves `next` through its 307.
+    if (!environment.isLocalDev && location.hostname === 'localhost') {
+      const probe = await fetch(`${environment.apiHostname}/api/dana/me`, { credentials: 'include' });
+      if (probe.status === 401) {
+        const next = encodeURIComponent(location.href);
+        location.href = `/login/en_us/login.html?next=${next}&cookieDomain=localhost`;
+        // Resolve with a never-settling promise so Angular doesn't finish bootstrap before the redirect.
+        return new Promise<boolean>(() => {});
+      }
+    }
 
     const authResult = await this.app.init(
       (req: any) => req,
