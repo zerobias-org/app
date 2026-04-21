@@ -18,10 +18,10 @@
 |---|---|
 | Missing reference architecture / recipes | 3 |
 | Documentation gaps | 3 |
-| Tooling gaps / ergonomics / CLI design | 6 |
+| Tooling gaps / ergonomics / CLI design | 5 |
 | Conflicts with 3rd-party tooling | 1 |
 
-Total: 13 findings.
+Total: 12 findings.
 
 ---
 
@@ -223,32 +223,43 @@ imports:
 
 ---
 
-### 011 — `zbb build <stack>` hardcoded to Gradle; ignores `lifecycle.build:` from stack manifest
+### 011 — zbb CLI commands (`build`, `stop`, and likely others) require a Gradle project
 
-**Category:** Tooling gap / feature request
-**Date:** 2026-04-17
-**Phase:** 19 v2 execution
+**Category:** Tooling gap / CLI design
+**Date:** 2026-04-17 (build), 2026-04-21 (stop)
+**Phase:** 19 v2 execution; re-surfaced at close-out
 
 **What happened:**
-Phase 19 stack manifests defined `lifecycle.build: bash setup.sh build` (for Angular SPA: invokes `npm run build:stack`; for login: invokes `npm run build`). Running `zbb build sme-mart-spa` errored with:
+Multiple zbb CLI commands fail outside a Gradle-backed repo with:
 
 ```
 zbb: requires a Gradle project. Run from a directory with gradlew
 ```
 
-So `zbb build` is hardcoded to `./gradlew monorepoBuild` regardless of what the stack's `lifecycle.build:` hook declares. Forced consumers to bypass zbb entirely and run `npm run build:stack` directly from the app root — which means `zbb build` is misleading for non-Gradle stacks (people will reach for it and get an unhelpful error).
+Two confirmed instances, same root cause:
+- **`zbb build <stack>`** — hardcoded to `./gradlew monorepoBuild`. Ignores `lifecycle.build:` from the stack manifest (`bash setup.sh build`, `npm run build:stack`, etc.). Forced consumers to bypass zbb entirely and invoke their own toolchain from the app root.
+- **`zbb stop <stack>`** — fails from the same app directory where `zbb up` worked minutes before. Consumer apps that `zbb stack add` + `zbb up` have no zbb-native teardown path; must fall back to `docker stop` / `docker rm` with manually-discovered container names (compounds finding 013).
+
+Presumably `restart`, `status`, `logs`, etc. fail the same way — not tested, but the pattern is "zbb shells through Gradle regardless of what the command is or whether it needs Gradle."
 
 **Impact:**
-- zbb CLI's build command is effectively broken for any stack not built with Gradle.
-- Stack manifests' `lifecycle.build:` declarations become documentation-only, not invocable.
-- Consumers must know to bypass zbb for build and run their own toolchain directly.
+- Inconsistent CLI surface: `zbb up` works from a non-Gradle directory; `zbb build` / `zbb stop` don't.
+- Stack manifests' `lifecycle.*` declarations become documentation-only, not invocable.
+- Breaks the "zbb manages stacks end-to-end" mental model — it manages bring-up but not build or teardown for non-Gradle consumers.
+- Affects any 3rd-party dev building an app (Angular, React, Next.js, etc.) as a zbb stack. The module-authoring path is Gradle-centric; the consumer-app path isn't, but zbb doesn't know the difference.
+- Error message is misleading — "requires a Gradle project" suggests the user is in the wrong directory, when actually the command itself is coupled to Gradle.
 
 **Suggested improvement (feature request):**
-- `zbb build <stack>` should honor `lifecycle.build:` from the stack manifest when present. Fall back to Gradle only if no lifecycle hook defined.
-- Alternatively: rename the Gradle-only command to `zbb gradle-build` or similar, and make `zbb build` the lifecycle-driven entrypoint.
-- stacks-guide.md should clarify: "Today `zbb build` is Gradle-specific; use your stack's toolchain directly for non-Gradle builds."
+- Decouple lifecycle commands (`up`, `stop`, `restart`, `status`, `logs`) from the Gradle-project requirement. These operate on docker compose and don't need Gradle.
+- `zbb build` should honor `lifecycle.build:` from the stack manifest when present, falling back to Gradle only if no lifecycle hook is defined. Alternative: rename the Gradle-only command (`zbb gradle-build`) and make `zbb build` the lifecycle-driven entrypoint.
+- Gradle-coupling should be limited to module/build-toolchain commands (`zbb publish`, etc.) where it's actually needed.
+- Error message should distinguish "this command needs Gradle" vs. "zbb needs *some* context" — current message is misleading because `zbb up` worked from the exact same directory.
 
-This affects any third-party dev building an app (Angular, React, Next.js, etc.) as a zbb stack — the module-authoring path is Gradle-centric but consumer apps aren't.
+**Workaround:** For build, invoke the app's toolchain directly (`npm run build:stack`). For stop, use docker directly:
+```bash
+docker stop sme-mart-local-nginx sme-mart-local-minio
+docker rm sme-mart-local-nginx sme-mart-local-minio
+```
 
 ---
 
@@ -287,42 +298,6 @@ zerobias.slot:              sme-mart-local
 - Cross-stack plumbing that assumes a hardcoded peer-container name needs a smoke test that exercises the exact `docker exec` path.
 
 **Workaround in this repo:** Patched both setup.sh files to resolve the cloudfront-sim nginx container by label (`com.docker.compose.service=nginx` + `zerobias.slot`). Fix is local; the underlying docs/tooling confusion remains.
-
----
-
-### 014 — `zbb stop` (and likely all lifecycle commands) requires a Gradle project
-
-**Category:** Tooling gap / CLI design
-**Date:** 2026-04-21
-**Phase:** 19 (close-out)
-
-**What happened:**
-After a multi-day Phase 19 session, ran `zbb stop cloudfront-sim sme-mart-spa sme-mart-login` from the SME Mart app directory (where the stacks were added and started via `zbb up`) to tear down the running containers. Got:
-
-```
-zbb: requires a Gradle project. Run from a directory with gradlew
-```
-
-Same failure mode as finding 011 (`zbb build`): the CLI shells out through Gradle regardless of the command, so any stack-lifecycle command (`stop`, presumably `restart`, `status`, etc.) is unusable outside a Gradle-backed module repo. Consumer apps that add stacks via `zbb stack add` and start them via `zbb up` have no zbb-native path to stop them.
-
-**Impact:**
-- `zbb up` works from a non-Gradle directory, but `zbb stop` doesn't — inconsistent CLI surface.
-- Forces consumers to bypass zbb entirely for teardown and use raw `docker stop` / `docker rm` against container names they have to discover themselves (see finding 013 re: container naming).
-- Breaks the mental model that zbb's "stack" abstraction manages lifecycle end-to-end — it manages bring-up but not teardown for non-Gradle consumers.
-- Compounds finding 011: the whole non-Gradle consumer story is half-wired.
-
-**Suggested improvement (feature request):**
-- Decouple stack-lifecycle commands (`up`, `stop`, `restart`, `status`, `logs`) from the Gradle-project requirement. These operate on docker compose and don't need Gradle at all.
-- Gradle-coupling should be limited to module/build commands (`zbb build`, `zbb publish`, etc.) where it makes sense.
-- At minimum: when a lifecycle command is run outside a Gradle project, detect the nearest `.zbb/` directory or stack manifest and operate on it; don't blanket-reject.
-- Error message should distinguish "this command needs Gradle" vs. "zbb needs *some* context" — the current message is misleading because `zbb up` worked from the exact same directory.
-
-**Workaround:** Stop containers directly via docker. For this repo's Phase 19 stack:
-```bash
-docker stop sme-mart-local-nginx sme-mart-local-minio
-docker rm sme-mart-local-nginx sme-mart-local-minio
-```
-(Container names come from the slot — see finding 013.)
 
 ---
 
