@@ -30,10 +30,12 @@ bash zbb-stacks/smoke-all.sh
 ```
 
 Access:
-- **SPA:** http://localhost:15002/sme-mart/
-- **Login:** http://localhost:15002/login/
-- **API proxy:** http://localhost:15002/api/* → uat.zerobias.com
-- **Dana auth:** http://localhost:15002/dana/* → uat.zerobias.com
+- **SPA:** http://localhost:15100/sme-mart/
+- **Login:** http://localhost:15100/login/
+- **API proxy:** http://localhost:15100/api/* → uat.zerobias.com
+- **Dana auth:** http://localhost:15100/dana/* → uat.zerobias.com
+
+> **Port note:** zbb.yaml declares `value: "15002"` but zbb's `type: port` auto-allocates regardless, and the slot ended up on 15100. To confirm the actual port for your slot: `docker port sme-mart-local-nginx` or `cat ~/.zbb/slots/<slot>/.env | grep CLOUDFRONT_SIM_PORT`.
 
 ---
 
@@ -44,7 +46,7 @@ Access:
 ```
 Client (browser)
     ↓
-http://localhost:15002
+http://localhost:15100
     │
     ├─ /login/*           → minio://sme-mart-login/ (static files)
     ├─ /sme-mart/*        → minio://sme-mart-app/ (static SPA)
@@ -52,7 +54,7 @@ http://localhost:15002
     ├─ /dana/*            → proxy to uat.zerobias.com/dana/ (with cookie rewriting)
     └─ /app/session       → proxy to uat.zerobias.com/app/session (WebSocket)
 
-All requests go through single nginx origin (localhost:15002).
+All requests go through single nginx origin (localhost:15100).
 Cookies scoped to localhost (not uat.zerobias.com).
 Session sharing works — same cookies used for SPA + login.
 ```
@@ -63,7 +65,7 @@ Session sharing works — same cookies used for SPA + login.
 
 ### Step 1: Browser opens SPA
 ```bash
-curl -i http://localhost:15002/sme-mart/
+curl -i http://localhost:15100/sme-mart/
 # Response: 200 index.html
 # (SPA loads, no auth yet)
 ```
@@ -73,9 +75,9 @@ SPA calls `whoAmI()` → gets 401 Unauthorized → SDK calls `redirectLogin()`.
 
 Browser automatically redirected to:
 ```
-http://localhost:15002/login/
+http://localhost:15100/login/
   ↓ (rendered by login page)
-http://localhost:15002/dana/me/session/login?next=...&cookieDomain=localhost
+http://localhost:15100/dana/me/session/login?next=...&cookieDomain=localhost
 ```
 
 ### Step 3: Login endpoint creates session
@@ -88,7 +90,7 @@ nginx `proxy_cookie_domain uat.zerobias.com localhost;` rewrites the Domain attr
 Browser stores cookie with `Domain=localhost`.
 
 ### Step 4: Session persists across SPA navigation
-Browser reloads page or navigates to `http://localhost:15002/sme-mart/`.
+Browser reloads page or navigates to `http://localhost:15100/sme-mart/`.
 
 SPA calls `whoAmI()` → request includes cookie (same domain).
 
@@ -106,25 +108,25 @@ docker ps | grep -E 'cloudfront-sim|minio' | wc -l
 # Expected: 2+ containers
 
 # 2. SPA loads
-curl -i http://localhost:15002/sme-mart/ | head -5
+curl -i http://localhost:15100/sme-mart/ | head -5
 # Expected: HTTP/1.1 200 OK, <html> in body
 
 # 3. Deep-route fallback works (LS-01)
-curl -s http://localhost:15002/sme-mart/rfps/test-route | grep -q 'index.html'
+curl -s http://localhost:15100/sme-mart/rfps/test-route | grep -q 'index.html'
 # Expected: index.html content returned (not 404)
 
 # 4. Login page loads
-curl -i http://localhost:15002/login/ | head -5
+curl -i http://localhost:15100/login/ | head -5
 # Expected: HTTP/1.1 200 OK, login-related HTML
 
 # 5. Browser real login (manual, requires UAT credentials)
-#    Open http://localhost:15002/login/ in browser
+#    Open http://localhost:15100/login/ in browser
 #    Log in with valid uat.zerobias.com credentials
-#    Observe: DevTools → Network tab → requests going to localhost:15002
+#    Observe: DevTools → Network tab → requests going to localhost:15100
 #    Observe: DevTools → Application → Cookies → Domain: localhost (not uat.zerobias.com)
 
 # 6. After login, navigate to SPA
-#    Open http://localhost:15002/sme-mart/
+#    Open http://localhost:15100/sme-mart/
 #    SPA should load with session (no redirect to login)
 #    Network tab shows requests with cookies
 
@@ -196,7 +198,7 @@ zbb up cloudfront-sim
 
 ## Troubleshooting
 
-### Issue: `curl http://localhost:15002/sme-mart/` returns 502 Bad Gateway
+### Issue: `curl http://localhost:15100/sme-mart/` returns 502 Bad Gateway
 **Cause:** minio not running or cloudfront-sim can't reach it.
 **Fix:**
 ```bash
@@ -279,7 +281,7 @@ zbb stack add ./zbb-stacks/sme-mart-login
 
 | Var | Default | Where Set | Override |
 |-----|---------|-----------|----------|
-| `CLOUDFRONT_SIM_PORT` | 15002 (fixed) | zbb.yaml | `zbb env set CLOUDFRONT_SIM_PORT 15003` |
+| `CLOUDFRONT_SIM_PORT` | 15100 (zbb-allocated; `value: "15002"` in zbb.yaml was treated as a hint and overridden at slot creation) | `~/.zbb/slots/<slot>/stacks/cloudfront-sim/.env` | `zbb env set CLOUDFRONT_SIM_PORT <port>` |
 | `SPA_REPO_PATH` | `../../../` (app root) | zbb.yaml | `zbb env set SPA_REPO_PATH /abs/path` |
 | `LOGIN_REPO_PATH` | `../../../login` | zbb.yaml | `zbb env set LOGIN_REPO_PATH /abs/path` |
 | `AWS_ENDPOINT` | (from minio) | imported | Set via minio stack |

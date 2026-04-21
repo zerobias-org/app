@@ -84,8 +84,16 @@ case "${1:-start}" in
       exit 1
     fi
 
-    echo "Uploading SPA files to minio..."
-    $MC cp --recursive "$BUILD_DIR"/* "${ALIAS_NAME}/${MINIO_BUCKET}/"
+    # Angular 21 builder emits SPA assets under dist/<app>/browser/ (SSR-aware layout).
+    # nginx proxies /sme-mart/ -> minio://sme-mart-app/ (bucket root), so upload from
+    # browser/ if it exists; otherwise fall back to build-dir root for older layouts.
+    UPLOAD_DIR="$BUILD_DIR"
+    if [[ -d "$BUILD_DIR/browser" && -f "$BUILD_DIR/browser/index.html" ]]; then
+      UPLOAD_DIR="$BUILD_DIR/browser"
+    fi
+    echo "Uploading SPA files to minio (from $UPLOAD_DIR)..."
+    # --overwrite ensures index.html + hashed bundles replace the stale copies from prior builds.
+    $MC mirror --overwrite --remove "$UPLOAD_DIR" "${ALIAS_NAME}/${MINIO_BUCKET}/"
     echo "✓ Upload complete: $MINIO_BUCKET/"
 
     # Write nginx location block for cloudfront-sim (D-12, D-14)
@@ -124,13 +132,19 @@ EOF
       cp "$CONF_FILE" "$CONF_TARGET" 2>/dev/null || echo "  (location block will be injected by hand if needed)"
     fi
 
-    # Reload nginx (D-14) — B1 FIX: Use cloudfront-sim-nginx (actual container name) instead of ${STACK_NAME}-cloudfront-sim
-    # Remove silent fallback: if reload fails, exit with error
+    # Reload nginx (D-14) — find the cloudfront-sim nginx container by compose label.
+    # zbb substitutes ${STACK_NAME} with the slot name, not the stack alias, so the
+    # container name is unpredictable (e.g. sme-mart-local-nginx, not cloudfront-sim-nginx).
     echo "Reloading nginx in cloudfront-sim container..."
-    if docker exec cloudfront-sim-nginx nginx -s reload; then
-      echo "✓ nginx reloaded"
+    CFS_CONTAINER=$(docker ps --filter "label=com.docker.compose.service=nginx" --filter "label=zerobias.slot" --format '{{.Names}}' | head -1)
+    if [ -z "$CFS_CONTAINER" ]; then
+      echo "ERROR: cloudfront-sim nginx container not found — is cloudfront-sim running?"
+      exit 1
+    fi
+    if docker exec "$CFS_CONTAINER" nginx -s reload; then
+      echo "✓ nginx reloaded ($CFS_CONTAINER)"
     else
-      echo "ERROR: nginx reload failed — is cloudfront-sim running?"
+      echo "ERROR: nginx reload failed in $CFS_CONTAINER"
       exit 1
     fi
     ;;
