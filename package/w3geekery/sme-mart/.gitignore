@@ -65,6 +65,7 @@ src/environments/environment.neon.ts
 .claude/design/
 .claude/plans-archive/
 .claude/scripts/node_modules/
+.claude/scripts/.stitch-project-id
 .claude/plans/
 .claude/notes/plans/
 .claude/notes/meetings/**/*.docx
