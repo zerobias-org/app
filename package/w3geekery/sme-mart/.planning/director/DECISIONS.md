@@ -1,5 +1,38 @@
 # Director Decisions
 
+## ServiceOfferings Defer With Brian — Data-Model Brian Asks Block, Copy/Branding Don't
+**Date:** 2026-04-24
+**Decision:** `ServiceOffering` records are NOT seeded in v1.4. All ServiceOffering work — including the previously-planned placeholder tier values (Free / Growth $99/mo / Enterprise $999/mo) — defers until Brian confirms the pricing structure. This supersedes the "placeholder tier values ship in Phase 26" clause from the "v1.4 Phase 29 Deferred to v1.5" decision below.
+
+**Refinement of the broader "Brian Asks Are Placeholders" rule:** the rule applies to **copy/branding-layer Brian asks** (logos, ToS URLs, marketing blurbs, final tier names) — those ship with sensible defaults regardless. The rule does NOT apply to **data-model Brian asks** (what tiers exist, what they cost, how the hierarchy is structured, which compliance gates exist) — those block because downstream schemas, pricing calculations, and access-control logic depend on the decision and will need rework if the data model changes later.
+
+ServiceOffering tier structure is a data-model decision: it fixes the records we'd have to backfill or migrate if the tier scheme changes. Shipping placeholder $99/$999 values creates an implicit commitment that is harder to walk back than missing data.
+
+**Phase 26 scope after this decision:**
+- KEEP: ZB-as-provider identity record (`MarketplaceProfileItem` or equivalent)
+- KEEP: `company_info` convention doc (`COMPANY-INFO-CONVENTION.md`) — applies to ALL providers, not tier-specific
+- KEEP: Retroactive `Object.tag` push for W3Geekery walkthrough records (Engagement + SmeMartProject)
+- KEEP: TAG-SHAPE-TEST-C residue cleanup via `markDeleted`
+- REMOVE: Three ServiceOffering records (SP-03 in the original brief)
+- REMOVE: Unit tests for ServiceOffering rendering (SP-06's tier portion)
+
+**Phase 30 scope after this decision:**
+- KEEP: Default project board rendering the seeded SmeMartProject
+- KEEP: Three "Coming Soon" placeholder surfaces (Org Documents 046, Engagement Dashboard 066, Message Center 065)
+- REMOVE: Tier placeholder banner ("you're on the Free tier...") — PB-05 in the original brief
+
+**Why:** Clark direction 2026-04-24. The original "placeholder values ship, Brian refines later" framing conflated data-model with display-layer decisions. When Brian hasn't confirmed the tier structure, shipping $99/$999 ServiceOffering records isn't a placeholder — it's a guess at Brian's decision that bakes into the data model and costs more to undo than to defer.
+
+**How to apply:** When a future decision surfaces a Brian-dependency, classify it:
+- If the decision shapes schemas, records, pricing calculations, access-control logic, or other structural commitments → BLOCK until Brian confirms
+- If the decision only affects copy, URLs, branding assets, or display text → SHIP PLACEHOLDERS
+
+**Anti-pattern:** Treating all Brian asks uniformly under the "placeholders ship" rule without asking whether the placeholder is display-layer (cheap to update) or data-model (costly to migrate).
+
+**Triggers for revisit:** Brian confirms tier structure (via meeting, Slack, or platform-task in the default ZB engagement). At that point, a follow-up phase or hotfix creates the ServiceOffering records and the tier-display surface.
+
+
+
 ## Object.tag Field Shape — Validated via UAT Experiment
 **Date:** 2026-04-24
 **Decision:** The `Object.tag` field (inherited property on every class, `propertyId` `65aadece-c352-4d59-8137-6ae03b98506d`, `dataTypeName: "tag"`, `dataTypeType: "object"`, `multi: true`) accepts at Pipeline.receive ingest time in this canonical shape:

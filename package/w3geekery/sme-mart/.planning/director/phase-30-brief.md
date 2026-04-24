@@ -24,7 +24,7 @@ A functional default project board that the authenticated, onboarded user lands 
 ### Deliverables
 
 1. **Default project board route + component** (`src/app/default-project-board/*`). Entry point per Phase 27 routing. Shows:
-   - Engagement header (name, description, tier display banner in placeholder form — "You're on the Free tier" or similar; real tier display is v1.5 Phase 29).
+   - Engagement header (name, description). No tier display — that's deferred to v1.5 pending Brian's tier-structure decision (see DECISIONS.md "ServiceOfferings Defer With Brian").
    - Default project content — whatever SmeMartProject rendering SME Mart already uses, parameterized for the default project ID.
    - 3 navigation/tab surfaces: Org Documents, Engagement Dashboard, Message Center.
 2. **3 "Coming Soon" placeholder surfaces.** Each is a standalone Angular component + route:
@@ -34,8 +34,7 @@ A functional default project board that the authenticated, onboarded user lands 
    - Optional: "Notify me when ready" button that either just toasts or files a tag on the user's MarketplaceProfileItem (implementation choice — simpler is better for v1.4).
    - Links back to the default project board.
 3. **Navigation integration.** The 3 surfaces are reachable from the default project board (tabs, cards, sidebar — whichever fits existing SME Mart nav patterns). If a user deep-links to them outside the board, they render the same placeholder — not a 404.
-4. **Tier-display placeholder banner.** Informational banner on the board: "You're on the Free tier — Growth and Enterprise coming soon". Static copy; Brian may refine later. No tier-switch UI in v1.4.
-5. **Unit tests** for: default board renders with the seeded project, 3 Coming Soon components render their placeholder content, navigation links resolve correctly.
+4. **Unit tests** for: default board renders with the seeded project, 3 Coming Soon components render their placeholder content, navigation links resolve correctly.
 
 ## Requirements
 
@@ -43,9 +42,10 @@ A functional default project board that the authenticated, onboarded user lands 
 - **PB-02:** Default project content (name, description, any existing SmeMartProject widgets) renders for the seeded default project.
 - **PB-03:** 3 "Coming Soon" surfaces exist as components + routes, each with its own disabled-styled placeholder content.
 - **PB-04:** Coming-Soon surfaces are reachable from the board AND deep-linkable.
-- **PB-05:** Tier placeholder banner renders on the board.
 - **PB-06:** No half-built functional UI in the 3 Coming-Soon surfaces — they are honest placeholders only.
 - **PB-07:** Unit tests cover the board + each placeholder component's rendering.
+
+**Removed from scope (see DECISIONS.md):** PB-05 (tier placeholder banner) — deferred until Brian confirms tier structure.
 
 ## Dependencies
 
@@ -60,20 +60,20 @@ A functional default project board that the authenticated, onboarded user lands 
 - Default project content matches Phase 26 seed (name: "SME Mart Platform Development" for W3Geekery; real values per the seeded Org).
 - Click "Org Documents" → Coming Soon placeholder; navigate back to board works.
 - Direct URL `/org-documents` → same placeholder renders.
-- Tier banner visible and readable.
 - Nothing crashes if the default project is missing — fall back gracefully with a "default project is missing, please contact support" inline message (Phase 27 should have prevented this, but defensive UX).
 
 ## Out of scope
 
 - Real implementation of 046 (Org Documents) / 066 (Engagement Dashboard) / 065 (Message Center) — all v1.5+.
+- Tier display entirely — including placeholder banner — deferred until Brian confirms tier structure (DECISIONS.md "ServiceOfferings Defer With Brian").
 - Real tier enforcement / billing / upgrade flow (v1.5+).
-- Real tier-display design per Brian input (v1.5 Phase 29).
 - Multi-engagement switching on the board (v1.5+; default engagement is the only scope for v1.4).
 - Board customization / widget rearrangement (v1.5+).
 
 ## References
 
 - DECISIONS.md "v1.4 Backlog Adds — 046/066/065 as Coming Soon Placeholders"
-- DECISIONS.md "v1.4 Phase 29 Deferred to v1.5" (tier display deferred, placeholder banner here is fine)
+- DECISIONS.md "ServiceOfferings Defer With Brian — Data-Model Brian Asks Block, Copy/Branding Don't" (2026-04-24 — why PB-05 is removed)
+- DECISIONS.md "v1.4 Phase 29 Deferred to v1.5" (display-layer concerns deferred broadly)
 - BACKLOG.md entries 046, 066, 065 (full context for the deferred features)
 - ngx-library: `ZbEmptyStateContainerComponent` + `ZbSimplePanelComponent` (likely building blocks)
