@@ -132,10 +132,11 @@ This task IS the conceptual meta-tracker AND the engagement's `zerobiasTaskId`. 
 - `zerobiasTaskId`: UUID from Step B.
 - `dateCreated`: YYYY-MM-DD (date type, NOT datetime — refinement #11). Today's date.
 - `dateLastModified`: YYYY-MM-DD. Today's date.
+- `tag`: `[{ "value": "<zerobiasTagId from Step A>" }]` — array of `{value}` objects holding tag UUIDs. **Must be set AT INGEST TIME** — immutable post-ingest per Kevin. Validated shape (2026-04-24 experiment, see DECISIONS.md "Object.tag Field Shape").
 
 **Fields REMOVED per Plan 075 (do NOT include — will be rejected or ignored):** `category`, `budgetType`, `budgetMin`, `budgetMax`, `timeline`, `createdAt`, `updatedAt`. These moved to `SmeMartProject` or were dropped entirely. The earlier "Platform" category proposal is moot — no category field exists on Engagement (refinement #7).
 
-**Note on Pipeline.receive `tagIds` param:** Does NOT tag the ingested Object (refinements #15, #17). Semantics still unclear; possibly tags the batch-job record only. Do NOT rely on `tagIds` for Object discovery. See "Tag-at-ingest" section below for Kevin's clarification on how Object tagging actually works.
+**Note on Pipeline.receive `tagIds` param:** Does NOT tag the ingested Object (refinements #15, #17). Semantics still unclear; possibly tags the batch-job record only. Do NOT rely on `tagIds` for Object discovery — use the per-record `tag: [{ value }]` field (above) instead.
 
 **Verify:** GQL query using RFC4515 filter syntax (refinement #12): `Engagement(id: ".eq.<uuid>")`. NOT GraphQL `filter: { id: { EQ: ... } }`. Confirm record materialized within 30s with all fields. If GQL doesn't return the record, the pipeline is unhealthy or the class ID is wrong — STOP and diagnose before proceeding.
 
@@ -168,6 +169,7 @@ This task IS the conceptual meta-tracker AND the engagement's `zerobiasTaskId`. 
 - `wizardStep`: `999` (sentinel for "complete" — used by demo seeder for non-wizard records).
 - `dateCreated`: YYYY-MM-DD (date type).
 - `dateLastModified`: YYYY-MM-DD (date type).
+- `tag`: `[{ "value": "<zerobiasTagId from Step A>" }]` — same validated shape as Step C. Ties the Project to the same hydra Tag the Engagement carries, enabling tag-scoped discovery of both records together.
 
 **Fields to consider (refinement #5):** `category`, `budgetType`, `budgetMin`, `budgetMax`, `timeline` now live on SmeMartProject (moved from Engagement per Plan 075 — resolves the earlier Step E/C category-mismatch concern by moot). Values for the default-ZB project are TBD by the Phase 26 brief (ZB-as-provider seed with placeholder tiers). For the W3Geekery walkthrough these were left unset; Phase 26 will define the canonical values.
 
@@ -184,10 +186,9 @@ This task IS the conceptual meta-tracker AND the engagement's `zerobiasTaskId`. 
 **Implications:**
 - **No schema PR needed for backlog 005.** The `Object` base class already exposes the `tag` field (`propertyId: 65aadece-...`, fieldName `zerobias.zerobias.platform.schema.tag`, dataTypeName `tag`, `multi: true`). Just USE it at ingest time.
 - **W3Geekery walkthrough records have NO tags applied** (we passed batch-level `tagIds` to Pipeline.receive, which doesn't tag Objects; we never populated `data[i].tag`). Lean: accept for the proof-of-concept. Task↔Engagement bridging via shared `zerobiasTagId` + Step D's `tagResource` call still works.
-- **Open — field shape experiment (~30 min, fresh MCP session):** Push a throwaway Engagement-class record with various `tag` payload shapes (UUID array? tag-resource refs? tag objects with name/ownerId?); query back; document the recipe for the batch script. This runs against a disposable test record, not a real customer engagement.
-- **Open — READ endpoint:** Pending Kevin's reply on the read-side API name for Object tags. Without a read API, tags-as-data-discovery doesn't actually help us.
-
-**Once the field shape is known,** update Step C to include the correct `tag: [...]` value in the Pipeline.receive payload. Then the batch script gets tag-at-ingest for free on every new engagement it creates.
+- **Field shape validated 2026-04-24** (see DECISIONS.md "Object.tag Field Shape"): `tag: [{ value: "<hydra-tag-UUID>" }]` — array of objects, each with a required `value` property holding the tag UUID. Server stores literally, no normalization. Steps C and E above now include this field.
+- **READ-by-tag also validated 2026-04-24:** GQL via `graphql.Boundary.boundaryExecuteRawQuery` with structured Input filter — `ClassName(tag: { value: ".eq.<tag-uuid>" }) { ... }`. No separate endpoint needed. The Kevin-ask is closed.
+- **Test residue on UAT:** `SmeMartProject` record `TAG-SHAPE-TEST-C` (id `64047b6c-52e7-4592-ac1d-27f5020d1e01`) left after the experiment — Pipeline.receive doesn't allow delete-only batches. Clean up by including `markDeleted: ["64047b6c-..."]` in a future batch for class `c66114a2-48e2-5b93-b7d6-7ccd6ef45a03`.
 
 ## Completion status
 
@@ -205,10 +206,11 @@ See DECISIONS.md "Default ZB Engagement Bootstrap — W3Geekery" for the full ra
 
 ## Next actions (post-W3Geekery)
 
-1. **Object.tag field shape experiment** (~30 min, fresh MCP session, `uat-clark@w3geekery` profile lock) — validate what shape the `tag` field expects in Pipeline.receive payload. Documents the recipe for batch script.
-2. **Walk HIS as a second proof-of-concept** (~45 min, manual) — confirms recipe generalizes beyond W3Geekery before automation. Recommended at least once before encoding batch.
-3. **Encode batch script** (`.planning/director/batch-prime-engagements-for-existing-orgs.md`) — after HIS validation + Object.tag experiment. Script loops over existing platform Orgs, performs Steps A-E plus the validated tag-at-ingest payload.
-4. **Release MCP profile lock:** `~/.claude/scripts/zb-mcp-profile-lock.sh release uat-clark@w3geekery <purpose-slug>`.
+1. ~~**Object.tag field shape experiment**~~ — **DONE 2026-04-24.** Validated shape is `tag: [{ value: "<tag-uuid>" }]`; folded into Steps C + E above and into DECISIONS.md.
+2. **Walk HIS as a second proof-of-concept** (~45 min, manual) — confirms recipe generalizes beyond W3Geekery before automation. Recommended at least once before encoding batch. Now includes the validated tag-at-ingest payload for both Engagement and SmeMartProject.
+3. **Encode batch script** (`.planning/director/batch-prime-engagements-for-existing-orgs.md`) — after HIS validation. Script loops over existing platform Orgs, performs Steps A-E with the full validated payload including `tag: [{ value }]`. Also includes a cleanup pass for the `TAG-SHAPE-TEST-C` residue record.
+4. **Update on HIS walkthrough or batch run:** also retroactively push the walkthrough Engagement + SmeMartProject records with the tag field populated, since those were created before the shape was known and currently have no tags applied.
+5. **Release MCP profile lock:** `~/.claude/scripts/zb-mcp-profile-lock.sh release uat-clark@w3geekery <purpose-slug>`.
 
 ## Failure handling and rollback
 

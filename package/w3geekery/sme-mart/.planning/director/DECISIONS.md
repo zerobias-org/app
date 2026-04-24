@@ -1,5 +1,44 @@
 # Director Decisions
 
+## Object.tag Field Shape — Validated via UAT Experiment
+**Date:** 2026-04-24
+**Decision:** The `Object.tag` field (inherited property on every class, `propertyId` `65aadece-c352-4d59-8137-6ae03b98506d`, `dataTypeName: "tag"`, `dataTypeType: "object"`, `multi: true`) accepts at Pipeline.receive ingest time in this canonical shape:
+
+```
+"tag": [ { "value": "<hydra-tag-UUID>" } ]
+```
+
+- Array of objects (matching `multi: true`).
+- Each object has a required `value` property holding the tag UUID.
+- Server stores the value literally — no auto-enrichment with tag name/ownerId/type.
+- Schema validator accepts `oneOf`: single object (`{ value: ... }`) OR the array form. Prefer the array form to match `multi: true` semantics and handle the multi-tag case.
+
+**Evidence:** Pushed a throwaway `SmeMartProject` record on UAT via `platform.Pipeline.receive` with `tag: [{ value: "a81cd320-243e-44eb-bdd9-9824019ef3dd" }]`. First attempt with `[{ id: "..." }]` failed schema validation with a leaked error that specified the required `value` property; corrected attempt succeeded. Verified via `platform.Object.getVersionByObjectIdOrVersionId` that the tag materialized on the stored object exactly as pushed.
+
+**Test artifacts (residue on UAT — clean up in a future batch):**
+- Record: `TAG-SHAPE-TEST-C`
+- Schema id: `64047b6c-52e7-4592-ac1d-27f5020d1e01`
+- Internal Object id: `ae2f6996-665f-4b97-86b0-66e5afded26f`
+- Cleanup path: include `markDeleted: ["64047b6c-52e7-4592-ac1d-27f5020d1e01"]` in a future Pipeline.receive batch targeting class `c66114a2-48e2-5b93-b7d6-7ccd6ef45a03` (SmeMartProject). Pipeline.receive requires `data` to be non-empty so it cannot be a delete-only batch.
+
+**Why:** Refinement #18 of the W3Geekery walkthrough noted `platform.Object.tag` (post-ingest call) was a write-only stub. Kevin (CIO) clarified 2026-04-23 that tags are immutable post-ingest and must be set at ingest time via the inherited `Object.tag` field. This experiment validates the exact payload shape needed — unblocking (a) the batch-prime engagement script, and (b) any future code path that wants Object-level tags for discovery.
+
+**Anti-pattern:** Guessing the shape from the class description (`multi: true`, `dataTypeName: "tag"`) instead of pushing a test record and letting the validator tell us. Three of four plausible shapes (UUID string, `{id: ...}` ref, full `{id, name, ownerId}` ref) would have been accepted-at-lint but rejected-at-ingest; only `{ value: ... }` was correct. Validator-driven discovery via a throwaway push is cheaper than reading the whole dataType schema tree.
+
+**Implications for bootstrap brief + batch script:**
+- Step C (Engagement) and Step E (SmeMartProject) of `bootstrap-w3geekery-engagement.md` now include `tag: [{ value: "<zerobiasTagId>" }]` in the Pipeline.receive payload. Folded in 2026-04-24.
+- Step D (`hydra.Resource.tagResource` on the Engagement Task) remains necessary. The Task is a hydra Resource, NOT a Pipeline-ingested class-Object. The tag-at-ingest mechanism only applies to the latter.
+- Backlog 005 no longer has open questions. Status moves from "open experiment" to "validated recipe in bootstrap brief".
+
+**READ paths also validated 2026-04-24 (no Kevin-ask needed):**
+- **Read-by-id:** `platform.Object.getVersionByObjectIdOrVersionId(<internal-object-uuid>)` returns the full record including the `tag` array — verified during the write experiment.
+- **Read-by-tag (discovery):** GQL via `graphql.Boundary.boundaryExecuteRawQuery` with structured Input filter — `ClassName(tag: { value: ".eq.<tag-uuid>" }) { ... }`. Verified: returned exactly the `TAG-SHAPE-TEST-C` record when filtered by its tag UUID; returned empty when filtered by unrelated tags; returned all 19 `SmeMartProject` records when unfiltered.
+- Filter syntax: `zerobias.*.schemaInput` types accept `.eq.` dot-prefix RFC4515 inside property values. For the tag field: `{ value: ".eq.<uuid>" }`. Other operators (`.sw.`, `.in.`, etc.) presumably work — untested.
+
+No separate tag-discovery endpoint needed; the existing GQL path is sufficient. The open question for Kevin is closed.
+
+
+
 ## Default ZB Engagement Bootstrap — W3Geekery (proof-of-concept run, UAT)
 **Date:** 2026-04-23 (walkthrough completed end-of-day)
 **Decision:** Manual walkthrough of the default-ZB engagement creation recipe completed successfully on UAT. W3Geekery is the first proof-of-concept Org. Recipe is validated for batch generalization to all other existing platform Orgs.
