@@ -7,18 +7,19 @@ export const environment = {
   isLocalDev: true,
   socketUrlPath: '', // Empty = no WebSocket connection (portal-only feature)
   localPortalOrigin: 'http://localhost:4200',
+  apiHostname: '',
   cdnUrl: '',
-  // Generic SQL Hub Module connection (QA)
-  smeMartConnectionId: 'e3c874f5-5fd8-4fbc-8120-19861e28b19e',
+  // Generic SQL Hub Module connection — UAT SME Marketplace DEV boundary, @auditlogic/module-auditmation-generic-sql@0.5.0
+  smeMartConnectionId: 'a7b22df3-dee5-443a-b562-0256d86e46ec',
   // DB access mode: 'hub' = DataProducer via Hub Module, 'neon' = direct Neon HTTP
-  // Use 'neon' while Hub Module is unavailable, switch to 'hub' when ready
+  // Dev defaults to 'neon' for fastest local iteration; flip to 'hub' locally to exercise the published-build path against UAT Hub.
   dbMode: 'neon' as 'hub' | 'neon',
   // Neon connection string (only used when dbMode='neon')
   // Generated from NEON_DATABASE_URL in .env.local via scripts/gen-neon-env.mjs
   neonConnectionString: NEON_DATABASE_URL,
-  // AuditgraphDB Pipeline + Boundary (UAT — SME Marketplace boundary, Zerobias org)
+  // AuditgraphDB Pipeline + Boundary (UAT — SME Marketplace DEV boundary, W3Geekery org)
   pipelineId: 'f6d1f579-fe02-4158-b99e-a55113fd70cb',
-  boundaryId: 'e3871f0b-56f0-4e5e-87c6-6ca196bf88c7',
+  boundaryId: 'c15fb2dc-4f8c-48b5-b27a-707bd516b005',
   // Feature flags
   featureFlags: {
     /** User prefs backend: 'localStorage' (fast, no network) or 'pkv' (cross-device sync via ZB API).

@@ -3,8 +3,10 @@ export const environment = {
   isLocalDev: false,
   socketUrlPath: '', // Empty = no WebSocket connection (portal-only feature)
   localPortalOrigin: '',
+  apiHostname: '',
   cdnUrl: 'https://cdn.zerobias.com',
-  smeMartConnectionId: '', // Set per deployment
+  // TODO(prod-hub): Kevin to provision prod generic-sql deployment + connection against prod Neon; set UUID when ready. Blocks first prod release.
+  smeMartConnectionId: '',
   dbMode: 'hub' as 'hub' | 'neon',
   neonConnectionString: '', // Never used in prod — Hub Module handles credentials
   // AuditgraphDB Pipeline + Boundary (prod — Zerobias org)

@@ -268,18 +268,20 @@ Engagement tags are on the engagement entities (corp-to-corp). Projects inherit 
 | `sme-mart.eng.healthtech` | `3b2e84a6-52bc-41d7-8e8c-5e78e65a033c` |
 
 ### Tasks (on UAT)
-All tasks are in boundary **"SME Marketplace"** (`e3871f0b-56f0-4e5e-87c6-6ca196bf88c7`).
+All tasks are in boundary **"SME Marketplace DEV"** (`c15fb2dc-4f8c-48b5-b27a-707bd516b005`), W3Geekery org.
 
 | Task Code | Task Name | UAT Task ID |
 |-----------|-----------|-------------|
-| `aha1-1` | SOC 2 Readiness Assessment | `abc5d715-b97d-4c76-a24b-95c643b68795` |
-| `aha1-2` | NIST CSF Gap Analysis | `c3b5fc15-2cf3-406d-961b-570f78689821` |
-| `aha1-3` | Compliance Automation Setup | `3a6799c6-65ea-4833-9cf9-3f739f0fe587` |
-| `aha1-4` | FedRAMP Authorization Support | `900dfe93-ad93-4c02-996c-a8c13700e8ab` |
-| `aha1-5` | ISO 27001 Evidence Collection | `d9895a40-38a4-4dad-9e8a-6ee588104cf0` |
+| `aha1-1` | SOC 2 Readiness Assessment | `fb45b170-aae7-4991-a6ab-fc33b73d062f` |
+| `aha1-2` | NIST CSF Gap Analysis | `43ce8d38-6335-4ee7-a782-01b4257d7239` |
+| `aha1-3` | Compliance Automation Setup | `371abdc5-1d31-479d-98e4-d83462592b46` |
+| `aha1-4` | FedRAMP Authorization Support | `3ec47264-7ec0-46ce-bf24-6c4d087f89de` |
+| `aha1-5` | ISO 27001 Evidence Collection | `ff4f20f0-61d3-4723-9a35-c0d3eeb3d16c` |
+
+**Deprecated (pending deletion):** the prior ZeroBias-org boundary `SME Marketplace` (`e3871f0b-56f0-4e5e-87c6-6ca196bf88c7`) contains old versions of these same 5 tasks with the `ENG <slug>:` name prefix. Those are scheduled for deletion after W3Geekery cutover is verified.
 
 ### Boundary
-All engagements share boundary **"SME Marketplace"**: `e3871f0b-56f0-4e5e-87c6-6ca196bf88c7`
+All engagements share boundary **"SME Marketplace DEV"**: `c15fb2dc-4f8c-48b5-b27a-707bd516b005` (W3Geekery org).
 
 ---
 

@@ -75,7 +75,7 @@ lifecycle:
     docker run --rm -v cloudfront-sim-conf:/mnt alpine:latest rm -f /mnt/sme-mart-spa.conf && docker exec cloudfront-sim-nginx nginx -s reload || true
 
   health:
-    command: "curl -sf ${CLOUDFRONT_SIM_URL}${SPA_BASE_PATH}/ | grep -q '<html>'"
+    command: "curl -sf ${CLOUDFRONT_SIM_URL}${SPA_BASE_PATH}/ | grep -qi '<html'"
     interval: 2
     timeout: 30
     retries: 10

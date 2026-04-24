@@ -17,9 +17,11 @@
 | Category | Count |
 |---|---|
 | Missing reference architecture / recipes | 3 |
-| Documentation gaps | 2 |
-| Tooling gaps / ergonomics | 2 |
+| Documentation gaps | 3 |
+| Tooling gaps / ergonomics / CLI design | 5 |
 | Conflicts with 3rd-party tooling | 1 |
+
+Total: 12 findings.
 
 ---
 
@@ -47,23 +49,13 @@ Phase 19 goal is "bring SME Mart SPA + login online locally, serving from a Clou
 
 ---
 
-### 002 — Hub-server opacity for 3rd-party consumers
+### 002 — zbb could ship a `@zerobias-com/hub-server` built-in stack
 
-**Category:** Missing reference architecture / Documentation gap
+**Category:** Missing reference architecture (zbb slice)
 **Date:** 2026-04-16
 **Phase:** 19 (original plan)
 
-**What happened:**
-Phase 19 original scope included running a local `hub-server` that loads the SME Mart Hub module from a local Verdaccio registry (`@zerobias-com/registry` built-in stack). Plan required writing a `Dockerfile` for hub-server. Planner couldn't determine: (a) runtime (Java? Node?), (b) whether `zerobias-org/hub` publishes a Docker image, (c) how hub-server discovers/loads modules at startup (env vars? CLI flags? `npm install` from registry URL?). No design doc explains this. Had to escalate to Kevin. Ultimately descoped the hub-server piece and deferred to backlog 089 to avoid blocking Phase 19 on the unknown.
-
-**Impact:**
-- One ~full-session blocker that required human escalation to Kevin.
-- Backlog item 089 created to preserve the work when hub-server is understood.
-- LS-02 requirement deferred.
-
-**Suggested improvement:**
-- zbb should either ship a `@zerobias-com/hub-server` built-in stack (so consumers just add it and specify the module), or the `zerobias-org/hub` repo should have a top-level README: "Running hub-server locally: Docker image location, module loading model, required env vars."
-- The "run a local Hub module against a local registry" workflow is exactly the kind of thing 3rd-party devs will want, and it's opaque today.
+Running a local hub-server to load a custom module from a local registry is an obvious 3rd-party workflow that has no zbb on-ramp today. Consumers would benefit from a `hub-server` built-in stack (similar to `@zerobias-com/registry`) that accepts a module coordinate and just works. The broader "how does hub-server load modules at runtime" opacity is a `zerobias-org/hub` docs issue, not zbb — filed separately. Phase 19 descoped this (LS-02 deferred to backlog 089).
 
 ---
 
@@ -124,23 +116,13 @@ First gsd-plan iteration put `npm run build` inside `setup.sh` (which runs on ev
 
 ---
 
-### 006 — Port collision: minio default (9000) vs common reverse-proxy port (9000)
+### 006 — No static port-conflict detection at `zbb stack add`
 
-**Category:** Conflicts with 3rd-party tooling
+**Category:** Tooling ergonomics
 **Date:** 2026-04-17
 **Phase:** 19 (replan)
 
-**What happened:**
-`zb/ui/scripts/gateway.js` uses port 9000 by default. Minio also uses port 9000 by default. A cloudfront-sim stack fronting a minio stack on the same slot can't use port 9000 — they collide. Requires changing the default on one side.
-
-**Impact:**
-- Not a blocker, but a gotcha that needs explicit handling in every stack that composes nginx + minio.
-- Planner's initial recommendation (use 9000 to mirror gateway.js) was wrong for SME Mart's context and required Director correction to 15002.
-
-**Suggested improvement:**
-- `zbb` could detect port conflicts at `zbb stack add` time (not just at `zbb up` time) by statically inspecting declared ports in composed stacks.
-- Built-in stacks should document their default ports in a single reference table so consumers can plan around them.
-- Consider: minio uses a less-contested port (9000 is a popular default for many tools — Portainer, PHP-FPM via some configs, etc.).
+Port collisions (minio 9000 vs reverse-proxy 9000 was the specific case, but any pair of built-in stacks with overlapping defaults hits this) surface at `zbb up` time when containers fail to bind — not at `zbb stack add` time when declared ports could be compared statically. A pre-flight check at `stack add` (and/or a reference table of built-in stack default ports) would let consumers plan ports ahead of bring-up instead of debugging bind failures.
 
 ---
 
@@ -241,32 +223,81 @@ imports:
 
 ---
 
-### 011 — `zbb build <stack>` hardcoded to Gradle; ignores `lifecycle.build:` from stack manifest
+### 011 — zbb CLI commands (`build`, `stop`, and likely others) require a Gradle project
 
-**Category:** Tooling gap / feature request
-**Date:** 2026-04-17
-**Phase:** 19 v2 execution
+**Category:** Tooling gap / CLI design
+**Date:** 2026-04-17 (build), 2026-04-21 (stop)
+**Phase:** 19 v2 execution; re-surfaced at close-out
 
 **What happened:**
-Phase 19 stack manifests defined `lifecycle.build: bash setup.sh build` (for Angular SPA: invokes `npm run build:stack`; for login: invokes `npm run build`). Running `zbb build sme-mart-spa` errored with:
+Multiple zbb CLI commands fail outside a Gradle-backed repo with:
 
 ```
 zbb: requires a Gradle project. Run from a directory with gradlew
 ```
 
-So `zbb build` is hardcoded to `./gradlew monorepoBuild` regardless of what the stack's `lifecycle.build:` hook declares. Forced consumers to bypass zbb entirely and run `npm run build:stack` directly from the app root — which means `zbb build` is misleading for non-Gradle stacks (people will reach for it and get an unhelpful error).
+Two confirmed instances, same root cause:
+- **`zbb build <stack>`** — hardcoded to `./gradlew monorepoBuild`. Ignores `lifecycle.build:` from the stack manifest (`bash setup.sh build`, `npm run build:stack`, etc.). Forced consumers to bypass zbb entirely and invoke their own toolchain from the app root.
+- **`zbb stop <stack>`** — fails from the same app directory where `zbb up` worked minutes before. Consumer apps that `zbb stack add` + `zbb up` have no zbb-native teardown path; must fall back to `docker stop` / `docker rm` with manually-discovered container names (compounds finding 013).
+
+Presumably `restart`, `status`, `logs`, etc. fail the same way — not tested, but the pattern is "zbb shells through Gradle regardless of what the command is or whether it needs Gradle."
 
 **Impact:**
-- zbb CLI's build command is effectively broken for any stack not built with Gradle.
-- Stack manifests' `lifecycle.build:` declarations become documentation-only, not invocable.
-- Consumers must know to bypass zbb for build and run their own toolchain directly.
+- Inconsistent CLI surface: `zbb up` works from a non-Gradle directory; `zbb build` / `zbb stop` don't.
+- Stack manifests' `lifecycle.*` declarations become documentation-only, not invocable.
+- Breaks the "zbb manages stacks end-to-end" mental model — it manages bring-up but not build or teardown for non-Gradle consumers.
+- Affects any 3rd-party dev building an app (Angular, React, Next.js, etc.) as a zbb stack. The module-authoring path is Gradle-centric; the consumer-app path isn't, but zbb doesn't know the difference.
+- Error message is misleading — "requires a Gradle project" suggests the user is in the wrong directory, when actually the command itself is coupled to Gradle.
 
 **Suggested improvement (feature request):**
-- `zbb build <stack>` should honor `lifecycle.build:` from the stack manifest when present. Fall back to Gradle only if no lifecycle hook defined.
-- Alternatively: rename the Gradle-only command to `zbb gradle-build` or similar, and make `zbb build` the lifecycle-driven entrypoint.
-- stacks-guide.md should clarify: "Today `zbb build` is Gradle-specific; use your stack's toolchain directly for non-Gradle builds."
+- Decouple lifecycle commands (`up`, `stop`, `restart`, `status`, `logs`) from the Gradle-project requirement. These operate on docker compose and don't need Gradle.
+- `zbb build` should honor `lifecycle.build:` from the stack manifest when present, falling back to Gradle only if no lifecycle hook is defined. Alternative: rename the Gradle-only command (`zbb gradle-build`) and make `zbb build` the lifecycle-driven entrypoint.
+- Gradle-coupling should be limited to module/build-toolchain commands (`zbb publish`, etc.) where it's actually needed.
+- Error message should distinguish "this command needs Gradle" vs. "zbb needs *some* context" — current message is misleading because `zbb up` worked from the exact same directory.
 
-This affects any third-party dev building an app (Angular, React, Next.js, etc.) as a zbb stack — the module-authoring path is Gradle-centric but consumer apps aren't.
+**Workaround:** For build, invoke the app's toolchain directly (`npm run build:stack`). For stop, use docker directly:
+```bash
+docker stop sme-mart-local-nginx sme-mart-local-minio
+docker rm sme-mart-local-nginx sme-mart-local-minio
+```
+
+---
+
+### 013 — `${STACK_NAME}` substitution is the slot name, not the stack alias
+
+**Category:** Documentation gaps / Tooling gaps
+**Date:** 2026-04-20
+**Phase:** 19 (UAT re-verification)
+
+**What happened:**
+`zbb-stacks/cloudfront-sim/compose.yml` declares `container_name: "${STACK_NAME}-nginx"`. Phase 19 planners (and I) assumed `${STACK_NAME}` would be substituted with the stack's own name — `cloudfront-sim` — producing a container named `cloudfront-sim-nginx`. Both `sme-mart-spa/setup.sh` and `sme-mart-login/setup.sh` hardcoded that expectation in their `docker exec cloudfront-sim-nginx nginx -s reload` step, with a comment literally saying *"B1 FIX: use cloudfront-sim-nginx (actual container name)"*.
+
+In practice `${STACK_NAME}` is substituted with the **slot** name (e.g. `sme-mart-local`), so the real container is `sme-mart-local-nginx`. The setup script's `docker exec` fails with `No such container: cloudfront-sim-nginx`, blocking the entire SPA/login deploy step.
+
+Verified via `docker inspect`:
+```
+com.docker.compose.project: sme-mart-local
+com.docker.compose.service: nginx
+zerobias.slot:              sme-mart-local
+```
+
+**Impact:**
+- Setup-script bug that survived Phase 19 review.
+- Any dev who re-runs `zbb stack start` after the initial `zbb up` is guaranteed to hit this, because the SPA/login `start` lifecycle goes through setup.sh but the cloudfront-sim container isn't newly created (just the nginx reload).
+- Confusing because the `container_name` line *looks* parameterized by the stack's own identity, not the enclosing slot.
+
+**Suggested improvement (zbb docs / ergonomics):**
+- `stacks-spec.md` should explicitly document what `${STACK_NAME}` resolves to and when. The current naming implies "the stack" but it's really "the slot (which is the docker-compose project)". Either rename the variable (`${SLOT_NAME}` would be honest) or call it out loudly in the spec.
+- Better: expose a `${STACK_ALIAS}` or `${STACK_SELF}` variable so stacks that truly want per-stack container names can get them.
+- `stacks-guide.md` recipe for "stack A talks to stack B's container" should recommend **looking up the container by compose service label**, not by guessing a name string. Something like:
+  ```bash
+  docker ps --filter "label=com.docker.compose.project=${STACK_NAME}" \
+            --filter "label=com.docker.compose.service=nginx" \
+            --format '{{.Names}}'
+  ```
+- Cross-stack plumbing that assumes a hardcoded peer-container name needs a smoke test that exercises the exact `docker exec` path.
+
+**Workaround in this repo:** Patched both setup.sh files to resolve the cloudfront-sim nginx container by label (`com.docker.compose.service=nginx` + `zerobias.slot`). Fix is local; the underlying docs/tooling confusion remains.
 
 ---
 

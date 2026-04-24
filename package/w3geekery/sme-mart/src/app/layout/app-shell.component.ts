@@ -10,6 +10,7 @@ import { UserProfileDropdown } from '../shared/components/user-profile-dropdown/
 import { NotificationPanel } from '../shared/components/notification-panel/notification-panel.component';
 import { ImpersonationSwitcher } from '../shared/components/impersonation-switcher/impersonation-switcher.component';
 import { ImpersonationService } from '../core/services/impersonation.service';
+import { DemoModeService } from '../core/services/demo-mode.service';
 import { UserPreferencesService } from '../core/services/user-preferences.service';
 import { CatalogService } from '../core/services/catalog.service';
 
@@ -43,6 +44,7 @@ export class AppShell implements OnInit, OnDestroy {
   private readonly prefs = inject(UserPreferencesService);
   private readonly catalog = inject(CatalogService);
   readonly impersonation = inject(ImpersonationService);
+  readonly demoMode = inject(DemoModeService);
   private readonly subs = new Subscription();
 
   readonly isMobile = signal(false);
