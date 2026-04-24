@@ -5,9 +5,11 @@ export const environment = {
   isLocalDev: false, // Session-based auth in platform iframe, no API key
   socketUrlPath: '', // Empty = no WebSocket connection (portal-only feature)
   localPortalOrigin: '',
+  apiHostname: '',
   cdnUrl: 'https://cdn.zerobias.com',
-  smeMartConnectionId: '', // Hub Module not active yet — set when Phase 3 completes
-  dbMode: 'neon' as 'hub' | 'neon', // Switch to 'hub' when Hub Module connection is ready
+  // Generic SQL Hub connection — UAT SME Marketplace DEV boundary, @auditlogic/module-auditmation-generic-sql@0.5.0 (readwrite Neon role).
+  smeMartConnectionId: 'a7b22df3-dee5-443a-b562-0256d86e46ec',
+  dbMode: 'hub' as 'hub' | 'neon',
   neonConnectionString: '', // NEVER embed credentials in deployed builds
   // AuditgraphDB Pipeline + Boundary (UAT — SME Marketplace DEV boundary, W3Geekery org)
   pipelineId: 'f6d1f579-fe02-4158-b99e-a55113fd70cb',

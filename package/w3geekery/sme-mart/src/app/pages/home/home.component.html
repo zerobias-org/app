@@ -1,3 +1,8 @@
+<!-- Logo Hero -->
+<section class="logo-hero">
+  <img src="sme-mart-logo.svg" alt="SME Mart - Compliance Experts Marketplace" class="logo-hero-image" />
+</section>
+
 <!-- Hero -->
 <section class="hero">
   <h1>Find the Right Expert for Your Compliance Needs</h1>
@@ -14,8 +19,55 @@
   </div>
 </section>
 
-<!-- Categories -->
-@if (categories().length) {
+<!-- Getting Started -->
+<section class="getting-started">
+  <div class="section-header">
+    <h2>Get Started</h2>
+    <p class="getting-started-subtitle">
+      Tell us a bit about who you are so we can point you to the right place.
+    </p>
+  </div>
+  <div class="path-grid">
+    <mat-card appearance="outlined" class="path-card" (click)="goToBuyer()">
+      <mat-card-content>
+        <mat-icon class="path-icon">business</mat-icon>
+        <h3>I'm a Buyer</h3>
+        <p>
+          Looking for compliance experts to help your organization.
+          Set up your org profile so providers can find you.
+        </p>
+        <a mat-button color="primary">Set up org profile</a>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card appearance="outlined" class="path-card" (click)="goToProvider()">
+      <mat-card-content>
+        <mat-icon class="path-icon">support_agent</mat-icon>
+        <h3>I'm a Provider</h3>
+        <p>
+          Offering compliance expertise for hire. Build out your provider profile
+          so buyers can find and engage you.
+        </p>
+        <a mat-button color="primary">Build provider profile</a>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card appearance="outlined" class="path-card" (click)="goToProfileSettings()">
+      <mat-card-content>
+        <mat-icon class="path-icon">swap_horiz</mat-icon>
+        <h3>Both</h3>
+        <p>
+          You can be both &mdash; toggle buyer/provider/both in your profile settings
+          and we'll surface both paths.
+        </p>
+        <a mat-button color="primary">Open settings</a>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</section>
+
+<!-- Categories (hidden for now) -->
+@if (false) {
   <section class="categories-section">
     <h2>Browse by Category</h2>
     <div class="category-grid">
@@ -31,22 +83,24 @@
   </section>
 }
 
-<!-- Featured Providers -->
-<section class="featured-section">
-  <div class="section-header">
-    <h2>Featured Providers</h2>
-    <a mat-button routerLink="/providers">View all</a>
-  </div>
-
-  @if (loading()) {
-    <zb-empty-state-container [loading]="true" />
-  } @else if (featuredProviders().length) {
-    <div class="provider-grid">
-      @for (provider of featuredProviders(); track provider.id) {
-        <app-provider-card [provider]="provider" />
-      }
+<!-- Featured Providers (hidden for now) -->
+@if (false) {
+  <section class="featured-section">
+    <div class="section-header">
+      <h2>Featured Providers</h2>
+      <a mat-button routerLink="/providers">View all</a>
     </div>
-  } @else {
-    <zb-empty-state-container [loading]="false" emptyText="No providers yet" />
-  }
-</section>
+
+    @if (loading()) {
+      <zb-empty-state-container [loading]="true" />
+    } @else if (featuredProviders().length) {
+      <div class="provider-grid">
+        @for (provider of featuredProviders(); track provider.id) {
+          <app-provider-card [provider]="provider" />
+        }
+      </div>
+    } @else {
+      <zb-empty-state-container [loading]="false" emptyText="No providers yet" />
+    }
+  </section>
+}

@@ -224,6 +224,21 @@
     <mat-tab label="Settings">
       <div class="tab-content">
         <div class="settings-grid">
+          @if (demoMode.canToggle()) {
+            <mat-card>
+              <mat-card-header>
+                <mat-card-title>Demo Mode</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <mat-slide-toggle
+                  [checked]="demoMode.enabled()"
+                  (change)="toggleDemoMode()">
+                  Show demo data
+                </mat-slide-toggle>
+                <p class="setting-note">When off, only real customer data is visible across the entire app. Demo providers, reviews, and users are hidden.</p>
+              </mat-card-content>
+            </mat-card>
+          }
           <mat-card>
             <mat-card-header>
               <mat-card-title>Registration</mat-card-title>

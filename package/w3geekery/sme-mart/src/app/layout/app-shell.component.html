@@ -1,4 +1,4 @@
-@if (impersonation.isImpersonating()) {
+@if (impersonation.isImpersonating() && demoMode.showDemoData()) {
   <div class="impersonation-banner">
     <mat-icon>switch_account</mat-icon>
     <span>Viewing as <strong>{{ impersonation.effectiveUserName() }}</strong></span>
@@ -80,4 +80,6 @@
   </main>
 }
 
-<app-impersonation-switcher />
+@if (demoMode.showDemoData()) {
+  <app-impersonation-switcher />
+}

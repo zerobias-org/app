@@ -2,6 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { ZerobiasClientApp } from '@zerobias-com/zerobias-client';
 import { TranslateService } from '@ngx-translate/core';
 import { SmeMartDbService } from './services/sme-mart-db.service';
+import { DemoModeService } from './services/demo-mode.service';
 import { environment } from '../../environments/environment';
 
 /**
@@ -16,6 +17,7 @@ export class AppInitService {
   private readonly app = inject(ZerobiasClientApp);
   private readonly translate = inject(TranslateService);
   private readonly db = inject(SmeMartDbService);
+  private readonly demoMode = inject(DemoModeService);
 
   async init(): Promise<boolean> {
     this.translate.setDefaultLang('en');
@@ -45,9 +47,11 @@ export class AppInitService {
     );
 
     // Connect to Neon via Generic SQL Hub Module (non-blocking — don't fail app init)
-    this.db.connect().then((result) => {
+    this.db.connect().then(async (result) => {
       if (result.success) {
         console.log('[SmeMartDb] Connected to Generic SQL Hub Module');
+        await this.demoMode.init(this.db);
+        console.log(`[DemoMode] ${this.demoMode.enabled() ? 'ON' : 'OFF'} (canToggle: ${this.demoMode.canToggle()})`);
       } else {
         console.warn('[SmeMartDb] Connection failed:', result.error);
       }

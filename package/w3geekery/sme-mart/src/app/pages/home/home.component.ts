@@ -72,4 +72,16 @@ export class Home implements OnInit {
   getCategoryIcon(slug: string): string {
     return this.categoryIcons[slug] || 'category';
   }
+
+  goToBuyer(): void {
+    this.router.navigate(['/org']);
+  }
+
+  goToProvider(): void {
+    this.router.navigate(['/my-profile']);
+  }
+
+  goToProfileSettings(): void {
+    this.router.navigate(['/my-profile']);
+  }
 }
