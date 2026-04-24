@@ -8,17 +8,20 @@ SME Mart is a marketplace for Subject Matter Experts in compliance and cybersecu
 
 A transparent, task-gated marketplace where every boundary API operation requires task/subtask approval — demand/supply/transparency partitions at every level of the hierarchy.
 
-## Current Milestone: v1.3 Dev Experience, Hardening & Transparency
+## Current Milestone: v1.4 3P Onboarding & Default Engagement
 
-**Goal:** Ship buyer/vendor productivity polish (org switcher, form templates, org docs completion) while hardening the write path (fire-and-forget audit) and standing up local dev stacks to unblock Hub module + SPA iteration — plus lock the Transparency Controls UI spec.
+**Goal:** Wire authenticated ZB platform customers through a first-login flow: detect session, enforce the compliance-required default ZeroBias engagement (auto-created via the validated bootstrap recipe if missing), review-only company profile form pre-populated from platform data, land on a default project board with seeded ZB-as-provider content and honest "Coming Soon" placeholders for unfinished feature areas. W3Geekery dogfoods as first customer.
 
 **Target features:**
-- Org switcher user-menu dropdown — replaces the DevTools sessionStorage hack (P18)
-- zbb local dev stacks — SPA + Hub module + reusable CloudFront-sim stack for SPA and login (P19)
-- Fire-and-forget `pushEntity` audit + telemetry + opportunistic remediation (P20)
-- Org Documents Center completion — folders, color/tag, template surfacing, preview, time-boxed (P21)
-- Form Template Library — save/reuse/fork form templates, new `FormTemplate` schema class (P22)
-- Transparency Controls UI-SPEC lock + opportunistic implementation (P23)
+- Demo Data Visibility Gate — hide demo records from non-admin users via Object.tag filtering (P24)
+- Platform Data Audit — SDK inventory of pre-fillable org/user data for onboarding (P25)
+- ZB-as-Provider Seed — company_info convention, placeholder ServiceOffering tiers (P26)
+- Auth Gate + Onboarding Routing + Lazy Default-Engagement Guard (P27)
+- Company Profile Review/Confirm Form — pre-populated from platform data (P28)
+- Default Project Board + 3 "Coming Soon" placeholders (P30)
+- W3Geekery Dogfood + Production Smoke Test (P31)
+
+**Deferred from v1.3 to v1.5:** Phases 20-23 (Fire-and-Forget Audit, Org Documents Center, Form Template Library, Transparency Controls). Phase 29 (tier display / ToS / branding) also deferred to v1.5.
 
 ## Current State (after v1.1)
 
@@ -47,13 +50,16 @@ A transparent, task-gated marketplace where every boundary API operation require
 
 ### Active
 
+- [ ] Demo data visibility gate — Object.tag filtering, admin escape hatch (v1.4 P24)
+- [ ] Platform data audit — SDK inventory of pre-fillable fields (v1.4 P25)
+- [ ] ZB-as-provider seed — company_info convention, ServiceOffering tiers (v1.4 P26)
+- [ ] Auth gate + onboarding routing + lazy default-engagement guard (v1.4 P27)
+- [ ] Company profile review/confirm form — pre-populated, skip-for-now (v1.4 P28)
+- [ ] Default project board + "Coming Soon" placeholders (v1.4 P30)
+- [ ] W3Geekery dogfood + production smoke test (v1.4 P31)
 - [ ] Task/subtask partitioning into demand/supply/transparency (CEO P0, deferred)
 - [ ] Tasks as runtime access control — boundary API gating via task approval (deferred)
-- [ ] Hard requirements (1-5) / soft requirements (6-10) approval model (deferred)
-- [ ] Supply-side explicit resource requirements (ARN, IAM, data objects, schedule) (deferred)
-- [ ] Project Bloom UI (boards, tasks, activities, workflows) (deferred)
-- [ ] Neon table archival (scheduled 2026-04-02)
-- [ ] Transparency Center (aggregated rollups from subtask → project) (deferred)
+- [ ] Transparency Center (aggregated rollups from subtask -> project) (deferred)
 
 ### Out of Scope
 
@@ -68,10 +74,11 @@ A transparent, task-gated marketplace where every boundary API operation require
 ## Context
 
 - **Architecture:** Angular 21 standalone components, PipelineWriteService (writes) + GraphqlReadService (reads), optimistic updates for eventual consistency
-- **Pipeline:** `091d5068-0527-4f45-9839-37f6d5c1669e` (SME Mart Entity Pipeline)
+- **Pipeline (UAT):** `43f08afd-7ab9-4e99-a93c-619c46adaabe` (current SME Mart receiver)
+- **Deployment:** ZeroBias platform publishing (UAT: `uat.zerobias.com/sme-mart`). Branded login at `w3geekery.uat.zerobias.com`.
 - **Schema:** `zerobias-org/schema` YAML packages, auto-deployed on merge, 15-min reload. MarketplaceProfileItem added v1.1.
 - **Team:** Clark (W3Geekery contractor, 15 hrs/week), Kevin (CIO, platform), Brian (CEO, directives)
-- **Deployment:** Vercel (temporary), target: ZeroBias platform publishing
+- **W3Geekery default engagement (UAT):** Engagement `746010b7-dc99-436b-9142-8c4b85c5e623`, Project `ea4db55f-2c57-4567-a1be-6e7fd1a210bf`, Tag `a81cd320-243e-44eb-bdd9-9824019ef3dd`
 
 ## Constraints
 
@@ -94,6 +101,10 @@ A transparent, task-gated marketplace where every boundary API operation require
 | Profile items as pointers (not copies) | Vetting sees live profile updates | ✓ Good — no stale data |
 | /orgs/:orgId read-only | Editing stays on /org for current org | ✓ Good — clear separation |
 | Org switching stubbed | Requires session auth, not API key | — Pending (platform dependency) |
+| Default ZB engagement is auto/invariant | Compliance-driven, not opt-in UI | ✓ Good — recipe validated on UAT |
+| Object.tag at ingest time | Tags immutable post-ingest per Kevin | ✓ Good — shape validated 2026-04-24 |
+| Brian asks are placeholders, not blockers | Ship with defaults; Brian refines later | ✓ Good — unblocks milestones |
+| Engagement naming `<Buyer> <- <Provider>` | Supply-flow direction, buyer-first | ✓ Good — aligns with Demand/Supply vocabulary |
 
 ## Evolution
 
@@ -113,4 +124,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-15 after v1.3 milestone started*
+*Last updated: 2026-04-24 after v1.4 milestone started*
