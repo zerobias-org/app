@@ -110,18 +110,16 @@ jobs:
                   "type": "header",
                   "text": {
                     "type": "plain_text",
-                    "text": ":rocket: Deployed ${{ env.PKG_NAME }} to *${{ env.ENV_NAME }}*",
+                    "text": ":rocket: ${{ env.PKG_NAME }} deployed to ${{ env.ENV_NAME }}",
                     "emoji": true
                   }
                 },
                 {
-                  "type": "context",
-                  "elements": [
-                    {
-                      "type": "mrkdwn",
-                      "text": "S3 Bucket: `${{ env.S3_BUCKET }}`"
-                    }
-                  ]
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Repo:* `${{ github.repository }}`\n*Bucket:* `${{ env.S3_BUCKET }}`\n*Commit:* <https://github.com/${{ github.repository }}/commit/${{ github.sha }}|`${{ github.sha }}`>\n*Run:* <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|View workflow>"
+                  }
                 }
               ]
             }
