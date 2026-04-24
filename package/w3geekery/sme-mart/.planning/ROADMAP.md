@@ -6,6 +6,7 @@
 - ✅ **v1.1 Org Navigation & Vendor Profile** — Phases 7-12 (shipped 2026-04-02) | [Archive](milestones/v1.1-ROADMAP.md)
 - ✅ **v1.2 RFP Packages & Pilot Projects** — Phases 13-17 (complete 2026-04-15) — Multi-document packages, invitation controls, form builder, pilot project lifecycle, demo scripts
 - 🔄 **v1.3 Dev Experience, Hardening & Transparency** — Phases 18-23 (active 2026-04-15) — Org switcher, local dev stacks, fire-and-forget audit, org documents, form templates, transparency spec
+- 🔄 **v1.4 3P Onboarding & Default Engagement** — Phases 24-28, 30-31 (active 2026-04-24) — Demo data visibility gate, platform data audit, ZB-as-provider seed, auth + routing + lazy guard, company profile form, default board, smoke test
 
 ## Phases
 
@@ -44,10 +45,11 @@
 
 </details>
 
-### v1.3 Dev Experience, Hardening & Transparency (Phases 18-23)
+<details>
+<summary>🔄 v1.3 Dev Experience, Hardening & Transparency (Phases 18-23) — ACTIVE 2026-04-15</summary>
 
-- ✅ **Phase 18: Org Switcher** (5/5 plans, complete 2026-04-16) — User-menu dropdown switches active ZB org; Director UAT-approved (W3Geekery switch confirmed real org-context swap). Resolved errata 013/014/016 in-phase.
-- ✅ **Phase 19: zbb Local Dev Stacks** (4/4 plans, complete 2026-04-17) — Unified-origin reverse-proxy local dev environment for SPA + login via `zbb` with CloudFront-sim + nginx. Real UAT auth, real cookies, multi-user testing. Director UAT ready.
+- [x] **Phase 18: Org Switcher** (5/5 plans, complete 2026-04-16) — User-menu dropdown switches active ZB org; Director UAT-approved (W3Geekery switch confirmed real org-context swap). Resolved errata 013/014/016 in-phase.
+- [x] **Phase 19: zbb Local Dev Stacks** (4/4 plans, complete 2026-04-17) — Unified-origin reverse-proxy local dev environment for SPA + login via `zbb` with CloudFront-sim + nginx. Real UAT auth, real cookies, multi-user testing. Director UAT ready.
   - [x] **Plan 01 (Wave 1)** — Angular env + cloudfront-sim stack manifest + nginx config + entrypoint (completed 2026-04-17)
   - [x] **Plan 02 (Wave 2)** — sme-mart-spa stack: build + upload + location block injection (completed 2026-04-17)
   - [x] **Plan 03 (Wave 2)** — sme-mart-login stack: build + upload + location block injection (completed 2026-04-17)
@@ -56,6 +58,22 @@
 - [ ] **Phase 21: Org Documents Center Completion** (TBD plans) — Folders, colors, tags, templates, preview (est. ~20 hrs, time-boxed, scope trims on creep)
 - [ ] **Phase 22: Form Template Library** (TBD plans) — Save/reuse/fork form templates, library page, RFP wizard integration, new FormTemplate schema class (est. 22–32 hrs)
 - [ ] **Phase 23: Transparency Controls UI-SPEC + Opportunistic Implementation** (TBD plans) — Lock UI-SPEC and wireframes, research backend capabilities, code if feasible (est. 4–6 hrs if spec-only)
+
+</details>
+
+<details>
+<summary>🔄 v1.4 3P Onboarding & Default Engagement (Phases 24-28, 30-31) — ACTIVE 2026-04-24</summary>
+
+- [ ] **Phase 24: Demo Data Visibility Gate** (TBD plans) — Filter demo records from non-admin users via Object.tag; admin delete action (est. 4-6 hrs)
+- [ ] **Phase 25: Platform Data Audit** (TBD plans) — Inventory ZeroBias SDK data available for onboarding pre-fill (est. 4-6 hrs, research-as-phase)
+- [ ] **Phase 26: Seed Provider (ZB-as-Provider)** (TBD plans) — Create ZeroBias as provider with company_info convention (est. 5-7 hrs)
+- [ ] **Phase 27: Auth Gate + Onboarding Routing + Lazy Guard** (TBD plans) — Authenticate users, route to onboarding or board, auto-create default engagement (est. 8-12 hrs)
+- [ ] **Phase 28: Company Profile Review/Confirm Form** (TBD plans) — Pre-populate from platform data, confirm + save (est. 6-10 hrs)
+- [ ] **Phase 29: DEFERRED TO v1.5** — Tier display, Terms of Service, ZB branding (intentionally skipped in v1.4)
+- [ ] **Phase 30: Default Project Board + Coming Soon Placeholders** (TBD plans) — Seeded project board with 3 feature stubs (est. 6-8 hrs)
+- [ ] **Phase 31: W3Geekery Dogfood + Production Smoke Test** (TBD plans) — End-to-end validation and production readiness (est. 4-6 hrs)
+
+</details>
 
 ---
 
@@ -214,12 +232,12 @@
   7. STACKS.md documents setup, real auth flow, iteration workflow, teardown, troubleshooting
 
 **Plans**: 4 plans
-  - [ ] **Phase 19 Plan 01 (Wave 1)** — Angular env (environment.stack.ts) + cloudfront-sim stack manifest (zbb.yaml, compose.yml, nginx.conf.template, docker-entrypoint.sh) — Requirements: LS-01, LS-04, LS-05
-  - [ ] **Phase 19 Plan 02 (Wave 2)** — sme-mart-spa stack: build (npm run build:stack) + upload (mc cp) + location block injection — Requirements: LS-01, LS-04, LS-05
-  - [ ] **Phase 19 Plan 03 (Wave 2)** — sme-mart-login stack: build (npm run build, not --local) + upload (mc cp) + location block injection — Requirements: LS-03, LS-04, LS-05, LS-06
-  - [ ] **Phase 19 Plan 04 (Wave 3)** — STACKS.md operator guide + smoke test suite (master + per-stack scripts) — Requirements: LS-01, LS-03, LS-04, LS-05, LS-06
+  - [x] **Phase 19 Plan 01 (Wave 1)** — Angular env (environment.stack.ts) + cloudfront-sim stack manifest (zbb.yaml, compose.yml, nginx.conf.template, docker-entrypoint.sh) — Requirements: LS-01, LS-04, LS-05 (completed 2026-04-17)
+  - [x] **Phase 19 Plan 02 (Wave 2)** — sme-mart-spa stack: build (npm run build:stack) + upload (mc cp) + location block injection — Requirements: LS-01, LS-04, LS-05 (completed 2026-04-17)
+  - [x] **Phase 19 Plan 03 (Wave 2)** — sme-mart-login stack: build (npm run build, not --local) + upload (mc cp) + location block injection — Requirements: LS-03, LS-04, LS-05, LS-06 (completed 2026-04-17)
+  - [x] **Phase 19 Plan 04 (Wave 3)** — STACKS.md operator guide + smoke test suite (master + per-stack scripts) — Requirements: LS-01, LS-03, LS-04, LS-05, LS-06 (completed 2026-04-17)
 
-**Effort**: 10–14 hours (Wave 1: 3–4h, Wave 2: 4–5h parallel, Wave 3: 2–3h; estimate revised after errata 017 reverse-proxy discovery)
+**Effort**: 10–14 hours (Wave 1: 3–4h, Wave 2: 4–5h parallel, Wave 3: 2–3h)
 **Tech Stack**: `zbb` CLI + Docker + nginx (cloudfront-sim) + minio (static serving) + Angular + Metalsmith (login)
 **Architecture**: Unified-origin reverse-proxy pattern (reference: `~/Projects/zb/ui/scripts/gateway.js`). Single nginx at localhost:15002 serves SPA + login from minio buckets, proxies /api/, /dana/, /app/session to uat.zerobias.com with cookie rewriting (Domain: uat.zerobias.com → Domain: localhost).
 **Key Decisions** (locked in brief):
@@ -333,6 +351,180 @@
 
 ---
 
+### Phase 24: Demo Data Visibility Gate
+
+**Goal:** Non-admin users see only production data; admins retain full demo visibility and deletion capability
+
+**Depends on:** None (independent)
+
+**Requirements:** DG-01, DG-02, DG-03, DG-04, DG-05
+
+**Success Criteria** (what must be TRUE):
+  1. Demo-seeded records carry Object.tag with demo-seed UUID at ingest time
+  2. Core listing/search services apply `.ne.` GQL filter on demo-tag for non-admin users
+  3. Admin users (`getPrincipal().isAdmin === true`) see all records including demo data without filtering
+  4. Admin delete-demo action bulk-marks all demo-tagged records as deleted and clears hydra Resources
+  5. Unit tests verify three gate scenarios: admin-sees-demo, non-admin-filtered, admin-delete
+
+**Plans:** TBD
+
+**Estimates:** 4-6 hrs
+
+---
+
+### Phase 25: Platform Data Audit
+
+**Goal:** Document all ZeroBias SDK data sources available for pre-filling onboarding forms (research-as-phase)
+
+**Depends on:** None (independent, but informs Phase 28 pre-fill map)
+
+**Requirements:** PDA-01, PDA-02, PDA-03, PDA-04, PDA-05
+
+**Success Criteria** (what must be TRUE):
+  1. `PLATFORM-DATA-INVENTORY.md` created at `.planning/director/` with structured SDK inventory
+  2. Minimum 9 data-source sections documented with sample responses and field lists
+  3. Pre-fill map table covers every field in Phase 28 company-profile form
+  4. Known-unknown list identifies fields needing user input or LLM enrichment
+  5. Pipeline health check confirms current pipeline receiver is live on UAT
+
+**Plans:** TBD
+
+**Estimates:** 4-6 hrs (research-heavy, no app code)
+
+**UI hint**: no
+
+---
+
+### Phase 26: Seed Provider (ZB-as-Provider)
+
+**Goal:** Create ZeroBias as a visible provider in SME Mart with proper data conventions
+
+**Depends on:** Phase 25 (company_info convention informs seed structure)
+
+**Requirements:** SP-01, SP-02, SP-04, SP-05, SP-06
+
+**Success Criteria** (what must be TRUE):
+  1. `COMPANY-INFO-CONVENTION.md` exists and is referenced by Phase 28 brief
+  2. ZeroBias appears as a provider in SME Mart UI (Browse Providers view lists it)
+  3. All seeded records carry appropriate Object.tag (platform-provider for ZB, sme-mart.eng.w3geekery-default-zb for default-engagement records)
+  4. Walkthrough residue TAG-SHAPE-TEST-C cleaned up via markDeleted
+  5. Unit tests for seed function and Browse Providers rendering
+
+**Plans:** TBD
+
+**Estimates:** 5-7 hrs
+
+**UI hint**: yes
+
+---
+
+### Phase 27: Auth Gate + Onboarding Routing + Lazy Guard
+
+**Goal:** Authenticate users, route to onboarding or board based on profile state, auto-create default ZB engagement
+
+**Depends on:** Phase 24 (demo gate must exist before routing real users through auth flow)
+
+**Requirements:** AR-01, AR-02, AR-03, AR-04, AR-05, AR-06
+
+**Success Criteria** (what must be TRUE):
+  1. Unauthenticated users redirected to branded login URL on any SME Mart route
+  2. Post-auth routing routes unconfirmed profile to Phase 28 form, confirmed profile to Phase 30 board
+  3. Lazy-on-load guard queries default ZB engagement; creates it via bootstrap recipe if missing; idempotent on retry
+  4. Guard failure surfaces user-friendly error + retry option, no crashes
+  5. Admin users skip onboarding form and go directly to admin dashboard
+  6. Object.tag populated at ingest time for both new Engagement and SmeMartProject with validated shape
+
+**Plans:** TBD
+
+**Estimates:** 8-12 hrs
+
+**UI hint**: yes
+
+---
+
+### Phase 28: Company Profile Review/Confirm Form
+
+**Goal:** Users review and confirm their organization's compliance profile pre-populated from platform data
+
+**Depends on:** Phase 25 (pre-fill map) + Phase 26 (company_info convention)
+
+**Requirements:** CP-01, CP-02, CP-03, CP-04, CP-05, CP-06, CP-07, CP-08
+
+**Success Criteria** (what must be TRUE):
+  1. Form renders every field in the company_info convention
+  2. Pre-fillable fields populated on mount from correct SDK/GQL source per Phase 25 map
+  3. Known-unknown fields show "please provide" indicator with optional hint text
+  4. Save writes all confirmed values to platform via Phase 25-mapped endpoint(s)
+  5. Post-save, onboarding-complete marker set for current user+org
+  6. Skip-for-now escape routes to Phase 30 WITHOUT setting complete marker
+  7. Subsequent logins with complete marker → Phase 27 routes directly to Phase 30
+  8. Unit tests cover pre-fill, save, skip, repeat-login-skip flows
+
+**Plans:** TBD
+
+**Estimates:** 6-10 hrs
+
+**UI hint**: yes
+
+---
+
+### Phase 29: DEFERRED TO v1.5
+
+**Tier Display / Terms of Service / ZB Branding**
+
+This phase is intentionally deferred from v1.4. When v1.5 begins, Phase 29 work will proceed. No work happens in v1.4.
+
+- Pricing tier display on default project board
+- Terms of Service / Privacy / legal-doc link surfaces
+- ZB branding (logo, tier-specific styling) — Brian-ask content
+
+---
+
+### Phase 30: Default Project Board + Coming Soon Placeholders
+
+**Goal:** Authenticated onboarded users land on a seeded project board with honest "Coming Soon" placeholders for unfinished features
+
+**Depends on:** Phase 26 (seeded project content) + Phase 27 (routing) + Phase 28 (onboarding marker)
+
+**Requirements:** PB-01, PB-02, PB-03, PB-04, PB-06, PB-07
+
+**Success Criteria** (what must be TRUE):
+  1. Authenticated onboarded users land on default project board route per Phase 27 routing
+  2. Default project content (name, description, SmeMartProject widgets) renders for seeded default project
+  3. Three "Coming Soon" surfaces exist as components + routes (Org Documents 046, Engagement Dashboard 066, Message Center 065)
+  4. Coming Soon surfaces reachable from board AND deep-linkable
+  5. No half-built functional UI in the three Coming Soon surfaces — honest placeholders only
+  6. Unit tests for board + each placeholder component rendering
+
+**Plans:** TBD
+
+**Estimates:** 6-8 hrs
+
+**UI hint**: yes
+
+---
+
+### Phase 31: W3Geekery Dogfood + Production Smoke Test
+
+**Goal:** Validate end-to-end workflow and production readiness
+
+**Depends on:** All prior phases (24-28, 30)
+
+**Requirements:** V14-01, V14-02, V14-03, V14-04, V14-05
+
+**Success Criteria** (what must be TRUE):
+  1. UAT smoke walkthrough executed end-to-end; `v1.4-smoke-test-report.md` exists
+  2. All 6 active phases (24, 25, 26, 27, 28, 30) have pass/fail verdict in report
+  3. Any blockers have errata filed + hotfix phase queued
+  4. Production promotion checklist exists as separate director brief
+  5. Friction log populated honestly — not a "everything's fine" whitewash
+
+**Plans:** TBD
+
+**Estimates:** 4-6 hrs
+
+---
+
 ## Progress
 
 | Phase | Plans Complete | Status | Completed |
@@ -343,16 +535,25 @@
 | 16. Form Builder | 5/5 | Complete    | 2026-04-14 |
 | 17. Demo Seed Scripts | 1/1 | Complete    | 2026-04-15 |
 | 18. Org Switcher | 5/5 | Complete    | 2026-04-16 |
-| 19. zbb Local Dev Stacks | 2/4 | Wave 2 executing (19-02 complete, 19-03 in parallel) | 2026-04-17 |
+| 19. zbb Local Dev Stacks | 4/4 | Complete    | 2026-04-17 |
 | 20. Fire-and-Forget Audit | 0/? | Not started | — |
 | 21. Org Documents Center | 0/? | Not started | — |
 | 22. Form Template Library | 0/? | Not started | — |
 | 23. Transparency Controls UI-SPEC | 0/? | Not started | — |
+| 24. Demo Data Visibility Gate | 0/? | Not started | — |
+| 25. Platform Data Audit | 0/? | Not started | — |
+| 26. Seed Provider (ZB-as-Provider) | 0/? | Not started | — |
+| 27. Auth Gate + Routing | 0/? | Not started | — |
+| 28. Company Profile Form | 0/? | Not started | — |
+| 29. DEFERRED TO v1.5 | — | Skipped | — |
+| 30. Default Project Board | 0/? | Not started | — |
+| 31. W3Geekery Dogfood + Smoke Test | 0/? | Not started | — |
 
 **v1.2 Milestone:** 5/5 phases complete, 14/14 plans complete (closed 2026-04-15).
-**v1.3 Milestone:** 6 phases total (18-23), 35 requirements, ~80–90 hrs estimated. Phase 18 complete (2026-04-16), Phase 19 Wave 1-2 in progress (19-01 + 19-02 complete, 19-03 parallel, 19-04 pending Wave 3).
+**v1.3 Milestone:** 6 phases total (18-23), 35 requirements, ~80–90 hrs estimated. Phases 18-19 complete (2026-04-17), phases 20-23 not started.
+**v1.4 Milestone:** 7 phases total (24-28, 30-31; phase 29 deferred), 38 requirements, ~37-55 hrs estimated. All phases not started. Phase 29 intentionally skipped.
 
 ---
 
 **Created:** 2026-03-17
-**Last Updated:** 2026-04-17 (Phase 19 Wave 2 executing: Plan 02 complete, Plan 03 in parallel)
+**Last Updated:** 2026-04-24 (v1.4 ROADMAP complete)
