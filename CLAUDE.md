@@ -72,8 +72,14 @@ package/zerobias/
 
 **Branch → Environment Mapping:**
 - `dev` branch → `https://dev.zerobias.com/{basePath}`
+- `uat` branch → `https://uat.zerobias.com/{basePath}`
 - `qa` branch → `https://qa.zerobias.com/{basePath}`
 - `main/master` branch → `https://app.zerobias.com/{basePath}`
+
+**Publishing path for W3Geekery / SME Mart (cross-fork PR):**
+- Work happens on `w3geekery/app` fork's `poc/sme-mart` branch. **That branch publishes nowhere.**
+- To publish to UAT: open a PR **from `w3geekery/app:poc/sme-mart` → `zerobias-org/app:uat`**. Merging triggers auto-deploy to `https://uat.zerobias.com/sme-mart`.
+- Same pattern for other environments — target the matching `zerobias-org/app` branch.
 
 **basePath Requirements:**
 - Must be globally unique across all ZeroBias apps
