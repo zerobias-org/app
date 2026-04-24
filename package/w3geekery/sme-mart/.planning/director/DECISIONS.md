@@ -1,5 +1,204 @@
 # Director Decisions
 
+## ServiceOfferings Defer With Brian — Data-Model Brian Asks Block, Copy/Branding Don't
+**Date:** 2026-04-24
+**Decision:** `ServiceOffering` records are NOT seeded in v1.4. All ServiceOffering work — including the previously-planned placeholder tier values (Free / Growth $99/mo / Enterprise $999/mo) — defers until Brian confirms the pricing structure. This supersedes the "placeholder tier values ship in Phase 26" clause from the "v1.4 Phase 29 Deferred to v1.5" decision below.
+
+**Refinement of the broader "Brian Asks Are Placeholders" rule:** the rule applies to **copy/branding-layer Brian asks** (logos, ToS URLs, marketing blurbs, final tier names) — those ship with sensible defaults regardless. The rule does NOT apply to **data-model Brian asks** (what tiers exist, what they cost, how the hierarchy is structured, which compliance gates exist) — those block because downstream schemas, pricing calculations, and access-control logic depend on the decision and will need rework if the data model changes later.
+
+ServiceOffering tier structure is a data-model decision: it fixes the records we'd have to backfill or migrate if the tier scheme changes. Shipping placeholder $99/$999 values creates an implicit commitment that is harder to walk back than missing data.
+
+**Phase 26 scope after this decision:**
+- KEEP: ZB-as-provider identity record (`MarketplaceProfileItem` or equivalent)
+- KEEP: `company_info` convention doc (`COMPANY-INFO-CONVENTION.md`) — applies to ALL providers, not tier-specific
+- KEEP: Retroactive `Object.tag` push for W3Geekery walkthrough records (Engagement + SmeMartProject)
+- KEEP: TAG-SHAPE-TEST-C residue cleanup via `markDeleted`
+- REMOVE: Three ServiceOffering records (SP-03 in the original brief)
+- REMOVE: Unit tests for ServiceOffering rendering (SP-06's tier portion)
+
+**Phase 30 scope after this decision:**
+- KEEP: Default project board rendering the seeded SmeMartProject
+- KEEP: Three "Coming Soon" placeholder surfaces (Org Documents 046, Engagement Dashboard 066, Message Center 065)
+- REMOVE: Tier placeholder banner ("you're on the Free tier...") — PB-05 in the original brief
+
+**Why:** Clark direction 2026-04-24. The original "placeholder values ship, Brian refines later" framing conflated data-model with display-layer decisions. When Brian hasn't confirmed the tier structure, shipping $99/$999 ServiceOffering records isn't a placeholder — it's a guess at Brian's decision that bakes into the data model and costs more to undo than to defer.
+
+**How to apply:** When a future decision surfaces a Brian-dependency, classify it:
+- If the decision shapes schemas, records, pricing calculations, access-control logic, or other structural commitments → BLOCK until Brian confirms
+- If the decision only affects copy, URLs, branding assets, or display text → SHIP PLACEHOLDERS
+
+**Anti-pattern:** Treating all Brian asks uniformly under the "placeholders ship" rule without asking whether the placeholder is display-layer (cheap to update) or data-model (costly to migrate).
+
+**Triggers for revisit:** Brian confirms tier structure (via meeting, Slack, or platform-task in the default ZB engagement). At that point, a follow-up phase or hotfix creates the ServiceOffering records and the tier-display surface.
+
+
+
+## Object.tag Field Shape — Validated via UAT Experiment
+**Date:** 2026-04-24
+**Decision:** The `Object.tag` field (inherited property on every class, `propertyId` `65aadece-c352-4d59-8137-6ae03b98506d`, `dataTypeName: "tag"`, `dataTypeType: "object"`, `multi: true`) accepts at Pipeline.receive ingest time in this canonical shape:
+
+```
+"tag": [ { "value": "<hydra-tag-UUID>" } ]
+```
+
+- Array of objects (matching `multi: true`).
+- Each object has a required `value` property holding the tag UUID.
+- Server stores the value literally — no auto-enrichment with tag name/ownerId/type.
+- Schema validator accepts `oneOf`: single object (`{ value: ... }`) OR the array form. Prefer the array form to match `multi: true` semantics and handle the multi-tag case.
+
+**Evidence:** Pushed a throwaway `SmeMartProject` record on UAT via `platform.Pipeline.receive` with `tag: [{ value: "a81cd320-243e-44eb-bdd9-9824019ef3dd" }]`. First attempt with `[{ id: "..." }]` failed schema validation with a leaked error that specified the required `value` property; corrected attempt succeeded. Verified via `platform.Object.getVersionByObjectIdOrVersionId` that the tag materialized on the stored object exactly as pushed.
+
+**Test artifacts (residue on UAT — clean up in a future batch):**
+- Record: `TAG-SHAPE-TEST-C`
+- Schema id: `64047b6c-52e7-4592-ac1d-27f5020d1e01`
+- Internal Object id: `ae2f6996-665f-4b97-86b0-66e5afded26f`
+- Cleanup path: include `markDeleted: ["64047b6c-52e7-4592-ac1d-27f5020d1e01"]` in a future Pipeline.receive batch targeting class `c66114a2-48e2-5b93-b7d6-7ccd6ef45a03` (SmeMartProject). Pipeline.receive requires `data` to be non-empty so it cannot be a delete-only batch.
+
+**Why:** Refinement #18 of the W3Geekery walkthrough noted `platform.Object.tag` (post-ingest call) was a write-only stub. Kevin (CIO) clarified 2026-04-23 that tags are immutable post-ingest and must be set at ingest time via the inherited `Object.tag` field. This experiment validates the exact payload shape needed — unblocking (a) the batch-prime engagement script, and (b) any future code path that wants Object-level tags for discovery.
+
+**Anti-pattern:** Guessing the shape from the class description (`multi: true`, `dataTypeName: "tag"`) instead of pushing a test record and letting the validator tell us. Three of four plausible shapes (UUID string, `{id: ...}` ref, full `{id, name, ownerId}` ref) would have been accepted-at-lint but rejected-at-ingest; only `{ value: ... }` was correct. Validator-driven discovery via a throwaway push is cheaper than reading the whole dataType schema tree.
+
+**Implications for bootstrap brief + batch script:**
+- Step C (Engagement) and Step E (SmeMartProject) of `bootstrap-w3geekery-engagement.md` now include `tag: [{ value: "<zerobiasTagId>" }]` in the Pipeline.receive payload. Folded in 2026-04-24.
+- Step D (`hydra.Resource.tagResource` on the Engagement Task) remains necessary. The Task is a hydra Resource, NOT a Pipeline-ingested class-Object. The tag-at-ingest mechanism only applies to the latter.
+- Backlog 005 no longer has open questions. Status moves from "open experiment" to "validated recipe in bootstrap brief".
+
+**READ paths also validated 2026-04-24 (no Kevin-ask needed):**
+- **Read-by-id:** `platform.Object.getVersionByObjectIdOrVersionId(<internal-object-uuid>)` returns the full record including the `tag` array — verified during the write experiment.
+- **Read-by-tag (discovery):** GQL via `graphql.Boundary.boundaryExecuteRawQuery` with structured Input filter — `ClassName(tag: { value: ".eq.<tag-uuid>" }) { ... }`. Verified: returned exactly the `TAG-SHAPE-TEST-C` record when filtered by its tag UUID; returned empty when filtered by unrelated tags; returned all 19 `SmeMartProject` records when unfiltered.
+- Filter syntax: `zerobias.*.schemaInput` types accept `.eq.` dot-prefix RFC4515 inside property values. For the tag field: `{ value: ".eq.<uuid>" }`. Other operators (`.sw.`, `.in.`, etc.) presumably work — untested.
+
+No separate tag-discovery endpoint needed; the existing GQL path is sufficient. The open question for Kevin is closed.
+
+
+
+## Default ZB Engagement Bootstrap — W3Geekery (proof-of-concept run, UAT)
+**Date:** 2026-04-23 (walkthrough completed end-of-day)
+**Decision:** Manual walkthrough of the default-ZB engagement creation recipe completed successfully on UAT. W3Geekery is the first proof-of-concept Org. Recipe is validated for batch generalization to all other existing platform Orgs.
+
+**Created artifacts (canonical UUIDs):**
+
+| Artifact | UUID | Notes |
+|---|---|---|
+| Hydra Tag (`zerobiasTagId`) | `a81cd320-243e-44eb-bdd9-9824019ef3dd` | Name: `sme-mart.eng.w3geekery-default-zb` |
+| Engagement Task (meta-tracker, `zerobiasTaskId`) | `2c95bc18-a978-4766-a7d3-f7ceb8a9cff5` | Code: `aha1-6`. Activity: aha1 (Ad Hoc - One person, `e15830c8-4274-4d67-bf9b-c22b60001e32`). Tagged with engagement Tag. |
+| Engagement (class-schema external UUID) | `746010b7-dc99-436b-9142-8c4b85c5e623` | Use this for GQL queries and cross-references in our recipe |
+| Engagement (internal Object UUID) | `f5361821-4beb-4e1b-8d92-04bc243fa63a` | Platform-internal bookkeeping; visible via `boundaryObjectSearch`; do NOT use in our recipe except for diagnosis |
+| SmeMartProject | `ea4db55f-2c57-4567-a1be-6e7fd1a210bf` | Name: "SME Mart Platform Development"; status `active`; projectType `project`; `engagementId` set to the Engagement external UUID |
+
+**Pipeline used:** `43f08afd-7ab9-4e99-a93c-619c46adaabe` (current SME Mart receiver, NOT the v1.2 carry-forward `f6d1f579-...`).
+**Boundary:** `c15fb2dc-4f8c-48b5-b27a-707bd516b005` (W3Geekery SME Marketplace DEV).
+**Buyer org/user:** `cd7105df-523d-5392-9f9a-3f83d3f30107` (W3Geekery — same UUID as prod) / `3da9385a-5d15-4d19-84ab-e1c9ce8d84ed` (Clark).
+**ZeroBias org UAT:** `57c741cf-a58e-5efc-bf2f-93c4f6cf76ec` (provider; not stored on Engagement since schema has no provider field).
+
+**18 refinements surfaced during walkthrough** (folded into bootstrap brief at session end):
+
+1. Brief L43–44 "UAT differs from prod" caveat wrong — org UUIDs match prod for both W3Geekery + ZeroBias
+2. L48 stale pipeline ID `f6d1f579-...` — replace with current `43f08afd-...`
+3. L50 "throwaway push health-check" skipped — Step C is the real test
+4. Step B name generalized to `"Engagement coordination — <Buyer> <- ZeroBias"` (v1.4 hardcoding removed; meta-tracker is permanent, outlives milestone)
+5. Step E category mismatch moot — Engagement no longer has `category` field per Plan 075
+6. Step C field list trimmed per Plan 075 migration: removed `category`, `budgetType`, `budgetMin`, `budgetMax`, `timeline`; renamed `createdAt`/`updatedAt` → `dateCreated`/`dateLastModified`
+7. "Platform" category idea dies for Engagement — `engagementTag = "default-project"` is the sole default-vs-marketplace distinguisher
+8. No W3Geekery-owned activity exists — use global catalog `aha1` (Ad Hoc - One person, `e15830c8-...`)
+9. Hydra Tag `type` defaulted to "other" — fine; engagementTag string field is what app filters on
+10. Task default status `todo` — no `transitionId` needed for first transition
+11. **CRITICAL:** Engagement `dateCreated`/`dateLastModified` are date type (YYYY-MM-DD), NOT datetime. Demo seeder at `src/app/test-helpers/demo-data-seeder.ts:52` uses `.toISOString()` — production bug. Audit + fix demo seeder.
+12. GQL reads use RFC4515 filters in args (`Engagement(id: ".eq.<uuid>")`), NOT GraphQL `filter: { id: { EQ: ... } }` syntax
+13. Step D mechanism: `hydra.Resource.tagResource(taskId, [zerobiasTagId])` — NOT `Task.update(links=)` or `linkResources` (FK-fail cross-realm; AuditgraphDB Class Objects aren't in hydra Resource table). Brief L129–136 full rewrite.
+14. Memory `feedback_task_links_bidirectional.md` does NOT apply to tag-based linkage — one `tagResource` call achieves bidirectional discoverability
+15. Pipeline.receive `tagIds` parameter does NOT tag ingested Objects (semantics still unclear, possibly tags batch-job record only)
+16. Engagement has TWO identifiers: class-schema external ID (we push + cross-ref) + internal Object UUID (platform-internal). Batch idempotency check: GQL filter on `engagementTag = "default-project"` AND `buyerZerobiasOrgId = <orgUUID>`. NEVER use hydra `getResource` on class entities.
+17. Pipeline.receive `tagIds` confirmed unclear/non-useful for class-Object discovery (Step G Front 1 verified)
+18. `platform.Object.tag` exists as a write-only stub (no matching read API). Untested path: populate inherited `Object.tag` field via Pipeline.receive payload — shape TBD; ~30 min experiment to validate.
+
+**Why:** Validated the recipe end-to-end with human supervision on every MCP call (Clark direction: no agent handoff for this kind of work). Recipe is now ready to either: (a) walk a second case (e.g., HIS) for additional generalization confidence, OR (b) encode as the batch script for all remaining orgs.
+**Anti-pattern:** Trusting any prior memory note about engagement schema fields without re-verifying — Plan 075 migration moved fields from Engagement to SmeMartProject and our memory was 36+ days stale (`project_sme_mart_prod_schema.md`). Always cross-check via `platform.Class.getClass` for live schema before constructing Pipeline.receive payloads.
+
+
+
+## v1.4 Milestone Shape — Brian Asks Are Placeholders, Not Blockers
+**Date:** 2026-04-22
+**Decision:** For v1.4 (3P Onboarding & Default Engagement) and going forward, requirements that depend on Brian input (pricing tiers, ToS/legal URLs, branding, opt-in vs auto behaviors, guild-tier rules) ship with sensible default placeholder values. Brian input is NOT a planning blocker. If he provides input later, the placeholders get refined; if not, the placeholders ship.
+**Why:** Clark told me 2026-04-22 that Brian asks "come in drips and spurts and/or not at all" and explicitly does not consider those phases blocked. Treating Brian as a planning gate produces stalled milestones and wasted Director cycles. The CEO communication channel is Tue/Fri meetings + future ZB-platform-tasks via the W3Geekery↔ZB engagement; it is not a synchronous decision pipeline.
+**Anti-pattern:** Director will want to mark phases as "soft-blocked on Brian" with "ask at next meeting" notes. Don't. Mark them unblocked, list the placeholder defaults explicitly in the phase brief, file an informational task in the W3Geekery↔ZB engagement so Brian can refine if/when he chooses.
+
+## v1.4 Test-Infra Deferral and Unit-Test Default
+**Date:** 2026-04-22
+**Decision:** v1.4 contains zero test-infrastructure backlog items (082 data-testid, 052 P4 Playwright CI, 053 QA skills, etc.). Those wait for a dedicated test-infrastructure milestone. Unit tests for components touched by v1.4 phases are mandatory and baked into each plan as default tasks.
+**Why:** Clark direction 2026-04-22. Bolting test-infra onto feature milestones produces split-focus milestones with no thematic coherence. Better to let test-infra accumulate as a backlog cluster and ship as one milestone whose theme IS testing. The unit-test-on-touch rule keeps coverage from rotting between infra milestones.
+**Anti-pattern:** Director will be tempted to add "small wins" like data-testid sweeps because they "support Phase 31 verification." Resist — those rationales are how feature milestones become 30% test-infra by mass.
+
+## v1.4 Backlog Adds — 046/066/065 as "Coming Soon" Placeholders
+**Date:** 2026-04-22
+**Decision:** Org Documents (046 remaining), Engagement Dashboard (066), Message Center (065) are NOT real-build items in v1.4. They render as "Coming Soon" placeholder UI surfaces in the Default Project Board (likely 3 disabled tab/card surfaces with placeholder copy) so the product feels complete to a 3PO landing on it. Real implementations soft-launch in v1.5+ after the initial onboarding ships.
+**Why:** Clark direction 2026-04-22. v1.4 is about getting 3POs through the front door cleanly. Building 30+ hrs of supporting features before validating the front door risks shipping the wrong supporting features. The placeholder pattern lets us learn what real 3PO behavior calls for before committing implementation effort.
+**Anti-pattern:** Director will want to "just slice in the small parts of 046/066/065 that fit" to make the dashboard feel real. Don't — that creates ambiguous shipped state where users wonder if the half-built thing is functional. Disabled-with-coming-soon-copy is honest; partial-functional is deceptive.
+
+## SME Mart Admin Mechanism Is Decided — `getPrincipal().isAdmin`
+**Date:** 2026-04-22 (memory landed; decision predates by months per Clark)
+**Decision:** Admin detection uses `getPrincipal()` returning `OrgPrincipalWithAdminFlag` with `isAdmin` boolean. No alternative architecture will be proposed. Granular per-org admin scoping is a future enhancement of the same flag, not a different mechanism.
+**Why:** Clark told me four times across sessions before I retained it. Persisted to project memory `project_sme_mart_admin_detection.md` and indexed in MEMORY.md so future sessions know.
+**Anti-pattern:** Proposing `@zerobias.com` email convention, custom platform-role mapping, group-membership inference, or "ask Brian for admin role definition" as an open question. All wrong. Use the SDK call.
+
+## Engagement Naming Convention: `<Buyer> <- <Provider>` (ASCII reverse-arrow, buyer-first, supply-flow direction)
+**Date:** 2026-04-23 (revised same day after considering Demand/Supply vocabulary alignment)
+**Decision:** Engagement records use the `name` field as the human-readable identifier of the buyer/provider direction since the schema has only `buyerZerobiasOrgId` (no provider field). Convention: `"<Buyer Org Name> <- <Provider Org Name>"`. ASCII reverse-arrow `<-` (not Unicode `↔` `→` `⇐`). Buyer named first (positional convention preserved from existing demo data); arrow points TOWARD the buyer indicating supply/satisfaction flowing from Provider to Buyer.
+
+Rationale for arrow direction: Buyer is the 1st-class citizen — owner of the engagement and its projects, the Demand-side party. The Supplier exists to satisfy Buyer's demand. In the project's Demand/Supply vocabulary (memory `project_sme_mart_transparency_invariant.md`, BACKLOG CE4 Demand/Supply twin pattern), supply flows from Supplier to Demand. The arrow encodes that direction explicitly.
+
+Examples:
+- Default ZB engagement (W3Geekery's): `"W3Geekery <- ZeroBias"` (W3Geekery is buyer of ZB platform services)
+- Marketplace engagement (W3Geekery hires HIS as auditor): `"W3Geekery <- HIS"` (W3Geekery is buyer of HIS auditor services)
+- ZB as customer of W3Geekery dev services (hypothetical future): `"ZeroBias <- W3Geekery"` (ZB is buyer of W3Geekery dev services)
+
+Existing demo engagement records use the older `↔` bidirectional convention (`"Pinnacle Corp ↔ W3Geekery"` etc.). Those are NOT being backfilled — Phase 24 (demo data visibility gate) will gate or delete them anyway. Apply the new convention to all NEW engagements going forward only.
+
+ASCII over Unicode is per Clark's global preferences (`~/.claude/CLAUDE.md` ambiguous-width chars section): `<>`, `<->`, `->`, `<-`, `=>` over `↔`, `→`, `←`, `⇒`, `⇔`. Terminal display reliability + grep-ability.
+**Why:** Clark direction 2026-04-23. Bidirectional `↔` was misleading — engagement relationships are asymmetric. Directional arrow needed. Director's first proposal was `Buyer -> Provider` (buyer-engages-provider reading); Clark countered with the supply-flow framing (`Buyer <- Provider`, supply flows toward buyer-as-Demand-owner). The supply-flow framing aligns with the project's own Demand/Supply vocabulary used throughout the transparency invariant and CE4 entanglement model — preferring the framing the project already uses for cross-party data relationships is more coherent than a separate engage/pay metaphor.
+**Anti-pattern:** (a) Using `↔` in new engagement names "because that's what the demo data does." (b) Using `->` (forward arrow, buyer-first) — that was the Director's first instinct but loses the Demand/Supply alignment. (c) Backfilling existing demo records — they're being phased out by Phase 24. (d) Putting Provider first (e.g., `"ZeroBias -> W3Geekery"`) — loses the buyer-as-1st-class-citizen positional convention.
+
+## Default ZB Engagement is Auto, Invariant, Compliance-Driven — NOT a Product UI Concern
+**Date:** 2026-04-23
+**Decision:** Every existing ZeroBias platform Org always has at least one engagement with ZeroBias (3PO=Buyer, ZB=Provider) by default. This is a side-effect of being a ZB platform customer and a ZB compliance requirement. The default ZB engagement is created automatically via org-detection, NOT via any user UI action. SME Mart maintains this invariant via (a) one-shot batch backfill for all existing platform orgs and (b) lazy-on-load reconciliation in the auth/routing layer for orgs added after the batch runs. Long-term, ZB platform itself will own this responsibility (likely at platform-onboarding time); SME Mart fills the gap until then.
+
+Customers can additionally create as many marketplace engagements as their business requires (with vendors, auditors, other 3POs) via the existing Create Engagement UI. The Create Engagement UI stays — but it is for those marketplace engagements, NOT for the default ZB engagement. The default ZB engagement has no UI surface for creation; it just exists.
+**Why:** Clark direction 2026-04-23. The earlier framing — "user opts in to creating their first engagement after company-info save" — was wrong on two axes: (a) the engagement is invariant, not optional; (b) the trigger is org-detection, not company-info-save (those are decoupled).
+**Anti-pattern:** Adding a "Create Engagement" button or ToS gate or tier-picker step into the v1.4 onboarding flow specifically for the default ZB engagement. None of those belong in the default-engagement-creation path. They may live elsewhere (informational tier display on the project board, ToS in the platform sign-up flow that happens upstream) but NOT as gates on the default engagement.
+
+## v1.4 Phase 29 Deferred to v1.5; Lazy-on-Load Guard Added to Phase 27 (v1.4)
+**Date:** 2026-04-23
+**Decision:** The v1.4 phase originally framed as "ZB offerings + first engagement creation" (Phase 29) loses its CREATION scope under the auto/invariant default-engagement directive (creation moves to batch + lazy-on-load). What remains is the human-facing CONTENT layer that goes WITH the default engagement once it exists:
+- Pricing tier display on the default project board (informational — "you're on Free / Growth / Enterprise")
+- ToS / Privacy / legal-doc link surfaces
+- ZB branding (logo, tier-specific styling)
+
+These remaining concerns ARE Brian-ask placeholders — pricing tiers, ToS URLs, branding assets — that he may or may not provide. Per Clark direction 2026-04-23, **Phase 29 (with its scope narrowed to display-layer placeholders) defers to v1.5.** v1.4 ships with a minimal default project board (Phase 30) that does NOT need the tier display / ToS / branding to function. v1.5 adds the human-facing content layer in a refocused Phase 29.
+
+Pricing tier placeholder values that ARE needed in v1.4: the seeded `ServiceOffering` records created by Phase 26 (ZB-as-provider seed) need real numeric tiers. Defaults: Free / Growth $99/mo / Enterprise $999/mo. Those values live in the Phase 26 brief and ship even if Brian never confirms — they're data, not display.
+
+The OTHER part of Phase 29's old scope — actual default-engagement-creation logic — moves out entirely:
+- `.planning/director/batch-prime-engagements-for-existing-orgs.md` (one-shot brief, written after the W3Geekery walkthrough validates the recipe)
+- A **lazy-on-load guard** in SME Mart's auth/routing layer — added to Phase 27 (v1.4) scope. Guard logic: on authed-user load, check if currentOrg has its default ZB engagement; if not, create it inline via the validated recipe; then proceed to engagement board. Idempotent — fires at most once per org's lifetime.
+
+**Net v1.4 milestone shape: 7 phases (24, 25, 26, 27, 28, 30, 31).** Phase 29 deferred to v1.5.
+**Why:** Direct consequence of the auto/invariant default-engagement decision above (creation logic disappears from UI), combined with Clark's "Brian asks come in drips, ship placeholders, prolly v1.5 is fine for the display-layer Brian-ask content."
+**Anti-pattern:** (a) Trying to ship the tier-display / ToS / branding in v1.4 just because they were originally scoped there — they are display-layer polish that v1.4 doesn't need. (b) Forgetting the pricing-tier placeholder values that DO need to ship in v1.4 (data layer, lives in Phase 26's seeded ServiceOffering records).
+
+## Data-Migration Work Goes in Director Briefs, Not GSD Phases
+**Date:** 2026-04-22
+**Decision:** One-shot data migrations and hand-executed MCP scripts (e.g., bootstrap engagement creation, batch pre-creation across all platform orgs, per-org LLM-prompt generation) belong in director-authored briefs at `.planning/director/{slug}.md`, NOT as `/gsd:add-phase` items. Briefs are runnable in a fresh Claude session by Clark or a gsd-executor with clean context, get traceability via DECISIONS.md updates after execution, but skip the ROADMAP/REQUIREMENTS/PLAN ceremony that GSD imposes.
+**Why:** Clark direction 2026-04-22. GSD phase ceremony assumes UI/feature work where requirements, plans, and verification matter. Pure data-migration work has no user flow, no acceptance criteria beyond "records created", and benefits from being a self-contained brief that a fresh session can execute without loading milestone context. Padding milestones with migration phases dilutes their thematic coherence.
+**Anti-pattern:** Director will be tempted to "make it official" by adding migrations as Phase 26.5 / 28.5 / etc. Don't — that creates fake phases with no real plan dependencies. Use briefs.
+
+## Bootstrap-Recursion Collapses by Manual Engagement Creation
+**Date:** 2026-04-22
+**Decision:** Before v1.4 onboarding flow ships, the W3Geekery↔ZeroBias dev-services Engagement + default Project will be created manually via MCP / Pipeline.receive on UAT (later promoted to prod when ZB rebuilds the dev server). This opens the dogfood communication channel TODAY, not when Phase 31 ships. All v1.4 cross-org communication (Brian asks, Kevin escalations, Andrey nags) flows through ZB-platform-tasks in this engagement immediately.
+**Why:** Clark observation 2026-04-22 — if we're building the channel, we should be using the channel (or its manual equivalent) to coordinate building it. Eliminates the "no channel until Phase 31" caveat and provides a real artifact to dogfood through every subsequent v1.4 phase. Buyer = ZeroBias; Provider = W3Geekery (dev services). NOT the same engagement as the eventual ZB-as-platform-tenant default-engagement that Brian's directive describes for paying customers — those are two different engagement concepts.
+**Anti-pattern:** Confusing this dev-services engagement with the "default-project" engagement Brian directed for ZB-as-platform-tenant onboarding. Different tags (`w3geekery-services` or similar vs `default-project`), different buyer/provider direction (W3Geekery=provider here vs W3Geekery=buyer there).
+
+
+
 ## Phase 17 Wired via Parent-Session MCP (Option B over A)
 **Date:** 2026-04-15
 **Decision:** When gsd-executor returned Phase 17 code with stubbed MCP calls, chose Option B (rewrite helpers to use real ZeroBias SDK, standalone CLI) over Option A (execute seed one-shot via parent-session MCP, leave CLI as scaffolding).
