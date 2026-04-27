@@ -1,5 +1,35 @@
 # Director Decisions
 
+## MarketplaceProfileItem Replace Semantics + Cleanup Residue
+**Date:** 2026-04-27
+**Decision:** Pipeline.receive replace key for `MarketplaceProfileItem` (class `7bcf86a5-91dc-520d-b9bf-e308b1078d46`) is **`id` only**. Per-section saves are safe — ingesting one MPI record does NOT clobber other MPI records of the same class with different ids.
+
+**Why:** Phase 28 form save flow needs to write per-field MPI records keyed by `(orgId, section)` without read-modify-write fan-out. This was the gating empirical question for Phase 28 design. Validated via UAT experiment 2026-04-27: ingested two records (`mpi-test-a-cd7105df` / section=test_a / data=A and `mpi-test-b-cd7105df` / section=test_b / data=B), both visible. Then ingested only `test_a` with data=A2; `test_a` updated, `test_b` survived.
+
+**How to apply:**
+- Phase 28 save flow: one `Pipeline.receive` batch per save click; data array contains one record per dirty form field; each record has a deterministic id derived from `(orgId, section)`.
+- Recommended id format: `mpi-<orgId>-<section>` (id field is `string`, not strict UUID). Example: `mpi-cd7105df-523d-5392-9f9a-3f83d3f30107-legal_name`.
+- Pre-fill flow: one GQL query — `MarketplaceProfileItem(orgId: ".eq.<id>") { section, data }` — group client-side by `section`, project to form model.
+
+**Test residue on UAT (cleanup queue):**
+- `mpi-test-a-cd7105df` (section=test_a, data=A2)
+- `mpi-test-b-cd7105df` (section=test_b, data=B)
+- Plus the pre-existing TAG-SHAPE-TEST-C SmeMartProject (`64047b6c-...`)
+- Cleanup path: include all three in `markDeleted` of a future Pipeline.receive batch (one batch per class). Pipeline.receive requires non-empty `data`, so cleanup goes alongside the next real ingest.
+
+## W3Geekery Object.tag Remediation
+**Date:** 2026-04-27
+**Decision:** Re-ingest the W3Geekery default-engagement records (`Engagement` `746010b7-...` and `SmeMartProject` `ea4db55f-...`) via Pipeline.receive with the validated Object.tag payload `tag: [{value: "a81cd320-..."}]`. Closes the gap accepted at walkthrough time (refinement #18 / line 188 of bootstrap brief).
+
+**Why:** The Phase 25 GQL audit confirmed `Engagement.tag = null` and the default SmeMartProject's `tag = null` — leftover from the original walkthrough's use of batch-level `tagIds` (which doesn't populate Object.tag) instead of per-record `data[i].tag`. The recipe was amended for future runs but W3Geekery records were never re-ingested. Three tag-related fields existed in three different states: `engagementTag` (string discriminator, set), `zerobiasTagId` (UUID scalar, set), `tag` (Object.tag array, NULL). This inconsistency would surprise any Phase 27 lazy-guard or batch reconciliation logic that uses `ClassName(tag: {value: ".eq.<id>"})` for discovery — works on freshly-recipe-correct orgs, silently fails on W3Geekery.
+
+**How to apply:** Verified via GQL re-query — both records now show `tag: [{value: "a81cd320-..."}]`. Tag-filter discovery returns 1 Engagement + 2 SmeMartProjects (TAG-SHAPE-TEST-C + the default project). Phase 27 lazy guard can rely on Object.tag being present uniformly. Bootstrap walkthrough updated with remediation note. No backlog row needed; one-shot fix complete.
+
+**Class IDs captured for batch use:**
+- Engagement class: `7711aa41-e55b-5cda-9b7a-35844a2006a1`
+- SmeMartProject class: `c66114a2-48e2-5b93-b7d6-7ccd6ef45a03`
+- Pipeline (UAT receiver): `43f08afd-7ab9-4e99-a93c-619c46adaabe`
+
 ## ServiceOfferings Defer With Brian — Data-Model Brian Asks Block, Copy/Branding Don't
 **Date:** 2026-04-24
 **Decision:** `ServiceOffering` records are NOT seeded in v1.4. All ServiceOffering work — including the previously-planned placeholder tier values (Free / Growth $99/mo / Enterprise $999/mo) — defers until Brian confirms the pricing structure. This supersedes the "placeholder tier values ship in Phase 26" clause from the "v1.4 Phase 29 Deferred to v1.5" decision below.
