@@ -1,0 +1,235 @@
+0:0:3.121 --> 0:0:3.161Clark StacerOh.
+0:0:3.121 --> 0:0:5.1Brian HierholzerWhat's happening?
+0:0:3.201 --> 0:0:7.921Clark StacerOh, just just cranking.
+0:0:9.401 --> 0:0:12.281Brian HierholzerI'm tired. I've been.
+0:0:10.801 --> 0:0:11.161Clark StacerYeah.
+0:0:13.281 --> 0:0:15.281Brian HierholzerDan and I were on a call.
+0:0:16.641 --> 0:0:20.281Brian HierholzerI think starting at 7 my time. Um.
+0:0:21.281 --> 0:0:32.521Brian HierholzerBut I was up an hour before that, kind of working at six, and I just have been back-to-back all damn day. I am tired and I'm ready to get the hell out of my office.
+0:0:31.561 --> 0:0:35.481Clark StacerYeah, man, I bet. I bet, yeah.
+0:0:34.321 --> 0:0:38.921Brian HierholzerSo what's going on, man? What's happening here?
+0:0:37.201 --> 0:0:51.201Clark StacerWell, yeah, yeah, I'm working right now on smoke tests over on the ZB side and then over in SME Mart. I have GS.
+0:0:50.841 --> 0:0:57.81Brian HierholzerDo you just like you just blow right into a pipeline or what? Like, you know, just.
+0:1:0.681 --> 0:1:14.161Brian HierholzerI'm joking. I'm just a smoke test. I did, but bing fell flat.
+0:1:1.361 --> 0:1:2.441Clark StacerWhat do you mean?
+0:1:4.41 --> 0:1:4.81Clark StacerOh.
+0:1:6.161 --> 0:1:10.81Clark StacerOh, oh, oh, God. OK, sorry, I missed that.
+0:1:11.681 --> 0:1:27.321Clark StacerNo, I mean, you know, you don't wanna let the smoke out of your components because they don't work anymore. That's funny. Yeah. Yeah. So over here. Oh, it's already ready. So.
+0:1:27.521 --> 0:1:42.681Clark StacerGSD is running in SME Mart. It just finished planning the phase where we're adding RFP invitations, so if you want to have a private RFP.
+0:1:43.201 --> 0:1:49.601Clark StacerUm, you can send invitations to certain certain vendors.
+0:1:49.481 --> 0:1:57.481Brian HierholzerSo you can select, you can do an open bid versus a closed. OK, so you can. OK, got. Yep. Cool. Cool.
+0:1:53.801 --> 0:1:54.401Clark StacerThat's right.
+0:1:55.121 --> 0:2:11.481Clark StacerYeah, so that's what I'm putting in right now. And let's see that does. So there's a there's an invitations page, an invited vendors tab on the RFP. There'll be a way, you know, if you if it's a closed.
+0:2:11.921 --> 0:2:27.201Clark StacerIf it's a private RFP, then there'll be this invitations. Basically you're allowing people to have access, so you're sending them a request. If the vendor responds, they could.
+0:2:16.321 --> 0:2:16.801Brian HierholzerMhm.
+0:2:25.201 --> 0:2:29.401Brian HierholzerThey can decline it, I assume, right? Or yeah, yeah, yeah.
+0:2:27.801 --> 0:2:38.761Clark StacerYep, and they don't get to see the details of the RFP. They get. They get like an overview of the RFP until they accept the invitation.
+0:2:37.121 --> 0:2:56.881Brian HierholzerAnd there may be some sort of like there may be an interim step where there's an NDA or you know, who knows, right. There may be some engagement stuff that is like, OK, here's kind of like an overall summary. Are you interested? You know, like, yeah, we'll sign the NDA for the engagement portion and then then then maybe there's like a secondary.
+0:2:57.1 --> 0:3:7.401Brian HierholzerComponent to the RFP, let's say, which is more requirements or more specifics, maybe right where I'm gonna disclose more, right? Cool.
+0:3:3.281 --> 0:3:4.81Clark StacerYeah.
+0:3:5.41 --> 0:3:23.401Clark StacerYeah, yeah. In fact, right before this phase, I put in the phase for for pilot projects and that's a kind of exactly what you're talking about is there might be, you know, there might be a project where the project is sign this NDA and.
+0:3:15.521 --> 0:3:17.481Brian HierholzerYeah, yeah.
+0:3:23.841 --> 0:3:43.1Clark StacerYou know, whatever that you know, whatever level of of detail you want in the project, that's a pilot. And then you can either you can either promote a pilot project to a real project or spawn a new project based on the pilot project if you want or.
+0:3:43.401 --> 0:3:43.641Brian HierholzerCool.
+0:3:44.161 --> 0:4:0.961Clark StacerSo it just really depends where we wanna go with that, you know, later. So we have options there. Yep. And then let's see invitation teaser. One of the questions was do do we show private RFP?
+0:3:48.161 --> 0:3:48.641Brian HierholzerOK, awesome.
+0:3:51.801 --> 0:3:52.41Brian HierholzerYeah.
+0:4:1.761 --> 0:4:19.801Clark StacerTeasers in the RFP public RFP list. So do you, you know, do you allow people to see that there are private RF PS that they're not invited to and maybe even allow them to ask for an invitation?
+0:4:19.521 --> 0:4:39.441Brian HierholzerSo you're what you're saying is maybe a semi-private category. I think that would be a third category where it's semi-private, where it's a teaser, but it's not necessarily everything, right? Maybe, maybe. I don't know, right? I I don't know because to me there's either I wanted people to know or I don't or do I kind of.
+0:4:20.321 --> 0:4:20.521Clark StacerWhere?
+0:4:34.761 --> 0:4:34.881Clark StacerOK.
+0:4:39.521 --> 0:4:44.561Brian HierholzerI have. I don't, you know. I don't know yet. I don't know. Yeah, yeah, yeah.
+0:4:41.41 --> 0:4:53.401Clark StacerOK. Yeah, that's a good point. Yeah. Like if you want, yeah, if you want only certain vendors to bid, then you have it private and you send invitations to those vendors.
+0:4:51.441 --> 0:4:52.121Brian HierholzerYeah.
+0:4:53.601 --> 0:4:53.961Brian HierholzerYeah.
+0:4:54.881 --> 0:4:56.601Clark StacerSo I guess it just comes down to.
+0:4:57.241 --> 0:5:4.921Brian HierholzerAnd I think what it may be just is like, look here, here's the bid, but here's my criteria. If you meet that, I I think there's just um.
+0:4:58.161 --> 0:4:58.521Clark StacerYeah.
+0:5:6.881 --> 0:5:23.761Brian HierholzerIt could be an open bid maybe, but there is select criteria that you have to match so you could commit. But if you don't meet this then then it already discards you or you know and and because the marketplace may not, you know, let's say I was searching.
+0:5:24.241 --> 0:5:41.481Brian HierholzerFor for potential assignees, let's say where is more of I'm looking for them rather than the matching process, but I'm trying to query. The reality is, is that I may not be querying because their detail on their side isn't granular or specific.
+0:5:44.161 --> 0:5:57.401Brian HierholzerSo where you may want to say, here's a public bid, but here are the requirements. I can't tell or I've been able to search, but if I've missed anybody, anybody can come to it, right? Maybe or something like that. I don't know. I don't know.
+0:5:57.721 --> 0:6:5.41Clark StacerSo basically, even an open, even an open RFP, a public one you could still invite.
+0:6:2.121 --> 0:6:19.281Brian HierholzerCould still have, could still have requirements, yes or or qualifications, right? Like look, it's an open RFP, but these are the requirements. If you cannot explicitly state that that you meet these, then you know you're not, you're not allowed and the something in the profile.
+0:6:19.961 --> 0:6:39.201Brian HierholzerWould have to match that. You know, it's like I don't want liars and garbage saying that they meet it, but they don't, right? So we would need a programmatic something to validate that or not. And but but to me that's where I feel like that passive part of this is, is like, look, you have to declare that you meet this and show that you meet this.
+0:6:25.761 --> 0:6:26.121Clark StacerYeah.
+0:6:30.241 --> 0:6:32.441Clark StacerYeah, prove it, yeah.
+0:6:39.521 --> 0:6:57.201Brian HierholzerYou know what I mean? Like, it's not this like, I'm just going to fill out the box and nothing checks it. You know, like my answer could be anything versus I have to explicitly like prove that this is met and then I can meet these criteria or something like that. I don't know.
+0:6:47.121 --> 0:6:47.401Clark StacerYeah.
+0:6:56.881 --> 0:7:14.441Clark StacerNo, you you're right. Yeah, I already have. So there's like a vetting process. There's I'm building. Part of it is a form builder. So the the whoever's building the RFP and there'll be one for each side for the buyer, buyer and seller.
+0:7:14.161 --> 0:7:14.601Brian HierholzerYeah.
+0:7:15.41 --> 0:7:30.601Clark StacerThat they can build a little form that's a checklist with form fields like either check boxes or file uploads or whatever it would be. A snap, a picture, a JPEG or a PNG or something.
+0:7:28.881 --> 0:7:31.241Brian HierholzerYeah, yeah, yeah.
+0:7:31.401 --> 0:7:45.681Clark StacerAnd the other party has to upload a file and the the buyer can say I accept this. So there so there's a whole like process of accepting the the requirement criteria.
+0:7:44.1 --> 0:8:3.681Brian HierholzerYeah. And there may be some eventual tech that vets it for you. That way it's kind of an automated assessment. Like does it, you know, there's some sort of bot or agentic thing that says this doesn't meet, you know, kind of discarded it for you. Like, no, we don't agree, whatever that may come to right later. But yeah, cool.
+0:7:49.921 --> 0:7:50.441Clark StacerYeah.
+0:8:1.601 --> 0:8:17.721Clark StacerYeah, Yep, Yep, exactly. So there's there's there's several like there's a whole vetting process in in this RFP flow too. So, so there's lots of checkpoints and gates for flexibility there, so.
+0:8:3.961 --> 0:8:4.201Brian HierholzerCool.
+0:8:12.201 --> 0:8:12.321Brian HierholzerOK.
+0:8:18.481 --> 0:8:19.481Brian HierholzerYeah, awesome.
+0:8:20.161 --> 0:8:23.921Clark StacerYeah. So that's that's all in progress.
+0:8:22.801 --> 0:8:37.161Brian HierholzerYeah. So it may be RFP with requirements. So it may be just a generic or maybe every RFP is kind of gonna have requirements. I don't know. And maybe it's like more stringent. So I, you know, I I don't know what that looks like, right. But.
+0:8:37.841 --> 0:8:57.681Brian HierholzerThere may be a way to declare less or declare more versus just strictly private, which is, you know, I already know who and I'm just, you know, they've already walked into my desk and I'm they were, they were there and I'm going to say, OK, I'll do a pilot and we'll just stand one up because we've already talked.
+0:8:57.721 --> 0:9:0.561Brian HierholzerOn the phone, let's say, right? Maybe. Don't know.
+0:8:58.401 --> 0:8:58.761Clark StacerYeah.
+0:9:0.881 --> 0:9:15.841Clark StacerYeah, yeah. So there, yeah, we'll we'll need to have some flexibility with what the RFP process. It can be as stringent as you want it to be or it can, you know, it can be as simple as a conversation or an e-mail or something.
+0:9:6.681 --> 0:9:6.921Brian HierholzerYeah.
+0:9:14.641 --> 0:9:16.521Brian HierholzerYeah, yeah.
+0:9:16.161 --> 0:9:35.761Clark StacerYou know, depending on what the layers are, their compliance layers are. So, so yeah. And then the, you know, the who's, whoever's building the RFP has control over the exact requirements. Like, you know, I need a picture ID, I need, you know, this thing, I need this.
+0:9:21.601 --> 0:9:21.881Brian HierholzerCool.
+0:9:35.441 --> 0:9:52.561Brian HierholzerYeah, all your all the people. I have to have background check and AUS citizenship or whatever it is, right, with all of this declarative tooling. Now that being said, you know, on the supply side, you know, if I wanted a definitive explicit truth.
+0:9:35.881 --> 0:9:36.81Clark StacerThing.
+0:9:52.681 --> 0:10:8.201Brian HierholzerYou know, we would have to, they would have to have a boundary. You know, this goes back into how do I, on the supply side, you know, meet these criteria. This goes back into the assessment portion, which is OK, what is the tool set?
+0:10:8.441 --> 0:10:26.921Brian HierholzerThat you're doing to validate the ID? Is there a system of record that you have in your boundary that you've connected to that you've that you're managing, you know, citizenship or valid IDs for right? So or we may provide one.
+0:10:25.81 --> 0:10:25.201Clark StacerYeah.
+0:10:27.201 --> 0:10:47.81Brian HierholzerAs a bridge there too as like look you know like we're LinkedIn the platform and and we are requiring everybody to have an ID or is this a supply side tool that they're required on their side to have in their stack, you know what I mean? So but yeah, I mean there should be a programmatic way whether we provide the.
+0:10:47.201 --> 0:10:51.601Brian HierholzerTool to programmatically validate or they do right the the supplier, let's say.
+0:10:50.321 --> 0:10:51.161Clark StacerNo.
+0:10:52.521 --> 0:11:7.961Clark StacerYeah, yeah. And then you know there'll be API accessibility for LLMS on either side. So either side will be able to use their cloud instance or whatever to query the RFP and the bid.
+0:11:8.401 --> 0:11:12.1Clark StacerAnd interact with it.
+0:11:8.561 --> 0:11:8.881Brian HierholzerYeah.
+0:11:10.201 --> 0:11:26.321Brian HierholzerYeah. And hopefully what we do is we build, we build tools, we build skills, so that there's almost a RFP builder based on a **** ton of templates or there's a response builder based on a bunch of templates, right? And this is kind of the way I was going with Dan on a project, I'm like.
+0:11:17.961 --> 0:11:18.121Clark StacerRight.
+0:11:26.361 --> 0:11:44.401Brian HierholzerYou know, you should be able to in an audit project, let's say I've got an engagement. If somebody posts their boundary, you know, in a read only scenario to Dan, he should be able to see just by the boundary contents, the policies, procedures, products, whatever.
+0:11:44.961 --> 0:12:4.521Brian HierholzerAnd he should be able to read that our vendor product list and he should be able to see policies. He should be able to come to them with 50 different like task templates because he already has a massive catalog of logic and assessment against that stack, plausibly, right? So he would.
+0:12:4.721 --> 0:12:13.241Brian HierholzerJust taking that data, he could respond with a **** ton of demands once you get into the project at actual project itself.
+0:12:14.121 --> 0:12:33.641Clark StacerYeah, yeah. What I just pulled up on the screen here is my backlog of, you know, like the To Do List basically. So on there's an RFP package builder and access controls that's that's this will be LLM.
+0:12:34.1 --> 0:12:50.41Clark StacerThis can be LLM assisted for the RFP building side and then also on the bidding side and LLM assisted bid generation that will you know so so yeah that's definitely in in my sights right now.
+0:12:36.801 --> 0:12:37.161Brian HierholzerYeah.
+0:12:48.1 --> 0:13:7.81Brian HierholzerYeah, I, you know, I'm, I'm kind of using this word Braille and and I don't, I think I did I mentioned it to you yet or not. So you you know Braille, right? Like for blind people, right? I mean so and and deaf and and mute plausibly, right. So at the end of the day we got Helen Keller, right.
+0:12:55.681 --> 0:12:57.841Clark StacerI don't think I've heard that.
+0:12:59.561 --> 0:12:59.801Clark StacerRight.
+0:13:7.921 --> 0:13:27.401Brian HierholzerAnd I'm kind of creating an analogy of there are so much trauma and wasted time based on 95% pilot failure rates in the AI world. And in my opinion, it is because there is not a very programmatic, very mature, very explicit set of requirements.
+0:13:27.441 --> 0:13:46.841Brian HierholzerThat are programmatic and we've kind of talked about this, right. And I feel it's the same on the other side. How do I express my product with deep, deep, deep, deep clarity and very deep specificity of the value or the feature sets that we do that we bring to the table, whether it's compliance, legal.
+0:13:47.121 --> 0:14:3.281Brian HierholzerLicensing price model, whatever that is, right? Even though somebody puts a price sheet out there, there's still tons of lack of clarity of of, you know, compliance or security standards, but even the explicit value of what they do functionally, features, whatever.
+0:14:3.801 --> 0:14:23.681Brian HierholzerAnd I feel like, you know, even with modern tool sets, RFPs are sophisticated, but they're PDFs and they're not programmatic like we've discussed. And the other thing is there's a response and people go type responses. Oh yeah, and here's this, you know, and I literally had this conversation the other day with one of the guys that he said that.
+0:14:23.721 --> 0:14:43.321Brian HierholzerIBM had 40 people on this high, high end bid process, 40 people working on a response to a complex bid and then the bid changed or the RFP kind of tweaked and next thing you know and they were working on this for months. So think about it on the.
+0:14:43.561 --> 0:15:3.481Brian HierholzerThe bidding process, right? 40 people at Big Blue. And then all of a sudden the RFP went through a tweak and they're like, oh ****, we're going to do this. And then it went to a different team within IBM because it wasn't the big deal team, it was the medium deal team, let's say, right? And next thing you know, they said then it did it again.
+0:15:3.561 --> 0:15:20.41Brian HierholzerYeah. And so there was months and months and months of one group and then these that groups like we're out, like we're not even going to do this. This is 40 people that basically pushed away from the desk and said no more. It went into a smaller team within IBM, different group because the deal kind of changed and the value, blah, blah, blah, blah, blah.
+0:15:20.361 --> 0:15:39.841Brian HierholzerAnd my and at the end of the day, he told me that it didn't even happen. They didn't even get it. So just think about all that stuff. But the problem is, is that you have this archaic process of Word docs, PDFs, explicit things, all this stuff. And then on this side you have all these people typing this ****.
+0:15:41.201 --> 0:15:59.921Brian HierholzerAnd there's still a really hard, programmatic, difficult process because there's it is nothing but requirements and responses or here are my requirements, but can you do more? And there's no programmatic way in in a system that is like Braille where what if we couldn't actually type?
+0:16:0.41 --> 0:16:19.561Brian HierholzerWhat if we couldn't actually talk and wouldn't? What if we couldn't actually see? And we were trying to do business together, but we were blind, deaf and dumb, literally blind, deaf and dumb. And and the only way we would have to do this is to create some sort of Braille system.
+0:16:19.721 --> 0:16:38.921Brian HierholzerThat allowed us to get very, very specific clarity that bridged the gap of communication without being able to see, hear, speak, type. You see what I'm saying? Read, read wise and and to me this is what we're trying to do here is we're trying to get a computer-based.
+0:16:32.81 --> 0:16:32.441Clark StacerYeah.
+0:16:39.281 --> 0:16:54.41Brian HierholzerExplicit programmatic demand side and a supply side where machines can define what they want with humans behind them and machines can respond to what what they can fulfill.
+0:16:54.361 --> 0:17:13.921Brian HierholzerAnd and enhance beyond what that is in a programmatic, very explicit way and then actually commit commerce if you will or transact commerce and actually measure are these things being fulfilled you know in in a real time all the time transparency layer.
+0:17:14.121 --> 0:17:30.361Brian HierholzerAcross every one of those requirements every single day, and that they're measurable. I know that's a crazy statement, but I just look like it as a modern Braille system. You know, I don't know if that's a good analogy or not, but I'm literally trying to solve.
+0:17:30.361 --> 0:17:46.761Brian HierholzerThis in this, this way that is not programmatic. And if we can hand people clay with these templates that can get very, very, very explicitly sophisticated, but they're very, very clear and they're very, very programmatic.
+0:17:46.881 --> 0:17:54.681Brian HierholzerYou know, a a programmatic machine can respond to that, let's say, and then try to and try to prove it right at the end of the day.
+0:17:52.41 --> 0:17:52.241Clark StacerYeah.
+0:17:56.481 --> 0:17:56.921Clark StacerYeah.
+0:17:56.521 --> 0:18:9.1Brian HierholzerAnyway, I know that I don't know. That's just my that's my Braille analogy. Transparency without being able to see, hear or speak. And you have to have, you know what I mean? I mean, truly, right?
+0:18:4.801 --> 0:18:5.81Clark StacerYeah.
+0:18:8.241 --> 0:18:13.641Clark StacerYeah, you have to be very specific, very, yeah, very granular with it. Um.
+0:18:13.281 --> 0:18:13.441Brian HierholzerYeah.
+0:18:15.121 --> 0:18:15.321Clark StacerYeah.
+0:18:15.521 --> 0:18:25.401Brian HierholzerSo anyway, but but that's what software does every damn day. All you guys do every day is granularity. And like, why can't we bring this to commerce, right? Anyway.
+0:18:23.761 --> 0:18:37.601Clark StacerYeah, yeah, that's what we're trying to do is line it all up, you know, so that it can be done that way instead of these archaic, you know, weird docs. Freaking hate doc X.
+0:18:36.161 --> 0:18:36.561Brian HierholzerYes.
+0:18:38.41 --> 0:18:48.41Brian HierholzerYeah, anyway, it's just absolutely asinine. So anyway, OK, we're we're building a revolution here, Clark. We're building a new way of everything.
+0:18:38.961 --> 0:18:44.601Clark StacerYeah, yeah, yeah, totally. Yeah. Yeah. So, yeah, like.
+0:18:46.241 --> 0:18:49.161Clark StacerYou're right. You're right. Yep.
+0:18:50.441 --> 0:19:3.241Clark StacerYeah, so this week, yeah, I got all this stuff done. Supply side vendor profile, pilot projects, project centric boundary model. So.
+0:19:2.401 --> 0:19:5.161Brian HierholzerOh, don't go there. We know where that's.
+0:19:4.721 --> 0:19:20.361Clark StacerWell, you know, I mean like like I was trying to say in the stand up, like that's what my job, what I think my job is, is to map what you say your vision is onto what's possible to do in the platform.
+0:19:21.81 --> 0:19:37.721Clark StacerYou know, knowing that platform is a is a permanent bottleneck right now and it will be until until they can clone Kevin, Nick and and Chris, you know, so it's gonna just, it's gonna move slow.
+0:19:23.361 --> 0:19:23.841Brian HierholzerYeah.
+0:19:33.81 --> 0:19:34.241Brian HierholzerYeah, yeah, yeah.
+0:19:38.321 --> 0:19:41.81Clark StacerAnd we're just going to have to do what we can.
+0:19:42.721 --> 0:19:56.721Clark StacerWith what's there and maybe that's like, uh, maybe that's a little bit of smoke and mirrors on the front end with the UI, just like the way we're presenting it, you know, so.
+0:19:44.441 --> 0:19:45.121Brian HierholzerYeah.
+0:19:54.521 --> 0:20:11.761Brian HierholzerExactly. Just put a wrapper around it. I you know, I I think in in logical UI senses like you don't have to hide or or trick the system, whatever the hell it is, just create a UI that presents information. It may be wound differently, but as long as I see what how it looks.
+0:20:12.401 --> 0:20:14.761Brian HierholzerDoesn't matter, right? Let's say anyway.
+0:20:12.761 --> 0:20:17.841Clark StacerRight. Yeah, yeah, yeah, yeah. So, so, yeah, that's exactly.
+0:20:17.201 --> 0:20:37.121Brian HierholzerSo, so I also I I responded to to Joe who you had commented on and you know I'm paying work world stuff to create demand on our system just like I'm paying you to create demand on the system literally and now Dan too like I'm literally building outside customers that that.
+0:20:37.201 --> 0:20:54.41Brian HierholzerThat have the same kind of model or that Dan and Joe need you because at the end of the day we are talking about a commerce engine where our customers are trying to build applications. We are a development platform for building assessment and or other tool sets.
+0:20:55.1 --> 0:21:14.601Brian HierholzerAnd at the end of the day, this is buy and sell. This is the hard pie and this is real time assessment just on steroids. Still our core, our missions there, transparency is there. An audit is nothing but ITSM tool set is nothing but a DevSecOps. If you architect it the right way, it goes that way.
+0:21:15.161 --> 0:21:15.441Brian HierholzerGet some.
+0:21:15.441 --> 0:21:35.361Brian HierholzerIt does the information and it comes out with the result and an audit may just say this is the result, but a remediation would say this is the result, this is bad, this is how I fix. It is literally nothing but an audit plus code to fix, right? If it's wrong at the end.
+0:21:35.441 --> 0:21:55.1Brian HierholzerIt's just the same pattern over and over and over. Same thing with DevSecOps. Whatever this is, if I'm running a SOC on top of a security operation center on top of 0 bias, I have a customer owner network. I'm running this in this agentic world. I have my ****. They have their ****. How do we connect? I got to get data out of the system.
+0:21:55.441 --> 0:22:15.161Brian HierholzerI'm assessing configurations or settings or whatever that is, and now I've come to a resolution that this is wrong and I need to fix it because the assessment said it was not compliant to this configuration. It's it's the same thing over and over and over, right? So all I'm saying is that we are just.
+0:22:13.161 --> 0:22:13.441Clark StacerYeah.
+0:22:15.521 --> 0:22:33.441Brian HierholzerArchitecting a way for service providers in a new AI world that has a different type of tool set that has security among these transactions. And I'm looking at this over and over and over. It's a SAS application. It's a tool set. It really doesn't matter.
+0:22:34.121 --> 0:22:34.281Brian HierholzerSo.
+0:22:36.81 --> 0:22:51.801Brian HierholzerIt's just commerce. It's agentic commerce. And the pilot has to happen. The commercials have to happen. The legal has to happen. The licensing has to happen. The dollars have to happen.
+0:22:37.801 --> 0:22:38.121Clark StacerYeah.
+0:22:52.521 --> 0:22:58.561Brian HierholzerThis is assessment. This is supply demand with Braille.
+0:22:59.401 --> 0:23:0.401Clark StacerYeah, yeah.
+0:23:0.81 --> 0:23:19.921Brian HierholzerI I I one one other example. I I went to lunch last week with a guy that was selling for Quest Software selling Quest Software selling into American Airlines, JP Morgan, massive companies, Fortune 100 and they didn't really have a good licensing engine. It was all a quote UN quote, you know, an audit.
+0:23:20.1 --> 0:23:35.881Brian HierholzerThe self-audit, self-report consumption model for the Quest software. So Quest got spun out of Dell because they were rolled up in that acquisition there. Big private equity group came in there and they started going in and auditing all of their customers for the usage.
+0:23:36.921 --> 0:23:56.241Brian HierholzerAnd next thing you know, they're ******* off everybody and asking them $1 million bill, $2,000,000 bill, $500,000 bill, everything. The problem was, is that they had no engine like this. I mean, honest to God, when you really think about it, there's no mechanized way that that Quest could say, here's how you're consumed and that.
+0:23:56.321 --> 0:24:14.41Brian HierholzerThe buyer said this is how I consume, we're agreeing on it and where there's a stitching layer that allows both parties to have clarity and transparency of those transactions. Literally this this is a problem and it exists everywhere and and this can solve this, this can solve this.
+0:24:6.401 --> 0:24:6.681Clark StacerYeah.
+0:24:14.321 --> 0:24:30.241Brian HierholzerWhether it's license consumption, tied to dollars, tied to a license model, tied to a legal agreement of a minimum commitment or a maximum, whatever the hell it is, doesn't matter. It's a requirement, it is a satisfaction thereof, and it is the transparency.
+0:24:30.321 --> 0:24:49.721Brian HierholzerCenter that provides visibility to both parties or multiple parties right at the end of the day. So one last thing. So Joe sent that e-mail about that little project tool set using the transcript and he kind of took it, you know, further. I said, you know, what if we did this GSD but it listened.
+0:24:37.761 --> 0:24:37.961Clark StacerYeah.
+0:24:38.921 --> 0:24:39.161Clark StacerUhuh.
+0:24:43.921 --> 0:24:44.121Clark StacerUhuh.
+0:24:50.241 --> 0:25:5.241Brian HierholzerInto our conversation and then kind of started assigning, oh, Clark got this, Brian's got that, Joe's got that of the different people part of to the to the project that are part of the project, right. Just like we we converse, same thing that we do with them.
+0:24:58.761 --> 0:24:59.41Clark StacerYeah.
+0:25:5.441 --> 0:25:25.41Brian HierholzerSo you kind of took your concept and just went further, but back to what I was saying and I replied in the e-mail, this is shared code because I'm paying for Joe and this team over there to be a customer on top of this to demand the feature sets and harden our platform with a friendly.
+0:25:25.121 --> 0:25:44.881Brian HierholzerEvery customer I'm paying for creating our own customers, bottom line and that code is available. So what I was gonna say is that we wanna take his code and your code if you whatever you built to do this thing and we wanna kind of create a little product with this that we can.
+0:25:44.881 --> 0:26:3.801Brian HierholzerSo all I'm saying is, is that that you and Joe kind of mashed that little toolkit together. That is a product within our project, which is Project Notetaker and automated task assignment. Whatever the hell we call this, this is a tool that I think everybody could use. Quite frankly, I do.
+0:26:3.881 --> 0:26:13.81Clark StacerYeah, yeah, yeah. I think we should be recording all of our standup, all the demos and everything, you know? Yeah, so many things get.
+0:26:4.801 --> 0:26:5.241Brian HierholzerReally do.
+0:26:6.801 --> 0:26:7.41Brian Hierholzer1.
+0:26:12.401 --> 0:26:29.201Brian HierholzerWe, we, we are, we're going to be and you're the product set that we're doing this together and then we're going to start doing every engagement with ourselves, right. And just say, OK, who's the assignment, where is it going? Here's the lowdown we're we're doing, we're further advanced than the core team.
+0:26:25.561 --> 0:26:25.881Clark StacerYeah.
+0:26:29.481 --> 0:26:30.521Clark StacerIt's yeah.
+0:26:29.521 --> 0:26:47.1Brian HierholzerJoe and Joe is further advanced in the core team and the same thing needs to go with Dan and Dan needs to do it. And we need to show everybody a meeting in a video and what the net output of that is too and say show this to Dan and say Dan, this is what your yours and Brian's meeting should look like.
+0:26:41.401 --> 0:26:42.1Clark StacerYeah.
+0:26:47.681 --> 0:27:2.681Brian HierholzerAnd these are the tools. So this is what I'm hoping to do and to show everybody as well. And my question is stand up wise, wouldn't this work in a stand up just the same in the mornings? Again, I don't know, but wouldn't it? Kind of.
+0:26:52.241 --> 0:26:52.481Clark StacerYeah.
+0:26:57.561 --> 0:26:57.921Clark StacerYeah.
+0:27:0.761 --> 0:27:9.561Clark StacerJust hit record. Yeah, hit record on transcript and then process somebody process it at the end. You know what?
+0:27:9.161 --> 0:27:23.281Brian HierholzerAnd then and then it may even create tasks like literally his is OK, this is Daniel's task, this is Clark's task is and it would literally go create tasks across the system. That's what I hope it can do. Yeah. So anyway.
+0:27:12.121 --> 0:27:12.241Clark StacerYep.
+0:27:20.361 --> 0:27:21.241Clark StacerYeah.
+0:27:21.921 --> 0:27:29.881Clark StacerAnd even drop drop keywords into it. So while you're in the meeting, just say make a task for this bug, you know, and assign it to Clark.
+0:27:28.641 --> 0:27:42.681Brian HierholzerYeah, literally, yeah, literally. Hey, hey, Claude or hey, whatever. While we're in the meeting and we're like almost like we're tuning our conversation to kind of get it to where it tracks, right, let's say, yes.
+0:27:31.881 --> 0:27:32.321Clark StacerYeah.
+0:27:34.281 --> 0:27:34.521Clark StacerYep.
+0:27:40.361 --> 0:28:0.41Clark StacerYeah, like it's listening. It's gonna listen to what we're saying and pick up, you know, and then like the summarizer skill that that I have it, it then it it summarizes all the things and then makes suggestions for like maybe you want to slack this, this guy, maybe you want to.
+0:27:44.801 --> 0:27:45.481Brian HierholzerYes.
+0:28:0.41 --> 0:28:10.801Clark StacerMake a ticket for this. Maybe you want to do this. You know, it makes action item suggestions. So yeah, exactly that can easily be built on later. Yeah, like you're saying.
+0:28:10.161 --> 0:28:26.721Brian HierholzerYeah, and and we to to that point, even part of this, I can say what I want to do is this section right here that we're going to talk about right now. I want to make sure we copy Joe Llamas over at Work Worlds and open up a task or take this portion of this meeting and this summary and translation and ship it to him.
+0:28:26.521 --> 0:28:26.881Clark StacerYeah.
+0:28:27.441 --> 0:28:46.961Brian HierholzerAnd put it in Slack or whatever it is and open up a test so you can read it. Like why couldn't we do that to a customer like that we were literally talking about plausibly, you know, and then and then some sort of review that says, well, but make sure I review it first to make sure that it's acceptable and then I can send it. I could literally just audio that to this.
+0:28:33.321 --> 0:28:33.681Clark StacerYeah.
+0:28:36.521 --> 0:28:37.601Clark StacerWe can.
+0:28:44.241 --> 0:28:44.481Clark StacerRight.
+0:28:47.41 --> 0:28:53.841Brian HierholzerPass system and then the review for me, tell it to for me to review it and then to send it to Joe.
+0:28:54.161 --> 0:29:6.41Clark StacerAnd then you hook up Claude to your Slack. Claude, you know, Claude can then Slack you and say, hey, these, these are the action items from the meeting, you know, and you know, just remind you.
+0:29:3.601 --> 0:29:20.441Brian HierholzerExactly. And and that's what Joe was doing with Claudbot. So he was kind of using Claudbot and and and Claud together or whatever open Claw is. But yeah, he's kind of doing that. But yes, this is the intent is really a really good collaborative.
+0:29:11.961 --> 0:29:12.241Clark StacerYeah.
+0:29:16.81 --> 0:29:16.361Clark StacerYeah.
+0:29:20.481 --> 0:29:29.121Brian HierholzerTranscription and then task assignment. I think it'd be great. Anyway, let's just keep iterating on it, but I think it'd be cool.
+0:29:28.801 --> 0:29:43.961Clark StacerYeah, and in fact one of the things on my list is a messaging center and and I've taken that the idea that you you put a link to a website that had like basically Slack with AI built into it.
+0:29:42.201 --> 0:29:51.321Brian HierholzerYeah, it's the, it's the, it's the prompt prompt QL prompt ql.com. Yeah, it's the guys that did Graph QL, yes.
+0:29:46.1 --> 0:29:46.321Clark StacerYes.
+0:29:47.721 --> 0:30:4.721Clark StacerThat's it. And I had, I had Claude dig into that and and evaluate it and look at the patterns there. And so essentially we can do this in SME Mart by embedding. We can embed a slack channel.
+0:30:6.81 --> 0:30:17.841Clark StacerInto a project and like have that, you know, every Slack conversation that happens is immediately added to the timeline in claw in the Smee Mart project, you know so.
+0:30:17.921 --> 0:30:37.801Brian HierholzerAnd we could use it in Slack or use our own little messaging channel in the. And that's kind of what they're doing is they like built their own little internal messaging service, right? A channel system. But yeah, agree, agree. Yeah, I told Joe the same thing. I was like, since you already built that thing and Clark's doing that too, I said go build that freaking prompt QS.
+0:30:24.561 --> 0:30:25.121Clark StacerExactly.
+0:30:29.81 --> 0:30:30.641Clark StacerYeah, yeah.
+0:30:38.1 --> 0:30:54.801Brian HierholzerThing to and get let's get out of Slack and he's like, OK, I'll try. So anyway, but same thing like we're like literally the same because to me this is all this project ****, right? It's like this collaborative stuff, whether it's internal collaboration or between multiple parties.
+0:30:49.41 --> 0:30:49.321Clark StacerYeah.
+0:30:54.681 --> 0:30:54.961Clark StacerYeah.
+0:30:54.921 --> 0:31:0.721Brian HierholzerThat are in different orgs. It's the same problems, the same challenges, the same opportunities, I guess.
+0:30:57.801 --> 0:30:58.241Clark StacerYeah.
+0:31:0.361 --> 0:31:1.681Clark StacerYeah, exactly.
+0:31:3.281 --> 0:31:4.361Brian HierholzerOK, cool.
+0:31:3.281 --> 0:31:17.201Clark StacerYeah. Oh, and I I don't know if you saw I made that. I made a Slack channel for you and me and Dan. So for for Dan and I to sync up, it's on that zero rise org. Yeah, and it's a private.
+0:31:9.161 --> 0:31:11.121Brian HierholzerOh, I did not.
+0:31:12.721 --> 0:31:20.361Brian HierholzerWhere's that at? Is that in org? Oh, ZPZPP. Oh, OK, yeah, I got it. I got it. Yeah, cool.
+0:31:19.601 --> 0:31:38.81Clark StacerYeah, yeah. So anyway, I wanted to show you that, like I had Claude write a prompt for him to give to his Claude to. So there's a protocol for him and I and our Claude instances to sync up on stuff that we need to sync up on, you know, terminology.
+0:31:38.841 --> 0:31:43.801Clark StacerTech stack like whatever, whatever it is, you know?
+0:31:42.1 --> 0:31:42.201Brian HierholzerYeah.
+0:31:43.161 --> 0:32:2.601Brian HierholzerYeah, do me a favor, open up with with me, you and Joe and try to do this little messenger task thing. You know what I mean? The the the thing we're just talking about the the the the task assignment post transcript, the the transcript processor if you will do that.
+0:31:54.961 --> 0:31:55.81Clark StacerOK.
+0:32:2.761 --> 0:32:18.161Brian HierholzerThat too. And I want to, yeah, we'll kind of, you know, that way we could, I could have said to the system right now, if it was listening and it was transcribing and pushing it into Slack, it could almost go and then drop something into Slack from this, right? Maybe.
+0:32:2.881 --> 0:32:3.81Clark StacerYeah.
+0:32:17.281 --> 0:32:29.601Clark StacerYeah. Should it be? Should it be private with us? Yeah. OK, cool. Yeah. Yeah, I'll do that. Yeah.
+0:32:18.681 --> 0:32:19.761Brian HierholzerYeah.
+0:32:20.921 --> 0:32:25.601Brian HierholzerYeah, that's fine. Just us threes for for now. Yeah, cool.
+0:32:26.921 --> 0:32:41.921Brian HierholzerAwesome. OK, well you I will send you the doc or the file as soon as it comes in and I will see you in the Joe channel as well and and you have a great weekend.
+0:32:39.761 --> 0:32:40.521Clark StacerAll right.

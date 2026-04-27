@@ -25,6 +25,7 @@ SME Mart is a **marketplace for Subject Matter Experts** in compliance/cybersecu
 | **SDK source** | `~/Projects/zb/clients/packages/` |
 | **Neon DB reference** | [`.claude/notes/neon-mcp-reference.md`](.claude/notes/neon-mcp-reference.md) — project ID, tables, common SQL queries |
 | **Hub Connection Setup (Neon)** | [`.claude/docs/HUB_CONNECTION_SETUP_NEON.md`](.claude/docs/HUB_CONNECTION_SETUP_NEON.md) — step-by-step playbook: generic-sql deployment + managed secret + connection via ZB MCP |
+| **UAT CloudFront Cache Invalidation** | [`.claude/docs/UAT_CLOUDFRONT_CACHE_INVALIDATION.md`](.claude/docs/UAT_CLOUDFRONT_CACHE_INVALIDATION.md) — when `uat.zerobias.com/sme-mart/` shows stale code after deploy: SSO prod account → distribution `E23VJPBBDUCHBQ` → Invalidations → `/*` |
 | **ZB Portal API curl Fallback** | [`.claude/docs/ZB_PORTAL_CURL_FALLBACK.md`](.claude/docs/ZB_PORTAL_CURL_FALLBACK.md) — recipe for querying `portal.*` endpoints (frameworks, vendors) when ZB MCP doesn't index the service |
 | **Demo data guide** | [`.claude/notes/demo-data-guide.md`](.claude/notes/demo-data-guide.md) — buyers, providers, engagements, ZB Tasks, demo scenarios |
 | **GQL Schema Extension (howto)** | [`.claude/notes/zb-graphql-custom-schema-howto.md`](.claude/notes/zb-graphql-custom-schema-howto.md) — customer-facing guide: YAML schema packages, querying, filtering |

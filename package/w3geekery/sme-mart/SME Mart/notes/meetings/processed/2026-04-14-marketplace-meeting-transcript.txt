@@ -1,0 +1,198 @@
+0:0:3.149 --> 0:0:21.349Brian HierholzerSlack to me at 531 on April 13th regarding the interpretations for the MIRA board. And the question and answer, the true false of home versus linked agreements, asymmetric project one.
+0:0:22.389 --> 0:0:22.789Brian HierholzerUm...
+0:0:23.829 --> 0:0:40.69Brian HierholzerI believe that, yeah, they are separate engagements, right? But what we would do is have a primary engagement. And then I like the idea of a linked engagement, if you will. When you say asymmetric, what do you mean by that?
+0:0:40.629 --> 0:0:43.749Clark StacerSo those are, I think that's the, when you pull in.
+0:0:44.789 --> 0:1:1.349Brian HierholzerOh, oh, oh, oh, oh, not many to many. So here's the thing on this, on the, on the, let's say, let's call it mapping, right, of party to party, let's say, in this scenario, there are,
+0:0:45.989 --> 0:0:47.29Clark Stacerfrom yeah.
+0:1:2.549 --> 0:1:3.509Brian HierholzerPossible.
+0:1:5.429 --> 0:1:24.149Brian HierholzerThere are possible combinations. The 0 bias standard in order to eliminate bias, in order to abide by the 0 bias standard of an unbiased assessment, there are several things that have to happen to be an unbiased assessment. The most important
+0:1:24.189 --> 0:1:44.69Brian Hierholzerones are the alignment of dollar flows of who's paying the auditor. Because if the supplier is paying the auditor, there is an alignment between the auditor and the supplier to do well or to pass things that are potentially shouldn't be passed. So the current auditing world is completely biased and it's broken.
+0:1:44.429 --> 0:2:3.429Brian HierholzerAnd if you look at the first principles concept of what an audit should be, it should actually align with the buyer of technology or the buyer of services and the assessor should be aligned or paid by the buyer rather than the supplier. So the current paradigm is completely upside down. So
+0:2:3.909 --> 0:2:23.429Brian Hierholzerin this scenario, in the perfect scenario where there we are eliminating bias, where we have alignment of the auditor with the buyer of the technology, and the auditor is auditing the supplier and delivering the audit data into the transparency center, the shared portion,
+0:2:24.69 --> 0:2:32.149Brian Hierholzerof the transparency center. We would have the buyer and the assessor.
+0:2:34.629 --> 0:2:37.109Brian HierholzerAligned on who each other are.
+0:2:39.349 --> 0:2:54.309Brian HierholzerBut the seller may have a scenario, and this is the other key component to 0 bias elimination or elimination of bias, is that the auditor is blind to the auditee.
+0:2:55.269 --> 0:3:13.669Brian Hierholzerand fully anonymous. So the purest sense of a pure unbiased audit is that the engagement or the linked engagement or the alignment of the auditor to the buyer is a core relationship and that that engagement is
+0:3:14.229 --> 0:3:35.759Brian Hierholzeryou know, one that is to be kept. The seller is not a party of the transaction or the engagement, but they are a party to the results of the auditor that is, that they do not know who they are, right? So in that scenario, we have a
+0:3:35.909 --> 0:3:59.869Brian Hierholzerprimary engagement or a home engagement. I do like a kind of a primary, if you will. And then maybe we have secondary engagements or linked. So it's a primary, secondary, and then a tertiary, maybe something like that. But at the, you know, they are linked engagements, but they are not the primary engagement. The primary engagement would be between the buyer and the seller.
+0:3:51.429 --> 0:3:51.709Clark StacerAnd.
+0:4:0.549 --> 0:4:8.389Brian Hierholzerin that scenario, right? So does that answer number one? Long, long, long-winded question.
+0:4:2.469 --> 0:4:2.789Clark StacerYeah.
+0:4:8.709 --> 0:4:9.989Clark StacerI think so, yeah.
+0:4:9.749 --> 0:4:11.349Brian HierholzerOr I should say answered.
+0:4:11.749 --> 0:4:20.229Clark StacerLike, there's only like the home is immutable, like that. The primary engagement is like, yeah, that's in, that's like.
+0:4:20.869 --> 0:4:26.149Brian HierholzerYeah, they are the ones conducting commerce, right? It is their commerce.
+0:4:21.669 --> 0:4:23.189Clark StacerEverything else is linked.
+0:4:24.709 --> 0:4:25.29Clark StacerYeah.
+0:4:26.309 --> 0:4:26.709Clark StacerYeah.
+0:4:27.829 --> 0:4:28.789Clark StacerYeah, I think so.
+0:4:28.69 --> 0:4:46.949Brian HierholzerThe assessor, they are in commerce, but they are in commerce with the buyer, but it is a secondary transaction and it is, you know, not the primary commerce component. It is a secondary engagement that serves the linked
+0:4:47.829 --> 0:5:10.149Brian Hierholzerengagement into that transparency center. Okay, so #2, standing persistent. Buyer auditors on retainer relationship, it exists independent of any project and gets pulled into projects on demand. That is very plausible because I, as a buyer of technology, may have aligned with multiple auditors. And I'm hinting at future questions you have here.
+0:4:51.669 --> 0:4:52.309Clark StacerYeah, yeah.
+0:5:10.469 --> 0:5:30.469Brian Hierholzeraround specialty auditors. I may have a, I may go to the marketplace. I may find assessors that have different scopes or specialty capabilities. One of them may be a clinical, let's say a health-related audit.
+0:5:12.709 --> 0:5:13.109Clark StacerUh-huh.
+0:5:30.789 --> 0:5:49.869Brian Hierholzeror clinical engineering. One of them may be a cybersecurity audit. One of them may be, and this is all plausibly in the same engagement between a buyer and a seller, right? But we have a healthcare vertical scenario and a healthcare vertical app, let's say, as the supplier.
+0:5:42.229 --> 0:5:42.549Clark StacerYeah.
+0:5:50.709 --> 0:6:9.749Brian Hierholzerthe seller, and the buyer is a health system, let's say, and they're going to audit multiple parts of the stack that is delivered by the supplier. So it may be clinical compliance auditing,
+0:6:10.69 --> 0:6:29.869Brian HierholzerThere may be clinical engineering auditing around HIPAA, or not even HIPAA, around HL7, so clinical things. Then there's a cybersecurity component around HIPAA or anything like that, or NIST or SOC 2. And then there may be an AI auditor in there.
+0:6:19.29 --> 0:6:19.429Clark StacerYeah.
+0:6:30.229 --> 0:6:49.509Brian Hierholzerseparate in addition to these other specialty auditors that is around AI governance and controls and security. So these things are very, it is very plausible that in a transparency
+0:6:50.429 --> 0:7:10.789Brian Hierholzercenter within a given project that sits within a project within engagement between a buyer and a seller, in this case, the health care system buying a health app, that they solicit and engage via the marketplace assessors that have varying
+0:7:10.949 --> 0:7:30.429Brian Hierholzerspecialties, and they may bring all of them to the project. And it is also plausible that depending on the boundaries that live within the project and the types of the boundaries that are within it, that there may be overlap
+0:7:31.189 --> 0:7:51.749Brian Hierholzerof certain assessors that are still party to certain apps or whatever, or people or policies in a given boundary, or they're in different boundaries, but they are blind to each other. There should be no understanding. And every data request from one auditor
+0:7:52.229 --> 0:8:12.549Brian Hierholzerto another auditor, you know, that's proprietary data that is, you know, tied to the task and tied to those specific parties and tied to those specific auditor A, auditor B, auditor C. So there should be no overlap or data, you know, that is mixed together, let's say.
+0:8:13.349 --> 0:8:23.669Clark StacerSo it needs to be clear the source of the data belongs to this particular engagement within this particular project, not all intermixed.
+0:8:24.789 --> 0:8:28.69Clark StacerThere just needs to be a clear, clear trail back to whoever.
+0:8:25.189 --> 0:8:25.829Brian HierholzerCorrect.
+0:8:28.789 --> 0:8:46.829Brian HierholzerYeah, so it is definitely plausible that based on the image that I sent, that there are a primary engagement between the health system in this case and a health app as the seller, and that there are three or four different specialty assessors that the primary buyer
+0:8:48.229 --> 0:9:9.789Brian Hierholzeris engaged with in its own accord. And then they are invited into the project and they will be assessing different domain expertise. And that all of that data in all of those different domains, albeit it may be anonymous because the auditor does not know who the auditee is,
+0:9:10.149 --> 0:9:28.869Brian Hierholzerbut they are publishing the information into the transparency center and the supplier who is being audited by these different subject specialty auditors still doesn't know who the auditor is. They're just seeing the failure or the good or the bad.
+0:9:29.109 --> 0:9:30.389Brian HierholzerIn those assessments.
+0:9:30.869 --> 0:9:31.349Clark StacerOkay.
+0:9:32.389 --> 0:9:44.949Clark StacerYeah, so yeah, the last sentence in that one was, auditor doesn't sign a new contract per project. The engagement with the auditor handles as many projects as it needs to.
+0:9:43.589 --> 0:10:3.349Brian HierholzerWell, I don't know about that. I actually, I see that incorrect. I do believe that the auditor or auditors and the buyer still have an engagement level thing, which is MSA, you know, potential background, history, Dun and Bradstreet, you know, maybe some primary banking.
+0:9:49.29 --> 0:9:49.429Clark StacerOK.
+0:10:3.589 --> 0:10:26.749Brian Hierholzerbut there's still probably going to be things that are chargeback wise relative to the project itself and the scope of the auditing. If the scope is narrow, there's still a monetization transaction between the buyer of the technology and their auditor that they've engaged
+0:10:26.829 --> 0:10:46.229Brian Hierholzerfor the audit of the supplier. And those dollar transactions are going to be very specific, and they may be very different from one audit engagement or audit project to the next. So I still definitely see subscription-based auditing
+0:10:40.309 --> 0:10:41.29Clark StacerOkay.
+0:10:46.469 --> 0:11:5.829Brian Hierholzeron a project by project basis between the secondary engaged parties, if you will, or the secondary linked engagement into those projects on very different commercial terms with the auditor, depending on the scope. It could be doing a really, really broad scope.
+0:11:5.989 --> 0:11:24.949Brian Hierholzeror it could be doing something narrow. And however that is defined between the two parties in that project, it is still a project between the auditor that is aligned with the buyer, but there's just a third party that is being audited, right, which is the other
+0:11:26.149 --> 0:11:36.789Brian Hierholzerengagement party, if you will. So there is definitely a variable of commerce in that scenario.
+0:11:29.29 --> 0:11:29.589Clark StacerGotcha.
+0:11:34.949 --> 0:11:35.429Clark StacerOkay.
+0:11:37.189 --> 0:11:40.629Clark StacerYeah, so maybe or maybe not a new contract, probably.
+0:11:39.909 --> 0:11:45.189Brian HierholzerYeah, and the 3PAO is a third party assessment organization. It's just an acronym.
+0:11:45.669 --> 0:11:47.189Clark StacerOkay, gotcha.
+0:11:49.109 --> 0:12:2.69Clark StacerSeller, okay, next one was seller consent is baked into engagement one. Seller signing engagement one pre-authorizes buyer to pull in auditors later. Seller doesn't approve each pull in case by case.
+0:12:2.549 --> 0:12:21.989Brian HierholzerYeah, I think that's going to have to be agreed on within the transparency system that you are being subject to my auditor or auditors of choice. And I'm going to be bringing those parties to the table on my behalf. And you're going to have to share information with them.
+0:12:16.949 --> 0:12:18.869Clark StacerSo some consent, yeah.
+0:12:22.269 --> 0:12:32.469Brian HierholzerThey don't know who you are, so your data is safe relative to your brand or your company. That is irrelevant. The assessment is all that matters.
+0:12:29.29 --> 0:12:29.349Clark StacerYeah.
+0:12:33.509 --> 0:12:40.69Clark StacerOkay, yeah, that makes sense. Let's see, private, published to shared.
+0:12:41.109 --> 0:13:0.29Clark StacerEach third party works in their private workspace. They explicitly elevate findings to shared transparency, at which point buyer configured anonymity rules apply, mask the org logo, contact, preserve role plus specialty, not a separate visibility gate.
+0:12:53.589 --> 0:12:54.229Brian HierholzerYes.
+0:13:0.309 --> 0:13:19.869Brian HierholzerI would say that the anonymity is a toggle. You know, if they want to use the purest sense of anonymity, I believe that that would be the best practice to align with the 0 bias standard of elimination of bias. But it is not a requirement.
+0:13:1.149 --> 0:13:1.829Clark StacerThat makes sense.
+0:13:20.469 --> 0:13:20.949Clark StacerOkay.
+0:13:21.189 --> 0:13:26.549Brian Hierholzerunless the buyer wants to, you know, make sure that that is the case.
+0:13:27.669 --> 0:13:36.709Clark StacerSo the buyer can always say, all of these are going to be anonymous or can for, you know, force specific ones to be anonymous or.
+0:13:34.629 --> 0:13:44.629Brian HierholzerHowever, yeah, season to taste on a on a on a linked engagement by linked engagement scenario or however you want to call that.
+0:13:37.909 --> 0:13:38.389Clark StacerOkay.
+0:13:44.789 --> 0:13:45.909Clark StacerOkay, okay.
+0:13:47.109 --> 0:13:52.789Clark StacerUm, let's see, next for um, for planning.
+0:13:54.149 --> 0:14:14.389Clark StacerThird party specialty taxonomy, platform level ontology or engagement configurable? See, seen in Miro, AI quantum encryption, IAM. You mentioned cyber, agent audit and encryption auditing. Is this a fixed list, a buyer defined per engagement or community?
+0:14:14.709 --> 0:14:16.229Clark StacerMarketplace curated.
+0:14:14.949 --> 0:14:33.949Brian HierholzerYeah, this goes back to kind of previous, you know, conversations above is that I believe that there will be a massive amount of assessors on the Zero Bias Assessment Platform, because it is a the primary objective of transparency is assessments.
+0:14:34.309 --> 0:14:54.469Brian HierholzerAnd, you know, we, our primary customer base, they're going to be assessors and they're going to be using this solution to assess their clients, right? And the marketplace value of transparency is that we are creating a very, very specific high value marketplace in that
+0:14:44.709 --> 0:14:45.109Clark StacerYeah.
+0:14:55.749 --> 0:15:12.709Brian HierholzerIf you're joining this marketplace, you are intent to have full transparency and be, you know, kind of turned over in a deeper assessment world than you ever have before, because these are highly regulated, highly critical environments, let's say.
+0:15:13.189 --> 0:15:13.749Clark StacerGotcha.
+0:15:14.829 --> 0:15:31.909Clark StacerOkay, next, scope overlap arbitration. If 2 third parties are scoped to the same boundary, so second opinion, and they publish conflicting findings, who arbitrates? The buyer, majority rule, escalation.
+0:15:31.469 --> 0:15:48.789Brian HierholzerYeah, that's a really good, you know, so there's a couple scenarios here, right? There would be multiple potential auditors, as we've discussed, depending on specialty. However, I think that there is high value that
+0:15:49.949 --> 0:16:9.349Brian HierholzerA buyer that is extremely paranoid wants to bake off multiple auditors against the same environment that is in the same domain, and that is not that they are the same specialty. So this is really, really interesting. I think that that would go towards the buyer of the technology
+0:16:9.589 --> 0:16:17.349Brian Hierholzersaying that I, you know, we're going to choose, let's say one says green and one says red, that will.
+0:16:19.669 --> 0:16:32.469Brian HierholzerThat will be determined by the buyer and their requirements of that, if that is acceptable or not. Now, this gets to an interesting conversation because there's something here that we are not
+0:16:26.469 --> 0:16:26.869Clark StacerYeah.
+0:16:34.389 --> 0:16:55.309Brian HierholzerWe are not defining right now, which is the buyers cyber. I'm going to save this to the end. It's A cybersecurity service level agreement. OK, I'm going to save that to the end. And this is essentially an agreement between
+0:16:45.109 --> 0:16:45.589Clark StacerOK.
+0:16:55.669 --> 0:17:15.869Brian Hierholzerthe buyer and the seller, where the buyer has very explicit things that they are going to monitor and have in the contractual terms. And if, and it could go so far as explicit logic. If the buyer knows the stack,
+0:17:16.69 --> 0:17:35.909Brian Hierholzerof a seller. And because they're using the 0 bias assessment platform and they see all of the logic from the logic menu and the catalog, they could explicitly define certain controls or certain assessments against certain products.
+0:17:36.149 --> 0:17:55.589Brian Hierholzerthat have to be within the assurance requirements around the alerts or the assessment status of if it's good or bad with rights to cure within certain time periods, let's say. So let's say, you know, in
+0:17:55.909 --> 0:18:14.869Brian Hierholzerin certain critical controls that the buyer is monitoring. And the assessor has packaged certain things for the buyer, and they are buying from the assessor a cybersecurity SLA where they are paying a subscription to the auditor.
+0:18:15.189 --> 0:18:34.989Brian Hierholzerto audit the seller of whatever that denomination may look like. Let's just say that they're assessing against five applications on the seller for critical assessment. They may have a monetization between the buyer and the assessor, the auditor,
+0:18:36.309 --> 0:18:56.309Brian Hierholzerof, let's say, $200 per application that they are assessing. So it would be $1,000 a month because these are critical things that they want to monitor. And those, the assessor may package service level agreements and language
+0:18:56.549 --> 0:19:16.549Brian Hierholzerrelative to terms and conditions that they could put or supply to a buyer to include in any contracts with the seller. So the assessor has packaged service level agreement logic of the assessments of the apps
+0:19:16.869 --> 0:19:35.429Brian Hierholzerand legal terms and conditions, as well as rights secure into the buyer's hands that then could be put into the project between the buyer and the seller, but they're using the logic and the terminology and the legalese from the assessor.
+0:19:35.749 --> 0:19:37.29Brian HierholzerDoes that make sense?
+0:19:37.269 --> 0:19:43.989Clark StacerI think so, like pre-assessment require, yeah, a pre-assessment of certain things, yeah.
+0:19:41.509 --> 0:20:0.229Brian HierholzerYeah, these are requirements. This is called continuous monitoring. So it's literally a cybersecurity SLA that assessors are selling to buyers that they will impose on sellers of technology so that they're truly packaging
+0:20:13.829 --> 0:20:14.69Clark StacerYeah.
+0:20:14.109 --> 0:20:21.909Brian HierholzerJust a cybersecurity SLA around assessors, and and that that the buyers.
+0:20:18.789 --> 0:20:19.349Clark StacerOkay.
+0:20:23.509 --> 0:20:37.109Brian Hierholzermay impose those cybersecurity SLAs into the project with the in the primary engagement or the primary project owners.
+0:20:37.509 --> 0:20:37.909Clark StacerYeah.
+0:20:39.69 --> 0:20:40.469Clark StacerOkay, yeah, I think...
+0:20:39.829 --> 0:20:42.709Brian HierholzerI said I was gonna, I said I was gonna come to it, and then I just did it.
+0:20:43.389 --> 0:21:2.349Clark StacerThat's all right. Let's move on to seven, anonymity through remediation. Auditor publishes a finding requiring seller remediation. Does the remediation workflow reveal auditor identity or does buyer become the proxy for back and forth?
+0:21:3.109 --> 0:21:6.229Brian HierholzerYeah, I believe that the um...
+0:21:7.909 --> 0:21:13.589Brian HierholzerThe remediation requirement that there is a failure and that there is alert. There is a...
+0:21:14.949 --> 0:21:34.189Brian Hierholzerin this project, there has to be, in the transparency center, there has to be some sort of dashboarding around the failures of these things. And those are embedded alerts and or the logic that goes with those in the transparency center in the shared environment.
+0:21:34.309 --> 0:21:53.69Brian Hierholzerright? And those are published. The rights to cure or to remediate, you know, it may be, hey, you're failing, but you have a 30 day or a 60 day or a 90 to cure. And depending on the cybersecurity SLA, which I will, you know, go back to the
+0:21:54.149 --> 0:22:14.549Brian Hierholzerthat is in the transparency center as requirements, because the cybersecurity SLA are requirements that are in the transparency center that are required of the buyer, that those things have to be cured. The, you know, the seller would have to cure those within a given time.
+0:22:14.949 --> 0:22:34.949Brian HierholzerAnd depending on the teeth of the cybersecurity SLA, there may be monetization penalties or dollar penalties or contractual outs. So if they meet certain criteria or they fail, the buyer may be able to get out of the engagement completely or the project completely and it
+0:22:35.509 --> 0:22:42.469Brian HierholzerIt is a cause of failure to meet the contract terms, and they can get out.
+0:22:41.549 --> 0:22:41.909Clark StacerYeah.
+0:22:42.869 --> 0:22:43.189Clark StacerYeah.
+0:22:44.869 --> 0:23:2.149Clark StacerOkay. Okay, third party 3PAO sourcing. Do buyers select 3PAOs from Smemart catalog or bring their own or both? This drives whether Smemart needs a 3PAO directory surface.
+0:23:0.949 --> 0:23:19.589Brian HierholzerThe the the the the SME Mart needs a directory service for everything known demand, and that we need the the the marketplace and the app builders or service providers to declare their own verticals if we don't have it covered.
+0:23:19.829 --> 0:23:38.829Brian HierholzerSo I feel like they need to be able to declare one, and then it is pinned there, and then we may relabel it depending on our choice, or we will allow it to stand. But I don't think that we can define every nuance or nook and cranny of any, you know, there's so many
+0:23:31.909 --> 0:23:32.149Clark StacerOkay.
+0:23:39.349 --> 0:23:50.149Brian Hierholzervariables within the marketplace, I don't think we can capture them all. And I think that's going to, just like you, create your own scheme extensions, we need to be able to accommodate for this.
+0:23:40.789 --> 0:23:41.29Clark StacerNo.
+0:23:50.549 --> 0:23:51.669Clark StacerOkay, gotcha.
+0:23:51.749 --> 0:23:58.549Brian HierholzerBut third party assessment organizations or auditors, I think is definitely like a category number one that we want to have.
+0:23:59.29 --> 0:24:2.669Clark StacerOkay, that's going to be a big part of the business.
+0:24:0.389 --> 0:24:6.389Brian Hierholzerand to trap lots of different credentials. There are a lot of different credentials for these types of assessors.
+0:24:7.189 --> 0:24:7.749Clark StacerOkay.
+0:24:8.709 --> 0:24:18.549Clark StacerSo like a buyer can bring their own assessors, upload the credentials for the assessors, and like, you know, with those.
+0:24:17.829 --> 0:24:38.949Brian HierholzerYeah, they would still have to go in and, you know, jump into Smemart. You know what I mean? They would still, in order for me to bring my own assessor, I'm going to say, hey, you have to go register in Smemart so that we can do this in the platform. So, you know, we can't have them off the island. We got to get them in, but they can bring their own. And I think we talked about that before, which is a private
+0:24:30.309 --> 0:24:30.709Clark StacerYeah.
+0:24:39.29 --> 0:24:42.789Brian Hierholzerplacement, if you will, versus a open bid, right?
+0:24:42.389 --> 0:25:0.549Clark StacerYeah, yep, yeah. Yeah, there will be the ability to have private ones versus public ones. Okay, 9, partial boundary scope all or some. When you said party to all boundaries in scope or some boundaries,
+0:24:50.69 --> 0:24:50.349Brian HierholzerYeah.
+0:25:0.949 --> 0:25:16.709Clark StacerIs sum a boundary subset, E.g. 3 out of 10 boundaries on the seller, or is it a partition within a boundary, specific task controls within one boundary? Probably both, but want to confirm. OK.
+0:25:13.989 --> 0:25:31.189Brian HierholzerYeah, so I think it's all of the above. I think this is in all of the above. I think there's going to be so many scenarios where you have multiple parties assessing that are all independent of each other that may not even know each other exist in a boundary doing work specific for that.
+0:25:32.549 --> 0:25:51.429Brian Hierholzerwork. And they may be also some others maybe in separate boundaries that are assessing other types of domains or different areas of scope in the specialty or the given use case. So I think it's an and, and, and, and, and.
+0:25:51.749 --> 0:26:12.149Clark StacerOkay, okay, last question. Now this ties back into what you were talking about at stand up that or the other day about this needs to persist forever. Does a terminated linked engagement, so a linked engagement, an auditor contract, auto revoke the...
+0:26:12.469 --> 0:26:16.629Clark StacerAuditors access across all projects they were pulled into.
+0:26:17.749 --> 0:26:20.629Brian HierholzerYeah, so I think that there's got to be some...
+0:26:22.909 --> 0:26:41.829Brian HierholzerBecause, okay, so there is a, let's just say we're in the primary engaged project, right? Primary engagement parties and project one. And you know, there's a buyer and a seller. They are the primary.
+0:26:43.109 --> 0:27:4.549Brian Hierholzerstakeholders, if you will, to that project. They both have to have permission sets where they, you know, they both have to agree that something is consummated and is over, and that they are both agreeing that they are exiting that, and then they retain everything that was relevant to the shared environment for both parties.
+0:27:5.909 --> 0:27:19.29Brian HierholzerBut just like any sort of, let's say you were starting to buy a house or you bought a house and you contracted with a builder and the builder decides to stop halfway through the project. But you've been paying them.
+0:27:19.829 --> 0:27:39.509Brian HierholzerThat doesn't mean that you don't have a contract. That doesn't mean that you don't have a project that's existing. What you have is that one party has decided to leave, but the project itself and the engagement itself still has terms and conditions that are bound to. And, you know, that's subject to legal disputes and all that stuff. And to me,
+0:27:39.829 --> 0:28:0.949Brian HierholzerOne of the reasons for our solution is because it has a airtight, deeply secure, you know, environment here where, you know, you can't really escape this. You know, this is actually like a liability risk mitigation tool set because a buyer
+0:28:1.749 --> 0:28:19.909Brian Hierholzeryou know, may get a lot more information because this information just doesn't go away, right? So, you know, but if they both are done and they both agree, then it has to be like a mutual handshake between we are done and this is over and we are both taking our shared information and we're parting ways.
+0:28:6.349 --> 0:28:6.789Clark StacerRight.
+0:28:20.229 --> 0:28:42.869Brian HierholzerAnd our platform, our memory system should have all that data when that project goes away. But both parties should have it. Now, if they want to delete it on their side of that thing, that's a different question. If we have an auditor come to the table where we have a secondary
+0:28:44.789 --> 0:28:53.429Brian HierholzerEngagement between the buyer and the auditor against the in the project in the in the project.
+0:28:55.269 --> 0:29:15.349Brian HierholzerI believe that because the buyer in the scenarios that we've discussed in the past year, the buyer is retaining that, and that is an engagement between, within the project, between the buyer and the auditor. And if the auditor is revoked,
+0:29:15.989 --> 0:29:31.109Brian Hierholzerby the buyer themselves. They are revoked from the shared project because the auditor does not have access to the primary transparency environment. But
+0:29:32.789 --> 0:29:50.309Brian HierholzerI'm curious if there's actually a secondary transparency environment here between the auditor and the buyer that has a secondary transparency system that is shared that then goes and it's published into this
+0:29:51.669 --> 0:30:4.69Brian Hierholzershared transparency system between the primary engaged parties in that project, in the project, right? So that one, you know, just kind of threw me for a loop there. I don't know.
+0:29:58.789 --> 0:29:59.189Clark StacerYeah.
+0:30:4.669 --> 0:30:10.629Clark StacerYeah, it seems to me like any, there's a separate transparency center for each party.
+0:30:9.669 --> 0:30:12.69Brian HierholzerFor any Engage party, yeah.
+0:30:11.669 --> 0:30:16.869Clark StacerYeah, they they each they might see the whole thing or they might only see pieces of it.
+0:30:16.949 --> 0:30:29.909Brian HierholzerSo they have their own project, but that project goes into the other project. So there's a linked project too, with a linked engagement or transparency data set that may or may not, okay.
+0:30:22.949 --> 0:30:23.509Clark StacerRight.
+0:30:28.69 --> 0:30:28.469Clark StacerYeah.
+0:30:30.709 --> 0:30:34.229Clark StacerI mean, that's what it seems like to me. That's what it would need to be.
+0:30:32.229 --> 0:30:43.589Brian HierholzerYeah, well, in structurally that makes sense. That way everything is kind of there, but then you're kind of creating this nesting is just absolutely asinine. I will say that. It's just crazy, crazy nesting.
+0:30:42.589 --> 0:30:58.389Clark StacerAnd then who, like, are there going to be, you know, a global auditor that's going to need to see all of the, you know, all of the transparency centers between all the other, you know, or is it, you know what I mean? Like, how, how deep does it go?
+0:30:55.109 --> 0:30:55.629Brian HierholzerYeah.
+0:30:56.869 --> 0:30:57.189Brian HierholzerYeah.
+0:30:58.869 --> 0:31:8.789Brian HierholzerYeah, the nesting, yeah, it's like the spinning top in, what's it called, inception. How many layers of inception is this, right?
+0:31:5.989 --> 0:31:6.549Clark StacerRight.
+0:31:8.709 --> 0:31:9.429Clark StacerAll right.
+0:31:11.829 --> 0:31:29.989Clark StacerYeah, all right. Well, this is great. This is super helpful. This will help me keep going to refine what we're doing here. I told, Claude asked, is a project something that you can nest? And I said,
+0:31:30.309 --> 0:31:42.789Clark StacerIt needs to be flexible so projects can have a parent that can be nested or they can be linked projects that are tied together through different engagements or through different projects.
+0:31:38.229 --> 0:31:38.629Brian HierholzerYeah.
+0:31:41.429 --> 0:31:59.509Brian HierholzerBut to your point, right, is that there is no project without its own transparency center also. So then you're going to have project and transparency center linked into a primary project and transparency center. So you have these linked, yeah, components there.
+0:31:59.949 --> 0:32:2.429Brian HierholzerThat's, yeah, yeah, what a...
+0:32:7.829 --> 0:32:8.389Brian HierholzerYeah.
+0:32:19.509 --> 0:32:19.909Brian HierholzerYeah.
+0:32:19.989 --> 0:32:21.669Clark StacerSo, yeah, we'll have to workout.
+0:32:21.269 --> 0:32:30.629Brian HierholzerYeah, that you are. Yeah, this is, I hope we're not overcomplicating it right here. But anyway, it makes sense to me though.
+0:32:31.29 --> 0:32:35.669Clark StacerBut yeah, how else do we handle all these cases, you know, so like...
+0:32:35.669 --> 0:32:48.389Brian HierholzerYeah, because you're doing, these people are doing commerce and they're also doing commerce relative to a project where the other parties are doing commerce and there's no, there's no way you can kind of get around it.
+0:32:48.949 --> 0:32:57.349Clark StacerYeah, and the boundaries have to somehow be, you know, scoped in a way that allows for that, you know, yeah, exactly.
+0:32:55.829 --> 0:32:56.309Brian HierholzerYeah.
+0:32:58.469 --> 0:33:13.589Clark StacerSo yeah, I'll just keep going down this path and then we'll see, you know, we'll see how bad it gets. And at some point, maybe we have to go, we have to back up a little bit and make it simplify it or something. But yeah.
+0:32:58.549 --> 0:32:59.189Brian HierholzerOkay.
+0:33:6.629 --> 0:33:6.869Brian HierholzerBut.
+0:33:9.589 --> 0:33:12.709Brian HierholzerYeah, yeah, yeah, yeah, yeah, okay.
+0:33:13.749 --> 0:33:15.509Brian HierholzerOkay, awesome.
+0:33:15.909 --> 0:33:17.349Clark StacerSweet, alright.
+0:33:17.29 --> 0:33:17.669Brian HierholzerHurry!
+0:33:18.309 --> 0:33:24.309Clark StacerI'm working, man. All right, thank you. You too, man. Bye.
+0:33:21.269 --> 0:33:23.829Brian HierholzerOkay, buddy. Have a good day. Thanks. Bye.

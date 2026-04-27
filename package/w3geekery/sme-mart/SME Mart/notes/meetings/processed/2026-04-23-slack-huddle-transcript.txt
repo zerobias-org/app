@@ -1,0 +1,127 @@
+Transcript of huddle in brianhierholzer on Apr 23 from 2:52 PM to 3:03 PM Pacific Time (US and Canada).
+This transcript is auto-generated, so some information may be inaccurate. It won't be surfaced in search results.
+
+@brianhierholzer [0:22]: The, the main pork.
+@Clark Stacer [0:26]: Um I'm OK, so You're talking about um
+@brianhierholzer [0:35]: Like the Geekre app, the Smemart, like, we're going to release it in like 3 phases. One's going to be like In the, on the marketplace or in the UI or not in the UI. I don't remember all of the things that you were gonna, you said.
+@Clark Stacer [0:48]: Oh Oh, right, yeah, well, initially the soft launch will is um Just As another tab, so it's in, it's in an open tab on its own. And
+@brianhierholzer [1:03]: Yeah, and how do you get to that though? How do you find it?
+@Clark Stacer [1:03]: It's not in Well, that'll be um the publishing path goes um like UAT.zerobias.com/Smemart. Or whatever, you know
+@brianhierholzer [1:18]: OK.
+@Clark Stacer [1:19]: Whatever package we want to give it, whatever name we want.
+@brianhierholzer [1:22]: Yeah, which we'll, we'll talk about it or it just may be marketplace, but, but anyway, um,
+@Clark Stacer [1:22]: Um Yeah, yeah, whatever you like. And then um
+@brianhierholzer [1:30]: So
+@Clark Stacer [1:32]: Yeah, and then we'll add a, a new section to the portal Um on the home page that says Marketplace apps.
+@brianhierholzer [1:36]: As in
+@Clark Stacer [1:39]: Or for community apps or something like that.
+@brianhierholzer [1:39]: Yup OK
+@Clark Stacer [1:43]: And that'll just be a link that opens it in a new tab So it's still standalone, but we just have a link to it.
+@brianhierholzer [1:49]: Yeah, and what's the, what's the difficulty to get it actually in the Like marketplace in the left column or whatever. How hard is that
+@Clark Stacer [2:02]: Um I don't think it's, I don't think it's super hard. It just, we just, you know, it requires some focus from um like Chris's team and
+@brianhierholzer [2:11]: Yeah, OK
+@Clark Stacer [2:11]: Um so it's just, you know, we just have to pull their focus Onto it
+@brianhierholzer [2:16]: Yeah.
+@Clark Stacer [2:17]: So, but I don't think it's very challenging. It's, it's just we ever, we all have to be working on it at the same time, or both.
+@brianhierholzer [2:19]: OK Getting a cycle. Yep. OK, and then, and then what others have to go through that? How did they publish in their own apps in the marketplace though, you know what I mean? Or they' services
+@Clark Stacer [2:26]: Yeah Yeah, um, yeah, like right, like Mira XR or, you know, like the cyber command thing that they have, that's how I, that's the same path I used for um SME mart, um, so, yeah, a third party will make a clone of the Zerbius Org apprepo.
+@Clark Stacer [2:56]: And I make a fork of it, sorry, and then um they'll build their app out locally When they're ready, they can um They can make a PR Uh and Once I merge their PR and that deploys to UAT.zerobias.com/ whatever their app name is.
+@Clark Stacer [3:20]: So, um, yeah, so there's a way to do it.
+@brianhierholzer [3:20]: Yeah And then technically they become a provider org, right? Then they become a provider or by default or when you select when you go to that, how do you order, you know what I mean? And we'll have to work through that shit too, right? At the end of the day.
+@Clark Stacer [3:35]: Yeah, yup
+@brianhierholzer [3:35]: Because that, that whole engagement thing, right?
+@Clark Stacer [3:37]: Yeah, we're gonna have to, well Yup, yup. Yeah, right now what I'm working on and the main thing that I'm working on in an SMER is the uh
+@brianhierholzer [3:42]: OK.
+@Clark Stacer [3:48]: Um setting up the default and so basically If a if A third party organisation is a full customer of er bias, they automatically By default, have an engagement with us
+@Clark Stacer [4:05]: Where zero bias is the provider. Um,
+@brianhierholzer [4:10]: Yes. And, and ideally that relationship falls into Project One once we have a project construct encore.
+@Clark Stacer [4:11]: Right Exactly, yep, exactly. So by default, if you're a customer, you automatically have that one-way engagement, um.
+@brianhierholzer [4:27]: Yeah, you land in a project with us that way any questions, tasks, bugs. Whatever the hell it is, goes back and forth. Yeah. So we have our own fernal board. We have a board with you. Every one of our customers has a board with us, so we can see real time. They can see real time. That's what we've got to have that way they can open up tickets or tasks and bugs and, you know, just anything, right?
+@Clark Stacer [4:36]: Exactly That's right Exactly, yep, that's what I'm working on right now. So, um
+@brianhierholzer [4:56]: Yeah.
+@Clark Stacer [4:57]: Uh, yeah, yeah, and then that.
+@brianhierholzer [4:59]: There's no, there's no wiring for this from, from Nick though right now, right, that you're aware of? You're just building the concept and then you would have to connect to his wiring, I assume, once he has something there or not.
+@Clark Stacer [5:13]: Right, like all the, the pieces that Nick is working on right now. I have my own version of what a project and a workspace is
+@brianhierholzer [5:23]: Yes, yes, yes.
+@Clark Stacer [5:24]: Insight, that's a Muar. I have it all modelled. It's like a prototype of
+@brianhierholzer [5:28]: Yup.
+@Clark Stacer [5:29]: And then once it releases what whichever pieces he pulls into the platform, I can swap out. Um, so it
+@brianhierholzer [5:30]: Yup Yeah, you can basically, you, rather than it being your latticework or your framing, you jump onto his framing as he takes it out from underneath of your framing. Basically he eats your, your framing. Yeah, gotcha. OK.
+@Clark Stacer [5:48]: Exactly That's right. That's right. So, yeah, and that's just a process, you know, I'm sure that'll just be ongoing as we go, you know, so.
+@brianhierholzer [5:53]: Yup
+@Clark Stacer [5:58]: Um,
+@brianhierholzer [5:58]: Yup. OK
+@Clark Stacer [5:59]: Yep.
+@brianhierholzer [6:01]: Cool. Yeah, that's, that is great.
+@Clark Stacer [6:02]: Yeah, so pretty close, you know, in the next week or so, we'll be able to, you know, let people come in and poke around in their project and start finding bugs. I'm sure we need to give them a way to, uh, an easy way to um file bugs and um
+@brianhierholzer [6:04]: And, and Yeah
+@Clark Stacer [6:19]: You know, Make it easy to communicate with them.
+@brianhierholzer [6:21]: Yeah, I mean, we just need a, uh, yeah, between, exactly, and, and they're gonna have their side of the project. We'll have our side of the project, right? And then there's a transparency middle that all this runs through.
+@Clark Stacer [6:30]: Exactly
+@brianhierholzer [6:34]: And then over time there's going to have to be the data, you know, between our boundary and their boundary, whatever that may be, um, but we'll, we'll get to those later. Those are the data flows versus just the, let's just say a, a task volley For now, right? Minimally viable task volley.
+@Clark Stacer [6:52]: Yeah That's right, yeah Yeah, like they're, yeah, exactly.
+@brianhierholzer [7:00]: OK. Because technically their tasks, we have a mirror which is the entangled piece, and it would They would see their task, but their task would shoot shit to us via transparency, so we would see the mirror of that, if you will, or the, you know, the entangled
+@brianhierholzer [7:21]: The entangled, the, the opposite because they would say I need this. We would get that data into our task, and then we would respond with data going back the other way with our response, some sort of volley. I don't know how that's going to work
+@Clark Stacer [7:37]: Right, yeah, there'll there'll be a messaging centre where we can track whatever, we'll be able to, like, my plans include letting the each organisation will be able to set up any manner of boards that they want. If they're not boards, they're like task views, so, so we can have, you know, there's the entangled pair tasks that are that are, that's one concept, but then there's also like a message centre concept that's like kind of separate, it doesn't necessarily mean that there are mirrored tasks, but mere te
+@brianhierholzer [8:10]: It's just like a dialogue.
+@Clark Stacer [8:12]: Yeah, yeah, exactly
+@brianhierholzer [8:14]: Yeah.
+@Clark Stacer [8:14]: You know, like prompt QL like you were talking about.
+@brianhierholzer [8:16]: Because even, even, even, even Slack is starting to do projects now within Slack. So like, you know, a lot of people are, you know, what I like is that a lot of nomenclature is becoming the same. Like we will support a project and we will support, you know, let's say a workspace and a task, right? So these constructs, even a
+@brianhierholzer [8:37]: Project in a slack channel could be in the project via the slack, and it would ingest that into the project because it has the hook into that slack project because uh slack is now creating a project channel where you basically back and forth and do tasks within a project that you named. So, yeah, yeah, so go check that out. Yeah, that's a new thing. So slack has a new
+
+@Clark Stacer [8:56]: Oh, that's cool, yeah. And that's kind of what Yeah, yeah, that's kind of what I was envisioning for the message centres that they're, you know, you can.
+
+@brianhierholzer [9:05]: Go ahead Yeah, slack and pull the in all these different vehicles that people are running their project in and Slack has a quote unquote project capability now in a channel so you can name it.
+
+@Clark Stacer [9:19]: Yeah Yep
+
+@brianhierholzer [9:21]: Right
+
+@Clark Stacer [9:21]: Exactly, yeah, yeah Super cool
+
+@brianhierholzer [9:24]: This is why all this nomenclature is pretty important, I think, like the structural things, tasks, projects, workspaces so we can kind of, we're mimicking the rest of industry, if you will, or the, you know, the AI, and I don't know where the plans piece would come into that, you know, if we would have like a plans.
+
+@Clark Stacer [9:30]: Yeah.
+
+@brianhierholzer [9:44]: You know, sectioned and at some point I don't know
+
+@Clark Stacer [9:48]: Yeah
+
+@brianhierholzer [9:49]: That could be like a, a, a section, like, you know, that could be an ongoing plans area relative to a project or a subproject or a workspace where it's more of like a bulletin board of plans and plan updates. I don't, again, don't know, right? I don't know.
+
+@Clark Stacer [9:50]: Yeah, yeah, for like
+
+@Clark Stacer [10:06]: Yeah, like all the project management stuff that is needed to manage a project, you know, have, you know, be able to connect with project management tools and, you know, that kind of, you know, pull that stuff in so that
+
+@brianhierholzer [10:10]: Yes. Yeah
+
+@Clark Stacer [10:20]: Yeah, so that it's all talking to all the other parts of the system that people need, you know.
+
+@brianhierholzer [10:25]: Yeah Yup
+
+@Clark Stacer [10:26]: Yeah.
+
+@brianhierholzer [10:28]: OK. Yeah, so, yeah, that sounds good. If, if, if Nick could get us that, you know, We would have a project on our side. They have a project on their side. They're connected via the transparency and the board, right?
+
+@Clark Stacer [10:44]: Yeah
+
+@brianhierholzer [10:44]: Um, and then the tasks, right? This is all dual, right? We have our shit, they have their shit, and then we come together.
+
+@Clark Stacer [10:52]: That's right, yep And we're, yeah, we're laying the foundation for that right now, and, and, uh,
+
+@brianhierholzer [10:55]: OK. Well, and what I like about that is it allows that data path to for that the there is the, the transparency piece, there's going to be some sort of You know, when, when you request something right now, it may just be a response. It may be, hey, we did this ticket or here's a ticket update or you know, it's in progress, but eventually that's going to be I need these 4 data objects within this boundary, you know, and, or, or I need all your boundary information.
+
+@brianhierholzer [11:27]: You know, and that will be like a, a read write, you know, permission. Essentially
+
+@Clark Stacer [11:33]: Yeah Yeah Yeah
+
+@brianhierholzer [11:37]: So, OK OK
+
+@Clark Stacer [11:39]: Yeah.
+
+@brianhierholzer [11:40]: Cool, bud. Well, thank you.
+@Clark Stacer [11:41]: Cruising along All right, man. Thank you
+@brianhierholzer [11:43]: Hurry.
+@Clark Stacer [11:45]: OK. Bye.
+@brianhierholzer [11:46]: Right

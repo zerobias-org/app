@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en" style="color-scheme: dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZeroBias + Work Worlds + SME Mart — Architecture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --font-body: 'Sora', system-ui, sans-serif;
+    --font-mono: 'IBM Plex Mono', 'SF Mono', Consolas, monospace;
+
+    /* Dark mode forced */
+    --bg: #0c0e14;
+    --surface: #141822;
+    --surface-elevated: #1a1f2e;
+    --border: rgba(255, 255, 255, 0.07);
+    --border-bright: rgba(255, 255, 255, 0.14);
+    --text: #e2e8f0;
+    --text-dim: #8896ab;
+
+    --zb: #60a5fa;
+    --zb-dim: rgba(96, 165, 250, 0.12);
+    --ww: #a78bfa;
+    --ww-dim: rgba(167, 139, 250, 0.12);
+    --sme: #34d399;
+    --sme-dim: rgba(52, 211, 153, 0.12);
+    --ext: #f59e0b;
+    --ext-dim: rgba(245, 158, 11, 0.10);
+    --api: #f472b6;
+    --api-dim: rgba(244, 114, 182, 0.12);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    background-image:
+      radial-gradient(at 30% 15%, var(--zb-dim) 0%, transparent 50%),
+      radial-gradient(at 70% 70%, var(--sme-dim) 0%, transparent 45%),
+      radial-gradient(at 15% 80%, var(--ww-dim) 0%, transparent 40%);
+    color: var(--text);
+    font-family: var(--font-body);
+    padding: 40px;
+    min-height: 100vh;
+    overflow-wrap: break-word;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate {
+    animation: fadeUp 0.45s ease-out both;
+    animation-delay: calc(var(--i, 0) * 0.07s);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-delay: 0ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  .container { max-width: 1100px; margin: 0 auto; }
+
+  h1 {
+    font-size: 36px;
+    font-weight: 700;
+    letter-spacing: -1px;
+    margin-bottom: 6px;
+    text-wrap: balance;
+    background: linear-gradient(135deg, var(--zb), var(--sme));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .subtitle {
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    margin-bottom: 28px;
+  }
+
+  .description {
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--text-dim);
+    margin-bottom: 32px;
+    max-width: 780px;
+  }
+
+  .description strong { color: var(--text); }
+
+  /* ============ MERMAID CONTAINER ============ */
+  .mermaid-wrap {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px 24px;
+    overflow: auto;
+    margin-bottom: 32px;
+    min-height: 400px;
+    resize: both;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+  .mermaid-wrap::-webkit-scrollbar { width: 6px; height: 6px; }
+  .mermaid-wrap::-webkit-scrollbar-track { background: transparent; }
+  .mermaid-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  .mermaid-wrap::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
+  .mermaid-wrap::after {
+    content: '';
+    position: absolute;
+    bottom: 4px; right: 4px;
+    width: 14px; height: 14px;
+    background: linear-gradient(135deg, transparent 50%, var(--text-dim) 50%, var(--text-dim) 55%, transparent 55%, transparent 70%, var(--text-dim) 70%, var(--text-dim) 75%, transparent 75%);
+    opacity: 0.4;
+    pointer-events: none;
+    border-radius: 0 0 8px 0;
+  }
+  .mermaid-wrap .mermaid {
+    display: flex;
+    justify-content: center;
+    transition: transform 0.2s ease;
+    transform-origin: top left;
+  }
+
+  .diagram-controls {
+    position: absolute;
+    top: 8px; right: 8px;
+    display: flex; gap: 2px; z-index: 10;
+    background: var(--surface-elevated);
+    border: 1px solid var(--border);
+    border-radius: 6px; padding: 2px;
+  }
+  .diagram-controls button {
+    width: 32px; height: 32px; border: none;
+    background: transparent; color: var(--text-dim);
+    font-family: var(--font-mono); font-size: 16px;
+    cursor: pointer; border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .diagram-controls button:hover { background: var(--border); color: var(--text); }
+  .diagram-controls .sep { width: 1px; background: var(--border); margin: 4px 2px; }
+
+  .mermaid-wrap.is-zoomed { cursor: grab; }
+  .mermaid-wrap.is-panning { cursor: grabbing; user-select: none; }
+
+  /* Fullscreen overlay */
+  .mermaid-fullscreen-overlay {
+    position: fixed; inset: 0; z-index: 9999;
+    background: var(--bg); display: flex; flex-direction: column;
+    opacity: 0; transition: opacity 0.2s ease;
+  }
+  .mermaid-fullscreen-overlay.visible { opacity: 1; }
+  .mermaid-fullscreen-overlay .fs-toolbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 20px; background: var(--surface);
+    border-bottom: 1px solid var(--border); flex-shrink: 0;
+  }
+  .mermaid-fullscreen-overlay .fs-toolbar .fs-title {
+    font-family: var(--font-mono); font-size: 14px; font-weight: 600;
+    color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px;
+  }
+  .mermaid-fullscreen-overlay .fs-toolbar .fs-controls { display: flex; gap: 4px; }
+  .mermaid-fullscreen-overlay .fs-toolbar button {
+    width: 36px; height: 36px; border: none;
+    background: var(--surface-elevated); color: var(--text-dim);
+    font-family: var(--font-mono); font-size: 18px;
+    cursor: pointer; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .mermaid-fullscreen-overlay .fs-toolbar button:hover { background: var(--border); color: var(--text); }
+  .mermaid-fullscreen-overlay .fs-toolbar .fs-zoom-label {
+    font-family: var(--font-mono); font-size: 14px; color: var(--text-dim);
+    min-width: 48px; text-align: center; padding: 0 8px; line-height: 36px;
+  }
+  .mermaid-fullscreen-overlay .fs-viewport {
+    flex: 1; overflow: auto; padding: 24px; cursor: grab;
+  }
+  .mermaid-fullscreen-overlay .fs-viewport.is-panning { cursor: grabbing; user-select: none; }
+  .mermaid-fullscreen-overlay .fs-viewport svg { transition: transform 0.15s ease; transform-origin: top left; }
+
+  /* ============ MERMAID SVG OVERRIDES ============ */
+  .mermaid .nodeLabel {
+    font-family: var(--font-body) !important;
+    font-size: 18px !important;
+    color: var(--text) !important;
+  }
+  .mermaid .edgeLabel {
+    font-family: var(--font-mono) !important;
+    font-size: 16px !important;
+    color: var(--text-dim) !important;
+    background-color: var(--surface) !important;
+  }
+  .mermaid .edgeLabel rect {
+    fill: var(--surface) !important;
+  }
+  .mermaid .node rect,
+  .mermaid .node circle,
+  .mermaid .node polygon {
+    stroke-width: 1.5px !important;
+  }
+  .mermaid .edge-pattern-solid {
+    stroke-width: 1.5px !important;
+  }
+  .mermaid .cluster rect {
+    rx: 10 !important;
+    ry: 10 !important;
+  }
+  .mermaid .cluster-label .nodeLabel {
+    font-size: 16px !important;
+    font-weight: 600 !important;
+  }
+
+  /* ============ LEGEND ============ */
+  .legend {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    margin-bottom: 32px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--text-dim);
+  }
+  .legend-swatch {
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+  }
+
+  /* ============ CALLOUT CARDS ============ */
+  .callouts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .callouts > * { min-width: 0; }
+
+  .callout {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    font-size: 16px;
+    line-height: 1.65;
+  }
+  .callout-title {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .callout-title::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+  }
+  .callout p { color: var(--text-dim); }
+  .callout strong { color: var(--text); }
+  .callout code {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    background: var(--zb-dim);
+    color: var(--zb);
+    padding: 1px 6px;
+    border-radius: 3px;
+  }
+
+  /* Timeline events list */
+  .event-list {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0 0 0;
+  }
+  .event-list li {
+    padding: 5px 0 5px 18px;
+    position: relative;
+    font-size: 16px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+  .event-list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 12px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--ww);
+  }
+
+  /* ============ DATA TABLE ============ */
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 32px;
+  }
+  .table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  .data-table thead { position: sticky; top: 0; z-index: 2; }
+  .data-table th {
+    background: var(--surface-elevated);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+    text-align: left;
+    padding: 14px 18px;
+    border-bottom: 2px solid var(--border-bright);
+    white-space: nowrap;
+  }
+  .data-table td {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    color: var(--text);
+  }
+  .data-table tbody tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.02);
+  }
+  .data-table tbody tr {
+    transition: background 0.15s ease;
+  }
+  .data-table tbody tr:hover {
+    background: var(--border);
+  }
+  .data-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+  .data-table code {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    background: var(--zb-dim);
+    color: var(--zb);
+    padding: 1px 6px;
+    border-radius: 3px;
+  }
+  .data-table small {
+    display: block;
+    color: var(--text-dim);
+    font-size: 14px;
+    margin-top: 2px;
+  }
+
+  .badge {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 5px;
+    white-space: nowrap;
+  }
+  .badge--zb { background: var(--zb-dim); color: var(--zb); }
+  .badge--ww { background: var(--ww-dim); color: var(--ww); }
+  .badge--sme { background: var(--sme-dim); color: var(--sme); }
+
+  /* ============ FOOTER ============ */
+  .footer {
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-dim);
+    opacity: 0.6;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* ============ SECTION DIVIDER ============ */
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: 15px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-dim);
+    margin-bottom: 16px;
+    margin-top: 8px;
+  }
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width: 768px) {
+    body { padding: 16px; }
+    h1 { font-size: 24px; }
+    .mermaid-wrap { padding: 16px 12px; }
+    .callouts { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <h1 class="animate" style="--i:0">ZeroBias + Work Worlds + SME Mart</h1>
+  <p class="subtitle animate" style="--i:1">three-layer architecture &mdash; system of record &rarr; execution &rarr; marketplace</p>
+
+  <p class="description animate" style="--i:2">
+    <strong>ZeroBias</strong> is the system of record (tasks, findings, boundaries, auth).
+    <strong>Work Worlds</strong> is the execution and performance layer (missions, scoring, proof of work).
+    <strong>SME Mart</strong> is the marketplace (discovery, RFPs, contracting, engagement center, assessments, credential verification).
+    Both WW and SME Mart are third-party apps built on the ZeroBias platform using ZeroBias SDKs.
+  </p>
+
+  <!-- DIAGRAM -->
+  <div class="mermaid-wrap animate" style="--i:3">
+    <div class="diagram-controls">
+      <button onclick="zoomDiagram(this, 1.3)" title="Zoom in">+</button>
+      <button onclick="zoomDiagram(this, 0.7)" title="Zoom out">&minus;</button>
+      <button onclick="resetZoom(this)" title="Reset zoom">&#8634;</button>
+      <div class="sep"></div>
+      <button onclick="openFullscreen(this)" title="Full screen">&#x26F6;</button>
+    </div>
+    <pre class="mermaid">
+graph TD
+  %% ── External Systems ──
+  ext["External Systems<br/>Stellar Cyber, Mend, Palo Alto..."]
+
+  %% ── ZeroBias Platform ──
+  subgraph ZB["ZeroBias Platform — System of Record"]
+    direction LR
+    zbTasks["Tasks &amp; Findings"]
+    zbBound["Boundaries &amp; Auth"]
+    zbCat["Catalog &amp; Tags"]
+    zbAudit["Audit Graph &amp; PKV"]
+  end
+
+  %% ── Work Worlds ──
+  subgraph WW["Work Worlds — Execution Layer"]
+    direction TB
+    wwMission["Missions"]
+    wwMatch["Skill + Performance Matching"]
+    wwScore["Scoring Engine"]
+    wwProof["Proof of Work"]
+  end
+
+  %% ── SME Mart ──
+  subgraph SM["SME Mart — Marketplace + Vetting"]
+    direction TB
+    smDisc["Provider Discovery &amp; Profiles"]
+    smRFP["RFPs &amp; Proposals"]
+    smContract["Contracting"]
+    smEngage["Engagement Center"]
+    smTimeline["Timeline &amp; Events"]
+    smSched["Scheduling"]
+    smAssess["Adaptive Assessments"]
+    smCred["Credential Verification"]
+  end
+
+  %% ── WW API node ──
+  wwAPI(["WW APIs<br/>scoring, matchmaker,<br/>performance, mission events"])
+
+  %% ── Connections ──
+  ext -->|"findings"| ZB
+  ZB -->|"normalized tasks"| WW
+  ZB -->|"tasks, boundaries,<br/>auth, catalog"| SM
+  SM -.->|"task updates,<br/>tags, boundaries"| ZB
+  WW --> wwAPI
+  wwAPI ==>|"scores, matches,<br/>mission events"| SM
+
+  %% ── Styles ──
+  classDef extStyle fill:#f59e0b22,stroke:#f59e0b,stroke-width:2px
+  classDef zbStyle fill:#60a5fa22,stroke:#60a5fa,stroke-width:2px
+  classDef wwStyle fill:#a78bfa22,stroke:#a78bfa,stroke-width:2px
+  classDef smStyle fill:#34d39922,stroke:#34d399,stroke-width:2px
+  classDef apiStyle fill:#f472b622,stroke:#f472b6,stroke-width:2px
+
+  class ext extStyle
+  class zbTasks,zbBound,zbCat,zbAudit zbStyle
+  class wwMission,wwMatch,wwScore,wwProof wwStyle
+  class smDisc,smRFP,smContract,smEngage,smTimeline,smSched,smAssess,smCred smStyle
+  class wwAPI apiStyle
+    </pre>
+  </div>
+
+  <!-- LEGEND -->
+  <div class="legend animate" style="--i:4">
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--ext)"></div> External Systems</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--zb)"></div> ZeroBias Platform</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--ww)"></div> Work Worlds</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--sme)"></div> SME Mart</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--api)"></div> WW APIs</div>
+  </div>
+
+  <!-- KEY CALLOUTS -->
+  <p class="section-label animate" style="--i:5">Key Architecture Decisions</p>
+
+  <div class="callouts">
+    <div class="callout animate" style="--i:6; border-left: 3px solid var(--sme)">
+      <div class="callout-title" style="color: var(--sme)">Engagement Center</div>
+      <p><strong>SME Mart owns it.</strong> The marketplace/business view of engagements &mdash; status, contracting, proposals, timeline. Work Worlds provides a separate <em>execution</em> view of the same underlying ZeroBias Tasks.</p>
+    </div>
+
+    <div class="callout animate" style="--i:7; border-left: 3px solid var(--ww)">
+      <div class="callout-title" style="color: var(--ww)">WW Mission Events in Timeline</div>
+      <p>SME Mart's timeline displays read-only events from Work Worlds:</p>
+      <ul class="event-list">
+        <li>Mission Started</li>
+        <li>Mission Completed (score, duration, outcome)</li>
+        <li>Assessment Passed</li>
+        <li>Score Updated</li>
+      </ul>
+    </div>
+
+    <div class="callout animate" style="--i:8; border-left: 3px solid var(--sme)">
+      <div class="callout-title" style="color: var(--sme)">Scheduling</div>
+      <p><strong>SME Mart builds scheduling</strong> so buyers and providers coordinate when work happens. A scheduled block in SME Mart can trigger a WW mission. Scheduling = marketplace coordination; execution = WW.</p>
+    </div>
+
+    <div class="callout animate" style="--i:9; border-left: 3px solid var(--zb)">
+      <div class="callout-title" style="color: var(--zb)">Shared Identity</div>
+      <p><strong>ZeroBias user ID</strong> is the shared key across all three systems. Provider profiles in SME Mart, scoring data in WW, and tasks in ZB all link via the same <code>userId</code>.</p>
+    </div>
+  </div>
+
+  <!-- DATA SOURCE TABLE -->
+  <p class="section-label animate" style="--i:10">Data Source Mapping</p>
+
+  <div class="table-wrap animate" style="--i:11">
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>SME Mart Feature</th>
+            <th>Data Source</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Provider score / reputation</td>
+            <td><span class="badge badge--ww">Work Worlds API</span></td>
+            <td>Display-only. WW computes from mission performance.</td>
+          </tr>
+          <tr>
+            <td>Credential verification (Credly)</td>
+            <td><span class="badge badge--sme">SME Mart</span></td>
+            <td>SME Mart owns Credly integration. Badges displayed on provider profiles.</td>
+          </tr>
+          <tr>
+            <td>Adaptive assessments</td>
+            <td><span class="badge badge--sme">SME Mart</span></td>
+            <td>SME Mart owns provider vetting quizzes. Adaptive difficulty, scoring.</td>
+          </tr>
+          <tr>
+            <td>Provider matching for RFPs</td>
+            <td><span class="badge badge--ww">Work Worlds API</span></td>
+            <td>WW matchmaker uses skills + performance history.</td>
+          </tr>
+          <tr>
+            <td>Engagement task tracking</td>
+            <td><span class="badge badge--zb">ZeroBias Task API</span></td>
+            <td>Both apps read/write the same ZB Tasks.</td>
+          </tr>
+          <tr>
+            <td>RFPs, proposals, contracting</td>
+            <td><span class="badge badge--sme">SME Mart DB</span></td>
+            <td>Purely SME Mart's domain. Neon PostgreSQL.</td>
+          </tr>
+          <tr>
+            <td>Provider profiles &amp; services</td>
+            <td><span class="badge badge--sme">SME Mart DB</span></td>
+            <td>SME Mart owns marketplace profiles.</td>
+          </tr>
+          <tr>
+            <td>Timeline activity</td>
+            <td><span class="badge badge--sme">SME Mart</span> + <span class="badge badge--ww">WW Events</span></td>
+            <td>Comments &amp; status changes from SME Mart; mission events from WW.</td>
+          </tr>
+          <tr>
+            <td>Scheduling</td>
+            <td><span class="badge badge--sme">SME Mart</span></td>
+            <td>Marketplace-side coordination. Can trigger WW missions.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- WHAT NOT TO BUILD -->
+  <p class="section-label animate" style="--i:12">Build vs. Consume</p>
+
+  <div class="callouts">
+    <div class="callout animate" style="--i:13; border-left: 3px solid #ef4444;">
+      <div class="callout-title" style="color: #ef4444">Consume from WW APIs</div>
+      <ul class="event-list" style="margin-top:6px">
+        <li style="--dot-color: #ef4444">Scoring logic or algorithms</li>
+        <li style="--dot-color: #ef4444">Matching algorithm</li>
+        <li style="--dot-color: #ef4444">Mission execution &amp; proof of work</li>
+      </ul>
+      <p style="margin-top:10px">These are <strong>Work Worlds features</strong>. Display-only in SME Mart.</p>
+    </div>
+
+    <div class="callout animate" style="--i:14; border-left: 3px solid var(--sme);">
+      <div class="callout-title" style="color: var(--sme)">Build in SME Mart</div>
+      <ul class="event-list">
+        <li>Marketplace discovery &amp; search</li>
+        <li>RFPs, proposals, contracting</li>
+        <li>Engagement center (business view)</li>
+        <li><strong>Adaptive assessments</strong> (provider vetting)</li>
+        <li><strong>Credential verification</strong> (Credly)</li>
+        <li>Timeline with WW event placeholders</li>
+        <li>Scheduling feature</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="footer animate" style="--i:15">
+    ZeroBias + Work Worlds + SME Mart &mdash; Architecture Diagram &mdash; 2026-02-25
+  </div>
+
+</div>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+  import elkLayouts from 'https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk/dist/mermaid-layout-elk.esm.min.mjs';
+
+  mermaid.registerLayoutLoaders(elkLayouts);
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    look: 'classic',
+    layout: 'elk',
+    themeVariables: {
+      primaryColor: '#1a2744',
+      primaryBorderColor: '#60a5fa',
+      primaryTextColor: '#e2e8f0',
+      secondaryColor: '#1a1433',
+      secondaryBorderColor: '#a78bfa',
+      secondaryTextColor: '#e2e8f0',
+      tertiaryColor: '#0f2922',
+      tertiaryBorderColor: '#34d399',
+      tertiaryTextColor: '#e2e8f0',
+      lineColor: '#475569',
+      fontSize: '18px',
+      fontFamily: "'Sora', system-ui, sans-serif",
+      noteBkgColor: '#1a2744',
+      noteTextColor: '#e2e8f0',
+      noteBorderColor: '#60a5fa',
+      clusterBkg: '#141822',
+      clusterBorder: '#334155',
+    }
+  });
+</script>
+<script>
+  // --- Inline zoom controls ---
+  function updateZoomState(wrap) {
+    var target = wrap.querySelector('.mermaid');
+    var zoom = parseFloat(target.dataset.zoom || '1');
+    wrap.classList.toggle('is-zoomed', zoom > 1);
+  }
+  function zoomDiagram(btn, factor) {
+    var wrap = btn.closest('.mermaid-wrap');
+    var target = wrap.querySelector('.mermaid');
+    var current = parseFloat(target.dataset.zoom || '1');
+    var next = Math.min(Math.max(current * factor, 0.3), 8);
+    target.dataset.zoom = next;
+    target.style.transform = 'scale(' + next + ')';
+    updateZoomState(wrap);
+  }
+  function resetZoom(btn) {
+    var wrap = btn.closest('.mermaid-wrap');
+    var target = wrap.querySelector('.mermaid');
+    target.dataset.zoom = '1';
+    target.style.transform = 'scale(1)';
+    updateZoomState(wrap);
+  }
+
+  document.querySelectorAll('.mermaid-wrap').forEach(function(wrap) {
+    wrap.addEventListener('wheel', function(e) {
+      if (!e.ctrlKey && !e.metaKey) return;
+      e.preventDefault();
+      var target = wrap.querySelector('.mermaid');
+      var current = parseFloat(target.dataset.zoom || '1');
+      var factor = e.deltaY < 0 ? 1.3 : 0.7;
+      var next = Math.min(Math.max(current * factor, 0.3), 8);
+      target.dataset.zoom = next;
+      target.style.transform = 'scale(' + next + ')';
+      updateZoomState(wrap);
+    }, { passive: false });
+
+    var startX, startY, scrollL, scrollT;
+    wrap.addEventListener('mousedown', function(e) {
+      if (e.target.closest('.diagram-controls')) return;
+      var target = wrap.querySelector('.mermaid');
+      if (parseFloat(target.dataset.zoom || '1') <= 1) return;
+      wrap.classList.add('is-panning');
+      startX = e.clientX; startY = e.clientY;
+      scrollL = wrap.scrollLeft; scrollT = wrap.scrollTop;
+    });
+    window.addEventListener('mousemove', function(e) {
+      if (!wrap.classList.contains('is-panning')) return;
+      wrap.scrollLeft = scrollL - (e.clientX - startX);
+      wrap.scrollTop = scrollT - (e.clientY - startY);
+    });
+    window.addEventListener('mouseup', function() {
+      wrap.classList.remove('is-panning');
+    });
+  });
+
+  // --- Fullscreen mode ---
+  function openFullscreen(btn) {
+    var wrap = btn.closest('.mermaid-wrap');
+    var svg = wrap.querySelector('.mermaid svg');
+    if (!svg) return;
+    var overlay = document.createElement('div');
+    overlay.className = 'mermaid-fullscreen-overlay';
+    var zoom = 1;
+    function updateLabel() {
+      var label = overlay.querySelector('.fs-zoom-label');
+      if (label) label.textContent = Math.round(zoom * 100) + '%';
+    }
+    function applyZoom() {
+      var clone = overlay.querySelector('.fs-viewport svg');
+      if (clone) clone.style.transform = 'scale(' + zoom + ')';
+      updateLabel();
+    }
+    var toolbar = document.createElement('div');
+    toolbar.className = 'fs-toolbar';
+    toolbar.innerHTML =
+      '<span class="fs-title">Architecture &mdash; Full Screen</span>' +
+      '<div class="fs-controls">' +
+        '<button class="fs-zoom-out" title="Zoom out">&minus;</button>' +
+        '<span class="fs-zoom-label">100%</span>' +
+        '<button class="fs-zoom-in" title="Zoom in">+</button>' +
+        '<button class="fs-fit" title="Fit to screen">Fit</button>' +
+        '<button class="fs-close" title="Close (Esc)">&times;</button>' +
+      '</div>';
+    var viewport = document.createElement('div');
+    viewport.className = 'fs-viewport';
+    var svgClone = svg.cloneNode(true);
+    svgClone.style.transformOrigin = 'top left';
+    svgClone.style.maxWidth = 'none';
+    svgClone.style.width = 'auto';
+    svgClone.style.height = 'auto';
+    viewport.appendChild(svgClone);
+    overlay.appendChild(toolbar);
+    overlay.appendChild(viewport);
+    document.body.appendChild(overlay);
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() { overlay.classList.add('visible'); });
+    });
+    function fitToScreen() {
+      var vw = viewport.clientWidth - 48;
+      var vh = viewport.clientHeight - 48;
+      var sw = svgClone.getBoundingClientRect().width / zoom;
+      var sh = svgClone.getBoundingClientRect().height / zoom;
+      if (sw > 0 && sh > 0) { zoom = Math.min(vw / sw, vh / sh, 3); zoom = Math.max(zoom, 0.2); }
+      applyZoom();
+    }
+    setTimeout(fitToScreen, 100);
+    toolbar.querySelector('.fs-zoom-in').addEventListener('click', function() { zoom = Math.min(zoom * 1.3, 8); applyZoom(); });
+    toolbar.querySelector('.fs-zoom-out').addEventListener('click', function() { zoom = Math.max(zoom * 0.7, 0.1); applyZoom(); });
+    toolbar.querySelector('.fs-fit').addEventListener('click', fitToScreen);
+    function closeOverlay() { overlay.classList.remove('visible'); setTimeout(function() { overlay.remove(); }, 200); }
+    toolbar.querySelector('.fs-close').addEventListener('click', closeOverlay);
+    function onKey(e) { if (e.key === 'Escape') { closeOverlay(); document.removeEventListener('keydown', onKey); } }
+    document.addEventListener('keydown', onKey);
+    viewport.addEventListener('wheel', function(e) {
+      e.preventDefault();
+      var factor = e.deltaY < 0 ? 1.3 : 0.7;
+      zoom = Math.min(Math.max(zoom * factor, 0.1), 8);
+      applyZoom();
+    }, { passive: false });
+    var panX, panY, panSL, panST;
+    viewport.addEventListener('mousedown', function(e) {
+      if (e.target.closest('button')) return;
+      viewport.classList.add('is-panning');
+      panX = e.clientX; panY = e.clientY;
+      panSL = viewport.scrollLeft; panST = viewport.scrollTop;
+    });
+    viewport.addEventListener('mousemove', function(e) {
+      if (!viewport.classList.contains('is-panning')) return;
+      viewport.scrollLeft = panSL - (e.clientX - panX);
+      viewport.scrollTop = panST - (e.clientY - panY);
+    });
+    viewport.addEventListener('mouseup', function() { viewport.classList.remove('is-panning'); });
+    viewport.addEventListener('mouseleave', function() { viewport.classList.remove('is-panning'); });
+  }
+</script>
+
+</body>
+</html>

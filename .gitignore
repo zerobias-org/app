@@ -19,3 +19,6 @@ package/w3geekery/sme-mart-nextjs-deprecated/
 
 # Session-specific context (not shared)
 **/restart_context*
+
+# Graphify knowledge graph output
+graphify-out/

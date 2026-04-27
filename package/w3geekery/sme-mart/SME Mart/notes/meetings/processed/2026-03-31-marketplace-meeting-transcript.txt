@@ -1,0 +1,188 @@
+0:0:3.142 --> 0:0:7.542Clark StacerMessages about WAP and Fiverr.
+0:0:7.662 --> 0:0:17.62Brian HierholzerYeah, I don't know. You know, I know you kind of know, you know, Fiverr to me is like Upwork, right? But WAP is a bit different because it's more of an app marketplace, let's say.
+0:0:8.62 --> 0:0:8.382Clark StacerFiber.
+0:0:12.382 --> 0:0:12.702Clark StacerYeah.
+0:0:17.262 --> 0:0:27.462Clark StacerYeah, yeah, yeah. Those were part of the initial research that we did for for for SME Martin. Yeah, for sure.
+0:0:24.782 --> 0:0:44.542Brian HierholzerYeah, yeah. I just couldn't find it in our channels anywhere because I know that, you know, I mean, we're more of WAP like we're app, but we're more kind of structured, I would say like, you know, Fiverr or Upwork almost. But to me it's a hybrid, right? It's it's app and consultancy services.
+0:0:44.622 --> 0:0:48.822Brian HierholzerSo anyway, how are how are things coming along?
+0:0:46.702 --> 0:0:48.182Clark StacerYeah, yeah.
+0:0:49.262 --> 0:1:3.742Clark StacerPretty good. Yeah. I just, I'm just continuing to let's see today I'm working on the well, it started as the vendor profile, but it's really there's profile for each side, so.
+0:1:4.382 --> 0:1:22.462Clark StacerReorganizing the my orgs. There's a my orgs page now that has that shows you all of the organizations that you have access to on the platform and then allows you to select which one you know if you wanted to switch orgs.
+0:1:22.862 --> 0:1:42.302Clark StacerAnd then so with a little like a little blurb about each org and then when you switch orgs you get to an an org profile page and that that's where all of the org level stuff is going to live. Like you know any anything that's like documents that are scoped for org level will live there.
+0:1:23.542 --> 0:1:23.822Brian HierholzerYep.
+0:1:42.382 --> 0:1:51.662Clark StacerAnd we'll just use pointers to those in all of the like in in the other places that reference those.
+0:1:50.862 --> 0:2:9.342Brian HierholzerYeah, there's a there's a construct of the org which I I'm struggling with. It was more the GitHub org versus this is a legal entity and you are not part of our organization, you know. And GitHub is like where you, you know an org in GitHub is.
+0:2:9.342 --> 0:2:27.782Brian HierholzerBringing, you know, multiple people together, let's say into an org and they're sharing, you know, kind of a a project. To me, org is more of almost like a project construct that we are using in my mind. And this is what I, you know, I've I've challenged Kevin on is, is that.
+0:2:28.62 --> 0:2:45.222Brian HierholzerYou know, we are inviting people to orgs, but the reality is, is we should be inviting them to projects that are locked down into boundaries and not inviting them to the org, but a project construct instead of an org construct.
+0:2:45.422 --> 0:2:46.502Clark StacerI'm on now.
+0:2:45.862 --> 0:3:5.502Brian HierholzerSo I have a, I have a, you know, and I've got a major challenge with the org construct that we have versus the project construct. And I almost feel like the org construct needs to be consumed by the project construct, you know, as because you know an outside or an outside company never joined.
+0:3:5.662 --> 0:3:25.182Brian HierholzerJoins your company. They are not in your domain. They don't share your e-mail addresses. Those are project affiliations cuz they are an outside organization. An organization to me is a legal entity with an e-mail address and a domain and if a user.
+0:3:25.382 --> 0:3:42.102Brian HierholzerDoes not have a domain of that organization. They are not part of the org. They are, you know, an external party in a project that is then shared among multiple orgs coming together to achieve a multi org.
+0:3:42.222 --> 0:3:58.342Brian HierholzerObjective between a buyer and a seller, if that makes sense. And this is that this is a significant thing that we need to talk about at the platform level I there may be use cases for.
+0:3:46.302 --> 0:3:46.582Clark StacerYeah.
+0:3:59.822 --> 0:4:15.502Brian HierholzerSomebody joining an org. But again, if we have the project construct, help me understand how somebody, you know, uses their e-mail or they they become part of the org. They don't. They're not a guest in an organization.
+0:4:16.302 --> 0:4:33.542Brian HierholzerYou know, because if you're a user and you are logged into a company's things and you're onboarded into their systems like you are 0 bias, you are part of 0 bias. You are part of the org. You are not joining an org as Clark at clark.com.
+0:4:34.142 --> 0:4:37.102Brian HierholzerDoes that make sense? Because you're not in the security wrapper.
+0:4:36.662 --> 0:4:36.822Clark StacerYeah.
+0:4:37.822 --> 0:4:43.702Clark StacerYeah. So it's almost like at the engagement level, there's another.
+0:4:45.102 --> 0:4:46.142Clark StacerThere's like.
+0:4:47.542 --> 0:4:51.142Clark StacerAffiliated orgs, Affiliated users.
+0:4:52.782 --> 0:4:57.742Clark StacerIt's not even that at the engage, is that at the engagement level or is that even?
+0:4:55.942 --> 0:5:11.582Brian HierholzerWell, an engagement is an engagement is with an organization. Yeah, that is not you, right. And you can't. I don't know. You know, again, the construct of an org is not a GitHub construct of an org that our our.
+0:5:11.662 --> 0:5:31.222Brian HierholzerConcept of an org is a project. I would say Kevin will say, well no an organ is an org and you can join orgs. I would say no. An organization is a tax ID with people on a given domain that is owned and and if you are not in their e-mail address, you are not part of their organization.
+0:5:31.422 --> 0:5:47.502Brian HierholzerYou may be invited to do things in a project that has security credentials or access into a boundary because you've been giving boundary permissions, but you're not.
+0:5:48.142 --> 0:5:51.142Brian HierholzerA organization permission.
+0:5:51.542 --> 0:6:6.662Clark StacerYeah, yeah, like a boundary, a boundary invitees, boundary actors. Maybe it's a role, a boundary role that has that can have anybody.
+0:6:6.942 --> 0:6:9.942Clark StacerUh, internal or external?
+0:6:7.662 --> 0:6:26.982Brian HierholzerYes, multiple, multiple orgs are invited to boundaries via a project, right? Yeah, and it is a boundary construct, not an org construct. I believe that our org construct needs to be deleted and all of those org level permissions need to move to.
+0:6:12.862 --> 0:6:14.102Clark StacerYeah, yeah.
+0:6:27.342 --> 0:6:42.502Brian HierholzerA boundary slash project or a project slash boundary permission set or a boundary permission set and then that is included in a project scope.
+0:6:43.462 --> 0:7:2.862Brian HierholzerBut it's a boundary permission set, not an org permission set. So net net I want to move all org permissions to a boundary permissions that are not if they apply to parties or people that do not share an.
+0:7:2.862 --> 0:7:10.822Brian Hierholzere-mail address within that domain and they are not logged in using that same two-factor authentication that everybody in that domain has.
+0:7:12.462 --> 0:7:14.342Clark StacerYeah, yeah, yeah.
+0:7:12.462 --> 0:7:28.462Brian HierholzerMakes sense. I mean, for clarity wise, I mean, do you do you kind of agree in that regard? Because this is important and this moves org permissions to boundaries more so, or at least it splits it.
+0:7:28.942 --> 0:7:48.182Brian HierholzerAnybody that has a non an e-mail address that is not and is not logging in to the two factor that is native to the e-mail address in the domain of an organization, those permission sets need to move to boundary permission sets. They are not org permission sets.
+0:7:48.502 --> 0:7:52.262Brian HierholzerSo this is a boundary switcher, not an org switcher.
+0:7:52.982 --> 0:8:2.502Clark StacerYeah, yeah. We should definitely have this conversation with Kevin and and make it clear. Like what? Yeah, yeah.
+0:7:58.182 --> 0:8:2.582Brian HierholzerAnd and Nick and Chris, like sooner than later, yeah.
+0:8:3.662 --> 0:8:6.382Clark StacerUm, yeah, in fact.
+0:8:7.662 --> 0:8:20.662Clark StacerWell, maybe tomorrow morning if you want to jump in on, we do a stand up in the morning, that might be something to invite, you know, invite yourself to the stand up and we talk to talk about that.
+0:8:13.62 --> 0:8:13.542Brian HierholzerYes.
+0:8:19.262 --> 0:8:38.702Brian HierholzerWell then then then then pull me in or or start a start a a a Slack with me, you, Nick, Chris and Kevin and say that we need to talk about org permissions versus boundary permissions for parties that do not.
+0:8:38.782 --> 0:8:58.222Brian HierholzerNot use the domain, e-mail a domain or the two factor authentication system into our thing. All those users that do not share that should be moved to a boundary permission set. Or maybe you start dialoguing that internally and then invite me to the party once you guys all chat about it.
+0:9:0.822 --> 0:9:16.262Clark StacerOK. Yeah, that's a good, that's a good idea. I can introduce the, I can introduce the the concept and explain why, you know, and then we can pull you in for details, yeah.
+0:9:13.102 --> 0:9:26.742Brian HierholzerYes, yeah, I I I think this is a fundamental change that we need to retake all of those those permissions and move them to boundary permissions.
+0:9:27.822 --> 0:9:39.462Clark StacerSo is this a true statement that any interaction between any org or and any user that's external to the organization has to occur in a boundary?
+0:9:28.382 --> 0:9:28.502Brian HierholzerHe.
+0:9:40.382 --> 0:9:43.262Brian HierholzerThat is a boundary construct. That is not an org construct.
+0:9:43.262 --> 0:9:53.662Clark StacerSo is that a true statement though? Like you you will only ever have interactions with people via a boundary like that will always be?
+0:9:51.742 --> 0:10:8.142Brian HierholzerThe boundary is the security container that does everything. I do not see a use case where this is an org level permission set. This is a boundary permission set and it is via a boundary. A boundary gives access to anything and everything. The boundary is the security construct.
+0:10:9.142 --> 0:10:17.742Brian HierholzerBoundaries are security constructs of inviting multiple parties to access applications and systems within that boundary.
+0:10:19.222 --> 0:10:39.142Brian HierholzerThe organization is reserved for the company and the people in the e-mail addresses and the two factor that they are logged into. They if they are not using if you are not using zero bias.com and you are not using zero bias e-mail address and you are not logging into our zero bias two factor authentication with with.
+0:10:39.222 --> 0:10:57.902Brian HierholzerMicrosoft you are not in our org. The only way you yeah abso freaking lutely and this is the our org construct needs to be split in half and the non e-mail address non domains need to move to a boundary permission set.
+0:10:41.942 --> 0:10:43.862Clark StacerYou're out of bound, yeah.
+0:10:45.862 --> 0:10:46.222Clark StacerYeah.
+0:11:0.262 --> 0:11:14.302Clark StacerYeah. So, so from that perspective, like any document that's used in any RFP or project or assessment or anything like that is going to be, it will always have to be tied to at least one boundary.
+0:11:14.662 --> 0:11:29.782Brian HierholzerYes, a project can span multiple boundaries or one, but it requires A boundary to get access to anything. There is no other vehicle to get access to anything from one org to another. It is a boundary constraint.
+0:11:29.782 --> 0:11:39.22Brian HierholzerFirst and foremost, they have to be tied to a project, but then there has to be a boundary within the project for these people to share information and to do anything, yes.
+0:11:37.862 --> 0:11:38.222Clark StacerYeah.
+0:11:41.182 --> 0:11:56.422Clark StacerOK, what I'm gonna do after we finish is I'm gonna have Claude summarize this and then I'll I'll ask him to formulate it as a something to present to, you know, to Kevin.
+0:11:57.102 --> 0:12:6.702Clark StacerAnd then I'll show it to you and then we can refine it if you want. And then and then I'll show it to Kevin for, yeah.
+0:12:4.862 --> 0:12:14.262Brian HierholzerYeah, this is a this is a very near term construct that has to be changed like critical in my opinion.
+0:12:13.382 --> 0:12:18.902Clark StacerYeah. While they're building, they're building out project right now. So that's, yeah, yeah.
+0:12:16.902 --> 0:12:20.582Brian HierholzerThat's what I'm saying. This is like a now thing. This is a now thing.
+0:12:20.862 --> 0:12:23.342Clark StacerYeah. OK. Yeah, it's good.
+0:12:24.502 --> 0:12:31.622Clark StacerOK, what other details can we add to this while we're right here?
+0:12:29.462 --> 0:12:37.862Brian HierholzerThat's the most important thing in my opinion, which is what we just discussed. Now outside of that, just tell me progress wise.
+0:12:39.302 --> 0:12:44.742Clark StacerOh, yeah. So, um, so yeah, there will be. So there's.
+0:12:45.862 --> 0:13:0.422Clark StacerAt the at the org profile level, any user of SME Mart might be a member of multiple organizations and if there are any documents that are.
+0:12:59.302 --> 0:13:3.382Brian HierholzerNot, not in, not in, even in the new rules that I just provided.
+0:13:2.822 --> 0:13:7.902Clark StacerWell, not in the new rules. It'll be. Well, yeah, it would still be.
+0:13:8.982 --> 0:13:12.102Clark StacerThere would still be a an org view.
+0:13:13.702 --> 0:13:21.982Clark StacerLike where the orgs and a list of orgs? Or is that even needed? It would just be my my projects.
+0:13:19.702 --> 0:13:37.102Brian HierholzerThe the orgs are the a list of orgs are those that I have engagements with within projects. So I could I could have a list of orgs, but I don't belong to any of them. But I I have engagements with them, right? And I have an engagement and a project or I have an engagement.
+0:13:26.702 --> 0:13:26.822Clark StacerRight.
+0:13:32.222 --> 0:13:33.982Clark StacerRight. Yep.
+0:13:37.542 --> 0:13:56.942Brian HierholzerWell, you know, it may be in a pilot phase or or it's going into an engagement phase, but there are engagements and projects spanning different organizations. So yeah, here's a list of of of engagements I have and the organizations.
+0:13:51.422 --> 0:13:52.302Clark StacerOK, yeah.
+0:13:57.62 --> 0:14:15.502Brian HierholzerOf those engagements and then any project or projects that are tied to those engagements and any boundaries or bound or any boundary and or boundaries that are associated with the projects that are associated with that that engagement.
+0:14:16.102 --> 0:14:19.502Brian HierholzerAnd the org that the engagement is with.
+0:14:20.422 --> 0:14:21.982Clark StacerRight, yeah.
+0:14:23.222 --> 0:14:24.102Clark StacerYeah.
+0:14:23.742 --> 0:14:29.622Brian HierholzerSo yeah, this is a bad thing, 'cause your **** right now is tied to an org construct that needs to die.
+0:14:30.582 --> 0:14:32.942Clark StacerYep, yeah, it needs to be.
+0:14:30.582 --> 0:14:41.382Brian HierholzerIt is a project construct that is that needs to be shifted to the boundaries underneath the project, and a project needs to have at least one boundary or more.
+0:14:41.782 --> 0:14:42.102Clark StacerYep.
+0:14:43.382 --> 0:14:53.862Clark StacerWell, there could still be projects that don't have a boundary, but those would be personal private projects that, you know, you're not ever going to invite anyone to basically.
+0:14:53.542 --> 0:15:11.22Brian HierholzerIf if you're ever gonna get into any access of anything, the boundary construct is what gives you access to and permissions to certain things at certain points. But yes, plausibly there for an internal project. But if you're going to get access to something, you know it would at least in in zero bias.
+0:14:58.662 --> 0:14:59.142Clark StacerYes.
+0:15:11.542 --> 0:15:14.302Brian HierholzerIt would only be granted through a boundary.
+0:15:15.22 --> 0:15:24.382Clark StacerRight. Yep. Yep. Yeah. We're we're at, like you said, the the sole determination is there. Yeah, exactly.
+0:15:16.462 --> 0:15:17.862Brian HierholzerPlausibly.
+0:15:19.862 --> 0:15:30.982Brian HierholzerIt is the security construct. It grants access. It is the, it is the IM. We it is the centralized global IM across all applications, yes.
+0:15:30.342 --> 0:15:34.262Clark StacerYep. OK. Yeah, that totally makes sense.
+0:15:35.902 --> 0:15:50.502Brian HierholzerSo does this make sense to you or does it? Is this hard to get your head around? Cause it to me it's pretty easy. If I don't have an e-mail address at zerobias.com, I am not part of their org. And if I don't use their two-factor and an e-mail address, I am not part of their org. Period.
+0:15:50.742 --> 0:16:1.262Clark StacerSo then so then for you know for example we hire some outside contractor to do like some little bit of work that that that will always be.
+0:15:58.102 --> 0:16:15.742Brian HierholzerThat is a project. They will be using their own e-mail address and they will use their own e-mail address plausibly and they will be granted access to a boundary within the project and they will be treated as an outsider. Yes, now if I if I bring them in.
+0:16:9.262 --> 0:16:10.382Clark StacerThat's right.
+0:16:11.982 --> 0:16:13.142Clark StacerOK, Yep.
+0:16:15.942 --> 0:16:34.702Brian HierholzerAnd say, OK, you're going to become inside the shop, inside the org, and we're going to give you an e-mail address and you're going to use our, our, our two-factor authentication, then yes, that is inside the org. But you know how many Upwork engagements is somebody going to do that? They don't do that ****, you know what I mean?
+0:16:28.982 --> 0:16:29.262Clark StacerYeah.
+0:16:33.422 --> 0:16:34.862Clark StacerNo, no, yeah.
+0:16:37.62 --> 0:16:46.702Brian HierholzerSo there's a big there's a formality difference. One has way more process than another. One is maybe way more permanent than another being transient, let's say.
+0:16:47.622 --> 0:16:47.902Clark StacerYeah.
+0:16:50.942 --> 0:16:51.342Clark StacerYeah.
+0:16:52.982 --> 0:17:7.382Clark StacerSo at the project, which equals one or more boundaries, project is, you know, that's that's where outside third parties live as an invitee.
+0:16:58.902 --> 0:16:59.222Brian HierholzerLikely.
+0:17:6.462 --> 0:17:6.942Brian HierholzerCorrect.
+0:17:8.262 --> 0:17:9.462Clark StacerAnd.
+0:17:8.662 --> 0:17:14.982Brian HierholzerCorrect to the boundary based on a restriction of the boundary construct, yes, and the permissions.
+0:17:13.62 --> 0:17:17.582Clark StacerTo only what the boundary allows them to have access to, right? Yeah.
+0:17:16.22 --> 0:17:30.382Brian HierholzerYes, yes. Boundary is the construct of the security access of internal parties or outside parties. It is a multi org construct, so a project may have three.
+0:17:23.742 --> 0:17:24.142Clark StacerYeah.
+0:17:31.102 --> 0:17:50.582Brian HierholzerParties to it or three orgs. So a project may actually have a 2 engagements or let's say I have, let's say I have a project to 0 bias and we are hiring two different organizations to a project. We would have an engagement with one org to get all of the.
+0:17:50.662 --> 0:18:9.982Brian HierholzerMSA and the agreement and the dollars and the panking and all that stuff, right? And I would invite them to a project and then I would, I would give them access or their certain team members access to certain parts of the boundary and certain apps in the boundary. Now I would also plausibly get another engagement with another party.
+0:17:55.222 --> 0:17:55.942Clark StacerYeah.
+0:18:10.262 --> 0:18:25.902Brian HierholzerBecause one might do the day shift, right? And I have another engagement with another party. I onboard them into the engagement and I get all of our MSAS in place and the dollars, etcetera, but I invite them to the same project.
+0:18:14.622 --> 0:18:14.782Clark StacerYeah.
+0:18:28.262 --> 0:18:30.222Brian HierholzerAnd into the same boundary.
+0:18:31.702 --> 0:18:51.382Brian HierholzerSo I may have a project and a boundary where there are two or three orgs tied to those different engagements. They are in a shared project, but they are separate engagements because the engagement is at the company to company level where between buyer and seller, but there may be multiple.
+0:18:51.702 --> 0:18:58.62Brian HierholzerSellers in a project because there are multiple contracting groups in a shared project.
+0:18:59.142 --> 0:19:0.782Clark StacerYeah, Yep.
+0:18:59.502 --> 0:19:0.822Brian HierholzerDoes that make sense?
+0:19:2.502 --> 0:19:9.822Clark StacerUm, would would there even be the the concept of sub projects? So you have like an over you have like a?
+0:19:9.582 --> 0:19:21.382Brian HierholzerYou you might have a global project and then a sub project. I don't, you know, plausibly, yes, there may be some detail there. Yes, it's possible where there is a.
+0:19:11.462 --> 0:19:11.742Clark StacerYeah.
+0:19:18.62 --> 0:19:25.342Clark StacerSo like sub projects, each project might have its own engagements and its own like you know.
+0:19:23.462 --> 0:19:42.982Brian HierholzerYeah. So let's say it's like daytime project versus nighttime project, right? Let's say, right. And and one is one party and then another is another maybe within the same, you know, kind of global project, let's say or or whatever. But yes, that's possible if they wanted to kind of categorize.
+0:19:28.942 --> 0:19:29.102Clark StacerRight.
+0:19:32.982 --> 0:19:33.262Clark StacerYeah.
+0:19:38.382 --> 0:19:38.582Clark StacerYeah.
+0:19:43.302 --> 0:20:2.782Brian HierholzerThem in that regard, but they would still be tied to a boundary if it's a shared boundary. Or you know, it could be like I'm just going to give each different party in the project in a different sub project and I'm going to stand up different boundaries for each one, but it's still the overall project is is mine.
+0:20:2.982 --> 0:20:6.822Brian HierholzerAnd I've got a couple different people in different areas working.
+0:20:3.702 --> 0:20:4.142Clark StacerYeah.
+0:20:8.142 --> 0:20:8.342Clark StacerYeah.
+0:20:9.302 --> 0:20:25.182Clark StacerYeah, we'll have to hash these details out with Kevin and decide like, yeah, do we nest projects and then do do permissions cascade down into sub projects or does each project define its own permissions completely? You know, that kind of thing.
+0:20:25.262 --> 0:20:39.782Brian HierholzerYeah, you may, there may be some sub project stuff. You may just want to stub that for now, right? Like just have a have a spot for it. Don't go too deep, but you know, just kind of stub it. But at the end of the day, the big thing is, is that these are not joining orgs, these are joining projects.
+0:20:29.942 --> 0:20:30.382Clark StacerYeah.
+0:20:33.182 --> 0:20:33.542Clark StacerNo.
+0:20:42.582 --> 0:20:58.422Brian HierholzerAt the high level, and they are joining boundaries, and the boundary permission sets are the critical things between these different organizations. They are truly different organizations. People don't just join orgs. That is a that is a.
+0:20:58.422 --> 0:21:5.702Brian HierholzerThat is an incorrect org structure that needs to be broken and remedied like now.
+0:21:2.222 --> 0:21:2.502Clark StacerYeah.
+0:21:5.382 --> 0:21:20.822Clark StacerIt's an interface. It's a boundary. It's a firewall. There's like points that you open up between them, you know. But the whole thing is not open. Only the pieces that spots that you want open are open. Not only the people you want to have access have access.
+0:21:8.902 --> 0:21:9.262Brian HierholzerYes.
+0:21:11.262 --> 0:21:11.702Brian HierholzerYes.
+0:21:16.742 --> 0:21:17.982Brian HierholzerYep, Yep.
+0:21:20.662 --> 0:21:29.902Brian HierholzerThe real easy delineation is people that join an org have the same e-mail address and they use the same two factor. If they do not, it does not apply.
+0:21:20.822 --> 0:21:21.102Clark StacerYeah.
+0:21:30.342 --> 0:21:30.702Clark StacerYeah.
+0:21:31.222 --> 0:21:44.22Brian HierholzerIt's a very easy black and white yes or no, one or a zero. That is a very easy construct to abide by, and if not, then they are a boundary. They are a boundary permission set.
+0:21:46.782 --> 0:21:46.902Clark StacerOK.
+0:21:49.462 --> 0:21:55.382Clark StacerYeah, this totally makes sense, Brian. I don't, I don't see any reason why.
+0:21:55.542 --> 0:22:6.142Brian HierholzerI hope that is not too hard to change, but we need to change it and we need to change it now with the work that we're doing on these boards and the project level stuff.
+0:22:6.902 --> 0:22:7.262Clark StacerYeah.
+0:22:9.62 --> 0:22:18.142Clark StacerYeah. And at the very least that's we can still model it in SME Mart and then have that be, you know, you know.
+0:22:15.382 --> 0:22:34.942Brian HierholzerYeah, hand it over. Yeah, hand it over. But but we, I don't feel like and if you want to do that work quickly, but we got to hand that over to these guys and and this, but this is a very, very immediate term. I've already brought it up to Kevin and we've already talked about these org changes. This is not the first time he's heard it. I just.
+0:22:34.782 --> 0:22:34.902Clark StacerOK.
+0:22:35.142 --> 0:22:50.942Brian HierholzerI don't know that he's gotten to it, but I have given explicit clarity of what an org is and what they aren't, and that is a same e-mail address and same two factor login by the IDP.
+0:22:36.662 --> 0:22:37.862Clark StacerOK, good.
+0:22:51.502 --> 0:22:51.662Clark StacerYeah.
+0:22:51.502 --> 0:22:59.462Brian HierholzerIf they do not, if they are not in that e-mail address and not in that IDP, they are not part of the org. They are their own org.
+0:23:0.902 --> 0:23:20.342Brian HierholzerWe already have multiple orgs, but you know, we're like using these things as these flimsy constructs. We need a rigid one. You know what I mean? Because you have your own org. SDI has his own org. Zero Bias is his own org. But we're saying, oh, Clark, you know, Geekery can join our org. No, no, we're not. He doesn't use our.
+0:23:1.22 --> 0:23:1.182Clark StacerYeah.
+0:23:8.742 --> 0:23:9.22Clark StacerYeah.
+0:23:10.462 --> 0:23:10.622Clark StacerYeah.
+0:23:20.542 --> 0:23:26.302Brian HierholzerE-mail address Geekery is Geekery. He has his own org. He can join a boundary in a project.
+0:23:23.662 --> 0:23:24.342Clark StacerNo, no.
+0:23:26.862 --> 0:23:27.302Clark StacerNo.
+0:23:28.862 --> 0:23:33.102Clark StacerThat has a set of permissions applied, yeah.
+0:23:31.782 --> 0:23:40.942Brian HierholzerYep, Yep, Yep, Yep, Yep, Yep. Exactly. Cool. I think that's enough for today, but that is critical that we get that forward.
+0:23:35.422 --> 0:23:35.982Clark StacerOK.
+0:23:37.302 --> 0:23:44.582Clark StacerWell, good. Yeah, this is, this is exactly. Yeah, this is very timely. So.
+0:23:44.462 --> 0:23:59.342Brian HierholzerWell, you brought that up. I'm like, oh ****, you're actually going to do it wrong. And I want to, I want to make sure that you're not doing it wrong because it is wrong. It's it is that way in the platform. But that is ******* wrong. It is broke. We got to change it to get the way we need it.
+0:23:47.382 --> 0:23:47.742Clark StacerYeah.
+0:24:2.542 --> 0:24:3.502Clark StacerOK, awesome.
+0:24:5.142 --> 0:24:10.582Brian HierholzerOK bud, keep me posted. I I will uh drop the. I'll share the thing once it produces.
+0:24:5.622 --> 0:24:6.542Clark StacerYeah, man.
+0:24:10.262 --> 0:24:14.622Clark StacerPerfect. Thank you. Catch you later, Brian. Bye.
+0:24:11.822 --> 0:24:13.822Brian HierholzerOkay, all good. We'll see you. Bye. Okay, bye.

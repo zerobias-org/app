@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en" style="color-scheme: dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exhibit F → SME Mart Demand-Side Breakdown</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #1c2333;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --accent: #58a6ff;
+    --accent2: #3fb950;
+    --warn: #d29922;
+    --danger: #f85149;
+    --purple: #bc8cff;
+    --pink: #f778ba;
+    --teal: #39d2c0;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    padding: 24px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* TOC */
+  .toc { position: fixed; top: 24px; right: 24px; width: 240px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; z-index: 100; max-height: 90vh; overflow-y: auto; }
+  .toc-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 8px; }
+  .toc a { display: block; font-size: 14px; color: var(--accent); text-decoration: none; padding: 3px 0; }
+  .toc a:hover { color: var(--text); }
+
+  /* Hero */
+  .hero { background: linear-gradient(135deg, #1a1e2e 0%, #0d1117 100%); border: 1px solid var(--border); border-radius: 12px; padding: 40px; margin-bottom: 32px; margin-right: 260px; }
+  .hero h1 { font-size: 28px; margin-bottom: 8px; }
+  .hero .subtitle { font-size: 18px; color: var(--text-muted); margin-bottom: 16px; }
+  .hero .meta { font-size: 14px; color: var(--text-muted); }
+
+  /* Sections */
+  .section { margin-bottom: 32px; margin-right: 260px; }
+  .section h2 { font-size: 22px; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .section h3 { font-size: 18px; margin: 16px 0 8px; color: var(--accent); }
+
+  /* KPI row */
+  .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 32px; margin-right: 260px; }
+  .kpi { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px; text-align: center; }
+  .kpi-value { font-size: 36px; font-weight: 700; }
+  .kpi-label { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+  .kpi-sub { font-size: 14px; color: var(--text-muted); margin-top: 2px; }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+  th { background: var(--surface2); font-size: 14px; font-weight: 600; text-align: left; padding: 10px 12px; border-bottom: 2px solid var(--border); }
+  td { font-size: 16px; padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:hover td { background: rgba(88,166,255,0.04); }
+
+  /* Badges */
+  .badge { display: inline-block; font-size: 13px; font-weight: 600; padding: 2px 8px; border-radius: 4px; white-space: nowrap; }
+  .badge-security { background: #f8514922; color: var(--danger); border: 1px solid #f8514944; }
+  .badge-compliance { background: #d2992222; color: var(--warn); border: 1px solid #d2992244; }
+  .badge-functional { background: #58a6ff22; color: var(--accent); border: 1px solid #58a6ff44; }
+  .badge-legal { background: #bc8cff22; color: var(--purple); border: 1px solid #bc8cff44; }
+  .badge-financial { background: #3fb95022; color: var(--accent2); border: 1px solid #3fb95044; }
+  .badge-covered { background: #3fb95022; color: var(--accent2); }
+  .badge-gap { background: #f8514922; color: var(--danger); }
+  .badge-partial { background: #d2992222; color: var(--warn); }
+  .badge-future { background: #8b949e22; color: var(--text-muted); }
+  .badge-high { background: #f8514922; color: var(--danger); }
+  .badge-medium { background: #d2992222; color: var(--warn); }
+  .badge-low { background: #8b949e22; color: var(--text-muted); }
+
+  /* Task tree */
+  .task-tree { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin: 16px 0; }
+  .task-tree summary { font-size: 16px; font-weight: 600; cursor: pointer; padding: 6px 0; }
+  .task-tree summary:hover { color: var(--accent); }
+  .task-tree details { margin-left: 24px; margin-top: 4px; }
+  .task-tree details > summary { font-weight: 500; }
+  .subtask-list { list-style: none; margin: 8px 0 8px 24px; }
+  .subtask-list li { font-size: 16px; padding: 4px 0; border-left: 2px solid var(--border); padding-left: 12px; margin-bottom: 2px; }
+  .subtask-list li:hover { border-left-color: var(--accent); }
+  .subtask-ref { font-size: 14px; color: var(--text-muted); margin-left: 8px; }
+
+  /* Insight cards */
+  .insight-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin: 16px 0; }
+  .insight-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  .insight-card .card-title { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+  .insight-card .card-body { font-size: 16px; color: var(--text-muted); }
+
+  /* Mermaid */
+  .mermaid-wrapper { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin: 16px 0; resize: both; overflow: auto; min-height: 300px; position: relative; }
+  .mermaid-wrapper::after { content: '⟐'; position: absolute; bottom: 4px; right: 8px; color: var(--text-muted); font-size: 14px; pointer-events: none; }
+  .mermaid-controls { display: flex; gap: 8px; margin-bottom: 8px; }
+  .mermaid-controls button { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 14px; }
+  .mermaid-controls button:hover { background: var(--border); }
+  .mermaid-inner { overflow: auto; cursor: grab; }
+  .mermaid-inner:active { cursor: grabbing; }
+
+  /* Fullscreen overlay */
+  .fullscreen-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: var(--bg); z-index: 9999; padding: 16px; }
+  .fullscreen-overlay.active { display: flex; flex-direction: column; }
+  .fullscreen-overlay .fs-controls { display: flex; gap: 8px; margin-bottom: 8px; justify-content: flex-end; }
+  .fullscreen-overlay .fs-content { flex: 1; overflow: auto; cursor: grab; }
+  .fullscreen-overlay .fs-content:active { cursor: grabbing; }
+  .fullscreen-overlay button { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 6px 14px; border-radius: 4px; cursor: pointer; font-size: 14px; }
+
+  /* Footer */
+  .footer { font-size: 12px; color: var(--text-muted); text-align: center; margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--border); margin-right: 260px; }
+
+  @media (max-width: 900px) {
+    .toc { display: none; }
+    .hero, .section, .kpi-row, .footer { margin-right: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOC -->
+<nav class="toc">
+  <div class="toc-title">Contents</div>
+  <a href="#overview">Overview</a>
+  <a href="#hierarchy">Hierarchy Diagram</a>
+  <a href="#task-mapping">Document → Task Mapping</a>
+  <a href="#full-tree">Full Task Tree (45 SubTasks)</a>
+  <a href="#gap-analysis">Gap Analysis</a>
+  <a href="#insights">Strategic Insights</a>
+  <a href="#next-steps">Next Steps</a>
+</nav>
+
+<!-- Hero -->
+<div class="hero">
+  <h1>Exhibit F → SME Mart Demand-Side Breakdown</h1>
+  <div class="subtitle">CDPH Information Systems Security Requirements (ISO/SR1 v5.5) decomposed into SME Mart's Engagement → Activity → Task → SubTask hierarchy</div>
+  <div class="meta">Source: Exhibit F (Oct 2025) &nbsp;|&nbsp; Analysis: 2026-03-05 &nbsp;|&nbsp; Brian's directive: Build the demand side of buyer with detailed requirements</div>
+</div>
+
+<!-- KPIs -->
+<div class="kpi-row">
+  <div class="kpi">
+    <div class="kpi-value" style="color: var(--accent)">5</div>
+    <div class="kpi-label">Requirement Categories</div>
+    <div class="kpi-sub">→ 5 Tasks</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-value" style="color: var(--accent2)">45</div>
+    <div class="kpi-label">Individual Requirements</div>
+    <div class="kpi-sub">→ 45 SubTasks</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-value" style="color: var(--warn)">1</div>
+    <div class="kpi-label">Exhibit (of many)</div>
+    <div class="kpi-sub">Security only — full RFP has Legal, Financial, Functional, SOW</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-value" style="color: var(--danger)">7</div>
+    <div class="kpi-label">Major Gaps</div>
+    <div class="kpi-sub">Features SME Mart needs to support this flow</div>
+  </div>
+</div>
+
+<!-- Hierarchy Diagram -->
+<div class="section" id="hierarchy">
+  <h2>Hierarchy: How Exhibit F Maps to SME Mart</h2>
+  <div class="mermaid-wrapper" id="hierarchy-diagram">
+    <div class="mermaid-controls">
+      <button onclick="zoomDiagram('hierarchy-diagram', 1.3)">+</button>
+      <button onclick="zoomDiagram('hierarchy-diagram', 0.7)">−</button>
+      <button onclick="fitDiagram('hierarchy-diagram')">Fit</button>
+      <button onclick="openFullscreen('hierarchy-diagram')">⛶</button>
+    </div>
+    <div class="mermaid-inner">
+      <pre class="mermaid">
+graph TB
+  subgraph PROJECT["🏢 Project: CDPH IT Modernization"]
+    direction TB
+    DOC["📄 Uploaded Documents<br/>Exhibit F (Security)<br/>Exhibit A (SOW)<br/>Exhibit B (Budget)<br/>Exhibit C (Legal)"]
+
+    subgraph ENG["🤝 Engagement / Boundary with Vendor X"]
+      direction TB
+
+      subgraph ACT["📋 Activity: Security Requirements Assessment"]
+        direction TB
+        T1["Task: Admin/Mgmt Safeguards<br/><b>Type: COMPLIANCE</b><br/>8 SubTasks"]
+        T2["Task: Technical & Operational<br/><b>Type: SECURITY</b><br/>14 SubTasks"]
+        T3["Task: Solution Architecture<br/><b>Type: FUNCTIONAL</b><br/>15 SubTasks"]
+        T4["Task: Documentation<br/><b>Type: LEGAL</b><br/>7 SubTasks"]
+        T5["Task: ISO Notifications<br/><b>Type: COMPLIANCE</b><br/>4 SubTasks"]
+      end
+
+      subgraph ACT2["📋 Activity: Vendor Response (Supply Side)"]
+        direction TB
+        R1["Provider maps readiness<br/>to each requirement"]
+        R2["Evidence attached<br/>per subtask"]
+        R3["Transparency Center<br/>shows real-time status"]
+      end
+    end
+  end
+
+  DOC -.->|"parsed into"| ACT
+  ACT -->|"response mapped"| ACT2
+
+  style PROJECT fill:#1a1e2e,stroke:#30363d,color:#e6edf3
+  style ENG fill:#161b22,stroke:#58a6ff,color:#e6edf3
+  style ACT fill:#1c2333,stroke:#3fb950,color:#e6edf3
+  style ACT2 fill:#1c2333,stroke:#d29922,color:#e6edf3
+  style DOC fill:#0d1117,stroke:#bc8cff,color:#e6edf3
+  style T1 fill:#0d1117,stroke:#d29922,color:#e6edf3
+  style T2 fill:#0d1117,stroke:#f85149,color:#e6edf3
+  style T3 fill:#0d1117,stroke:#58a6ff,color:#e6edf3
+  style T4 fill:#0d1117,stroke:#bc8cff,color:#e6edf3
+  style T5 fill:#0d1117,stroke:#d29922,color:#e6edf3
+  style R1 fill:#0d1117,stroke:#30363d,color:#8b949e
+  style R2 fill:#0d1117,stroke:#30363d,color:#8b949e
+  style R3 fill:#0d1117,stroke:#30363d,color:#8b949e
+      </pre>
+    </div>
+  </div>
+</div>
+
+<!-- Task Type Mapping -->
+<div class="section" id="task-mapping">
+  <h2>Document → Task Type Mapping</h2>
+  <table>
+    <thead>
+      <tr><th>Exhibit F Category</th><th>SME Mart Task Type</th><th>SubTask Count</th><th>Key Standards Referenced</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Administrative / Management Safeguards</td>
+        <td><span class="badge badge-compliance">COMPLIANCE</span></td>
+        <td>8</td>
+        <td>HIPAA, CDPH Incident Response Policy, SAM</td>
+      </tr>
+      <tr>
+        <td>Technical and Operational Safeguards</td>
+        <td><span class="badge badge-security">SECURITY</span></td>
+        <td>14</td>
+        <td>FIPS 140, NIST 800-88, SIMM 5355-A, NIST SP800-63B</td>
+      </tr>
+      <tr>
+        <td>Solution Architecture</td>
+        <td><span class="badge badge-functional">FUNCTIONAL</span></td>
+        <td>15</td>
+        <td>NIST SP800-53r5, OWASP ASVS 4.0.3, NIST SP800-190, PCI DSS, FIDO2</td>
+      </tr>
+      <tr>
+        <td>Documentation of Solution</td>
+        <td><span class="badge badge-legal">LEGAL</span></td>
+        <td>7</td>
+        <td>FIPS-199, SAM 5305, SIMM 5310-C, CDPH Privacy Policy</td>
+      </tr>
+      <tr>
+        <td>ISO Notifications and Approvals</td>
+        <td><span class="badge badge-compliance">COMPLIANCE</span></td>
+        <td>4</td>
+        <td>SAM 4921, PAL Stage/Gate, CDPH Breach Notification Policy</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Full Task Tree -->
+<div class="section" id="full-tree">
+  <h2>Full Task Tree — 5 Tasks, 45 SubTasks</h2>
+  <p style="color: var(--text-muted); margin-bottom: 12px;">This is the complete demand-side breakdown from Exhibit F alone. A full RFP would multiply this across all exhibits.</p>
+
+  <div class="task-tree">
+    <details open>
+      <summary><span class="badge badge-compliance">COMPLIANCE</span> Task 1: Administrative / Management Safeguards</summary>
+      <ul class="subtask-list">
+        <li><strong>1.1 Workforce Confidentiality Statement</strong> — All persons sign Security & Confidentiality Acknowledgement; annual renewal <span class="subtask-ref">§1</span></li>
+        <li><strong>1.2 Access Authorization & Maintenance</strong> — Documented vetting/granting rules; semi-annual access review & removal <span class="subtask-ref">§2</span></li>
+        <li><strong>1.3 Information System Activity Review</strong> — Regular audit log/access report/incident tracking review; 6-year log retention <span class="subtask-ref">§3</span></li>
+        <li><strong>1.4 Periodic Security & Log Review</strong> — Vulnerability assessments, penetration testing tools; unauthorized access detection <span class="subtask-ref">§4</span></li>
+        <li><strong>1.5 Technology Recovery Plan</strong> — TRP procedures, annual BIA (MTD, dependencies), periodic recovery testing <span class="subtask-ref">§5</span></li>
+        <li><strong>1.6 Change Control</strong> — Documented change control with separation of duties; CIA protection <span class="subtask-ref">§6</span></li>
+        <li><strong>1.7 Business Associate Compliance</strong> — HIPAA BA written agreements for all entities handling PHI <span class="subtask-ref">§8</span></li>
+        <li><strong>1.8 Incident Response Plan</strong> — IRP + dedicated IRT + 7 procedures (detect, report, contain, mitigate, communicate, document, investigate) <span class="subtask-ref">§9</span></li>
+      </ul>
+    </details>
+  </div>
+
+  <div class="task-tree">
+    <details open>
+      <summary><span class="badge badge-security">SECURITY</span> Task 2: Technical & Operational Safeguards</summary>
+      <ul class="subtask-list">
+        <li><strong>2.1 Endpoint Protection</strong> — Enterprise endpoint security per SIMM 5355-A <span class="subtask-ref">§10</span></li>
+        <li><strong>2.2 Patch Management</strong> — 2-week SLA from vendor release; critical patches on faster timeline <span class="subtask-ref">§11</span></li>
+        <li><strong>2.3 Encryption — In Transit</strong> — All classified data encrypted on public networks; FIPS 140 validated modules <span class="subtask-ref">§12</span></li>
+        <li><strong>2.4 Encryption — At Rest</strong> — All classified data encrypted when stored; FIPS 140 validated modules <span class="subtask-ref">§13</span></li>
+        <li><strong>2.5 Workstation/Laptop Encryption</strong> — Full disk encryption per CDPH Cryptographic Standards <span class="subtask-ref">§14</span></li>
+        <li><strong>2.6 Removable Media Encryption</strong> — USB/CD/DVD/tape encrypted; NIST SP800-111 best practices <span class="subtask-ref">§15</span></li>
+        <li><strong>2.7 Secure Connectivity</strong> — All data links encrypted between systems and CDT CGEN <span class="subtask-ref">§16</span></li>
+        <li><strong>2.8 Intrusion Detection & Prevention</strong> — Real-time IDS/IPS for internet-accessible/critical systems; events to enterprise SIEM <span class="subtask-ref">§17</span></li>
+        <li><strong>2.9 Information Sanitization</strong> — NIST 800-88 media sanitization; notify contract manager post-sanitization <span class="subtask-ref">§19</span></li>
+        <li><strong>2.10 Authentication Logging</strong> — Log success/failure at all layers + DB transactions; all privilege levels <span class="subtask-ref">§22</span></li>
+        <li><strong>2.11 Reauthentication</strong> — Session termination by AAL level; re-auth on authenticator/role change or privileged functions <span class="subtask-ref">§23</span></li>
+        <li><strong>2.12 Audit Access</strong> — Role-based access to audit functions; least privilege; auto-forward to secure storage <span class="subtask-ref">§24</span></li>
+        <li><strong>2.13 Audit Event & Content</strong> — 8+ event types logged; 6 minimum record fields (timestamp, user, transaction, success/fail, component, data) <span class="subtask-ref">§25</span></li>
+        <li><strong>2.14 Audit Record Retention</strong> — Minimum 6 years; CDPH ISO final authority on period <span class="subtask-ref">§26</span></li>
+      </ul>
+    </details>
+  </div>
+
+  <div class="task-tree">
+    <details open>
+      <summary><span class="badge badge-functional">FUNCTIONAL</span> Task 3: Solution Architecture</summary>
+      <ul class="subtask-list">
+        <li><strong>3.1 System Security Compliance</strong> — SAM, PHAM, HIPAA, Privacy Act, all applicable State/Federal regs <span class="subtask-ref">§28</span></li>
+        <li><strong>3.2 Warning Banner</strong> — Standard login warning text on all access points (desktops, web apps, servers, network devices) <span class="subtask-ref">§29</span></li>
+        <li><strong>3.3 Layered Application Design</strong> — 4-tier: Presentation → Business Logic → Data Access → Database; firewall separated; authenticated requests <span class="subtask-ref">§30</span></li>
+        <li><strong>3.4 Application Container Security</strong> — NIST SP800-190 compliance for microservices (images, registry, orchestrator, container, host OS) <span class="subtask-ref">§31</span></li>
+        <li><strong>3.5 Web Application Firewall</strong> — F5 Silverline WAF for public-facing apps; DDoS + web exploit defense; project-funded <span class="subtask-ref">§32</span></li>
+        <li><strong>3.6 Identity Proofing</strong> — IAL 2 per NIST SP800-63A; unsupervised remote or in-person proofing <span class="subtask-ref">§33</span></li>
+        <li><strong>3.7 Multi-Factor Authentication</strong> — FIDO2/YubiKey (AAL 3) for employees/contractors; SIMM 5360-C; project-funded hardware <span class="subtask-ref">§34</span></li>
+        <li><strong>3.8 ASVS Level 2 Compliance</strong> — OWASP ASVS 4.0.3; 14 chapters covering auth, session mgmt, access control, crypto, error handling, data protection, API security <span class="subtask-ref">§35</span></li>
+        <li><strong>3.9 MASVS L1+R</strong> — Mobile apps: OWASP MASVS 2.0 Level 1 + Resiliency (anti-tampering, anti-reverse-engineering) <span class="subtask-ref">§36</span></li>
+        <li><strong>3.10 Low-Code/No-Code Security</strong> — OWASP LCNC Top 10; DAST during testing phase <span class="subtask-ref">§37</span></li>
+        <li><strong>3.11 Secure SDLC</strong> — Azure DevOps; Veracode SAST/SCA/DAST; code review gates; secrets management; ISO approval pre-production <span class="subtask-ref">§38</span></li>
+        <li><strong>3.12 Penetration Testing</strong> — Annual + post-change; collaborative with CDPH SOC; remediation + re-test cycle <span class="subtask-ref">§39</span></li>
+        <li><strong>3.13 Privileged Access Management</strong> — CDPH PAM Standard for all staff/contractors managing privileged accounts <span class="subtask-ref">§40</span></li>
+        <li><strong>3.14 NIST SP800-53 Rev 5</strong> — Full compliance; FIPS-199 categorization → control selection → implementation → assessment <span class="subtask-ref">§41</span></li>
+        <li><strong>3.15 PCI DSS Compliance</strong> — Latest version for payment card processing systems (if applicable) <span class="subtask-ref">§42</span></li>
+      </ul>
+    </details>
+  </div>
+
+  <div class="task-tree">
+    <details open>
+      <summary><span class="badge badge-legal">LEGAL</span> Task 4: Documentation Requirements</summary>
+      <ul class="subtask-list">
+        <li><strong>4.1 System Configuration Documentation</strong> — Detailed design, hardware/software/network, special configs, external interfaces, all security layers <span class="subtask-ref">§44</span></li>
+        <li><strong>4.2 Information Asset Inventory</strong> — SAM 5305; categorize by FIPS-199 (Low/Moderate/High); owner, custodians, users, classification, consequences <span class="subtask-ref">§45</span></li>
+        <li><strong>4.3 Information System Security Plan (ISSP)</strong> — Security categorization + baseline controls; CDPH ISO approval pre-implementation <span class="subtask-ref">§46</span></li>
+        <li><strong>4.4 System Roles & Relationships</strong> — Owner, custodian, users, security admin, external entities; organizational structure documented <span class="subtask-ref">§47</span></li>
+        <li><strong>4.5 Audit Method Documentation</strong> — Document auditing features; provide audit report samples <span class="subtask-ref">§48</span></li>
+        <li><strong>4.6 Documentation Retention</strong> — 6 years minimum; includes audit and activity logs <span class="subtask-ref">§49</span></li>
+        <li><strong>4.7 Privacy Threshold & Impact Assessments</strong> — PTA + PIA with CDPH Privacy Office for all PII-containing systems; SIMM 5310-C <span class="subtask-ref">§50</span></li>
+      </ul>
+    </details>
+  </div>
+
+  <div class="task-tree">
+    <details open>
+      <summary><span class="badge badge-compliance">COMPLIANCE</span> Task 5: ISO Notifications & Approvals</summary>
+      <ul class="subtask-list">
+        <li><strong>5.1 Security Compliance Notification</strong> — Document how solution meets all SR1 requirements; submit to ISO before taking custody of data <span class="subtask-ref">§51</span></li>
+        <li><strong>5.2 Change Notification</strong> — No changes to scope/docs/systems/components without ISO change approval post-finalization <span class="subtask-ref">§52</span></li>
+        <li><strong>5.3 Breach Notification</strong> — Immediate written report to ISO + Privacy Office; remediation; possible security audit; HIPAA PHI + PII notification requirements <span class="subtask-ref">§53</span></li>
+        <li><strong>5.4 Project Security Approvals</strong> — SAM 4921 PAL Stage/Gate; all security deliverables in project plan; ISO given reasonable review time <span class="subtask-ref">§54</span></li>
+      </ul>
+    </details>
+  </div>
+</div>
+
+<!-- Gap Analysis -->
+<div class="section" id="gap-analysis">
+  <h2>Gap Analysis: SME Mart Coverage</h2>
+
+  <h3>What We Cover Today</h3>
+  <table>
+    <thead><tr><th>Capability</th><th>Status</th><th>How</th></tr></thead>
+    <tbody>
+      <tr><td>Task / SubTask hierarchy</td><td><span class="badge badge-covered">COVERED</span></td><td>ZB Tasks with <code>child_of</code> links</td></tr>
+      <tr><td>Task status lifecycle</td><td><span class="badge badge-covered">COVERED</span></td><td>draft → open → in_progress → awaiting_approval → completed</td></tr>
+      <tr><td>Engagement (Boundary) creation</td><td><span class="badge badge-covered">COVERED</span></td><td><code>work_requests</code> + ZB Boundary</td></tr>
+      <tr><td>Notes & documentation per engagement</td><td><span class="badge badge-covered">COVERED</span></td><td>Milkdown editor, note folders</td></tr>
+      <tr><td>Timeline / activity tracking</td><td><span class="badge badge-covered">COVERED</span></td><td>Activity center component</td></tr>
+      <tr><td>Tag-based hierarchy</td><td><span class="badge badge-covered">COVERED</span></td><td>PROJ/ENG/TASK tag prefixes</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Critical Gaps</h3>
+  <table>
+    <thead><tr><th>Capability Needed</th><th>Priority</th><th>Blocked By</th><th>Why It Matters (Exhibit F Proves)</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Document upload to Project</strong></td>
+        <td><span class="badge badge-high">HIGH</span></td>
+        <td>ZB Task Attachments (SDK exists, not wired)</td>
+        <td>Buyer uploads Exhibit F, SOW, budget docs — the foundation of all requirements</td>
+      </tr>
+      <tr>
+        <td><strong>Typed Tasks</strong> (Security, Compliance, Legal, Functional, Financial)</td>
+        <td><span class="badge badge-high">HIGH</span></td>
+        <td>ZB-3 (Custom Task Activities)</td>
+        <td>Each Exhibit F category maps to a task type — without typing, no domain rollups</td>
+      </tr>
+      <tr>
+        <td><strong>Typed SubTasks with custom fields</strong></td>
+        <td><span class="badge badge-high">HIGH</span></td>
+        <td>ZB-3</td>
+        <td>Each requirement needs: text, standard reference, evidence type, pass/fail/NA status</td>
+      </tr>
+      <tr>
+        <td><strong>RFP creation wizard</strong> (SM-18)</td>
+        <td><span class="badge badge-high">HIGH</span></td>
+        <td>Activity layer (SM-17)</td>
+        <td>Buyer builds structured RFP from uploaded documents → generates task tree</td>
+      </tr>
+      <tr>
+        <td><strong>AI-assisted requirement decomposition</strong></td>
+        <td><span class="badge badge-high">HIGH</span></td>
+        <td>SM-18 + AI integration</td>
+        <td>Parsing Exhibit F into 45 subtasks manually is brutal — AI agent is the differentiator</td>
+      </tr>
+      <tr>
+        <td><strong>Vendor proposal response flow</strong> (SM-19)</td>
+        <td><span class="badge badge-high">HIGH</span></td>
+        <td>SM-18</td>
+        <td>Provider maps capabilities to each buyer requirement (task-by-task response)</td>
+      </tr>
+      <tr>
+        <td><strong>Demand/supply view filtering</strong> (SM-24)</td>
+        <td><span class="badge badge-medium">MEDIUM</span></td>
+        <td>SM-17</td>
+        <td>Buyer sees requirements; provider sees obligations; shared = transparency</td>
+      </tr>
+      <tr>
+        <td><strong>Evidence/artifact linking per subtask</strong></td>
+        <td><span class="badge badge-medium">MEDIUM</span></td>
+        <td>ZB Task Attachments</td>
+        <td>Provider attaches certs, audit reports, policies to specific requirement subtasks</td>
+      </tr>
+      <tr>
+        <td><strong>Compliance standard references</strong></td>
+        <td><span class="badge badge-low">LOW</span></td>
+        <td>Custom Activities or Neon</td>
+        <td>Link subtasks to NIST SP800-53, OWASP ASVS, HIPAA, PCI DSS, FIPS-199 controls</td>
+      </tr>
+      <tr>
+        <td><strong>Readiness scoring per domain</strong></td>
+        <td><span class="badge badge-future">FUTURE</span></td>
+        <td>ZB Scoring App</td>
+        <td>Roll up subtask completion → "Security: 78% ready" — the Transparency Center endgame</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Strategic Insights -->
+<div class="section" id="insights">
+  <h2>Strategic Insights</h2>
+  <div class="insight-grid">
+    <div class="insight-card">
+      <div class="card-title" style="color: var(--accent2)">✓ The 4-level hierarchy works</div>
+      <div class="card-body">Engagement → Activity → Task → SubTask naturally maps to real procurement documents. Exhibit F proves it: 5 categories = 5 tasks, ~45 individual requirements = 45 subtasks. No forcing needed.</div>
+    </div>
+    <div class="insight-card">
+      <div class="card-title" style="color: var(--warn)">⚠ Scale reality check</div>
+      <div class="card-body">A single exhibit produces 45 subtasks. A full government RFP has 5–10 exhibits → <strong>200–400+ subtasks</strong>. UI must handle this with filtering, search, domain rollups, and collapse/expand.</div>
+    </div>
+    <div class="insight-card">
+      <div class="card-title" style="color: var(--accent)">★ Document-to-task decomposition is the killer feature</div>
+      <div class="card-body">An AI agent that parses procurement exhibits and auto-generates the task/subtask tree would be a <strong>massive differentiator</strong> vs. Upwork/Fiverr. No competitor does this. This is the agentic opportunity Brian envisions.</div>
+    </div>
+    <div class="insight-card">
+      <div class="card-title" style="color: var(--purple)">◆ Typed tasks are non-negotiable</div>
+      <div class="card-body">Without Security/Compliance/Legal/Functional typing, you can't build domain-specific rollups or the Transparency Center. This is the <strong>foundation</strong> for everything — blocked by ZB-3 (Custom Task Activities). Flag to Kevin.</div>
+    </div>
+    <div class="insight-card">
+      <div class="card-title" style="color: var(--pink)">♦ Standards references add massive value</div>
+      <div class="card-body">Exhibit F references NIST SP800-53, OWASP ASVS, FIPS-140, HIPAA, PCI DSS. Linking subtasks to specific standard controls enables automated compliance mapping — a premium enterprise feature.</div>
+    </div>
+    <div class="insight-card">
+      <div class="card-title" style="color: var(--teal)">◎ This is ONLY the demand side</div>
+      <div class="card-body">Everything here is what the buyer defines. The supply side <strong>mirrors</strong> this structure with evidence, attestation, and readiness per subtask. The transparency center shows where they meet.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Transparency Flow Diagram -->
+<div class="section">
+  <h2>Transparency Center: Demand ↔ Supply ↔ Shared</h2>
+  <div class="mermaid-wrapper" id="transparency-diagram">
+    <div class="mermaid-controls">
+      <button onclick="zoomDiagram('transparency-diagram', 1.3)">+</button>
+      <button onclick="zoomDiagram('transparency-diagram', 0.7)">−</button>
+      <button onclick="fitDiagram('transparency-diagram')">Fit</button>
+      <button onclick="openFullscreen('transparency-diagram')">⛶</button>
+    </div>
+    <div class="mermaid-inner">
+      <pre class="mermaid">
+graph LR
+  subgraph DEMAND["📋 Demand Side (Buyer)"]
+    D1["Upload Exhibit F"]
+    D2["Define Requirements<br/>45 SubTasks"]
+    D3["Set pass/fail criteria"]
+    D4["Review evidence"]
+    D5["Approve / Reject"]
+  end
+
+  subgraph SHARED["🔍 Transparency Center"]
+    S1["Requirement Status<br/>per SubTask"]
+    S2["Domain Rollups<br/>Security: 78%<br/>Compliance: 92%<br/>Legal: 85%"]
+    S3["Audit Trail<br/>who, when, what"]
+  end
+
+  subgraph SUPPLY["🛠 Supply Side (Provider)"]
+    P1["View requirements"]
+    P2["Map capabilities"]
+    P3["Attach evidence<br/>certs, audits, policies"]
+    P4["Submit for review"]
+  end
+
+  D1 --> D2 --> D3
+  D3 --> S1
+  P1 --> P2 --> P3 --> P4
+  P4 --> S1
+  S1 --> S2 --> S3
+  S1 --> D4 --> D5
+
+  style DEMAND fill:#1a1e2e,stroke:#58a6ff,color:#e6edf3
+  style SHARED fill:#1a2e1a,stroke:#3fb950,color:#e6edf3
+  style SUPPLY fill:#2e1a1a,stroke:#d29922,color:#e6edf3
+      </pre>
+    </div>
+  </div>
+</div>
+
+<!-- Next Steps -->
+<div class="section" id="next-steps">
+  <h2>Next Steps</h2>
+  <table>
+    <thead><tr><th>#</th><th>Action Item</th><th>Owner</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Use Exhibit F breakdown as the template for SM-18 (RFP creation wizard) design</td><td>Clark</td><td>This IS the spec for what the wizard produces</td></tr>
+      <tr><td>2</td><td>Design typed task model (Security, Compliance, Legal, Functional, Financial)</td><td>Clark + Kevin</td><td>Blocked by ZB-3; design workaround with tags/Neon metadata in interim</td></tr>
+      <tr><td>3</td><td>Prototype demand-side project view showing task tree with status rollups</td><td>Clark</td><td>Static mock first → wire to ZB Tasks</td></tr>
+      <tr><td>4</td><td>Evaluate AI-assisted document parsing for requirement extraction</td><td>Clark</td><td>The agentic differentiator — parse Exhibit F → generate 45 subtasks automatically</td></tr>
+      <tr><td>5</td><td>Wire ZB Task Attachments into SME Mart UI</td><td>Clark</td><td>SDK exists; needs component for upload/list/download per task</td></tr>
+      <tr><td>6</td><td>Share this analysis with Brian for validation</td><td>Clark</td><td>Confirm task type taxonomy and subtask granularity is right</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="footer">
+  Generated 2026-03-05 &nbsp;|&nbsp; Source: Exhibit F — CDPH Information Systems Security Requirements (ISO/SR1) v5.5 &nbsp;|&nbsp; SME Mart Demand-Side Analysis
+</div>
+
+<!-- Fullscreen overlay -->
+<div class="fullscreen-overlay" id="fs-overlay">
+  <div class="fs-controls">
+    <button onclick="fsZoom(1.3)">+</button>
+    <button onclick="fsZoom(0.7)">−</button>
+    <button onclick="fsFit()">Fit</button>
+    <button onclick="closeFullscreen()">✕ Close</button>
+  </div>
+  <div class="fs-content" id="fs-content"></div>
+</div>
+
+<script>
+  // Mermaid init
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'dark',
+    fontSize: 18,
+    themeVariables: {
+      darkMode: true,
+      background: '#0d1117',
+      primaryColor: '#1c2333',
+      primaryTextColor: '#e6edf3',
+      primaryBorderColor: '#30363d',
+      lineColor: '#58a6ff',
+      secondaryColor: '#161b22',
+      tertiaryColor: '#1a1e2e',
+      edgeLabelBackground: '#0d1117',
+      fontSize: '18px'
+    }
+  });
+
+  // Zoom state per diagram
+  const zoomState = {};
+
+  function getZoom(id) {
+    if (!zoomState[id]) zoomState[id] = 1;
+    return zoomState[id];
+  }
+
+  function zoomDiagram(id, factor) {
+    const wrapper = document.getElementById(id);
+    const inner = wrapper.querySelector('.mermaid-inner');
+    let z = getZoom(id) * factor;
+    z = Math.max(0.1, Math.min(8, z));
+    zoomState[id] = z;
+    const svg = inner.querySelector('svg');
+    if (svg) svg.style.transform = `scale(${z})`;
+  }
+
+  function fitDiagram(id) {
+    zoomState[id] = 1;
+    const wrapper = document.getElementById(id);
+    const svg = wrapper.querySelector('svg');
+    if (svg) svg.style.transform = 'scale(1)';
+  }
+
+  // Pan support
+  document.querySelectorAll('.mermaid-inner').forEach(el => {
+    let isDragging = false, startX, startY, scrollLeft, scrollTop;
+    el.addEventListener('mousedown', e => {
+      isDragging = true;
+      startX = e.pageX - el.offsetLeft;
+      startY = e.pageY - el.offsetTop;
+      scrollLeft = el.scrollLeft;
+      scrollTop = el.scrollTop;
+    });
+    el.addEventListener('mousemove', e => {
+      if (!isDragging) return;
+      e.preventDefault();
+      el.scrollLeft = scrollLeft - (e.pageX - el.offsetLeft - startX);
+      el.scrollTop = scrollTop - (e.pageY - el.offsetTop - startY);
+    });
+    el.addEventListener('mouseup', () => isDragging = false);
+    el.addEventListener('mouseleave', () => isDragging = false);
+    el.addEventListener('wheel', e => {
+      e.preventDefault();
+      const id = el.closest('.mermaid-wrapper').id;
+      zoomDiagram(id, e.deltaY < 0 ? 1.3 : 0.7);
+    }, { passive: false });
+  });
+
+  // Fullscreen
+  let fsZoomLevel = 1;
+  let fsSourceId = null;
+
+  function openFullscreen(id) {
+    fsSourceId = id;
+    fsZoomLevel = 1;
+    const overlay = document.getElementById('fs-overlay');
+    const content = document.getElementById('fs-content');
+    const source = document.getElementById(id).querySelector('.mermaid-inner');
+    content.innerHTML = source.innerHTML;
+    const svg = content.querySelector('svg');
+    if (svg) {
+      svg.style.transform = 'scale(1)';
+      svg.style.transformOrigin = 'top left';
+    }
+    overlay.classList.add('active');
+
+    // Pan in fullscreen
+    let isDragging = false, startX, startY, scrollLeft, scrollTop;
+    content.addEventListener('mousedown', e => {
+      isDragging = true;
+      startX = e.pageX;
+      startY = e.pageY;
+      scrollLeft = content.scrollLeft;
+      scrollTop = content.scrollTop;
+    });
+    content.addEventListener('mousemove', e => {
+      if (!isDragging) return;
+      e.preventDefault();
+      content.scrollLeft = scrollLeft - (e.pageX - startX);
+      content.scrollTop = scrollTop - (e.pageY - startY);
+    });
+    content.addEventListener('mouseup', () => isDragging = false);
+    content.addEventListener('wheel', e => {
+      e.preventDefault();
+      fsZoom(e.deltaY < 0 ? 1.3 : 0.7);
+    }, { passive: false });
+  }
+
+  function closeFullscreen() {
+    document.getElementById('fs-overlay').classList.remove('active');
+  }
+
+  function fsZoom(factor) {
+    fsZoomLevel = Math.max(0.1, Math.min(8, fsZoomLevel * factor));
+    const svg = document.getElementById('fs-content').querySelector('svg');
+    if (svg) svg.style.transform = `scale(${fsZoomLevel})`;
+  }
+
+  function fsFit() {
+    fsZoomLevel = 1;
+    const svg = document.getElementById('fs-content').querySelector('svg');
+    if (svg) svg.style.transform = 'scale(1)';
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeFullscreen();
+  });
+</script>
+</body>
+</html>
