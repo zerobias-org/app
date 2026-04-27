@@ -65,7 +65,11 @@
 <summary>🔄 v1.4 3P Onboarding & Default Engagement (Phases 24-28, 30-31) — ACTIVE 2026-04-24</summary>
 
 - [ ] **Phase 24: Demo Data Visibility Gate** (TBD plans) — Filter demo records from non-admin users via Object.tag; admin delete action (est. 4-6 hrs)
-- [ ] **Phase 25: Platform Data Audit** (TBD plans) — Inventory ZeroBias SDK data available for onboarding pre-fill (est. 4-6 hrs, research-as-phase)
+- [x] **Phase 25: Platform Data Audit** (5 plans, Plan 01-04/5 complete 2026-04-24) — Inventory ZeroBias SDK data available for onboarding pre-fill (est. 4-6 hrs, research-as-phase)
+  - [x] **Plan 01 (Wave 0)** — Infrastructure scaffold: verify-inventory.sh, per-source template, index file (completed 2026-04-24)
+  - [x] **Plan 02 (Wave 1)** — SDK Sources audit: whoami, currentorg, orgsearch, usersearch, boundary, task (6 sources documented, completed 2026-04-24)
+  - [x] **Plan 03 (Wave 1 parallel)** — GQL Sources audit + pre-fill map synthesis: MarketplaceProfileItem fields resolve all Phase 28 form fields (completed 2026-04-24)
+  - [x] **Plan 04 (Wave 2)** — Pre-fill map synthesis + company_info convention draft: PLATFORM-DATA-INVENTORY.md refined with Known-Unknowns data-sparse guidance; COMPANY-INFO-CONVENTION-DRAFT.md created for Phase 26 ratification (completed 2026-04-24)
 - [ ] **Phase 26: Seed Provider (ZB-as-Provider)** (TBD plans) — Create ZeroBias as provider with company_info convention (est. 5-7 hrs)
 - [ ] **Phase 27: Auth Gate + Onboarding Routing + Lazy Guard** (TBD plans) — Authenticate users, route to onboarding or board, auto-create default engagement (est. 8-12 hrs)
 - [ ] **Phase 28: Company Profile Review/Confirm Form** (TBD plans) — Pre-populate from platform data, confirm + save (est. 6-10 hrs)
@@ -541,7 +545,7 @@ This phase is intentionally deferred from v1.4. When v1.5 begins, Phase 29 work 
 | 22. Form Template Library | 0/? | Not started | — |
 | 23. Transparency Controls UI-SPEC | 0/? | Not started | — |
 | 24. Demo Data Visibility Gate | 0/? | Not started | — |
-| 25. Platform Data Audit | 0/? | Not started | — |
+| 25. Platform Data Audit | 3/5 | In progress | 2026-04-24 (Plans 01-03 complete) |
 | 26. Seed Provider (ZB-as-Provider) | 0/? | Not started | — |
 | 27. Auth Gate + Routing | 0/? | Not started | — |
 | 28. Company Profile Form | 0/? | Not started | — |

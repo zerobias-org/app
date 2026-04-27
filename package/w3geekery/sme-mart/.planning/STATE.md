@@ -1,34 +1,34 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.4
-milestone_name: 3P Onboarding & Default Engagement
-status: roadmap_complete
-last_updated: "2026-04-24T15:30:00.000Z"
-last_activity: 2026-04-24 -- v1.4 ROADMAP created
+milestone_name: **3P Onboarding & Default Engagement**
+status: executing
+last_updated: "2026-04-24T23:30:00.000Z"
+last_activity: 2026-04-24 -- Plan 25-05 complete (pipeline health check + env fix)
 progress:
-  total_phases: 7
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_phases: 19
+  completed_phases: 5
+  total_plans: 29
+  completed_plans: 24
 ---
 
 # STATE.md -- Session Context
 
 **Session Name:** `poc/sme-mart`
 **Date Created:** 2026-04-24
-**Current Focus:** v1.4 ROADMAP complete, ready for phase planning
+**Current Focus:** Phase 25 — platform-data-audit
 
 ---
 
 ## Current Position
 
 Milestone: v1.4 3P Onboarding & Default Engagement
-Phase: Not started (roadmap complete)
-Plan: --
-Status: ROADMAP_COMPLETE — ready for `/gsd:plan-phase 24`
-Last activity: 2026-04-24 -- v1.4 ROADMAP created
+Phase: 25 (platform-data-audit) — COMPLETE
+Plan: 5 of 5 — COMPLETED
+Status: Plan 25-05 (Pipeline Health Check) complete
+Last activity: 2026-04-24 -- Plan 25-05 complete: Pipeline health check ping successful; environment.uat.ts pipelineId corrected from v1.2 carry-forward to current receiver; health check report documented in PLATFORM-DATA-INVENTORY.md
 
-Next: `/gsd:plan-phase 24` for Phase 24 planning
+Next: Phase 26 (ZB-as-Provider Seed) — create ZeroBias as provider with company_info convention
 
 ---
 
@@ -54,6 +54,7 @@ See: .planning/PROJECT.md (updated 2026-04-24)
 **Total:** 7 phases, ~37-55 hrs estimated, 38 requirements mapped
 
 **Dependency Chain:**
+
 ```
 Phase 24 (Demo Gate)           Phase 25 (Platform Audit)
       |                              |
@@ -73,11 +74,13 @@ Phase 24 (Demo Gate)           Phase 25 (Platform Audit)
 ## Accumulated Context
 
 From v1.0:
+
 - All 17 entity types on AuditgraphDB (Pipeline writes + GraphQL reads)
 - 14 domain services migrated, 7 still on SmeMartDbService
 - Neon archival scheduled 2026-04-02
 
 From v1.1:
+
 - Three-tier org navigation (/orgs, /orgs/:orgId, /org)
 - MarketplaceProfileItem GQL schema entity (6 sections)
 - VendorProfileService with full CRUD
@@ -86,6 +89,7 @@ From v1.1:
 - Internal/External org badges, project parties tab
 
 From v1.2:
+
 - Pilot Projects (projectType discriminator, completion + promotion workflow)
 - RfpInvitation + closed/invitation-only RFPs (11-method service, access gate, My Invitations, Invited Vendors)
 - DocumentTemplate + DocumentInstance (+ VariableSubstitutionService, Milkdown editor extension)
@@ -93,11 +97,13 @@ From v1.2:
 - Demo seed CLI (real SDK wiring, state-file cleanup, end-to-end verified on UAT)
 
 From v1.3 (partial -- phases 18-19 complete, 20-23 not started):
+
 - Org Switcher user-menu dropdown (Phase 18)
 - zbb local dev stacks -- SPA + Hub module scaffolding (Phase 19)
 - Pipeline (UAT): `43f08afd-7ab9-4e99-a93c-619c46adaabe`
 
 From v1.3/v1.4 director work (pre-milestone):
+
 - Default ZB engagement bootstrap recipe validated on UAT (W3Geekery proof-of-concept)
 - Object.tag field shape validated: `[{ value: "<tag-uuid>" }]` at ingest time
 - W3Geekery default engagement: `746010b7-dc99-436b-9142-8c4b85c5e623`
@@ -107,6 +113,7 @@ From v1.3/v1.4 director work (pre-milestone):
 - SME Mart deployed at uat.zerobias.com/sme-mart
 
 Platform observations (carry-forward):
+
 - Pipeline-created objects do NOT materialize as hydra Resource rows -- tagResource FK fails
 - Pipeline.receive rejects empty data[] even with markDeleted populated
 - Date-only fields reject full ISO timestamps
@@ -125,7 +132,7 @@ Platform observations (carry-forward):
 | Phase | Goal | Hours | Requirements | Status |
 |-------|------|-------|--------------|--------|
 | 24 | Demo Data Visibility Gate | 4-6 | 5 (DG-01..05) | Not started |
-| 25 | Platform Data Audit | 4-6 | 5 (PDA-01..05) | Not started |
+| 25 | Platform Data Audit | 4-6 | 5 (PDA-01..05) | Plan 01/5 complete |
 | 26 | ZB-as-Provider Seed | 5-7 | 5 (SP-01,02,04,05,06) | Not started |
 | 27 | Auth Gate + Routing | 8-12 | 6 (AR-01..06) | Not started |
 | 28 | Company Profile Form | 6-10 | 8 (CP-01..08) | Not started |
@@ -163,5 +170,5 @@ claude --resume poc/sme-mart
 
 ---
 
-**Last Updated:** 2026-04-24 15:30 UTC
-**Milestone v1.4:** ROADMAP_COMPLETE — 38 requirements mapped, 7 phases defined, dependencies locked
+**Last Updated:** 2026-04-24 23:15 UTC
+**Milestone v1.4:** EXECUTING — Phase 25 Plan 01 complete (infrastructure scaffold)

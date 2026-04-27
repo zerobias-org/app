@@ -192,6 +192,7 @@ Items deferred from the RFP gap analysis — revisit when Phase 1/2 plans are co
 | E6 | Multi-year contract lifecycle management | Low | Renewal notifications, extension options |
 | P1 | Vendor conference scheduling with calendar integration | Low | — |
 | P3 | Site visit coordination through platform | Low | — |
+| CLEANUP-25 | Phase 25 audit residue cleanup — `markDeleted` for `mpi-test-a-cd7105df`, `mpi-test-b-cd7105df` (MarketplaceProfileItem class `7bcf86a5-91dc-520d-b9bf-e308b1078d46`) and `64047b6c-52e7-4592-ac1d-27f5020d1e01` TAG-SHAPE-TEST-C (SmeMartProject class `c66114a2-48e2-5b93-b7d6-7ccd6ef45a03`) | Low | Pipeline.receive requires non-empty `data`; piggyback on next real ingest per class. Pipeline `43f08afd-7ab9-4e99-a93c-619c46adaabe`. |
 
 ## Platform Alignment
 
