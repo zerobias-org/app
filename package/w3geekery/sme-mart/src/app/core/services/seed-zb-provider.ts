@@ -1,143 +1,78 @@
-/**
- * ZeroBias Provider Seed Function
- *
- * Ingests ZeroBias org as a marketplace provider via Platform.Pipeline.receive.
- * Uses option-b distinguisher: MPI provider_type section with data="platform"
- *
- * Phase 26-02 implementation per plan.
- */
+import { Injectable, inject } from '@angular/core';
+import { ZerobiasClientApi } from '@zerobias-com/zerobias-client';
+import { SimpleBatch } from '@zerobias-com/platform-sdk';
+import { UUID } from '@zerobias-org/types-core-js';
+import { environment } from '../../../environments/environment';
 
-import { ZerobiasClientApp } from '@zerobias-com/zerobias-client';
-import * as dotenv from 'dotenv';
-
-// Load .env.local for credentials
-dotenv.config({ path: '.env.local' });
-
-/**
- * Constants (locked in Phase 26 CONTEXT)
- */
-const ZEROBIAS_ORG_ID = '57c741cf-a58e-5efc-bf2f-93c4f6cf76ec'; // UAT
+const ZEROBIAS_ORG_ID = '57c741cf-a58e-5efc-bf2f-93c4f6cf76ec';
+// Empirically-validated UAT class id (Pipeline.receive accepts this; the schema-derived
+// UUID v5 'ee1e68b7-...' in pipeline-write.service.ts was rejected with "No such Class").
+// See errata in DECISIONS.md / phase-26 if this divergence persists across envs.
 const MPI_CLASS_ID = '7bcf86a5-91dc-520d-b9bf-e308b1078d46';
-const PIPELINE_ID = '43f08afd-7ab9-4e99-a93c-619c46adaabe';
 const CLEANUP_IDS = ['mpi-test-a-cd7105df', 'mpi-test-b-cd7105df'];
 
-/**
- * Interface for seed section data
- */
 export interface SeedSection {
   section: string;
   data: string;
 }
 
-/**
- * Canonical seed sections (17-section catalog from COMPANY-INFO-CONVENTION)
- * Option-b includes provider_type section for platform provider distinguisher
- */
-const SEED_SECTIONS: SeedSection[] = [
+// Option-b distinguisher (Plan 26-01 DECISIONS.md): provider_type section identifies
+// platform providers. NO Object.tag, NO hardcoded orgId filter.
+export const SEED_SECTIONS: SeedSection[] = [
   { section: 'legal_name', data: 'ZeroBias' },
   { section: 'logo_url', data: 'https://zerobias.com/logo.png' },
   { section: 'short_blurb', data: 'Cybersecurity and compliance automation platform' },
   {
     section: 'long_description',
-    data: 'ZeroBias is a platform for automating cybersecurity and compliance frameworks...'
+    data: 'ZeroBias is a platform for automating cybersecurity and compliance frameworks.',
   },
   { section: 'website', data: 'https://zerobias.com' },
   { section: 'years_in_business', data: '10' },
   { section: 'employee_count', data: '201-500' },
-  /**
-   * CRITICAL: Option-b distinguisher
-   * Identifies this org as a platform provider (not a marketplace provider)
-   */
-  { section: 'provider_type', data: 'platform' }
+  { section: 'provider_type', data: 'platform' },
 ];
 
-/**
- * Build a single MPI record for seeding
- *
- * @param section The section definition (name + data)
- * @returns MPI record ready for Pipeline.receive
- */
-export function buildMPIRecord(section: SeedSection): any {
-  const id = `mpi-${ZEROBIAS_ORG_ID}-${section.section}`;
-  const record: any = {
-    id,
+export interface MPIRecord {
+  id: string;
+  name: string;
+  orgId: string;
+  section: string;
+  data: string;
+  status: string;
+}
+
+export function buildMPIRecord(section: SeedSection): MPIRecord {
+  return {
+    id: `mpi-${ZEROBIAS_ORG_ID}-${section.section}`,
+    name: `MPI - ZeroBias - ${section.section}`,
     orgId: ZEROBIAS_ORG_ID,
     section: section.section,
     data: section.data,
-    status: 'active'
+    status: 'active',
   };
-
-  /**
-   * Option-b: NO Object.tag field
-   * (Option-a was rejected; option-c was rejected)
-   * Provider discovery via section presence, not tagging.
-   */
-
-  return record;
 }
 
-/**
- * Main seed function
- *
- * Constructs and executes Pipeline.receive batch to ingest ZeroBias org
- * as a marketplace provider. Includes cleanup of test residues.
- *
- * @param client Initialized ZerobiasClientApp
- * @returns Result from Pipeline.receive
- */
-export async function seedZBProvider(client: ZerobiasClientApp): Promise<any> {
-  console.log('[SEED] Starting ZeroBias provider seed...');
+@Injectable({ providedIn: 'root' })
+export class SeedZbProviderService {
+  private readonly clientApi = inject(ZerobiasClientApi);
 
-  // Step 1: Build MPI records from seed sections
-  const records = SEED_SECTIONS
-    .filter(s => s.data) // Skip empty fields
-    .map(s => buildMPIRecord(s));
+  readonly classId = MPI_CLASS_ID;
+  readonly orgId = ZEROBIAS_ORG_ID;
+  readonly cleanupIds = CLEANUP_IDS;
 
-  console.log(`[SEED] Built ${records.length} MPI records`);
-
-  // Step 2: Construct Pipeline.receive payload
-  const payload = {
-    pipelineId: PIPELINE_ID,
-    classId: MPI_CLASS_ID,
-    tagIds: [], // Empty — does NOT tag Objects (locked in DECISIONS.md)
-    data: records,
-    markDeleted: CLEANUP_IDS
-  };
-
-  console.log('[SEED] Payload constructed, calling Pipeline.receive...');
-  console.log('[SEED] Data count:', payload.data.length);
-  console.log('[SEED] Cleanup ids:', payload.markDeleted);
-
-  // Step 3: Call Pipeline.receive via MCP
-  try {
-    const result = await client.platformClient().getPipelineApi().receive(payload);
-    console.log('[SEED] Success:', result);
-    return result;
-  } catch (err) {
-    console.error('[SEED] ERROR:', err);
-    throw err;
+  buildBatch(): SimpleBatch {
+    const records = SEED_SECTIONS.filter(s => s.data).map(buildMPIRecord);
+    return new SimpleBatch(
+      new UUID(MPI_CLASS_ID),
+      records,
+      [],
+      CLEANUP_IDS,
+    );
   }
-}
 
-/**
- * CLI entry point for standalone execution
- * Usage: npx ts-node src/app/core/services/seed-zb-provider.ts
- */
-async function main() {
-  try {
-    // Initialize ZeroBias client with W3Geekery credentials (MCP auth)
-    // Expects ZB_ORG_ID, ZB_API_KEY, ZB_TOKEN in .env.local
-    const client = await ZerobiasClientApp.getInstance();
-    await seedZBProvider(client);
-    console.log('[SEED] COMPLETE');
-    process.exit(0);
-  } catch (err) {
-    console.error('[SEED] FATAL:', err);
-    process.exit(1);
+  async seed(): Promise<void> {
+    const pipelineApi = this.clientApi.platformClient.getPipelineApi();
+    const batch = this.buildBatch();
+    await pipelineApi.receive(new UUID(environment.pipelineId), batch);
   }
-}
-
-// Only run main() if executed as a standalone script (not imported as a module)
-if (import.meta.url === `file://${process.argv[1]}`) {
-  main();
 }
