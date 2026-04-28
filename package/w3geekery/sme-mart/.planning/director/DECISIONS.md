@@ -1,5 +1,56 @@
 # Director Decisions
 
+## Platform-Assigned Class IDs Are Not Deterministic UUID v5
+**Date:** 2026-04-28
+**Decision:** SME Mart class IDs are assigned by the platform's class-registration pipeline (dataloader / catalog publish), **not** derived as `uuidv5(schema-namespace, className)`. Any const in `pipeline-write.service.ts` carrying the comment `(deterministic UUID v5 from schema)` is suspect and must be verified against `platform.Class.getClass(<name>)` before being trusted.
+
+**Why:** 2026-04-28 audit of all 23 entries in `SME_MART_CLASS_IDS` against UAT (`platform.Class.getClass`) found 21 matches and **2 fictional consts** that do not correspond to any registered class:
+- `MarketplaceProfileItem`: codebase `ee1e68b7-...` is fictional; canonical platform-assigned ID is `7bcf86a5-91dc-520d-b9bf-e308b1078d46`.
+- `EngagementVettingItem`: codebase `66fa174f-...` is fictional; canonical is `21f5841f-dd27-53ef-a0f5-6a816ec7f7e1`.
+
+Both bug consts are commented as `(deterministic UUID v5 from schema)`. The UUID v5 derivations the original Plan 041 / Plan 063 authors computed do not match what the platform actually assigned at registration time. Pipeline.receive returns `"No such Class"` for both fictional values. Silent-failure pathways (fire-and-forget `.catch` in `vendor-profile.service` and `vetting.service`) hid this for the entire life of those plans — ZERO MPI writes and ZERO vetting-item writes through `PipelineWriteService` have ever landed on UAT.
+
+**How to apply:**
+- **Immediate:** Plan 26-04 (handed to gsd-plan 2026-04-28) corrects both consts in `pipeline-write.service.ts:33,36`, drops the misleading UUID-v5 comments, adds tests bound to canonical IDs, and verifies live writes via `vendor-profile.create` + `vetting.initializeVetting`.
+- **Systemic:** Phase 20 (Fire-and-Forget Audit, in v1.3 roadmap as TBD) is now confirmed-needed, not theoretical — its watch pattern (errata 011) has two real confirmed instances. Phase 20 should be planned and executed before Phase 27 (which adds the auth gate + onboarding routing whose lazy-engagement-guard will rely on round-trip writes succeeding).
+- **Verification rule for new entity types:** When adding a new class to `SME_MART_CLASS_IDS`, the plan's verification step MUST include `platform.Class.getClass(<name>)` and assert `classInfo.id === <const>`. Don't trust schema-derivation assumptions.
+- **Comment hygiene:** When fixing or adding consts, drop any "deterministic UUID v5" framing. Use "platform-assigned (verified via platform.Class.getClass)" with the verification date.
+
+**Audit results (kept for reference, all verified 2026-04-28 via platform.Class.getClass):**
+
+| Class | Codebase const | Platform-assigned | Match |
+|---|---|---|---|
+| Engagement | `7711aa41-...` | `7711aa41-...` | ✅ |
+| Bid | `ccddd2e5-...` | `ccddd2e5-...` | ✅ |
+| BidResponse | `a024a0b5-...` | `a024a0b5-...` | ✅ |
+| ServiceOffering | `ff689173-...` | `ff689173-...` | ✅ |
+| Note | `fe7c58a9-...` | `fe7c58a9-...` | ✅ |
+| NoteFolder | `4d50975e-...` | `4d50975e-...` | ✅ |
+| Review | `ef5d821a-...` | `ef5d821a-...` | ✅ |
+| SmeMartDocument | `e1497ca8-...` | `e1497ca8-...` | ✅ |
+| SmeMartProject | `c66114a2-...` | `c66114a2-...` | ✅ |
+| SmeMartBoard | `20be589b-...` | `20be589b-...` | ✅ |
+| SmeMartActivity | `36405d75-...` | `36405d75-...` | ✅ |
+| SmeMartWorkflow | `295938d2-...` | `295938d2-...` | ✅ |
+| SmeMartTask | `e15f1e0a-...` | `e15f1e0a-...` | ✅ |
+| ProjectPrd | `920fca70-...` | `920fca70-...` | ✅ |
+| PrdSection | `d30445f3-...` | `d30445f3-...` | ✅ |
+| ProjectPlan | `bc6159da-...` | `bc6159da-...` | ✅ |
+| PlanMilestone | `ac1a1cc8-...` | `ac1a1cc8-...` | ✅ |
+| **EngagementVettingItem** | **`66fa174f-...`** | **`21f5841f-...`** | ❌ FICTIONAL |
+| **MarketplaceProfileItem** | **`ee1e68b7-...`** | **`7bcf86a5-...`** | ❌ FICTIONAL |
+| RfpInvitation | `941cf01b-...` | `941cf01b-...` | ✅ |
+| DocumentTemplate | `d2493bf7-...` | `d2493bf7-...` | ✅ |
+| DocumentInstance | `3e1d232f-...` | `3e1d232f-...` | ✅ |
+| FormSubmission | `179bd4b1-...` | `179bd4b1-...` | ✅ |
+
+**Related:**
+- Errata 023 — full root-cause + fix-path narrative
+- Errata 011 — fire-and-forget masks errors (the parent watch pattern)
+- Phase 20 brief — fire-and-forget audit (now urgent, not theoretical)
+
+---
+
 ## MarketplaceProfileItem Replace Semantics + Cleanup Residue
 **Date:** 2026-04-27
 **Decision:** Pipeline.receive replace key for `MarketplaceProfileItem` (class `7bcf86a5-91dc-520d-b9bf-e308b1078d46`) is **`id` only**. Per-section saves are safe — ingesting one MPI record does NOT clobber other MPI records of the same class with different ids.

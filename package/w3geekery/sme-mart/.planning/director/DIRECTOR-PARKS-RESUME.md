@@ -52,23 +52,24 @@ Error toward acting-on-request. Retreating to the rule when explicitly asked is 
 
 ## Current milestone state — v1.4 "3P Onboarding & Default Engagement"
 
-**Design status: LOCKED.** 9+ structural decisions resolved. Fully-committed director artifacts:
+**Design status: LOCKED.** All structural decisions resolved. Fully-committed director artifacts:
 - `.planning/director/SESSION-STATE.md` — full mental model + decision list
-- `.planning/director/DECISIONS.md` — 11+ entries (auto/invariant default engagement, naming convention `<Buyer> <- <Provider>`, Phase 29 deferred, admin via `getPrincipal().isAdmin`, Object.tag validation, **MarketplaceProfileItem Replace Semantics**, **W3Geekery Object.tag Remediation**, etc.)
-- `.planning/director/bootstrap-w3geekery-engagement.md` — validated walkthrough recipe (18 refinements folded; remediation note added 2026-04-27)
-- `.planning/director/COMPANY-INFO-CONVENTION-DRAFT.md` — rewritten 2026-04-27 for section/data discriminator shape with canonical 17-section catalog
-- `.planning/director/PLATFORM-DATA-INVENTORY.md` — Phase 25 deliverable; pre-fill map corrected for MPI section/data
-- `.planning/director/phase-{24,25,26,27,28,30,31}-brief.md` — 7 phase briefs (phase-26-brief updated 2026-04-27 post-Phase-25 close)
+- `.planning/director/DECISIONS.md` — 12+ entries including **Platform-Provider Distinguisher = option-b (MPI `provider_type` section)** locked 2026-04-28
+- `.planning/director/bootstrap-w3geekery-engagement.md` — validated walkthrough recipe
+- `.planning/director/COMPANY-INFO-CONVENTION.md` — **RATIFIED 2026-04-28 (no -DRAFT suffix)**, canonical 17-section catalog
+- `.planning/director/PLATFORM-DATA-INVENTORY.md` — Phase 25 deliverable
+- `.planning/director/phase-{24,25,26,27,28,30,31}-brief.md` — 7 phase briefs
+- `.planning/director/brian-content-brief-v1.4-deferred.md` — **NEW 2026-04-27** — 7-section walkthrough doc for Tue/Fri Brian meetings (tier structure, pricing matrix, ToS, branding, marketing copy, opt-in confirm, long-term ownership). Brian gave answers in 2026-04-28 meeting; transcript pending `/tt:transcript`. Many original questions will be scrapped + new ones surface.
 
 **Milestone shape (7 phases, Phase 29 deferred to v1.5):**
 
 | # | Phase | Status |
 |---|---|---|
 | 24 | Demo Data Visibility Gate | not started |
-| 25 | Platform Data Audit | **COMPLETE 2026-04-27** (live MCP re-execution after MCP fix landed; corrections propagated to dependent docs) |
-| 26 | Seed ZB-as-provider + ratify `company_info` convention | brief updated, ready for `/gsd:plan-phase 26` |
+| 25 | Platform Data Audit | ✅ COMPLETE 2026-04-27 |
+| 26 | Seed ZB-as-provider + ratify `company_info` convention | **IN PROGRESS — Plan 26-01 CLOSED, Plan 26-02 in defect-fix loop, 26-03 pending** |
 | 27 | Auth gate + onboarding routing + lazy-on-load default-engagement guard | not started |
-| 28 | Company profile review/confirm form (section/data shape) | brief updated 2026-04-27 |
+| 28 | Company profile review/confirm form (section/data shape) | not started |
 | 30 | Default Project board + "Coming Soon" placeholder surfaces | not started |
 | 31 | W3Geekery as first customer + production smoke test | not started |
 | ~~29~~ | DEFERRED to v1.5 | tier display / ToS / branding |
@@ -85,9 +86,11 @@ Error toward acting-on-request. Retreating to the rule when explicitly asked is 
 - SmeMartProject default `ea4db55f-2c57-4567-a1be-6e7fd1a210bf` — Object.tag now populated ✅
 
 **Class IDs (deterministic across env):**
-- Engagement: `7711aa41-e55b-5cda-9b7a-35844a2006a1`
-- SmeMartProject: `c66114a2-48e2-5b93-b7d6-7ccd6ef45a03`
-- MarketplaceProfileItem: `7bcf86a5-91dc-520d-b9bf-e308b1078d46`
+- Engagement: `7711aa41-e55b-5cda-9b7a-35844a2006a1` (metadata UUID — needs verification of which UUID is for Pipeline.receive)
+- SmeMartProject: `c66114a2-48e2-5b93-b7d6-7ccd6ef45a03` (metadata UUID — same caveat)
+- MarketplaceProfileItem: **`7bcf86a5-91dc-520d-b9bf-e308b1078d46` is canonical** (platform-assigned, verified via `platform.Class.getClass` on UAT 2026-04-28).
+- EngagementVettingItem: **`21f5841f-dd27-53ef-a0f5-6a816ec7f7e1` is canonical** (same audit).
+- **Codebase const audit complete (2026-04-28).** 21/23 SME_MART_CLASS_IDS entries match platform; 2 are fictional (`ee1e68b7-...` for MPI, `66fa174f-...` for EngagementVettingItem). Both are silently failing in production — see errata 023 and DECISIONS.md "Platform-Assigned Class IDs Are Not Deterministic UUID v5". Plan 26-04 (handed to gsd-plan 2026-04-28) corrects both consts.
 
 **Pipeline UUIDs:**
 - UAT receiver: `43f08afd-7ab9-4e99-a93c-619c46adaabe`
@@ -125,12 +128,12 @@ See DECISIONS.md "MarketplaceProfileItem Replace Semantics".
 
 Three test residues to `markDeleted` in future Pipeline.receive batches (one per class — non-empty `data` required so piggyback on next real ingest):
 
-| Class | Class ID | Records to delete |
+| Class | Class ID (Pipeline.receive — canonical) | Records to delete |
 |---|---|---|
-| MarketplaceProfileItem | `7bcf86a5-91dc-520d-b9bf-e308b1078d46` | `mpi-test-a-cd7105df`, `mpi-test-b-cd7105df` (replace-semantics test) |
-| SmeMartProject | `c66114a2-48e2-5b93-b7d6-7ccd6ef45a03` | `64047b6c-52e7-4592-ac1d-27f5020d1e01` ("TAG-SHAPE-TEST-C", pre-existing) |
+| MarketplaceProfileItem | `7bcf86a5-91dc-520d-b9bf-e308b1078d46` | `mpi-test-a-cd7105df`, `mpi-test-b-cd7105df` — **CLEARED 2026-04-28** by Plan 26-02 seed batch (verified absent via GQL) |
+| SmeMartProject | `c66114a2-48e2-5b93-b7d6-7ccd6ef45a03` | `64047b6c-52e7-4592-ac1d-27f5020d1e01` ("TAG-SHAPE-TEST-C", pre-existing) — pending next SmeMartProject ingest |
 
-Phase 26 seed batch is the natural place to clean up the MPI residues (same class, same ingest). SmeMartProject residue defers until next SmeMartProject ingest.
+Phase 26 seed batch is the natural place to clean up the MPI residues. SmeMartProject residue defers until next SmeMartProject ingest.
 
 ---
 
@@ -146,24 +149,80 @@ Kevin's READ-endpoint question (Object.tag discovery) was **resolved empirically
 
 ---
 
-## Recent commits (2026-04-27)
+## Recent commits (2026-04-28)
 
-- `c94be39` feat(phase-25): platform data audit — 9 SDK/GQL/hydra sources documented + UAT pipelineId fix
-- `cd24f04` docs(director): MarketplaceProfileItem section/data shape + W3Geekery Object.tag remediation
-- `1824c92` chore(phase-25): closeout — summaries, verification re-execution, BACKLOG cleanup row
-- `92a66b4` docs(phase-26): brief updated post-Phase-25 close
+Phase 26 commits since 2026-04-27 close:
+- `cfa38a7` docs(26-01): lock platform-provider distinguisher decision (option-b)
+- `2918e3d` docs(26-01): plan summary — convention ratified, distinguisher locked (option-b)
+- `908872b` docs(26-01): state + roadmap updates — plan complete
+- `9082418` test(26-02): add failing tests for seed-zb-provider.ts (red phase, option-b)
+- `f825b2d` feat(26-02): implement seed-zb-provider.ts (green phase, option-b)
+- `5f5e9fc` refactor(26-02): align src/ and scripts/ implementations (tests pass)
+- `8283d93` docs(26-02): complete ZeroBias provider seed plan — option-b distinguisher locked, 5 tests passing
+- (pending) gsd-execute fix commit on top — corrects 7 defects gsd-execute halt-diagnosed; once landed, 26-02 truly closes
 
-Earlier: `9019b82` seeder fix → `2b06694` walkthrough folded → `c0392a6` Hub docs → `28bd078` Object.tag validated → `f52af09` 7 phase briefs → `5089c47` deploy-probe → `537d52b` Phase 25 plan files.
+Side-channel work 2026-04-27/28 (parallel to Phase 26):
+- `36544dc` (on `w3geekery/tag` fork) — first PR ever on `zerobias-com/tag` (PR #1) introducing `marketplace` tag type with `platform_provider` + `demo` global tags. Awaiting Daniel Rojas review.
+- Repo migration to `~/Projects/w3geekery/zb-forks/{com,org}/<repo>` — login×2, module, schema, product, vendor, tag relocated. 27 doc references updated. `/ss` skill updated. `app/` deferred to end-of-session (when this session exits).
 
 ---
 
-## Next-action sequence
+## Phase 26 status — IN PROGRESS as of 2026-04-28
 
-1. **`/gsd:plan-phase 26`** — Phase 26 brief is updated and ready. Direct command, no extra context needed. The brief references all canonical specs.
-2. **Phase 26 review** — when plans land, Director Parks reviews against the brief + COMPANY-INFO-CONVENTION-DRAFT.md + replace-semantics finding.
-3. **Phase 26 execute** — Pipeline.receive seed for ZeroBias org's MPI records. Includes residue cleanup (`mpi-test-a/b`). Browse Providers UI verification.
-4. **Phase 27** — auth gate + lazy-engagement-guard. Brief exists; will need refresh after Phase 26 lands.
-5. **Phase 28** — company profile form. Brief updated with section/data shape + adapter pattern + deterministic id strategy. Form-schema work (Phase 22) is a dependency.
+**Plan 26-01 (Ratify Convention + Lock Distinguisher) — CLOSED**
+- Convention ratified at `.planning/director/COMPANY-INFO-CONVENTION.md` (no -DRAFT suffix)
+- Distinguisher locked: **option-b (MPI `provider_type` section with `data: "platform"`)**. DECISIONS.md entry: "Platform-Provider Distinguisher (Phase 26 Plan 01)".
+
+**Plan 26-02 (Seed Function + Pipeline.receive Batch + GQL Verification) — IN DEFECT-FIX LOOP**
+
+gsd-execute initially declared 26-02 complete with 5/5 tests passing, then halted itself on Wave 2 quality verification with 7 defects:
+1. Wrong MPI class ID — but the call here was REVERSED: codebase const `ee1e68b7-...` was actually the fictional one. The `7bcf86a5-...` from director artifacts WAS correct. gsd-execute used `7bcf86a5-...` and the seed succeeded. Audit 2026-04-28 confirmed this — see DECISIONS.md "Platform-Assigned Class IDs Are Not Deterministic UUID v5".
+2. Wrong SDK shape — `client.platformClient()` (method) vs `client.platformClient` (property) — broke ng serve build with TS2339
+3. `ZerobiasClientApp.getInstance()` doesn't exist (Next.js pattern carried into Angular code) — should be `inject(ZerobiasClientApi)`
+4. Tests passed against fictional API mocks (mocks matched broken impl shape)
+5. Task 3 NOT executed on UAT — agent reinterpreted as "document for someone else"
+6. `scripts/seed-zb-provider.ts` is a stub
+7. Gratuitous src/ + scripts/ duplication
+
+Director's call (2026-04-28): **Option 1 — fix in place + actually seed.** Handoff sent to gsd-execute with 7 numbered conditions covering each defect, P1 build-fix flag (dev server blocked), commit format, and feedback memory creation.
+
+**Plan 26-03 (Browse Providers UI tests + UAT manual verify)** — gated on 26-02 fix landing.
+
+---
+
+## Brian meeting 2026-04-28 (2 PM PT) — content brief consumed
+
+Brian walked through `.planning/director/brian-content-brief-v1.4-deferred.md` and answered many sections in the meeting. Transcript pending — Clark will run `/tt:transcript` when ready. Director then needs to:
+- Process answers into DECISIONS.md entries (especially anything data-model: tier structure, ServiceOffering scaffolding, opt-in confirms)
+- Mark answered sections `[ANSWERED date - summary]` in the brief
+- Surface NEW questions Brian raised — Clark warned the answers will scrap a lot of the original questions and create a new slew
+- Determine if any answer un-defers Phase 29 (likely NOT yet — even fully-answered tier structure still needs follow-up implementation, which is v1.5 timing)
+
+---
+
+## In-flight tracker
+
+| Item | Owner | Status |
+|---|---|---|
+| Phase 26-02 fix + actual UAT seed + GQL verify | gsd-execute | **VERIFIED 2026-04-28** — commit `d7e8cd2` landed; 8 MPI rows on UAT, residue cleared, build green. Director independent re-verification via GQL passed. |
+| Plan 26-04: correct fictional class IDs (MPI + EngagementVettingItem) in pipeline-write.service.ts | gsd-plan | **HANDED OFF 2026-04-28** — copy-paste prompt delivered; gates on Plan 26-02 close (now closed). |
+| Errata 023 + DECISIONS.md entry "Platform-Assigned Class IDs Are Not Deterministic UUID v5" | Director Parks | **DONE 2026-04-28** |
+| Phase 20 (Fire-and-Forget Audit) — promote from TBD to actively planned | Director Parks | NEXT — should run before Phase 27 (auth gate + lazy guard relies on round-trip writes succeeding) |
+| Brian meeting transcript processing | Clark + Director Parks | waiting on `/tt:transcript` |
+| `zerobias-com/tag` PR #1 review | Daniel Rojas | NOT blocking (Phase 26 went option-b) |
+| PKV API verification on UAT (zb-dx friction log 2026-03-13) | deferred | env file reverted; can't test until dev server unblocks; rerun after 26-04 lands |
+| `app/` directory move to `zb-forks/org/app/` | end-of-session | deferred — needs session exit + memory dir rename + 11 worktree cleanup |
+
+---
+
+## Next-action sequence (when Director Parks resumes)
+
+1. **Process Brian transcript** (`/tt:transcript` after Clark says go) — extract answers, file new DECISIONS.md entries for any data-model decisions, update `brian-content-brief-v1.4-deferred.md` status table, surface follow-up questions for next meeting.
+2. **Review gsd-plan output for Plan 26-04** — checkpoint plan before execution. Verify TDD scope is tight (just the two consts, no Phase 20 scope creep), tests bind to canonical UUIDs, live-write verification on UAT included.
+3. **Wave 3 (Plan 26-03)** review when ready — Browse Providers UI tests + UAT manual verify. Now unblocked since live MPI data is on UAT.
+4. **Phase 26 close** — verification report, SUMMARY consolidation, mark complete.
+5. **Promote Phase 20 (Fire-and-Forget Audit)** from TBD to actively planned. Errata 023 confirms two real instances of the silent-failure pattern — Phase 20 is no longer theoretical. Should run before Phase 27 to avoid stacking more silent-failure exposure during onboarding routing work.
+6. **Phase 27** — auth gate + lazy-engagement-guard. Brief refresh likely needed post-Phase-26 + Phase-20.
 
 ---
 
@@ -183,7 +242,7 @@ Earlier: `9019b82` seeder fix → `2b06694` walkthrough folded → `c0392a6` Hub
 
 ## Quick-start prompt for the next Director Parks session
 
-> Resume Director Parks. Read `.planning/director/DIRECTOR-PARKS-RESUME.md` FIRST (role contract + direct-request override + v1.4 state). Then `.planning/director/SESSION-STATE.md` and recent `.planning/director/DECISIONS.md` entries. The /meta:director skill applies. v1.4 milestone design is locked (7 phases). **Phase 25 COMPLETE 2026-04-27** with live-MCP corrections (synthesized→live; MarketplaceProfileItem schema corrected; W3Geekery Object.tag remediated). Phase 26 brief updated post-Phase-25 close — ready for `/gsd:plan-phase 26`. Direct request overrides default boundary (you can run /gsd:* if asked).
+> Resume Director Parks. Read `.planning/director/DIRECTOR-PARKS-RESUME.md` FIRST (role contract + direct-request override + v1.4 state + IN-FLIGHT TRACKER). Then `.planning/director/SESSION-STATE.md` and recent `.planning/director/DECISIONS.md` entries. The /meta:director skill applies. v1.4 milestone design is locked (7 phases). **Phase 25 COMPLETE.** **Phase 26: Plan 01 + Plan 02 CLOSED** (option-b distinguisher locked; UAT seed verified 2026-04-28 — 8 MPI rows landed via canonical class id `7bcf86a5-...`). **Plan 26-04 handed to gsd-plan** to correct two fictional class id consts (`ee1e68b7-...` for MPI and `66fa174f-...` for EngagementVettingItem in `pipeline-write.service.ts:33,36`) — confirmed via 2026-04-28 audit of all 23 SME_MART_CLASS_IDS against `platform.Class.getClass`. Both fictional consts have been silently failing in production via fire-and-forget `.catch` (errata 023, DECISIONS.md "Platform-Assigned Class IDs Are Not Deterministic UUID v5"). **Brian meeting transcript pending** — process via `/tt:transcript` when Clark signals ready. **Phase 20 (Fire-and-Forget Audit)** should be promoted from TBD to actively planned before Phase 27. Direct request overrides default boundary (you can run /gsd:* if asked).
 
 ---
 
