@@ -42,27 +42,27 @@ export class DemoModeService {
 
   private async loadSetting(db: { searchRows: Function }): Promise<boolean> {
     try {
-      const result = await db.searchRows('app_settings', `(setting_key=${DEMO_MODE_SETTING_KEY})`, { pageSize: 1 });
+      const result = await db.searchRows('app_settings', `(key=${DEMO_MODE_SETTING_KEY})`, { pageSize: 1 });
       const row = result.items?.[0];
       if (!row) return false;
-      return row.setting_value === 'true' || row.setting_value === true;
+      return row.value === 'true' || row.value === true;
     } catch {
       return false;
     }
   }
 
   private async saveSetting(db: { searchRows: Function; updateRow: Function; createRow: Function }, value: boolean): Promise<void> {
-    const result = await db.searchRows('app_settings', `(setting_key=${DEMO_MODE_SETTING_KEY})`, { pageSize: 1 });
+    const result = await db.searchRows('app_settings', `(key=${DEMO_MODE_SETTING_KEY})`, { pageSize: 1 });
     const existing = result.items?.[0];
     if (existing) {
       await db.updateRow('app_settings', existing.id, {
-        setting_value: String(value),
+        value: String(value),
         updated_by: this._userEmail() || 'unknown',
       });
     } else {
       await db.createRow('app_settings', {
-        setting_key: DEMO_MODE_SETTING_KEY,
-        setting_value: String(value),
+        key: DEMO_MODE_SETTING_KEY,
+        value: String(value),
         updated_by: this._userEmail() || 'unknown',
       });
     }
