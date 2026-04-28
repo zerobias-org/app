@@ -11,10 +11,10 @@ export interface ProviderProfile {
   about: string | null;
   avatar_url: string | null;
   hourly_rate: string | null;
-  availability_status: AvailabilityStatus;
+  availability_status: AvailabilityStatus | null;
   response_time: string | null;
-  total_jobs_completed: number;
-  total_earnings: string;
+  total_jobs_completed: number | null;
+  total_earnings: string | null;
   rating_average: string | null;
   created_at: string;
   updated_at: string;
@@ -92,10 +92,10 @@ export interface ProviderDirectoryRow extends ProviderProfile {
   frameworks: string;
   segments: string;
   service_segments: string;
-  skill_count: number;
-  role_count: number;
-  service_count: number;
-  review_count: number;
+  skill_count: number | null;
+  role_count: number | null;
+  service_count: number | null;
+  review_count: number | null;
 }
 
 // VIEW model — v_provider_detail (full profile)
@@ -110,5 +110,5 @@ export interface ProviderDetailRow extends ProviderProfile {
   service_segments: string;
   service_offerings: string;
   reviews: string;
-  review_count: number;
+  review_count: number | null;
 }
