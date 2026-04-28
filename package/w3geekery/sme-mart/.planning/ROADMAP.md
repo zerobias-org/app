@@ -261,24 +261,28 @@
 
 ### Phase 20: Fire-and-Forget `pushEntity` Audit, Instrumentation + Opportunistic Remediation
 
-**Goal**: Audit all `pushEntity` call sites for silent-failure risk, add telemetry to measure real-world failure rates, and remediate any CRITICAL+SIMPLE cases in-phase. Complex remediations deferred to v1.4 as individual backlog entries.
+**Goal**: Audit all `pushEntity` / `pushEntities` call sites for silent-failure risk, add telemetry to measure real-world failure rates, and remediate any CRITICAL+SIMPLE cases in-phase. CRITICAL+COMPLEX remediations deferred to v1.5 as individual backlog entries. Director recommends executing before Phase 27 — final ordering is a GSD call.
 
-**Depends on**: None (self-contained audit + selective remediation)
+**Depends on**: None operationally. Plan 26-04 (canonical class-ID corrections, commit `b1e997b`, merged 2026-04-28) is the baseline Phase 20's class-ID re-verification audits against.
 
-**Requirements**: FF-01, FF-02, FF-03, FF-04, FF-05
+**Requirements**: FF-01..FF-08 (refreshed 2026-04-28 — see `.planning/director/phase-20-brief.md` for full text). Original FF-01..FF-05 retained; adds FF-06 (AWAITED-callers verification), FF-07 + FF-08 (WATCH-LIST patterns), and tightens FF-02 to mandate `platform.Class.getClass` re-verification of every `SME_MART_CLASS_IDS` entry at audit time.
 
-**Success Criteria** (what must be TRUE):
-  1. AUDIT.md exists in `.planning/phases/20-fire-and-forget-audit/` with 100% of `pushEntity` call sites cataloged (48+ identified), each rated for risk (CRITICAL/MEDIUM/LOW) + complexity (SIMPLE/MEDIUM/COMPLEX)
-  2. Telemetry ships — every `.catch()` fires a counted event to console + optional remote sink; UAT soak for 1 week confirms non-zero fire-and-forget failures occur in production
-  3. All CRITICAL+SIMPLE call sites have fire-and-forget removed and error state surfaced to users (toast, inline error, retry prompt); each error path covered by at least one spec
-  4. CRITICAL+MEDIUM and CRITICAL+COMPLEX call sites have individual backlog entries in `.planning/BACKLOG.md` with proposed fix approaches and complexity rationale
-  5. WATCH-LIST pattern updated: "Service method ends with `.catch(err => console.error(err))`" flagged as BLOCK for user-triggered actions going forward
+**Success Criteria** (what must be TRUE — see brief for full FF-01..FF-08 detail):
+  1. AUDIT.md exists in `.planning/phases/20-fire-and-forget-audit/` with 100% of `pushEntity` / `pushEntities` call sites cataloged (60 identified 2026-04-28; seed at `.planning/director/phase-20-call-site-audit.md`), each rated for criticality + remediation complexity
+  2. Class-ID safety re-verification table appended to AUDIT.md: every `SME_MART_CLASS_IDS` entry confirmed against `platform.Class.getClass(<name>)` at audit time, including any added since 2026-04-28
+  3. Telemetry ships — every fire-and-forget rejection produces a structured logged event tagged with `className`, `callSite`, error message, timestamp; UAT 1-week soak runs before phase close
+  4. All CRITICAL+SIMPLE call sites have fire-and-forget removed and error state surfaced to users; each error path covered by at least one spec with a correctly-shaped SDK mock (per `feedback_tests_passing_against_wrong_shape_mocks.md`)
+  5. AWAITED call sites verified — caller-surface check on each of the 16 awaited sites; any swallowing caller promoted to SIMPLE remediation list
+  6. CRITICAL+COMPLEX call sites have individual backlog entries in `.planning/BACKLOG.md` under a "Fire-and-Forget Remediation" section with proposed fix approaches and complexity rationale
+  7. WATCH-LIST patterns updated: `.catch(err => console.error(err))` is BLOCK for user-triggered actions; `(deterministic UUID v5 from schema)` comments on class-ID consts are SUSPECT — verify before trust
 
 **Plans**: TBD
 
-**Effort**: ~8 hours (audit+instrument ~5h + opportunistic remediation ~3h)
+**Effort**: ~10 hours (audit+instrument ~6h + opportunistic SIMPLE remediation ~4h)
 **Tech Stack**: TypeScript + grep + spec coverage analysis
-**Origin**: Errata 011 (director-flagged, v1.2 carry-forward)
+**Origin**: Errata 011 (director-flagged 2026-04-15) — promoted from theoretical risk to confirmed by Errata 023 (2026-04-28: two real production bugs — MPI + EngagementVettingItem fictional class IDs silently failing for months until Plan 26-04 corrected the consts)
+**Brief**: `.planning/director/phase-20-brief.md` (refreshed 2026-04-28 by Director Parks #2)
+**Audit seed**: `.planning/director/phase-20-call-site-audit.md` (60 sites: 44 fire-and-forget + 16 awaited; preliminary criticality classification)
 
 ---
 
