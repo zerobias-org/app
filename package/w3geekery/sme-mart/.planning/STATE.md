@@ -1,34 +1,34 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.4
-milestone_name: **3P Onboarding & Default Engagement**
+milestone: v1.5
+milestone_name: **Tier Display / Terms of Service / ZB Branding**
 status: executing
-last_updated: "2026-04-24T23:30:00.000Z"
-last_activity: 2026-04-24 -- Plan 25-05 complete (pipeline health check + env fix)
+last_updated: "2026-04-27T22:53:49.301Z"
+last_activity: 2026-04-27 -- Phase 26 execution started
 progress:
   total_phases: 19
-  completed_phases: 5
-  total_plans: 29
-  completed_plans: 24
+  completed_phases: 6
+  total_plans: 32
+  completed_plans: 27
 ---
 
 # STATE.md -- Session Context
 
 **Session Name:** `poc/sme-mart`
 **Date Created:** 2026-04-24
-**Current Focus:** Phase 25 — platform-data-audit
+**Current Focus:** Phase 26 — seed-provider-zb-as-provider
 
 ---
 
 ## Current Position
 
 Milestone: v1.4 3P Onboarding & Default Engagement
-Phase: 25 (platform-data-audit) — COMPLETE
-Plan: 5 of 5 — COMPLETED
-Status: Plan 25-05 (Pipeline Health Check) complete
-Last activity: 2026-04-24 -- Plan 25-05 complete: Pipeline health check ping successful; environment.uat.ts pipelineId corrected from v1.2 carry-forward to current receiver; health check report documented in PLATFORM-DATA-INVENTORY.md
+Phase: 26 (seed-provider-zb-as-provider) — EXECUTING
+Plan: 1 of 3 **[COMPLETE]**
+Status: Plan 26-01 complete; platform-provider distinguisher locked (option-b)
+Last activity: 2026-04-28 -- Phase 26-01 ratification + decision lock complete
 
-Next: Phase 26 (ZB-as-Provider Seed) — create ZeroBias as provider with company_info convention
+Next: Phase 26 Plan 02 (ZB-as-Provider Seed Batch) — seed ZeroBias org with company_info MPI + provider_type section
 
 ---
 
