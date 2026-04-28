@@ -182,4 +182,38 @@ describe('PipelineWriteService', () => {
       expect(cached?.['name']).toBe('Test'); // original mutation doesn't affect cache
     });
   });
+
+  // ── SME_MART_CLASS_IDS canonical UUIDs ──
+  //
+  // Plan 26-04: pipeline-write.service.ts had two FICTIONAL deterministic-UUID-v5
+  // class id consts that were never registered with the platform. Pipeline.receive
+  // returned "No such Class" for both, and every write through these classes
+  // failed silently (the call sites .catch(err => console.error(...)) and never
+  // surface the failure).
+  //
+  // These tests pin the canonical platform-assigned ids so future regressions
+  // (e.g., someone "correcting" the comment back to UUID v5 form) fail fast.
+
+  describe('SME_MART_CLASS_IDS canonical UUIDs', () => {
+    it('MarketplaceProfileItem must use canonical class id 7bcf86a5-91dc-520d-b9bf-e308b1078d46', async () => {
+      await service.pushEntities('MarketplaceProfileItem', [
+        { id: 'mpi-test-uuid-check', name: 'mpi-test-uuid-check', section: 'legal_name', data: 'Test', orgId: 'test-org' },
+      ]);
+
+      expect(mockPipelineApi.receive).toHaveBeenCalledTimes(1);
+      const batch = mockPipelineApi.receive.mock.calls[0][1];
+      // SimpleBatch.classId is a UUID instance — toString() yields the string form.
+      expect(batch.classId.toString()).toBe('7bcf86a5-91dc-520d-b9bf-e308b1078d46');
+    });
+
+    it('EngagementVettingItem must use canonical class id 21f5841f-dd27-53ef-a0f5-6a816ec7f7e1', async () => {
+      await service.pushEntities('EngagementVettingItem', [
+        { id: 'evi-test-uuid-check', name: 'evi-test-uuid-check' },
+      ]);
+
+      expect(mockPipelineApi.receive).toHaveBeenCalledTimes(1);
+      const batch = mockPipelineApi.receive.mock.calls[0][1];
+      expect(batch.classId.toString()).toBe('21f5841f-dd27-53ef-a0f5-6a816ec7f7e1');
+    });
+  });
 });
