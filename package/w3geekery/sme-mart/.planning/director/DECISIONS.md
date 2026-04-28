@@ -61,7 +61,29 @@ ServiceOffering tier structure is a data-model decision: it fixes the records we
 
 **Triggers for revisit:** Brian confirms tier structure (via meeting, Slack, or platform-task in the default ZB engagement). At that point, a follow-up phase or hotfix creates the ServiceOffering records and the tier-display surface.
 
+## Platform-Provider Distinguisher (Phase 26 Plan 01)
+**Date:** 2026-04-28
+**Decision:** Option B — MPI `provider_type` section with `data: "platform"` for ZeroBias org records.
 
+**Mechanism:** Add a section called `provider_type` to ZeroBias's MarketplaceProfileItem records with `data: "platform"`. Browse Providers + any future filter discovers platform providers via GQL `MarketplaceProfileItem(orgId: ".eq.<orgId>", section: ".eq.provider_type") { data }` or by filtering all-MPI-by-org for the section.
+
+**Why option-a was rejected:**
+- Option-a (hydra global tag `marketplace.platform_provider`) requires a new TagType `marketplace` to exist in `hydra.tag_type`.
+- Empirically verified 2026-04-27 that `platform.Tag.suggestTag` rejects unregistered types: API error: `type 'marketplace' is not valid - {boundary|client|environment|env-type|framework|module-deployment|other|product-segment|query-folder|region|service-segment}`.
+- Only way to register a new TagType is a PR to `zerobias-com/tag` adding a folder. That PR was opened 2026-04-27 as `zerobias-com/tag#1` (first PR ever on the repo) but cycle time is unknown — likely Daniel Rojas territory and could be days-to-weeks.
+
+**Why option-c was rejected:** Hardcoded `orgId === ZB_ORG_UUID` is env-fragile (UAT and prod ZB org UUIDs differ in non-aligned envs; brittle in tests).
+
+**Forward path:** `zerobias-com/tag#1` PR introduces `marketplace` type with `platform_provider` global tag; if/when merged + published, v1.5 can migrate via a one-shot `Pipeline.receive` batch (add `Object.tag`, drop section). Not blocking v1.4.
+
+**Anti-pattern note:** Introducing `provider_type` as a fully generic provider taxonomy (auditor / consultant / vendor / SME-individual / platform). For now the section ONLY distinguishes platform-provider from everything else; broader taxonomy is a v1.5+ design decision.
+
+**How to apply:**
+- Plan 26-02 seed batch includes one additional MPI record per ZB org: `{ section: "provider_type", data: "platform", ... }`
+- Phase 28 form schema must explicitly skip the `provider_type` section (one-line filter: `section !== 'provider_type'`)
+- Browse Providers (Plan 26-03): platform providers identified by presence of `provider_type` section in their MPI records
+
+**Test coverage:** Unit tests in 26-02 assert seed payload includes `provider_type` section; 26-03 tests assert Browse Providers correctly filters/displays based on the section.
 
 ## Object.tag Field Shape — Validated via UAT Experiment
 **Date:** 2026-04-24
