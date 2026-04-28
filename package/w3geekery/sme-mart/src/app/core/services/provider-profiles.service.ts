@@ -153,8 +153,7 @@ export class ProviderProfilesService {
       }
 
       // Fetch all MPI rows for platform orgs
-      const orgIdFilter = platformOrgIds.map(id => `".eq.${id}"`).join(',');
-      const allRows = await this.queryMpi(`orgId: { _or: [${orgIdFilter}] }`, 1000);
+      const allRows = await this.queryMpi(`orgId: ".in.${platformOrgIds.join(',')}"`, 1000);
 
       const grouped = this.groupByOrg(allRows);
       const items = platformOrgIds.map(orgId => this.projectToDirectoryRow(orgId, grouped.get(orgId) ?? []));
@@ -196,12 +195,12 @@ export class ProviderProfilesService {
   // ─────────────────────────────────────────────────────────────────────────
 
   /**
-   * NOTE: This is a placeholder stub for now. Wave 2 does not rewrite CRUD methods.
+   * NOTE: These are placeholder stubs. Wave 2 does not rewrite CRUD methods.
    * They still require SmeMartDbService which is out of scope for 26-03.
-   * Future phase (cleanup) will remove this dependency entirely.
+   * Future phase (cleanup) will implement via PipelineWriteService after Neon->GQL migration.
+   * Unused parameters are suppressed with underscore prefix to suppress TS6133 warnings.
    */
-  async updateProfile(id: string, data: Partial<ProviderProfile>): Promise<ProviderProfile> {
-    // TODO: Implement via PipelineWriteService after Neon->GQL migration
+  async updateProfile(_id: string, _data: Partial<ProviderProfile>): Promise<ProviderProfile> {
     throw new Error('updateProfile not yet implemented for GQL-backed providers');
   }
 
@@ -209,51 +208,51 @@ export class ProviderProfilesService {
   // Expertise CRUD — 6 relation tables — UNCHANGED from pre-26-03
   // ─────────────────────────────────────────────────────────────────────────
 
-  async addSkill(providerId: string, data: Omit<ProviderSkill, 'id' | 'provider_id' | 'created_at'>): Promise<ProviderSkill> {
+  async addSkill(_providerId: string, _data: Omit<ProviderSkill, 'id' | 'provider_id' | 'created_at'>): Promise<ProviderSkill> {
     throw new Error('addSkill not yet implemented for GQL-backed providers');
   }
 
-  async deleteSkill(skillId: string): Promise<void> {
+  async deleteSkill(_skillId: string): Promise<void> {
     throw new Error('deleteSkill not yet implemented for GQL-backed providers');
   }
 
-  async addRole(providerId: string, data: Omit<ProviderRole, 'id' | 'provider_id' | 'created_at'>): Promise<ProviderRole> {
+  async addRole(_providerId: string, _data: Omit<ProviderRole, 'id' | 'provider_id' | 'created_at'>): Promise<ProviderRole> {
     throw new Error('addRole not yet implemented for GQL-backed providers');
   }
 
-  async deleteRole(roleId: string): Promise<void> {
+  async deleteRole(_roleId: string): Promise<void> {
     throw new Error('deleteRole not yet implemented for GQL-backed providers');
   }
 
-  async addProduct(providerId: string, data: Omit<ProviderProduct, 'id' | 'provider_id' | 'created_at'>): Promise<ProviderProduct> {
+  async addProduct(_providerId: string, _data: Omit<ProviderProduct, 'id' | 'provider_id' | 'created_at'>): Promise<ProviderProduct> {
     throw new Error('addProduct not yet implemented for GQL-backed providers');
   }
 
-  async deleteProduct(productId: string): Promise<void> {
+  async deleteProduct(_productId: string): Promise<void> {
     throw new Error('deleteProduct not yet implemented for GQL-backed providers');
   }
 
-  async addFramework(providerId: string, data: Omit<ProviderFramework, 'id' | 'provider_id' | 'created_at'>): Promise<ProviderFramework> {
+  async addFramework(_providerId: string, _data: Omit<ProviderFramework, 'id' | 'provider_id' | 'created_at'>): Promise<ProviderFramework> {
     throw new Error('addFramework not yet implemented for GQL-backed providers');
   }
 
-  async deleteFramework(frameworkId: string): Promise<void> {
+  async deleteFramework(_frameworkId: string): Promise<void> {
     throw new Error('deleteFramework not yet implemented for GQL-backed providers');
   }
 
-  async addSegment(providerId: string, data: Omit<ProviderSegment, 'id' | 'provider_id' | 'created_at'>): Promise<ProviderSegment> {
+  async addSegment(_providerId: string, _data: Omit<ProviderSegment, 'id' | 'provider_id' | 'created_at'>): Promise<ProviderSegment> {
     throw new Error('addSegment not yet implemented for GQL-backed providers');
   }
 
-  async deleteSegment(segmentId: string): Promise<void> {
+  async deleteSegment(_segmentId: string): Promise<void> {
     throw new Error('deleteSegment not yet implemented for GQL-backed providers');
   }
 
-  async addServiceSegment(providerId: string, data: Omit<ProviderServiceSegment, 'id' | 'provider_id' | 'created_at'>): Promise<ProviderServiceSegment> {
+  async addServiceSegment(_providerId: string, _data: Omit<ProviderServiceSegment, 'id' | 'provider_id' | 'created_at'>): Promise<ProviderServiceSegment> {
     throw new Error('addServiceSegment not yet implemented for GQL-backed providers');
   }
 
-  async deleteServiceSegment(segmentId: string): Promise<void> {
+  async deleteServiceSegment(_segmentId: string): Promise<void> {
     throw new Error('deleteServiceSegment not yet implemented for GQL-backed providers');
   }
 
