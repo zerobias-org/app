@@ -72,3 +72,87 @@ describe('ProviderCard', () => {
     expect(mockRouter.navigate).toHaveBeenCalledWith(['/providers', 'prov-001']);
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────
+// ZB-shaped corporate provider rendering (Plan 26-03 Wave 3)
+// ─────────────────────────────────────────────────────────────────────
+
+const ZB_ORG = '57c741cf-a58e-5efc-bf2f-93c4f6cf76ec';
+
+function makeZbProvider(): ProviderDirectoryRow {
+  return {
+    id: ZB_ORG,
+    user_id: null,
+    slug: 'zerobias',
+    zerobias_user_id: '',
+    zerobias_org_id: ZB_ORG,
+    display_name: 'ZeroBias',
+    headline: 'Cybersecurity & compliance automation',
+    about: null,
+    avatar_url: 'https://zerobias.com/logo.png',
+    hourly_rate: null,
+    availability_status: null,
+    response_time: null,
+    total_jobs_completed: null,
+    total_earnings: null,
+    rating_average: null,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    skills: '[]',
+    roles: '[]',
+    products: '[]',
+    frameworks: '[]',
+    segments: '[]',
+    service_segments: '[]',
+    skill_count: null,
+    role_count: null,
+    service_count: null,
+    review_count: null,
+  } as ProviderDirectoryRow;
+}
+
+describe('ProviderCard — ZB-shaped corporate provider rendering', () => {
+  let component: ProviderCard;
+  let mockRouter: { navigate: ReturnType<typeof vi.fn> };
+
+  beforeEach(() => {
+    mockRouter = { navigate: vi.fn() };
+    TestBed.configureTestingModule({
+      imports: [ProviderCard],
+      providers: [{ provide: Router, useValue: mockRouter }],
+    });
+    const fixture = TestBed.createComponent(ProviderCard);
+    component = fixture.componentInstance;
+    component.provider = makeZbProvider();
+  });
+
+  it('renders legal_name as display name', () => {
+    expect(component.displayName()).toBe('ZeroBias');
+  });
+
+  it('renders short_blurb as headline', () => {
+    expect(component.headline()).toBe('Cybersecurity & compliance automation');
+  });
+
+  it('renders avatar from logo_url', () => {
+    expect(component.avatarUrl()).toBe('https://zerobias.com/logo.png');
+  });
+
+  it('does not render rating section when rating_average is null', () => {
+    component.provider = makeZbProvider();
+    expect(component.rating()).toBeNull();
+  });
+
+  it('does not render skills section when skills === "[]"', () => {
+    component.provider = makeZbProvider();
+    expect(component.topSkills()).toEqual([]);
+  });
+
+  it('does not crash when total_jobs_completed is null', () => {
+    component.provider = makeZbProvider();
+    expect(component.jobsCompleted()).toBe(0);
+    expect(() => {
+      component.jobsCompleted();
+    }).not.toThrow();
+  });
+});

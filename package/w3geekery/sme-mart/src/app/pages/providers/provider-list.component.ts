@@ -70,7 +70,7 @@ export class ProviderList implements OnInit {
     } else if (sort === 'name') {
       items = [...items].sort((a, b) => a.display_name.localeCompare(b.display_name));
     } else if (sort === 'jobs') {
-      items = [...items].sort((a, b) => b.total_jobs_completed - a.total_jobs_completed);
+      items = [...items].sort((a, b) => (b.total_jobs_completed ?? 0) - (a.total_jobs_completed ?? 0));
     }
 
     return items;
