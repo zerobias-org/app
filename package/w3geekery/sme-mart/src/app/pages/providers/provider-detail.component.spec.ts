@@ -6,7 +6,6 @@ import { ReviewsService } from '../../core/services/reviews.service';
 import { ActivatedRoute } from '@angular/router';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { of } from 'rxjs';
-import { signal } from '@angular/core';
 import type { ProviderDetailRow } from '../../core/models';
 
 const ZB_ORG = '57c741cf-a58e-5efc-bf2f-93c4f6cf76ec';

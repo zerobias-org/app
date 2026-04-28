@@ -3,7 +3,6 @@ import { ActivatedRoute } from '@angular/router';
 import { ProviderCard } from '../../shared/components/provider-card/provider-card.component';
 import { ListPage, SortOption } from '../../shared/components/list-page/list-page.component';
 import { ProviderProfilesService } from '../../core/services/provider-profiles.service';
-import { CatalogService } from '../../core/services/catalog.service';
 import { UserPreferencesService } from '../../core/services/user-preferences.service';
 import type { ProviderDirectoryRow } from '../../core/models';
 
@@ -21,7 +20,6 @@ import type { ProviderDirectoryRow } from '../../core/models';
 export class ProviderList implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly providerProfiles = inject(ProviderProfilesService);
-  private readonly catalog = inject(CatalogService);
   private readonly prefs = inject(UserPreferencesService);
 
   readonly loading = this.providerProfiles.loading;
