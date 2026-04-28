@@ -415,7 +415,7 @@
   4. Walkthrough residue TAG-SHAPE-TEST-C cleaned up via markDeleted
   5. Unit tests for seed function and Browse Providers rendering
 
-**Plans:** TBD
+**Plans:** 4/4 plans complete
 
 **Estimates:** 5-7 hrs
 
@@ -547,7 +547,7 @@ This phase is intentionally deferred from v1.4. When v1.5 begins, Phase 29 work 
 | 23. Transparency Controls UI-SPEC | 0/? | Not started | — |
 | 24. Demo Data Visibility Gate | 0/? | Not started | — |
 | 25. Platform Data Audit | 3/5 | In progress | 2026-04-24 (Plans 01-03 complete) |
-| 26. Seed Provider (ZB-as-Provider) | 0/? | Not started | — |
+| 26. Seed Provider (ZB-as-Provider) | 4/4 | Complete   | 2026-04-28 |
 | 27. Auth Gate + Routing | 0/? | Not started | — |
 | 28. Company Profile Form | 0/? | Not started | — |
 | 29. DEFERRED TO v1.5 | — | Skipped | — |
