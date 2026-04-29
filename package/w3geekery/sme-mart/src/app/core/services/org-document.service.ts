@@ -9,6 +9,7 @@
  */
 
 import { Injectable, inject } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { ZerobiasClientApi } from '@zerobias-com/zerobias-client';
 import { Nmtoken } from '@zerobias-org/types-core-js';
 import { Md5 } from 'ts-md5';
@@ -59,6 +60,7 @@ export class OrgDocumentService {
   private readonly docService = inject(DocumentService);
   private readonly impersonation = inject(ImpersonationService);
   private readonly tagService = inject(SmeMartTagService);
+  private readonly snackBar = inject(MatSnackBar);
 
   // ---------------------------------------------------------------------------
   // Upload
@@ -109,7 +111,7 @@ export class OrgDocumentService {
       this.docService.uploadProgress$.next({ filename, percent: 50, done: false });
     }
 
-    // Build GQL data with camelCase field names and push to Pipeline (fire-and-forget)
+    // Build GQL data with camelCase field names and push to Pipeline
     const userId = this.impersonation.effectiveUserId();
     const gqlData: Record<string, unknown> = {
       id: crypto.randomUUID(),
@@ -128,10 +130,17 @@ export class OrgDocumentService {
       updatedAt: new Date().toISOString(),
     };
 
-    // Fire-and-forget Pipeline push
-    this.pipelineWrite.pushEntity('SmeMartDocument', gqlData).catch(err => {
-      console.error('Failed to push document metadata to Pipeline:', err);
-    });
+    // Push to Pipeline
+    try {
+      await this.pipelineWrite.pushEntity('SmeMartDocument', gqlData, [], 'org-document.service:132');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to save document metadata: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     // Return optimistically (transform GQL to Neon shape for OrgDocument)
     const neonData = mapGqlToNeon<OrgDocument>(gqlData, DOCUMENT_FIELD_MAPPING.gqlToNeon);
