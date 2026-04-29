@@ -17,32 +17,6 @@ import type { RfpInvitation } from '../models/rfp-invitation.model';
 import type { GqlRfpInvitationResponse } from '../gql-types';
 
 describe('RfpInvitationService Field Mapping Tests', () => {
-  const RFP_INV_FIXTURE: GqlRfpInvitationResponse = {
-    id: 'rfp-inv-001',
-    projectId: 'proj-001',
-    vendorOrgId: 'vendor-org-001',
-    status: 'pending',
-    invitedAt: '2026-04-01T10:00:00Z',
-    createdAt: '2026-04-01T10:00:00Z',
-    updatedAt: '2026-04-01T10:00:00Z',
-  };
-
-  const RFP_INV_ACCEPTED: GqlRfpInvitationResponse = {
-    ...RFP_INV_FIXTURE,
-    id: 'rfp-inv-002',
-    status: 'accepted',
-    respondedAt: '2026-04-01T10:30:00Z',
-    updatedAt: '2026-04-01T10:30:00Z',
-  };
-
-  const RFP_INV_DECLINED: GqlRfpInvitationResponse = {
-    ...RFP_INV_FIXTURE,
-    id: 'rfp-inv-003',
-    status: 'declined',
-    respondedAt: '2026-04-01T10:45:00Z',
-    updatedAt: '2026-04-01T10:45:00Z',
-  };
-
   // ──────────────────────────────────────────────────────────────────────────────
   // Field Mapping Tests
   // ──────────────────────────────────────────────────────────────────────────────

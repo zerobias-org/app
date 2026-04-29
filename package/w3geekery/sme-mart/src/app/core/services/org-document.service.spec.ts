@@ -8,9 +8,7 @@ import { GraphqlReadService } from './graphql-read.service';
 import { DocumentService } from './document.service';
 import { ImpersonationService } from './impersonation.service';
 import { SmeMartTagService } from './sme-mart-tag.service';
-import type { OrgDocument, OrgDocumentDetail, OrgDocumentShare } from '../models/org-document.model';
-import { makeOrgDocument, makeOrgDocumentDetail, makeOrgDocumentShare } from '../../test-helpers/factories';
-import { TEST_ORG_ID, TEST_DOC_ID, TEST_TAG_ID, TEST_USER_ID, TEST_ENG_ID } from '../../test-helpers/constants';
+import { TEST_ORG_ID, TEST_DOC_ID, TEST_USER_ID, TEST_ENG_ID } from '../../test-helpers/constants';
 import { fakeImpersonation, fakePipelineWriteService, fakeGraphqlReadService } from '../../test-helpers/angular';
 import type { GqlDocumentResponse } from '../gql-types/document.types';
 
@@ -293,7 +291,6 @@ describe('OrgDocumentService', () => {
     it('should create a share row with defaults', async () => {
       // Note: shareDocument still uses SmeMartDbService internally
       // This test demonstrates that sharing is orthogonal to metadata migration
-      const stub = vi.fn().mockResolvedValue({});
       TestBed.inject(SmeMartTagService); // Trigger setup
 
       // For now, we'll skip this test as it requires db service

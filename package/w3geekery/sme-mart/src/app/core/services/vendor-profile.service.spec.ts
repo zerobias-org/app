@@ -10,8 +10,8 @@ import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
 import { fakePipelineWriteService, fakeGraphqlReadService } from '../../test-helpers/angular';
 import type { GqlMarketplaceProfileItemResponse } from '../gql-types/marketplace-profile-item.types';
-import type { MarketplaceProfileItem, InsuranceData, AttestationData, CorporateIdentityData } from '../models/marketplace-profile-item.model';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import type { InsuranceData, AttestationData } from '../models/marketplace-profile-item.model';
+import { describe, it, expect, beforeEach } from 'vitest';
 
 // ── Test Fixtures ──
 
@@ -36,17 +36,6 @@ function createMockAttestationData(): AttestationData {
     avgProjectDuration: '8 weeks',
     certifications: ['ISO 27001', 'CEH'],
     specializations: ['cloud_security'],
-  };
-}
-
-function createMockCorporateIdentityData(): CorporateIdentityData {
-  return {
-    legalEntityName: 'Acme Security LLC',
-    businessType: 'llc',
-    foundedYear: 2015,
-    yearsInBusiness: 9,
-    certifications: ['ISO 27001'],
-    numberOfEmployees: 42,
   };
 }
 

@@ -12,7 +12,6 @@ import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
 import { ImpersonationService } from './impersonation.service';
 import type { GqlSmeMartTaskResponse } from '../gql-types/sme-mart-task.types';
-import type { SmeMartTask } from '../models/sme-mart-task.model';
 
 type MockFn = ReturnType<typeof vi.fn>;
 
@@ -345,7 +344,7 @@ describe('SmeMartTaskService', () => {
       page: { pageNumber: 1, pageSize: 1000, totalCount: 2 },
     });
 
-    const tree = await service.getTaskTree('board-1');
+    await service.getTaskTree('board-1');
 
     // Should detect cycle and warn
     expect(consoleWarnSpy).toHaveBeenCalledWith(

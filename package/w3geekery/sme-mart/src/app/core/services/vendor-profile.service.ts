@@ -13,14 +13,13 @@
 import { Injectable, inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { PipelineWriteService } from './pipeline-write.service';
-import { GraphqlReadService, type GqlQueryOptions } from './graphql-read.service';
+import { GraphqlReadService } from './graphql-read.service';
 import { MARKETPLACE_PROFILE_ITEM_FIELD_MAPPING, mapGqlToNeon, mapNeonToGql } from '../field-mappings';
 import type { GqlMarketplaceProfileItemResponse } from '../gql-types/marketplace-profile-item.types';
 import type {
   MarketplaceProfileItem,
   SectionType,
   CreateMarketplaceProfileItemRequest,
-  UpdateMarketplaceProfileItemRequest,
   CorporateIdentityData,
   AttestationData,
   InsuranceData,

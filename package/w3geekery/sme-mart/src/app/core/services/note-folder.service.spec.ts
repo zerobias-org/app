@@ -1,12 +1,11 @@
 import { TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { NoteFolderService, type NoteFolderTreeNode } from './note-folder.service';
+import { NoteFolderService } from './note-folder.service';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
 import { ImpersonationService } from './impersonation.service';
 import { fakePipelineWriteService, fakeGraphqlReadService } from '../../test-helpers/angular';
 import type { GqlNoteFolderResponse } from '../gql-types/note-folder.types';
-import type { NoteFolder } from '../models';
 
 describe('NoteFolderService', () => {
   let service: NoteFolderService;

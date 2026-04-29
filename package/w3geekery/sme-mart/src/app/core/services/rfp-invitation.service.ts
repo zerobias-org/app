@@ -13,7 +13,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService, type GqlQueryOptions } from './graphql-read.service';
 import { RFP_INVITATION_FIELD_MAPPING, mapNeonToGql, mapGqlToNeon } from '../field-mappings';
-import type { RfpInvitation, RfpInvitationStatus, CreateRfpInvitationRequest, UpdateRfpInvitationRequest, RequestInvitationRequest } from '../models';
+import type { RfpInvitation, CreateRfpInvitationRequest, RequestInvitationRequest } from '../models';
 import type { GqlRfpInvitationResponse } from '../gql-types';
 
 @Injectable({ providedIn: 'root' })

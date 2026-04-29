@@ -10,7 +10,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { PipelineWriteService } from './pipeline-write.service';
-import { GraphqlReadService, type GqlQueryOptions } from './graphql-read.service';
+import { GraphqlReadService } from './graphql-read.service';
 import { ImpersonationService } from './impersonation.service';
 import { VETTING_ITEM_FIELD_MAPPING, mapGqlToNeon, mapNeonToGql } from '../field-mappings';
 import type { GqlVettingItemResponse } from '../gql-types/vetting-item.types';

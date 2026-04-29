@@ -5,7 +5,6 @@ import { NotesService } from './notes.service';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
 import { ImpersonationService } from './impersonation.service';
-import { makeNote, makeNoteWithTags } from '../../test-helpers/factories';
 import { fakePipelineWriteService, fakeGraphqlReadService, fakeImpersonation } from '../../test-helpers/angular';
 import type { GqlNoteResponse } from '../gql-types/note.types';
 

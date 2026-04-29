@@ -5,7 +5,7 @@ import { GraphqlReadService, type GqlQueryOptions } from './graphql-read.service
 import { REVIEW_FIELD_MAPPING, mapNeonToGql, mapGqlToNeon } from '../field-mappings';
 import type { QueryOptions } from '@zerobias-org/data-utils';
 import { PagedResults } from '@zerobias-org/types-core-js';
-import type { Review, AdminReviewRow } from '../models';
+import type { Review } from '../models';
 import type { GqlReviewResponse } from '../gql-types';
 
 /**

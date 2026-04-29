@@ -14,7 +14,6 @@ import { GraphqlReadService } from './graphql-read.service';
 import { NotificationService } from './notification.service';
 import { SmeMartTagService } from './sme-mart-tag.service';
 import { SmeMartResourceService } from './sme-mart-resource.service';
-import { BID_GQL_FIXTURE } from '../../test-helpers/gql-fixtures';
 import { fakePipelineWriteService, fakeGraphqlReadService, fakeSmeMartTagService, fakeNotificationService } from '../../test-helpers/angular';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
