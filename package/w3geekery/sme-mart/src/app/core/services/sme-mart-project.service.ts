@@ -1,4 +1,5 @@
 import { Injectable, inject } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService, type GqlQueryOptions } from './graphql-read.service';
 import { SmeMartTagService } from './sme-mart-tag.service';
@@ -31,6 +32,7 @@ export class SmeMartProjectService {
   private readonly graphqlRead = inject(GraphqlReadService);
   private readonly tagService = inject(SmeMartTagService);
   private readonly resourceService = inject(SmeMartResourceService);
+  private readonly snackBar = inject(MatSnackBar);
 
   /** Scalar fields queryable via standard GraphqlReadService.query() */
   private readonly scalarFields = [
@@ -90,7 +92,7 @@ export class SmeMartProjectService {
       updatedAt: now,
     };
 
-    this.pushToGql(project);
+    await this.pushToGql(project);
     return project;
   }
 
@@ -169,7 +171,7 @@ export class SmeMartProjectService {
       updatedAt: new Date().toISOString(),
     };
 
-    this.pushToGql(updated);
+    await this.pushToGql(updated);
     return updated;
   }
 
@@ -341,7 +343,7 @@ export class SmeMartProjectService {
    * Push a SmeMartProject to Pipeline (full replace — all fields).
    * Fire-and-forget — caller returns optimistic result.
    */
-  private pushToGql(project: SmeMartProject): void {
+  private async pushToGql(project: SmeMartProject): Promise<void> {
     const gqlData = mapNeonToGql<Record<string, unknown>>(
       project,
       SME_MART_PROJECT_FIELD_MAPPING.neonToGql,
@@ -350,9 +352,16 @@ export class SmeMartProjectService {
     if (project.engagementId) {
       gqlData['engagement'] = project.engagementId;
     }
-    this.pipelineWrite.pushEntity('SmeMartProject', gqlData).catch(err => {
-      console.error('[ProjectService] Failed to push project:', err);
-    });
+    try {
+      await this.pipelineWrite.pushEntity('SmeMartProject', gqlData, [], 'sme-mart-project.service:345');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to save project: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
   }
 
   private generateUUID(): string {
