@@ -8,6 +8,7 @@
  */
 
 import { Injectable, inject, signal } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService, type GqlQueryOptions } from './graphql-read.service';
 import { ImpersonationService } from './impersonation.service';
@@ -44,6 +45,7 @@ export class VettingService {
   private readonly pipelineWrite = inject(PipelineWriteService);
   private readonly graphqlRead = inject(GraphqlReadService);
   private readonly impersonation = inject(ImpersonationService);
+  private readonly snackBar = inject(MatSnackBar);
 
   // ── Pilot Completion Suggestion Signal (Plan 077 Task 1) ──
 
@@ -181,9 +183,16 @@ export class VettingService {
 
     // Push all items to pipeline in one batch
     const gqlItems = items.map(item => this.toGql(item));
-    this.pipelineWrite.pushEntities('EngagementVettingItem', gqlItems).catch(err => {
-      console.error('[VettingService] Failed to seed default vetting items:', err);
-    });
+    try {
+      await this.pipelineWrite.pushEntities('EngagementVettingItem', gqlItems, [], 'vetting.service:184');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to initialize vetting items: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     return items;
   }
@@ -223,9 +232,16 @@ export class VettingService {
     };
 
     const gqlData = this.toGql(item);
-    this.pipelineWrite.pushEntity('EngagementVettingItem', gqlData).catch(err => {
-      console.error('[VettingService] Failed to push vetting item:', err);
-    });
+    try {
+      await this.pipelineWrite.pushEntity('EngagementVettingItem', gqlData, [], 'vetting.service:226');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to add vetting item: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     return item;
   }
@@ -280,9 +296,16 @@ export class VettingService {
     }
 
     const gqlData = this.toGql(updated);
-    this.pipelineWrite.pushEntity('EngagementVettingItem', gqlData).catch(err => {
-      console.error('[VettingService] Failed to update vetting item:', err);
-    });
+    try {
+      await this.pipelineWrite.pushEntity('EngagementVettingItem', gqlData, [], 'vetting.service:295');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to update vetting item: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     return updated;
   }
@@ -306,9 +329,16 @@ export class VettingService {
       dateDeleted: today,
     };
 
-    this.pipelineWrite.pushEntity('EngagementVettingItem', gqlData).catch(err => {
-      console.error('[VettingService] Failed to delete vetting item:', err);
-    });
+    try {
+      await this.pipelineWrite.pushEntity('EngagementVettingItem', gqlData, [], 'vetting.service:321');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to delete vetting item: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
   }
 
   // ── Reference Counting (D-12, D-13) ──

@@ -5,6 +5,7 @@
  */
 
 import { TestBed } from '@angular/core/testing';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { VettingService } from './vetting.service';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
@@ -50,10 +51,12 @@ describe('VettingService', () => {
   let service: VettingService;
   let pipelineWrite: ReturnType<typeof fakePipelineWriteService>;
   let graphqlRead: ReturnType<typeof fakeGraphqlReadService>;
+  let mockSnackBar: { open: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     pipelineWrite = fakePipelineWriteService();
     graphqlRead = fakeGraphqlReadService();
+    mockSnackBar = { open: vi.fn() };
 
     TestBed.configureTestingModule({
       providers: [
@@ -61,6 +64,7 @@ describe('VettingService', () => {
         { provide: PipelineWriteService, useValue: pipelineWrite },
         { provide: GraphqlReadService, useValue: graphqlRead },
         { provide: ImpersonationService, useValue: fakeImpersonation() },
+        { provide: MatSnackBar, useValue: mockSnackBar },
       ],
     });
 
@@ -85,6 +89,8 @@ describe('VettingService', () => {
       expect(pipelineWrite.pushEntities).toHaveBeenCalledWith(
         'EngagementVettingItem',
         expect.any(Array),
+        [],
+        'vetting.service:184',
       );
     });
 
@@ -197,6 +203,8 @@ describe('VettingService', () => {
       expect(pipelineWrite.pushEntity).toHaveBeenCalledWith(
         'EngagementVettingItem',
         expect.objectContaining({ name: 'HIPAA BAA' }),
+        [],
+        'vetting.service:226',
       );
     });
   });
@@ -218,6 +226,8 @@ describe('VettingService', () => {
       expect(pipelineWrite.pushEntity).toHaveBeenCalledWith(
         'EngagementVettingItem',
         expect.objectContaining({ status: 'submitted' }),
+        [],
+        'vetting.service:295',
       );
     });
 
@@ -287,6 +297,8 @@ describe('VettingService', () => {
       expect(pipelineWrite.pushEntity).toHaveBeenCalledWith(
         'EngagementVettingItem',
         expect.objectContaining({ dateDeleted: expect.any(String) }),
+        [],
+        'vetting.service:321',
       );
     });
   });
@@ -460,6 +472,85 @@ describe('VettingService', () => {
 
       service.setPilotCompletionSuggestion(suggestion2);
       expect(service.pilotCompletionSuggestion()?.pilotName).toBe('Pilot Two');
+    });
+  });
+
+  // ── Error Handling (Phase 20 Wave 2) ──
+
+  describe('error handling on Pipeline rejection', () => {
+    it('should surface error to user on initializeVetting rejection', async () => {
+      graphqlRead.query.mockResolvedValue({
+        items: [],
+        page: { pageNumber: 1, pageSize: 200, totalCount: 0 },
+      });
+
+      const mockError = new Error('Seed failed');
+      pipelineWrite.pushEntities.mockRejectedValueOnce(mockError);
+
+      await expect(
+        service.initializeVetting('eng-001')
+      ).rejects.toThrow(mockError);
+
+      expect(mockSnackBar.open).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to initialize vetting items'),
+        'Dismiss',
+        expect.any(Object),
+      );
+    });
+
+    it('should surface error to user on addVettingItem rejection', async () => {
+      const mockError = new Error('Add failed');
+      pipelineWrite.pushEntity.mockRejectedValueOnce(mockError);
+
+      await expect(
+        service.addVettingItem('eng-001', {
+          name: 'Custom Item',
+          category: 'conditional',
+          vetting_type: 'compliance',
+          evidence_type: 'document',
+          direction: 'buyer_requires',
+        })
+      ).rejects.toThrow(mockError);
+
+      expect(mockSnackBar.open).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to add vetting item'),
+        'Dismiss',
+        expect.any(Object),
+      );
+    });
+
+    it('should surface error to user on updateVettingItem rejection', async () => {
+      graphqlRead.getById.mockResolvedValue(VETTING_GQL_FIXTURE);
+
+      const mockError = new Error('Update failed');
+      pipelineWrite.pushEntity.mockRejectedValueOnce(mockError);
+
+      await expect(
+        service.updateVettingItem('vi-001', { notes: 'test notes' })
+      ).rejects.toThrow(mockError);
+
+      expect(mockSnackBar.open).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to update vetting item'),
+        'Dismiss',
+        expect.any(Object),
+      );
+    });
+
+    it('should surface error to user on deleteVettingItem rejection', async () => {
+      graphqlRead.getById.mockResolvedValue(VETTING_GQL_FIXTURE);
+
+      const mockError = new Error('Delete failed');
+      pipelineWrite.pushEntity.mockRejectedValueOnce(mockError);
+
+      await expect(
+        service.deleteVettingItem('vi-001')
+      ).rejects.toThrow(mockError);
+
+      expect(mockSnackBar.open).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to delete vetting item'),
+        'Dismiss',
+        expect.any(Object),
+      );
     });
   });
 });
