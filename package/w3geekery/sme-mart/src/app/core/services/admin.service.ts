@@ -22,20 +22,20 @@ export class AdminService {
     // Find the setting by key, then update by its row ID
     const result = await this.db.searchRows<AppSetting>(
       'app_settings',
-      `(setting_key=${key})`,
+      `(key=${key})`,
       { pageSize: 1 },
     );
     const existing = result.items?.[0];
     if (existing) {
       return this.db.updateRow<AppSetting>('app_settings', existing.id, {
-        setting_value: value,
+        value: value,
         updated_by: updatedBy,
       });
     }
     // Create if not found
     return this.db.createRow<AppSetting>('app_settings', {
-      setting_key: key,
-      setting_value: value,
+      key: key,
+      value: value,
       updated_by: updatedBy,
     });
   }

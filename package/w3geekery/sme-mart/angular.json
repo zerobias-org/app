@@ -23,10 +23,6 @@
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
-            "outputPath": {
-              "base": "dist",
-              "browser": ""
-            },
             "assets": [
               {
                 "glob": "**/*",
