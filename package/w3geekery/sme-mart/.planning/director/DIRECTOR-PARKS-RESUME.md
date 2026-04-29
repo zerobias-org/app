@@ -220,12 +220,14 @@ Brian walked through `.planning/director/brian-content-brief-v1.4-deferred.md` a
 
 ## Next-action sequence (when Director Parks resumes)
 
-1. **Phase 20 (Fire-and-Forget Audit)** — plan is written and waiting on the `director-parks-2-phase20` branch. Director recommended running this before Phase 27 to avoid stacking more silent-failure exposure during onboarding routing work. Execution path: merge `b243935` to execution branch; gsd-executor opens 20-01-PLAN.md first; REQUIREMENTS.md gets FF-06/07/08 added during Wave 1 (DP2 deliberately did not edit it).
-2. **Phase 27** — auth gate + lazy-engagement-guard. Brief refresh likely after Phase 20 lands.
-3. **Brian transcript processing** (`/tt:transcript` after Clark signals go) — extract answers, file new DECISIONS.md entries for any data-model decisions, update `brian-content-brief-v1.4-deferred.md`, surface follow-up questions.
-4. **Worktree hygiene** — `git worktree prune` (8 stale entries; safe, untaken).
-5. **Phase 28** — company profile review/confirm form (post-Phase-27).
-6. **Phase 30 + 31** — default board, smoke test (close out v1.4).
+1. **Phase 20 Wave 1 fix verification** — gsd-execute should have addressed the two BLOCKERS (test failure + AUDIT.md exec summary). Run `npm test -- --watch=false` to confirm 1472/1472 green. Then greenlight Wave 2 (Director's scope clarification already locked: 42 sites, simple-pattern remediation everywhere + backlog entries for sites needing more polish).
+2. **Phase 20 Wave 2 checkpoint** — gsd-execute halts at Wave 2 commit boundary. Director spot-checks: (a) 42 sites remediated with `await` + try/catch + MatSnackBar + explicit `callSiteTag`, (b) test specs use correctly-shaped SDK mocks, (c) backlog entries filed under "Fire-and-Forget Remediation Polish (v1.5)" for the bid submit + vetting batch sites + any others needing more.
+3. **Phase 20 Wave 3 + close** — kill-network E2E + verifier + `gsd-tools phase complete 20`. AUDIT.md prose cleanup (relabel "Error Surface?" column, replace "likely has error handling" with code citations).
+4. **Phase 27** — auth gate + lazy-engagement-guard. Brief refresh likely after Phase 20 lands.
+5. **Brian transcript processing** (`/tt:transcript` after Clark signals go) — extract answers, file new DECISIONS.md entries for any data-model decisions, update `brian-content-brief-v1.4-deferred.md`, surface follow-up questions.
+6. **Worktree hygiene** — `git worktree prune` (8 stale entries; safe, untaken).
+7. **Phase 28** — company profile review/confirm form (post-Phase-27).
+8. **Phase 30 + 31** — default board, smoke test (close out v1.4).
 
 ---
 
@@ -245,7 +247,7 @@ Brian walked through `.planning/director/brian-content-brief-v1.4-deferred.md` a
 
 ## Quick-start prompt for the next Director Parks session
 
-> Resume Director Parks. Read `.planning/director/DIRECTOR-PARKS-RESUME.md` FIRST (role contract + direct-request override + v1.4 state + IN-FLIGHT TRACKER). Then `.planning/director/SESSION-STATE.md` and recent `.planning/director/DECISIONS.md` entries. The /meta:director skill applies. v1.4 milestone design is locked (7 phases). **Phases 24, 25, 26 COMPLETE.** **Phase 26 fully shipped to UAT 2026-04-29** (PR #51 deploy-only set + #52 flatten-dist hotfix); engagements + providers render at `uat.zerobias.com/sme-mart/`. **`poc/sme-mart` synced with `upstream/uat`** (merge `4d6ef39`) — closes the long-divergence problem that caused the deploy saga. **Phase 20 (Fire-and-Forget Audit) plan written** on `director-parks-2-phase20` worktree branch (commit `b243935`); brief + ROADMAP entry already cherry-picked into `poc/sme-mart`. Director recommendation: execute Phase 20 before Phase 27 (auth gate + lazy guard) to avoid stacking more silent-failure exposure. **Brian meeting transcript still pending** — process via `/tt:transcript` when Clark signals ready. Direct request overrides default boundary (you can run /gsd:* if asked).
+> Resume Director Parks. Read `.planning/director/DIRECTOR-PARKS-RESUME.md` FIRST (role contract + direct-request override + v1.4 state + **IN-FLIGHT TRACKER — Phase 20 Wave 1 is HALTED for Director-required fixes**). Then `.planning/director/SESSION-STATE.md` and recent `.planning/director/DECISIONS.md` entries. The /meta:director skill applies. v1.4 milestone design is locked (7 phases). **Phases 25 + 26 COMPLETE; Phase 26 fully shipped to UAT 2026-04-29** (PR #51 + #52 hotfix; engagements + providers render). **`poc/sme-mart` synced with `upstream/uat`** (merge `4d6ef39`). **PHASE 20 IS THE ACTIVE BLOCKER:** gsd-execute completed Wave 1 (telemetry + AUDIT.md, commits `977828c` + `97885c9`) but HALTED with two issues Director must clear before Wave 2: (1) failing test `pipeline-write.service.spec.ts:280` (vitest stack-frame issue with `deriveCallSiteFromStack` — fix is to relax assertion or pass explicit `callSiteTag` in test), (2) AUDIT.md exec summary contradiction ("1 fictional ❌" vs table showing 0 fictional). Director's full Wave 2 scope clarification is locked in the In-flight tracker — 42 sites (33 CRITICAL FF + 9 MEDIUM FF) get the simple `await + try/catch + MatSnackBar + callSiteTag` pattern; sites needing more get backlog entries for v1.5 polish. **`marketplace` tagType decision filed 2026-04-29** — new tags use `marketplace`, existing `other` tags stay, `sme-mart.` prefix retained. See CLAUDE.md Key Constraints + DECISIONS.md "Marketplace tagType Is Preferred for New Tags". Phase 24 brief now uses the global `demo` tag as primitive. **Brian meeting transcript still pending** — `/tt:transcript` when Clark signals. Direct request overrides default boundary (you can run /gsd:* if asked).
 
 ---
 
