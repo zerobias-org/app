@@ -18,7 +18,13 @@ Each section names a default. Director will ship that default at v1.5 plan kicko
 
 ---
 
-## Section 1: Tier Structure [OPEN]
+## Section 1: Tier Structure [SCRAPPED 2026-04-28]
+
+**Status:** Scrapped per Brian directive 2026-04-28. SME Mart has NO internal pricing tiers. Monetization is a 3% transactional toll on marketplace transactions; sellers define their own pricing on each ServiceOffering. See DECISIONS.md "Marketplace Monetization Is a 3% Transactional Toll Only." All section A/B/C tier-structure options below are obsolete — the question itself was wrong-shaped.
+
+**Original section preserved below for audit trail.**
+
+---
 
 **What we need:** Locked answer on how many pricing tiers SME Mart will have, what they're called, and what differentiates them.
 
@@ -34,7 +40,13 @@ Each section names a default. Director will ship that default at v1.5 plan kicko
 
 ---
 
-## Section 2: Tier Pricing + Entitlements [OPEN]
+## Section 2: Tier Pricing + Entitlements [SCRAPPED 2026-04-28]
+
+**Status:** Scrapped — same reason as Section 1. No SME-Mart-internal tiers exist. Sellers price their own ServiceOfferings; SME Mart takes 3% off the top. Tiered listing fees ("e.g., ~$100/mo to post an app") are a possible v1.6+ futurework but explicitly out of scope ("obvious when we get there" per Brian). See DECISIONS.md "Marketplace Monetization Is a 3% Transactional Toll Only."
+
+**Original section preserved below for audit trail.**
+
+---
 
 **What we need:** Monthly/annual price for each tier + what Buyer + Provider get at each tier.
 
@@ -58,7 +70,23 @@ Each section names a default. Director will ship that default at v1.5 plan kicko
 
 ---
 
-## Section 3: Terms of Service / Privacy / EULA [OPEN]
+## Section 3: Terms of Service / Privacy / EULA [ANSWERED-VIA-ARCHITECTURE 2026-04-28]
+
+**Status:** Answered architecturally — ToS lives at the **ZB platform per-app layer**, not at the SME Mart layer. Two-layer model:
+1. **Engagement-level MSA** — required to have a ZB account at all. Account-level ToS, like AWS.
+2. **Per-app/product ToS** — every ZB offering (SME Mart, Value Manager, Governance, ~30 packages eventually) carries its own ToS + consumption model + price model.
+
+SME Mart consumes the per-app ToS layer once it exists at the platform level. The actual ToS *content* gets authored as requirement-tasks in the **W3Geekery↔ZeroBias engagement project notes** (specifically in a "supporting all ZeroBias apps — content/assets gathering" workspace that Clark stands up after the W3Geekery↔ZB engagement is live). Brian responds to those tasks (eventually via his own Claude). One workspace covers content for all ZB apps.
+
+**Phase 29 implication:** Phase 29's old scope (ToS link surface on the engagement/project board in v1.5) collapses substantially. Without the platform-side per-app ToS layer, there's nothing to link to. Phase 29 either waits on the platform layer or its remaining scope (ZB branding adoption check) merges into Phase 30.
+
+**Open meta-question still unresolved:** Does the requirement-task carry the content (Brian writes ToS into the task body), or does the task point to an API that Brian writes to? Brian leans "task is a guide that *includes* the API for satisfaction." Worth resolving before building the requirement-task UI.
+
+See DECISIONS.md "Per-App ToS Architecture — Two-Layer (Engagement MSA + Per-App ToS)."
+
+**Original section preserved below for audit trail.**
+
+---
 
 **What we need:** URLs to ToS, Privacy Policy, and (if applicable) Acceptable Use / EULA.
 
@@ -87,7 +115,13 @@ Each section names a default. Director will ship that default at v1.5 plan kicko
 
 ---
 
-## Section 5: Tier Marketing Copy [OPEN]
+## Section 5: Tier Marketing Copy [SCRAPPED 2026-04-28]
+
+**Status:** Scrapped — no tiers exist (see Sections 1 + 2). No "Free / Pro / Enterprise" comparison page to write copy for. If individual ServiceOffering listings need marketing copy, that's seller-authored, not SME-Mart-authored. See DECISIONS.md "Marketplace Monetization Is a 3% Transactional Toll Only."
+
+**Original section preserved below for audit trail.**
+
+---
 
 **What we need:** 1-2 sentence pitch per tier — appears on tier cards, comparison page, upgrade prompts.
 
@@ -122,7 +156,17 @@ Each section names a default. Director will ship that default at v1.5 plan kicko
 
 ---
 
-## Section 7: Long-Term Engagement-Creation Ownership [OPEN]
+## Section 7: Long-Term Engagement-Creation Ownership [ANSWERED-PARTIAL 2026-04-28]
+
+**Status (partial answer):** Brian confirmed 2026-04-28 that **eventually onboarding adopts SME Mart's engagement→project flow** — the current website-CRM-trial → manual-setup path gets replaced. New signups land in a **pilot project** with thinner engagement requirements (no banking, lighter MSA); when the pilot graduates, the same project transitions from "pilot" type to "production" type (preserves entity/ID/history). See DECISIONS.md "Pilot vs Production Project Type Is a Type Flip on the Same Project."
+
+**What this means for SME Mart's lazy-on-load guard:** still interim, but the long-term direction is now clearer. The platform takes over the auto-creation responsibility WHEN the platform's onboarding adopts SME Mart's flow — that adoption is the migration trigger, not a separate "platform owns this now" handoff. So the SME Mart guard runs until the platform onboarding flow IS SME Mart's flow.
+
+**Still open / unscoped:** target date for the platform-onboarding adoption. No window committed.
+
+**Original section preserved below for audit trail.**
+
+---
 
 **What we need:** Confirmation that the default-ZB-engagement-creation responsibility eventually moves into the ZB platform itself (at platform-onboarding time), and SME Mart's lazy-on-load guard is interim only.
 
@@ -177,12 +221,19 @@ For any section I haven't fully decided, ask me 2-3 follow-up questions (not 10)
 
 | Section | Status | Date | Notes |
 |---|---|---|---|
-| 1. Tier structure | [OPEN] | — | Default: A (Free/Pro/Enterprise) |
-| 2. Tier pricing + entitlements | [OPEN] | — | Default: matrix above |
-| 3. ToS / Privacy / EULA | [OPEN] | — | Default: C (link to ZB Terms) |
+| 1. Tier structure | [SCRAPPED] | 2026-04-28 | Question wrong-shaped — no SME-Mart-internal tiers; 3% toll model |
+| 2. Tier pricing + entitlements | [SCRAPPED] | 2026-04-28 | Same — sellers define their own pricing |
+| 3. ToS / Privacy / EULA | [ANSWERED-VIA-ARCHITECTURE] | 2026-04-28 | Per-app ToS is a platform-layer concern; content authored in W3Geekery↔ZB project notes |
 | 4. Branding assets | [LARGELY RESOLVED] | — | Pulling from ngx-library / zb/ui; confirm voice + sub-brand vs platform-brand |
-| 5. Tier marketing copy | [OPEN] | — | Default: option A each tier |
+| 5. Tier marketing copy | [SCRAPPED] | 2026-04-28 | No tiers exist; per-offering copy is seller-authored |
 | 6. Opt-in vs auto | [ANSWERED] | 2026-04-23 | Auto/invariant — confirm sanity at next meeting |
-| 7. Platform ownership long-term | [OPEN] | — | Default: C (assume interim, build robust) |
+| 7. Platform ownership long-term | [ANSWERED-PARTIAL] | 2026-04-28 | Platform onboarding eventually adopts SME Mart's flow; no target date committed |
 
-**v1.5 Phase 29 unblock condition:** Sections 1, 2, 3, 5 all `[ANSWERED]` OR Director declares default-ship at v1.5 plan kickoff. Section 4 already has working defaults from ngx-library; Brian voice-confirmation is refinement, not a gate.
+**v1.5 Phase 29 status (revised 2026-04-28):** Original Phase 29 scope (tier display + ToS link + branding) has dissolved. Tiers don't exist. ToS is a platform-layer architectural concern, not a SME Mart v1.5 deliverable. Branding is largely resolved. **Recommendation:** Phase 29 either retires entirely (most scope evaporated) or its residual scope (ZB branding adoption check on the default-engagement page) merges into Phase 30. Director to make the call at v1.5 plan kickoff.
+
+**New questions surfaced 2026-04-28** (not in original brief — file as new sections or migrate to W3Geekery↔ZB project notes once that engagement is live):
+- Task-as-data-sink vs Task-pointing-to-API for requirement satisfaction (per-app ToS authoring workflow + future requirement-task patterns)
+- Marketplace listing tier model (DEFERRED — "obvious when we get there")
+- How Joe's and Dan's UIs integrate with SME Mart's structure (BACKLOG #095 cross-team sync)
+
+**Brief deprecation path:** Once W3Geekery↔ZB engagement+project is live (target end of 2026-04 week per Action Item #3), this brief stops accumulating new sections — new Brian asks file as project-notes tasks per DECISIONS.md "Brian-W3Geekery Collaborative Spec Lives in Project Notes."
