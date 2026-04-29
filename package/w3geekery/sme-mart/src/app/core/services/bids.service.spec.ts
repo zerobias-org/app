@@ -5,7 +5,15 @@
  * Integration with RfpInvitationService is tested through pure logic validation.
  */
 
-import { describe, it, expect } from 'vitest';
+import { TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { BidsService } from './bids.service';
+import { PipelineWriteService } from './pipeline-write.service';
+import { GraphqlReadService } from './graphql-read.service';
+import { NotificationService } from './notification.service';
+import { RfpInvitationService } from './rfp-invitation.service';
+import { SmeMartProjectService } from './sme-mart-project.service';
 import { BID_FIELD_MAPPING } from '../field-mappings';
 import type { SmeMartProject } from '../models';
 
@@ -44,6 +52,79 @@ describe('BidsService Field Mapping Tests', () => {
 
     // Verify legacy engagement mapping
     expect(mapping.request_id).toBe('engagementId');
+  });
+});
+
+describe('BidsService CRUD with Error Handling', () => {
+  let service: BidsService;
+  let mockPipeline: any;
+  let mockGql: any;
+  let mockNotifications: any;
+  let mockRfpInvitations: any;
+  let mockSmeMartProjects: any;
+  let mockSnackBar: { open: ReturnType<typeof vi.fn> };
+
+  beforeEach(() => {
+    mockPipeline = {
+      pushEntity: vi.fn().mockResolvedValue(undefined),
+      getCached: vi.fn().mockReturnValue(null),
+      seedCache: vi.fn(),
+    };
+    mockGql = {
+      query: vi.fn().mockResolvedValue({ items: [], page: { totalCount: 0 } }),
+      getById: vi.fn().mockResolvedValue(null),
+      rawQuery: vi.fn().mockResolvedValue({ Bid: [] }),
+    };
+    mockNotifications = { create: vi.fn().mockResolvedValue(undefined) };
+    mockRfpInvitations = { findByProjectAndVendor: vi.fn().mockResolvedValue(null) };
+    mockSmeMartProjects = { getProject: vi.fn().mockResolvedValue(null) };
+    mockSnackBar = { open: vi.fn() };
+
+    TestBed.configureTestingModule({
+      providers: [
+        BidsService,
+        { provide: PipelineWriteService, useValue: mockPipeline },
+        { provide: GraphqlReadService, useValue: mockGql },
+        { provide: NotificationService, useValue: mockNotifications },
+        { provide: RfpInvitationService, useValue: mockRfpInvitations },
+        { provide: SmeMartProjectService, useValue: mockSmeMartProjects },
+        { provide: MatSnackBar, useValue: mockSnackBar },
+      ],
+    });
+
+    service = TestBed.inject(BidsService);
+  });
+
+  describe('submitBid error handling', () => {
+    it('should surface error to user on Pipeline rejection', async () => {
+      const mockProject: SmeMartProject = {
+        id: 'proj-1',
+        name: 'Test RFP',
+        status: 'published',
+        startDate: '2026-04-01',
+        createdAt: '2026-04-01T00:00:00Z',
+        updatedAt: '2026-04-01T00:00:00Z',
+        isInvitationOnly: false,
+      };
+      mockSmeMartProjects.getProject.mockResolvedValue(mockProject);
+
+      const mockError = new Error('Network failure');
+      mockPipeline.pushEntity.mockRejectedValueOnce(mockError);
+
+      await expect(
+        service.submitBid({
+          project_id: 'proj-1',
+          provider_id: 'vendor-1',
+          cover_letter: 'Test bid',
+        })
+      ).rejects.toThrow(mockError);
+
+      expect(mockSnackBar.open).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to save bid'),
+        'Dismiss',
+        expect.any(Object)
+      );
+    });
   });
 });
 

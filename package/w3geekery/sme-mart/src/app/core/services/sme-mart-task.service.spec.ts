@@ -6,6 +6,7 @@
 
 import { TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { SmeMartTaskService } from './sme-mart-task.service';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
@@ -38,6 +39,7 @@ describe('SmeMartTaskService', () => {
   let mockPipelineWrite: MockPipelineWrite;
   let mockGraphqlRead: MockGraphqlRead;
   let mockImpersonation: MockImpersonation;
+  let mockSnackBar: { open: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     mockPipelineWrite = {
@@ -49,12 +51,13 @@ describe('SmeMartTaskService', () => {
       seedCache: vi.fn(),
     };
     mockGraphqlRead = {
-      query: vi.fn().mockResolvedValue({ items: [] }),
+      query: vi.fn().mockResolvedValue({ items: [], page: { totalCount: 0 } }),
       getById: vi.fn().mockResolvedValue(null),
     };
     mockImpersonation = {
       effectiveUserId: vi.fn().mockReturnValue('user-123'),
     };
+    mockSnackBar = { open: vi.fn() };
 
     TestBed.configureTestingModule({
       providers: [
@@ -62,6 +65,7 @@ describe('SmeMartTaskService', () => {
         { provide: PipelineWriteService, useValue: mockPipelineWrite },
         { provide: GraphqlReadService, useValue: mockGraphqlRead },
         { provide: ImpersonationService, useValue: mockImpersonation },
+        { provide: MatSnackBar, useValue: mockSnackBar },
       ],
     });
 
@@ -72,7 +76,7 @@ describe('SmeMartTaskService', () => {
   // createTask
   // ────────────────────────────────────────────────────────────────────────────
 
-  it('should create a task and push to pipeline fire-and-forget', async () => {
+  it('should create a task and push to pipeline with await', async () => {
     mockPipelineWrite.pushEntity.mockResolvedValue(undefined);
 
     const result = await service.createTask({
@@ -88,20 +92,28 @@ describe('SmeMartTaskService', () => {
     expect(mockPipelineWrite.pushEntity).toHaveBeenCalledWith(
       'SmeMartTask',
       expect.objectContaining({ boardId: 'board-1', name: 'Task 1', code: 'T1' }),
+      [],
+      'sme-mart-task.service:82',
     );
   });
 
-  it('should return task optimistically before pipeline completes', async () => {
-    mockPipelineWrite.pushEntity.mockImplementation(() => new Promise(() => {})); // Never completes
+  it('should surface error to user on Pipeline rejection in createTask', async () => {
+    const mockError = new Error('Save failed');
+    mockPipelineWrite.pushEntity.mockRejectedValueOnce(mockError);
 
-    const taskPromise = service.createTask({
-      boardId: 'board-1',
-      name: 'Task 1',
-      code: 'T1',
-    });
+    await expect(
+      service.createTask({
+        boardId: 'board-1',
+        name: 'Task 1',
+        code: 'T1',
+      })
+    ).rejects.toThrow(mockError);
 
-    const result = await Promise.race([taskPromise, Promise.resolve('completed')]);
-    expect(result).not.toBe('completed'); // Task returned immediately
+    expect(mockSnackBar.open).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to save task'),
+      'Dismiss',
+      expect.any(Object),
+    );
   });
 
   // ────────────────────────────────────────────────────────────────────────────
@@ -358,6 +370,23 @@ describe('SmeMartTaskService', () => {
     expect(mockPipelineWrite.pushEntity).toHaveBeenCalledWith(
       'SmeMartTask',
       expect.objectContaining({ id: 'task-1', name: 'Updated Task' }),
+      [],
+      'sme-mart-task.service:257',
+    );
+  });
+
+  it('should surface error to user on Pipeline rejection in updateTask', async () => {
+    const mockError = new Error('Update failed');
+    mockPipelineWrite.pushEntity.mockRejectedValueOnce(mockError);
+
+    await expect(
+      service.updateTask('task-1', { name: 'Updated Task' })
+    ).rejects.toThrow(mockError);
+
+    expect(mockSnackBar.open).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to update task'),
+      'Dismiss',
+      expect.any(Object),
     );
   });
 
@@ -371,5 +400,18 @@ describe('SmeMartTaskService', () => {
     await service.deleteTask('task-1');
 
     expect(mockPipelineWrite.deleteEntity).toHaveBeenCalledWith('SmeMartTask', 'task-1');
+  });
+
+  it('should surface error to user on Pipeline rejection in deleteTask', async () => {
+    const mockError = new Error('Delete failed');
+    mockPipelineWrite.deleteEntity.mockRejectedValueOnce(mockError);
+
+    await expect(service.deleteTask('task-1')).rejects.toThrow(mockError);
+
+    expect(mockSnackBar.open).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to delete task'),
+      'Dismiss',
+      expect.any(Object),
+    );
   });
 });

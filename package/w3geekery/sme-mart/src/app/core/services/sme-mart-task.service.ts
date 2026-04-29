@@ -9,6 +9,7 @@
  */
 
 import { Injectable, inject } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
 import { ImpersonationService } from './impersonation.service';
@@ -45,6 +46,7 @@ export class SmeMartTaskService {
   private readonly pipelineWrite = inject(PipelineWriteService);
   private readonly graphqlRead = inject(GraphqlReadService);
   private readonly impersonation = inject(ImpersonationService);
+  private readonly snackBar = inject(MatSnackBar);
 
   /**
    * Create a new task.
@@ -78,10 +80,17 @@ export class SmeMartTaskService {
       SME_MART_TASK_FIELD_MAPPING.gqlToNeon,
     );
 
-    // Fire-and-forget push to Pipeline
-    this.pipelineWrite.pushEntity('SmeMartTask', gqlData).catch(err => {
-      console.error('[SmeMartTaskService] Failed to push task to pipeline:', err);
-    });
+    // Push to Pipeline with error surface
+    try {
+      await this.pipelineWrite.pushEntity('SmeMartTask', gqlData, [], 'sme-mart-task.service:82');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to save task: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     // Return optimistically
     return modelData;
@@ -243,10 +252,17 @@ export class SmeMartTaskService {
       SME_MART_TASK_FIELD_MAPPING.gqlToNeon,
     );
 
-    // Fire-and-forget push
-    this.pipelineWrite.pushEntity('SmeMartTask', gqlData).catch(err => {
-      console.error('[SmeMartTaskService] Failed to push task update to pipeline:', err);
-    });
+    // Push to Pipeline with error surface
+    try {
+      await this.pipelineWrite.pushEntity('SmeMartTask', gqlData, [], 'sme-mart-task.service:257');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to update task: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     // Return optimistically
     return modelData;
@@ -258,10 +274,16 @@ export class SmeMartTaskService {
    * Returns immediately while Pipeline delete happens in background.
    */
   async deleteTask(taskId: string): Promise<void> {
-    // Fire-and-forget delete
-    this.pipelineWrite.deleteEntity('SmeMartTask', taskId).catch(err => {
-      console.error('[SmeMartTaskService] Failed to delete task:', err);
-    });
+    try {
+      await this.pipelineWrite.deleteEntity('SmeMartTask', taskId);
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to delete task: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
   }
 
   // ────────────────────────────────────────────────────────────────────────────

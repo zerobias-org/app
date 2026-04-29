@@ -1,4 +1,5 @@
 import { Injectable, inject } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService, type GqlQueryOptions } from './graphql-read.service';
 import { NotificationService } from './notification.service';
@@ -27,6 +28,7 @@ export class BidsService {
   private readonly notifications = inject(NotificationService);
   private readonly rfpInvitations = inject(RfpInvitationService);
   private readonly smeMartProjects = inject(SmeMartProjectService);
+  private readonly snackBar = inject(MatSnackBar);
 
   /** Scalar fields for standard queries (no link fields) */
   private readonly scalarBidFields = [
@@ -202,7 +204,7 @@ export class BidsService {
       updated_at: new Date().toISOString(),
     };
 
-    this.pushBid(bid);
+    await this.pushBid(bid);
     return bid;
   }
 
@@ -227,7 +229,7 @@ export class BidsService {
       updated_at: new Date().toISOString(),
     };
 
-    this.pushBid(bid);
+    await this.pushBid(bid);
     return bid;
   }
 
@@ -273,7 +275,7 @@ export class BidsService {
     }
 
     const merged: Bid = { ...current, ...updated } as Bid;
-    this.pushBid(merged);
+    await this.pushBid(merged);
     return merged;
   }
 
@@ -298,7 +300,7 @@ export class BidsService {
       updated_at: new Date().toISOString(),
     };
 
-    this.pushBid(updated);
+    await this.pushBid(updated);
 
     // Fire-and-forget notification
     const resourceId = updated.project_id || updated.request_id;
@@ -359,15 +361,22 @@ export class BidsService {
     if (!current) throw new Error(`Bid ${id} not found`);
 
     const updated: Bid = { ...current, status: status as Bid['status'], updated_at: new Date().toISOString() };
-    this.pushBid(updated);
+    await this.pushBid(updated);
     return updated;
   }
 
-  private pushBid(bid: Bid): void {
+  private async pushBid(bid: Bid): Promise<void> {
     const gqlData = mapNeonToGql<Record<string, unknown>>(bid, BID_FIELD_MAPPING.neonToGql);
-    this.pipelineWrite.pushEntity('Bid', gqlData).catch(err => {
-      console.error('[BidsService] Failed to push bid:', err);
-    });
+    try {
+      await this.pipelineWrite.pushEntity('Bid', gqlData, [], 'bids.service:368');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to save bid: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
   }
 
   /**
