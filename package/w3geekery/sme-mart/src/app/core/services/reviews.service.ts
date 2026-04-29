@@ -1,4 +1,5 @@
 import { Injectable, inject } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService, type GqlQueryOptions } from './graphql-read.service';
 import { REVIEW_FIELD_MAPPING, mapNeonToGql, mapGqlToNeon } from '../field-mappings';
@@ -20,6 +21,7 @@ import type { GqlReviewResponse } from '../gql-types';
 export class ReviewsService {
   private readonly pipelineWrite = inject(PipelineWriteService);
   private readonly graphqlRead = inject(GraphqlReadService);
+  private readonly snackBar = inject(MatSnackBar);
 
   /**
    * List reviews for a specific provider, optionally filtered to approved only.
@@ -138,18 +140,25 @@ export class ReviewsService {
       updated_at: now,
     };
 
-    // Transform to GQL shape and push to Pipeline (fire-and-forget)
+    // Transform to GQL shape and push to Pipeline
     const gqlData = mapNeonToGql<GqlReviewResponse>(review, REVIEW_FIELD_MAPPING.neonToGql);
-    this.pipelineWrite.pushEntity('Review', gqlData as unknown as Record<string, unknown>).catch(err => {
-      console.error('Failed to push Review to Pipeline:', err);
-    });
+    try {
+      await this.pipelineWrite.pushEntity('Review', gqlData as unknown as Record<string, unknown>, [], 'reviews.service:143');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to save review: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     // Return optimistic response immediately
     return review;
   }
 
   /**
-   * Approve a review and push approval metadata to Pipeline (fire-and-forget).
+   * Approve a review and push approval metadata to Pipeline.
    * Sets approved=true, approvedAt={now}, approvedBy={approverId}.
    * Returns optimistic updated Review.
    */
@@ -177,9 +186,16 @@ export class ReviewsService {
 
     // Push to Pipeline
     const gqlData = mapNeonToGql<GqlReviewResponse>(updated, REVIEW_FIELD_MAPPING.neonToGql);
-    this.pipelineWrite.pushEntity('Review', gqlData as unknown as Record<string, unknown>).catch(err => {
-      console.error('Failed to approve Review in Pipeline:', err);
-    });
+    try {
+      await this.pipelineWrite.pushEntity('Review', gqlData as unknown as Record<string, unknown>, [], 'reviews.service:193');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to approve review: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     // Return optimistic response
     return updated;
@@ -213,9 +229,16 @@ export class ReviewsService {
 
     // Push to Pipeline
     const gqlData = mapNeonToGql<GqlReviewResponse>(updated, REVIEW_FIELD_MAPPING.neonToGql);
-    this.pipelineWrite.pushEntity('Review', gqlData as unknown as Record<string, unknown>).catch(err => {
-      console.error('Failed to reject Review in Pipeline:', err);
-    });
+    try {
+      await this.pipelineWrite.pushEntity('Review', gqlData as unknown as Record<string, unknown>, [], 'reviews.service:228');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to reject review: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     // Return optimistic response
     return updated;

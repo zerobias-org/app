@@ -7,6 +7,7 @@
  */
 
 import { TestBed } from '@angular/core/testing';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { ReviewsService } from './reviews.service';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
@@ -19,16 +20,19 @@ describe('ReviewsService (Pipeline + GraphQL)', () => {
   let service: ReviewsService;
   let pipelineWrite: ReturnType<typeof fakePipelineWriteService>;
   let graphqlRead: ReturnType<typeof fakeGraphqlReadService>;
+  let mockSnackBar: { open: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     pipelineWrite = fakePipelineWriteService();
     graphqlRead = fakeGraphqlReadService();
+    mockSnackBar = { open: vi.fn() };
 
     TestBed.configureTestingModule({
       providers: [
         ReviewsService,
         { provide: PipelineWriteService, useValue: pipelineWrite },
         { provide: GraphqlReadService, useValue: graphqlRead },
+        { provide: MatSnackBar, useValue: mockSnackBar },
       ],
     });
 
@@ -178,6 +182,8 @@ describe('ReviewsService (Pipeline + GraphQL)', () => {
           reviewerZerobiasUserId: 'user-buyer-001-uuid',
           engagementId: 'eng-001-uuid',
         }),
+        [],
+        'reviews.service:143',
       );
       expect(result).toHaveProperty('id');
       expect(result).toHaveProperty('approved', false);
@@ -200,6 +206,8 @@ describe('ReviewsService (Pipeline + GraphQL)', () => {
           reviewerZerobiasUserId: 'user-001-uuid',
           approved: false,
         }),
+        [],
+        'reviews.service:143',
       );
     });
 
@@ -213,6 +221,25 @@ describe('ReviewsService (Pipeline + GraphQL)', () => {
       expect(result).toHaveProperty('request_id', null);
       expect(result).toHaveProperty('review_text', null);
       expect(result).toHaveProperty('approved_at', null);
+    });
+
+    it('should surface error to user on Pipeline rejection', async () => {
+      const mockError = new Error('Network failure');
+      pipelineWrite.pushEntity.mockRejectedValueOnce(mockError);
+
+      await expect(
+        service.createReview({
+          provider_id: 'provider-001-uuid',
+          reviewer_zerobias_user_id: 'user-001-uuid',
+          rating: 5,
+        })
+      ).rejects.toThrow(mockError);
+
+      expect(mockSnackBar.open).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to save review'),
+        'Dismiss',
+        expect.any(Object)
+      );
     });
   });
 
@@ -229,6 +256,8 @@ describe('ReviewsService (Pipeline + GraphQL)', () => {
           approved: true,
           approvedBy: 'admin-user-uuid',
         }),
+        [],
+        'reviews.service:193',
       );
       expect(result).toHaveProperty('approved', true);
       expect(result).toHaveProperty('approved_by', 'admin-user-uuid');
@@ -239,6 +268,20 @@ describe('ReviewsService (Pipeline + GraphQL)', () => {
       graphqlRead.getById.mockResolvedValue(null);
 
       await expect(service.approveReview('nonexistent-id', 'admin-user')).rejects.toThrow('Review nonexistent-id not found');
+    });
+
+    it('should surface error to user on Pipeline rejection', async () => {
+      graphqlRead.getById.mockResolvedValue(REVIEW_GQL_FIXTURE);
+      const mockError = new Error('Save failed');
+      pipelineWrite.pushEntity.mockRejectedValueOnce(mockError);
+
+      await expect(service.approveReview('review-001-uuid', 'admin-user-uuid')).rejects.toThrow(mockError);
+
+      expect(mockSnackBar.open).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to approve review'),
+        'Dismiss',
+        expect.any(Object),
+      );
     });
   });
 
@@ -255,6 +298,8 @@ describe('ReviewsService (Pipeline + GraphQL)', () => {
           approved: false,
           approvedBy: 'admin-user-uuid',
         }),
+        [],
+        'reviews.service:228',
       );
       expect(result).toHaveProperty('approved', false);
       expect(result).toHaveProperty('approved_by', 'admin-user-uuid');
@@ -264,6 +309,20 @@ describe('ReviewsService (Pipeline + GraphQL)', () => {
       graphqlRead.getById.mockResolvedValue(null);
 
       await expect(service.rejectReview('nonexistent-id', 'admin-user')).rejects.toThrow('Review nonexistent-id not found');
+    });
+
+    it('should surface error to user on Pipeline rejection', async () => {
+      graphqlRead.getById.mockResolvedValue(REVIEW_GQL_FIXTURE);
+      const mockError = new Error('Save failed');
+      pipelineWrite.pushEntity.mockRejectedValueOnce(mockError);
+
+      await expect(service.rejectReview('review-001-uuid', 'admin-user-uuid')).rejects.toThrow(mockError);
+
+      expect(mockSnackBar.open).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to reject review'),
+        'Dismiss',
+        expect.any(Object),
+      );
     });
   });
 
