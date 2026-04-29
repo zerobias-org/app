@@ -249,3 +249,59 @@ Brian walked through `.planning/director/brian-content-brief-v1.4-deferred.md` a
 ## Why this file is here instead of `.claude/restart_context.md`
 
 `.claude/restart_context.md` is ambiguous territory — any Claude session that resumes on this repo might read it. Director Parks role rules and in-flight state need a location that is clearly owned by the Director role so other sessions don't accidentally pick up Director-scoped rules and get confused about their own role. `.planning/director/DIRECTOR-PARKS-RESUME.md` is owned. Other sessions reading this path would know they stepped into Director territory.
+
+---
+
+## Update from gsd-execute session — 2026-04-28 (after this file's last save)
+
+Director Parks: while you were away, the gsd-execute worker ran Plan 26-03 to plan-level completion. Briefing you back in.
+
+### What landed
+
+| Commit | What |
+|--------|------|
+| 0ab1850 | Wave 1 RED — MPI-shaped failing tests for ProviderProfilesService |
+| 67c5883 | Wave 2 GREEN — MPI/GQL implementation (direct boundaryExecuteRawQuery, bypassing GraphqlReadService per your decision lock) |
+| 3188023 | Wave 3 — Component specs (provider-list/detail/card) for ZB-shaped data |
+| **fff95b2** | **(authored by you, not the executor)** — removed demo-mode short-circuit on graphql-read.service.ts. Originally locked OUT of scope for 26-03; you over-rode that decision mid-flight to unblock the impersonate-fix push (50f5d51). 46 previously-failing tests recovered. |
+| b6e1244 | Bug fix — listProviders was using fabricated `orgId: { _or: [...] }` filter shape; replaced with ZB's actual `.in.UUID1,UUID2` operator (source: `~/Projects/zb/platform/graphql/README.md`). Caught at local-dev verification. |
+| 90b4b1c | Cleanup — 22 unused-symbol diagnostics resolved (CRUD stub params prefixed with `_`, dead `signal`/`catalog` imports removed) |
+| 6fc9730 | SUMMARY.md for 26-03 |
+| 61a8a3f | ROADMAP.md — phase 26 marked 4/4 complete |
+
+### What's verified (local dev only)
+
+- `npm run dev` (localhost frontend → UAT data) shows ZeroBias card on `/providers` ✅
+- Browser console clean ✅
+- All targeted unit tests pass (37/37); `tsc --noEmit` clean on both configs; `ng build --configuration=development` succeeds
+- **Detail page `/providers/<zb-org-id>` rendering: NOT YET CONFIRMED** — Clark hadn't checked at handoff time
+- **UAT verification deferred to post-deploy** — pre-deploy UAT was a structural mistake by the executor; corrected on the fly
+
+### What is NOT done yet (your decisions to make)
+
+Phase 26 plan-level work is complete, but the **phase-level closure** has not been run. Per the execute-phase workflow, after the last plan SUMMARY lands, the orchestrator normally:
+
+1. **Regression gate** — run prior-phase test files (24/25 plans) to catch cross-phase regressions
+2. **`gsd-verifier`** — spawn verifier subagent → produces `26-VERIFICATION.md` checking phase goal vs. requirements (SP-01, SP-02, SP-04, SP-05, SP-06)
+3. **`gsd-tools phase complete 26`** — auto-updates STATE.md frontmatter, checks roadmap checkbox, advances next-phase pointer
+4. **PROJECT.md evolution** — move SP-* requirements from Active → Validated
+5. **Final docs commit**
+
+The gsd-execute session deliberately did NOT run any of these autonomously — that's a Director call.
+
+Also flagging: **STATE.md prose body is stale**. Frontmatter tracks correctly (`completed_plans: 29`), but the body's "Current Position" section still reads "Plan 2 of 3 / Next: Plan 02". The body refresh typically happens during `phase complete`.
+
+### Three options presented to Clark; he hasn't chosen yet
+
+- **(A) Run phase-level closure now** — gsd-execute runs regression gate → spawns `gsd-verifier` → `phase complete 26` → commits. Wraps up cleanly, advances STATE.md to phase 27.
+- **(B) Hold for detail-page verification first** — Clark verifies `/providers/<zb-org-id>` on local dev, then close.
+- **(C) Hold entirely** — phase closure is its own session; resume tomorrow / next director window.
+
+Clark mentioned he might have accidentally killed Director Parks while this was in flight, hence this update. Pick up wherever you choose.
+
+### Clark told me explicitly
+
+> "don't touch anything else just tell it what you told me above pls"
+
+So: in-flight tracker, role contract, decisions log, and quick-start prompt sections above are untouched. Only this section is new.
+
