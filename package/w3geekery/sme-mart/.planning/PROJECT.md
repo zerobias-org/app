@@ -47,12 +47,12 @@ A transparent, task-gated marketplace where every boundary API operation require
 - ✓ My Organizations refactor — three-tier org navigation (Plan 079) — v1.1
 - ✓ Project-centric boundary model — Internal/External badges, engagement/project counts, boundary parties tab (Plan 080) — v1.1
 - ✓ Supply-side vendor profile — 6-section corporate docs, CRUD, expiration, pre-fill (Plan 041) — v1.1
+- ✓ ZB-as-provider seed — `COMPANY-INFO-CONVENTION.md` ratified (17 sections), 8 MPI rows seeded on UAT with `provider_type=platform` distinguisher, Browse Providers UI rewired from Neon views to direct `boundaryExecuteRawQuery` against MarketplaceProfileItem, ZB card visible on `/providers` (Phase 26: SP-01, SP-02, SP-04, SP-05, SP-06) — v1.4
 
 ### Active
 
 - [ ] Demo data visibility gate — Object.tag filtering, admin escape hatch (v1.4 P24)
 - [ ] Platform data audit — SDK inventory of pre-fillable fields (v1.4 P25)
-- [ ] ZB-as-provider seed — company_info convention, ServiceOffering tiers (v1.4 P26)
 - [ ] Auth gate + onboarding routing + lazy default-engagement guard (v1.4 P27)
 - [ ] Company profile review/confirm form — pre-populated, skip-for-now (v1.4 P28)
 - [ ] Default project board + "Coming Soon" placeholders (v1.4 P30)

@@ -25,11 +25,11 @@ Requirements for v1.4 "3P Onboarding & Default Engagement". Each maps to roadmap
 
 ### Seed Provider (Phase 26)
 
-- [ ] **SP-01**: `COMPANY-INFO-CONVENTION.md` exists and is referenced by Phase 28 brief
-- [ ] **SP-02**: ZeroBias appears as a provider in SME Mart UI (Browse Providers view lists it)
-- [ ] **SP-04**: Every seeded record carries appropriate Object.tag (`platform-provider` for ZB-as-provider, `sme-mart.eng.w3geekery-default-zb` for W3Geekery default-engagement records)
-- [ ] **SP-05**: Walkthrough residue `TAG-SHAPE-TEST-C` (schema id `64047b6c-...`) cleaned up via `markDeleted`
-- [ ] **SP-06**: Unit tests for seed function + Browse Providers rendering ZB-as-provider
+- [x] **SP-01**: `COMPANY-INFO-CONVENTION.md` exists and is referenced by Phase 28 brief
+- [x] **SP-02**: ZeroBias appears as a provider in SME Mart UI (Browse Providers view lists it)
+- [x] **SP-04**: Every seeded record carries appropriate Object.tag (`platform-provider` for ZB-as-provider, `sme-mart.eng.w3geekery-default-zb` for W3Geekery default-engagement records)
+- [x] **SP-05**: Walkthrough residue `TAG-SHAPE-TEST-C` (schema id `64047b6c-...`) cleaned up via `markDeleted`
+- [x] **SP-06**: Unit tests for seed function + Browse Providers rendering ZB-as-provider
 
 ### Auth & Routing (Phase 27)
 
@@ -122,11 +122,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PDA-03 | Phase 25 | Pending |
 | PDA-04 | Phase 25 | Pending |
 | PDA-05 | Phase 25 | Pending |
-| SP-01 | Phase 26 | Pending |
-| SP-02 | Phase 26 | Pending |
-| SP-04 | Phase 26 | Pending |
-| SP-05 | Phase 26 | Pending |
-| SP-06 | Phase 26 | Pending |
+| SP-01 | Phase 26 | Complete |
+| SP-02 | Phase 26 | Complete |
+| SP-04 | Phase 26 | Complete |
+| SP-05 | Phase 26 | Complete |
+| SP-06 | Phase 26 | Complete |
 | AR-01 | Phase 27 | Pending |
 | AR-02 | Phase 27 | Pending |
 | AR-03 | Phase 27 | Pending |
