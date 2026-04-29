@@ -16,6 +16,7 @@ Hide demo-seeded records from non-admin users in SME Mart UI. Admins (via `getPr
 - A hydra Tag `w3geekery.sme-mart.demo-seed` already marks hydra Resources created by the seeder.
 - Class-Object records (Engagement, SmeMartProject, Bid, etc.) have had no tagging mechanism until 2026-04-24 — now resolved: `Object.tag` field accepts `[{ value: "<tag-uuid>" }]` at Pipeline.receive ingest time (see DECISIONS.md "Object.tag Field Shape").
 - Admin detection locked: `getPrincipal().isAdmin` from `OrgPrincipalWithAdminFlag` (see `project_sme_mart_admin_detection.md`, DECISIONS.md).
+- **2026-04-29 update — global `demo` tag is now available** in `marketplace` tagType (zerobias-com/tag PR #1, merged by Daniel Rojas). Phase 24 implementation should prefer the global `demo` tag over the existing `w3geekery.sme-mart.demo-seed` for new demo records. Look up the global `demo` tag UUID via `hydra.Tag.searchTags({ name: "demo", type: "marketplace" })`. Existing records tagged with `w3geekery.sme-mart.demo-seed` stay (UUID-churn migration not worth it); the visibility gate filters on EITHER tag UUID for the transition. See DECISIONS.md "Marketplace tagType Is Preferred for New Tags".
 
 ### Deliverables
 

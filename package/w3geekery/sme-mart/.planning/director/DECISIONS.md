@@ -136,6 +136,26 @@ ServiceOffering tier structure is a data-model decision: it fixes the records we
 
 **Test coverage:** Unit tests in 26-02 assert seed payload includes `provider_type` section; 26-03 tests assert Browse Providers correctly filters/displays based on the section.
 
+**Update 2026-04-29:** `zerobias-com/tag` PR #1 was merged by Daniel Rojas. `marketplace` tagType is now live, plus `platform_provider` and `demo` global tags. Option-a (tag-based platform-provider distinguisher) is now technically available. **Phase 26 keeps option-b as shipped** — no rework. The MPI section was deployed to UAT (PR #51/#52), verified, and works. Migrating now is pure churn. Tag-based path remains an option for v1.5 unification work or Phase 27+ if onboarding routing benefits from the platform-level tag. See companion entry "Marketplace tagType Is Preferred for New Tags" for forward-looking guidance on tagType selection.
+
+## Marketplace tagType Is Preferred for New Tags
+**Date:** 2026-04-29
+**Decision:** All NEW SME Mart tags going forward use `tagType: "marketplace"`. Existing tags created with `tagType: "other"` stay as-is — no migration. Tag NAMES retain the `sme-mart.` prefix for now. Tag-filter components in the app must accept BOTH `other` and `marketplace` types during the coexistence period.
+
+**Why now:** `zerobias-com/tag` PR #1 (Daniel Rojas merged 2026-04-29) registered `marketplace` as a valid tagType in `hydra.tag_type`, alongside two global tags (`platform_provider` and `demo`). Pre-PR, the only valid type for SME Mart's domain tags was `other` — generic, indistinguishable from any other use of `other` on the platform. Now there's a semantically correct type.
+
+**Why not migrate existing tags:** Tags are immutable post-ingest. "Renaming" or "retyping" requires creating a NEW tag (new UUID), re-ingesting every Object whose `Object.tag: [{value: <oldUuid>}]` references it, then deprecating the old tag. For SME Mart that's hundreds of records on UAT alone (engagements, projects, MPI rows, documents, etc.). Cost is high, benefit is purely cosmetic — a tag's UUID is what matters at query time, not its type or name. Skip the migration; let coexistence handle it.
+
+**Why keep the `sme-mart.` prefix:** `marketplace` tagType is platform-shared — any future marketplace product on ZB would also use it (vendor onboarding marketplace, credentialing marketplace, advisory marketplace). Until a second tenant emerges, the prefix is empty calories, but dropping it now would force a re-prefix migration if a tenant ever shows up. Cheaper to keep it. Revisit if/when multi-tenancy materializes.
+
+**How to apply:**
+- New tag creation (e.g., engagement tags, project tags, demo-data tags): `tagType: "marketplace"`, `name: "sme-mart.<scope>.<slug>"` (prefix retained).
+- Tag-filter code (services, components that look up tags by type): allow both `tagType in ("other", "marketplace")` during the transition. Filter UI may need to render unified.
+- Phase 24 (Demo Data Visibility Gate): use the new `demo` global tag (created by Daniel's PR) as the implementation primitive. Tag demo records at ingest with the `demo` global tag UUID; non-admin views filter on `tag.eq.<demo-uuid>`.
+- BACKLOG entry filed for v1.5 hygiene: refactor tag-filter components to canonicalize on `marketplace` once existing-tag remediation is feasible.
+
+**Anti-pattern:** Plans creating new tags with `tagType: "other"` going forward — that ignores the available semantically-correct type. Equally: trying to "fix" all old tags in a one-shot migration. Don't.
+
 ## Object.tag Field Shape — Validated via UAT Experiment
 **Date:** 2026-04-24
 **Decision:** The `Object.tag` field (inherited property on every class, `propertyId` `65aadece-c352-4d59-8137-6ae03b98506d`, `dataTypeName: "tag"`, `dataTypeType: "object"`, `multi: true`) accepts at Pipeline.receive ingest time in this canonical shape:

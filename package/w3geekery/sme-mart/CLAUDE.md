@@ -117,6 +117,7 @@ Temporary hosting while the ZeroBias platform publishing path is WIP.
 - **`@zerobias-com/zerobias-angular-client`** — wraps `zerobias-client` → `zerobias-sdk` (all SDKs)
 - **Generic SQL Hub Module** for Neon DB access (DataProducer interface, no direct Drizzle)
 - **Neon VIEWs** for read queries (no JOINs in DataProducer) — writes go to individual tables
+- **Tag tagType: use `marketplace` for all new tags** — registered 2026-04-29 in `zerobias-com/tag` PR #1 (Daniel Rojas merged). Existing `other`-typed tags stay (renaming = UUID churn). Tag NAMES retain `sme-mart.` prefix for now. See DECISIONS.md "Marketplace tagType Is Preferred for New Tags".
 - **15 hrs/week cap** — Clark / W3Geekery contractor
 
 ## Team
