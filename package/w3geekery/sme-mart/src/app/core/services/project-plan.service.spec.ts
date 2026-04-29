@@ -5,6 +5,7 @@
  */
 
 import { TestBed } from '@angular/core/testing';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ProjectPlanService } from './project-plan.service';
 import { PipelineWriteService } from './pipeline-write.service';
@@ -17,6 +18,7 @@ describe('ProjectPlanService', () => {
   let mockPipelineWrite: { pushEntity: ReturnType<typeof vi.fn>; pushEntities: ReturnType<typeof vi.fn>; deleteEntity: ReturnType<typeof vi.fn>; deleteEntities: ReturnType<typeof vi.fn>; getCached: ReturnType<typeof vi.fn>; seedCache: ReturnType<typeof vi.fn> };
   let mockGraphqlRead: { query: ReturnType<typeof vi.fn>; getById: ReturnType<typeof vi.fn> };
   let mockImpersonation: { effectiveUserId: ReturnType<typeof vi.fn> };
+  let mockSnackBar: { open: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     mockPipelineWrite = {
@@ -34,6 +36,9 @@ describe('ProjectPlanService', () => {
     mockImpersonation = {
       effectiveUserId: vi.fn().mockReturnValue('user-123'),
     };
+    mockSnackBar = {
+      open: vi.fn(),
+    };
 
     TestBed.configureTestingModule({
       providers: [
@@ -41,6 +46,7 @@ describe('ProjectPlanService', () => {
         { provide: PipelineWriteService, useValue: mockPipelineWrite },
         { provide: GraphqlReadService, useValue: mockGraphqlRead },
         { provide: ImpersonationService, useValue: mockImpersonation },
+        { provide: MatSnackBar, useValue: mockSnackBar },
       ],
     });
 
@@ -66,6 +72,26 @@ describe('ProjectPlanService', () => {
     expect(mockPipelineWrite.pushEntity).toHaveBeenCalledWith(
       'ProjectPlan',
       expect.objectContaining({ parentId: 'project-1', title: 'Project Execution Plan' }),
+      [],
+      'project-plan.service:77',
+    );
+  });
+
+  it('should surface error to user on Pipeline rejection for createPlan', async () => {
+    const mockError = new Error('Network failure');
+    mockPipelineWrite.pushEntity.mockRejectedValueOnce(mockError);
+
+    await expect(
+      service.createPlan({
+        parentId: 'project-1',
+        title: 'Project Execution Plan',
+      })
+    ).rejects.toThrow(mockError);
+
+    expect(mockSnackBar.open).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to create plan'),
+      'Dismiss',
+      expect.any(Object),
     );
   });
 
@@ -137,6 +163,21 @@ describe('ProjectPlanService', () => {
     expect(mockPipelineWrite.pushEntity).toHaveBeenCalledWith(
       'ProjectPlan',
       expect.objectContaining({ id: 'plan-1', title: 'Updated Plan' }),
+      [],
+      'project-plan.service:165',
+    );
+  });
+
+  it('should surface error to user on Pipeline rejection for updatePlan', async () => {
+    const mockError = new Error('Save failed');
+    mockPipelineWrite.pushEntity.mockRejectedValueOnce(mockError);
+
+    await expect(service.updatePlan('plan-1', { title: 'New Title' })).rejects.toThrow(mockError);
+
+    expect(mockSnackBar.open).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to update plan'),
+      'Dismiss',
+      expect.any(Object),
     );
   });
 
@@ -167,6 +208,26 @@ describe('ProjectPlanService', () => {
     expect(mockPipelineWrite.pushEntity).toHaveBeenCalledWith(
       'PlanMilestone',
       expect.objectContaining({ parentId: 'plan-1', name: 'Phase 1 Complete' }),
+      [],
+      'project-plan.service:217',
+    );
+  });
+
+  it('should surface error to user on Pipeline rejection for createMilestone', async () => {
+    const mockError = new Error('Network failure');
+    mockPipelineWrite.pushEntity.mockRejectedValueOnce(mockError);
+
+    await expect(
+      service.createMilestone('plan-1', {
+        parentId: 'plan-1',
+        name: 'Phase 1',
+      })
+    ).rejects.toThrow(mockError);
+
+    expect(mockSnackBar.open).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to create milestone'),
+      'Dismiss',
+      expect.any(Object),
     );
   });
 
@@ -222,6 +283,21 @@ describe('ProjectPlanService', () => {
     expect(mockPipelineWrite.pushEntity).toHaveBeenCalledWith(
       'PlanMilestone',
       expect.objectContaining({ id: 'milestone-1', status: 'done' }),
+      [],
+      'project-plan.service:271',
+    );
+  });
+
+  it('should surface error to user on Pipeline rejection for updateMilestone', async () => {
+    const mockError = new Error('Update failed');
+    mockPipelineWrite.pushEntity.mockRejectedValueOnce(mockError);
+
+    await expect(service.updateMilestone('milestone-1', { status: 'done' })).rejects.toThrow(mockError);
+
+    expect(mockSnackBar.open).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to update milestone'),
+      'Dismiss',
+      expect.any(Object),
     );
   });
 

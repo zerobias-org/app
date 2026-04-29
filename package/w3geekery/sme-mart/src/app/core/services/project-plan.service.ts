@@ -8,6 +8,7 @@
  */
 
 import { Injectable, inject } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
 import { ImpersonationService } from './impersonation.service';
@@ -42,6 +43,7 @@ export class ProjectPlanService {
   private readonly pipelineWrite = inject(PipelineWriteService);
   private readonly graphqlRead = inject(GraphqlReadService);
   private readonly impersonation = inject(ImpersonationService);
+  private readonly snackBar = inject(MatSnackBar);
 
   // ────────────────────────────────────────────────────────────────────────────
   // ProjectPlan CRUD Methods
@@ -74,9 +76,16 @@ export class ProjectPlanService {
     );
 
     // Fire-and-forget push to Pipeline
-    this.pipelineWrite.pushEntity('ProjectPlan', gqlData).catch(err => {
-      console.error('[ProjectPlanService] Failed to push plan to pipeline:', err);
-    });
+    try {
+      await this.pipelineWrite.pushEntity('ProjectPlan', gqlData, [], 'project-plan.service:77');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to create plan: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     // Return optimistically
     return modelData;
@@ -162,9 +171,16 @@ export class ProjectPlanService {
     );
 
     // Fire-and-forget push
-    this.pipelineWrite.pushEntity('ProjectPlan', gqlData).catch(err => {
-      console.error('[ProjectPlanService] Failed to push plan update to pipeline:', err);
-    });
+    try {
+      await this.pipelineWrite.pushEntity('ProjectPlan', gqlData, [], 'project-plan.service:165');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to update plan: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     // Return optimistically
     return modelData;
@@ -214,9 +230,16 @@ export class ProjectPlanService {
     );
 
     // Fire-and-forget push
-    this.pipelineWrite.pushEntity('PlanMilestone', gqlData).catch(err => {
-      console.error('[ProjectPlanService] Failed to push milestone to pipeline:', err);
-    });
+    try {
+      await this.pipelineWrite.pushEntity('PlanMilestone', gqlData, [], 'project-plan.service:217');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to create milestone: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     // Return optimistically
     return modelData;
@@ -268,9 +291,16 @@ export class ProjectPlanService {
     );
 
     // Fire-and-forget push
-    this.pipelineWrite.pushEntity('PlanMilestone', gqlData).catch(err => {
-      console.error('[ProjectPlanService] Failed to push milestone update to pipeline:', err);
-    });
+    try {
+      await this.pipelineWrite.pushEntity('PlanMilestone', gqlData, [], 'project-plan.service:271');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to update milestone: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     // Return optimistically
     return modelData;
