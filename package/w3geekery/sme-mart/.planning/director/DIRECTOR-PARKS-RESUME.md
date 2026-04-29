@@ -61,14 +61,15 @@ Error toward acting-on-request. Retreating to the rule when explicitly asked is 
 - `.planning/director/phase-{24,25,26,27,28,30,31}-brief.md` — 7 phase briefs
 - `.planning/director/brian-content-brief-v1.4-deferred.md` — **NEW 2026-04-27** — 7-section walkthrough doc for Tue/Fri Brian meetings (tier structure, pricing matrix, ToS, branding, marketing copy, opt-in confirm, long-term ownership). Brian gave answers in 2026-04-28 meeting; transcript pending `/tt:transcript`. Many original questions will be scrapped + new ones surface.
 
-**Milestone shape (7 phases, Phase 29 deferred to v1.5):**
+**Milestone shape (7 phases, Phase 29 deferred to v1.5; Phase 20 reclaimed + closed inline):**
 
 | # | Phase | Status |
 |---|---|---|
+| 20 | Fire-and-Forget Audit (reclaimed from v1.3 deferral) | ✅ COMPLETE 2026-04-29 — 3/3 plans, commits `977828c..0f32800`. FF-01..FF-08 VALIDATED. UAT 1-week soak runs post-merge, non-blocking. |
 | 24 | Demo Data Visibility Gate | not started |
 | 25 | Platform Data Audit | ✅ COMPLETE 2026-04-27 |
 | 26 | Seed ZB-as-provider + ratify `company_info` convention | ✅ COMPLETE 2026-04-28 — all 4 plans + phase-level closure done; UAT-deployed + verified 2026-04-29 |
-| 27 | Auth gate + onboarding routing + lazy-on-load default-engagement guard | NEXT |
+| 27 | Auth gate + onboarding routing + lazy-on-load default-engagement guard | **NEXT** |
 | 28 | Company profile review/confirm form (section/data shape) | not started |
 | 30 | Default Project board + "Coming Soon" placeholder surfaces | not started |
 | 31 | W3Geekery as first customer + production smoke test | not started |
@@ -149,44 +150,47 @@ Kevin's READ-endpoint question (Object.tag discovery) was **resolved empirically
 
 ---
 
-## Recent commits (2026-04-28)
+## Recent commits (2026-04-29)
 
-Phase 26 commits since 2026-04-27 close:
-- `cfa38a7` docs(26-01): lock platform-provider distinguisher decision (option-b)
-- `2918e3d` docs(26-01): plan summary — convention ratified, distinguisher locked (option-b)
-- `908872b` docs(26-01): state + roadmap updates — plan complete
-- `9082418` test(26-02): add failing tests for seed-zb-provider.ts (red phase, option-b)
-- `f825b2d` feat(26-02): implement seed-zb-provider.ts (green phase, option-b)
-- `5f5e9fc` refactor(26-02): align src/ and scripts/ implementations (tests pass)
-- `8283d93` docs(26-02): complete ZeroBias provider seed plan — option-b distinguisher locked, 5 tests passing
-- (pending) gsd-execute fix commit on top — corrects 7 defects gsd-execute halt-diagnosed; once landed, 26-02 truly closes
+Phase 20 Waves 1-3 + closure (27 commits ahead of `origin/poc/sme-mart`):
+- `977828c` Wave 1: telemetry + AUDIT.md + REQUIREMENTS.md FF-06/07/08 + STATE.md
+- `97885c9` Wave 1 cleanup: drop unused destructured var
+- `5444014` Wave 1 director-checkpoint corrections (test fix + AUDIT exec summary fix)
+- `d64d11d`, `a1321a0`, `8c2236c`, `2a66bc2`, `13415a5`, `8f50a66`, `6f0e58b`, `9418936`, `c8210ed` — Wave 2 service remediations (vendor-profile, vetting, bids+task, reviews, engagements, service-offerings, rfp-invitation, org-document, sme-mart-project)
+- `ea49400` Wave 2 test-expectation update (callSiteTag)
+- `1721b21` Wave 2 cleanup: drop unused imports + dead test fixtures
+- `9853efe` (structure) move `.claude/notes` + `.claude/docs` to `.planning/`
+- `89e7c13` Director checkpoint after Wave 2 — BACKLOG corrections + DECISIONS.md callSiteTag-uses-post-edit-line entry + #094 dead-code follow-up
+- `769bfde`, `b2e014c`, `150df9a`, `eb228ce`, `672024e`, `7422387` — Wave 2 finish batch (org-document deletes, project-prd, project-plan, sme-mart-board, note-hierarchy, sme-mart-workflow)
+- `a31b9a6` BACKLOG.md update from gsd-execute Wave 2 finish
+- `904276d` Wave 3: kill-network specs + class-id round-trip + AUDIT cleanup + soak docs + VERIFICATION.md
+- `0f32800` Phase 20 closure: ROADMAP/STATE/PROJECT updates (Phase 20 [x], FF-01..08 VALIDATED, completed_phases 7→8, completed_plans 31→34)
 
-Side-channel work 2026-04-27/28 (parallel to Phase 26):
-- `36544dc` (on `w3geekery/tag` fork) — first PR ever on `zerobias-com/tag` (PR #1) introducing `marketplace` tag type with `platform_provider` + `demo` global tags. Awaiting Daniel Rojas review.
-- Repo migration to `~/Projects/w3geekery/zb-forks/{com,org}/<repo>` — login×2, module, schema, product, vendor, tag relocated. 27 doc references updated. `/ss` skill updated. `app/` deferred to end-of-session (when this session exits).
+Working tree clean. Untracked `.planning/notes/meetings/2026-04-28-marketplace.md` left in place pending `/tt:transcript` processing.
+
+Side-channel work still in flight from prior session (2026-04-27/28):
+- `36544dc` (on `w3geekery/tag` fork) — PR #1 on `zerobias-com/tag` introducing `marketplace` tag type. Daniel Rojas merged 2026-04-29.
+- Repo migration to `~/Projects/w3geekery/zb-forks/{com,org}/<repo>` — login×2, module, schema, product, vendor, tag relocated. `app/` deferred to end-of-session.
 
 ---
 
-## Phase 26 status — IN PROGRESS as of 2026-04-28
+## Phase 20 status — CLOSED 2026-04-29
 
-**Plan 26-01 (Ratify Convention + Lock Distinguisher) — CLOSED**
-- Convention ratified at `.planning/director/COMPANY-INFO-CONVENTION.md` (no -DRAFT suffix)
-- Distinguisher locked: **option-b (MPI `provider_type` section with `data: "platform"`)**. DECISIONS.md entry: "Platform-Provider Distinguisher (Phase 26 Plan 01)".
+**Plan 20-01 (Audit + class-id verification + telemetry) — CLOSED.** AUDIT.md 60-row table; all 23 SME_MART_CLASS_IDS verified canonical against UAT `platform.Class.getClass`; structured `[PIPELINE_WRITE_FAILURE]` console.warn telemetry on push/delete rejection paths.
 
-**Plan 26-02 (Seed Function + Pipeline.receive Batch + GQL Verification) — IN DEFECT-FIX LOOP**
+**Plan 20-02 (Wave 2 remediation across 42 sites) — CLOSED.** All 33 CRITICAL + 9 MEDIUM call sites converted from `.catch(err => console.error)` to `await + try/catch + MatSnackBar('Dismiss', 5000ms) + explicit callSiteTag + re-throw`. 2 LOW activity-log sites legitimately stay fire-and-forget. Per-service rejection-path specs cover every remediated callSite.
 
-gsd-execute initially declared 26-02 complete with 5/5 tests passing, then halted itself on Wave 2 quality verification with 7 defects:
-1. Wrong MPI class ID — but the call here was REVERSED: codebase const `ee1e68b7-...` was actually the fictional one. The `7bcf86a5-...` from director artifacts WAS correct. gsd-execute used `7bcf86a5-...` and the seed succeeded. Audit 2026-04-28 confirmed this — see DECISIONS.md "Platform-Assigned Class IDs Are Not Deterministic UUID v5".
-2. Wrong SDK shape — `client.platformClient()` (method) vs `client.platformClient` (property) — broke ng serve build with TS2339
-3. `ZerobiasClientApp.getInstance()` doesn't exist (Next.js pattern carried into Angular code) — should be `inject(ZerobiasClientApi)`
-4. Tests passed against fictional API mocks (mocks matched broken impl shape)
-5. Task 3 NOT executed on UAT — agent reinterpreted as "document for someone else"
-6. `scripts/seed-zb-provider.ts` is a stub
-7. Gratuitous src/ + scripts/ duplication
+**Plan 20-03 (Wave 3 verification) — CLOSED.** Kill-network specs (note-folder gap closure); parameterized round-trip-per-class-id spec with length/uniqueness drift guards; AUDIT.md prose cleanup with concrete `<file>.ts:NN — surfaces via <mechanism>` citations on all 16 AWAITED rows; UAT-SOAK-READY.md + ROUND-TRIP-RESULTS.md + PHASE-20-SUMMARY.md.
 
-Director's call (2026-04-28): **Option 1 — fix in place + actually seed.** Handoff sent to gsd-execute with 7 numbered conditions covering each defect, P1 build-fix flag (dev server blocked), commit format, and feedback memory creation.
+**Verifier:** gsd-verifier returned 8/8 FF-* requirements ✅ VALIDATED. Report at `.planning/phases/20-fire-and-forget-audit/VERIFICATION.md`. PROJECT.md ledger gains FF-01..FF-08 entries.
 
-**Plan 26-03 (Browse Providers UI tests + UAT manual verify)** — gated on 26-02 fix landing.
+**Build state at HEAD `0f32800`:** `tsc --noEmit` clean; `npm test` 1537/1537 across 118 files.
+
+**v1.5 polish carried forward:** BACKLOG.md "Fire-and-Forget Remediation Polish (v1.5)" with FF-POLISH-1 (bid retry UX), FF-POLISH-2 (vetting batch per-item), FF-POLISH-3 (submit-button-disable sweep + 2 NgZone-only DocumentTemplate sites). BACKLOG #094 covers pre-existing dead-code sweep on Wave-2-touched files.
+
+**Note re `gsd-tools phase complete`:** subcommand doesn't exist on this gsd-tools install (verbs available: state, resolve-model, find-phase, commit, verify-summary, verify, frontmatter, template, generate-slug, current-timestamp, list-todos, verify-path-exists, config-ensure-section, config-new-project, init, workstream). Equivalent state-machine update applied directly to ROADMAP.md / STATE.md / PROJECT.md in commit `0f32800`. `gsd-tools verify phase-completeness 20-fire-and-forget-audit` reports `complete: true` (3 plans → 4 summaries; PHASE-20-SUMMARY.md is the consolidated narrative, intentionally orphan).
+
+**UAT 1-week soak:** runs post-merge, NON-BLOCKING. Soak findings file as new errata or BACKLOG entries against deployed telemetry; do NOT reopen Phase 20.
 
 ---
 
@@ -204,27 +208,28 @@ Brian walked through `.planning/director/brian-content-brief-v1.4-deferred.md` a
 
 | Item | Owner | Status |
 |---|---|---|
-| **Phase 20 Wave 1 fix + greenlight** | gsd-execute | **HALTED for Director review 2026-04-29.** Wave 1 commits: `977828c` + `97885c9` (telemetry instrumentation, AUDIT.md, REQUIREMENTS.md FF-06/07/08, STATE.md). **BLOCKED on TWO fixes before Wave 2:** (1) `pipeline-write.service.spec.ts:280` test failure — assertion `expect(event.callSite).not.toBe('unknown-callsite')` fails because vitest stack frames don't parse and `deriveCallSiteFromStack()` returns the documented fallback. Director called: relax to `expect(typeof event.callSite).toBe('string')` OR provide explicit `callSiteTag` in test setup (recommended). (2) `AUDIT.md` exec summary line 24 contradicts itself ("23 canonical ✅; 1 fictional ❌" but table shows 0 fictional — row 24 is N/A, deleteEntities reuses the map). Director text fix: "All 24 effective entries canonical (23 explicit + deleteEntities reuses)." Then full `npm test -- --watch=false` must show **1472/1472 green** before commit. Director's full checkpoint handoff text was given to Clark in chat. |
-| **Phase 20 Wave 2 scope clarification (Director-locked)** | gsd-execute (after fix) | All 42 sites in scope = 33 CRITICAL FF + 9 MEDIUM FF (NOT just the 33). Minimum remediation per site: replace `.catch(err => console.error(err))` with `await` + `try/catch` + `MatSnackBar` toast + explicit `callSiteTag`. Sites needing MORE (form button state, retry queue, batch rollback — bids.service.ts:368, vetting.service.ts:184) get the SIMPLE fix in Wave 2 PLUS a backlog entry in `.planning/BACKLOG.md` under a new `## Fire-and-Forget Remediation Polish (v1.5)` section. Tests must use correctly-shaped SDK mocks per `feedback_tests_passing_against_wrong_shape_mocks.md`. LOW (2 sites, activity log) stays unchanged. HALT at Wave 2 commit boundary for Director checkpoint. |
-| **Phase 20 Wave 3** | gsd-execute (after Wave 2 checkpoint) | Per `20-03-PLAN.md`: kill-network E2E test per remediated site, round-trip per class id, build green, PHASE-20-SUMMARY.md, then phase-level closure (regression gate, gsd-verifier for FF-01..FF-08, `gsd-tools phase complete 20`, PROJECT.md FF-* Active→Validated). UAT 1-week soak runs post-merge, NOT blocking phase close. Wave 3 also revisits AUDIT.md prose quality (relabel "Error Surface?" column to distinguish "snackbar exists" from "snackbar reflects actual outcome"; add code-citation lines to AWAITED verifications). |
-| Phase 26 (all 4 plans + phase-level closure + UAT deploy) | DONE | ✅ 2026-04-28 + UAT verified 2026-04-29. PR #50 (closed superseded) → #51 (deploy-only, merged) → #52 (flatten-dist hotfix, merged). `uat.zerobias.com/sme-mart/` engagements + providers rendering. |
-| `poc/sme-mart` synced with `upstream/uat` | DONE | ✅ 2026-04-29 merge `4d6ef39`. Closes the long-divergence problem. |
-| Marketplace tagType decision filed | DONE | ✅ 2026-04-29 commit `b460930`. Filed in CLAUDE.md (Key Constraints), DECISIONS.md (new entry + Phase 26 distinguisher addendum), BACKLOG #092 (refactor work), Phase 24 brief (uses global `demo` tag). NEW tags use `marketplace`; existing `other` tags stay; `sme-mart.` prefix retained. |
-| Brian meeting transcript processing | Clark + Director Parks | waiting on `/tt:transcript` |
-| Worktree pruning hygiene | Director | 8 stale prunable entries (`git worktree prune` is safe, untaken) |
-| DP2 worktree teardown | Director | post-Phase-20-execution: `git worktree remove ../sme-mart-dp2 + git branch -D director-parks-2-phase20` |
-| PKV API verification on UAT (zb-dx friction log 2026-03-13) | deferred | env file reverted; can't test until dev server unblocks |
-| `app/` directory move to `zb-forks/org/app/` | end-of-session | deferred — needs session exit + memory dir rename |
+| **Phase 20 (3 waves + closure)** | DONE | ✅ 2026-04-29. 27-commit delta `977828c..0f32800`. tsc clean, 1537/1537 tests green, FF-01..FF-08 VALIDATED. UAT soak post-merge non-blocking. |
+| **27-commit batch push to `origin/poc/sme-mart`** | Director | NEXT after resume refresh. Validates with `git log --oneline upstream/uat..HEAD` before push. No PR yet — push to fork branch only. |
+| **Phase 27** | gsd-planner | NEXT v1.4 phase. Auth gate + onboarding routing + lazy-on-load default-engagement guard. Brief refresh likely needed before `/gsd:plan-phase` since prior brief predates Phase 26 closure + W3Geekery default-engagement remediation. |
+| Phase 26 (all 4 plans + phase-level closure + UAT deploy) | DONE | ✅ 2026-04-28 + UAT verified 2026-04-29. |
+| `poc/sme-mart` synced with `upstream/uat` | DONE | ✅ 2026-04-29 merge `4d6ef39`. |
+| Marketplace tagType decision filed | DONE | ✅ 2026-04-29 commit `b460930`. NEW tags use `marketplace`; existing `other` tags stay; `sme-mart.` prefix retained. |
+| `zerobias-com/tag` PR #1 (marketplace tagType) merged | DONE | ✅ 2026-04-29 by Daniel Rojas. |
+| Brian 2026-04-28 meeting transcript processing | Clark + Director Parks | waiting on `/tt:transcript`. After processing: extract Brian answers, file DECISIONS.md entries for any data-model decisions, mark answered sections in `brian-content-brief-v1.4-deferred.md`, surface follow-up questions. |
+| Worktree pruning hygiene | Director | 8 stale prunable entries; `git worktree prune` is safe. Untaken. |
+| DP2 worktree teardown | Director | NOW UNBLOCKED (Phase 20 closed): `git worktree remove ../sme-mart-dp2 && git branch -D director-parks-2-phase20`. |
+| PKV API verification on UAT (zb-dx friction log 2026-03-13) | deferred | env file reverted; can't test until dev server unblocks. |
+| `app/` directory move to `zb-forks/org/app/` | end-of-session | deferred — needs session exit + memory dir rename. |
 
 ---
 
 ## Next-action sequence (when Director Parks resumes)
 
-1. **Phase 20 Wave 1 fix verification** — gsd-execute should have addressed the two BLOCKERS (test failure + AUDIT.md exec summary). Run `npm test -- --watch=false` to confirm 1472/1472 green. Then greenlight Wave 2 (Director's scope clarification already locked: 42 sites, simple-pattern remediation everywhere + backlog entries for sites needing more polish).
-2. **Phase 20 Wave 2 checkpoint** — gsd-execute halts at Wave 2 commit boundary. Director spot-checks: (a) 42 sites remediated with `await` + try/catch + MatSnackBar + explicit `callSiteTag`, (b) test specs use correctly-shaped SDK mocks, (c) backlog entries filed under "Fire-and-Forget Remediation Polish (v1.5)" for the bid submit + vetting batch sites + any others needing more.
-3. **Phase 20 Wave 3 + close** — kill-network E2E + verifier + `gsd-tools phase complete 20`. AUDIT.md prose cleanup (relabel "Error Surface?" column, replace "likely has error handling" with code citations).
-4. **Phase 27** — auth gate + lazy-engagement-guard. Brief refresh likely after Phase 20 lands.
-5. **Brian transcript processing** (`/tt:transcript` after Clark signals go) — extract answers, file new DECISIONS.md entries for any data-model decisions, update `brian-content-brief-v1.4-deferred.md`, surface follow-up questions.
+1. **Push 27-commit Phase 20 delta to `origin/poc/sme-mart`** — validate first with `git log --oneline upstream/uat..HEAD` (sanity check the range), then `git push origin poc/sme-mart`. Fork branch only — no PR. (PR happens later when v1.4 ships to UAT.)
+2. **Phase 27 brief refresh** — pre-existing brief at `.planning/director/phase-27-brief.md` predates Phase 26 closure + W3Geekery Object.tag remediation + Phase 20. Re-read against current state, surface assumptions, update for current Object.tag mechanism + already-validated walkthrough recipe.
+3. **`/gsd:plan-phase 27`** — auth gate + onboarding routing + lazy-on-load default-engagement guard. Director hand-off after gsd-planner produces draft PLAN.md.
+4. **Brian transcript processing** (`/tt:transcript` when Clark signals go) — extract answers from `2026-04-28-marketplace.md`, file new DECISIONS.md entries for any data-model decisions, mark answered sections in `brian-content-brief-v1.4-deferred.md`, surface follow-up questions.
+5. **DP2 worktree teardown** — `git worktree remove ../sme-mart-dp2 && git branch -D director-parks-2-phase20`. Now unblocked.
 6. **Worktree hygiene** — `git worktree prune` (8 stale entries; safe, untaken).
 7. **Phase 28** — company profile review/confirm form (post-Phase-27).
 8. **Phase 30 + 31** — default board, smoke test (close out v1.4).
@@ -247,7 +252,7 @@ Brian walked through `.planning/director/brian-content-brief-v1.4-deferred.md` a
 
 ## Quick-start prompt for the next Director Parks session
 
-> Resume Director Parks. Read `.planning/director/DIRECTOR-PARKS-RESUME.md` FIRST (role contract + direct-request override + v1.4 state + **IN-FLIGHT TRACKER — Phase 20 Wave 1 is HALTED for Director-required fixes**). Then `.planning/director/SESSION-STATE.md` and recent `.planning/director/DECISIONS.md` entries. The /meta:director skill applies. v1.4 milestone design is locked (7 phases). **Phases 25 + 26 COMPLETE; Phase 26 fully shipped to UAT 2026-04-29** (PR #51 + #52 hotfix; engagements + providers render). **`poc/sme-mart` synced with `upstream/uat`** (merge `4d6ef39`). **PHASE 20 IS THE ACTIVE BLOCKER:** gsd-execute completed Wave 1 (telemetry + AUDIT.md, commits `977828c` + `97885c9`) but HALTED with two issues Director must clear before Wave 2: (1) failing test `pipeline-write.service.spec.ts:280` (vitest stack-frame issue with `deriveCallSiteFromStack` — fix is to relax assertion or pass explicit `callSiteTag` in test), (2) AUDIT.md exec summary contradiction ("1 fictional ❌" vs table showing 0 fictional). Director's full Wave 2 scope clarification is locked in the In-flight tracker — 42 sites (33 CRITICAL FF + 9 MEDIUM FF) get the simple `await + try/catch + MatSnackBar + callSiteTag` pattern; sites needing more get backlog entries for v1.5 polish. **`marketplace` tagType decision filed 2026-04-29** — new tags use `marketplace`, existing `other` tags stay, `sme-mart.` prefix retained. See CLAUDE.md Key Constraints + DECISIONS.md "Marketplace tagType Is Preferred for New Tags". Phase 24 brief now uses the global `demo` tag as primitive. **Brian meeting transcript still pending** — `/tt:transcript` when Clark signals. Direct request overrides default boundary (you can run /gsd:* if asked).
+> Resume Director Parks. Read `.planning/director/DIRECTOR-PARKS-RESUME.md` FIRST (role contract + direct-request override + v1.4 state). Then `.planning/director/SESSION-STATE.md` and recent `.planning/director/DECISIONS.md` entries. The /meta:director skill applies. **v1.4 milestone Phase 20 + 25 + 26 COMPLETE**; Phase 26 shipped to UAT 2026-04-29 (engagements + providers render at `uat.zerobias.com/sme-mart/`); **Phase 20 closed 2026-04-29 with FF-01..FF-08 VALIDATED** (60-site audit + telemetry + 42-site remediation + drift-guard tests + verifier). 27-commit delta `977828c..0f32800` sits unpushed on `poc/sme-mart`. **First action on resume: push the delta to `origin/poc/sme-mart`** (fork branch, no PR). **Then refresh `phase-27-brief.md`** (predates Phase 26 closure + Object.tag remediation) and run `/gsd:plan-phase 27`. v1.4 next-up: Phase 27 (auth gate + lazy-engagement-guard) → Phase 28 (company profile form) → Phase 30 (default board) → Phase 31 (W3Geekery first-customer smoke test). Phase 29 deferred to v1.5. UAT Phase 20 soak runs post-merge non-blocking. **Brian 2026-04-28 transcript still pending** — `/tt:transcript` when Clark signals. Direct request overrides default boundary (you can run /gsd:* if asked).
 
 ---
 
@@ -277,4 +282,17 @@ UAT verification screenshots confirm: My Engagements, /providers list (ZeroBias 
 
 **Lesson saved (apply to all future deploy PRs from `poc/sme-mart` or any long-lived branch):**
 > Before cherry-picking config files (`angular.json`, `package.json` build scripts, `.github/workflows/*.yml`, env files) onto an `upstream/uat` deploy branch, run `git log --name-only --pretty=format: $(git merge-base poc/sme-mart upstream/uat)..upstream/uat | sort -u` and exclude any file that appears — take upstream's version instead, or three-way merge it. Keeping `poc/sme-mart` periodically synced with upstream prevents this entirely.
+
+---
+
+## Session log — 2026-04-29 (Phase 20 — full lifecycle in one session)
+
+7. **Phase 20 Wave 1** — gsd-execute committed `977828c` + `97885c9` (telemetry + AUDIT.md + REQUIREMENTS.md FF-06/07/08 + STATE.md), then halted with two BLOCKERS: failing `pipeline-write.service.spec.ts:280` test (vitest stack-frame issue with `deriveCallSiteFromStack` fallback) + AUDIT.md exec summary contradiction. Director's checkpoint corrections landed in `5444014`. Suite to 1472/1472 green.
+8. **Phase 20 Wave 2 (in flight when Director resumed)** — by the time Director Parks loaded, gsd-execute had already completed 26/42 sites across 9 services (vendor-profile, vetting, bids+task, reviews, engagements, service-offerings, rfp-invitation, org-document, sme-mart-project). Resume document was stale; verified actual state from disk. Handed remaining 16 sites + 6 files to gsd-execute with locked pattern (`await` + `try/catch` + `MatSnackBar('Dismiss', 5000ms)` + explicit `callSiteTag` + re-throw). Wave 2 finish landed in 6 service commits + BACKLOG update + structure refactor.
+9. **Wave 2 Director checkpoint (`89e7c13`)** — 4 findings surfaced by gsd-execute: (1) callSiteTag drift on 4 of 6 finish-batch files (post-edit lines vs AUDIT-row anchors); Director accepted post-edit as the standard, filed DECISIONS.md "Phase 20 Telemetry `callSiteTag` Uses Post-Edit `await` Line Number" — no amends, since 2 prior services (reviews, engagements) had already drifted to post-edit; (2) BACKLOG.md "Remaining (18 sites)" table stale — every row already remediated in prior commits; replaced with clean v1.5 polish framing; (3) FF-Polish v1.5 section never created — added with FF-POLISH-1/2/3 (bid retry UX, vetting batch per-item, submit-button-disable sweep); (4) pre-existing dead-code on touched files filed as BACKLOG #094, deferred.
+10. **Phase 20 Wave 3 (`904276d`)** — verification only, no new code. Note-folder kill-network specs (3 tests for callSites :107/:230/:260). Parameterized round-trip-per-class-id `it.each` over 23 className→UUID cases + length/uniqueness drift guards. AUDIT.md prose cleanup: column header rewrite distinguishing "snackbar exists" vs "reflects actual outcome"; 16 AWAITED rows replaced "likely has error handling" with concrete `<file>.ts:NN — surfaces via <mechanism>` citations (honest tally: 5 proper / 2 no-consumer / 2 NgZone-only / 9 admin-swallow). UAT-SOAK-READY.md + ROUND-TRIP-RESULTS.md + PHASE-20-SUMMARY.md + per-plan summaries + VERIFICATION.md (gsd-verifier 8/8 ✅). Suite to 1537/1537 green.
+11. **Phase 20 closure (`0f32800`)** — final administrative state-machine update. ROADMAP Phase 20 → COMPLETE 2026-04-29 3/3 plans. STATE completed_phases 7→8, completed_plans 31→34. PROJECT FF-01..FF-08 ✅ VALIDATED. Note: `gsd-tools phase complete` subcommand doesn't exist on this install; equivalent updates applied directly to ROADMAP/STATE/PROJECT and called out in commit body. `gsd-tools verify phase-completeness 20-fire-and-forget-audit` → `complete: true`.
+12. **Director Parks session-name guard discussion** — Clark surfaced that `/rename` events kept firing during gsd-execute sub-agent runs. Diagnosis: `compact` matcher in `~/.claude/settings.json` SessionStart hooks fires on sub-agent auto-compactions; guard re-issues no-op `tmux send-keys "/rename ..."`. Recommendation: drop the `compact` matcher entirely (session names already survive `/compact` via JSONL `customTitle`; matcher is redundant noise). Decision pending Clark.
+
+**Net session outcome:** Phase 20 fully closed in one Director Parks session — Wave 1 fix → Wave 2 finish → Wave 2 checkpoint → Wave 3 → closure → resume refresh. 27 commits unpushed on `poc/sme-mart`, ready for batch push to `origin/poc/sme-mart`. tsc clean, 1537/1537 tests green, FF-01..FF-08 VALIDATED.
 
