@@ -6,6 +6,7 @@
  */
 
 import { TestBed } from '@angular/core/testing';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { NoteHierarchyService, type FolderTreeNode } from './note-hierarchy.service';
 import { NoteFolderService, type NoteFolderTreeNode } from './note-folder.service';
 import { NotesService } from './notes.service';
@@ -58,6 +59,8 @@ describe('NoteHierarchyService', () => {
     deleteFolder: ReturnType<typeof vi.fn>;
   };
   let mockNotesService: { getNoteCounts: ReturnType<typeof vi.fn> };
+  let mockSnackBar: { open: ReturnType<typeof vi.fn> };
+  let mockPipelineWrite: ReturnType<typeof fakePipelineWriteService>;
 
   beforeEach(() => {
     mockFolderService = {
@@ -71,14 +74,21 @@ describe('NoteHierarchyService', () => {
       getNoteCounts: vi.fn().mockResolvedValue(new Map()),
     };
 
+    mockSnackBar = {
+      open: vi.fn(),
+    };
+
+    mockPipelineWrite = fakePipelineWriteService();
+
     TestBed.configureTestingModule({
       providers: [
         NoteHierarchyService,
         { provide: NoteFolderService, useValue: mockFolderService },
         { provide: NotesService, useValue: mockNotesService },
-        { provide: PipelineWriteService, useValue: fakePipelineWriteService() },
+        { provide: PipelineWriteService, useValue: mockPipelineWrite },
         { provide: GraphqlReadService, useValue: fakeGraphqlReadService() },
         { provide: ImpersonationService, useValue: fakeImpersonation() },
+        { provide: MatSnackBar, useValue: mockSnackBar },
       ],
     });
 
@@ -242,14 +252,27 @@ describe('NoteHierarchyService', () => {
 
   describe('moveNote()', () => {
     it('should push pipeline update and return optimistic result', async () => {
-      const pipelineWrite = TestBed.inject(PipelineWriteService) as any;
       const result = await service.moveNote('note-1', 'folder-2');
 
       expect(result.id).toBe('note-1');
       expect(result.folder_id).toBe('folder-2');
-      expect(pipelineWrite.pushEntity).toHaveBeenCalledWith(
+      expect(mockPipelineWrite.pushEntity).toHaveBeenCalledWith(
         'Note',
         expect.objectContaining({ id: 'note-1', folderId: 'folder-2' }),
+        [],
+        'note-hierarchy.service:149',
+      );
+    });
+
+    it('should surface error to user on Pipeline rejection for moveNote', async () => {
+      mockPipelineWrite.pushEntity.mockRejectedValueOnce(new Error('Move failed'));
+
+      await expect(service.moveNote('note-1', 'folder-2')).rejects.toThrow('Move failed');
+
+      expect(mockSnackBar.open).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to move note'),
+        'Dismiss',
+        expect.any(Object),
       );
     });
   });

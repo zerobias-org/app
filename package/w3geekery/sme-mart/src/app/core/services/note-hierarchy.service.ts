@@ -1,4 +1,5 @@
 import { Injectable, inject } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { NoteFolderService, type NoteFolderTreeNode } from './note-folder.service';
 import { NotesService } from './notes.service';
 import { PipelineWriteService } from './pipeline-write.service';
@@ -29,6 +30,7 @@ export class NoteHierarchyService {
   private readonly pipelineWrite = inject(PipelineWriteService);
   private readonly graphqlRead = inject(GraphqlReadService);
   private readonly impersonation = inject(ImpersonationService);
+  private readonly snackBar = inject(MatSnackBar);
 
   /**
    * Tracks folder names currently being created per engagement.
@@ -138,15 +140,23 @@ export class NoteHierarchyService {
   // ── Move operations ──
 
   async moveNote(noteId: string, newFolderId: string | null): Promise<Note> {
-    // Push update via Pipeline (fire-and-forget)
+    // Push update via Pipeline
     const gqlData: Record<string, unknown> = {
       id: noteId,
       folderId: newFolderId,
       updatedAt: new Date().toISOString(),
     };
-    this.pipelineWrite.pushEntity('Note', gqlData).catch(err => {
-      console.error('[NoteHierarchyService] Failed to move note:', err);
-    });
+
+    try {
+      await this.pipelineWrite.pushEntity('Note', gqlData, [], 'note-hierarchy.service:149');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to move note: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     // Return optimistically with minimal data
     return { id: noteId, folder_id: newFolderId } as Note;
