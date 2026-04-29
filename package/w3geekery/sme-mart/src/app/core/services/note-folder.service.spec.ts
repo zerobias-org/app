@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { NoteFolderService } from './note-folder.service';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
@@ -12,11 +13,13 @@ describe('NoteFolderService', () => {
   let mockPipeline: any;
   let mockGraphql: any;
   let mockImpersonation: any;
+  let mockSnackBar: any;
 
   beforeEach(() => {
     mockPipeline = fakePipelineWriteService();
     mockGraphql = fakeGraphqlReadService();
     mockImpersonation = { effectiveUserId: vi.fn().mockReturnValue('user-123') };
+    mockSnackBar = { open: vi.fn() };
 
     TestBed.configureTestingModule({
       providers: [
@@ -24,6 +27,7 @@ describe('NoteFolderService', () => {
         { provide: PipelineWriteService, useValue: mockPipeline },
         { provide: GraphqlReadService, useValue: mockGraphql },
         { provide: ImpersonationService, useValue: mockImpersonation },
+        { provide: MatSnackBar, useValue: mockSnackBar },
       ],
     });
 
@@ -382,5 +386,76 @@ describe('NoteFolderService', () => {
     expect(tree[0].children![0].id).toBe('folder-2');
     expect(tree[0].children![0].children![0].id).toBe('folder-3');
     expect(tree[0].children![0].children![0].children![0].id).toBe('folder-4');
+  });
+
+  // ──────────────────────────────────────────────────────────────────────────────
+  // Phase 20 Wave 3: Kill-network rejection paths
+  //
+  // For each remediated callSite (note-folder.service:107, :230, :260) verify
+  // that a Pipeline rejection (a) surfaces a MatSnackBar to the user and
+  // (b) re-throws so the caller observes the failure. This is the
+  // "snackbar reflects actual outcome" property — the Wave 2 contract.
+  // ──────────────────────────────────────────────────────────────────────────────
+
+  describe('Pipeline rejection error surface (Phase 20 Wave 3)', () => {
+    it('createFolder: surfaces snackbar and re-throws on Pipeline rejection (note-folder.service:107)', async () => {
+      const networkErr = new Error('Network unreachable');
+      mockPipeline.pushEntity.mockRejectedValueOnce(networkErr);
+
+      await expect(
+        service.createFolder('eng-001', { name: 'Folder X' }),
+      ).rejects.toThrow(networkErr);
+
+      expect(mockSnackBar.open).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to save folder'),
+        'Dismiss',
+        expect.objectContaining({ duration: 5000 }),
+      );
+    });
+
+    it('updateFolder: surfaces snackbar and re-throws on Pipeline rejection (note-folder.service:230)', async () => {
+      const networkErr = new Error('Network unreachable');
+      // updateFolder reads via GraphQL first (no cache), then pushes
+      mockGraphql.getById.mockResolvedValue({
+        id: 'folder-1',
+        engagementId: 'eng-001',
+        name: 'Original',
+        parentId: null,
+        accessLevel: 'boundary',
+        sortOrder: 0,
+      });
+      mockPipeline.pushEntity.mockRejectedValueOnce(networkErr);
+
+      await expect(
+        service.updateFolder('folder-1', { name: 'Renamed' }),
+      ).rejects.toThrow(networkErr);
+
+      expect(mockSnackBar.open).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to update folder'),
+        'Dismiss',
+        expect.objectContaining({ duration: 5000 }),
+      );
+    });
+
+    it('deleteFolder: surfaces snackbar and re-throws on Pipeline rejection (note-folder.service:260)', async () => {
+      const networkErr = new Error('Network unreachable');
+      mockGraphql.getById.mockResolvedValue({
+        id: 'folder-1',
+        engagementId: 'eng-001',
+        name: 'Original',
+        parentId: null,
+        accessLevel: 'boundary',
+        sortOrder: 0,
+      });
+      mockPipeline.pushEntity.mockRejectedValueOnce(networkErr);
+
+      await expect(service.deleteFolder('folder-1')).rejects.toThrow(networkErr);
+
+      expect(mockSnackBar.open).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to delete folder'),
+        'Dismiss',
+        expect.objectContaining({ duration: 5000 }),
+      );
+    });
   });
 });

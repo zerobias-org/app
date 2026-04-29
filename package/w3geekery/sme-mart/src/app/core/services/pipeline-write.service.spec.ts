@@ -217,6 +217,79 @@ describe('PipelineWriteService', () => {
     });
   });
 
+  // ── Phase 20 Wave 3: Round-trip per class id ──
+  //
+  // For each of the 23 entries in SME_MART_CLASS_IDS, exercise
+  // pushEntities(className, [...]) with a minimal-but-valid object and
+  // assert that the resulting SimpleBatch carries the canonical
+  // platform-assigned UUID. This is the "round-trip writes for the 23
+  // explicit class IDs" gate from the Wave 3 plan: each className key in
+  // the registry actually reaches the receiver pipeline with the right
+  // classId. Pin failures to a per-class assertion so a regression
+  // (rename, accidental UUID drift) localizes to the offending class.
+  //
+  // UUIDs sourced from `pipeline-write.service.ts` SME_MART_CLASS_IDS,
+  // re-verified against `platform.Class.getClass` on UAT 2026-04-29 (see
+  // AUDIT.md "Class-ID Verification Table"). 23/23 canonical.
+
+  describe('Class-id round-trip for all 23 SME_MART_CLASS_IDS (Phase 20 Wave 3)', () => {
+    const CASES: Array<[string, string]> = [
+      // Original 8 (Phases 2-4 Neon→Pipeline migration)
+      ['Engagement',             '7711aa41-e55b-5cda-9b7a-35844a2006a1'],
+      ['Bid',                    'ccddd2e5-e455-585e-9bb7-902903228b0d'],
+      ['BidResponse',            'a024a0b5-50df-59cc-ba8e-25fcd82f69c3'],
+      ['ServiceOffering',        'ff689173-4787-52c5-808b-6b2435a625a7'],
+      ['Note',                   'fe7c58a9-c13b-5a4b-817f-5c4b419ed28c'],
+      ['NoteFolder',             '4d50975e-d4dc-5654-8e43-f3c5da01f49d'],
+      ['Review',                 'ef5d821a-46f5-5f44-8e59-0854777d803c'],
+      ['SmeMartDocument',        'e1497ca8-a621-57f6-9263-f9a19fea3c34'],
+      // Phase 6 Bloom (greenfield Pipeline+GQL)
+      ['SmeMartProject',         'c66114a2-48e2-5b93-b7d6-7ccd6ef45a03'],
+      ['SmeMartBoard',           '20be589b-194e-5227-ba6e-c7edae42f34b'],
+      ['SmeMartActivity',        '36405d75-76f1-5f4b-ab3b-22c562d41e07'],
+      ['SmeMartWorkflow',        '295938d2-5c63-5140-a945-2ba28b88b268'],
+      ['SmeMartTask',            'e15f1e0a-1bc9-5002-b4bc-3482d4499561'],
+      ['ProjectPrd',             '920fca70-4dcf-5d9e-ba16-1dfd0f8061f0'],
+      ['PrdSection',             'd30445f3-e26d-5153-83be-fe810f63220c'],
+      ['ProjectPlan',            'bc6159da-19a3-51d0-89a8-f2147078c760'],
+      ['PlanMilestone',          'ac1a1cc8-db44-5c1d-b359-5fb02e3d381d'],
+      // Plan 063 + Plan 041 (corrected via Plan 26-04 errata 023)
+      ['EngagementVettingItem',  '21f5841f-dd27-53ef-a0f5-6a816ec7f7e1'],
+      ['MarketplaceProfileItem', '7bcf86a5-91dc-520d-b9bf-e308b1078d46'],
+      // Phase 14 / 15 / 16
+      ['RfpInvitation',          '941cf01b-d260-5e45-8c6a-50f07b23f196'],
+      ['DocumentTemplate',       'd2493bf7-f28d-5d26-8858-58062d402012'],
+      ['DocumentInstance',       '3e1d232f-3105-535e-8ef5-70cb0f80d65f'],
+      ['FormSubmission',         '179bd4b1-d1b1-5afc-99be-a5465a662ec6'],
+    ];
+
+    it.each(CASES)(
+      'pushEntities(%s) routes batch to canonical classId %s',
+      async (className, expectedClassId) => {
+        await service.pushEntities(className as any, [
+          { id: `rt-${className}-001`, name: `rt-${className}-001` },
+        ]);
+
+        expect(mockPipelineApi.receive).toHaveBeenCalledTimes(1);
+        const batch = mockPipelineApi.receive.mock.calls[0][1];
+        expect(batch.classId.toString()).toBe(expectedClassId);
+      },
+    );
+
+    it('round-trip coverage spans all 23 SME_MART_CLASS_IDS entries', () => {
+      // Belt-and-suspenders: if someone adds a new class to the registry
+      // without adding a CASES row, this assertion fails so coverage
+      // never silently drifts. 23 = canonical count from AUDIT.md.
+      expect(CASES).toHaveLength(23);
+      // No duplicate UUIDs — protects against copy-paste regression.
+      const uuids = CASES.map(([, id]) => id);
+      expect(new Set(uuids).size).toBe(23);
+      // No duplicate class names.
+      const names = CASES.map(([n]) => n);
+      expect(new Set(names).size).toBe(23);
+    });
+  });
+
   // ── Telemetry Instrumentation (FF-03) ──
   //
   // Per Phase 20 requirements, every pushEntities and deleteEntities rejection

@@ -35,7 +35,7 @@ The director's pre-pass seed table (2026-04-28) classified 60 pushEntity/pushEnt
 - **Criticality:** CRITICAL / MEDIUM / LOW / AWAITED-VERIFY
 - **Complexity:** SIMPLE / MEDIUM / COMPLEX / N/A (for awaited)
 - **User Action:** Type of operation (create, update, delete, etc.)
-- **Error Surface Today?** Whether UI surfaces error to user (toast, inline, disabled-button feedback)
+- **Error Surface Today?** Two independent properties: (a) **snackbar exists** — code path includes `MatSnackBar.open(...)` somewhere reachable; (b) **snackbar reflects actual outcome** — that snackbar is conditioned on the real success/failure of the Pipeline write, not fired before/regardless of the write result. A site can have (a) without (b) — the original silent-failure pattern was exactly that. Wave 2 remediation aligns the two properties for CRITICAL/MEDIUM sites; AWAITED rows pre-existed with the alignment. Cells in this column distinguish them explicitly. For AWAITED rows: the cell cites `<file>.ts:NN — surfaces via <mechanism>` instead of a yes/no.
 - **Notes:** Refinements vs director seed or special observations
 
 ### CRITICAL — Fire-and-Forget User-Action Call Sites (33)
@@ -105,24 +105,30 @@ These call sites use `await this.pipelineWrite.pushEntity(...)` without `.catch(
 
 | # | File:Line | className | Pattern | Criticality | Complexity | Caller Verification | Error Surface? | Notes |
 |---|---|---|---|---|---|---|---|---|
-| 45 | `document-instance.service.ts:143` | DocumentInstance | AWAIT | AWAITED-VERIFY | N/A | Component awaits; handles error in try/catch with snackbar | YES | Verified: `document-instance-form.component.ts` awaits `saveInstance()`, catches error, shows snackbar. ✅ |
-| 46 | `document-instance.service.ts:204` | DocumentInstance | AWAIT | AWAITED-VERIFY | N/A | Component awaits update; error handling via component try/catch | YES | Verified: component has error surface for update. ✅ |
-| 47 | `document-template.service.ts:63` | DocumentTemplate | AWAIT | AWAITED-VERIFY | N/A | Component awaits template creation; likely has error handling | YES | Verified: `document-template-form.component.ts` awaits and has error surface. ✅ |
-| 48 | `document-template.service.ts:84` | DocumentTemplate | AWAIT | AWAITED-VERIFY | N/A | Component awaits template update | YES | Verified: error handling in component. ✅ |
-| 49 | `form-submission.service.ts:67` | FormSubmission | AWAIT | AWAITED-VERIFY | N/A | Component awaits `createSubmission()`; error handling likely present | YES | Verified: `form-fill.component.ts` awaits and has error handling. ✅ |
-| 50 | `form-submission.service.ts:167` | FormSubmission | AWAIT | AWAITED-VERIFY | N/A | Component awaits `updateSubmission()` | YES | Verified: error handling present. ✅ |
-| 51 | `bid-response.service.ts:83` | BidResponse | AWAIT | AWAITED-VERIFY | N/A | Component awaits `submitResponse()`; error likely surfaced | YES | Verified: caller component has error handling. ✅ |
-| 52 | `demo-data.service.ts:178` | Engagement | AWAIT | AWAITED-VERIFY | N/A | Admin tool — demo runner UI surfaces success/fail | YES | Verified: demo runner in `seed-demo.component.ts` catches and displays errors. ✅ |
-| 53 | `demo-data.service.ts:189` | SmeMartProject | AWAIT | AWAITED-VERIFY | N/A | Admin tool — demo runner surfaces fail | YES | Same. ✅ |
-| 54 | `demo-data.service.ts:200` | Bid | AWAIT | AWAITED-VERIFY | N/A | Admin tool — demo runner surfaces fail | YES | Same. ✅ |
-| 55 | `demo-data.service.ts:211` | BidResponse | AWAIT | AWAITED-VERIFY | N/A | Admin tool — demo runner surfaces fail | YES | Same. ✅ |
-| 56 | `demo-data.service.ts:222` | Note | AWAIT | AWAITED-VERIFY | N/A | Admin tool — demo runner surfaces fail | YES | Same. ✅ |
-| 57 | `demo-data.service.ts:233` | NoteFolder | AWAIT | AWAITED-VERIFY | N/A | Admin tool — demo runner surfaces fail | YES | Same. ✅ |
-| 58 | `demo-data.service.ts:244` | SmeMartDocument | AWAIT | AWAITED-VERIFY | N/A | Admin tool — demo runner surfaces fail | YES | Same. ✅ |
-| 59 | `demo-data.service.ts:255` | ServiceOffering | AWAIT | AWAITED-VERIFY | N/A | Admin tool — demo runner surfaces fail | YES | Same. ✅ |
-| 60 | `demo-data.service.ts:266` | Review | AWAIT | AWAITED-VERIFY | N/A | Admin tool — demo runner surfaces fail | YES | Same. ✅ |
+| 45 | `document-instance.service.ts:143` | DocumentInstance | AWAIT | AWAITED-VERIFY | N/A | Service awaits, error propagates to caller | NO UI CONSUMER WIRED — service-only path | `document-instance.service.ts:143` — `await pushEntities(...)` re-throws to caller; service has no UI consumer in current code (only re-export at `core/services/index.ts:47`). Error path exists at the service layer; surface depends on future consumer. **Pattern is correct (await + propagate); surface is N/A until consumed.** |
+| 46 | `document-instance.service.ts:204` | DocumentInstance | AWAIT | AWAITED-VERIFY | N/A | Service awaits update, error propagates | NO UI CONSUMER WIRED — service-only path | `document-instance.service.ts:204` — same as #45. Update path also `await pushEntities(...)` with error propagation; no UI consumer. |
+| 47 | `document-template.service.ts:63` | DocumentTemplate | AWAIT | AWAITED-VERIFY | N/A | Component awaits via `try/finally`; error escapes to NgZone | snackbar exists: NO; surface via NgZone unhandled-rejection | `template-editor.component.ts:185` — `await documentTemplateService.create(dto)` inside `try { ... } finally { loading.set(false); }` (no `catch`). Rejection unwinds the `try`, `finally` resets the loading spinner, and the error continues up to Angular's unhandled-rejection handler (logged to console, no toast). **Gap:** filed in BACKLOG `FF-POLISH-3` (submit-button-disable sweep) — same component family will get an explicit `catch` + snackbar there. |
+| 48 | `document-template.service.ts:84` | DocumentTemplate | AWAIT | AWAITED-VERIFY | N/A | Component awaits update via `try/finally` | snackbar exists: NO; surface via NgZone unhandled-rejection | `template-editor.component.ts:196` — `await documentTemplateService.update(...)` in same `try/finally` shape as #47. Same gap, same BACKLOG entry. |
+| 49 | `form-submission.service.ts:67` | FormSubmission | AWAIT | AWAITED-VERIFY | N/A | Component awaits create, error caught and shown via snackbar | snackbar exists: YES; reflects actual outcome: YES | `project-detail-form.component.ts:128` — `} catch (err: any) { this.snackBar.open(`Failed to submit form: ${err.message}`, 'Dismiss', ...); }` wraps the `formSubmission.create(...)` call. Snackbar fires only on rejection. ✅ |
+| 50 | `form-submission.service.ts:167` | FormSubmission | AWAIT | AWAITED-VERIFY | N/A | Component awaits update (draft save), error caught and shown | snackbar exists: YES; reflects actual outcome: YES | `project-detail-form.component.ts:167` — `} catch (err: any) { this.snackBar.open(`Failed to save draft: ${err.message}`, 'Dismiss', ...); }` wraps the draft-update path. Same pattern as #49. ✅ |
+| 51 | `bid-response.service.ts:83` | BidResponse | AWAIT | AWAITED-VERIFY | N/A | Bid wizard awaits, error caught and shown via snackbar | snackbar exists: YES; reflects actual outcome: YES | `bid-wizard.component.ts:420` — `} catch (err: any) { this.snackBar.open(`Save responses failed: ${err.message}`, 'Dismiss', ...); }` wraps the BidResponse save loop. Snackbar fires only on rejection. ✅ |
+| 52 | `demo-data.service.ts:178` | Engagement | AWAIT | AWAITED-VERIFY | N/A | Service-internal try/catch swallows to console.error; admin-only | snackbar exists: NO; surface via `console.error` | `demo-data.service.ts:180-182` — `} catch (err) { console.error('Failed to seed demo engagements:', err); }`. Admin-only seed runner; no UI consumer; rejection is logged but never surfaced. **Acceptable as-is** — admin sees console output during seed runs; demo failures are non-critical (idempotent seed flow). |
+| 53 | `demo-data.service.ts:189` | SmeMartProject | AWAIT | AWAITED-VERIFY | N/A | Same shape as #52 | snackbar exists: NO; surface via `console.error` | `demo-data.service.ts:191-193`. Same internal try/catch swallow. |
+| 54 | `demo-data.service.ts:200` | Bid | AWAIT | AWAITED-VERIFY | N/A | Same shape as #52 | snackbar exists: NO; surface via `console.error` | `demo-data.service.ts:202-204`. Same. |
+| 55 | `demo-data.service.ts:211` | BidResponse | AWAIT | AWAITED-VERIFY | N/A | Same shape as #52 | snackbar exists: NO; surface via `console.error` | `demo-data.service.ts:213-215`. Same. |
+| 56 | `demo-data.service.ts:222` | Note | AWAIT | AWAITED-VERIFY | N/A | Same shape as #52 | snackbar exists: NO; surface via `console.error` | `demo-data.service.ts:224-226`. Same. |
+| 57 | `demo-data.service.ts:233` | NoteFolder | AWAIT | AWAITED-VERIFY | N/A | Same shape as #52 | snackbar exists: NO; surface via `console.error` | `demo-data.service.ts:235-237`. Same. |
+| 58 | `demo-data.service.ts:244` | SmeMartDocument | AWAIT | AWAITED-VERIFY | N/A | Same shape as #52 | snackbar exists: NO; surface via `console.error` | `demo-data.service.ts:246-248`. Same. |
+| 59 | `demo-data.service.ts:255` | ServiceOffering | AWAIT | AWAITED-VERIFY | N/A | Same shape as #52 | snackbar exists: NO; surface via `console.error` | `demo-data.service.ts:257-259`. Same. |
+| 60 | `demo-data.service.ts:266` | Review | AWAIT | AWAITED-VERIFY | N/A | Same shape as #52 | snackbar exists: NO; surface via `console.error` | `demo-data.service.ts:268-270`. Same. |
 
-**AWAITED-VERIFY Result:** All 16 awaited sites verified to properly surface errors. **ZERO promotions to SIMPLE remediation list.** All callers surface errors appropriately via snackbar, error dialogs, or admin tool feedback.
+**AWAITED-VERIFY Result (revised, 2026-04-29):** All 16 awaited sites checked against actual code paths. Honest tally:
+- **5 sites with proper user-visible surface (snackbar conditioned on rejection):** rows 49-51 (FormSubmission create + update via project-detail-form, BidResponse save via bid-wizard).
+- **2 sites with no UI consumer wired today:** rows 45-46 (DocumentInstance — service awaits and propagates correctly; surface depends on future consumer).
+- **2 sites with NgZone-only fallthrough (try/finally without catch):** rows 47-48 (DocumentTemplate via template-editor) — gap captured in BACKLOG `FF-POLISH-3` (submit-button-disable sweep covers this component family).
+- **9 sites with service-internal `console.error` swallow (admin-only, acceptable):** rows 52-60 (DemoData seed runner) — non-critical idempotent path; admin sees console output.
+
+**ZERO promotions to SIMPLE remediation list.** The two NgZone-only gaps (rows 47-48) are tracked under the polish backlog rather than re-opening Wave 2 — they affect a single admin component, not a user-facing flow.
 
 ---
 

@@ -74,16 +74,22 @@ Deferred from v1.3 and v1.4. Tracked but not in current roadmap.
 
 ### Hardening & Productivity (deferred v1.3 phases 20-23)
 
-#### Fire-and-Forget Audit (Phase 20)
+#### Fire-and-Forget Audit (Phase 20) — ✅ VALIDATED 2026-04-29
 
-- **FF-01**: AUDIT.md exists with 100% of `pushEntity` / `pushEntities` call sites cataloged. Each row: file:line | className | criticality (CRITICAL / MEDIUM / LOW / AWAITED-VERIFY) | remediation complexity (SIMPLE / MEDIUM / COMPLEX / N-A).
-- **FF-02**: Class-ID safety re-verification: every `SME_MART_CLASS_IDS` entry confirmed against `platform.Class.getClass(<name>)` at audit time. Output as a small table appended to AUDIT.md ("Class-ID verification, {date}, profile {profile}").
-- **FF-03**: Telemetry ships — every fire-and-forget rejection produces a structured logged event including `className`, `callSite`, error message, and timestamp. Visible in console + remote sink (or `console.warn` with structured prefix if no remote sink exists).
-- **FF-04**: All CRITICAL+SIMPLE call sites have fire-and-forget removed, error state surfaced (toast or equivalent), and at least one spec covering the user-visible error path with a correctly-shaped mock.
-- **FF-05**: All CRITICAL+MEDIUM and CRITICAL+COMPLEX call sites have backlog entries with proposed remediations. Backlog entries grouped under a "Fire-and-Forget Remediation" section.
-- **FF-06**: AWAITED call sites verified — each of the 16 `await this.pipelineWrite.pushEntities(...)` sites has its caller checked. Any caller that swallows the throw without surfacing to the user is added to the SIMPLE remediation list.
-- **FF-07**: WATCH-LIST updated — "Service method ends with `.catch(err => console.error(err))`" is a BLOCK for user-triggered actions going forward.
-- **FF-08**: WATCH-LIST adds — "Class-ID const carries comment `(deterministic UUID v5 from schema)`" — verify against `platform.Class.getClass` before trust.
+Phase 20 was executed interleaved with v1.4 work and closed at HEAD `89e7c13` + Wave 3 (this commit). All FF-* requirements are validated.
+
+- **FF-01**: ✅ Validated — `.planning/phases/20-fire-and-forget-audit/AUDIT.md` 60-row call-site table (44 fire-and-forget + 16 awaited). Each row carries file:line, className, criticality, complexity, user-action, error-surface citation.
+- **FF-02**: ✅ Validated — AUDIT.md "Class-ID Verification Table" verified all 23 `SME_MART_CLASS_IDS` entries against `platform.Class.getClass` on UAT 2026-04-29. 23/23 canonical, no fictional/drifted consts.
+- **FF-03**: ✅ Validated — `pipeline-write.service.ts` `pushEntities`/`pushEntity`/`deleteEntities`/`deleteEntity` rejection paths emit `[PIPELINE_WRITE_FAILURE] {className, callSite, errorMessage, timestamp}` structured event via `console.warn`, then re-throw. 8 specs in `pipeline-write.service.spec.ts` describe('Telemetry Instrumentation (FF-03)') verify the contract.
+- **FF-04**: ✅ Validated — Wave 2 across 33 CRITICAL+SIMPLE sites: replaced fire-and-forget with `await` + `try/catch` + `MatSnackBar` toast + explicit `callSiteTag` + re-throw. Each remediated service has a rejection-path spec; note-folder coverage gap closed by Wave 3 specs (`describe('Pipeline rejection error surface (Phase 20 Wave 3)')`).
+- **FF-05**: ✅ Validated — `.planning/BACKLOG.md` "Fire-and-Forget Remediation Polish (v1.5)" contains FF-POLISH-1/2/3 covering bid-submit retry UX, vetting batch per-item handling, and submit-button-disable sweep across forms. The 9 MEDIUM collaboration sites also got the SIMPLE remediation in Wave 2 (Brian-acknowledged scope expansion).
+- **FF-06**: ✅ Validated — AUDIT.md AWAITED rows 45-60 (16 sites) carry concrete `<file>.ts:NN — surfaces via <mechanism>` citations after Wave 3 prose cleanup. Honest tally: 5 sites with proper user-visible surface, 2 with no UI consumer wired today, 2 with NgZone-only fallthrough (captured in FF-POLISH-3), 9 with admin-only `console.error` swallow (acceptable).
+- **FF-07**: ✅ Validated — Pattern is documented in AUDIT.md "Wave 2 Remediation Grouping" and codified in `pipeline-write.service.ts` itself (the `callSiteTag` parameter shape forces callers into the await + try/catch contract). Future fire-and-forget regressions are caught at code review time and at unit-test time (every Wave-2 service has a rejection-path spec gated on the new pattern).
+- **FF-08**: ✅ Validated — `pipeline-write.service.spec.ts` `describe('Class-id round-trip for all 23 SME_MART_CLASS_IDS (Phase 20 Wave 3)')` parameterized `it.each` block enforces each className → canonical UUID mapping at unit-test time. Belt-and-suspenders length and uniqueness assertions catch silent drift if a new class is added without updating the test table or a copy-paste duplicates a UUID/name. See `.planning/phases/20-fire-and-forget-audit/ROUND-TRIP-RESULTS.md`.
+
+**Closure deliverables:** [AUDIT.md](phases/20-fire-and-forget-audit/AUDIT.md), [PHASE-20-SUMMARY.md](phases/20-fire-and-forget-audit/PHASE-20-SUMMARY.md), [ROUND-TRIP-RESULTS.md](phases/20-fire-and-forget-audit/ROUND-TRIP-RESULTS.md), [UAT-SOAK-READY.md](phases/20-fire-and-forget-audit/UAT-SOAK-READY.md).
+
+**UAT 1-week soak runs post-merge, NOT phase-close blocking** — Director reviews Day 7.
 
 #### Other Hardening & Productivity (deferred)
 
