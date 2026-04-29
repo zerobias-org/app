@@ -8,10 +8,14 @@ vercel.env
 
 # Local Claude plans and settings (not shared)
 **/.claude/plans/local/
+**/.claude/plans-archive/
 **/.claude/settings.local.json
 **/.claude/ideas/
 **/.claude/scheduled_tasks.lock
 **/.claude/worktrees/
+**/.claude/.obsidian/
+**/.claude/.DS_Store
+**/.claude/scripts/node_modules/
 # **/.planning/
 
 # Deprecated Next.js prototype (archived, kept on disk for reference)
@@ -19,9 +23,6 @@ package/w3geekery/sme-mart-nextjs-deprecated/
 
 # Parallel director-session worktrees (DPn) — never track as submodules
 package/w3geekery/sme-mart-dp*/
-
-# Personal obsidian vault / scratch notes (accidentally tracked by gsd-execute mass-add in ebb6f5b/67c5883)
-package/w3geekery/sme-mart/SME Mart/
 
 # Session-specific context (not shared)
 **/restart_context*

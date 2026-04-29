@@ -1,0 +1,243 @@
+EXHIBIT A - STATEMENT OF WORK (SOW)
+
+PROJECT BACKGROUND 
+The California Department of Public Health, Center for Preparedness and Response (hereafter referred to as “CDPH” or “the State”), coordinates overall emergency planning and preparedness efforts. CDPH plans and executes activities to prepare Californians for public health emergencies, oversee statewide public health disaster planning, and maintains and manages the Medical and Health Coordination Center (MHCC).
+
+DESCRIPTION OF PROPOSED SYSTEM
+The Contractor shall provide a data subscription, contractor-hosted, pre-existing Software as a Service (SaaS) solution with hospital onboarding services to support CDPH compliance with Assembly Bill 177 (AB 177), Chapter 999, Section 3, for the development and administration of healthcare bed capacity. The Hospital Bed and Emergency Medical Services Data System (HBEDS) shall display real-time staffed bed availability by bed type on a secure dashboard accessible to participating hospitals and local and state government officials. HBEDS shall be automated through hospital Electronic Medical Records/Electronic Health Records (EMR/EHR) systems, replacing manual bed-polling processes. The platform shall include functionality to collect data from specified healthcare entities, including bed census and availability by level of care, unit, and hospital, and shall report this data to support statewide situational awareness and emergency response coordination.
+
+SAAS SYSTEM SUBSCRIPTION/LICENSE
+Contractor will provide a SaaS solution compliant with the Software requirements outlined in the DGS PD 402-ITGP Cloud, Rev 02/20/2025, including Section 21.7 Cloud Computing Service Availability. The Contractor’s solution will be compliant with the California Department of Technology (CDT) Cloud Computing policies.
+
+Contractor will provide access to the SaaS solution for CDPH staff as appropriate and as defined herein.  
+
+TERM OF THE CONTRACT
+The base Contract term will be for three (3) years. This Contract is of no effect without the Department of General Services (DGS) approval. The Contractor shall not start work prior to approval of the Contract and before receipt of notice to proceed by the CDPH Contract Administrator. The parties may amend this Contract as permitted herein. All terms and conditions will remain the same for the entire Contract period, including any extension periods.
+
+AMENDMENTS
+Subject to the terms and conditions of this Contract and contingent upon mutual agreement between the State and the Contractor, the State may amend the Contract prior to its expiration date for:
+
+Two (2) additional one-year periods.
+Cost for adding additional hospitals at the originally agreed upon rate as specified in the Contract pricing.
+
+If the Contract is amended, the originally agreed upon rates as specified in the Contract pricing.
+
+
+The State is not obligated to use any or all of these extension options. No amendment or variation of the terms of this Contract will be valid unless made in writing, signed by CDPH and the Contractor, and approved by DGS. Oral communication is not binding.
+
+CONTRACT REPRESENTATIVES
+The Contractor shall assign a Contract Administrator and Project Manager who will be the main contact for all Contract and project issues for the term of the Contract. Any changes to the Contractor’s staff shall be immediately reported in writing to CDPH. In the absence of the CDPH Contract Administrator or Project Manager, the State reserves the right to appoint a CDPH Designated Representative.
+
+The Contract Administrator during the term of this Contract will be:
+
+The Project Manager during the term of this Contract will be:
+
+All payments from CDPH to the Contractor; shall be sent to the following remittance address:
+
+SERVICE LOCATION
+The Contractor shall perform all services remotely within the United States and comply with all hospital entry rules and regulations during any onboarding activities, including meetings with prospective hospitals that require access to hospital facilities.
+
+
+SERVICE HOURS
+System must be active 24 hours a day, seven (7) days a week, except during planned maintenance (including software updates) with live updated bed data every 15 minutes.
+
+Provide email or phone assistance and support with troubleshooting, updates,
+and operational questions. CDPH operating hours are 8:00 am – 5:00 pm (PST), Monday through Friday, excluding State Holidays.
+
+Observed State holidays are as indicated on the following website: https://www.calhr.ca.gov/employees/pages/state-holidays.aspx. 
+All scheduled services under this Contract must be completed within normal business hours (unless approved in writing and in advance by the State’s Contract Administrator or Designated Representative). Any hours of work that are not approved in advance will be considered performed at Contractor's own expense.
+
+STATE’S ROLES AND RESPONSIBILITIES
+CDPH will: 
+
+Designate the CDPH Contract Administrator, to whom all Contractor communications related to the Contract will be addressed, and who has the authority to act on all aspects of the services. This person will review the Contract and associated documents with the Contractor to ensure understanding of the responsibilities of both parties. Designate the CDPH Project Manager, to whom Contractor communications regarding the details of project implementation will be addressed.
+
+Deliver confirmation to the Contractor within 24 hours that a CDPH user is approved to be added to the system.
+
+Pay all properly submitted undisputed invoices in accordance with Exhibit B, Budget Detail and Payment Provisions and the California Prompt Payment Act. 
+ 
+Supply a list of General Acute Care Hospitals in California that are eligible to onboard and maintain an updated list of eligible hospitals throughout the duration of the Contract in accordance with AB 177, Chapter 999, Section 3.
+
+Authorized partners include: Local Health Department staff, Local EMS Authority staff, Regional Emergency Management Partners (such as Regional Disaster Medical Health Coordinators and Specialists), EMS providers, California Hospital Association staff, California State Agency staff (including the Emergency Medical Services Authority, the Department of Health Care Access and Information, California Health and Human Services Agency, California Governor’s Office of Emergency Services, Department of State Hospitals, and other agencies as requested).
+
+CONTRACTOR’S ROLES AND RESPONSIBILITIES:
+Ensure that the State has timely and accurate information at all times during both routine operations and declared emergencies (example: State of Emergency, Executive Order, etc.).
+
+Maintain continuous availability and reliability to enhance the State’s ability to plan, allocate resources, and respond effectively to evolving healthcare demands.
+
+Inform CDPH when a CDPH user obtains appropriate access.
+
+Maintain and submit to CDPH a monthly data subscription spreadsheet to track, monitor, and reconcile all hospital quarterly data subscription assignments throughout the Fiscal Year. All quarterly data subscriptions must be approved by CDPH prior to issuance. 
+
+Customer support to ensure successful data integration for hospital IT staff and EHR report writers. 
+
+Ensure that the Contractor’s solution remains fully compliant with all current and future Center for Disease Control and Prevention National Health Care Safety Network (CDC/NHSN) data submission under the CDC/NHSN Hospital Bed Connectivity Project and the CDC/NHSN Hospital Respiratory Reporting program.
+
+Continuously monitor, implement, and incorporate any updates, revisions, or new requirements issued by the CDC/NHSN to maintain uninterrupted compliance.
+Provide on-going system support including secure hosting, troubleshooting and continuous system monitoring, report development and generation, and updates and revisions to the Information Management System and its components, including updating technical features to accommodate browser updates.
+
+Designate a Project Manager to whom all project communications are addressed, which has the authority to act on all aspects of the services. This person will review the Contract and associated Contract documents with the CDPH Contract Administrator or their designee to ensure understanding of the responsibilities of both parties.
+
+All work is expected to occur remotely. However, in the rare instance where on-site work is required, and approved, any property provided by the State must be returned. 
+
+Respond directly to hospital inquiries regarding onboarding to the system based on the list of eligible hospitals.
+
+SOLUTION & SERVICE REQUIREMENTS
+The Contractor shall provide a data subscription, contractor-hosted, pre-existing Software as a Service (SaaS) solution that meets the State’s requirements for secure access, and enables the State to obtain healthcare hospital bed availability data in real time, with the following capabilities and features:
+
+System Integration, Data Collection, and Security
+
+Capable of integration and support with healthcare hospital HER/EMR systems to receive data on staffed bed availability by bed type used by healthcare hospitals in California.
+
+Collect data elements from hospitals on a continuous, 24/7 basis, in 15‑minute increments, as required by the Center for Disease Control and Prevention National Healthcare Safety Network (CDC/NHSN). The instructions can be found in Exhibit A1, HBEDS CDC-NHSN Instruction Book. 
+
+A full list of required data elements is provided in Exhibit A2, HBEDS CDC-NHSN Required Data Elements. The Contractor shall ensure the software incorporates and maintains all data elements listed in the Exhibit A2, HBEDS CDC-NHSN Required Data Elements. These are the data elements the Contractor is required to submit to the CDC/NHSN and are subject to change. If CDC/NHSN reporting requirements change, the Contractor shall comply with all applicable HBEDS requirements, notify the CDPH Contract Administrator and Project Manager, and adhere to all transmission and import guidelines. Additional information is available in Hospital Bed Capacity Project | NHSN |CDC. 
+
+These requirements include, but are not limited to, the following:
+
+Hospital inpatient and ICU bed capacity and occupancy data, overall and by bed type (i.e., pediatric and adult).
+
+Numbers of hospitalized patients with lab-confirmed COVID-19, Influenza, and RSV, by age group.
+Numbers of new hospital admissions of patients with lab-confirmed COVID-19, Influenza, and RSV, by age group.
+  
+Data should be retained by the Contractor for historical visualization purposes on the dashboard as outlined in Section B, Dashboard.
+
+Single Sign On (SSO) is required by using Security Assertion Markup Language (SAML) 2.0 or OpenID Connect (OIDC)/Open Authorization 2 (OAuth2) protocols.
+
+Multi Factor Authentication (MFA) is required by all; (a) privileged access, (b) user access to sensitive or confidential data, and (c) accounts representing official communications from state departments.
+
+Automate bed reporting on behalf of healthcare hospitals. 
+
+Support data transmission via Secure File Transfer Protocol (SFTP), Application Programming Interface (API), or Fast Health Interoperability Resources (FHIR), depending on each hospital’s capabilities.
+
+Dashboard 
+
+The dashboard shall include, as needed but not limited to, the following elements: 
+
+Filtering by hospital, bed type, and region. 
+
+Enable users to download historical data collected after enrollment. 
+
+Depict weekly, monthly, annual, and specified date filters overtime for participating hospitals.
+
+Real Time Bed Availability
+Number of staffed beds by type (ICU, medical/surgical, pediatric, psychiatric, etc.).
+Occupancy rates and available capacity across hospitals.
+
+Hospital Integration Status
+Connectivity with EHR/EMR systems.
+Success/failure logs of data feeds.
+
+Operational Insights
+Trends in bed usage over time.
+Surge capacity indicators for emergency activation.
+Geographic distribution of available beds across California.
+
+CDC/NHSN Reporting Compliance
+Timeliness of submissions and audit logs.
+Alerts for missed or delayed updates.
+Transmission
+
+Transmit and submit required bed capacity data on behalf of enrolled hospitals to CDC/NHSN at least twice daily as described on Exhibit A1, CDC/NHSN Instruction Book.
+
+Transmit data to CDPH via API every 15 minutes to support internal analysis and reporting.
+
+Program Implementation / Stakeholder Engagement
+
+Contractor shall develop a comprehensive Implementation Plan which defines the tasks, activities, timelines, and roles and responsibilities necessary to onboard hospitals into the HBEDS system including an outline of the overall approach for delivering the program to California healthcare hospitals and California government stakeholders. This Implementation Plan shall be provided to the CDPH Project Manager within 30 calendar days after Contract award. 
+The Implementation Plan shall be updated upon State request and shall specifically include, as applicable and not limited to, the following:
+
+Project timelines, including anticipated start and completion dates for major activities listed below.
+Kickoff meeting shall take place within 30 calendar days of Contract award
+CDPH access to the dashboard shall be granted within 60 calendar days of Contract award.
+Access for CDPH authorized partners shall be granted within 180 calendar days of Contract award.
+Hospital outreach materials shall be developed within 60 calendar days of Contract award.
+Initiation of hospital onboarding shall take place within 90 calendar days of Contract award.
+Contractor must provide hospitals with a participation agreement within 5 business days of request by hospital.
+
+Key milestones, readiness checkpoints, and progress review intervals.
+
+
+Readiness timeline indicating the estimated duration required for the Contractor to become fully prepared to onboard the first hospital following Contract execution.
+
+Hospital onboarding schedule specifying the number of hospitals the Contractor can onboard within defined time periods (e.g., monthly, quarterly, annually).
+
+Capacity projections describing the Contractor’s anticipated onboarding throughout and any factors that may affect onboarding volume.
+
+Conditions and factors that may affect project timelines or onboarding capacity.
+
+Risk mitigation strategies to address potential delays or barriers to implementation.
+
+Conduct outreach to program‑eligible hospitals and secure their participation in the program, including completing all required onboarding activities. 
+
+Virtual enrollment sessions with each hospital to explain the service, data requirements, and transmission process. 
+
+Documentation and handouts containing detailed onboarding instructions, subject to CDPH review and approval prior to distribution to hospitals.
+
+Outreach plan to promote service enrollment among specified healthcare hospitals. 
+
+Program Requirements/Participation Criteria
+
+Meetings with hospital staff as needed to support enrollment and ensure understanding of reporting requirements. 
+Support access management for healthcare hospital users, including granting/revoking access upon request. 
+
+CONTRACTOR’S PERFORMANCE
+Contractor accepts full responsibility for coordinating and controlling all aspects of the Contract,
+including support or activities to be performed by any of their subcontractors. The Contractor’s Program Manager will be the sole point of contact with the State, relative to Contract performance. The Contractor’s obligation to pay its subcontractors is an independent
+obligation from the State’s obligation to make payments to the Contractor. As a result, the State shall have no obligation to pay or to enforce the payment of any monies to any subcontractor with the exception of the provisions of Military and Veterans Code Sections 999.5 and 999.7.
+
+The Contractor agrees that any subcontract resulting from its performance under the terms and conditions of the Contract must include a provision that the subcontractor must abide by the terms and conditions of this Contract, as well as all other applicable federal and state laws, rules, and regulations pertinent hereto that have been or may hereafter be established. 
+
+
+SUBCONTRACTOR CHANGES
+The State recognizes that changes to Subcontractor(s), if identified, may be necessary and in the best interests of the State; however, advance notice of a contemplated change and the reasons for such change must be given to the State no less than 14 working days prior to the existing Subcontractor’s termination. The CDPH Contract Administrator or designee must approve any changes to the Subcontractor(s) prior to the termination of the existing Subcontractor(s) and hire of the new Subcontractor(s) and such approval will not be unreasonably withheld or delayed. This also includes any changes made between submittal of the Contractor’s RFP Response and Contract Award Date. The State will not compensate the Contractor for any of the Contractor’s time or effort to educate or otherwise make the new Subcontractor(s) ready to begin work on the Contract. Changes shall be made in accordance with Exhibit D, Additional Provisions.
+
+PROBLEM ESCALATION 
+The parties acknowledge and agree that certain technical and project related problems or issues may arise, and that such matters must be brought to CDPH’s attention. Problems or issues must normally be reported in regular status reports. There may be instances, however, where the severity of the problems justifies escalated reporting. To this extent, Contractor must determine the level of severity and notify the appropriate CDPH personnel. CDPH personnel must be notified, and the time taken to report the problem or issue must be at a level commensurate with the severity of the problem or issue. CDPH personnel includes, but is not limited to, the following: 
+
+First Level – CDPH Center for Preparedness and Response (CPR) Intelligence Section Program Manager II 
+Second Level – CDPH CPR Information Technology Manager
+Third Level – CDPH CPR Business Operations Branch Chief
+REPORTING
+The Contractor must provide a monthly onboarding report to CDPH identifying the onboarded hospitals for the month.  
+
+Each report must include:
+
+Hospital Name
+Address
+County
+Hospital Point of Contact Name
+Hospital Point of Contact Email Address
+Hospital Point of Contact Phone Number
+
+Reports are due to CDPH no later than the 5th of the following month (Example: reporting for July 2026 would be due to CDPH no later than August 5th, 2026). 
+
+TRAVEL
+The Department will not reimburse the Contractor travel costs under this Contract. All activities required to onboard the designated number of hospitals per year shall be completed by the Contractor without travel reimbursement. The Contractor is fully responsible for ensuring that onboarding activities are conducted through remote methods, unless otherwise approved in writing by the State.
+
+
+
+[Table 1]
+Agency: Center for Preparedness and Response | Contractor: TBD
+Section/Unit: TBD | Name: TBD
+Name: TBD | Title: TBD
+Address: TBD | Address: TBD
+Phone: TBD | Phone: TBD
+E-mail: TBD | E-mail: TBD
+
+[Table 2]
+Agency: Center for Preparedness and Response | Contractor: TBD
+Section/Unit: TBD | Name: TBD
+Name: TBD | Title: TBD
+Address: TBD | Address: TBD
+Phone: TBD | Phone: TBD
+E-mail: TBD | E-mail: TBD
+
+[Table 3]
+Contractor: TBD
+Attention “Cashier”: TBD
+Address: TBD
+City, Zip: TBD
+Phone: TBD
+Fax: TBD
+Email: TBD
