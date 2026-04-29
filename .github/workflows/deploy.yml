@@ -47,14 +47,10 @@ jobs:
           echo "S3_BUCKET=${{ github.event.inputs.s3-bucket }}" >> $GITHUB_ENV
           echo "FULL_PATH=${{ github.event.inputs.app-path }}/${{ github.event.inputs.app-name }}" >> $GITHUB_ENV
 
-          # uat runs in the prod AWS account; reuse the prod IAM role until a
-          # dedicated gh-app-uat-custom-app role is provisioned. Bucket stays
-          # env-specific (app-uat-zerobias.com) via S3_BUCKET above.
-          if [ "$ENV_NAME" = "uat" ]; then
-            echo "ROLE_ENV=prod" >> $GITHUB_ENV
-          else
-            echo "ROLE_ENV=$ENV_NAME" >> $GITHUB_ENV
-          fi
+          # Use the env-specific IAM role (gh-app-<env>-custom-app).
+          # Andrey provisioned gh-app-uat-custom-app on 2026-04-21 so we no longer
+          # need to piggyback on the prod role.
+          echo "ROLE_ENV=$ENV_NAME" >> $GITHUB_ENV
 
       - name: Import secrets
         uses: hashicorp/vault-action@v2.4.3
@@ -114,18 +110,16 @@ jobs:
                   "type": "header",
                   "text": {
                     "type": "plain_text",
-                    "text": ":rocket: Deployed ${{ env.PKG_NAME }} to *${{ env.ENV_NAME }}*",
+                    "text": ":rocket: ${{ env.PKG_NAME }} deployed to ${{ env.ENV_NAME }}",
                     "emoji": true
                   }
                 },
                 {
-                  "type": "context",
-                  "elements": [
-                    {
-                      "type": "mrkdwn",
-                      "text": "S3 Bucket: `${{ env.S3_BUCKET }}`"
-                    }
-                  ]
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Repo:* `${{ github.repository }}`\n*Bucket:* `${{ env.S3_BUCKET }}`\n*Commit:* <https://github.com/${{ github.repository }}/commit/${{ github.sha }}|`${{ github.sha }}`>\n*Run:* <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|View workflow>"
+                  }
                 }
               ]
             }
