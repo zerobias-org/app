@@ -67,8 +67,8 @@ Error toward acting-on-request. Retreating to the rule when explicitly asked is 
 |---|---|---|
 | 24 | Demo Data Visibility Gate | not started |
 | 25 | Platform Data Audit | ✅ COMPLETE 2026-04-27 |
-| 26 | Seed ZB-as-provider + ratify `company_info` convention | **IN PROGRESS — Plan 26-01 CLOSED, Plan 26-02 in defect-fix loop, 26-03 pending** |
-| 27 | Auth gate + onboarding routing + lazy-on-load default-engagement guard | not started |
+| 26 | Seed ZB-as-provider + ratify `company_info` convention | ✅ COMPLETE 2026-04-28 — all 4 plans + phase-level closure done; UAT-deployed + verified 2026-04-29 |
+| 27 | Auth gate + onboarding routing + lazy-on-load default-engagement guard | NEXT |
 | 28 | Company profile review/confirm form (section/data shape) | not started |
 | 30 | Default Project board + "Coming Soon" placeholder surfaces | not started |
 | 31 | W3Geekery as first customer + production smoke test | not started |
@@ -204,25 +204,27 @@ Brian walked through `.planning/director/brian-content-brief-v1.4-deferred.md` a
 
 | Item | Owner | Status |
 |---|---|---|
-| Phase 26-02 fix + actual UAT seed + GQL verify | gsd-execute | **VERIFIED 2026-04-28** — commit `d7e8cd2` landed; 8 MPI rows on UAT, residue cleared, build green. Director independent re-verification via GQL passed. |
-| Plan 26-04: correct fictional class IDs (MPI + EngagementVettingItem) in pipeline-write.service.ts | gsd-plan | **HANDED OFF 2026-04-28** — copy-paste prompt delivered; gates on Plan 26-02 close (now closed). |
-| Errata 023 + DECISIONS.md entry "Platform-Assigned Class IDs Are Not Deterministic UUID v5" | Director Parks | **DONE 2026-04-28** |
-| Phase 20 (Fire-and-Forget Audit) — promote from TBD to actively planned | Director Parks | NEXT — should run before Phase 27 (auth gate + lazy guard relies on round-trip writes succeeding) |
+| Phase 26 (all 4 plans + phase-level closure) | gsd-execute | **DONE 2026-04-28** — `26-VERIFICATION.md` PASS for SP-01/04/05/06; SP-02 PARTIAL → **PASS 2026-04-29 on UAT** |
+| UAT deploy of Phase 26 runtime | Clark + Director | **DONE 2026-04-29** — saga: PR #50 (full diff, closed superseded) → PR #51 (12-file deploy-only, merged but broke dist layout) → PR #52 hotfix (restored flatten-dist build config, merged 16:50Z) → UAT verified. CloudFront invalidated. `uat.zerobias.com/sme-mart/` loads, engagements + providers render. |
+| `poc/sme-mart` synced with `upstream/uat` | Director | **DONE 2026-04-29** — merge commit `4d6ef39`. Closes the long-divergence problem that drove the deploy-saga regressions. Future cherry-picks from this branch won't re-introduce stale config landmines. |
+| Phase 20 (Fire-and-Forget Audit) plan | DP2 worktree | **PLAN WRITTEN** — 3-wave plan + call-site audit live on `director-parks-2-phase20` branch (commit `b243935`). Brief + ROADMAP entry already cherry-picked into `poc/sme-mart` (commits `2bfecfa`, `96c8d45`). When ready to execute: merge `b243935` from `director-parks-2-phase20` to execution branch; gsd-executor opens 20-01-PLAN.md first; REQUIREMENTS.md gets FF-06/07/08 added during Wave 1. |
 | Brian meeting transcript processing | Clark + Director Parks | waiting on `/tt:transcript` |
 | `zerobias-com/tag` PR #1 review | Daniel Rojas | NOT blocking (Phase 26 went option-b) |
-| PKV API verification on UAT (zb-dx friction log 2026-03-13) | deferred | env file reverted; can't test until dev server unblocks; rerun after 26-04 lands |
-| `app/` directory move to `zb-forks/org/app/` | end-of-session | deferred — needs session exit + memory dir rename + 11 worktree cleanup |
+| PKV API verification on UAT (zb-dx friction log 2026-03-13) | deferred | env file reverted; can't test until dev server unblocks |
+| Worktree pruning hygiene | Director | 8 stale prunable entries (`git worktree prune` is safe, untaken) |
+| DP2 worktree teardown | Director | post-Phase-20-execution: `git worktree remove ../sme-mart-dp2 + git branch -D director-parks-2-phase20` |
+| `app/` directory move to `zb-forks/org/app/` | end-of-session | deferred — needs session exit + memory dir rename |
 
 ---
 
 ## Next-action sequence (when Director Parks resumes)
 
-1. **Process Brian transcript** (`/tt:transcript` after Clark says go) — extract answers, file new DECISIONS.md entries for any data-model decisions, update `brian-content-brief-v1.4-deferred.md` status table, surface follow-up questions for next meeting.
-2. **Review gsd-plan output for Plan 26-04** — checkpoint plan before execution. Verify TDD scope is tight (just the two consts, no Phase 20 scope creep), tests bind to canonical UUIDs, live-write verification on UAT included.
-3. **Wave 3 (Plan 26-03)** review when ready — Browse Providers UI tests + UAT manual verify. Now unblocked since live MPI data is on UAT.
-4. **Phase 26 close** — verification report, SUMMARY consolidation, mark complete.
-5. **Promote Phase 20 (Fire-and-Forget Audit)** from TBD to actively planned. Errata 023 confirms two real instances of the silent-failure pattern — Phase 20 is no longer theoretical. Should run before Phase 27 to avoid stacking more silent-failure exposure during onboarding routing work.
-6. **Phase 27** — auth gate + lazy-engagement-guard. Brief refresh likely needed post-Phase-26 + Phase-20.
+1. **Phase 20 (Fire-and-Forget Audit)** — plan is written and waiting on the `director-parks-2-phase20` branch. Director recommended running this before Phase 27 to avoid stacking more silent-failure exposure during onboarding routing work. Execution path: merge `b243935` to execution branch; gsd-executor opens 20-01-PLAN.md first; REQUIREMENTS.md gets FF-06/07/08 added during Wave 1 (DP2 deliberately did not edit it).
+2. **Phase 27** — auth gate + lazy-engagement-guard. Brief refresh likely after Phase 20 lands.
+3. **Brian transcript processing** (`/tt:transcript` after Clark signals go) — extract answers, file new DECISIONS.md entries for any data-model decisions, update `brian-content-brief-v1.4-deferred.md`, surface follow-up questions.
+4. **Worktree hygiene** — `git worktree prune` (8 stale entries; safe, untaken).
+5. **Phase 28** — company profile review/confirm form (post-Phase-27).
+6. **Phase 30 + 31** — default board, smoke test (close out v1.4).
 
 ---
 
@@ -242,7 +244,7 @@ Brian walked through `.planning/director/brian-content-brief-v1.4-deferred.md` a
 
 ## Quick-start prompt for the next Director Parks session
 
-> Resume Director Parks. Read `.planning/director/DIRECTOR-PARKS-RESUME.md` FIRST (role contract + direct-request override + v1.4 state + IN-FLIGHT TRACKER). Then `.planning/director/SESSION-STATE.md` and recent `.planning/director/DECISIONS.md` entries. The /meta:director skill applies. v1.4 milestone design is locked (7 phases). **Phase 25 COMPLETE.** **Phase 26: Plan 01 + Plan 02 CLOSED** (option-b distinguisher locked; UAT seed verified 2026-04-28 — 8 MPI rows landed via canonical class id `7bcf86a5-...`). **Plan 26-04 handed to gsd-plan** to correct two fictional class id consts (`ee1e68b7-...` for MPI and `66fa174f-...` for EngagementVettingItem in `pipeline-write.service.ts:33,36`) — confirmed via 2026-04-28 audit of all 23 SME_MART_CLASS_IDS against `platform.Class.getClass`. Both fictional consts have been silently failing in production via fire-and-forget `.catch` (errata 023, DECISIONS.md "Platform-Assigned Class IDs Are Not Deterministic UUID v5"). **Brian meeting transcript pending** — process via `/tt:transcript` when Clark signals ready. **Phase 20 (Fire-and-Forget Audit)** should be promoted from TBD to actively planned before Phase 27. Direct request overrides default boundary (you can run /gsd:* if asked).
+> Resume Director Parks. Read `.planning/director/DIRECTOR-PARKS-RESUME.md` FIRST (role contract + direct-request override + v1.4 state + IN-FLIGHT TRACKER). Then `.planning/director/SESSION-STATE.md` and recent `.planning/director/DECISIONS.md` entries. The /meta:director skill applies. v1.4 milestone design is locked (7 phases). **Phases 24, 25, 26 COMPLETE.** **Phase 26 fully shipped to UAT 2026-04-29** (PR #51 deploy-only set + #52 flatten-dist hotfix); engagements + providers render at `uat.zerobias.com/sme-mart/`. **`poc/sme-mart` synced with `upstream/uat`** (merge `4d6ef39`) — closes the long-divergence problem that caused the deploy saga. **Phase 20 (Fire-and-Forget Audit) plan written** on `director-parks-2-phase20` worktree branch (commit `b243935`); brief + ROADMAP entry already cherry-picked into `poc/sme-mart`. Director recommendation: execute Phase 20 before Phase 27 (auth gate + lazy guard) to avoid stacking more silent-failure exposure. **Brian meeting transcript still pending** — process via `/tt:transcript` when Clark signals ready. Direct request overrides default boundary (you can run /gsd:* if asked).
 
 ---
 
@@ -252,56 +254,24 @@ Brian walked through `.planning/director/brian-content-brief-v1.4-deferred.md` a
 
 ---
 
-## Update from gsd-execute session — 2026-04-28 (after this file's last save)
+## Session log — 2026-04-29 (Phase 26 closure + UAT deploy saga + upstream sync)
 
-Director Parks: while you were away, the gsd-execute worker ran Plan 26-03 to plan-level completion. Briefing you back in.
+What this session achieved, in order:
 
-### What landed
+1. **Phase 26 phase-level closure** — option A from yesterday's three-way. gsd-execute ran the regression gate (32 specs / 416 tests pass), spawned gsd-verifier (PASS for SP-01/04/05/06; SP-02 PARTIAL pending UAT), ran `gsd-tools phase complete 26`, refreshed STATE.md prose. Closure commits: `f66299a`, `1b0cc40`, `80aaf8f`.
+2. **DP2 handoff cherry-pick** — pulled DP2's Phase 20 brief refresh + ROADMAP entry into `poc/sme-mart` (`2bfecfa`, `96c8d45`). The 3-wave PLAN.md stays on the `director-parks-2-phase20` worktree branch until execution time.
+3. **DP2 worktree gitlink fix** — gsd-execute's `67c5883` commit had accidentally `git add`ed the worktree directory as a phantom 160000 submodule. Untracked + ignored (`bf5f2f0`).
+4. **`.claude/` Obsidian-rename damage repair** — the directory had been renamed on disk to `SME Mart` (literal space) by Obsidian opening it as a vault. Two prior commits (`ebb6f5b`, `67c5883`) bulk-added the renamed copy under the new name, replicating 188 files plus a `.obsidian/` folder + 36 MB `node_modules/`. Untracked the misnamed copy (`4cbf6d9`), `mv`'d back to `.claude/`, surgical gitignores for `.obsidian/`, `node_modules/`, `.DS_Store`, `plans-archive/`, then re-tracked legitimate content (`22719ed`).
+5. **UAT deploy saga**:
+   - PR #50 — full diff (93 files) including planning + `.claude/`. Closed as superseded.
+   - PR #51 — narrowed to 12 runtime files. Merged 16:43Z. Auto-deployed → broke: bucket layout was `sme-mart/sme-mart/browser/index.html` instead of `sme-mart/index.html`. `uat.zerobias.com/sme-mart/` → `/not-found`.
+   - **Root cause**: `poc/sme-mart` carried pre-PR-#46 versions of `angular.json` (no `outputPath` flatten) and `package.json` (bare `ng build`, no UAT config + base-href). Cherry-picking those onto upstream silently undid #46.
+   - Same family as `.github/workflows/deploy.yml` — that file had been excluded from #51 BECAUSE we noticed it carried Clark's old `afc97d8` rollback that PR #44 had already superseded.
+   - PR #52 — hotfix, restored `outputPath` and build-script line. SDK bumps preserved. Merged + deployed → working.
+6. **`poc/sme-mart` synced with `upstream/uat`** (merge `4d6ef39`) — closes the long-divergence problem at the source. Future cherry-picks from this branch won't carry stale config. Merge was clean (only `package.json` auto-merged; SDK bumps + build script + outputPath all converged correctly).
 
-| Commit | What |
-|--------|------|
-| 0ab1850 | Wave 1 RED — MPI-shaped failing tests for ProviderProfilesService |
-| 67c5883 | Wave 2 GREEN — MPI/GQL implementation (direct boundaryExecuteRawQuery, bypassing GraphqlReadService per your decision lock) |
-| 3188023 | Wave 3 — Component specs (provider-list/detail/card) for ZB-shaped data |
-| **fff95b2** | **(authored by you, not the executor)** — removed demo-mode short-circuit on graphql-read.service.ts. Originally locked OUT of scope for 26-03; you over-rode that decision mid-flight to unblock the impersonate-fix push (50f5d51). 46 previously-failing tests recovered. |
-| b6e1244 | Bug fix — listProviders was using fabricated `orgId: { _or: [...] }` filter shape; replaced with ZB's actual `.in.UUID1,UUID2` operator (source: `~/Projects/zb/platform/graphql/README.md`). Caught at local-dev verification. |
-| 90b4b1c | Cleanup — 22 unused-symbol diagnostics resolved (CRUD stub params prefixed with `_`, dead `signal`/`catalog` imports removed) |
-| 6fc9730 | SUMMARY.md for 26-03 |
-| 61a8a3f | ROADMAP.md — phase 26 marked 4/4 complete |
+UAT verification screenshots confirm: My Engagements, /providers list (ZeroBias card), /providers/<zb-org-id> detail page all rendering. SP-02 PARTIAL → PASS.
 
-### What's verified (local dev only)
-
-- `npm run dev` (localhost frontend → UAT data) shows ZeroBias card on `/providers` ✅
-- Browser console clean ✅
-- All targeted unit tests pass (37/37); `tsc --noEmit` clean on both configs; `ng build --configuration=development` succeeds
-- **Detail page `/providers/<zb-org-id>` rendering: NOT YET CONFIRMED** — Clark hadn't checked at handoff time
-- **UAT verification deferred to post-deploy** — pre-deploy UAT was a structural mistake by the executor; corrected on the fly
-
-### What is NOT done yet (your decisions to make)
-
-Phase 26 plan-level work is complete, but the **phase-level closure** has not been run. Per the execute-phase workflow, after the last plan SUMMARY lands, the orchestrator normally:
-
-1. **Regression gate** — run prior-phase test files (24/25 plans) to catch cross-phase regressions
-2. **`gsd-verifier`** — spawn verifier subagent → produces `26-VERIFICATION.md` checking phase goal vs. requirements (SP-01, SP-02, SP-04, SP-05, SP-06)
-3. **`gsd-tools phase complete 26`** — auto-updates STATE.md frontmatter, checks roadmap checkbox, advances next-phase pointer
-4. **PROJECT.md evolution** — move SP-* requirements from Active → Validated
-5. **Final docs commit**
-
-The gsd-execute session deliberately did NOT run any of these autonomously — that's a Director call.
-
-Also flagging: **STATE.md prose body is stale**. Frontmatter tracks correctly (`completed_plans: 29`), but the body's "Current Position" section still reads "Plan 2 of 3 / Next: Plan 02". The body refresh typically happens during `phase complete`.
-
-### Three options presented to Clark; he hasn't chosen yet
-
-- **(A) Run phase-level closure now** — gsd-execute runs regression gate → spawns `gsd-verifier` → `phase complete 26` → commits. Wraps up cleanly, advances STATE.md to phase 27.
-- **(B) Hold for detail-page verification first** — Clark verifies `/providers/<zb-org-id>` on local dev, then close.
-- **(C) Hold entirely** — phase closure is its own session; resume tomorrow / next director window.
-
-Clark mentioned he might have accidentally killed Director Parks while this was in flight, hence this update. Pick up wherever you choose.
-
-### Clark told me explicitly
-
-> "don't touch anything else just tell it what you told me above pls"
-
-So: in-flight tracker, role contract, decisions log, and quick-start prompt sections above are untouched. Only this section is new.
+**Lesson saved (apply to all future deploy PRs from `poc/sme-mart` or any long-lived branch):**
+> Before cherry-picking config files (`angular.json`, `package.json` build scripts, `.github/workflows/*.yml`, env files) onto an `upstream/uat` deploy branch, run `git log --name-only --pretty=format: $(git merge-base poc/sme-mart upstream/uat)..upstream/uat | sort -u` and exclude any file that appears — take upstream's version instead, or three-way merge it. Keeping `poc/sme-mart` periodically synced with upstream prevents this entirely.
 
