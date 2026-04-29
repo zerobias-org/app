@@ -272,7 +272,7 @@ export class PipelineWriteService {
           // Extract filename and line number
           const match = line.match(/at\s+(\w+)?\s*\(([^:]+):(\d+):/);
           if (match) {
-            const [, funcName, file, lineNum] = match;
+            const [, , file, lineNum] = match;
             const filename = file.split('/').pop() || 'unknown';
             return `${filename}:${lineNum}`;
           }
