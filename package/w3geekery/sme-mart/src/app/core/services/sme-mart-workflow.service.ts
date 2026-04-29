@@ -1,4 +1,5 @@
 import { Injectable, inject } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService, type GqlQueryOptions } from './graphql-read.service';
 import { SME_MART_WORKFLOW_FIELD_MAPPING, mapGqlToNeon } from '../field-mappings';
@@ -23,6 +24,7 @@ import type { GqlSmeMartWorkflowResponse } from '../gql-types';
 export class SmeMartWorkflowService {
   private readonly pipelineWrite = inject(PipelineWriteService);
   private readonly graphqlRead = inject(GraphqlReadService);
+  private readonly snackBar = inject(MatSnackBar);
 
   private readonly workflowFields = [
     'id',
@@ -50,9 +52,16 @@ export class SmeMartWorkflowService {
       updatedAt: now,
     };
 
-    this.pipelineWrite.pushEntity('SmeMartWorkflow', gqlData).catch(err => {
-      console.error('[WorkflowService] Failed to push workflow:', err);
-    });
+    try {
+      await this.pipelineWrite.pushEntity('SmeMartWorkflow', gqlData, [], 'sme-mart-workflow.service:53');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to create workflow: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     return {
       id: workflowId,
@@ -137,9 +146,16 @@ export class SmeMartWorkflowService {
       updatedAt: updated.updatedAt,
     };
 
-    this.pipelineWrite.pushEntity('SmeMartWorkflow', gqlData).catch(err => {
-      console.error('[WorkflowService] Failed to push workflow update:', err);
-    });
+    try {
+      await this.pipelineWrite.pushEntity('SmeMartWorkflow', gqlData, [], 'sme-mart-workflow.service:148');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to update workflow: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     return updated;
   }

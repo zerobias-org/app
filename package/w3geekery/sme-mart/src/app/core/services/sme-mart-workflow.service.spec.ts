@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { SmeMartWorkflowService } from './sme-mart-workflow.service';
 import { PipelineWriteService } from './pipeline-write.service';
@@ -26,6 +27,7 @@ describe('SmeMartWorkflowService', () => {
   let service: SmeMartWorkflowService;
   let mockPipelineWrite: MockPipelineWrite;
   let mockGraphqlRead: MockGraphqlRead;
+  let mockSnackBar: { open: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     mockPipelineWrite = {
@@ -41,12 +43,16 @@ describe('SmeMartWorkflowService', () => {
       getById: vi.fn().mockResolvedValue(null),
       rawQuery: vi.fn().mockResolvedValue(null),
     };
+    mockSnackBar = {
+      open: vi.fn(),
+    };
 
     TestBed.configureTestingModule({
       providers: [
         SmeMartWorkflowService,
         { provide: PipelineWriteService, useValue: mockPipelineWrite },
         { provide: GraphqlReadService, useValue: mockGraphqlRead },
+        { provide: MatSnackBar, useValue: mockSnackBar },
       ],
     });
 
@@ -71,6 +77,8 @@ describe('SmeMartWorkflowService', () => {
       expect(mockPipelineWrite.pushEntity).toHaveBeenCalledWith(
         'SmeMartWorkflow',
         expect.objectContaining({ name: 'Standard Workflow' }),
+        [],
+        'sme-mart-workflow.service:53',
       );
     });
 
@@ -92,6 +100,24 @@ describe('SmeMartWorkflowService', () => {
 
       expect(result.statuses).toEqual([{ name: 'todo' }, { name: 'done' }]);
       expect(result.transitions).toEqual([{ from: 'todo', to: 'done' }]);
+    });
+
+    it('should surface error to user on Pipeline rejection for createWorkflow', async () => {
+      const mockError = new Error('Network failure');
+      mockPipelineWrite.pushEntity.mockRejectedValueOnce(mockError);
+
+      await expect(
+        service.createWorkflow({
+          name: 'Test Workflow',
+          statuses: [{ name: 'todo' }],
+        })
+      ).rejects.toThrow(mockError);
+
+      expect(mockSnackBar.open).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to create workflow'),
+        'Dismiss',
+        expect.any(Object),
+      );
     });
   });
 
@@ -174,6 +200,8 @@ describe('SmeMartWorkflowService', () => {
       expect(mockPipelineWrite.pushEntity).toHaveBeenCalledWith(
         'SmeMartWorkflow',
         expect.objectContaining({ name: 'Updated Name' }),
+        [],
+        'sme-mart-workflow.service:148',
       );
     });
 
@@ -183,6 +211,30 @@ describe('SmeMartWorkflowService', () => {
       await expect(
         service.updateWorkflow('nonexistent', { name: 'Test' }),
       ).rejects.toThrow(/not found/);
+    });
+
+    it('should surface error to user on Pipeline rejection for updateWorkflow', async () => {
+      const existing: GqlSmeMartWorkflowResponse = {
+        id: 'workflow-123',
+        name: 'Original Name',
+        statuses: [{ name: 'todo' }],
+        createdAt: '2026-03-19T00:00:00Z',
+        updatedAt: '2026-03-19T00:00:00Z',
+      };
+
+      mockGraphqlRead.getById.mockResolvedValue(existing);
+      const mockError = new Error('Save failed');
+      mockPipelineWrite.pushEntity.mockRejectedValueOnce(mockError);
+
+      await expect(
+        service.updateWorkflow('workflow-123', { name: 'New Name' })
+      ).rejects.toThrow(mockError);
+
+      expect(mockSnackBar.open).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to update workflow'),
+        'Dismiss',
+        expect.any(Object),
+      );
     });
   });
 
