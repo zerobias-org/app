@@ -7,6 +7,7 @@
  */
 
 import { TestBed } from '@angular/core/testing';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { ServiceOfferingsService } from './service-offerings.service';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
@@ -19,16 +20,19 @@ describe('ServiceOfferingsService (Pipeline + GraphQL)', () => {
   let service: ServiceOfferingsService;
   let pipelineWrite: ReturnType<typeof fakePipelineWriteService>;
   let graphqlRead: ReturnType<typeof fakeGraphqlReadService>;
+  let mockSnackBar: { open: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     pipelineWrite = fakePipelineWriteService();
     graphqlRead = fakeGraphqlReadService();
+    mockSnackBar = { open: vi.fn() };
 
     TestBed.configureTestingModule({
       providers: [
         ServiceOfferingsService,
         { provide: PipelineWriteService, useValue: pipelineWrite },
         { provide: GraphqlReadService, useValue: graphqlRead },
+        { provide: MatSnackBar, useValue: mockSnackBar },
       ],
     });
 
@@ -133,6 +137,8 @@ describe('ServiceOfferingsService (Pipeline + GraphQL)', () => {
       expect(pipelineWrite.pushEntity).toHaveBeenCalledWith(
         'ServiceOffering',
         expect.objectContaining({ name: 'New Service' }),
+        [],
+        'service-offerings.service:109',
       );
       expect(result).toHaveProperty('id');
       expect(result).toHaveProperty('title', 'New Service');
@@ -161,6 +167,8 @@ describe('ServiceOfferingsService (Pipeline + GraphQL)', () => {
           name: 'Test Service',
           pricingType: 'hourly',
         }),
+        [],
+        'service-offerings.service:109',
       );
     });
 
@@ -182,6 +190,32 @@ describe('ServiceOfferingsService (Pipeline + GraphQL)', () => {
       expect(result).toHaveProperty('price', null);
       expect(result).toHaveProperty('delivery_time', null);
     });
+
+    it('should surface error to user on Pipeline rejection', async () => {
+      const mockError = new Error('Network failure');
+      pipelineWrite.pushEntity.mockRejectedValueOnce(mockError);
+
+      await expect(
+        service.createService('provider-001-uuid', {
+          title: 'Test',
+          description: null,
+          category: 'compliance',
+          subcategory: null,
+          pricing_type: 'fixed',
+          price: null,
+          delivery_time: null,
+          includes: null,
+          requirements: null,
+          is_active: true,
+        })
+      ).rejects.toThrow(mockError);
+
+      expect(mockSnackBar.open).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to save service offering'),
+        'Dismiss',
+        expect.any(Object)
+      );
+    });
   });
 
   describe('updateService()', () => {
@@ -193,7 +227,12 @@ describe('ServiceOfferingsService (Pipeline + GraphQL)', () => {
       });
 
       expect(graphqlRead.getById).toHaveBeenCalledWith('ServiceOffering', 'svc-001-uuid-hipaa-audit', expect.any(Array));
-      expect(pipelineWrite.pushEntity).toHaveBeenCalledWith('ServiceOffering', expect.any(Object));
+      expect(pipelineWrite.pushEntity).toHaveBeenCalledWith(
+        'ServiceOffering',
+        expect.any(Object),
+        [],
+        'service-offerings.service:148',
+      );
       expect(result).toHaveProperty('is_active', false);
     });
 
@@ -204,6 +243,20 @@ describe('ServiceOfferingsService (Pipeline + GraphQL)', () => {
         'ServiceOffering nonexistent-id not found',
       );
     });
+
+    it('should surface error to user on Pipeline rejection', async () => {
+      graphqlRead.getById.mockResolvedValue(SERVICE_OFFERING_GQL_FIXTURE);
+      const mockError = new Error('Save failed');
+      pipelineWrite.pushEntity.mockRejectedValueOnce(mockError);
+
+      await expect(service.updateService('svc-001-uuid-hipaa-audit', { is_active: false })).rejects.toThrow(mockError);
+
+      expect(mockSnackBar.open).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to update service offering'),
+        'Dismiss',
+        expect.any(Object),
+      );
+    });
   });
 
   describe('deleteService()', () => {
@@ -211,6 +264,19 @@ describe('ServiceOfferingsService (Pipeline + GraphQL)', () => {
       await service.deleteService('svc-001-uuid-hipaa-audit');
 
       expect(pipelineWrite.deleteEntity).toHaveBeenCalledWith('ServiceOffering', 'svc-001-uuid-hipaa-audit');
+    });
+
+    it('should surface error to user on Pipeline rejection', async () => {
+      const mockError = new Error('Delete failed');
+      pipelineWrite.deleteEntity.mockRejectedValueOnce(mockError);
+
+      await expect(service.deleteService('svc-001-uuid-hipaa-audit')).rejects.toThrow(mockError);
+
+      expect(mockSnackBar.open).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to delete service offering'),
+        'Dismiss',
+        expect.any(Object),
+      );
     });
   });
 
