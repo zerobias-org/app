@@ -293,6 +293,8 @@ describe('VendorProfileService', () => {
           name: 'Test Item',
           section: 'insurance',
         }),
+        [],
+        expect.any(String), // callSiteTag
       );
     });
 
@@ -379,6 +381,8 @@ describe('VendorProfileService', () => {
           id: 'profile-001',
           status: 'archived',
         }),
+        [],
+        expect.any(String), // callSiteTag
       );
     });
 
@@ -426,6 +430,8 @@ describe('VendorProfileService', () => {
         expect.objectContaining({
           dateDeleted: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/),
         }),
+        [],
+        expect.any(String), // callSiteTag
       );
     });
 

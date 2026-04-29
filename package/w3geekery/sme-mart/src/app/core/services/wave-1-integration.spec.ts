@@ -62,6 +62,8 @@ describe('Wave 1 Integration: SmeMartProject → Bid Flow (Plan 075)', () => {
     expect(pipelineWrite.pushEntity).toHaveBeenCalledWith(
       'SmeMartProject',
       expect.objectContaining({ name: 'HIPAA Compliance Audit' }),
+      [],
+      expect.any(String), // callSiteTag
     );
 
     // Mock getById to return the created project (submitBid needs to fetch it)
@@ -95,6 +97,8 @@ describe('Wave 1 Integration: SmeMartProject → Bid Flow (Plan 075)', () => {
     expect(pipelineWrite.pushEntity).toHaveBeenCalledWith(
       'Bid',
       expect.objectContaining({ coverLetter: 'We can help' }),
+      [],
+      expect.any(String), // callSiteTag
     );
 
     // 3. Verify Pipeline was called twice (project + bid)

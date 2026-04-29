@@ -133,7 +133,7 @@ describe('OrgDocumentService', () => {
         filename: 'test.pdf',
         mimeType: 'application/pdf',
         documentType: 'compliance',
-      }));
+      }), [], expect.any(String));
     });
 
     it('should include zbFileId from FileService upload', async () => {
@@ -144,7 +144,7 @@ describe('OrgDocumentService', () => {
       expect(mockPipeline.pushEntity).toHaveBeenCalledWith('SmeMartDocument', expect.objectContaining({
         zbFileId: 'file-001',
         zbFileVersionId: 'ver-001',
-      }));
+      }), [], expect.any(String));
     });
 
     it('should return optimistically without waiting for Pipeline', async () => {
@@ -182,7 +182,7 @@ describe('OrgDocumentService', () => {
 
       expect(mockPipeline.pushEntity).toHaveBeenCalledWith('SmeMartDocument', expect.objectContaining({
         displayName: 'My Custom Name',
-      }));
+      }), [], expect.any(String));
     });
 
     it('should handle FileService upload failure gracefully', async () => {

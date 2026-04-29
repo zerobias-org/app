@@ -531,14 +531,15 @@ describe('VendorProfileService — Roundtrip Field Validation', () => {
       pipelineWrite.pushEntity.mockRejectedValueOnce(new Error('Pipeline unavailable'));
 
       const original = createInsuranceItem();
-      const created = await service.createProfileItem(original.org_id, {
-        section: original.section,
-        name: original.name,
-        data: JSON.parse(original.data) as InsuranceData,
-      });
 
-      // Create should return immediately (fire-and-forget)
-      expect(created).toBeTruthy();
+      // Service now throws on Pipeline error (after remediation)
+      await expect(
+        service.createProfileItem(original.org_id, {
+          section: original.section,
+          name: original.name,
+          data: JSON.parse(original.data) as InsuranceData,
+        }),
+      ).rejects.toThrow('Pipeline unavailable');
     });
   });
 });

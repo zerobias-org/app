@@ -72,6 +72,8 @@ describe('SmeMartProjectService', () => {
       expect(mockPipelineWrite.pushEntity).toHaveBeenCalledWith(
         'SmeMartProject',
         expect.objectContaining({ name: 'Acme Security Review' }),
+        [],
+        expect.any(String), // callSiteTag
       );
     });
 
@@ -203,6 +205,8 @@ describe('SmeMartProjectService', () => {
       expect(mockPipelineWrite.pushEntity).toHaveBeenCalledWith(
         'SmeMartProject',
         expect.objectContaining({ name: 'Updated Name', id: 'proj-123' }),
+        [],
+        expect.any(String), // callSiteTag
       );
     });
 

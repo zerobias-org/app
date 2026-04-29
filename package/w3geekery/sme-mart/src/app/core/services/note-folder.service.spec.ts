@@ -60,6 +60,8 @@ describe('NoteFolderService', () => {
         sortOrder: 0,
         color: '#ff0000',
       }),
+      [],
+      expect.any(String), // callSiteTag
     );
 
     // Verify returned data has Neon field names (snake_case)
@@ -216,6 +218,8 @@ describe('NoteFolderService', () => {
         name: 'Renamed Folder',
         parentId: 'folder-2',
       }),
+      [],
+      expect.any(String), // callSiteTag
     );
 
     // Verify returned data has Neon field names
@@ -242,6 +246,8 @@ describe('NoteFolderService', () => {
         id: folderId,
         dateDeleted: expect.any(String),
       }),
+      [],
+      expect.any(String), // callSiteTag
     );
   });
 
