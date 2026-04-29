@@ -29,11 +29,11 @@ const SME_MART_CLASS_IDS = {
   ProjectPlan:     'bc6159da-19a3-51d0-89a8-f2147078c760',
   PlanMilestone:   'ac1a1cc8-db44-5c1d-b359-5fb02e3d381d',
 
-  // Plan 063 — Corporate Vetting (update after schema PR merge + dataloader verify)
-  EngagementVettingItem: '66fa174f-86b2-5854-b7c1-7ffe26fcaa46',
+  // Plan 063 — Corporate Vetting (canonical platform-assigned id, confirmed via platform.Class.getClass on UAT 2026-04-28)
+  EngagementVettingItem: '21f5841f-dd27-53ef-a0f5-6a816ec7f7e1',
 
-  // Plan 041 — Vendor Profile Service (deterministic UUID v5 from schema)
-  MarketplaceProfileItem: 'ee1e68b7-f003-5f5f-a111-7ec93b37681c',
+  // Plan 041 — Vendor Profile Service (canonical platform-assigned id, validated empirically by Plan 26-02 seed)
+  MarketplaceProfileItem: '7bcf86a5-91dc-520d-b9bf-e308b1078d46',
 
   // Phase 14 — Invitation Controls
   RfpInvitation: '941cf01b-d260-5e45-8c6a-50f07b23f196',

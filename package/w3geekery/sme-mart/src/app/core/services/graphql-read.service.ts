@@ -3,7 +3,6 @@ import { ZerobiasClientApi } from '@zerobias-com/zerobias-client';
 import { ExecuteRawGraphqlQuery, SortObject } from '@zerobias-com/graphql-sdk';
 import { UUID } from '@zerobias-org/types-core-js';
 import { environment } from '../../../environments/environment';
-import { DemoModeService } from './demo-mode.service';
 
 import type { SmeMartClassName } from './pipeline-write.service';
 
@@ -54,7 +53,6 @@ export interface GqlQueryOptions {
 @Injectable({ providedIn: 'root' })
 export class GraphqlReadService {
   private readonly clientApi = inject(ZerobiasClientApi);
-  private readonly demoMode = inject(DemoModeService);
 
   /**
    * Query entities of a given class with optional filtering, pagination, and sorting.
@@ -77,11 +75,6 @@ export class GraphqlReadService {
     fields: string[],
     options: GqlQueryOptions = {},
   ): Promise<GqlQueryResult<T>> {
-    // All GQL data is currently demo-seeded. When demo mode is off, return empty.
-    // Replace with per-entity isDemo field filtering when GQL schema supports it.
-    if (!this.demoMode.showDemoData()) {
-      return { items: [], page: { pageNumber: options.pageNumber ?? 1, pageSize: options.pageSize ?? 50, totalCount: 0 } };
-    }
     const gqlQuery = this.buildQuery(className, fields, options);
     const boundaryApi = this.clientApi.graphqlClient.getBoundaryApi();
     const rawQuery = new ExecuteRawGraphqlQuery(gqlQuery);
