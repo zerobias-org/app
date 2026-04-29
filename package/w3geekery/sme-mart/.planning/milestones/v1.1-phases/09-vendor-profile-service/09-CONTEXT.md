@@ -65,8 +65,8 @@ Service layer for `MarketplaceProfileItem` CRUD — read from GQL via GraphqlRea
 - `src/app/core/services/bid-response.roundtrip.spec.ts` — Third example
 
 ### Schema Context
-- `.claude/docs/SCHEMA_CHANGE_PROCESS.md` — Schema field names for Pipeline push data
-- `.claude/notes/zb-graphql-custom-schema-howto.md` — GQL query patterns, filtering, pagination
+- `.planning/docs/SCHEMA_CHANGE_PROCESS.md` — Schema field names for Pipeline push data
+- `.planning/notes/zb-graphql-custom-schema-howto.md` — GQL query patterns, filtering, pagination
 
 </canonical_refs>
 

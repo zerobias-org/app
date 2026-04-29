@@ -88,7 +88,7 @@ export class FormFieldRendererComponent implements OnInit {
 
     // TODO(v1.2): File upload integration
     // In v1.2, we capture filename/size only. File bytes are NOT uploaded to ZB FileService.
-    // See .claude/notes/zb-file-upload-sdk-reference.md for FileService SDK details.
+    // See .planning/notes/zb-file-upload-sdk-reference.md for FileService SDK details.
     // v1.3 will integrate the full FileService.create() → FileService.upload() flow.
 
     const fileRef: FileReference = {

@@ -78,7 +78,7 @@ Migrate all SME Mart demo data from Neon SQL inserts to AuditgraphDB Pipeline wr
 
 **Implementation notes:**
 - All field names use camelCase (matching GQL schema, not snake_case)
-- Demo data aligned with `.claude/notes/demo-data-guide.md` ZB Task IDs and engagement tags
+- Demo data aligned with `.planning/notes/demo-data-guide.md` ZB Task IDs and engagement tags
 - Builder functions support filtering by related entity IDs (e.g., `seedDemoBids(engagementIds)`)
 
 **Commit:** `89017e1` — test(05-verification-cleanup): add demo data models and seeder fixtures

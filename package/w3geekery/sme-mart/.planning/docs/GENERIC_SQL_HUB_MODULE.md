@@ -88,6 +88,6 @@ Generic-sql remains a consideration for Option A (admin tooling) or Option B (st
 
 ## Related
 
-- **Why Hub Module?**: `.claude/docs/WHY_HUB_MODULE.md`
+- **Why Hub Module?**: `.planning/docs/WHY_HUB_MODULE.md`
 - **Hub Module Plan**: `.claude/plans/local/007-hub-module-static-export.md`
 - **Master Plan**: `.claude/plans/public/000-MASTER-PLAN.md`

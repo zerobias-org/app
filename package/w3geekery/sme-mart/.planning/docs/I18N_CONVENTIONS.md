@@ -3,7 +3,7 @@
 > **Authoritative conventions** for internationalization keys, values, and structure in SME Mart.
 >
 > Established: 2026-04-09
-> Basis: Analysis of zb/ui `en.json` (`.claude/notes/i18n-zb-ui-analysis.md`) + convention discussion with Clark.
+> Basis: Analysis of zb/ui `en.json` (`.planning/notes/i18n-zb-ui-analysis.md`) + convention discussion with Clark.
 > Stack: `@ngx-translate/core` ^15, `@ngx-translate/http-loader` ^17, `@ngx-translate/messageformat-compiler` (to be installed).
 
 ---
@@ -29,7 +29,7 @@ This document is the canonical reference for **how to write, structure, and main
 
 ### Why these conventions exist
 
-- Prevent the 41% duplication, 38 capitalization inconsistencies, and 6-level nesting hell found in zb/ui's `en.json` (see `.claude/notes/i18n-zb-ui-analysis.md`)
+- Prevent the 41% duplication, 38 capitalization inconsistencies, and 6-level nesting hell found in zb/ui's `en.json` (see `.planning/notes/i18n-zb-ui-analysis.md`)
 - Make SME Mart a **model example** for eventually refactoring zb/ui i18n cleanly
 - Support future locales (Spanish, French, German, potentially Arabic, Russian) without rework
 - Keep translation files small, browseable, and translator-friendly

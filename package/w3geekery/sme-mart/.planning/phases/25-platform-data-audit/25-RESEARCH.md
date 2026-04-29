@@ -475,7 +475,7 @@ Phase 28 implementer needs both sides to build the save handler correctly.
 - MEMORY.md §"ZeroBias SDK — Org Selection & dana-org-id" — header behavior, sessionStorage precedence
 
 ### Tertiary (referenced, not seeded)
-- `.claude/notes/sme-mart-resource-types-summary.md` (2026-03-05) — prior resource-type inventory
+- `.planning/notes/sme-mart-resource-types-summary.md` (2026-03-05) — prior resource-type inventory
 - `.planning/research/internal/2026-04-23-credentials-zb-platform-research.md` — adjacent SDK research
 - `src/app/core/services/vendor-profile.service.ts` — existing MarketplaceProfileItem CRUD pattern (read model for write-path design)
 

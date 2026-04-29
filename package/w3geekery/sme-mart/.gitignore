@@ -67,9 +67,9 @@ src/environments/environment.neon.ts
 .claude/scripts/node_modules/
 .claude/scripts/.stitch-project-id
 .claude/plans/
-.claude/notes/plans/
-.claude/notes/meetings/**/*.docx
-.claude/notes/meetings/**/*.txt
+.planning/notes/plans/
+.planning/notes/meetings/**/*.docx
+.planning/notes/meetings/**/*.txt
 
 # GSD planning — tracked in git (no secrets; verified 2026-03-30)
 # .planning/

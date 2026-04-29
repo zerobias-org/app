@@ -62,7 +62,7 @@ Across at least three schema PRs (41, 42, 45) the working tree held the two-file
 
 - `Object.yml` in the `zerobias-base` schema package (the parent class — would have shown `name`/`description` are already defined)
 - **Sibling classes in the exact same folder** — `Bid.yml`, `RfpInvitation.yml`, `SmeMartProject.yml` all correctly omit `name`/`description`. A three-file `grep` for `^properties:` would have surfaced the correct pattern immediately.
-- The schema-extension how-to (`.claude/notes/zb-graphql-custom-schema-howto.md`) which calls out inherited properties explicitly.
+- The schema-extension how-to (`.planning/notes/zb-graphql-custom-schema-howto.md`) which calls out inherited properties explicitly.
 
 This is the same failure mode CLAUDE.md warns against: *"Prefer retrieval-led reasoning over pre-training-led reasoning... never guess when project documentation is available."* The author guessed that a class definition needs all its properties declared explicitly, because that's how most ORMs work. In this schema system, inheritance does the work and redeclaration is an error. No local source check was performed before writing.
 

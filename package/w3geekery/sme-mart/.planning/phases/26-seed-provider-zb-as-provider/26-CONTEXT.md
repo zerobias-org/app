@@ -130,7 +130,7 @@ Three options on the table — pick exactly ONE before seeding (brief Deliverabl
 - `[memory] ZeroBias MCP Parameter Patterns` — body params nested, `slim` options, etc.
 
 ### Cross-cutting platform docs
-- `.claude/notes/uat-migration-tracker.md` — UAT vs CI ID reference (UAT is target env)
+- `.planning/notes/uat-migration-tracker.md` — UAT vs CI ID reference (UAT is target env)
 - `CLAUDE.md` (project root) — naming conventions, ngx-library, Angular 21 patterns, **prefer ZB platform entities over custom classes**
 
 </canonical_refs>

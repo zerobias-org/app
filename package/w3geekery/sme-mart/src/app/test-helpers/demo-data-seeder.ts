@@ -4,7 +4,7 @@
  * Provides demo data for all 8 migrated SME Mart entity types:
  * Engagement, Bid, BidResponse, Note, NoteFolder, SmeMartDocument, ServiceOffering, Review.
  *
- * Data sources: .claude/notes/demo-data-guide.md
+ * Data sources: .planning/notes/demo-data-guide.md
  * Field naming: All fields use camelCase (matches GQL schema).
  *
  * Phase 5 Migration: Migrated from Neon SQL inserts to Pipeline writes.

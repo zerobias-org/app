@@ -18,6 +18,6 @@ Decide whether "Task Portfolio" (Brian's tier below Workspace in his 2026-04-20 
 
 Do **not** build a dedicated `TaskPortfolio` schema class preemptively.
 
-**Why now:** 2026-04-20 Slack huddle with Brian (see `.claude/notes/meetings/2026-04-20-slack-huddle-project-hierarchy-qa.md`, question A2). Brian did not explicitly address Task Portfolio during the call; by analogy to his framing of Engagement/Workspace Portfolios as "sorters" / "directories", this is inferred UI-only — but it may overlap with Nic's Board scope. Premature schema work risks duplicating a platform primitive.
+**Why now:** 2026-04-20 Slack huddle with Brian (see `.planning/notes/meetings/2026-04-20-slack-huddle-project-hierarchy-qa.md`, question A2). Brian did not explicitly address Task Portfolio during the call; by analogy to his framing of Engagement/Workspace Portfolios as "sorters" / "directories", this is inferred UI-only — but it may overlap with Nic's Board scope. Premature schema work risks duplicating a platform primitive.
 
 **Blocked by:** Nic's Board entity scope must be clear before we commit to an implementation path. Revisit during next Brian + Nic sync, or when Board reaches a reviewable state.

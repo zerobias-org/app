@@ -66,7 +66,7 @@ Same as upstream — `CONTEXT.md`, `RESEARCH.md`, `REQUIREMENTS.md` from the
 | `.planning/director/phase-<N>-brief.md` | Phase goal + requirements + scope |
 | `.planning/BACKLOG.md` | Source prompts for phases derived from backlog entries |
 | `.claude/design/DESIGN.md` | Token contract — pre-populate all design-contract answers from here |
-| `.claude/notes/stitch-designmd-pipeline.md` | Pipeline rationale + file layout |
+| `.planning/notes/stitch-designmd-pipeline.md` | Pipeline rationale + file layout |
 
 </upstream_input>
 
@@ -303,7 +303,7 @@ open_questions: <count>
 
 - Upstream agent: `~/.claude/agents/gsd-ui-researcher.md`
 - DESIGN.md: `.claude/design/DESIGN.md`
-- Pipeline notes: `.claude/notes/stitch-designmd-pipeline.md`
+- Pipeline notes: `.planning/notes/stitch-designmd-pipeline.md`
 - Stitch generation script: `.claude/scripts/stitch-gen.mjs`
 - Script deps: `.claude/scripts/package.json` (`@google/stitch-sdk`, `google-auth-library`)
 - Stitch SDK docs: https://github.com/google-labs-code/stitch-sdk

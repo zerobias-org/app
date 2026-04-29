@@ -40,7 +40,7 @@ Phase 5's work items are:
 
 | ID | Description | Research Support |
 |----|-------------|-----------------|
-| DATA-01 | Demo data seeded via PipelineWriteService.pushEntities() instead of Neon SQL inserts | PipelineWriteService API verified with pushEntities(className, data[], tagIds[]); demo data exists in .claude/notes/demo-data-guide.md; 5 active engagements with bids, providers, service categories documented |
+| DATA-01 | Demo data seeded via PipelineWriteService.pushEntities() instead of Neon SQL inserts | PipelineWriteService API verified with pushEntities(className, data[], tagIds[]); demo data exists in .planning/notes/demo-data-guide.md; 5 active engagements with bids, providers, service categories documented |
 | DATA-02 | All existing unit tests updated to mock PipelineWriteService + GraphqlReadService instead of SmeMartDbService | All migrated service specs (.spec.ts) already use fakePipelineWriteService() + fakeGraphqlReadService(); no SmeMartDbService mocks found in migrated service specs; test-helpers provide standardized mocks |
 | DATA-03 | Neon entity tables archived (renamed to *_archived) after 2-4 week verification period | Decision: mark as "scheduled" not "done"; 2-week clock starts when Phase 5 completes; operational archival plan deferred to Phase 6 or later |
 | DATA-04 | SmeMartDbService removed from all fully-migrated domain services | 8 migrated services identified; 9 non-migrated services still use SmeMartDbService correctly (categories, notifications, provider profiles, impersonation, note-hierarchy, resource, admin, bid-response fallback, document fallback) |
@@ -380,7 +380,7 @@ describe('EngagementsService (Pipeline + GraphQL)', () => {
 - **Phase gate:** `npm test` passes + `npm run lint` passes + grep confirms no SmeMartDbService in migrated services before `/gsd:verify-work`
 
 ### Wave 0 Gaps
-- [ ] **Demo data seeding script or test fixture** — No single "seed.ts" file identified; demo data documentation exists (.claude/notes/demo-data-guide.md), but no working seed code yet. Phase 5 must implement.
+- [ ] **Demo data seeding script or test fixture** — No single "seed.ts" file identified; demo data documentation exists (.planning/notes/demo-data-guide.md), but no working seed code yet. Phase 5 must implement.
 - [ ] **Neon archival runbook** — Operations plan for backing up and dropping Neon tables deferred; 2-week observation period starts after Phase 5, archival plan needed before week 2 completion.
 
 ---
@@ -426,7 +426,7 @@ describe('EngagementsService (Pipeline + GraphQL)', () => {
   - `.planning/CONTEXT.md` — User locked decisions and discretion areas
   - `.planning/REQUIREMENTS.md` — DATA-01 through DATA-04 requirement traceability
   - `.planning/phases/04-wave-3-standalone-entities/04-VERIFICATION.md` — Prior phase verification report (all 8 entities confirmed migrated)
-  - `.claude/notes/demo-data-guide.md` — 5 active engagements documented with ZB Task IDs and provider info
+  - `.planning/notes/demo-data-guide.md` — 5 active engagements documented with ZB Task IDs and provider info
 
 ### Secondary (MEDIUM confidence)
 - **Verification Reports from Phases 2–4**

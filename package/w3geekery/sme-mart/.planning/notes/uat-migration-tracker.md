@@ -81,7 +81,7 @@ Once UAT IDs are created, update these files:
 | `src/environments/environment.vercel.ts` | `smeMartConnectionId` → new UAT connection ID |
 | `middleware.ts` | Already defaults to `uat.zerobias.com` ✅ |
 | `vercel.env` | `ZB_API_KEY`, `ZB_ORG_ID` → UAT values (for Vercel deploy) |
-| `.claude/notes/demo-data-guide.md` | All tag IDs, task IDs, boundary ID → UAT values |
+| `.planning/notes/demo-data-guide.md` | All tag IDs, task IDs, boundary ID → UAT values |
 
 ---
 

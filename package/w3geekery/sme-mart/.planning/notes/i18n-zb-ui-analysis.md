@@ -223,7 +223,7 @@ Fair credit — not everything is bad:
     - Missing keys used in code (find `'key' | translate` with no corresponding entry)
     - Max nesting depth exceeded
 
-14. **Lock the convention in a doc** (`.claude/docs/I18N_CONVENTIONS.md`) — every PR touching strings follows it.
+14. **Lock the convention in a doc** (`.planning/docs/I18N_CONVENTIONS.md`) — every PR touching strings follows it.
 
 ---
 

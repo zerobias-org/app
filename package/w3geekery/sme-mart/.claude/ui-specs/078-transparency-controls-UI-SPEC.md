@@ -8,12 +8,12 @@ created: 2026-04-09
 target_milestone: v1.3+ (TBD — currently design-only, implementation deferred)
 source_artifacts:
   - .claude/sketches/transparency-center-ui-concepts.html
-  - .claude/notes/transparency-center-multi-party-clarification.md
-  - .claude/notes/entangled-task-pairs-model-evaluation.md
-  - .claude/notes/questions-for-brian-miro-reconciliation.md
-  - .claude/notes/CEO_NOTES.md (2026-02-06 Transparency Center Vision)
-  - .claude/notes/ceo-notes-2026-03-27.md (Brian — Transparency Bridge UI request)
-  - .claude/notes/meetings/2026-04-07-marketplace.md (Brian — boundary types insight)
+  - .planning/notes/transparency-center-multi-party-clarification.md
+  - .planning/notes/entangled-task-pairs-model-evaluation.md
+  - .planning/notes/questions-for-brian-miro-reconciliation.md
+  - .planning/notes/CEO_NOTES.md (2026-02-06 Transparency Center Vision)
+  - .planning/notes/ceo-notes-2026-03-27.md (Brian — Transparency Bridge UI request)
+  - .planning/notes/meetings/2026-04-07-marketplace.md (Brian — boundary types insight)
   - ~/Projects/w3geekery/zb-poc-devs/brian-directives/2026-04-06-boundary-components-transparency.md
   - Brian's Miro board: https://miro.com/app/board/uXjVGm64Grw=/
   - Clark's Miro board: https://miro.com/app/board/uXjVGm52yII=/
@@ -262,7 +262,7 @@ Reuse existing SME Mart/ngx-library status chip colors where possible (from `.cl
 
 ## i18n
 
-**Plan 078 is the pilot feature for SME Mart's new i18n conventions** — see `.claude/docs/I18N_CONVENTIONS.md`.
+**Plan 078 is the pilot feature for SME Mart's new i18n conventions** — see `.planning/docs/I18N_CONVENTIONS.md`.
 
 - Namespace: `Sm.Transparency.*`
 - Casing: PascalCase
@@ -411,8 +411,8 @@ After Clark's markup, produce low-fidelity wireframes (Miro board + HTML sketche
 ## Related Artifacts
 
 - **HTML sketches (living reference):** `.claude/sketches/transparency-center-ui-concepts.html`
-- **Architecture clarification (Kevin):** `.claude/notes/transparency-center-multi-party-clarification.md`
-- **Data model decision (Option B):** `.claude/notes/entangled-task-pairs-model-evaluation.md`
+- **Architecture clarification (Kevin):** `.planning/notes/transparency-center-multi-party-clarification.md`
+- **Data model decision (Option B):** `.planning/notes/entangled-task-pairs-model-evaluation.md`
 - **Brian's Miro feedback:** `~/Projects/w3geekery/zb-poc-devs/brian-directives/2026-04-06-boundary-components-transparency.md`
 - **Miro screenshots uploaded:** `~/Pictures/Screenshots/transparency-01-*.png` through `transparency-05-*.png`
 - **Backlog entry:** `.planning/BACKLOG.md` Plan 078

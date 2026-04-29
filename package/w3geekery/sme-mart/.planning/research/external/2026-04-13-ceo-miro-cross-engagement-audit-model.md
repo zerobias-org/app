@@ -203,7 +203,7 @@ LinkedEngagementScope {
 
 ## Resolved by Brian (2026-04-14 Marketplace Meeting)
 
-Meeting summary: [`.claude/notes/meetings/2026-04-14-marketplace.md`](../../../.claude/notes/meetings/2026-04-14-marketplace.md)
+Meeting summary: [`.planning/notes/meetings/2026-04-14-marketplace.md`](../../../.planning/notes/meetings/2026-04-14-marketplace.md)
 
 1. **Engagement ↔ Project cardinality** — **Asymmetric, not many-to-many.** Primary engagement = buyer↔seller (the commerce). Linked/secondary engagements = buyer↔auditor(s), aligned with the buyer. The primary engagement hosts the project; linked engagements "pull into" the project as secondary parties. Projects can also be nested (parentId) OR linked across engagements via linked transparency centers — see new open question on nesting depth.
 

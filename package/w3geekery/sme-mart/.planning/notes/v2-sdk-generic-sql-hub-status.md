@@ -167,18 +167,18 @@ Two-registry reminder (from MEMORY.md): `@zerobias-com` → `npm.pkg.github.com`
 
 1. **Update `package/w3geekery/sme-mart/package.json`** to depend on the v2 SDK (replacing the current `@zerobias-org/module-interface-dataproducer-hub-sdk@^1.2.32`).
 2. **Run `npm install`** in `package/w3geekery/sme-mart/` to pull the v2 down.
-3. **Re-run the audit checks** documented in `.claude/notes/hub-wiring-audit-2026-04-22.md`:
+3. **Re-run the audit checks** documented in `.planning/notes/hub-wiring-audit-2026-04-22.md`:
    - SDK-op alignment table (lines 22–37) against the new v2 surface — confirm every op `SmeMartDbService` calls still maps cleanly. If any rename, fix the service.
    - Run `npm test src/app/core/services/sme-mart-db.service.spec.ts` to catch type breaks.
 4. **Retry the Phase 3 validation steps** flagged as ⚠ in the same audit doc — they were deferred pending end-to-end Hub wireup, and the v2 SDK is a precondition for getting them green.
 5. **Pick up `.planning/phases/neon-via-hub-wireup.md`** at whichever phase it was paused on. The original blocker was the missing v2 SDK; with that resolved, the neon-via-hub wireup can proceed to provisioning the Generic SQL connection on UAT and flipping `dbMode: 'hub'` per backlog 003 (`.planning/director/backlog/003-generic-sql-hub-module-uat-neon.md`).
-6. **Director-side:** if v2 SDK landing changes any architectural decisions captured in `.claude/docs/HUB_CONNECTION_SETUP_NEON.md`, append an update note. If the new op surface unblocks any existing errata (esp. errata 015 on env.neon credential rotation), update the errata status.
+6. **Director-side:** if v2 SDK landing changes any architectural decisions captured in `.planning/docs/HUB_CONNECTION_SETUP_NEON.md`, append an update note. If the new op surface unblocks any existing errata (esp. errata 015 on env.neon credential rotation), update the errata status.
 
 ## Related context (for orientation, do NOT re-research these)
 
 - Backlog 003 `003-generic-sql-hub-module-uat-neon.md` — the wireup work this v2 SDK unblocks
-- `.claude/docs/HUB_CONNECTION_SETUP_NEON.md` — operator playbook for getting the Generic SQL connection live on UAT (assumes a working SDK exists)
-- `.claude/notes/hub-wiring-audit-2026-04-22.md` — the SDK-op alignment audit done against 1.2.32; re-read this for the op-surface mapping
+- `.planning/docs/HUB_CONNECTION_SETUP_NEON.md` — operator playbook for getting the Generic SQL connection live on UAT (assumes a working SDK exists)
+- `.planning/notes/hub-wiring-audit-2026-04-22.md` — the SDK-op alignment audit done against 1.2.32; re-read this for the op-surface mapping
 - `.planning/phases/neon-via-hub-wireup.md` — the in-flight Phase 0 → Phase N plan for the wireup itself
 
 ## Out of scope for this note

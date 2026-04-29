@@ -71,7 +71,7 @@ Of the 28 zerobias-org repositories, **SME Mart should evaluate and likely use 5
   - Already in PLAN.md as critical dependency
   - Required for custom GQL queries on ZeroBias platform
   - SME Mart resource types (engagements, proposals, reviews, service offerings) must be defined here
-  - Referenced in [`.claude/notes/zb-graphql-custom-schema-howto.md`](zb-graphql-custom-schema-howto.md) and [`.claude/notes/zb-graphql-schema-extension-guide.md`](zb-graphql-schema-extension-guide.md)
+  - Referenced in [`.planning/notes/zb-graphql-custom-schema-howto.md`](zb-graphql-custom-schema-howto.md) and [`.planning/notes/zb-graphql-schema-extension-guide.md`](zb-graphql-schema-extension-guide.md)
 
 - **How to use:**
   1. Create SME Mart schema package: `package/zerobias/schema-zerobias-sme-mart/`

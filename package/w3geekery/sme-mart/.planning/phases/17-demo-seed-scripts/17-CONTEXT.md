@@ -94,8 +94,8 @@ All entities tagged with demo marker.
 ### Project & SDK Patterns
 - `CLAUDE.md` (project) — UAT env, ZB MCP rules, ngx-library, task/subtask conventions
 - `src/app/core/services/` — existing RFP, bid, document, pilot, form-submission services (reference patterns, do NOT import)
-- `.claude/notes/zb-graphql-custom-schema-howto.md` — SME Mart schema querying
-- `.claude/notes/demo-data-guide.md` — existing demo data conventions
+- `.planning/notes/zb-graphql-custom-schema-howto.md` — SME Mart schema querying
+- `.planning/notes/demo-data-guide.md` — existing demo data conventions
 
 ### ZB MCP / Hydra / Pipeline
 - Memory: `project_sme_mart_prod_pipeline.md` — Pipeline.receive patterns

@@ -686,6 +686,6 @@ Plan 052 deferred CI integration. Future work:
 
 ## Further Reading
 
-- `.claude/notes/playwright-e2e-learnings-from-zb-ui.md` — original learnings dump from `zb/ui` (autocomplete workaround details, CDK overlay cleanup)
+- `.planning/notes/playwright-e2e-learnings-from-zb-ui.md` — original learnings dump from `zb/ui` (autocomplete workaround details, CDK overlay cleanup)
 - `~/Projects/zb/ui/e2e/` — reference implementation, different stack (iframed gateway) but same Angular/Material patterns
 - `e2e/README.md` — user-facing quick start

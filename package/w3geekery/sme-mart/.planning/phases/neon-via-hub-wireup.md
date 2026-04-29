@@ -28,10 +28,10 @@ If you're picking this up after `/clear`, do this before touching anything:
 ### 2. Read these files in this order (skim is fine after the first two)
 
 1. **This plan** — end to end.
-2. **`.claude/notes/hub-wiring-audit-2026-04-22.md`** — Phase 0 audit verdict, SDK-op mapping, env-file inventory, bit-rot findings.
-3. **`.claude/docs/HUB_CONNECTION_SETUP_NEON.md`** — the playbook for the Hub connection we stood up today. Exact MCP sequences for Secret.create / updateSecretValues / reverify are here.
+2. **`.planning/notes/hub-wiring-audit-2026-04-22.md`** — Phase 0 audit verdict, SDK-op mapping, env-file inventory, bit-rot findings.
+3. **`.planning/docs/HUB_CONNECTION_SETUP_NEON.md`** — the playbook for the Hub connection we stood up today. Exact MCP sequences for Secret.create / updateSecretValues / reverify are here.
 4. **`src/app/core/services/sme-mart-db.service.ts`** — the file being polished in Phase 2 (456 lines).
-5. **`.claude/docs/MODERNIZATION_GUIDE.md`** — Angular 21 patterns (signals, `input()`/`output()`/`inject()`). `@Input`/`@Output`/constructor injection banned.
+5. **`.planning/docs/MODERNIZATION_GUIDE.md`** — Angular 21 patterns (signals, `input()`/`output()`/`inject()`). `@Input`/`@Output`/constructor injection banned.
 6. **Root `CLAUDE.md`** (at `/Users/cstacer/Projects/w3geekery/zerobias-org-forks/CLAUDE.md`) — 3-repo overview.
 7. **App `CLAUDE.md`** (at `/Users/cstacer/Projects/w3geekery/zerobias-org-forks/app/CLAUDE.md`) — publishing path (cross-fork PR to `zerobias-org/app:uat` triggers `uat.zerobias.com/sme-mart`).
 8. **SME Mart `CLAUDE.md`** — project-level quick references; look for `Hub Connection Setup (Neon)` row added today.
@@ -166,7 +166,7 @@ Artifacts to read (in order):
    - `@zerobias-com/zerobias-client`
    - Any `dataproducer-client` / `module-auditmation-generic-sql-client-ts` lingering (SDK layer for the module).
 4. `src/environments/environment.ts` — look at every field the service touches (beyond `dbMode` and `smeMartConnectionId` — e.g., `apiHostname`, `isLocalDev`).
-5. `.claude/docs/GENERIC_SQL_HUB_MODULE.md` original v0.3.x API table — diff it against today's 0.5.0 op list (26 ops, captured in the playbook). Any op rename that the service depends on is a block.
+5. `.planning/docs/GENERIC_SQL_HUB_MODULE.md` original v0.3.x API table — diff it against today's 0.5.0 op list (26 ops, captured in the playbook). Any op rename that the service depends on is a block.
 
 Comparison targets (what "good" looks like):
 
@@ -176,7 +176,7 @@ Comparison targets (what "good" looks like):
 
 Output of Phase 0:
 
-- A 1-page `.claude/notes/hub-wiring-audit-2026-04-22.md` capturing: (i) op name map (service → 0.5.0), (ii) any method calls that are deprecated/renamed, (iii) auth-plumbing findings, (iv) whether the `e3c874f5-…` placeholder appears elsewhere.
+- A 1-page `.planning/notes/hub-wiring-audit-2026-04-22.md` capturing: (i) op name map (service → 0.5.0), (ii) any method calls that are deprecated/renamed, (iii) auth-plumbing findings, (iv) whether the `e3c874f5-…` placeholder appears elsewhere.
 - A go/no-go verdict. If no-go, an **inline amendment to this plan** listing the specific fixes Phase 0.5 must land before Phase 1. If go, proceed.
 
 Acceptance: the audit note exists, has a verdict, and lists any blocking fixes explicitly.
@@ -304,7 +304,7 @@ Rollback: if the deployed build breaks UAT, open a revert PR from `w3geekery/app
 **Goal:** Prevent regression of Hub-mode behaviour.
 
 1. Add a unit test case in `src/app/core/services/sme-mart-db.service.spec.ts` (or sibling) that exercises Hub mode explicitly, mocking the Angular ZB client. Cover `listRows`, `searchRows`, `createRow`, `updateRow`, `deleteRow`.
-2. Add a Playwright smoke test in `e2e/` that drives categories CRUD through the UI and asserts on DOM, tagged for the `smoke` suite. (Per CLAUDE.md's E2E guide — check `.claude/notes/e2e-testing-guide.md` first.)
+2. Add a Playwright smoke test in `e2e/` that drives categories CRUD through the UI and asserts on DOM, tagged for the `smoke` suite. (Per CLAUDE.md's E2E guide — check `.planning/notes/e2e-testing-guide.md` first.)
 3. Run targeted tests only (per memory `feedback_targeted_test_runs.md`): `npm test -- sme-mart-db.service` + the new Playwright spec.
 
 Acceptance: tests pass locally; failing tests produce actionable errors (not just "undefined").
@@ -325,15 +325,15 @@ Updates (the actual edits — not placeholders):
    - Rewrite the line "Generic SQL Hub Module for Neon DB access (DataProducer interface, no direct Drizzle)" to something like: "For published builds: **Neon access goes through ZB Hub** via generic-sql (connection `5ae47aa2-...`); browser never sees Neon creds. Dev mode uses direct Drizzle for speed. Pipeline+GQL migration is the longer-term direction per BACKLOG 089."
    - Quick Reference table: add a row for this plan + HUB_CONNECTION_SETUP_NEON.md if not already linked.
 
-2. **`.claude/docs/HUB_CONNECTION_SETUP_NEON.md`** (playbook):
+2. **`.planning/docs/HUB_CONNECTION_SETUP_NEON.md`** (playbook):
    - Append a "Consumed by" section: "The connection created by this playbook is consumed by the SME Mart Angular app via `smeMartConnectionId` in `src/environments/environment.*.ts`. The Neon role backing the secret must be readwrite, not readonly — see Phase 1 of `.planning/phases/neon-via-hub-wireup.md` for grants."
    - Add a "Rotating Neon creds in place" sub-section showing the exact `hub.Secret.updateSecretValues` + `reverify` flow used in Phase 1.
 
-3. **`.claude/docs/GENERIC_SQL_HUB_MODULE.md`** (stale doc):
+3. **`.planning/docs/GENERIC_SQL_HUB_MODULE.md`** (stale doc):
    - Remove the "publishing path not currently working" language.
    - Point readers to this plan and the playbook.
 
-4. **`.claude/docs/WHY_HUB_MODULE.md`** (stale doc):
+4. **`.planning/docs/WHY_HUB_MODULE.md`** (stale doc):
    - Add a dated note at the top: "The **consume generic-sql** approach proven here replaced the earlier 'build a custom Hub Module' framing. For why we consume rather than publish, see BACKLOG 089 and this plan."
 
 5. **`.planning/BACKLOG.md` entry 089**:

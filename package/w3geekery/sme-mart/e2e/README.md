@@ -69,7 +69,7 @@ await selectZbAutocompleteByProperty(
 ```
 
 Read `e2e/helpers/zb-autocomplete.ts` for full API and variants. Full
-context + other form component notes in `.claude/notes/e2e-testing-guide.md`.
+context + other form component notes in `.planning/notes/e2e-testing-guide.md`.
 
 ### CDK Overlay Remnants
 
@@ -111,6 +111,6 @@ npx playwright show-trace e2e/test-results/<test-dir>/trace.zip
 
 ## References
 
-- `.claude/notes/playwright-e2e-learnings-from-zb-ui.md` — full learnings
+- `.planning/notes/playwright-e2e-learnings-from-zb-ui.md` — full learnings
   from the `zb/ui` Boundary Manager E2E work
 - `~/Projects/zb/ui/e2e/` — reference implementation (Angular 21, same stack)

@@ -237,7 +237,7 @@ Brian walked through `.planning/director/brian-content-brief-v1.4-deferred.md` a
 - Admin mechanism is `getPrincipal().isAdmin` — never propose alternatives.
 - No agent handoffs for MCP work that mutates real platform state — Clark wants manual walkthroughs for that.
 - Brian asks aren't blockers — placeholders ship; Brian input refines if/when it arrives.
-- **Never name Brian (CEO) as a code-author.** Brian sets directives, doesn't write code. Default to "backend team" / "UI team" — never guess names. See `.claude/docs/ORG_CHART.md` for authoritative roster.
+- **Never name Brian (CEO) as a code-author.** Brian sets directives, doesn't write code. Default to "backend team" / "UI team" — never guess names. See `.planning/docs/ORG_CHART.md` for authoritative roster.
 - **Never ask "want to pause?" or "continue?".** Whether Clark pauses is none of my concern. He'll stop me if he wants.
 - Never fork repos without explicit auth; never merge PRs autonomously; SUCCESS-only CI counts.
 - Don't suggest breaks; don't ask "what's next?"; answer questions vs. assume action.

@@ -24,7 +24,7 @@ Read the `.component.ts` file and its `.component.html` template.
 
 ## Step 2: Audit Against Modern Patterns
 
-Check for each pattern from `.claude/docs/MODERNIZATION_GUIDE.md`:
+Check for each pattern from `.planning/docs/MODERNIZATION_GUIDE.md`:
 
 | # | Pattern | Legacy | Modern |
 |---|---------|--------|--------|

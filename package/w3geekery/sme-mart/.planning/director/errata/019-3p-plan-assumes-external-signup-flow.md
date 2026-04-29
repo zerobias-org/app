@@ -8,7 +8,7 @@ status: open
 
 # 3P plan assumes external ZB-signup → return-URL flow that contradicts hard auth requirement
 
-The 3P onboarding plan (`.claude/notes/plans/3p-org-signup-engagement-flow.md`) Phase 2 ("Auth routing + org detection") is built around a model where unauthed visitors land on `uat.zerobias.com/sme-mart`, get redirected to ZB signup, and return via a URL handoff. Open Kevin asks include "ZB signup auto-creates an org? Embed viable? Return URL mechanism?".
+The 3P onboarding plan (`.planning/notes/plans/3p-org-signup-engagement-flow.md`) Phase 2 ("Auth routing + org detection") is built around a model where unauthed visitors land on `uat.zerobias.com/sme-mart`, get redirected to ZB signup, and return via a URL handoff. Open Kevin asks include "ZB signup auto-creates an org? Embed viable? Return URL mechanism?".
 
 Clark clarified 2026-04-22: **no one uses SME Mart without legit ZB platform credentials. This is a hard requirement.** Authentication happens upstream of SME Mart entirely; the SPA only sees already-authenticated users.
 

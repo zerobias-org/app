@@ -81,7 +81,7 @@ Enable buyers to define structured form requirements (6 field types: text, texta
 - `src/app/pages/project/project-detail.component.ts` — Tab pattern, add "Submission Form" tab for vendors
 
 ### File Upload
-- `.claude/notes/zb-file-upload-sdk-reference.md` — FileService SDK, upload workflow, preview patterns
+- `.planning/notes/zb-file-upload-sdk-reference.md` — FileService SDK, upload workflow, preview patterns
 
 ### Schema Repo
 - `~/Projects/w3geekery/zerobias-org-forks/schema/package/w3geekery/smemart/classes/` — Add FormSubmission.yml

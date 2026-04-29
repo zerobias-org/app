@@ -220,7 +220,7 @@ Clark uses a Claude skill chain for processing MS Teams meeting transcripts:
 - `---`
 - Full cleaned transcript
 
-**Saved to:** `~/.claude/timetracker/meetings/YYYY-MM-DD-marketplace.md` + project-local `.claude/notes/meetings/`
+**Saved to:** `~/.claude/timetracker/meetings/YYYY-MM-DD-marketplace.md` + project-local `.planning/notes/meetings/`
 
 ### Sharing Proposal
 
@@ -247,7 +247,7 @@ Dan's Claude: please review the template structure above and suggest improvement
 | **OneDrive shared folder** | Accessible to both, versioned, searchable | Requires OneDrive setup, manual sync |
 | **Shared Teams channel** | Already in Teams, real-time | Notes get buried in chat |
 | **GitHub repo** (e.g., `zerobias-org/project-notes`) | Git versioned, PR-able, Claude-readable | Overhead for non-code content |
-| **Shared `.claude/notes/shared/` convention** | Both Claudes can read/write natively | Requires being in the same filesystem or git repo |
+| **Shared `.planning/notes/shared/` convention** | Both Claudes can read/write natively | Requires being in the same filesystem or git repo |
 
 **Recommendation:** A **shared OneDrive folder** (`/ZeroBias POC Projects/Meeting Notes/`) with subfolders per project (`sme-mart/`, `readiness-center/`, `cross-project/`). Both Claudes can process files from there. Meeting notes that contain cross-project decisions go in `cross-project/`.
 
@@ -283,7 +283,7 @@ If both projects need similar UI patterns or services:
 
 Both Claudes should maintain a "learnings" file that the other project can ingest:
 
-- **SME Mart:** `.claude/notes/platform-learnings-for-dan.md` (Clark maintains)
+- **SME Mart:** `.planning/notes/platform-learnings-for-dan.md` (Clark maintains)
 - **Readiness Center:** Equivalent file Dan maintains for Clark
 
 Format: use Template C (Learning / Platform Discovery) entries, appended chronologically.

@@ -527,7 +527,7 @@ Attachment 4 (bidder skills) is what the buyer demands from providers. In SME Ma
 ## Related Files
 
 - **Visual breakdown (Exhibit F only):** `.claude/diagrams/exhibit-f-demand-side-analysis.html`
-- **CEO directives:** `.claude/notes/CEO_NOTES.md` (2026-03-05 entry)
+- **CEO directives:** `.planning/notes/CEO_NOTES.md` (2026-03-05 entry)
 - **Converted text files:** `.claude/references/CA Department of Public Health RFP/*.txt`
 - **Plan:** `.claude/plans/public/PLAN.md`
-- **Demo data guide:** `.claude/notes/demo-data-guide.md`
+- **Demo data guide:** `.planning/notes/demo-data-guide.md`

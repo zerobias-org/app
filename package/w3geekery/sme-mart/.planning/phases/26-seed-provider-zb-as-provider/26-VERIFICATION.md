@@ -88,7 +88,7 @@ All code passes automated tests. UAT seed confirmed via GQL read-back. Distingui
 
 **Deferral (post-deploy):**
 - UAT manual verification (navigating to `/sme-mart/providers` on `https://uat.zerobias.com/`) deferred to post-deploy step
-- Director to invalidate CloudFront cache per `.claude/docs/UAT_CLOUDFRONT_CACHE_INVALIDATION.md` after PR merge to `zerobias-org/app:uat`
+- Director to invalidate CloudFront cache per `.planning/docs/UAT_CLOUDFRONT_CACHE_INVALIDATION.md` after PR merge to `zerobias-org/app:uat`
 - All code prerequisites met; UAT verification is deployment hygiene, not code deficiency
 
 **Files:**
@@ -232,7 +232,7 @@ All code passes automated tests. UAT seed confirmed via GQL read-back. Distingui
 
 **Steps:**
 1. Merge `poc/sme-mart` → `zerobias-org/app:uat` PR
-2. Invalidate CloudFront cache per `.claude/docs/UAT_CLOUDFRONT_CACHE_INVALIDATION.md`
+2. Invalidate CloudFront cache per `.planning/docs/UAT_CLOUDFRONT_CACHE_INVALIDATION.md`
 3. Navigate to `https://uat.zerobias.com/sme-mart/providers`
 4. Verify ZeroBias card displays with:
    - Name: "ZeroBias"

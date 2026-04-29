@@ -2,7 +2,7 @@
 
 Angular-specific coding standards for SME Mart Angular (Angular 21).
 
-> Adapted from ZeroBias UI `.claude/docs/ANGULAR_PATTERNS.md`
+> Adapted from ZeroBias UI `.planning/docs/ANGULAR_PATTERNS.md`
 
 ## Angular 21 Key Features
 

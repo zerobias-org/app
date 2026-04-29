@@ -74,7 +74,7 @@ await client.disconnect()
 
 ### UI Repo Pattern Docs
 
-`~/zb-repos/ui/.claude/docs/` has reusable Angular pattern guides:
+`~/zb-repos/ui/.planning/docs/` has reusable Angular pattern guides:
 
 | Doc | Topics |
 |-----|--------|

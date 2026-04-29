@@ -106,5 +106,5 @@ Typical import order (no enforced linter rule):
 
 - JSDoc on services and non-obvious functions
 - Inline comments for platform-specific quirks (e.g., GQL availability timing)
-- `CLAUDE.md` and `.claude/notes/` for architectural decisions
+- `CLAUDE.md` and `.planning/notes/` for architectural decisions
 - No auto-generated docs — code is self-documenting where possible

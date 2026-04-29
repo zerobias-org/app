@@ -49,7 +49,7 @@ If the director's design mode asks about "boot sequence," this is what it means 
 ## Platform Security & Permission Model (CRITICAL — read before any boundary/permission work)
 
 **Source:** ZeroBias Platform Security Guide (kb9) + Kevin corrections (2026-04-02).
-**Reference:** `.claude/docs/ZB_PLATFORM_SECURITY_GUIDE.md`
+**Reference:** `.planning/docs/ZB_PLATFORM_SECURITY_GUIDE.md`
 **How to refresh:** `meta.getKbArticleContent` with `code: "kb9"` via ZB MCP.
 
 ### The Actual Layering
@@ -123,7 +123,7 @@ Requirements arrive informally from Brian meetings, not formal specs.
 
 ## GQL Schema Workflow
 
-**MANDATORY READING:** [`.claude/docs/SCHEMA_CHANGE_PROCESS.md`](.claude/docs/SCHEMA_CHANGE_PROCESS.md) — full step-by-step guide for any GQL schema changes. GSD agents MUST read this before planning or executing any schema work.
+**MANDATORY READING:** [`.planning/docs/SCHEMA_CHANGE_PROCESS.md`](.planning/docs/SCHEMA_CHANGE_PROCESS.md) — full step-by-step guide for any GQL schema changes. GSD agents MUST read this before planning or executing any schema work.
 
 Schema changes require a PR to `zerobias-org/schema:dev`, which triggers platform reload (~15 min). Steps:
 1. Edit YAML in `zerobias-org-forks/schema` (our fork)
@@ -143,7 +143,7 @@ Class IDs are deterministic (same across environments). Pipeline IDs are NOT.
 | Prior (decommissioning) boundary — ZeroBias SME Marketplace | `e3871f0b-56f0-4e5e-87c6-6ca196bf88c7` |
 | Activity (Ad Hoc) | `e15830c8-4274-4d67-bf9b-c22b60001e32` |
 
-Full ID mapping: `.claude/notes/uat-migration-tracker.md`
+Full ID mapping: `.planning/notes/uat-migration-tracker.md`
 
 ## Planning Structure
 

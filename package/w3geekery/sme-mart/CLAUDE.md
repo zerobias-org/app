@@ -2,7 +2,7 @@
 
 > **On Startup:** Read `.planning/BACKLOG.md` — source of truth for all pending work. Read `.planning/PROJECT.md` + `.planning/ROADMAP.md` for current milestone state.
 
-> **UAT Environment:** CI/dev was rebuilt with hydra. UAT (`uat.zerobias.com`) is the active dev environment. Migration complete 2026-03-30 — see [`.claude/notes/uat-migration-tracker.md`](.claude/notes/uat-migration-tracker.md) for ID mapping reference. `npm run dev` targets UAT.
+> **UAT Environment:** CI/dev was rebuilt with hydra. UAT (`uat.zerobias.com`) is the active dev environment. Migration complete 2026-03-30 — see [`.planning/notes/uat-migration-tracker.md`](.planning/notes/uat-migration-tracker.md) for ID mapping reference. `npm run dev` targets UAT.
 
 > **⚠️ ALWAYS prefer `~/Projects/w3geekery/zerobias-org-forks/` over `~/Projects/zb/` for every repo that exists in zerobias-org-forks (app, login, module, schema, etc.).** We are a 3rd-party developer — work from the w3geekery fork, push to the fork, and create cross-fork PRs to zerobias-org. Only use `~/Projects/zb/` for read-only reference unless specifically asked otherwise.
 
@@ -14,25 +14,25 @@ SME Mart is a **marketplace for Subject Matter Experts** in compliance/cybersecu
 
 | What | Where |
 |------|-------|
-| **UAT ID Reference** | [`.claude/notes/uat-migration-tracker.md`](.claude/notes/uat-migration-tracker.md) — CI→UAT ID mapping (migration complete) |
+| **UAT ID Reference** | [`.planning/notes/uat-migration-tracker.md`](.planning/notes/uat-migration-tracker.md) — CI→UAT ID mapping (migration complete) |
 | **Backlog (all pending work)** | [`.planning/BACKLOG.md`](.planning/BACKLOG.md) — select items for next GSD milestone |
 | **Project & Milestone State** | [`.planning/PROJECT.md`](.planning/PROJECT.md), [`.planning/ROADMAP.md`](.planning/ROADMAP.md) |
 | **Plan Archive (historical)** | `.claude/plans-archive/` — old PLAN.md + 55 plan files (local-only, gitignored) |
-| **Source Paths (SDKs, repos)** | [`.claude/docs/SOURCE_PATHS.md`](.claude/docs/SOURCE_PATHS.md) |
+| **Source Paths (SDKs, repos)** | [`.planning/docs/SOURCE_PATHS.md`](.planning/docs/SOURCE_PATHS.md) |
 | **Angular 21 Docs** | [`AGENTS.md`](AGENTS.md) — local docs index in `.angular-docs/` (refresh: `npx angular-agents-md`) |
 | **Next.js prototype** (archived) | `../sme-mart-nextjs-deprecated/` |
 | **ZeroBias UI** (Angular 21 reference) | `~/Projects/zb/ui` |
 | **SDK source** | `~/Projects/zb/clients/packages/` |
-| **Neon DB reference** | [`.claude/notes/neon-mcp-reference.md`](.claude/notes/neon-mcp-reference.md) — project ID, tables, common SQL queries |
-| **Hub Connection Setup (Neon)** | [`.claude/docs/HUB_CONNECTION_SETUP_NEON.md`](.claude/docs/HUB_CONNECTION_SETUP_NEON.md) — step-by-step playbook: generic-sql deployment + managed secret + connection via ZB MCP |
-| **UAT CloudFront Cache Invalidation** | [`.claude/docs/UAT_CLOUDFRONT_CACHE_INVALIDATION.md`](.claude/docs/UAT_CLOUDFRONT_CACHE_INVALIDATION.md) — when `uat.zerobias.com/sme-mart/` shows stale code after deploy: SSO prod account → distribution `E23VJPBBDUCHBQ` → Invalidations → `/*` |
-| **ZB Portal API curl Fallback** | [`.claude/docs/ZB_PORTAL_CURL_FALLBACK.md`](.claude/docs/ZB_PORTAL_CURL_FALLBACK.md) — recipe for querying `portal.*` endpoints (frameworks, vendors) when ZB MCP doesn't index the service |
-| **Demo data guide** | [`.claude/notes/demo-data-guide.md`](.claude/notes/demo-data-guide.md) — buyers, providers, engagements, ZB Tasks, demo scenarios |
-| **GQL Schema Extension (howto)** | [`.claude/notes/zb-graphql-custom-schema-howto.md`](.claude/notes/zb-graphql-custom-schema-howto.md) — customer-facing guide: YAML schema packages, querying, filtering |
-| **GQL Schema Extension (internals)** | [`.claude/notes/zb-graphql-schema-extension-guide.md`](.claude/notes/zb-graphql-schema-extension-guide.md) — platform internals: SchemaBuilder, catalog tables, source files |
-| **SME Mart Resource Types** | [`.claude/notes/sme-mart-resource-types-summary.md`](.claude/notes/sme-mart-resource-types-summary.md) — resource type inventory shared with Kevin |
-| **File Upload SDK** | [`.claude/notes/zb-file-upload-sdk-reference.md`](.claude/notes/zb-file-upload-sdk-reference.md) — FileService SDK, upload workflow, task attachments, preview, ZB UI reference |
-| **E2E Testing Guide** | [`.claude/notes/e2e-testing-guide.md`](.claude/notes/e2e-testing-guide.md) — **READ before writing Playwright tests.** Stack, auth model, gotchas, page object patterns, debugging playbook |
+| **Neon DB reference** | [`.planning/notes/neon-mcp-reference.md`](.planning/notes/neon-mcp-reference.md) — project ID, tables, common SQL queries |
+| **Hub Connection Setup (Neon)** | [`.planning/docs/HUB_CONNECTION_SETUP_NEON.md`](.planning/docs/HUB_CONNECTION_SETUP_NEON.md) — step-by-step playbook: generic-sql deployment + managed secret + connection via ZB MCP |
+| **UAT CloudFront Cache Invalidation** | [`.planning/docs/UAT_CLOUDFRONT_CACHE_INVALIDATION.md`](.planning/docs/UAT_CLOUDFRONT_CACHE_INVALIDATION.md) — when `uat.zerobias.com/sme-mart/` shows stale code after deploy: SSO prod account → distribution `E23VJPBBDUCHBQ` → Invalidations → `/*` |
+| **ZB Portal API curl Fallback** | [`.planning/docs/ZB_PORTAL_CURL_FALLBACK.md`](.planning/docs/ZB_PORTAL_CURL_FALLBACK.md) — recipe for querying `portal.*` endpoints (frameworks, vendors) when ZB MCP doesn't index the service |
+| **Demo data guide** | [`.planning/notes/demo-data-guide.md`](.planning/notes/demo-data-guide.md) — buyers, providers, engagements, ZB Tasks, demo scenarios |
+| **GQL Schema Extension (howto)** | [`.planning/notes/zb-graphql-custom-schema-howto.md`](.planning/notes/zb-graphql-custom-schema-howto.md) — customer-facing guide: YAML schema packages, querying, filtering |
+| **GQL Schema Extension (internals)** | [`.planning/notes/zb-graphql-schema-extension-guide.md`](.planning/notes/zb-graphql-schema-extension-guide.md) — platform internals: SchemaBuilder, catalog tables, source files |
+| **SME Mart Resource Types** | [`.planning/notes/sme-mart-resource-types-summary.md`](.planning/notes/sme-mart-resource-types-summary.md) — resource type inventory shared with Kevin |
+| **File Upload SDK** | [`.planning/notes/zb-file-upload-sdk-reference.md`](.planning/notes/zb-file-upload-sdk-reference.md) — FileService SDK, upload workflow, task attachments, preview, ZB UI reference |
+| **E2E Testing Guide** | [`.planning/notes/e2e-testing-guide.md`](.planning/notes/e2e-testing-guide.md) — **READ before writing Playwright tests.** Stack, auth model, gotchas, page object patterns, debugging playbook |
 | **Schema repo** | [`zerobias-org/schema`](https://github.com/zerobias-org/schema) — YAML schema packages (source of truth for GQL entities) |
 | **Post-mortems** | [`.claude/post-mortems/`](.claude/post-mortems/) — failure reports (see [`INDEX.md`](.claude/post-mortems/INDEX.md)). **Read before starting any schema change.** |
 | **zb-dx (Developer Experience)** | `~/Projects/zb/zerobias-org/zb-dx` — shared knowledge base for all ZB platform developers. **File friction with `/friction`, browse patterns, find integration guides.** See below. |
@@ -77,7 +77,7 @@ A shared knowledge base for any developer building on `zerobias-sdk` / `zerobias
 
 ## Angular 21 Patterns
 
-**READ [`.claude/docs/MODERNIZATION_GUIDE.md`](.claude/docs/MODERNIZATION_GUIDE.md) before writing any component.** `@Input`/`@Output`/constructor injection are banned — use `input()`/`output()`/`inject()`. When modifying a file with old patterns, migrate what you touch.
+**READ [`.planning/docs/MODERNIZATION_GUIDE.md`](.planning/docs/MODERNIZATION_GUIDE.md) before writing any component.** `@Input`/`@Output`/constructor injection are banned — use `input()`/`output()`/`inject()`. When modifying a file with old patterns, migrate what you touch.
 
 ## File Naming Convention
 

@@ -99,7 +99,7 @@ None — no pending todos matched Phase 25 scope (all v1.4 todos are forward-loo
 - `.planning/director/bootstrap-w3geekery-engagement.md` — full Pipeline.receive payloads, Object.tag write shape, Engagement + SmeMartProject UUIDs
 
 ### Prior art (reference, do NOT seed from)
-- `.claude/notes/sme-mart-resource-types-summary.md` (2026-03-05) — SME Mart resource type inventory shared with Kevin; partial prior catalog
+- `.planning/notes/sme-mart-resource-types-summary.md` (2026-03-05) — SME Mart resource type inventory shared with Kevin; partial prior catalog
 - `.planning/research/internal/2026-04-23-credentials-zb-platform-research.md` — adjacent SDK research, may have reusable snippets
 - `.planning/research/internal/2026-04-23-seller-credentials-catalog-research.md` — adjacent
 
@@ -113,7 +113,7 @@ None — no pending todos matched Phase 25 scope (all v1.4 todos are forward-loo
 ### CLAUDE.md project pointers
 - `CLAUDE.md` §"UAT Environment" + §"Hub Connection Setup (Neon)" — UAT is active dev env
 - `CLAUDE.md` §"GQL Schema Extension (howto / internals)" — RFC4515 filter syntax, tag scope rules
-- `CLAUDE.md` §"ZB Portal API curl Fallback" — `.claude/docs/ZB_PORTAL_CURL_FALLBACK.md` for portal-only endpoints not indexed by ZB MCP
+- `CLAUDE.md` §"ZB Portal API curl Fallback" — `.planning/docs/ZB_PORTAL_CURL_FALLBACK.md` for portal-only endpoints not indexed by ZB MCP
 
 </canonical_refs>
 

@@ -44,5 +44,5 @@ SME Mart is a marketplace platform for Subject Matter Experts, talent, and task 
 ## Notes Save Location
 
 Primary: `~/.claude/timetracker/meetings/`
-Secondary: `.claude/notes/meetings/` (project-local copy)
+Secondary: `.planning/notes/meetings/` (project-local copy)
 Filename: `YYYY-MM-DD-marketplace.md`

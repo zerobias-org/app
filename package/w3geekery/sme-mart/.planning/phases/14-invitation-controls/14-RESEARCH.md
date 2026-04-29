@@ -865,7 +865,7 @@ No new CLI tools, runtimes, or services required.
 - Phase 13 Research (pilot-projects) — established SmeMartProject model, projectType field pattern
 - REQUIREMENTS.md (D1-01 through D1-06) — requirement traceability
 - STATE.md — project roadmap, Phase 14 effort estimate (12–16 hours)
-- Pending schema changes document (`.claude/notes/pending-schema-changes.md`) — tracks `isInvitationOnly` + RfpInvitation as immediate needs
+- Pending schema changes document (`.planning/notes/pending-schema-changes.md`) — tracks `isInvitationOnly` + RfpInvitation as immediate needs
 
 ### Tertiary (LOW confidence)
 - None — all research grounded in code inspection or explicit documentation

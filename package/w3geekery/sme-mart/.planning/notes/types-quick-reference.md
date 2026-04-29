@@ -253,8 +253,8 @@ When updating SME Mart models:
 
 | What | Where |
 |------|-------|
-| **Detailed comparison** | `.claude/notes/zerobias-org-types-comparison.md` |
-| **This quick ref** | `.claude/notes/types-quick-reference.md` |
+| **Detailed comparison** | `.planning/notes/zerobias-org-types-comparison.md` |
+| **This quick ref** | `.planning/notes/types-quick-reference.md` |
 | **types repo** | `https://github.com/zerobias-org/types` |
 | **Package source** | `packages/core-js/src/` in types repo |
 | **Error classes** | `packages/core-js/src/errors/` in types repo |

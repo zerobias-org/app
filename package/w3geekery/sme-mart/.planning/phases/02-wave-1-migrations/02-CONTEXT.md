@@ -84,7 +84,7 @@ Migrate Engagement (WorkRequest), Bid, and BidResponse services from SmeMartDbSe
 
 ### Schema reference
 - `.claude/plans/local/034-gql-schema-migration.md` — GQL schema YAML definitions, class IDs, field definitions, link relationships
-- `.claude/notes/sme-mart-resource-types-summary.md` — Resource type inventory
+- `.planning/notes/sme-mart-resource-types-summary.md` — Resource type inventory
 
 ### Migration approach
 - `.planning/research/ARCHITECTURE.md` — Dual-path architecture, data flow patterns

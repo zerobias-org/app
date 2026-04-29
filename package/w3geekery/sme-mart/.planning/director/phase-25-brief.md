@@ -70,6 +70,6 @@ Inventory everything the authenticated ZB platform session already tells us abou
 
 - Errata 020 (`.planning/director/errata/020-3p-plan-missing-platform-data-audit-phase.md` — or equivalent errata path)
 - DECISIONS.md "v1.4 Milestone Shape — Brian Asks Are Placeholders, Not Blockers"
-- `.claude/notes/sme-mart-resource-types-summary.md` (resource type inventory already shared with Kevin — partial prior art)
+- `.planning/notes/sme-mart-resource-types-summary.md` (resource type inventory already shared with Kevin — partial prior art)
 - `.planning/research/internal/2026-04-23-credentials-zb-platform-research.md` (adjacent research, may have reusable snippets)
 - Memory: `ZeroBias MCP Parameter Patterns`, `ZeroBias Hydra Migration`, `ZeroBias Dataloader & Schema Verification`

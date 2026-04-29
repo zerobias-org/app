@@ -23,7 +23,7 @@ selectValue(value) {
 }
 ```
 
-**SME Mart uses the helper at `e2e/helpers/zb-autocomplete.ts`** — call that, don't patch `onAction` manually. See `.claude/notes/e2e-testing-guide.md` § "Form Interactions — Required Helpers" for usage.
+**SME Mart uses the helper at `e2e/helpers/zb-autocomplete.ts`** — call that, don't patch `onAction` manually. See `.planning/notes/e2e-testing-guide.md` § "Form Interactions — Required Helpers" for usage.
 
 **Multi-select (`ZbSimpleMultiAutocompleteComponent`) is ALSO fixed as of `@zerobias-org/ngx-library@0.2.32`** — adds `selectValue(values[])` (replace) and `addValue(value)` (append, idempotent by `idKey`). The SME Mart helper at `e2e/helpers/zb-autocomplete.ts` wraps both. The legacy patching pattern below is kept for historical reference only; new specs should use the helpers.
 
