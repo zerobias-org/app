@@ -17,6 +17,9 @@ vercel.env
 # Deprecated Next.js prototype (archived, kept on disk for reference)
 package/w3geekery/sme-mart-nextjs-deprecated/
 
+# Parallel director-session worktrees (DPn) — never track as submodules
+package/w3geekery/sme-mart-dp*/
+
 # Session-specific context (not shared)
 **/restart_context*
 
