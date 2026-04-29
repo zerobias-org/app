@@ -1,4 +1,5 @@
 import { Injectable, inject } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService, type GqlQueryOptions } from './graphql-read.service';
 import { SME_MART_BOARD_FIELD_MAPPING, mapGqlToNeon } from '../field-mappings';
@@ -23,6 +24,7 @@ import type { GqlSmeMartBoardResponse, GqlSmeMartActivityResponse } from '../gql
 export class SmeMartBoardService {
   private readonly pipelineWrite = inject(PipelineWriteService);
   private readonly graphqlRead = inject(GraphqlReadService);
+  private readonly snackBar = inject(MatSnackBar);
 
   private readonly boardFields = [
     'id',
@@ -56,9 +58,16 @@ export class SmeMartBoardService {
       updatedAt: now,
     };
 
-    this.pipelineWrite.pushEntity('SmeMartBoard', gqlData).catch(err => {
-      console.error('[BoardService] Failed to push board:', err);
-    });
+    try {
+      await this.pipelineWrite.pushEntity('SmeMartBoard', gqlData, [], 'sme-mart-board.service:59');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to create board: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     return {
       id: boardId,
@@ -149,9 +158,16 @@ export class SmeMartBoardService {
       updatedAt: updated.updatedAt,
     };
 
-    this.pipelineWrite.pushEntity('SmeMartBoard', gqlData).catch(err => {
-      console.error('[BoardService] Failed to push board update:', err);
-    });
+    try {
+      await this.pipelineWrite.pushEntity('SmeMartBoard', gqlData, [], 'sme-mart-board.service:160');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to update board: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     return updated;
   }

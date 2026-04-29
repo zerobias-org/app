@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { SmeMartBoardService } from './sme-mart-board.service';
 import { PipelineWriteService } from './pipeline-write.service';
@@ -26,6 +27,7 @@ describe('SmeMartBoardService', () => {
   let service: SmeMartBoardService;
   let mockPipelineWrite: MockPipelineWrite;
   let mockGraphqlRead: MockGraphqlRead;
+  let mockSnackBar: { open: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     mockPipelineWrite = {
@@ -41,12 +43,16 @@ describe('SmeMartBoardService', () => {
       getById: vi.fn().mockResolvedValue(null),
       rawQuery: vi.fn().mockResolvedValue(null),
     };
+    mockSnackBar = {
+      open: vi.fn(),
+    };
 
     TestBed.configureTestingModule({
       providers: [
         SmeMartBoardService,
         { provide: PipelineWriteService, useValue: mockPipelineWrite },
         { provide: GraphqlReadService, useValue: mockGraphqlRead },
+        { provide: MatSnackBar, useValue: mockSnackBar },
       ],
     });
 
@@ -75,6 +81,29 @@ describe('SmeMartBoardService', () => {
       expect(mockPipelineWrite.pushEntity).toHaveBeenCalledWith(
         'SmeMartBoard',
         expect.objectContaining({ code: 'B1' }),
+        [],
+        'sme-mart-board.service:59',
+      );
+    });
+
+    it('should surface error to user on Pipeline rejection for createBoard', async () => {
+      const mockError = new Error('Network failure');
+      mockPipelineWrite.pushEntity.mockRejectedValueOnce(mockError);
+
+      await expect(
+        service.createBoard({
+          code: 'B1',
+          name: 'Demand Board',
+          scope: 'demand',
+          partition: 'P1',
+          parentId: 'proj-123',
+        })
+      ).rejects.toThrow(mockError);
+
+      expect(mockSnackBar.open).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to create board'),
+        'Dismiss',
+        expect.any(Object),
       );
     });
   });
@@ -164,6 +193,8 @@ describe('SmeMartBoardService', () => {
       expect(mockPipelineWrite.pushEntity).toHaveBeenCalledWith(
         'SmeMartBoard',
         expect.objectContaining({ name: 'Updated Name' }),
+        [],
+        'sme-mart-board.service:160',
       );
     });
 
@@ -173,6 +204,31 @@ describe('SmeMartBoardService', () => {
       await expect(
         service.updateBoard('nonexistent', { name: 'Test' }),
       ).rejects.toThrow(/not found/);
+    });
+
+    it('should surface error to user on Pipeline rejection for updateBoard', async () => {
+      const existing: GqlSmeMartBoardResponse = {
+        id: 'board-123',
+        code: 'B1',
+        name: 'Original Name',
+        scope: 'demand',
+        partition: 'P1',
+        parentId: 'proj-123',
+        createdAt: '2026-03-19T00:00:00Z',
+        updatedAt: '2026-03-19T00:00:00Z',
+      };
+
+      mockGraphqlRead.getById.mockResolvedValue(existing);
+      const mockError = new Error('Save failed');
+      mockPipelineWrite.pushEntity.mockRejectedValueOnce(mockError);
+
+      await expect(service.updateBoard('board-123', { name: 'New Name' })).rejects.toThrow(mockError);
+
+      expect(mockSnackBar.open).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to update board'),
+        'Dismiss',
+        expect.any(Object),
+      );
     });
   });
 
