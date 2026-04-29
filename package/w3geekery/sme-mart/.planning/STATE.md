@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: 3P Onboarding & Default Engagement
 status: executing
-last_updated: "2026-04-29T01:16:11.992Z"
+last_updated: "2026-04-29T22:30:00.000Z"
 last_activity: 2026-04-29
 progress:
   total_phases: 19
-  completed_phases: 7
+  completed_phases: 8
   total_plans: 33
-  completed_plans: 31
+  completed_plans: 34
 ---
 
 # STATE.md -- Session Context
@@ -22,29 +22,27 @@ progress:
 
 ## Current Position
 
-Milestone: v1.4 3P Onboarding & Default Engagement (with Phase 20 interleaved)
-Phase: 20 (Fire-and-Forget Audit)
-Plan: Wave 1 complete
-Status: Awaiting director review before Wave 2 remediation
+Milestone: v1.4 3P Onboarding & Default Engagement
+Phase: 27 (next — Auth Gate + Onboarding Routing + Lazy Guard)
+Status: Ready to plan Phase 27. Phase 20 (Fire-and-Forget Audit) closed 2026-04-29.
 Last activity: 2026-04-29
 
-**Wave 1 Completed (2026-04-29):**
-- AUDIT.md with 60 call sites refined (33 CRITICAL FF + 9 MEDIUM FF + 2 LOW FF + 16 AWAITED-VERIFY)
-- Class-ID verification: all 24 canonical ✅ (baseline 2026-04-28, no new entries)
-- Telemetry instrumentation: `pushEntities`, `pushEntity`, `deleteEntities`, `deleteEntity` all wrapped with rejection logging
-- Test coverage: 8 new specs for telemetry (rejection event firing, callSite tagging, error re-throw, success path)
-- REQUIREMENTS.md updated: FF-01..08 all specified
-- Build green: `npm run build:prod`, `npx tsc --noEmit` pass
+**Phase 20 closed 2026-04-29** (commits `977828c..904276d`):
 
-**Next: Wave 2 remediation (deferred to backlog for v1.5 planning)** — 33 CRITICAL+SIMPLE sites to remediate in priority order per AUDIT.md table.
+- Wave 1: AUDIT.md (60 sites refined), class-ID re-verification (23/23 canonical), telemetry instrumentation on receiver-rejection path, 8 telemetry specs.
+- Wave 2: 42 fire-and-forget call sites remediated with `await` + try/catch + `MatSnackBar` + explicit `callSiteTag` + re-throw across 17 services. v1.5 polish entries `FF-POLISH-1/2/3` filed.
+- Wave 3: Kill-network rejection-path coverage closed (note-folder gap), parameterized round-trip-per-class-id drift gate over all 23 classes, AUDIT prose cleanup with concrete code citations, soak docs.
+- Verifier: 8/8 FF-* requirements ✅ (`.planning/phases/20-fire-and-forget-audit/VERIFICATION.md`).
+- Build green at HEAD: `npx tsc --noEmit` clean, `npm test` 1537/1537 passing across 118 files.
+- UAT 1-week soak begins post-merge; **non-blocking** per `UAT-SOAK-READY.md`. Phase 20 is closed regardless of soak outcome — soak findings would file as new errata or BACKLOG entries against deployed telemetry.
 
-**Then: Phase 27** (Auth Gate + Onboarding Routing + Lazy Guard) — authenticate users, route to onboarding or board, auto-create default engagement
+**Next: Phase 27** (Auth Gate + Onboarding Routing + Lazy Guard) — authenticate users, route to onboarding or board, auto-create default engagement. The fire-and-forget remediation is a prerequisite for Phase 27's onboarding flow (silent failures during first-run setup are particularly user-hostile).
 
 ---
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-24)
+See: .planning/PROJECT.md (updated 2026-04-29 — FF-01..FF-08 promoted to ✅ VALIDATED)
 
 **Core value:** Transparent, task-gated marketplace with demand/supply/transparency partitions
 **Current focus:** v1.4 (phases 24-28, 30-31; gap at 29)
@@ -54,7 +52,7 @@ See: .planning/PROJECT.md (updated 2026-04-24)
 
 - Phase 24: Demo Data Visibility Gate (4-6 hrs) — Filter demo records from non-admin users
 - Phase 25: Platform Data Audit (4-6 hrs) — Research: inventory ZB SDK data available for onboarding
-- Phase 26: ZB-as-Provider Seed (5-7 hrs) — Create ZeroBias as provider with company_info convention
+- Phase 26: ZB-as-Provider Seed (5-7 hrs) — Create ZeroBias as provider with company_info convention — ✅ Complete 2026-04-29
 - Phase 27: Auth Gate + Onboarding Routing + Lazy Guard (8-12 hrs) — Authenticate, route, auto-create engagement
 - Phase 28: Company Profile Review/Confirm Form (6-10 hrs) — Pre-populate from platform data, save
 - Phase 29: DEFERRED TO v1.5 — Tier display, ToS, branding (intentionally skipped)
@@ -106,11 +104,12 @@ From v1.2:
 - FormSubmission + FormBuilder + DynamicFormRenderer (drag-drop builder, 6 field types, preview/fill/review modes)
 - Demo seed CLI (real SDK wiring, state-file cleanup, end-to-end verified on UAT)
 
-From v1.3 (partial -- phases 18-19 complete, 20-23 not started):
+From v1.3 (phases 18-19 complete, phases 20 closed 2026-04-29 in v1.4 timeline; phases 21-23 deferred to v1.5):
 
 - Org Switcher user-menu dropdown (Phase 18)
 - zbb local dev stacks -- SPA + Hub module scaffolding (Phase 19)
 - Pipeline (UAT): `43f08afd-7ab9-4e99-a93c-619c46adaabe`
+- **Phase 20 (Fire-and-Forget Audit) closed 2026-04-29** — receiver-rejection telemetry live, 42 user-action sites remediated, class-id round-trip drift gate enforced at unit-test time. UAT 1-week soak runs post-merge (non-blocking).
 
 From v1.3/v1.4 director work (pre-milestone):
 
@@ -130,6 +129,7 @@ Platform observations (carry-forward):
 - Pipeline.receive tagIds does NOT tag ingested Objects (tags batch-job record only)
 - Tags are immutable post-ingest -- must be set at Pipeline.receive time via Object.tag field
 - Object.tag shape: `[{ value: "<tag-uuid>" }]` at ingest time (locked 2026-04-24)
+- Telemetry: every PipelineWriteService rejection emits `[PIPELINE_WRITE_FAILURE] {className, callSite, errorMessage, timestamp}` via console.warn (Phase 20)
 
 ---
 
@@ -142,9 +142,9 @@ Platform observations (carry-forward):
 | Phase | Goal | Hours | Requirements | Status |
 |-------|------|-------|--------------|--------|
 | 24 | Demo Data Visibility Gate | 4-6 | 5 (DG-01..05) | Not started |
-| 25 | Platform Data Audit | 4-6 | 5 (PDA-01..05) | Plan 01/5 complete |
-| 26 | ZB-as-Provider Seed | 5-7 | 5 (SP-01,02,04,05,06) | Not started |
-| 27 | Auth Gate + Routing | 8-12 | 6 (AR-01..06) | Not started |
+| 25 | Platform Data Audit | 4-6 | 5 (PDA-01..05) | Plans 01-03 complete |
+| 26 | ZB-as-Provider Seed | 5-7 | 5 (SP-01,02,04,05,06) | ✅ Complete 2026-04-29 |
+| 27 | Auth Gate + Routing | 8-12 | 6 (AR-01..06) | Not started — **next** |
 | 28 | Company Profile Form | 6-10 | 8 (CP-01..08) | Not started |
 | 29 | DEFERRED TO v1.5 | — | — | Skipped |
 | 30 | Default Board + Coming Soon | 6-8 | 6 (PB-01..07) | Not started |
@@ -155,6 +155,8 @@ Platform observations (carry-forward):
 **Success Criteria Derived:** 2-5 per phase, all observable user outcomes
 
 **Dependencies validated:** Phase 24/25 independent, Phase 27 depends on 24, Phase 28 depends on 25+26, Phase 30 depends on 26+27+28, Phase 31 depends on all prior
+
+**Phase 20 (Fire-and-Forget Audit)** ran interleaved with v1.4 onboarding work (commits `977828c..904276d`, closed 2026-04-29) and is no longer interleaved — it is closed.
 
 ---
 
@@ -168,7 +170,7 @@ claude --resume poc/sme-mart
 
 **Next step:**
 
-`/gsd:plan-phase 24` -- start Phase 24 planning
+`/gsd:plan-phase 27` -- start Phase 27 planning (Auth Gate + Onboarding Routing + Lazy Guard)
 
 **If starting fresh:**
 
@@ -176,9 +178,10 @@ claude --resume poc/sme-mart
 - Read `.planning/ROADMAP.md` for v1.4 complete phase structure
 - Read `.planning/REQUIREMENTS.md` for v1.4 scope (38 requirements)
 - Read `.planning/director/phase-{24..28,30,31}-brief.md` for per-phase context (TBD)
+- Read `.planning/phases/20-fire-and-forget-audit/PHASE-20-SUMMARY.md` for Phase 20 closure context (recent)
 - Read `CLAUDE.md` for project conventions
 
 ---
 
-**Last Updated:** 2026-04-24 23:15 UTC
-**Milestone v1.4:** EXECUTING — Phase 25 Plan 01 complete (infrastructure scaffold)
+**Last Updated:** 2026-04-29 22:30 UTC
+**Milestone v1.4:** EXECUTING — Phase 20 closed (2026-04-29), Phase 26 closed (2026-04-29), Phase 25 Plans 01-03 complete; Phase 27 is next.

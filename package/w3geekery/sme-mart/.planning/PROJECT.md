@@ -21,7 +21,7 @@ A transparent, task-gated marketplace where every boundary API operation require
 - Default Project Board + 3 "Coming Soon" placeholders (P30)
 - W3Geekery Dogfood + Production Smoke Test (P31)
 
-**Deferred from v1.3 to v1.5:** Phases 20-23 (Fire-and-Forget Audit, Org Documents Center, Form Template Library, Transparency Controls). Phase 29 (tier display / ToS / branding) also deferred to v1.5.
+**Deferred from v1.3 to v1.5:** Phases 21-23 (Org Documents Center, Form Template Library, Transparency Controls). Phase 29 (tier display / ToS / branding) also deferred to v1.5. **Phase 20 (Fire-and-Forget Audit) was reclaimed and closed 2026-04-29 interleaved with v1.4 onboarding work** — see Validated requirements FF-01..FF-08 below.
 
 ## Current State (after v1.1)
 
@@ -48,6 +48,14 @@ A transparent, task-gated marketplace where every boundary API operation require
 - ✓ Project-centric boundary model — Internal/External badges, engagement/project counts, boundary parties tab (Plan 080) — v1.1
 - ✓ Supply-side vendor profile — 6-section corporate docs, CRUD, expiration, pre-fill (Plan 041) — v1.1
 - ✓ ZB-as-provider seed — `COMPANY-INFO-CONVENTION.md` ratified (17 sections), 8 MPI rows seeded on UAT with `provider_type=platform` distinguisher, Browse Providers UI rewired from Neon views to direct `boundaryExecuteRawQuery` against MarketplaceProfileItem, ZB card visible on `/providers` (Phase 26: SP-01, SP-02, SP-04, SP-05, SP-06) — v1.4
+- ✓ **FF-01** — AUDIT.md exists with 60-row call-site catalog (44 fire-and-forget + 16 awaited; criticality + complexity per row) — Phase 20 — v1.4 — VALIDATED 2026-04-29 — see [`VERIFICATION.md`](phases/20-fire-and-forget-audit/VERIFICATION.md)
+- ✓ **FF-02** — Class-ID re-verification: 23/23 `SME_MART_CLASS_IDS` entries confirmed canonical against `platform.Class.getClass` on UAT (corrects errata 023) — Phase 20 — v1.4 — VALIDATED 2026-04-29 — see [`VERIFICATION.md`](phases/20-fire-and-forget-audit/VERIFICATION.md)
+- ✓ **FF-03** — Receiver-rejection telemetry: structured `[PIPELINE_WRITE_FAILURE] {className, callSite, errorMessage, timestamp}` event via console.warn on every push/delete rejection, then re-throw — Phase 20 — v1.4 — VALIDATED 2026-04-29 — see [`VERIFICATION.md`](phases/20-fire-and-forget-audit/VERIFICATION.md)
+- ✓ **FF-04** — 33 CRITICAL+SIMPLE call sites remediated with `await` + try/catch + `MatSnackBar` + explicit `callSiteTag` + re-throw; rejection-path specs cover every remediated service (note-folder gap closed in Wave 3) — Phase 20 — v1.4 — VALIDATED 2026-04-29 — see [`VERIFICATION.md`](phases/20-fire-and-forget-audit/VERIFICATION.md)
+- ✓ **FF-05** — `BACKLOG.md` "Fire-and-Forget Remediation Polish (v1.5)" carries `FF-POLISH-1/2/3` for sites needing UX upgrades beyond the SIMPLE pattern (bid retry, vetting batch granularity, submit-button-disable sweep) — Phase 20 — v1.4 — VALIDATED 2026-04-29 — see [`VERIFICATION.md`](phases/20-fire-and-forget-audit/VERIFICATION.md)
+- ✓ **FF-06** — 16 AWAITED call sites verified with concrete `<file>.ts:NN — surfaces via <mechanism>` citations in AUDIT.md (5 proper user-visible surface, 2 no UI consumer wired, 2 NgZone-only fallthrough captured by FF-POLISH-3, 9 admin-only acceptable) — Phase 20 — v1.4 — VALIDATED 2026-04-29 — see [`VERIFICATION.md`](phases/20-fire-and-forget-audit/VERIFICATION.md)
+- ✓ **FF-07** — WATCH-LIST pattern enforced: fire-and-forget `.catch(console.error)` on user-action paths is a BLOCK; `callSiteTag` parameter shape pulls callers into the await + try/catch contract; rejection-path specs gate the pattern at unit-test time — Phase 20 — v1.4 — VALIDATED 2026-04-29 — see [`VERIFICATION.md`](phases/20-fire-and-forget-audit/VERIFICATION.md)
+- ✓ **FF-08** — WATCH-LIST pattern enforced: round-trip-per-class-id parameterized spec block (`pipeline-write.service.spec.ts`) maps every className → canonical UUID; length + uniqueness drift guards catch silent regressions on future class additions — Phase 20 — v1.4 — VALIDATED 2026-04-29 — see [`VERIFICATION.md`](phases/20-fire-and-forget-audit/VERIFICATION.md), [`ROUND-TRIP-RESULTS.md`](phases/20-fire-and-forget-audit/ROUND-TRIP-RESULTS.md)
 
 ### Active
 

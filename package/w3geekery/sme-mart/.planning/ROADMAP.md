@@ -54,7 +54,7 @@
   - [x] **Plan 02 (Wave 2)** — sme-mart-spa stack: build + upload + location block injection (completed 2026-04-17)
   - [x] **Plan 03 (Wave 2)** — sme-mart-login stack: build + upload + location block injection (completed 2026-04-17)
   - [x] **Plan 04 (Wave 3)** — STACKS.md documentation + smoke test suite (completed 2026-04-17)
-- [ ] **Phase 20: Fire-and-Forget Audit** (TBD plans) — Audit all `pushEntity` call sites, add telemetry, remediate CRITICAL+SIMPLE. **Promoted from theoretical to confirmed-needed by errata 023** (2026-04-28): two fictional class IDs (MPI + EngagementVettingItem) caused silent production failures since Plan 041 / Plan 063, hidden by fire-and-forget `.catch`. Should run before Phase 27 (lazy guard + onboarding routing rely on round-trip writes). (est. ~8 hrs)
+- [x] **Phase 20: Fire-and-Forget Audit** (3/3 plans) — COMPLETE 2026-04-29. Audited 60 `pushEntity` call sites (44 fire-and-forget + 16 awaited), added structured-event telemetry on receiver-rejection path, remediated 42 CRITICAL+MEDIUM call sites (await + try/catch + snackBar + re-throw + explicit `callSiteTag`), pinned all 23 class IDs with a round-trip drift gate. **Promoted from theoretical to confirmed-needed by errata 023** (2026-04-28): two fictional class IDs (MPI + EngagementVettingItem) caused silent production failures since Plan 041 / Plan 063, hidden by fire-and-forget `.catch`. UAT 1-week soak runs post-merge, non-blocking. Commits `977828c..904276d`. See [`PHASE-20-SUMMARY.md`](phases/20-fire-and-forget-audit/PHASE-20-SUMMARY.md).
 - [ ] **Phase 21: Org Documents Center Completion** (TBD plans) — Folders, colors, tags, templates, preview (est. ~20 hrs, time-boxed, scope trims on creep)
 - [ ] **Phase 22: Form Template Library** (TBD plans) — Save/reuse/fork form templates, library page, RFP wizard integration, new FormTemplate schema class (est. 22–32 hrs)
 - [ ] **Phase 23: Transparency Controls UI-SPEC + Opportunistic Implementation** (TBD plans) — Lock UI-SPEC and wireframes, research backend capabilities, code if feasible (est. 4–6 hrs if spec-only)
@@ -545,7 +545,7 @@ This phase is intentionally deferred from v1.4. When v1.5 begins, Phase 29 work 
 | 17. Demo Seed Scripts | 1/1 | Complete    | 2026-04-15 |
 | 18. Org Switcher | 5/5 | Complete    | 2026-04-16 |
 | 19. zbb Local Dev Stacks | 4/4 | Complete    | 2026-04-17 |
-| 20. Fire-and-Forget Audit | 0/? | Not started | — |
+| 20. Fire-and-Forget Audit | 3/3 | Complete    | 2026-04-29 (commits `977828c..904276d`) |
 | 21. Org Documents Center | 0/? | Not started | — |
 | 22. Form Template Library | 0/? | Not started | — |
 | 23. Transparency Controls UI-SPEC | 0/? | Not started | — |
