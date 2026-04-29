@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { vi } from 'vitest';
 import { Subject } from 'rxjs';
 import { OrgDocumentService } from './org-document.service';
@@ -37,10 +38,12 @@ describe('OrgDocumentService', () => {
   let mockDocService: MockDocService;
   let mockImpersonation: ReturnType<typeof fakeImpersonation>;
   let mockClientApi: MockClientApi;
+  let mockSnackBar: { open: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     mockPipeline = fakePipelineWriteService();
     mockGql = fakeGraphqlReadService();
+    mockSnackBar = { open: vi.fn() };
 
     // Default GQL fixtures
     const documentFixture: GqlDocumentResponse = {
@@ -109,6 +112,7 @@ describe('OrgDocumentService', () => {
         { provide: DocumentService, useValue: mockDocService },
         { provide: ImpersonationService, useValue: mockImpersonation },
         { provide: ZerobiasClientApi, useValue: mockClientApi },
+        { provide: MatSnackBar, useValue: mockSnackBar },
         { provide: SmeMartTagService, useValue: {} },
       ],
     });
@@ -280,6 +284,97 @@ describe('OrgDocumentService', () => {
 
       const result = await service.getDocument('nonexistent');
       expect(result).toBeNull();
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Archive / Restore / Update
+  // ---------------------------------------------------------------------------
+
+  describe('archiveDocument', () => {
+    it('should push archive update to Pipeline', async () => {
+      await service.archiveDocument(TEST_DOC_ID);
+
+      expect(mockPipeline.pushEntity).toHaveBeenCalledWith(
+        'SmeMartDocument',
+        expect.objectContaining({
+          id: TEST_DOC_ID,
+          archived: true,
+        }),
+        [],
+        'org-document.service:274',
+      );
+    });
+
+    it('should surface error to user on Pipeline rejection', async () => {
+      const mockError = new Error('Network failure');
+      mockPipeline.pushEntity.mockRejectedValueOnce(mockError);
+
+      await expect(service.archiveDocument(TEST_DOC_ID)).rejects.toThrow(mockError);
+
+      expect(mockSnackBar.open).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to archive document'),
+        'Dismiss',
+        expect.any(Object),
+      );
+    });
+  });
+
+  describe('restoreDocument', () => {
+    it('should push restore update to Pipeline', async () => {
+      await service.restoreDocument(TEST_DOC_ID);
+
+      expect(mockPipeline.pushEntity).toHaveBeenCalledWith(
+        'SmeMartDocument',
+        expect.objectContaining({
+          id: TEST_DOC_ID,
+          archived: false,
+        }),
+        [],
+        'org-document.service:286',
+      );
+    });
+
+    it('should surface error to user on Pipeline rejection', async () => {
+      const mockError = new Error('Save failed');
+      mockPipeline.pushEntity.mockRejectedValueOnce(mockError);
+
+      await expect(service.restoreDocument(TEST_DOC_ID)).rejects.toThrow(mockError);
+
+      expect(mockSnackBar.open).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to restore document'),
+        'Dismiss',
+        expect.any(Object),
+      );
+    });
+  });
+
+  describe('updateDocument', () => {
+    it('should push document metadata update to Pipeline', async () => {
+      await service.updateDocument(TEST_DOC_ID, { display_name: 'Updated Name' });
+
+      expect(mockPipeline.pushEntity).toHaveBeenCalledWith(
+        'SmeMartDocument',
+        expect.objectContaining({
+          id: TEST_DOC_ID,
+          displayName: 'Updated Name',
+        }),
+        [],
+        'org-document.service:300',
+      );
+    });
+
+    it('should surface error to user on Pipeline rejection', async () => {
+      const mockError = new Error('Update failed');
+      mockPipeline.pushEntity.mockRejectedValueOnce(mockError);
+
+      await expect(service.updateDocument(TEST_DOC_ID, { display_name: 'New Name' })).rejects.toThrow(mockError);
+
+      expect(mockSnackBar.open).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to update document'),
+        'Dismiss',
+        expect.any(Object),
+      );
     });
   });
 

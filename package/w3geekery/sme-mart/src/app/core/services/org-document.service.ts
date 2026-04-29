@@ -277,9 +277,16 @@ export class OrgDocumentService {
       archived: true,
       updatedAt: new Date().toISOString(),
     };
-    this.pipelineWrite.pushEntity('SmeMartDocument', updateData).catch(err => {
-      console.error('Failed to push document archive to Pipeline:', err);
-    });
+    try {
+      await this.pipelineWrite.pushEntity('SmeMartDocument', updateData, [], 'org-document.service:274');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to archive document: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
   }
 
   async restoreDocument(documentId: string): Promise<void> {
@@ -288,9 +295,16 @@ export class OrgDocumentService {
       archived: false,
       updatedAt: new Date().toISOString(),
     };
-    this.pipelineWrite.pushEntity('SmeMartDocument', updateData).catch(err => {
-      console.error('Failed to push document restore to Pipeline:', err);
-    });
+    try {
+      await this.pipelineWrite.pushEntity('SmeMartDocument', updateData, [], 'org-document.service:286');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to restore document: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -308,9 +322,16 @@ export class OrgDocumentService {
       documentType: updates.document_type,
       updatedAt: new Date().toISOString(),
     };
-    this.pipelineWrite.pushEntity('SmeMartDocument', updateData).catch(err => {
-      console.error('Failed to push document update to Pipeline:', err);
-    });
+    try {
+      await this.pipelineWrite.pushEntity('SmeMartDocument', updateData, [], 'org-document.service:300');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to update document: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     // Return optimistically (fetch from cache or construct)
     const doc = await this.getDocument(documentId);
