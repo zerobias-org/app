@@ -16,7 +16,7 @@ progress:
 
 **Session Name:** `poc/sme-mart`
 **Date Created:** 2026-04-24
-**Current Focus:** Phase 26 — seed-provider-zb-as-provider
+**Current Focus:** Phase 27 — auth-gate-+-onboarding-routing-+-lazy-guard
 
 ---
 
@@ -28,7 +28,7 @@ Plan: Not started
 Status: Ready to execute
 Last activity: 2026-04-29
 
-Next: Phase 26 Plan 02 (ZB-as-Provider Seed Batch) — seed ZeroBias org with company_info MPI + provider_type section
+Next: Phase 27 (Auth Gate + Onboarding Routing + Lazy Guard) — authenticate users, route to onboarding or board, auto-create default engagement
 
 ---
 
