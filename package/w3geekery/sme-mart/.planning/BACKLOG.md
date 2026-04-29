@@ -99,12 +99,18 @@ These depend on platform Task/Board/Boundary work. UI implementation deferred un
 
 **Purpose:** Phase 20 Wave 2 remediates 33 CRITICAL+SIMPLE call sites with await + toast. Deferred sites require more substantial UX work and are grouped here for v1.5 planning.
 
-**Wave 2 Completed (9 MEDIUM+CRITICAL sites):**
+**Wave 2 Completed (24 MEDIUM+CRITICAL sites):**
 - `notes.service.ts:52,89,118` — createNote, updateNote, deleteNote | await + toast ✅
 - `note-folder.service.ts:107,230,260` — createFolder, updateFolder, deleteFolder | await + toast ✅
 - `vendor-profile.service.ts:149,204,232` — create/update/delete profile items | await + toast ✅
+- `org-document.service.ts:274,286,300` — archiveDocument, restoreDocument, updateDocument | await + snackBar ✅
+- `project-prd.service.ts:76,164,216,270` — createPrd, updatePrd, createPrdSection, updatePrdSection | await + snackBar ✅
+- `project-plan.service.ts:77,165,217,271` — createPlan, updatePlan, createMilestone, updateMilestone | await + snackBar ✅
+- `sme-mart-board.service.ts:59,160` — createBoard, updateBoard | await + snackBar ✅
+- `note-hierarchy.service.ts:149` — moveNote | await + snackBar ✅
+- `sme-mart-workflow.service.ts:53,148` — createWorkflow, updateWorkflow | await + snackBar ✅
 
-**Remaining (33 CRITICAL+SIMPLE sites across 12 services):**
+**Remaining (18 CRITICAL+SIMPLE sites across 8 services):**
 
 | File:Line | Class | User Action | Current | Proposed Fix | Complexity |
 |---|---|---|---|---|---|
@@ -115,15 +121,11 @@ These depend on platform Task/Board/Boundary work. UI implementation deferred un
 | `engagements.service.ts:172,193` | Engagement | Create, update (2 sites) | Fire-and-forget | Await + snackbar + modal confirmation on error | SIMPLE |
 | `service-offerings.service.ts:109,139` | ServiceOffering | Create, update (2 sites) | Fire-and-forget | Await + form error state | SIMPLE |
 | `rfp-invitation.service.ts:286` | RfpInvitation | Invitation send (1 site) | Fire-and-forget | Await + disable send button until success; retry dialog on error | SIMPLE |
-| `org-document.service.ts:132,271,282,302` | SmeMartDocument | Upload, metadata, reclassify, delete (4 sites) | Fire-and-forget | Await + async completion handler already has toast; enhance with error handling | SIMPLE |
-| `project-prd.service.ts:76,164,216,270` | ProjectPrd / PrdSection | Create, update PRD and sections (4 sites) | Fire-and-forget | Await + form error state | SIMPLE |
-| `project-plan.service.ts:77,165,217,271` | ProjectPlan / PlanMilestone | Create, update plan and milestones (4 sites) | Fire-and-forget | Await + form error state | SIMPLE |
 | `sme-mart-project.service.ts:353` | SmeMartProject | Create/update project (1 site) | Fire-and-forget | Await + form error state | SIMPLE |
-| `sme-mart-board.service.ts:59,152` | SmeMartBoard | Create, update board (2 sites) | Fire-and-forget | Await + form error state | SIMPLE |
 
-**Subtotal: 33 CRITICAL+SIMPLE sites, all SIMPLE complexity.**
+**Subtotal: 18 CRITICAL+SIMPLE sites remaining, all SIMPLE complexity. Wave 2 removed 15 from queue (org-document 3, project-prd 4, project-plan 4, sme-mart-board 2, note-hierarchy 1, sme-mart-workflow 2).**
 
-**Severity:** All deferred sites are CRITICAL (user-initiated actions, loss of expected state if failure is silent). v1.5 should prioritize implementing all 33 remaining sites using the same Pattern: await + MatSnackBar.open + re-throw.
+**Severity:** All deferred sites are CRITICAL (user-initiated actions, loss of expected state if failure is silent). v1.5 should prioritize implementing all 18 remaining sites using the same Pattern: await + MatSnackBar.open + re-throw (or form error state for form-driven actions).
 
 **Related:** Errata 011, Errata 023, Phase 20 AUDIT.md Wave 2 grouping, `.planning/phases/20-fire-and-forget-audit/AUDIT.md`.
 
