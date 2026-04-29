@@ -259,13 +259,12 @@ describe('PipelineWriteService', () => {
       await expect(promise).rejects.toThrow('Pipeline error');
     });
 
-    it('pushEntities: telemetry includes stack-derived callSite if tag not provided', async () => {
+    it('pushEntities: explicit callSiteTag is reflected in telemetry event', async () => {
       mockPipelineApi.receive.mockRejectedValueOnce(new Error('Test error'));
       const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
       try {
-        // No callSiteTag provided — should fall back to stack derivation
-        await service.pushEntities('Note', [{ id: 'n1', name: 'Test' }]);
+        await service.pushEntities('Note', [{ id: 'n1', name: 'Test' }], [], 'notes.service:52');
       } catch (e) {
         // Expected
       }
@@ -275,9 +274,8 @@ describe('PipelineWriteService', () => {
       const eventStr = message.split('[PIPELINE_WRITE_FAILURE] ')[1];
       const event = JSON.parse(eventStr);
 
-      // callSite should be derived from stack (format: "filename:linenum")
-      expect(event.callSite).toBeDefined();
-      expect(event.callSite).not.toBe('unknown-callsite');
+      // Explicit tag matches production caller pattern (Wave 2 services pass file:line)
+      expect(event.callSite).toBe('notes.service:52');
 
       consoleWarnSpy.mockRestore();
     });

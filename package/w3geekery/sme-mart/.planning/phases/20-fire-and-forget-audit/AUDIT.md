@@ -21,7 +21,7 @@ The director's pre-pass seed table (2026-04-28) classified 60 pushEntity/pushEnt
 - **LOW (fire-and-forget):** 2 sites. Activity telemetry — idempotent, legitimate fire-and-forget.
 - **AWAITED-VERIFY:** 16 sites with `await` — **all verified, all properly surface errors** (no promotions to SIMPLE remediation list needed).
 
-**Class-ID verification:** All 24 constants in `SME_MART_CLASS_IDS` verified against `platform.Class.getClass()` on UAT. 23 canonical ✅; 1 fictional ❌ found (see section below).
+**Class-ID verification:** All 24 effective entries canonical ✅ (23 explicit `SME_MART_CLASS_IDS` entries + `deleteEntities`/`deleteEntity` reuse the same map). No fictional or drifted consts found (see section below).
 
 ---
 
