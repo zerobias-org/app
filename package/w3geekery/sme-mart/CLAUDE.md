@@ -36,6 +36,26 @@ SME Mart is a **marketplace for Subject Matter Experts** in compliance/cybersecu
 | **Schema repo** | [`zerobias-org/schema`](https://github.com/zerobias-org/schema) — YAML schema packages (source of truth for GQL entities) |
 | **Post-mortems** | [`.claude/post-mortems/`](.claude/post-mortems/) — failure reports (see [`INDEX.md`](.claude/post-mortems/INDEX.md)). **Read before starting any schema change.** |
 | **zb-dx (Developer Experience)** | `~/Projects/zb/zerobias-org/zb-dx` — shared knowledge base for all ZB platform developers. **File friction with `/friction`, browse patterns, find integration guides.** See below. |
+| **LSP routing** | `~/.claude/rules/common/lsp-registry.md` — built-in `LSP` is the default for symbol queries; `mcp__vscode-mcp__*` only for specific triggers (see below) |
+
+## LSP routing — built-in `LSP` is the default
+
+**Default rule: use the built-in `LSP` tool for symbol queries on `.ts`/`.tsx`/`.scss`/`.yaml`.** Reach for `mcp__vscode-mcp__*` only when one of these triggers applies:
+
+1. **Angular component template (`.html` inside a component dir)** — built-in LSP can't drive ngserver; use `mcp__vscode-mcp__get_symbol_lsp_info` / `get_references`.
+2. **Real-time diagnostics** ("did my edit just break TS / lint?") — use `mcp__vscode-mcp__get_diagnostics` (instant; replaces slow `tsc --noEmit` / `eslint .`).
+3. **Workspace-wide rename** with import updates — use `mcp__vscode-mcp__rename_symbol`.
+4. **Multi-project ref tracing** where built-in LSP returned incomplete results — switch only after observing the gap.
+
+For everything else — especially single-file hover/goToDefinition on plain `.ts` files — the built-in `LSP` tool is the right call. Lower latency, no 8KB response truncation bug, no VSCode dependency. **Don't drift to vscode-mcp because the tool names sound more capable.**
+
+For SCSS specifically, **always use built-in `LSP`** — VSCode's bundled CSS server is weaker than `some-sass-language-server` (no real cross-file `@use`/`@forward` resolution).
+
+**Project status for vscode-mcp:**
+- `strictTemplates: true` is already enabled in this repo's `tsconfig.json`, so Angular template intelligence via vscode-mcp works out of the box.
+- vscode-mcp setup (extensions + MCP server registration): see [w3geekery/claude-code-lsps CLAUDE.md](https://github.com/w3geekery/claude-code-lsps/blob/main/CLAUDE.md).
+
+Full routing table, failure-mode anchors, and detailed rationale: `~/.claude/rules/common/lsp-registry.md` (auto-loaded into every Claude Code session).
 
 ## zb-dx — ZeroBias Developer Experience
 
