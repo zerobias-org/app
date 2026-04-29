@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { vi } from 'vitest';
 import { NotesService } from './notes.service';
 import { PipelineWriteService } from './pipeline-write.service';
@@ -13,11 +14,13 @@ describe('NotesService', () => {
   let mockPipeline: ReturnType<typeof fakePipelineWriteService>;
   let mockGql: ReturnType<typeof fakeGraphqlReadService>;
   let mockImpersonation: ReturnType<typeof fakeImpersonation>;
+  let mockSnackBar: { open: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     mockPipeline = fakePipelineWriteService();
     mockGql = fakeGraphqlReadService();
     mockImpersonation = fakeImpersonation();
+    mockSnackBar = { open: vi.fn() };
 
     // Default GQL fixtures
     const noteFixture: GqlNoteResponse = {
@@ -46,6 +49,7 @@ describe('NotesService', () => {
         { provide: PipelineWriteService, useValue: mockPipeline },
         { provide: GraphqlReadService, useValue: mockGql },
         { provide: ImpersonationService, useValue: mockImpersonation },
+        { provide: MatSnackBar, useValue: mockSnackBar },
       ],
     });
 
@@ -59,11 +63,16 @@ describe('NotesService', () => {
   describe('createNote', () => {
     it('should push note to Pipeline with camelCase GQL data', async () => {
       await service.createNote('wr-001', { title: 'New Note', body: 'Content' });
-      expect(mockPipeline.pushEntity).toHaveBeenCalledWith('Note', expect.objectContaining({
-        engagementId: 'wr-001',
-        name: 'New Note',
-        content: 'Content',
-      }));
+      expect(mockPipeline.pushEntity).toHaveBeenCalledWith(
+        'Note',
+        expect.objectContaining({
+          engagementId: 'wr-001',
+          name: 'New Note',
+          content: 'Content',
+        }),
+        [],
+        'notes.service:52'
+      );
     });
 
     it('should default optional fields in GQL format', async () => {
@@ -74,14 +83,26 @@ describe('NotesService', () => {
       expect(call.archived).toBe(false);
     });
 
-    it('should return optimistically before Pipeline completes', async () => {
-      // Delay pipeline resolution
-      mockPipeline.pushEntity.mockImplementationOnce(() => new Promise(r => setTimeout(r, 100)));
-      const promise = service.createNote('wr-001', { title: 'Async Note', body: 'Content' });
-      // Should resolve immediately without waiting for pipeline
-      const result = await Promise.race([promise, Promise.resolve('immediate')]);
-      expect(result).not.toBe('immediate'); // Promise resolved before timeout
+    it('should await Pipeline push and return optimistic Note', async () => {
+      const result = await service.createNote('wr-001', { title: 'New Note', body: 'Content' });
       expect(mockPipeline.pushEntity).toHaveBeenCalled();
+      expect(result.id).toBeDefined();
+      expect(result.title).toBe('New Note');
+    });
+
+    it('should surface error to user on Pipeline rejection', async () => {
+      const mockError = new Error('Validation failed: missing required field');
+      mockPipeline.pushEntity.mockRejectedValueOnce(mockError);
+
+      await expect(
+        service.createNote('wr-001', { title: 'Test', body: 'Content' })
+      ).rejects.toThrow(mockError);
+
+      expect(mockSnackBar.open).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to save note'),
+        'Dismiss',
+        expect.any(Object)
+      );
     });
   });
 
@@ -97,10 +118,15 @@ describe('NotesService', () => {
 
     it('should push updated note to Pipeline', async () => {
       await service.updateNote('note-001', { title: 'Revised' });
-      expect(mockPipeline.pushEntity).toHaveBeenCalledWith('Note', expect.objectContaining({
-        id: 'note-001',
-        name: 'Revised', // neonToGql maps title → name (GQL Object base class)
-      }));
+      expect(mockPipeline.pushEntity).toHaveBeenCalledWith(
+        'Note',
+        expect.objectContaining({
+          id: 'note-001',
+          name: 'Revised', // neonToGql maps title → name (GQL Object base class)
+        }),
+        [],
+        'notes.service:89'
+      );
     });
 
     it('should set updatedByZerobiasUserId and updatedAt', async () => {
@@ -114,6 +140,21 @@ describe('NotesService', () => {
       mockGql.getById.mockResolvedValueOnce(null);
       await expect(service.updateNote('nonexistent', { title: 'X' })).rejects.toThrow('not found');
     });
+
+    it('should surface error to user on Pipeline rejection', async () => {
+      const mockError = new Error('Network error');
+      mockPipeline.pushEntity.mockRejectedValueOnce(mockError);
+
+      await expect(
+        service.updateNote('note-001', { title: 'Revised' })
+      ).rejects.toThrow(mockError);
+
+      expect(mockSnackBar.open).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to update note'),
+        'Dismiss',
+        expect.any(Object)
+      );
+    });
   });
 
   // ---------------------------------------------------------------------------
@@ -123,9 +164,14 @@ describe('NotesService', () => {
   describe('deleteNote', () => {
     it('should soft-delete by setting archived to true', async () => {
       await service.deleteNote('note-001');
-      expect(mockPipeline.pushEntity).toHaveBeenCalledWith('Note', expect.objectContaining({
-        archived: true,
-      }));
+      expect(mockPipeline.pushEntity).toHaveBeenCalledWith(
+        'Note',
+        expect.objectContaining({
+          archived: true,
+        }),
+        [],
+        'notes.service:118'
+      );
     });
 
     it('should fetch current note before archiving', async () => {
@@ -136,6 +182,21 @@ describe('NotesService', () => {
     it('should throw if note not found', async () => {
       mockGql.getById.mockResolvedValueOnce(null);
       await expect(service.deleteNote('nonexistent')).rejects.toThrow('not found');
+    });
+
+    it('should surface error to user on Pipeline rejection', async () => {
+      const mockError = new Error('Server error');
+      mockPipeline.pushEntity.mockRejectedValueOnce(mockError);
+
+      await expect(
+        service.deleteNote('note-001')
+      ).rejects.toThrow(mockError);
+
+      expect(mockSnackBar.open).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to delete note'),
+        'Dismiss',
+        expect.any(Object)
+      );
     });
   });
 

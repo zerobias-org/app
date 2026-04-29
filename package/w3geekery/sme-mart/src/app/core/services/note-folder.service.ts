@@ -9,6 +9,7 @@
  */
 
 import { Injectable, inject } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
 import { ImpersonationService } from './impersonation.service';
@@ -69,6 +70,7 @@ export class NoteFolderService {
   private readonly pipelineWrite = inject(PipelineWriteService);
   private readonly graphqlRead = inject(GraphqlReadService);
   private readonly impersonation = inject(ImpersonationService);
+  private readonly snackBar = inject(MatSnackBar);
 
   /**
    * Create a new note folder.
@@ -103,10 +105,17 @@ export class NoteFolderService {
       NOTE_FOLDER_FIELD_MAPPING.gqlToNeon,
     );
 
-    // Fire-and-forget push to Pipeline
-    this.pipelineWrite.pushEntity('NoteFolder', gqlData).catch(err => {
-      console.error('[NoteFolderService] Failed to push folder to pipeline:', err);
-    });
+    // Push to Pipeline with error surface
+    try {
+      await this.pipelineWrite.pushEntity('NoteFolder', gqlData, [], 'note-folder.service:107');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to save folder: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     // Return optimistically
     return neonData;
@@ -226,10 +235,17 @@ export class NoteFolderService {
       NOTE_FOLDER_FIELD_MAPPING.gqlToNeon,
     );
 
-    // Fire-and-forget push (full object)
-    this.pipelineWrite.pushEntity('NoteFolder', merged).catch(err => {
-      console.error('[NoteFolderService] Failed to push folder update to pipeline:', err);
-    });
+    // Push to Pipeline with error surface
+    try {
+      await this.pipelineWrite.pushEntity('NoteFolder', merged, [], 'note-folder.service:230');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to update folder: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     // Return optimistically
     return neonData;
@@ -256,10 +272,17 @@ export class NoteFolderService {
       dateDeleted: today,
     };
 
-    // Fire-and-forget push (full object with dateDeleted set)
-    this.pipelineWrite.pushEntity('NoteFolder', gqlData).catch(err => {
-      console.error('[NoteFolderService] Failed to soft-delete folder:', err);
-    });
+    // Push to Pipeline with error surface
+    try {
+      await this.pipelineWrite.pushEntity('NoteFolder', gqlData, [], 'note-folder.service:260');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to delete folder: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
   }
 
   // ────────────────────────────────────────────────────────────────────────────

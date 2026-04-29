@@ -1,4 +1,5 @@
 import { Injectable, inject, signal } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService, type GqlQueryOptions } from './graphql-read.service';
 import { ImpersonationService } from './impersonation.service';
@@ -27,6 +28,7 @@ export class NotesService {
   private readonly pipelineWrite = inject(PipelineWriteService);
   private readonly graphqlRead = inject(GraphqlReadService);
   private readonly impersonation = inject(ImpersonationService);
+  private readonly snackBar = inject(MatSnackBar);
 
   readonly notes = signal<NoteWithTags[]>([]);
   readonly loading = signal(false);
@@ -48,10 +50,17 @@ export class NotesService {
       archived: false,
     };
 
-    // Fire-and-forget Pipeline push
-    this.pipelineWrite.pushEntity('Note', gqlData).catch(err => {
-      console.error('Failed to push note to Pipeline:', err);
-    });
+    // Push to Pipeline with error surface
+    try {
+      await this.pipelineWrite.pushEntity('Note', gqlData, [], 'notes.service:52');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to save note: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     // Return optimistically (transform GQL to Neon shape)
     const neonData = mapGqlToNeon<Note>(gqlData, NOTE_FIELD_MAPPING.gqlToNeon);
@@ -85,10 +94,17 @@ export class NotesService {
       updatedByZerobiasUserId: userId,
     };
 
-    // Fire-and-forget Pipeline push
-    this.pipelineWrite.pushEntity('Note', gqlData).catch(err => {
-      console.error('Failed to update note in Pipeline:', err);
-    });
+    // Push to Pipeline with error surface
+    try {
+      await this.pipelineWrite.pushEntity('Note', gqlData, [], 'notes.service:89');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to update note: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     // Return optimistically
     const neonData = mapGqlToNeon<Note>(gqlData, NOTE_FIELD_MAPPING.gqlToNeon);
@@ -114,10 +130,17 @@ export class NotesService {
       updatedAt: new Date().toISOString(),
     };
 
-    // Fire-and-forget Pipeline push
-    this.pipelineWrite.pushEntity('Note', gqlData).catch(err => {
-      console.error('Failed to archive note in Pipeline:', err);
-    });
+    // Push to Pipeline with error surface
+    try {
+      await this.pipelineWrite.pushEntity('Note', gqlData, [], 'notes.service:118');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to delete note: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     // Return optimistically
     const neonData = mapGqlToNeon<Note>(gqlData, NOTE_FIELD_MAPPING.gqlToNeon);

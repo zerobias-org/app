@@ -11,6 +11,7 @@
  */
 
 import { Injectable, inject } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService, type GqlQueryOptions } from './graphql-read.service';
 import { MARKETPLACE_PROFILE_ITEM_FIELD_MAPPING, mapGqlToNeon, mapNeonToGql } from '../field-mappings';
@@ -41,6 +42,7 @@ type SectionData =
 export class VendorProfileService {
   private readonly pipelineWrite = inject(PipelineWriteService);
   private readonly graphqlRead = inject(GraphqlReadService);
+  private readonly snackBar = inject(MatSnackBar);
 
   // ── Query ──
 
@@ -146,9 +148,16 @@ export class VendorProfileService {
     };
 
     const gqlData = this.toGql(item);
-    this.pipelineWrite.pushEntity('MarketplaceProfileItem', gqlData).catch(err => {
-      console.error('[VendorProfileService] Failed to push profile item:', err);
-    });
+    try {
+      await this.pipelineWrite.pushEntity('MarketplaceProfileItem', gqlData, [], 'vendor-profile.service:149');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to save profile item: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     return item;
   }
@@ -201,9 +210,16 @@ export class VendorProfileService {
     }
 
     const gqlData = this.toGql(updated);
-    this.pipelineWrite.pushEntity('MarketplaceProfileItem', gqlData).catch(err => {
-      console.error('[VendorProfileService] Failed to update profile item:', err);
-    });
+    try {
+      await this.pipelineWrite.pushEntity('MarketplaceProfileItem', gqlData, [], 'vendor-profile.service:204');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to update profile item: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     return updated;
   }
@@ -229,9 +245,16 @@ export class VendorProfileService {
       dateDeleted: today,
     };
 
-    this.pipelineWrite.pushEntity('MarketplaceProfileItem', gqlData).catch(err => {
-      console.error('[VendorProfileService] Failed to delete profile item:', err);
-    });
+    try {
+      await this.pipelineWrite.pushEntity('MarketplaceProfileItem', gqlData, [], 'vendor-profile.service:232');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to delete profile item: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
   }
 
   // ── Private helpers ──
