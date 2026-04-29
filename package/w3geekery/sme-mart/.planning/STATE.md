@@ -22,13 +22,23 @@ progress:
 
 ## Current Position
 
-Milestone: v1.4 3P Onboarding & Default Engagement
-Phase: 27
-Plan: Not started
-Status: Ready to execute
+Milestone: v1.4 3P Onboarding & Default Engagement (with Phase 20 interleaved)
+Phase: 20 (Fire-and-Forget Audit)
+Plan: Wave 1 complete
+Status: Awaiting director review before Wave 2 remediation
 Last activity: 2026-04-29
 
-Next: Phase 27 (Auth Gate + Onboarding Routing + Lazy Guard) — authenticate users, route to onboarding or board, auto-create default engagement
+**Wave 1 Completed (2026-04-29):**
+- AUDIT.md with 60 call sites refined (33 CRITICAL FF + 9 MEDIUM FF + 2 LOW FF + 16 AWAITED-VERIFY)
+- Class-ID verification: all 24 canonical ✅ (baseline 2026-04-28, no new entries)
+- Telemetry instrumentation: `pushEntities`, `pushEntity`, `deleteEntities`, `deleteEntity` all wrapped with rejection logging
+- Test coverage: 8 new specs for telemetry (rejection event firing, callSite tagging, error re-throw, success path)
+- REQUIREMENTS.md updated: FF-01..08 all specified
+- Build green: `npm run build:prod`, `npx tsc --noEmit` pass
+
+**Next: Wave 2 remediation (deferred to backlog for v1.5 planning)** — 33 CRITICAL+SIMPLE sites to remediate in priority order per AUDIT.md table.
+
+**Then: Phase 27** (Auth Gate + Onboarding Routing + Lazy Guard) — authenticate users, route to onboarding or board, auto-create default engagement
 
 ---
 

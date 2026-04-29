@@ -216,4 +216,163 @@ describe('PipelineWriteService', () => {
       expect(batch.classId.toString()).toBe('21f5841f-dd27-53ef-a0f5-6a816ec7f7e1');
     });
   });
+
+  // ── Telemetry Instrumentation (FF-03) ──
+  //
+  // Per Phase 20 requirements, every pushEntities and deleteEntities rejection
+  // must log a structured telemetry event so that silent failures become visible
+  // in console logs + CloudWatch queries.
+
+  describe('Telemetry Instrumentation (FF-03)', () => {
+    it('pushEntities: rejection fires telemetry event with className, callSite, errorMessage', async () => {
+      const error = new Error('Pipeline validation failed');
+      mockPipelineApi.receive.mockRejectedValueOnce(error);
+      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+      try {
+        await service.pushEntities('Bid', [{ id: 'b1', name: 'Test' }], [], 'bid-submit.component.ts:142');
+      } catch (e) {
+        // Expected — error is re-thrown
+      }
+
+      expect(consoleWarnSpy).toHaveBeenCalledTimes(1);
+      const [message] = consoleWarnSpy.mock.calls[0];
+
+      expect(message).toContain('[PIPELINE_WRITE_FAILURE]');
+      const eventStr = message.split('[PIPELINE_WRITE_FAILURE] ')[1];
+      const event = JSON.parse(eventStr);
+
+      expect(event.className).toBe('Bid');
+      expect(event.callSite).toBe('bid-submit.component.ts:142');
+      expect(event.errorMessage).toBe('Pipeline validation failed');
+      expect(event.timestamp).toBeDefined();
+
+      consoleWarnSpy.mockRestore();
+    });
+
+    it('pushEntities: rejection re-throws error after logging', async () => {
+      const error = new Error('Pipeline error');
+      mockPipelineApi.receive.mockRejectedValueOnce(error);
+      vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+      const promise = service.pushEntities('Engagement', [{ id: 'e1', name: 'Test' }]);
+      await expect(promise).rejects.toThrow('Pipeline error');
+    });
+
+    it('pushEntities: telemetry includes stack-derived callSite if tag not provided', async () => {
+      mockPipelineApi.receive.mockRejectedValueOnce(new Error('Test error'));
+      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+      try {
+        // No callSiteTag provided — should fall back to stack derivation
+        await service.pushEntities('Note', [{ id: 'n1', name: 'Test' }]);
+      } catch (e) {
+        // Expected
+      }
+
+      expect(consoleWarnSpy).toHaveBeenCalledTimes(1);
+      const [message] = consoleWarnSpy.mock.calls[0];
+      const eventStr = message.split('[PIPELINE_WRITE_FAILURE] ')[1];
+      const event = JSON.parse(eventStr);
+
+      // callSite should be derived from stack (format: "filename:linenum")
+      expect(event.callSite).toBeDefined();
+      expect(event.callSite).not.toBe('unknown-callsite');
+
+      consoleWarnSpy.mockRestore();
+    });
+
+    it('pushEntity: delegates to pushEntities with callSiteTag', async () => {
+      mockPipelineApi.receive.mockRejectedValueOnce(new Error('Test error'));
+      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+      try {
+        await service.pushEntity('Review', { id: 'r1', name: 'Test' }, [], 'review-submit.component.ts:85');
+      } catch (e) {
+        // Expected
+      }
+
+      expect(consoleWarnSpy).toHaveBeenCalledTimes(1);
+      const [message] = consoleWarnSpy.mock.calls[0];
+      const eventStr = message.split('[PIPELINE_WRITE_FAILURE] ')[1];
+      const event = JSON.parse(eventStr);
+
+      expect(event.callSite).toBe('review-submit.component.ts:85');
+
+      consoleWarnSpy.mockRestore();
+    });
+
+    it('deleteEntities: rejection fires telemetry event', async () => {
+      mockPipelineApi.receive.mockRejectedValueOnce(new Error('Delete failed'));
+      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+      try {
+        await service.deleteEntities('Note', ['n1', 'n2'], 'note-delete.component.ts:99');
+      } catch (e) {
+        // Expected
+      }
+
+      expect(consoleWarnSpy).toHaveBeenCalledTimes(1);
+      const [message] = consoleWarnSpy.mock.calls[0];
+      const eventStr = message.split('[PIPELINE_WRITE_FAILURE] ')[1];
+      const event = JSON.parse(eventStr);
+
+      expect(event.className).toBe('Note');
+      expect(event.callSite).toBe('note-delete.component.ts:99');
+      expect(event.errorMessage).toBe('Delete failed');
+
+      consoleWarnSpy.mockRestore();
+    });
+
+    it('deleteEntity: delegates to deleteEntities with callSiteTag', async () => {
+      mockPipelineApi.receive.mockRejectedValueOnce(new Error('Delete failed'));
+      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+      try {
+        await service.deleteEntity('Engagement', 'e1', 'engagement-delete.component.ts:44');
+      } catch (e) {
+        // Expected
+      }
+
+      expect(consoleWarnSpy).toHaveBeenCalledTimes(1);
+      const [message] = consoleWarnSpy.mock.calls[0];
+      const eventStr = message.split('[PIPELINE_WRITE_FAILURE] ')[1];
+      const event = JSON.parse(eventStr);
+
+      expect(event.callSite).toBe('engagement-delete.component.ts:44');
+
+      consoleWarnSpy.mockRestore();
+    });
+
+    it('telemetry event timestamp is ISO format', async () => {
+      mockPipelineApi.receive.mockRejectedValueOnce(new Error('Test'));
+      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+      try {
+        await service.pushEntities('Bid', [{ id: 'b1', name: 'Test' }]);
+      } catch (e) {
+        // Expected
+      }
+
+      expect(consoleWarnSpy).toHaveBeenCalledTimes(1);
+      const [message] = consoleWarnSpy.mock.calls[0];
+      const eventStr = message.split('[PIPELINE_WRITE_FAILURE] ')[1];
+      const event = JSON.parse(eventStr);
+
+      // ISO format example: "2026-04-29T12:34:56.789Z"
+      expect(event.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
+    });
+
+    it('success path does not log telemetry or re-throw', async () => {
+      mockPipelineApi.receive.mockResolvedValueOnce(undefined);
+      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+      // Should complete without throwing or logging
+      await service.pushEntities('Engagement', [{ id: 'e1', name: 'Test' }]);
+
+      expect(consoleWarnSpy).not.toHaveBeenCalled();
+
+      consoleWarnSpy.mockRestore();
+    });
+  });
 });

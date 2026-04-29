@@ -123,11 +123,18 @@ export class PipelineWriteService {
   /**
    * Push one or more objects of a given class into AuditgraphDB.
    * Objects are created or updated based on their `id` field (upsert).
+   *
+   * @param className Entity type
+   * @param data Array of objects to push
+   * @param tagIds Optional tag IDs to associate with the batch
+   * @param callSiteTag Optional explicit caller identifier for telemetry. If not provided,
+   *                     derived from stack trace as fallback.
    */
   async pushEntities(
     className: SmeMartClassName,
     data: object[],
     tagIds: string[] = [],
+    callSiteTag?: string,
   ): Promise<void> {
     const classId = SME_MART_CLASS_IDS[className];
     const pipelineApi = this.clientApi.platformClient.getPipelineApi();
@@ -148,7 +155,22 @@ export class PipelineWriteService {
       ensured,
       tagIds.map(id => new UUID(id)),
     );
-    await pipelineApi.receive(new UUID(PIPELINE_ID), batch);
+
+    try {
+      await pipelineApi.receive(new UUID(PIPELINE_ID), batch);
+    } catch (err) {
+      // FF-03: Telemetry instrumentation — log rejection with caller context
+      const callSite = callSiteTag || this.deriveCallSiteFromStack();
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      const event = {
+        className,
+        callSite,
+        errorMessage,
+        timestamp: new Date().toISOString(),
+      };
+      console.warn(`[PIPELINE_WRITE_FAILURE] ${JSON.stringify(event)}`);
+      throw err;  // Re-throw so caller can handle normally
+    }
 
     // Update cache with pushed objects (write-through, merge into existing)
     for (const obj of ensured) {
@@ -170,22 +192,28 @@ export class PipelineWriteService {
 
   /**
    * Push a single entity. Convenience wrapper around pushEntities.
+   *
+   * @param callSiteTag Optional explicit caller identifier for telemetry.
    */
   async pushEntity(
     className: SmeMartClassName,
     data: Record<string, unknown>,
     tagIds: string[] = [],
+    callSiteTag?: string,
   ): Promise<void> {
-    await this.pushEntities(className, [data], tagIds);
+    await this.pushEntities(className, [data], tagIds, callSiteTag);
   }
 
   /**
    * Mark entities as deleted in AuditgraphDB (differential mode).
    * Removes objects by their external IDs.
+   *
+   * @param callSiteTag Optional explicit caller identifier for telemetry.
    */
   async deleteEntities(
     className: SmeMartClassName,
     ids: string[],
+    callSiteTag?: string,
   ): Promise<void> {
     const classId = SME_MART_CLASS_IDS[className];
     const pipelineApi = this.clientApi.platformClient.getPipelineApi();
@@ -195,16 +223,64 @@ export class PipelineWriteService {
       [],       // no tags
       ids,      // markDeleted
     );
-    await pipelineApi.receive(new UUID(PIPELINE_ID), batch);
+
+    try {
+      await pipelineApi.receive(new UUID(PIPELINE_ID), batch);
+    } catch (err) {
+      // FF-03: Telemetry instrumentation — log rejection with caller context
+      const callSite = callSiteTag || this.deriveCallSiteFromStack();
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      const event = {
+        className,
+        callSite,
+        errorMessage,
+        timestamp: new Date().toISOString(),
+      };
+      console.warn(`[PIPELINE_WRITE_FAILURE] ${JSON.stringify(event)}`);
+      throw err;  // Re-throw so caller can handle normally
+    }
   }
 
   /**
    * Mark a single entity as deleted. Convenience wrapper.
+   *
+   * @param callSiteTag Optional explicit caller identifier for telemetry.
    */
   async deleteEntity(
     className: SmeMartClassName,
     id: string,
+    callSiteTag?: string,
   ): Promise<void> {
-    await this.deleteEntities(className, [id]);
+    await this.deleteEntities(className, [id], callSiteTag);
+  }
+
+  /**
+   * Derive call site from the stack trace as a fallback when callSiteTag is not provided.
+   * Extracts the first caller outside this service as a location hint.
+   *
+   * @internal
+   */
+  private deriveCallSiteFromStack(): string {
+    try {
+      const stack = new Error().stack || '';
+      const lines = stack.split('\n');
+      // Lines format: "    at FunctionName (file.ts:line:col)"
+      // Skip first 2 lines (Error.stack header + this function)
+      for (let i = 2; i < lines.length; i++) {
+        const line = lines[i];
+        if (line && !line.includes('pipeline-write.service.ts')) {
+          // Extract filename and line number
+          const match = line.match(/at\s+(\w+)?\s*\(([^:]+):(\d+):/);
+          if (match) {
+            const [, funcName, file, lineNum] = match;
+            const filename = file.split('/').pop() || 'unknown';
+            return `${filename}:${lineNum}`;
+          }
+        }
+      }
+    } catch {
+      // Stack parsing failed
+    }
+    return 'unknown-callsite';
   }
 }

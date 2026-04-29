@@ -74,7 +74,19 @@ Deferred from v1.3 and v1.4. Tracked but not in current roadmap.
 
 ### Hardening & Productivity (deferred v1.3 phases 20-23)
 
-- **FF-01..05**: Fire-and-forget `pushEntity` audit + telemetry + remediation (Phase 20)
+#### Fire-and-Forget Audit (Phase 20)
+
+- **FF-01**: AUDIT.md exists with 100% of `pushEntity` / `pushEntities` call sites cataloged. Each row: file:line | className | criticality (CRITICAL / MEDIUM / LOW / AWAITED-VERIFY) | remediation complexity (SIMPLE / MEDIUM / COMPLEX / N-A).
+- **FF-02**: Class-ID safety re-verification: every `SME_MART_CLASS_IDS` entry confirmed against `platform.Class.getClass(<name>)` at audit time. Output as a small table appended to AUDIT.md ("Class-ID verification, {date}, profile {profile}").
+- **FF-03**: Telemetry ships — every fire-and-forget rejection produces a structured logged event including `className`, `callSite`, error message, and timestamp. Visible in console + remote sink (or `console.warn` with structured prefix if no remote sink exists).
+- **FF-04**: All CRITICAL+SIMPLE call sites have fire-and-forget removed, error state surfaced (toast or equivalent), and at least one spec covering the user-visible error path with a correctly-shaped mock.
+- **FF-05**: All CRITICAL+MEDIUM and CRITICAL+COMPLEX call sites have backlog entries with proposed remediations. Backlog entries grouped under a "Fire-and-Forget Remediation" section.
+- **FF-06**: AWAITED call sites verified — each of the 16 `await this.pipelineWrite.pushEntities(...)` sites has its caller checked. Any caller that swallows the throw without surfacing to the user is added to the SIMPLE remediation list.
+- **FF-07**: WATCH-LIST updated — "Service method ends with `.catch(err => console.error(err))`" is a BLOCK for user-triggered actions going forward.
+- **FF-08**: WATCH-LIST adds — "Class-ID const carries comment `(deterministic UUID v5 from schema)`" — verify against `platform.Class.getClass` before trust.
+
+#### Other Hardening & Productivity (deferred)
+
 - **OD-01..05**: Org Documents Center completion -- folders, color/tag, template surfacing, preview (Phase 21)
 - **FT-01..09**: Form Template Library -- save/reuse/fork, `FormTemplate` schema class (Phase 22)
 - **TC-01..05**: Transparency Controls UI-SPEC lock + opportunistic implementation (Phase 23)
