@@ -5,6 +5,7 @@
  */
 
 import { TestBed } from '@angular/core/testing';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ProjectPrdService } from './project-prd.service';
 import { PipelineWriteService } from './pipeline-write.service';
@@ -17,6 +18,7 @@ describe('ProjectPrdService', () => {
   let mockPipelineWrite: { pushEntity: ReturnType<typeof vi.fn>; pushEntities: ReturnType<typeof vi.fn>; deleteEntity: ReturnType<typeof vi.fn>; deleteEntities: ReturnType<typeof vi.fn>; getCached: ReturnType<typeof vi.fn>; seedCache: ReturnType<typeof vi.fn> };
   let mockGraphqlRead: { query: ReturnType<typeof vi.fn>; getById: ReturnType<typeof vi.fn> };
   let mockImpersonation: { effectiveUserId: ReturnType<typeof vi.fn> };
+  let mockSnackBar: { open: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     mockPipelineWrite = {
@@ -34,6 +36,9 @@ describe('ProjectPrdService', () => {
     mockImpersonation = {
       effectiveUserId: vi.fn().mockReturnValue('user-123'),
     };
+    mockSnackBar = {
+      open: vi.fn(),
+    };
 
     TestBed.configureTestingModule({
       providers: [
@@ -41,6 +46,7 @@ describe('ProjectPrdService', () => {
         { provide: PipelineWriteService, useValue: mockPipelineWrite },
         { provide: GraphqlReadService, useValue: mockGraphqlRead },
         { provide: ImpersonationService, useValue: mockImpersonation },
+        { provide: MatSnackBar, useValue: mockSnackBar },
       ],
     });
 
@@ -66,6 +72,26 @@ describe('ProjectPrdService', () => {
     expect(mockPipelineWrite.pushEntity).toHaveBeenCalledWith(
       'ProjectPrd',
       expect.objectContaining({ parentId: 'project-1', title: 'Product Requirements' }),
+      [],
+      'project-prd.service:76',
+    );
+  });
+
+  it('should surface error to user on Pipeline rejection for createPrd', async () => {
+    const mockError = new Error('Network failure');
+    mockPipelineWrite.pushEntity.mockRejectedValueOnce(mockError);
+
+    await expect(
+      service.createPrd({
+        parentId: 'project-1',
+        title: 'Product Requirements',
+      })
+    ).rejects.toThrow(mockError);
+
+    expect(mockSnackBar.open).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to create PRD'),
+      'Dismiss',
+      expect.any(Object),
     );
   });
 
@@ -133,6 +159,21 @@ describe('ProjectPrdService', () => {
     expect(mockPipelineWrite.pushEntity).toHaveBeenCalledWith(
       'ProjectPrd',
       expect.objectContaining({ id: 'prd-1', title: 'Updated Requirements' }),
+      [],
+      'project-prd.service:164',
+    );
+  });
+
+  it('should surface error to user on Pipeline rejection for updatePrd', async () => {
+    const mockError = new Error('Save failed');
+    mockPipelineWrite.pushEntity.mockRejectedValueOnce(mockError);
+
+    await expect(service.updatePrd('prd-1', { title: 'New Title' })).rejects.toThrow(mockError);
+
+    expect(mockSnackBar.open).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to update PRD'),
+      'Dismiss',
+      expect.any(Object),
     );
   });
 
@@ -163,6 +204,27 @@ describe('ProjectPrdService', () => {
     expect(mockPipelineWrite.pushEntity).toHaveBeenCalledWith(
       'PrdSection',
       expect.objectContaining({ parentId: 'prd-1', type: 'functional_requirements' }),
+      [],
+      'project-prd.service:216',
+    );
+  });
+
+  it('should surface error to user on Pipeline rejection for createPrdSection', async () => {
+    const mockError = new Error('Network failure');
+    mockPipelineWrite.pushEntity.mockRejectedValueOnce(mockError);
+
+    await expect(
+      service.createPrdSection('prd-1', {
+        parentId: 'prd-1',
+        type: 'functional_requirements',
+        content: 'Requirements',
+      })
+    ).rejects.toThrow(mockError);
+
+    expect(mockSnackBar.open).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to create PRD section'),
+      'Dismiss',
+      expect.any(Object),
     );
   });
 
@@ -216,6 +278,21 @@ describe('ProjectPrdService', () => {
     expect(mockPipelineWrite.pushEntity).toHaveBeenCalledWith(
       'PrdSection',
       expect.objectContaining({ id: 'section-1', content: 'Updated content' }),
+      [],
+      'project-prd.service:270',
+    );
+  });
+
+  it('should surface error to user on Pipeline rejection for updatePrdSection', async () => {
+    const mockError = new Error('Update failed');
+    mockPipelineWrite.pushEntity.mockRejectedValueOnce(mockError);
+
+    await expect(service.updatePrdSection('section-1', { content: 'New content' })).rejects.toThrow(mockError);
+
+    expect(mockSnackBar.open).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to update PRD section'),
+      'Dismiss',
+      expect.any(Object),
     );
   });
 

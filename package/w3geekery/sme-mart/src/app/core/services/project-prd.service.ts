@@ -8,6 +8,7 @@
  */
 
 import { Injectable, inject } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
 import { ImpersonationService } from './impersonation.service';
@@ -42,6 +43,7 @@ export class ProjectPrdService {
   private readonly pipelineWrite = inject(PipelineWriteService);
   private readonly graphqlRead = inject(GraphqlReadService);
   private readonly impersonation = inject(ImpersonationService);
+  private readonly snackBar = inject(MatSnackBar);
 
   // ────────────────────────────────────────────────────────────────────────────
   // ProjectPrd CRUD Methods
@@ -73,9 +75,16 @@ export class ProjectPrdService {
     );
 
     // Fire-and-forget push to Pipeline
-    this.pipelineWrite.pushEntity('ProjectPrd', gqlData).catch(err => {
-      console.error('[ProjectPrdService] Failed to push PRD to pipeline:', err);
-    });
+    try {
+      await this.pipelineWrite.pushEntity('ProjectPrd', gqlData, [], 'project-prd.service:76');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to create PRD: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     // Return optimistically
     return modelData;
@@ -161,9 +170,16 @@ export class ProjectPrdService {
     );
 
     // Fire-and-forget push
-    this.pipelineWrite.pushEntity('ProjectPrd', gqlData).catch(err => {
-      console.error('[ProjectPrdService] Failed to push PRD update to pipeline:', err);
-    });
+    try {
+      await this.pipelineWrite.pushEntity('ProjectPrd', gqlData, [], 'project-prd.service:164');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to update PRD: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     // Return optimistically
     return modelData;
@@ -213,9 +229,16 @@ export class ProjectPrdService {
     );
 
     // Fire-and-forget push
-    this.pipelineWrite.pushEntity('PrdSection', gqlData).catch(err => {
-      console.error('[ProjectPrdService] Failed to push section to pipeline:', err);
-    });
+    try {
+      await this.pipelineWrite.pushEntity('PrdSection', gqlData, [], 'project-prd.service:216');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to create PRD section: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     // Return optimistically
     return modelData;
@@ -267,9 +290,16 @@ export class ProjectPrdService {
     );
 
     // Fire-and-forget push
-    this.pipelineWrite.pushEntity('PrdSection', gqlData).catch(err => {
-      console.error('[ProjectPrdService] Failed to push section update to pipeline:', err);
-    });
+    try {
+      await this.pipelineWrite.pushEntity('PrdSection', gqlData, [], 'project-prd.service:270');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to update PRD section: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     // Return optimistically
     return modelData;
