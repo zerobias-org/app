@@ -1,4 +1,5 @@
 import { Injectable, inject, signal } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService, type GqlQueryOptions } from './graphql-read.service';
 import { Memoize } from '../../shared/utils/memoize.decorator';
@@ -25,6 +26,7 @@ import type { GqlEngagementResponse } from '../gql-types';
 export class EngagementsService {
   private readonly pipelineWrite = inject(PipelineWriteService);
   private readonly graphqlRead = inject(GraphqlReadService);
+  private readonly snackBar = inject(MatSnackBar);
 
   readonly engagements = signal<EngagementSummaryRow[]>([]);
   readonly loading = signal(false);
@@ -169,9 +171,16 @@ export class EngagementsService {
     };
 
     const gqlData = mapNeonToGql<GqlEngagementResponse>(engagement, ENGAGEMENT_FIELD_MAPPING.neonToGql);
-    this.pipelineWrite.pushEntity('Engagement', gqlData as unknown as Record<string, unknown>).catch(err => {
-      console.error('Failed to push engagement to Pipeline:', err);
-    });
+    try {
+      await this.pipelineWrite.pushEntity('Engagement', gqlData as unknown as Record<string, unknown>, [], 'engagements.service:172');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to create engagement: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     return engagement;
   }
@@ -190,9 +199,16 @@ export class EngagementsService {
     const updated: Engagement = { ...current, ...data, updated_at: new Date().toISOString() };
 
     const gqlData = mapNeonToGql<GqlEngagementResponse>(updated, ENGAGEMENT_FIELD_MAPPING.neonToGql);
-    this.pipelineWrite.pushEntity('Engagement', gqlData as unknown as Record<string, unknown>).catch(err => {
-      console.error('Failed to update engagement in Pipeline:', err);
-    });
+    try {
+      await this.pipelineWrite.pushEntity('Engagement', gqlData as unknown as Record<string, unknown>, [], 'engagements.service:205');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to update engagement: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     return updated;
   }

@@ -6,6 +6,7 @@
  */
 
 import { TestBed } from '@angular/core/testing';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { EngagementsService } from '../../core/services/engagements.service';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
@@ -17,16 +18,19 @@ describe('EngagementsService (Plan 075)', () => {
   let service: EngagementsService;
   let pipelineWrite: ReturnType<typeof fakePipelineWriteService>;
   let graphqlRead: ReturnType<typeof fakeGraphqlReadService>;
+  let mockSnackBar: { open: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     pipelineWrite = fakePipelineWriteService();
     graphqlRead = fakeGraphqlReadService();
+    mockSnackBar = { open: vi.fn() };
 
     TestBed.configureTestingModule({
       providers: [
         EngagementsService,
         { provide: PipelineWriteService, useValue: pipelineWrite },
         { provide: GraphqlReadService, useValue: graphqlRead },
+        { provide: MatSnackBar, useValue: mockSnackBar },
       ],
     });
 
@@ -89,10 +93,31 @@ describe('EngagementsService (Plan 075)', () => {
       expect(pipelineWrite.pushEntity).toHaveBeenCalledWith(
         'Engagement',
         expect.objectContaining({ name: 'Pinnacle Corp ↔ W3Geekery' }),
+        [],
+        'engagements.service:172',
       );
       expect(result).toHaveProperty('id');
       expect(result.title).toBe('Pinnacle Corp ↔ W3Geekery');
       expect(result.status).toBe('in_progress');
+    });
+
+    it('should surface error to user on Pipeline rejection', async () => {
+      const mockError = new Error('Network failure');
+      pipelineWrite.pushEntity.mockRejectedValueOnce(mockError);
+
+      await expect(
+        service.createEngagement({
+          buyer_zerobias_user_id: 'user-001',
+          title: 'Test',
+          engagement_tag: 'sme-mart.eng.test',
+        })
+      ).rejects.toThrow(mockError);
+
+      expect(mockSnackBar.open).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to create engagement'),
+        'Dismiss',
+        expect.any(Object)
+      );
     });
   });
 
@@ -102,8 +127,27 @@ describe('EngagementsService (Plan 075)', () => {
 
       const result = await service.updateEngagement('eng-001', { status: 'completed' as any });
 
-      expect(pipelineWrite.pushEntity).toHaveBeenCalled();
+      expect(pipelineWrite.pushEntity).toHaveBeenCalledWith(
+        'Engagement',
+        expect.any(Object),
+        [],
+        'engagements.service:205',
+      );
       expect(result.status).toBe('completed');
+    });
+
+    it('should surface error to user on Pipeline rejection', async () => {
+      graphqlRead.getById.mockResolvedValue(ENGAGEMENT_GQL_FIXTURE);
+      const mockError = new Error('Save failed');
+      pipelineWrite.pushEntity.mockRejectedValueOnce(mockError);
+
+      await expect(service.updateEngagement('eng-001', { status: 'completed' as any })).rejects.toThrow(mockError);
+
+      expect(mockSnackBar.open).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to update engagement'),
+        'Dismiss',
+        expect.any(Object),
+      );
     });
   });
 
@@ -127,17 +171,4 @@ describe('EngagementsService (Plan 075)', () => {
     });
   });
 
-  describe('Pipeline integration', () => {
-    it('should handle Pipeline errors gracefully (fire-and-forget)', async () => {
-      pipelineWrite.pushEntity.mockRejectedValue(new Error('Pipeline error'));
-
-      await expect(
-        service.createEngagement({
-          buyer_zerobias_user_id: 'user-001',
-          title: 'Test',
-          engagement_tag: 'sme-mart.eng.test',
-        }),
-      ).resolves.toBeDefined();
-    });
-  });
 });
