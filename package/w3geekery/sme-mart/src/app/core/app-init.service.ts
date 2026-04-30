@@ -23,20 +23,17 @@ export class AppInitService {
     this.translate.setDefaultLang('en');
     this.translate.use('en');
 
-    // Stack-mode (localhost unified-origin) workaround for platform bug:
-    // Dana's /api/dana/me/session/login?next=... responds 307 Location: /login/ with `next` stripped.
-    // The client SDK's redirectLogin() passes `next` correctly; Dana discards it.
-    // We pre-empt by probing whoAmI ourselves and redirecting straight to the static login
-    // page with `next` intact (login.js honors ?next= via URLSearchParams).
-    // Remove once Dana preserves `next` through its 307.
-    if (!environment.isLocalDev && location.hostname === 'localhost') {
+    // Check session status and redirect unauthenticated users to branded login.
+    // Probe whoAmI to detect 401; if unauthenticated, redirect to branded login URL
+    // with the current URL encoded as the redirect query parameter.
+    try {
       const probe = await fetch(`${environment.apiHostname}/api/dana/me`, { credentials: 'include' });
       if (probe.status === 401) {
-        const next = encodeURIComponent(location.href);
-        location.href = `/login/en_us/login.html?next=${next}&cookieDomain=localhost`;
-        // Resolve with a never-settling promise so Angular doesn't finish bootstrap before the redirect.
-        return new Promise<boolean>(() => {});
+        this.redirectToBrandedLogin();
       }
+    } catch (err) {
+      // Network error or other probe failure — log but don't block (SDK init will handle auth)
+      console.warn('[AppInit] Session probe failed:', err);
     }
 
     const authResult = await this.app.init(
@@ -60,5 +57,22 @@ export class AppInitService {
     });
 
     return authResult;
+  }
+
+  /**
+   * Redirect unauthenticated user to branded login URL with return URL encoded.
+   * Uses brandedLoginSubdomain if available; falls back to defaultLoginUrl.
+   * Constructs: `<baseUrl>/login?redirect=<currentUrl>`
+   * Never returns (redirects at location.href level).
+   */
+  private redirectToBrandedLogin(): never {
+    const subdomain = environment.brandedLoginSubdomain ?? null;
+    const fallback = environment.defaultLoginUrl;
+    const baseUrl = subdomain ?? fallback;
+    const redirect = encodeURIComponent(location.href);
+    const target = `${baseUrl}/login?redirect=${redirect}`;
+    location.href = target;
+    // Resolve with a never-settling promise so Angular doesn't finish bootstrap before the redirect.
+    return new Promise<never>(() => {}) as never;
   }
 }
