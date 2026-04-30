@@ -84,6 +84,22 @@ Output: Functional `CanActivateFn` that serves as the route guard, plus loading 
 @.planning/phases/28-company-profile-form/28-CONTEXT.md — routing destination contract ("user sees company-profile form on first login")
 </context>
 
+## Wave 0 Probe — Phase 28 Service Availability
+
+Before starting any task in this plan, run:
+
+```bash
+test -f src/app/core/services/marketplace-profile.service.ts && echo "PHASE_28_SHIPPED=true" || echo "PHASE_28_SHIPPED=false"
+```
+
+**If PHASE_28_SHIPPED=true:**
+- Read the file and confirm the exact `getCompletionStatus` signature.
+- Use the service directly per Path A below.
+
+**If PHASE_28_SHIPPED=false:**
+- Use the temporary direct-MPI-read shim per Path B below.
+- Tag the shim removal as a Phase 28 follow-up: leave a `// TODO: remove shim once Phase 28's MarketplaceProfileService.getCompletionStatus lands` comment alongside the shim code.
+
 <interfaces>
 <!-- Key SDK types and service contracts for executor reference -->
 
@@ -120,9 +136,15 @@ async getPrincipal(): Promise<OrgPrincipalWithAdminFlag>;
 
 From MarketplaceProfileService (Phase 28, if exists; otherwise temporary shim):
 ```typescript
-getCompletionStatus(orgId: string): Observable<'incomplete' | 'complete'> | Promise<'incomplete' | 'complete'>;
-// 'incomplete' → user needs company-profile form (AR-05 route to /onboarding/company-profile)
-// 'complete' → user can proceed to /projects
+// Path A (if Phase 28 shipped):
+getCompletionStatus(orgId: string): Promise<boolean> | Observable<boolean>;
+// Returns true/false (not a string; see Phase 28's 28-02 artifact for actual return type)
+// 'true' → user completed profile, proceed to /projects
+// 'false' → user needs company-profile form, route to /onboarding/company-profile
+
+// Path B (temporary shim if Phase 28 not shipped):
+// Direct GQL query reading MarketplaceProfileItem(section='onboarding_complete')
+// Returns boolean: true if record exists, false otherwise
 ```
 
 From MatSnackBar (Material):
@@ -149,7 +171,7 @@ this.snackBar.open('Onboarding in progress — please retry in a moment.', 'Dism
   </files>
   <read_first>
     src/app/core/services/onboarding-bootstrap.service.ts — DEPENDENCY from Plan 27-02 (must exist)
-    src/app/core/services/marketplace-profile.service.ts — check for getCompletionStatus(orgId) signature; if missing, document temporary shim path in task action
+    src/app/core/services/marketplace-profile.service.ts — check for getCompletionStatus(orgId) signature; if missing, use temporary shim
     src/app/app.config.ts — provideRouter structure for reference
     .planning/docs/MODERNIZATION_GUIDE.md — inject() pattern, no constructor DI
     27-RESEARCH.md "Routing Decision Tree" section — exact branch logic for admin/first-time/returning paths
@@ -157,13 +179,19 @@ this.snackBar.open('Onboarding in progress — please retry in a moment.', 'Dism
   <action>
 Create a functional `onboardingGuard: CanActivateFn` that orchestrates session check → bootstrap → routing decision:
 
+**Step 0: Determine which path to use (A or B)**
+- If `marketplace-profile.service.ts` exists and has `getCompletionStatus` method returning a Promise or Observable, use **Path A**.
+- If the file does not exist, use **Path B (temporary shim)** with a TODO comment for removal.
+
+**Path A: Use MarketplaceProfileService (Phase 28 shipped)**
+
 ```typescript
 import { inject } from '@angular/core';
-import { Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
+import { Router, ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { ZerobiasAppService } from '../services/zerobias-app.service';
 import { OnboardingBootstrapService } from '../services/onboarding-bootstrap.service';
-import { MarketplaceProfileService } from '../services/marketplace-profile.service'; // or temporary shim
+import { MarketplaceProfileService } from '../services/marketplace-profile.service';
 
 export const onboardingGuard = async (
   route: ActivatedRouteSnapshot,
@@ -172,6 +200,7 @@ export const onboardingGuard = async (
   const router = inject(Router);
   const zerobias = await ZerobiasAppService.getInstance();
   const bootstrap = inject(OnboardingBootstrapService);
+  const profileService = inject(MarketplaceProfileService);
 
   // Step 1: Check session validity
   let principal;
@@ -200,29 +229,28 @@ export const onboardingGuard = async (
     );
 
     // Step 4: Check profile completion status (AR-05)
-    const profileService = inject(MarketplaceProfileService);
-    let completionStatus: 'incomplete' | 'complete';
+    // EXECUTOR NOTE: Read the actual signature from marketplace-profile.service.ts
+    // If it returns Observable<boolean>, use firstValueFrom() below
+    // If it returns Promise<boolean>, use await directly without firstValueFrom
+    let completionStatus: boolean;
     
-    try {
-      completionStatus = await firstValueFrom(
-        profileService.getCompletionStatus(principal.orgId)
-      );
-    } catch (err) {
-      // Temporary shim if service doesn't exist yet (Phase 28 not deployed):
-      // Query GQL directly for SmeMartCompanyProfile(engagementId) record
-      // If exists and has non-null requiredFields (e.g., businessLicense, contactName) → 'complete'
-      // Else → 'incomplete'
-      // TODO: Remove shim once Phase 28 deployed and MarketplaceProfileService available
-      console.warn('[ONBOARDING_GUARD] MarketplaceProfileService unavailable, using temporary GQL shim', { engagementId });
-      completionStatus = 'incomplete'; // Safe default: route to form
+    // Probe the return type by attempting await first (Promise path)
+    const result = profileService.getCompletionStatus(principal.orgId);
+    if (result instanceof Promise) {
+      completionStatus = await result;
+    } else {
+      // Observable path
+      completionStatus = await firstValueFrom(result);
     }
 
     // Step 5: Route based on completion (AR-05)
-    if (completionStatus === 'incomplete') {
+    if (!completionStatus) {
       return router.createUrlTree(['/onboarding/company-profile']);
     } else {
       return router.createUrlTree(['/projects']);
     }
+
+    // TODO: per-app ToS gate (v1.5) — DECISIONS.md "Per-App ToS Architecture — Two-Layer"
 
   } catch (err) {
     // Bootstrap or completion-check failed (AR-09 — graceful error handling)
@@ -233,23 +261,93 @@ export const onboardingGuard = async (
 };
 ```
 
+**Path B: Temporary direct-MPI shim (Phase 28 not shipped)**
+
+```typescript
+import { inject } from '@angular/core';
+import { Router, ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree } from '@angular/router';
+import { ZerobiasAppService } from '../services/zerobias-app.service';
+import { OnboardingBootstrapService } from '../services/onboarding-bootstrap.service';
+import { GraphqlReadService } from '../services/graphql-read.service';
+
+export const onboardingGuard = async (
+  route: ActivatedRouteSnapshot,
+  state: RouterStateSnapshot
+): Promise<boolean | UrlTree> => {
+  const router = inject(Router);
+  const zerobias = await ZerobiasAppService.getInstance();
+  const bootstrap = inject(OnboardingBootstrapService);
+  const graphqlRead = inject(GraphqlReadService);
+
+  // Step 1: Check session validity
+  let principal;
+  try {
+    principal = await zerobias.whoAmI();
+  } catch (err) {
+    return router.createUrlTree(['/login']);
+  }
+
+  if (!principal) {
+    return router.createUrlTree(['/login']);
+  }
+
+  // Step 2: Admin branch (AR-02)
+  if (principal.isAdmin) {
+    return router.createUrlTree(['/admin']);
+  }
+
+  // Step 3: Ensure default engagement exists
+  try {
+    const { engagementId, created } = await bootstrap.ensureDefaultEngagement(
+      principal.orgId,
+      principal.id,
+      principal.partyId
+    );
+
+    // Step 4: Check profile completion status via temporary direct-MPI shim
+    // TODO: remove shim once Phase 28's MarketplaceProfileService.getCompletionStatus lands
+    const mpiRecords = await graphqlRead.query(
+      'MarketplaceProfileItem',
+      ['id', 'section', 'status'],
+      {
+        filters: { orgId: `.eq.${principal.orgId}`, section: '.eq.onboarding_complete' },
+        pageSize: 1,
+      }
+    );
+    const completionStatus = mpiRecords && mpiRecords.length > 0;
+
+    // Step 5: Route based on completion (AR-05)
+    if (!completionStatus) {
+      return router.createUrlTree(['/onboarding/company-profile']);
+    } else {
+      return router.createUrlTree(['/projects']);
+    }
+
+    // TODO: per-app ToS gate (v1.5) — DECISIONS.md "Per-App ToS Architecture — Two-Layer"
+
+  } catch (err) {
+    // Bootstrap failed (AR-09)
+    console.error('[ONBOARDING_GUARD] Bootstrap failed', { error: err });
+    return router.createUrlTree(['/onboarding/bootstrap'], { queryParams: { error: 'bootstrap-failed' } });
+  }
+};
+```
+
 **Key design decisions:**
 1. **Async function (not Observable)** — matches functional guard signature, uses `await` for ZerobiasAppService.whoAmI() and OnboardingBootstrapService.ensureDefaultEngagement()
-2. **Step-by-step branches:** (a) session check, (b) admin detection, (c) bootstrap call, (d) completion status check, (e) final routing
-3. **Temporary shim for MarketplaceProfileService:** If Phase 28 hasn't shipped yet, the service doesn't exist. Task documents the fallback: direct GQL query for SmeMartCompanyProfile(engagementId) with field presence check. Remove shim once Phase 28 completes.
-4. **Per-app ToS gate (v1.5) insertion point** (LOCKED DECISION from CONTEXT.md): Add TODO comment after Step 5 that cites DECISIONS.md "Per-App ToS Architecture — Two-Layer":
-```typescript
-// TODO: per-app ToS gate (v1.5) — DECISIONS.md "Per-App ToS Architecture — Two-Layer"
-```
-5. **No controller component initialization** — guard ONLY routes; no imperative component creation
-6. **Uses `inject()` for all services** (Angular 21 modernization)
-7. **Returns Promise<boolean | UrlTree>** (functional guard async signature)
+2. **Step-by-step branches:** (a) session check, (b) admin detection, (c) bootstrap call, (d) completion status check (Path A or B), (e) final routing
+3. **Path A (Phase 28 shipped):** Injects MarketplaceProfileService, calls getCompletionStatus, probes return type (Promise vs Observable)
+4. **Path B (Phase 28 not shipped):** Temporary GQL shim reading onboarding_complete marker directly. Marked with TODO for removal.
+5. **Per-app ToS gate (v1.5) insertion point** (LOCKED DECISION): Add TODO comment per DECISIONS.md "Per-App ToS Architecture — Two-Layer"
+6. **No controller component initialization** — guard ONLY routes; no imperative component creation
+7. **Uses `inject()` for all services** (Angular 21 modernization)
+8. **Returns Promise<boolean | UrlTree>** (functional guard async signature)
   </action>
   <verify>
     <automated>npx tsc --noEmit</automated>
   </verify>
   <done>
-    onboarding.guard.ts created with functional CanActivateFn signature, async session check, admin branch (isAdmin), bootstrap service call, completion status check, routing decision tree, and v1.5 ToS placeholder comment. TypeScript compiles. Guard is importable from src/app/core/guards/index.ts or directly from the file.
+    onboarding.guard.ts created with functional CanActivateFn signature, async session check, admin branch (isAdmin), bootstrap service call, Wave 0 probe-aware completion status check (Path A or B determined at execute time), routing decision tree, and v1.5 ToS placeholder comment. TypeScript compiles. Guard is importable from src/app/core/guards/index.ts or directly from the file.
   </done>
 </task>
 
@@ -265,13 +363,14 @@ export const onboardingGuard = async (
   </read_first>
   <behavior>
     - Test 1: Admin principal → guard returns UrlTree to /admin (AR-02)
-    - Test 2: Non-admin, profile incomplete → guard calls bootstrap, returns UrlTree to /onboarding/company-profile (AR-05)
-    - Test 3: Non-admin, profile complete → guard calls bootstrap, returns UrlTree to /projects (AR-05)
-    - Test 4: Bootstrap fails (e.g., all 5 steps error) → guard catches error, returns UrlTree to /onboarding/bootstrap?error=bootstrap-failed (AR-09)
+    - Test 2: Non-admin, profile incomplete (Path A, Promise returning false) → guard calls bootstrap, returns UrlTree to /onboarding/company-profile (AR-05)
+    - Test 3: Non-admin, profile complete (Path A, Promise returning true) → guard calls bootstrap, returns UrlTree to /projects (AR-05)
+    - Test 4: Bootstrap fails (e.g., Step C error) → guard catches error, returns UrlTree to /onboarding/bootstrap?error=bootstrap-failed (AR-09)
     - Test 5: Invalid session (whoAmI rejects) → guard returns UrlTree to /login (AR-01 precondition)
+    - Test 6: Path B shim (MarketplaceProfileService unavailable) → direct GQL query reads onboarding_complete, routes accordingly
   </behavior>
   <action>
-Create comprehensive unit test suite for the guard:
+Create comprehensive unit test suite for the guard with both Path A (Phase 28 shipped) and Path B (Phase 28 not shipped) scenarios:
 
 ```typescript
 import { TestBed } from '@angular/core/testing';
@@ -281,12 +380,14 @@ import { onboardingGuard } from './onboarding.guard';
 import { ZerobiasAppService } from '../services/zerobias-app.service';
 import { OnboardingBootstrapService } from '../services/onboarding-bootstrap.service';
 import { MarketplaceProfileService } from '../services/marketplace-profile.service';
+import { GraphqlReadService } from '../services/graphql-read.service';
 
 describe('onboardingGuard', () => {
   let router: Router;
   let zerobiasService: jasmine.SpyObj<ZerobiasAppService>;
   let bootstrapService: jasmine.SpyObj<OnboardingBootstrapService>;
   let profileService: jasmine.SpyObj<MarketplaceProfileService>;
+  let graphqlRead: jasmine.SpyObj<GraphqlReadService>;
 
   const mockRoute = {} as ActivatedRouteSnapshot;
   const mockState = {} as RouterStateSnapshot;
@@ -309,12 +410,14 @@ describe('onboardingGuard', () => {
     const zeroMock = jasmine.createSpyObj('ZerobiasAppService', ['whoAmI']);
     const bootMock = jasmine.createSpyObj('OnboardingBootstrapService', ['ensureDefaultEngagement']);
     const profMock = jasmine.createSpyObj('MarketplaceProfileService', ['getCompletionStatus']);
+    const gqlMock = jasmine.createSpyObj('GraphqlReadService', ['query']);
 
     TestBed.configureTestingModule({
       providers: [
         { provide: ZerobiasAppService, useValue: zeroMock },
         { provide: OnboardingBootstrapService, useValue: bootMock },
         { provide: MarketplaceProfileService, useValue: profMock },
+        { provide: GraphqlReadService, useValue: gqlMock },
       ],
     });
 
@@ -322,6 +425,7 @@ describe('onboardingGuard', () => {
     zerobiasService = TestBed.inject(ZerobiasAppService) as jasmine.SpyObj<ZerobiasAppService>;
     bootstrapService = TestBed.inject(OnboardingBootstrapService) as jasmine.SpyObj<OnboardingBootstrapService>;
     profileService = TestBed.inject(MarketplaceProfileService) as jasmine.SpyObj<MarketplaceProfileService>;
+    graphqlRead = TestBed.inject(GraphqlReadService) as jasmine.SpyObj<GraphqlReadService>;
 
     spyOn(router, 'createUrlTree').and.callThrough();
   });
@@ -335,14 +439,14 @@ describe('onboardingGuard', () => {
     expect(result.toString()).toContain('/admin');
   });
 
-  it('Test 2: Non-admin, incomplete profile routes to company-profile form (AR-05)', async () => {
+  it('Test 2: Non-admin, incomplete profile (Promise path) routes to company-profile form (AR-05)', async () => {
     zerobiasService.whoAmI.and.resolveValue(mockPrincipal);
     bootstrapService.ensureDefaultEngagement.and.resolveValue({
       engagementId: 'eng-123',
       projectId: 'proj-123',
       created: true,
     });
-    profileService.getCompletionStatus.and.returnValue(of('incomplete'));
+    profileService.getCompletionStatus.and.resolveValue(false); // Promise<false>
 
     const result = await onboardingGuard(mockRoute, mockState);
 
@@ -351,14 +455,14 @@ describe('onboardingGuard', () => {
     expect(result.toString()).toContain('/onboarding/company-profile');
   });
 
-  it('Test 3: Non-admin, complete profile routes to /projects (AR-05)', async () => {
+  it('Test 3: Non-admin, complete profile (Promise path) routes to /projects (AR-05)', async () => {
     zerobiasService.whoAmI.and.resolveValue(mockPrincipal);
     bootstrapService.ensureDefaultEngagement.and.resolveValue({
       engagementId: 'eng-123',
       projectId: 'proj-123',
       created: false,
     });
-    profileService.getCompletionStatus.and.returnValue(of('complete'));
+    profileService.getCompletionStatus.and.resolveValue(true); // Promise<true>
 
     const result = await onboardingGuard(mockRoute, mockState);
 
@@ -367,7 +471,22 @@ describe('onboardingGuard', () => {
     expect(result.toString()).toContain('/projects');
   });
 
-  it('Test 4: Bootstrap fails, guard redirects to /onboarding/bootstrap with error param (AR-09)', async () => {
+  it('Test 4: Non-admin, complete profile (Observable path) routes to /projects (AR-05)', async () => {
+    zerobiasService.whoAmI.and.resolveValue(mockPrincipal);
+    bootstrapService.ensureDefaultEngagement.and.resolveValue({
+      engagementId: 'eng-123',
+      projectId: 'proj-123',
+      created: false,
+    });
+    profileService.getCompletionStatus.and.returnValue(of(true)); // Observable<true>
+
+    const result = await onboardingGuard(mockRoute, mockState);
+
+    expect(router.createUrlTree).toHaveBeenCalledWith(['/projects']);
+    expect(result.toString()).toContain('/projects');
+  });
+
+  it('Test 5: Bootstrap fails, guard redirects to /onboarding/bootstrap with error param (AR-09)', async () => {
     zerobiasService.whoAmI.and.resolveValue(mockPrincipal);
     bootstrapService.ensureDefaultEngagement.and.rejectWith(new Error('Step C failed: Pipeline.receive error'));
 
@@ -377,7 +496,7 @@ describe('onboardingGuard', () => {
     expect(result.toString()).toContain('/onboarding/bootstrap');
   });
 
-  it('Test 5: Invalid session (whoAmI rejects) redirects to /login (AR-01)', async () => {
+  it('Test 6: Invalid session (whoAmI rejects) redirects to /login (AR-01)', async () => {
     zerobiasService.whoAmI.and.rejectWith(new Error('Unauthorized'));
 
     const result = await onboardingGuard(mockRoute, mockState);
@@ -386,7 +505,7 @@ describe('onboardingGuard', () => {
     expect(result.toString()).toContain('/login');
   });
 
-  it('Test 6: whoAmI returns null, redirects to /login', async () => {
+  it('Test 7: whoAmI returns null, redirects to /login', async () => {
     zerobiasService.whoAmI.and.resolveValue(null);
 
     const result = await onboardingGuard(mockRoute, mockState);
@@ -395,18 +514,33 @@ describe('onboardingGuard', () => {
     expect(result.toString()).toContain('/login');
   });
 
-  it('Test 7: MarketplaceProfileService unavailable (temporary shim path), defaults to incomplete', async () => {
+  it('Test 8: Path B shim (GQL query for onboarding_complete) — found', async () => {
+    // Simulate MarketplaceProfileService not injected; use GraphqlReadService directly
     zerobiasService.whoAmI.and.resolveValue(mockPrincipal);
     bootstrapService.ensureDefaultEngagement.and.resolveValue({
       engagementId: 'eng-123',
       projectId: 'proj-123',
       created: false,
     });
-    profileService.getCompletionStatus.and.returnValue(throwError(() => new Error('Service unavailable')));
+    graphqlRead.query.and.resolveValue([{ section: 'onboarding_complete', status: 'active' }]); // Shim: found
 
     const result = await onboardingGuard(mockRoute, mockState);
 
-    // Shim path: assume incomplete, route to form
+    expect(router.createUrlTree).toHaveBeenCalledWith(['/projects']);
+    expect(result.toString()).toContain('/projects');
+  });
+
+  it('Test 9: Path B shim (GQL query for onboarding_complete) — not found', async () => {
+    zerobiasService.whoAmI.and.resolveValue(mockPrincipal);
+    bootstrapService.ensureDefaultEngagement.and.resolveValue({
+      engagementId: 'eng-123',
+      projectId: 'proj-123',
+      created: false,
+    });
+    graphqlRead.query.and.resolveValue([]); // Shim: not found
+
+    const result = await onboardingGuard(mockRoute, mockState);
+
     expect(router.createUrlTree).toHaveBeenCalledWith(['/onboarding/company-profile']);
     expect(result.toString()).toContain('/onboarding/company-profile');
   });
@@ -416,10 +550,11 @@ describe('onboardingGuard', () => {
 **Test coverage:**
 - Routing decision tree: admin/non-admin branches (AR-02)
 - Bootstrap service integration: called with correct params
-- Profile completion status: routes based on 'complete' vs 'incomplete' (AR-05)
+- Profile completion status (Path A Promise): routes based on true/false
+- Profile completion status (Path A Observable): routes based on firstValueFrom result
+- Profile completion status (Path B shim): GQL query reads onboarding_complete marker
 - Error handling: bootstrap failure → /onboarding/bootstrap redirect with error query param (AR-09)
 - Session validity: invalid/null session → /login (AR-01)
-- Service unavailability: temporary shim behavior (MarketplaceProfileService missing)
 
 All tests use `await onboardingGuard()` (async guard) and verify `router.createUrlTree()` calls.
   </action>
@@ -427,7 +562,7 @@ All tests use `await onboardingGuard()` (async guard) and verify `router.createU
     <automated>npm test -- --include='**/onboarding.guard.spec.ts'</automated>
   </verify>
   <done>
-    onboarding.guard.spec.ts created with 7 test cases covering: admin routing, incomplete/complete profile routing, bootstrap failure, invalid session, and temporary service-unavailable shim path. All tests pass. Coverage of AR-02, AR-04, AR-05, AR-09.
+    onboarding.guard.spec.ts created with 9 test cases covering: admin routing, incomplete/complete profile routing (both Promise and Observable paths), bootstrap failure, invalid session, and both Path A and Path B completion status flows. All tests pass. Coverage of AR-02, AR-04, AR-05, AR-09.
   </done>
 </task>
 
@@ -722,20 +857,20 @@ describe('OnboardingBootstrapShellComponent', () => {
 
 <task type="checkpoint:human-verify" gate="blocking">
   <what-built>
-    Functional guard (onboarding.guard.ts) orchestrating session check → admin/non-admin branch → bootstrap service → profile completion status → routing decision. Loading shell component (onboarding-bootstrap-shell) with error handling, full test coverage for guard (7 tests) and shell component (5 tests). All source files, templates, styles, and specs created.
+    Functional guard (onboarding.guard.ts) with Wave 0 probe determining Phase 28 availability at execute time. Guard orchestrates session check → admin/non-admin branch → bootstrap service → completion status check (Path A if Phase 28 shipped, Path B temporary shim if not) → routing decision. Loading shell component (onboarding-bootstrap-shell) with error handling, full test coverage for guard (9 tests covering both paths) and shell component (5 tests). All source files, templates, styles, and specs created.
   </what-built>
   <how-to-verify>
-    1. **Code inspection:** Review `onboarding.guard.ts` for the three-branch decision tree (admin → /admin, non-admin incomplete → /onboarding/company-profile, complete → /projects). Verify `onboarding-bootstrap-shell.component.ts` has no direct bootstrap service call (guard owns that). Verify ToS comment uses lowercase "per-app" with exact casing from DECISIONS.md.
-    2. **Test execution:** Run `npm test -- --include='**/onboarding.guard.spec.ts'` — all 7 tests pass. Run `npm test -- --include='**/onboarding-bootstrap-shell.component.spec.ts'` — all 5 tests pass.
+    1. **Code inspection:** Review `onboarding.guard.ts` for the Wave 0 probe block and two-path decision logic (Path A: MarketplaceProfileService, Path B: temporary GQL shim). Verify `onboarding-bootstrap-shell.component.ts` has no direct bootstrap service call (guard owns that). Verify ToS comment uses lowercase "per-app" with exact casing from DECISIONS.md.
+    2. **Test execution:** Run `npm test -- --include='**/onboarding.guard.spec.ts'` — all 9 tests pass (covering Path A Promise, Path A Observable, Path B shim). Run `npm test -- --include='**/onboarding-bootstrap-shell.component.spec.ts'` — all 5 tests pass.
     3. **Type checking:** `npx tsc --noEmit` exits 0 (all TypeScript compiled).
-    4. **Manual walk-through (local dev):** Start dev server. Simulate a non-admin first-time user login:
+    4. **Manual walk-through (local dev, assuming Phase 28 not shipped):** Start dev server. Simulate a non-admin first-time user login:
        - Verify guard fires (break in `onboarding.guard.ts` line 1 on app load)
-       - Watch network tab: bootstrap service calls fire (all 5 steps from 27-02)
+       - Watch network tab: bootstrap service calls fire (all 5 steps from 27-02); GQL query fires for `onboarding_complete` (Path B shim)
        - Observe page shows loading spinner ("Setting up your account...")
-       - After bootstrap completes, page redirects to /onboarding/company-profile (or /projects if already complete)
+       - After bootstrap completes, page redirects to /onboarding/company-profile (shim returns false)
     5. **Error simulation:** Temporarily mock `OnboardingBootstrapService.ensureDefaultEngagement()` to reject. Verify guard catches error, routes to /onboarding/bootstrap?error=bootstrap-failed, loading shell displays error message with Retry button.
   </how-to-verify>
-  <resume-signal>Type "approved" if code review and test execution pass. Describe any issues if tests fail or logic doesn't match AR-02/04/05/09 requirements.</resume-signal>
+  <resume-signal>Type "approved" if code review and test execution pass. Describe any issues if tests fail or logic doesn't match AR-02/04/05/09 requirements, or if Phase 28 service signature differs from Path A assumption.</resume-signal>
 </task>
 
 </tasks>
@@ -747,28 +882,30 @@ AR-02, AR-04, AR-05, AR-09 verification paths:
 |---|---|
 | AR-02 (Admin detection) | Guard checks `principal.isAdmin` → returns `/admin` UrlTree. Test 1 in guard.spec.ts verifies. Grep: `isAdmin` appears in guard + spec files. |
 | AR-04 (Loading surface) | OnboardingBootstrapShellComponent displays mat-progress-spinner + "Setting up your account..." text. Template uses @if control flow. Component + template + styles created. |
-| AR-05 (Routing based on completion) | Guard calls `MarketplaceProfileService.getCompletionStatus(orgId)` → routes to `/onboarding/company-profile` if incomplete, `/projects` if complete. Test 2 and Test 3 in guard.spec.ts verify. |
-| AR-09 (Graceful error handling) | Bootstrap failure → guard catches exception → routes to `/onboarding/bootstrap?error=bootstrap-failed`. Shell component detects error query param → displays error message + Retry button. Test 4 in guard.spec.ts + Test 2 in shell.spec.ts verify. |
+| AR-05 (Routing based on completion) | Guard determines completion status via Path A (MarketplaceProfileService) or Path B (temporary GQL shim). Routes to `/onboarding/company-profile` if incomplete, `/projects` if complete. Tests 2, 3, 4, 8, 9 in guard.spec.ts verify all paths. |
+| AR-09 (Graceful error handling) | Bootstrap failure → guard catches exception → routes to `/onboarding/bootstrap?error=bootstrap-failed`. Shell component detects error query param → displays error message + Retry button. Test 5 in guard.spec.ts + Test 2 in shell.spec.ts verify. |
 
-Post-merge on UAT, full end-to-end test will cover actual guard firing during Route.canActivate evaluation once routing is wired (Plan 27-04).
+Post-merge on UAT, full end-to-end test will cover actual guard firing during Route.canActivate evaluation once routing is wired (Plan 27-04). Phase 28 integration validated when MarketplaceProfileService lands (Path A probe confirms its presence + signature).
 </verification>
 
 <success_criteria>
-1. onboarding.guard.ts functional CanActivateFn created, async signature, orchestrates session → bootstrap → routing.
+1. onboarding.guard.ts functional CanActivateFn created with Wave 0 probe for Phase 28 service availability, two paths (A: Phase 28 shipped, B: temporary shim), async signature, orchestrates session → bootstrap → routing.
 2. Guard routing decision tree verified: admin → /admin, non-admin incomplete → /onboarding/company-profile, complete → /projects, invalid/error → /onboarding/bootstrap.
 3. onboarding-bootstrap-shell component created, standalone, displays spinner + error message via query param.
-4. Guard and shell component fully unit tested (7 guard tests + 5 shell tests, all green).
+4. Guard and shell component fully unit tested (9 guard tests + 5 shell tests, all green, including both Path A and Path B scenarios).
 5. All TypeScript compiles (`npx tsc --noEmit`).
 6. Guard is importable and ready for route attachment (Plan 27-04).
 7. AR-02/04/05/09 requirements fully implemented.
+8. Wave 0 probe and Path A/B decision logic clear in task action and test suite.
 </success_criteria>
 
 <output>
 After completion, create `.planning/phases/27-auth-onboarding-guard/27-03-onboarding-guard-SUMMARY.md` with:
-- Guard decision tree (session check → admin branch → bootstrap → completion status → routing)
+- Guard decision tree (session check → admin branch → bootstrap → completion status via Path A or B → routing)
+- Wave 0 probe result (Phase 28 shipped or temporary shim active)
 - Bootstrap service integration (Task 1 orchestrates Task 3 from 27-02)
 - Loading shell component (error handling via query param, Dismiss button)
-- Test coverage summary (guard: 7 tests, shell: 5 tests, all green)
+- Test coverage summary (guard: 9 tests including Path A Promise, Path A Observable, Path B shim; shell: 5 tests; all green)
 - AR-02/04/05/09 verification evidence
 - No open issues
 </output>
