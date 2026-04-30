@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonModule } from '@angular/material/button';
 import { OnboardingBootstrapShellComponent } from './onboarding-bootstrap-shell.component';
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 describe('OnboardingBootstrapShellComponent', () => {
   let component: OnboardingBootstrapShellComponent;

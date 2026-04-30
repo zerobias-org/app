@@ -22,8 +22,8 @@ import { MarketplaceProfileService } from '../services/marketplace-profile.servi
  * Per Phase 27 CONTEXT.md and AR-02/04/05/09 requirements.
  */
 export const onboardingGuard: CanActivateFn = async (
-  route: ActivatedRouteSnapshot,
-  state: RouterStateSnapshot,
+  _route: ActivatedRouteSnapshot,
+  _state: RouterStateSnapshot,
 ): Promise<boolean | UrlTree> => {
   const router = inject(Router);
   const clientApi = inject(ZerobiasClientApi);
@@ -79,11 +79,7 @@ export const onboardingGuard: CanActivateFn = async (
 
   // Step 3: Ensure default engagement exists (calls OnboardingBootstrapService)
   try {
-    const { engagementId, created } = await bootstrap.ensureDefaultEngagement(
-      orgId,
-      userId,
-      partyId,
-    );
+    await bootstrap.ensureDefaultEngagement(orgId, userId, partyId);
 
     // Step 4: Check profile completion status (AR-05)
     // MarketplaceProfileService.getCompletionStatus returns Promise<boolean>

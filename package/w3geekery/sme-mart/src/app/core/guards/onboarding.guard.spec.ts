@@ -159,7 +159,7 @@ describe('onboardingGuard', () => {
     });
     profileService.getCompletionStatus.mockRejectedValue(new Error('GQL query failed'));
 
-    const result = await runInInjectionContext(injector, () => onboardingGuard(mockRoute, mockState));
+    await runInInjectionContext(injector, () => onboardingGuard(mockRoute, mockState));
 
     expect(router.createUrlTree).toHaveBeenCalledWith(['/onboarding/bootstrap'], {
       queryParams: { error: 'bootstrap-failed' },
