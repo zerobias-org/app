@@ -2,9 +2,11 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
-import { ZerobiasClientApp } from '@zerobias-com/zerobias-client';
+import { ZerobiasClientApp, ZerobiasClientApi } from '@zerobias-com/zerobias-client';
 import { CompanyProfileFormComponent } from './company-profile-form.component';
 import { MarketplaceProfileService } from '../core/services/marketplace-profile.service';
+import { GraphqlReadService } from '../core/services/graphql-read.service';
+import { PipelineWriteService } from '../core/services/pipeline-write.service';
 import { CompanyInfoStruct } from './company-info.model';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 
@@ -272,6 +274,92 @@ describe('CompanyProfileFormComponent', () => {
 
       expect(component.loadError()).toContain('organization');
       expect(component.isLoading()).toBe(false);
+    });
+  });
+
+  describe('routing integration (CP-07: repeat-login-skip)', () => {
+    // Phase 27 owns the guard; this test verifies the service signal only.
+    it('should recognize when onboarding_complete marker is present (completion status true)', async () => {
+      // This test documents the assumption: Phase 27 will call marketplaceProfile.getCompletionStatus()
+      // to decide routing. If true, route to /projects. If false, route to /onboarding/company-profile.
+      //
+      // Phase 28 does NOT test the actual Phase 27 guard (not built yet).
+      // Phase 28 ONLY tests that the service correctly signals completion status.
+
+      const mockGqlReadWithCompletion = {
+        query: vi.fn().mockResolvedValue({
+          items: [
+            { id: 'mpi-test-onboarding-complete', section: 'onboarding_complete', status: 'active', data: '2026-04-30' },
+          ],
+          page: { pageNumber: 1, pageSize: 50, totalCount: 1 },
+        }),
+      };
+
+      const mockClientApiForTest = {
+        danaClient: {
+          getMeApi: vi.fn().mockReturnValue({
+            listMyOrgs: vi.fn(),
+          }),
+        },
+      };
+
+      TestBed.resetTestingModule();
+      await TestBed.configureTestingModule({
+        providers: [
+          MarketplaceProfileService,
+          { provide: GraphqlReadService, useValue: mockGqlReadWithCompletion },
+          { provide: PipelineWriteService, useValue: {} },
+          { provide: ZerobiasClientApi, useValue: mockClientApiForTest },
+          { provide: MatSnackBar, useValue: mockSnackBar },
+        ],
+      }).compileComponents();
+
+      const serviceInstance = TestBed.inject(MarketplaceProfileService);
+      const isComplete = await serviceInstance.getCompletionStatus(mockOrgId);
+
+      expect(isComplete).toBe(true);
+      expect(mockGqlReadWithCompletion.query).toHaveBeenCalledWith(
+        'MarketplaceProfileItem',
+        expect.arrayContaining(['id', 'section', 'status']),
+        expect.objectContaining({
+          filters: expect.objectContaining({
+            orgId: `.eq.${mockOrgId}`,
+          }),
+        }),
+      );
+    });
+
+    it('should recognize when onboarding_complete marker is absent (completion status false)', async () => {
+      const mockGqlReadWithoutCompletion = {
+        query: vi.fn().mockResolvedValue({
+          items: [],
+          page: { pageNumber: 1, pageSize: 50, totalCount: 0 },
+        }),
+      };
+
+      const mockClientApiForTest = {
+        danaClient: {
+          getMeApi: vi.fn().mockReturnValue({
+            listMyOrgs: vi.fn(),
+          }),
+        },
+      };
+
+      TestBed.resetTestingModule();
+      await TestBed.configureTestingModule({
+        providers: [
+          MarketplaceProfileService,
+          { provide: GraphqlReadService, useValue: mockGqlReadWithoutCompletion },
+          { provide: PipelineWriteService, useValue: {} },
+          { provide: ZerobiasClientApi, useValue: mockClientApiForTest },
+          { provide: MatSnackBar, useValue: mockSnackBar },
+        ],
+      }).compileComponents();
+
+      const serviceInstance = TestBed.inject(MarketplaceProfileService);
+      const isComplete = await serviceInstance.getCompletionStatus(mockOrgId);
+
+      expect(isComplete).toBe(false);
     });
   });
 });
