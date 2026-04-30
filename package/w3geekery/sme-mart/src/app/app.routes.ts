@@ -13,6 +13,7 @@ import { RfpWizard } from './pages/rfps/rfp-wizard/rfp-wizard.component';
 import { BidWizard } from './pages/rfps/bid-wizard/bid-wizard.component';
 import { BidComparisonPage } from './pages/rfps/bid-comparison-page.component';
 import { ComingSoon } from './pages/coming-soon/coming-soon.component';
+import { CompanyProfileFormComponent } from './onboarding/company-profile-form.component';
 
 export const routes: Routes = [
   {
@@ -35,6 +36,12 @@ export const routes: Routes = [
         path: 'templates/:id',
         loadComponent: () =>
           import('./pages/templates/template-editor.component').then(m => m.TemplateEditorComponent),
+      },
+      {
+        path: 'onboarding',
+        children: [
+          { path: 'company-profile', component: CompanyProfileFormComponent },
+        ],
       },
       // Legacy redirects
       { path: 'engagements', redirectTo: 'rfps', pathMatch: 'full' },
