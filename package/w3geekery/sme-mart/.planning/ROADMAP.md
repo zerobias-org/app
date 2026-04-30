@@ -470,7 +470,7 @@
   7. Subsequent logins with complete marker → Phase 27 routes directly to Phase 30
   8. Unit tests cover pre-fill, save, skip, repeat-login-skip flows
 
-**Plans:** TBD
+**Plans:** 3/5 plans executed
 
 **Estimates:** 6-10 hrs
 
@@ -554,7 +554,7 @@ This phase is intentionally deferred from v1.4. When v1.5 begins, Phase 29 work 
 | 25. Platform Data Audit | 3/5 | In progress | 2026-04-24 (Plans 01-03 complete) |
 | 26. Seed Provider (ZB-as-Provider) | 4/4 | Complete    | 2026-04-29 |
 | 27. Auth Gate + Routing | 0/? | Not started | — |
-| 28. Company Profile Form | 0/? | Not started | — |
+| 28. Company Profile Form | 3/5 | In Progress|  |
 | 29. DEFERRED TO v1.5 | — | Skipped | — |
 | 30. Default Project Board | 0/? | Not started | — |
 | 31. W3Geekery Dogfood + Smoke Test | 0/? | Not started | — |

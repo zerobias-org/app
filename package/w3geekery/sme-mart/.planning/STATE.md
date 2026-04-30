@@ -1,15 +1,15 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.4
-milestone_name: 3P Onboarding & Default Engagement
+milestone: v1.5
+milestone_name: **Tier Display / Terms of Service / ZB Branding**
 status: executing
-last_updated: "2026-04-30T17:10:00.000Z"
-last_activity: 2026-04-30 -- Phase 28 Plan 01 complete
+last_updated: "2026-04-30T17:13:00.680Z"
+last_activity: 2026-04-30
 progress:
   total_phases: 19
   completed_phases: 8
   total_plans: 41
-  completed_plans: 36
+  completed_plans: 38
 ---
 
 # STATE.md -- Session Context
@@ -24,9 +24,9 @@ progress:
 
 Milestone: v1.4 3P Onboarding & Default Engagement
 Phase: 28 (company-profile-form) — EXECUTING
-Plan: 1 of 5 — COMPLETE
-Status: Phase 28 Plan 01 complete; ready for Plan 02
-Last activity: 2026-04-30 -- Phase 28 Plan 01 complete
+Plan: 2 of 5 — COMPLETE
+Status: Ready to execute
+Last activity: 2026-04-30
 
 **Phase 20 closed 2026-04-29** (commits `977828c..904276d`):
 
