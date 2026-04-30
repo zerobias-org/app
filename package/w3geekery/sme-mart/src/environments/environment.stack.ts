@@ -15,6 +15,9 @@ export const environment = {
   pipelineId: '43f08afd-7ab9-4e99-a93c-619c46adaabe',           // (same as dev environment.ts)
   boundaryId: 'c15fb2dc-4f8c-48b5-b27a-707bd516b005',          // (same as dev environment.ts)
   neonConnectionString: NEON_DATABASE_URL,
+  // Branded login configuration (stack mode uses local login)
+  brandedLoginSubdomain: null,
+  defaultLoginUrl: '/login/en_us/login.html',
   featureFlags: {
     prefsBackend: 'localStorage' as 'localStorage' | 'pkv',
   },

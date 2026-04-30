@@ -20,6 +20,9 @@ export const environment = {
   // AuditgraphDB Pipeline + Boundary (UAT — SME Marketplace DEV boundary, W3Geekery org)
   pipelineId: 'f6d1f579-fe02-4158-b99e-a55113fd70cb',
   boundaryId: 'c15fb2dc-4f8c-48b5-b27a-707bd516b005',
+  // Branded login configuration
+  brandedLoginSubdomain: null, // No subdomain in local dev
+  defaultLoginUrl: '/login/en_us/login.html', // Local login fallback (matches app-init.service.ts line 36)
   // Feature flags
   featureFlags: {
     /** User prefs backend: 'localStorage' (fast, no network) or 'pkv' (cross-device sync via ZB API).

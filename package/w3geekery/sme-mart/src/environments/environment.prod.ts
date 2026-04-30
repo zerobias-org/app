@@ -12,6 +12,9 @@ export const environment = {
   // AuditgraphDB Pipeline + Boundary (prod — Zerobias org)
   pipelineId: '091d5068-0527-4f45-9839-37f6d5c1669e',
   boundaryId: '2842fab1-ceff-4ec4-bf09-ce5e7c33c3e2',
+  // Branded login configuration (Andrey subdomain provisioned; fallback to ZB platform default)
+  brandedLoginSubdomain: 'https://w3geekery.zerobias.com',
+  defaultLoginUrl: 'https://app.zerobias.com/login',
   featureFlags: {
     prefsBackend: 'pkv' as 'localStorage' | 'pkv',
   },
