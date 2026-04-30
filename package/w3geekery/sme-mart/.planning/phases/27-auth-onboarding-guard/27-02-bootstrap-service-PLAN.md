@@ -56,6 +56,37 @@ Purpose: Comply with AR-03 (lazy-on-load guard creates missing default engagemen
 Output: Testable service that encapsulates all 5 calls, handles idempotency, follows Phase 20 error pattern, and produces correct Engagement + SmeMartProject records with Object.tag populated.
 </objective>
 
+<director_sign_off>
+**DECISION REQUIRED: Discovery Filter Shape**
+
+Plan 02 implements discovery query (Step 0 idempotency check) before bootstrap Steps A–E. The discovery query finds existing default Engagement to skip bootstrap if already created. Three options exist for the query filter:
+
+**Option (a) — Default (selected):** Filter by `buyerZerobiasOrgId` only
+```graphql
+Engagement(buyerZerobiasOrgId: ".eq.<currentOrgId>") { id, tag { value } }
+```
+**Assumption:** ≤1 engagement per org (org-level scope). Simplest, no tag lookup overhead.
+**Constraint:** Fails if org has >1 engagement (violation of invariant).
+
+**Option (b) — Per-Org Tag Lookup:**
+1. Query org's hydra tag: `Tag.searchTags({ ownerId: currentOrgId, name: 'sme-mart.eng.*' })`
+2. Filter by tag UUID: `Engagement(buyerZerobiasOrgId: ".eq.<currentOrgId>", tag: { value: ".eq.<tagUUID>" })`
+**Assumption:** Each org has a single designated tag for default engagement.
+**Benefit:** Handles multiple engagements per org.
+**Cost:** Additional tag lookup before discovery.
+
+**Option (c) — Global Sentinel Tag:**
+Use a single global tag (e.g., `sme-mart.default-engagement`) registered once per platform:
+```graphql
+Engagement(tag: { value: ".eq.<sentinelTagId>" }) { id, ... }
+```
+**Benefit:** Works across all orgs.
+**Cost:** One-time retag of all existing engagements (migration).
+
+**Please confirm:** Option (a) is implemented in this plan. Confirm acceptance or select option (b) or (c) for revision.
+
+</director_sign_off>
+
 <execution_context>
 @$HOME/.claude/get-shit-done/workflows/execute-plan.md
 @.planning/phases/27-auth-onboarding-guard/27-CONTEXT.md — locked decisions (all 5 steps, idempotency probes, error pattern, Object.tag shape)

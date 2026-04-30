@@ -19,7 +19,7 @@ must_haves:
     - Authenticated user with completed profile skips loading shell, routes to /projects
     - Admin users skip bootstrap entirely, route to /admin
     - Guard redirects user to /login if session invalid (AR-01 branded login redirect fires)
-    - Bootstrap failure shows user-friendly "Onboarding in progress" message, allows dismiss, redirects to /login on retry
+    - Bootstrap failure shows user-friendly "Onboarding in progress" message, allows dismiss, redirects to /onboarding/bootstrap on retry
   artifacts:
     - path: "src/app/core/guards/onboarding.guard.ts"
       provides: "Functional CanActivateFn that checks session → admin/non-admin branch → bootstrap service call → MarketplaceProfileService completion check → UrlTree redirect"
@@ -135,7 +135,7 @@ From OnboardingBootstrapService (Plan 27-02):
 // Error handling pattern (emitted at time of bootstrap failure):
 console.warn('[ONBOARDING_GUARD_FAILURE]', { callSiteTag: 'onboarding-guard:bootstrap-failure', error });
 this.snackBar.open('Onboarding in progress — please retry in a moment.', 'Dismiss', { duration: 5000 });
-// Then re-throws, allowing guard to catch and redirect to /login
+// Then re-throws, allowing guard to catch and redirect to /onboarding/bootstrap
 ```
 
 </interfaces>
@@ -228,7 +228,7 @@ export const onboardingGuard = async (
     // Bootstrap or completion-check failed (AR-09 — graceful error handling)
     // OnboardingBootstrapService already logged + snackbar; guard just redirects
     console.error('[ONBOARDING_GUARD] Bootstrap failed', { error: err });
-    return router.createUrlTree(['/login'], { queryParams: { error: 'onboarding-failed' } });
+    return router.createUrlTree(['/onboarding/bootstrap'], { queryParams: { error: 'bootstrap-failed' } });
   }
 };
 ```
@@ -239,11 +239,7 @@ export const onboardingGuard = async (
 3. **Temporary shim for MarketplaceProfileService:** If Phase 28 hasn't shipped yet, the service doesn't exist. Task documents the fallback: direct GQL query for SmeMartCompanyProfile(engagementId) with field presence check. Remove shim once Phase 28 completes.
 4. **Per-app ToS gate (v1.5) insertion point** (LOCKED DECISION from CONTEXT.md): Add TODO comment after Step 5 that cites DECISIONS.md "Per-App ToS Architecture — Two-Layer":
 ```typescript
-// TODO: Per-app ToS gate (v1.5) — DECISIONS.md "Per-App ToS Architecture — Two-Layer"
-// Step 6 (future): If completionStatus === 'incomplete' AND app.requiresAcceptedToS
-//   Return router.createUrlTree(['/onboarding/terms-of-service'], { queryParams: { next: '/onboarding/company-profile' } })
-// This gate is OUT OF SCOPE for Phase 27 (v1.4 focus on auth/engagement/profile form).
-// Placeholder for v1.5 post-profile milestone.
+// TODO: per-app ToS gate (v1.5) — DECISIONS.md "Per-App ToS Architecture — Two-Layer"
 ```
 5. **No controller component initialization** — guard ONLY routes; no imperative component creation
 6. **Uses `inject()` for all services** (Angular 21 modernization)
@@ -271,7 +267,7 @@ export const onboardingGuard = async (
     - Test 1: Admin principal → guard returns UrlTree to /admin (AR-02)
     - Test 2: Non-admin, profile incomplete → guard calls bootstrap, returns UrlTree to /onboarding/company-profile (AR-05)
     - Test 3: Non-admin, profile complete → guard calls bootstrap, returns UrlTree to /projects (AR-05)
-    - Test 4: Bootstrap fails (e.g., all 5 steps error) → guard catches error, returns UrlTree to /login?error=onboarding-failed (AR-09)
+    - Test 4: Bootstrap fails (e.g., all 5 steps error) → guard catches error, returns UrlTree to /onboarding/bootstrap?error=bootstrap-failed (AR-09)
     - Test 5: Invalid session (whoAmI rejects) → guard returns UrlTree to /login (AR-01 precondition)
   </behavior>
   <action>
@@ -371,14 +367,14 @@ describe('onboardingGuard', () => {
     expect(result.toString()).toContain('/projects');
   });
 
-  it('Test 4: Bootstrap fails, guard redirects to /login with error param (AR-09)', async () => {
+  it('Test 4: Bootstrap fails, guard redirects to /onboarding/bootstrap with error param (AR-09)', async () => {
     zerobiasService.whoAmI.and.resolveValue(mockPrincipal);
     bootstrapService.ensureDefaultEngagement.and.rejectWith(new Error('Step C failed: Pipeline.receive error'));
 
     const result = await onboardingGuard(mockRoute, mockState);
 
-    expect(router.createUrlTree).toHaveBeenCalledWith(['/login'], { queryParams: { error: 'onboarding-failed' } });
-    expect(result.toString()).toContain('/login');
+    expect(router.createUrlTree).toHaveBeenCalledWith(['/onboarding/bootstrap'], { queryParams: { error: 'bootstrap-failed' } });
+    expect(result.toString()).toContain('/onboarding/bootstrap');
   });
 
   it('Test 5: Invalid session (whoAmI rejects) redirects to /login (AR-01)', async () => {
@@ -421,7 +417,7 @@ describe('onboardingGuard', () => {
 - Routing decision tree: admin/non-admin branches (AR-02)
 - Bootstrap service integration: called with correct params
 - Profile completion status: routes based on 'complete' vs 'incomplete' (AR-05)
-- Error handling: bootstrap failure → /login redirect with error query param (AR-09)
+- Error handling: bootstrap failure → /onboarding/bootstrap redirect with error query param (AR-09)
 - Session validity: invalid/null session → /login (AR-01)
 - Service unavailability: temporary shim behavior (MarketplaceProfileService missing)
 
@@ -472,9 +468,9 @@ export class OnboardingBootstrapShellComponent implements OnInit {
     // This component is routed to when AR-04 loading surface is needed.
     // The guard (Task 1) orchestrates the actual bootstrap call.
     // If bootstrap succeeds, the guard routes away automatically.
-    // If bootstrap fails, the guard routes here with ?error=onboarding-failed query param.
+    // If bootstrap fails, the guard routes here with ?error=bootstrap-failed query param.
     const error = new URLSearchParams(window.location.search).get('error');
-    if (error === 'onboarding-failed') {
+    if (error === 'bootstrap-failed') {
       this.isLoading = false;
       this.errorMessage = 'Onboarding setup encountered an issue. Please try again.';
     }
@@ -490,7 +486,7 @@ export class OnboardingBootstrapShellComponent implements OnInit {
 **Design decisions:**
 1. **Standalone component** (Angular 21 default, no NgModule)
 2. **OnInit only** — minimal logic. The real work is orchestrated by the guard (Task 1).
-3. **Error detection via query param** — guard passes `?error=onboarding-failed`, component reads and displays message
+3. **Error detection via query param** — guard passes `?error=bootstrap-failed`, component reads and displays message
 4. **Dismiss button action** — routes to /login to restart the flow (user can retry)
 5. **No direct OnboardingBootstrapService call** — guard owns the bootstrap orchestration; this component is purely a UI surface
 6. **Uses Material components** (mat-progress-spinner, mat-button) per ngx-library availability
@@ -625,7 +621,7 @@ button {
   </files>
   <behavior>
     - Test 1: Component initializes with isLoading=true (normal path)
-    - Test 2: Query param ?error=onboarding-failed sets errorMessage and isLoading=false
+    - Test 2: Query param ?error=bootstrap-failed sets errorMessage and isLoading=false
     - Test 3: Dismiss button calls dismissError() and routes to /login
     - Test 4: Template shows spinner during loading, hides on error
     - Test 5: Error message is rendered when errorMessage is set
@@ -664,9 +660,9 @@ describe('OnboardingBootstrapShellComponent', () => {
     expect(component.errorMessage).toBeNull();
   });
 
-  it('Test 2: Query param ?error=onboarding-failed sets errorMessage and isLoading=false', () => {
+  it('Test 2: Query param ?error=bootstrap-failed sets errorMessage and isLoading=false', () => {
     spyOnProperty(window, 'location', 'get').and.returnValue({
-      search: '?error=onboarding-failed',
+      search: '?error=bootstrap-failed',
     } as Location);
 
     fixture.detectChanges();
@@ -711,7 +707,7 @@ describe('OnboardingBootstrapShellComponent', () => {
 
 **Test coverage:**
 - Initialization state (isLoading=true by default)
-- Query param detection (error=onboarding-failed)
+- Query param detection (error=bootstrap-failed)
 - Button click handler (dismissError → router.navigate)
 - Template rendering based on state (spinner vs error)
 - Error message display
@@ -726,10 +722,10 @@ describe('OnboardingBootstrapShellComponent', () => {
 
 <task type="checkpoint:human-verify" gate="blocking">
   <what-built>
-    Functional guard (onboarding.guard.ts) orchestrating session check → admin/non-admin branch → bootstrap service → profile completion status → routing decision. Loading shell component (onboarding-bootstrap-shell) with error handling, full test coverage for guard (5 tests) and shell component (5 tests). All source files, templates, styles, and specs created.
+    Functional guard (onboarding.guard.ts) orchestrating session check → admin/non-admin branch → bootstrap service → profile completion status → routing decision. Loading shell component (onboarding-bootstrap-shell) with error handling, full test coverage for guard (7 tests) and shell component (5 tests). All source files, templates, styles, and specs created.
   </what-built>
   <how-to-verify>
-    1. **Code inspection:** Review `onboarding.guard.ts` for the three-branch decision tree (admin → /admin, non-admin incomplete → /onboarding/company-profile, complete → /projects). Verify `onboarding-bootstrap-shell.component.ts` has no direct bootstrap service call (guard owns that).
+    1. **Code inspection:** Review `onboarding.guard.ts` for the three-branch decision tree (admin → /admin, non-admin incomplete → /onboarding/company-profile, complete → /projects). Verify `onboarding-bootstrap-shell.component.ts` has no direct bootstrap service call (guard owns that). Verify ToS comment uses lowercase "per-app" with exact casing from DECISIONS.md.
     2. **Test execution:** Run `npm test -- --include='**/onboarding.guard.spec.ts'` — all 7 tests pass. Run `npm test -- --include='**/onboarding-bootstrap-shell.component.spec.ts'` — all 5 tests pass.
     3. **Type checking:** `npx tsc --noEmit` exits 0 (all TypeScript compiled).
     4. **Manual walk-through (local dev):** Start dev server. Simulate a non-admin first-time user login:
@@ -737,7 +733,7 @@ describe('OnboardingBootstrapShellComponent', () => {
        - Watch network tab: bootstrap service calls fire (all 5 steps from 27-02)
        - Observe page shows loading spinner ("Setting up your account...")
        - After bootstrap completes, page redirects to /onboarding/company-profile (or /projects if already complete)
-    5. **Error simulation:** Temporarily mock `OnboardingBootstrapService.ensureDefaultEngagement()` to reject. Verify guard catches error, routes to /login?error=onboarding-failed, loading shell displays error message with Retry button.
+    5. **Error simulation:** Temporarily mock `OnboardingBootstrapService.ensureDefaultEngagement()` to reject. Verify guard catches error, routes to /onboarding/bootstrap?error=bootstrap-failed, loading shell displays error message with Retry button.
   </how-to-verify>
   <resume-signal>Type "approved" if code review and test execution pass. Describe any issues if tests fail or logic doesn't match AR-02/04/05/09 requirements.</resume-signal>
 </task>
@@ -752,14 +748,14 @@ AR-02, AR-04, AR-05, AR-09 verification paths:
 | AR-02 (Admin detection) | Guard checks `principal.isAdmin` → returns `/admin` UrlTree. Test 1 in guard.spec.ts verifies. Grep: `isAdmin` appears in guard + spec files. |
 | AR-04 (Loading surface) | OnboardingBootstrapShellComponent displays mat-progress-spinner + "Setting up your account..." text. Template uses @if control flow. Component + template + styles created. |
 | AR-05 (Routing based on completion) | Guard calls `MarketplaceProfileService.getCompletionStatus(orgId)` → routes to `/onboarding/company-profile` if incomplete, `/projects` if complete. Test 2 and Test 3 in guard.spec.ts verify. |
-| AR-09 (Graceful error handling) | Bootstrap failure → guard catches exception → routes to `/login?error=onboarding-failed`. Shell component detects error query param → displays error message + Retry button. Test 4 in guard.spec.ts + Test 2 in shell.spec.ts verify. |
+| AR-09 (Graceful error handling) | Bootstrap failure → guard catches exception → routes to `/onboarding/bootstrap?error=bootstrap-failed`. Shell component detects error query param → displays error message + Retry button. Test 4 in guard.spec.ts + Test 2 in shell.spec.ts verify. |
 
 Post-merge on UAT, full end-to-end test will cover actual guard firing during Route.canActivate evaluation once routing is wired (Plan 27-04).
 </verification>
 
 <success_criteria>
 1. onboarding.guard.ts functional CanActivateFn created, async signature, orchestrates session → bootstrap → routing.
-2. Guard routing decision tree verified: admin → /admin, non-admin incomplete → /onboarding/company-profile, complete → /projects, invalid/error → /login.
+2. Guard routing decision tree verified: admin → /admin, non-admin incomplete → /onboarding/company-profile, complete → /projects, invalid/error → /onboarding/bootstrap.
 3. onboarding-bootstrap-shell component created, standalone, displays spinner + error message via query param.
 4. Guard and shell component fully unit tested (7 guard tests + 5 shell tests, all green).
 5. All TypeScript compiles (`npx tsc --noEmit`).
