@@ -7,7 +7,6 @@ import { ServiceCatalog } from './pages/services/service-catalog.component';
 import { RfpList } from './pages/rfps/rfp-list.component';
 import { RfpDetail } from './pages/rfps/rfp-detail.component';
 import { EngagementDetail } from './pages/engagements/engagement-detail.component';
-import { EngagementEdit } from './pages/engagements/engagement-edit.component';
 import { ENGAGEMENT_TAB_ROUTES } from './pages/engagements/engagement.routes';
 import { RfpWizard } from './pages/rfps/rfp-wizard/rfp-wizard.component';
 import { BidWizard } from './pages/rfps/bid-wizard/bid-wizard.component';
