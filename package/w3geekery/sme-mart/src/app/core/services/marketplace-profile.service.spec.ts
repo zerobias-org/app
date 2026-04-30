@@ -5,7 +5,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { MarketplaceProfileService } from './marketplace-profile.service';
 import { GraphqlReadService } from './graphql-read.service';
 import { PipelineWriteService } from './pipeline-write.service';
-import { CompanyInfoStruct, MarketplaceProfileItemRecord } from '../../onboarding/company-info.model';
+import { CompanyInfoStruct } from '../../onboarding/company-info.model';
 import { SECTION_ONBOARDING_COMPLETE } from '../../onboarding/company-info-sections';
 
 describe('MarketplaceProfileService', () => {
