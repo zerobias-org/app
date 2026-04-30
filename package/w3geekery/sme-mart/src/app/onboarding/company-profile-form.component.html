@@ -1,0 +1,241 @@
+<div class="company-profile-form">
+  <!-- Loading state -->
+  @if (isLoading()) {
+    <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+  }
+
+  <!-- Error state -->
+  @if (loadError()) {
+    <div class="error-banner">
+      <p>{{ loadError() }}</p>
+      <button mat-raised-button (click)="onRetryLoad()">Retry</button>
+    </div>
+  }
+
+  <!-- Form sections -->
+  @if (!isLoading() && !loadError()) {
+    <form [formGroup]="form()">
+      <!-- Section: Company Basics -->
+      <fieldset>
+        <legend>Company Basics</legend>
+
+        <!-- legal_name (required) -->
+        <mat-form-field>
+          <mat-label>Legal Business Name *</mat-label>
+          <input matInput formControlName="legalName" />
+          @if (isPreFilled('legalName')) {
+            <mat-hint>(pre-filled from platform)</mat-hint>
+          }
+          @if (form().get('legalName')?.hasError('required')) {
+            <mat-error>Required</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- dba (optional) -->
+        <mat-form-field>
+          <mat-label>DBA / Doing Business As</mat-label>
+          <input matInput formControlName="dba" placeholder="please provide" />
+          @if (!isPreFilled('dba')) {
+            <mat-hint>(please provide)</mat-hint>
+          }
+        </mat-form-field>
+
+        <!-- logo_url (optional, URL) -->
+        <mat-form-field>
+          <mat-label>Logo URL</mat-label>
+          <input
+            matInput
+            formControlName="logoUrl"
+            type="url"
+            placeholder="https://..."
+          />
+          @if (isPreFilled('logoUrl')) {
+            <mat-hint>(pre-filled from platform)</mat-hint>
+          } @else {
+            <mat-hint>(please provide)</mat-hint>
+          }
+          @if (form().get('logoUrl')?.hasError('pattern')) {
+            <mat-error>Must be valid HTTPS URL</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- short_blurb (optional, ≤ 500) -->
+        <mat-form-field>
+          <mat-label>Short Blurb (Company Tagline)</mat-label>
+          <textarea
+            matInput
+            formControlName="shortBlurb"
+            rows="2"
+            placeholder="please provide"
+          ></textarea>
+          <mat-hint>Max 500 characters</mat-hint>
+          @if (form().get('shortBlurb')?.hasError('maxLength')) {
+            <mat-error>Max 500 chars</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- long_description (optional, ≤ 5000) -->
+        <mat-form-field>
+          <mat-label>Company Description</mat-label>
+          <textarea
+            matInput
+            formControlName="longDescription"
+            rows="4"
+            placeholder="please provide"
+          ></textarea>
+          <mat-hint>Max 5000 characters (markdown allowed)</mat-hint>
+          @if (form().get('longDescription')?.hasError('maxLength')) {
+            <mat-error>Max 5000 chars</mat-error>
+          }
+        </mat-form-field>
+      </fieldset>
+
+      <!-- Section: Primary Contact -->
+      <fieldset [formGroupName]="'primaryContact'">
+        <legend>Primary Contact</legend>
+
+        <!-- primary_contact.user_id (simple text for now, no autocomplete yet) -->
+        <mat-form-field>
+          <mat-label>Contact Person (User ID)</mat-label>
+          <input
+            matInput
+            formControlName="userId"
+            placeholder="Select from org members..."
+          />
+          @if (!isPreFilled('primaryContact.userId')) {
+            <mat-hint>(please provide)</mat-hint>
+          }
+        </mat-form-field>
+
+        <!-- primary_contact.name (read-only or derived) -->
+        <mat-form-field>
+          <mat-label>Name</mat-label>
+          <input matInput formControlName="name" readonly />
+          @if (isPreFilled('primaryContact.name')) {
+            <mat-hint>(auto-filled from selected member)</mat-hint>
+          }
+        </mat-form-field>
+
+        <!-- primary_contact.email (read-only or derived) -->
+        <mat-form-field>
+          <mat-label>Email</mat-label>
+          <input matInput formControlName="email" type="email" readonly />
+          @if (isPreFilled('primaryContact.email')) {
+            <mat-hint>(auto-filled from selected member)</mat-hint>
+          }
+          @if (form().get('primaryContact')?.get('email')?.hasError('email')) {
+            <mat-error>Valid email required</mat-error>
+          }
+        </mat-form-field>
+      </fieldset>
+
+      <!-- Section: Web Presence -->
+      <fieldset>
+        <legend>Web Presence</legend>
+
+        <!-- website (optional, URL) -->
+        <mat-form-field>
+          <mat-label>Website</mat-label>
+          <input
+            matInput
+            formControlName="website"
+            type="url"
+            placeholder="https://..."
+          />
+          @if (!isPreFilled('website')) {
+            <mat-hint>(please provide)</mat-hint>
+          }
+          @if (form().get('website')?.hasError('pattern')) {
+            <mat-error>Must be valid HTTPS URL</mat-error>
+          }
+        </mat-form-field>
+      </fieldset>
+
+      <!-- Section: Headquarters Location -->
+      <fieldset [formGroupName]="'hqLocation'">
+        <legend>Headquarters Location</legend>
+
+        <mat-form-field>
+          <mat-label>Street Address</mat-label>
+          <input matInput formControlName="street" placeholder="please provide" />
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>City</mat-label>
+          <input matInput formControlName="city" placeholder="please provide" />
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>State/Region</mat-label>
+          <input matInput formControlName="state" placeholder="please provide" />
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Country</mat-label>
+          <input matInput formControlName="country" placeholder="please provide" />
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Postal/ZIP Code</mat-label>
+          <input matInput formControlName="postalCode" placeholder="please provide" />
+        </mat-form-field>
+      </fieldset>
+
+      <!-- Section: Company Profile -->
+      <fieldset>
+        <legend>Company Profile</legend>
+
+        <!-- years_in_business -->
+        <mat-form-field>
+          <mat-label>Years in Business</mat-label>
+          <input
+            matInput
+            formControlName="yearsInBusiness"
+            type="number"
+            min="0"
+            placeholder="please provide"
+          />
+          @if (form().get('yearsInBusiness')?.hasError('min')) {
+            <mat-error>Must be >= 0</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- employee_count (select from allowlist) -->
+        <mat-form-field>
+          <mat-label>Employee Count</mat-label>
+          <mat-select formControlName="employeeCount">
+            <mat-option value="">-- please provide --</mat-option>
+            <mat-option value="1-10">1-10</mat-option>
+            <mat-option value="11-50">11-50</mat-option>
+            <mat-option value="51-200">51-200</mat-option>
+            <mat-option value="201-500">201-500</mat-option>
+            <mat-option value="500+">500+</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </fieldset>
+
+      <!-- Form actions -->
+      <div class="form-actions">
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="onSave()"
+          [disabled]="form().invalid || isSaving()"
+        >
+          @if (!isSaving()) {
+            <span>Save Profile</span>
+          } @else {
+            <span
+              ><mat-progress-spinner
+                mode="indeterminate"
+                diameter="20"
+              ></mat-progress-spinner>
+              Saving...</span
+            >
+          }
+        </button>
+        <button mat-stroked-button (click)="onSkip()">Skip for Now</button>
+      </div>
+    </form>
+  }
+</div>
