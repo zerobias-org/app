@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.5
 milestone_name: **Tier Display / Terms of Service / ZB Branding**
 status: executing
-last_updated: "2026-04-30T17:13:00.680Z"
+last_updated: "2026-04-30T21:17:36.932Z"
 last_activity: 2026-04-30
 progress:
   total_phases: 19
   completed_phases: 8
-  total_plans: 41
-  completed_plans: 38
+  total_plans: 45
+  completed_plans: 39
 ---
 
 # STATE.md -- Session Context
@@ -24,8 +24,8 @@ progress:
 
 Milestone: v1.4 3P Onboarding & Default Engagement
 Phase: 28 (company-profile-form) — EXECUTING
-Plan: 2 of 5 — COMPLETE
-Status: Ready to execute
+Plan: 4 of 5 — COMPLETE
+Status: Ready to execute Plan 02 (MarketplaceProfileService adapter)
 Last activity: 2026-04-30
 
 **Phase 20 closed 2026-04-29** (commits `977828c..904276d`):
@@ -37,7 +37,15 @@ Last activity: 2026-04-30
 - Build green at HEAD: `npx tsc --noEmit` clean, `npm test` 1537/1537 passing across 118 files.
 - UAT 1-week soak begins post-merge; **non-blocking** per `UAT-SOAK-READY.md`. Phase 20 is closed regardless of soak outcome — soak findings would file as new errata or BACKLOG entries against deployed telemetry.
 
-**Next: Phase 27** (Auth Gate + Onboarding Routing + Lazy Guard) — authenticate users, route to onboarding or board, auto-create default engagement. The fire-and-forget remediation is a prerequisite for Phase 27's onboarding flow (silent failures during first-run setup are particularly user-hostile).
+**Phase 28 Progress (2026-04-30):**
+
+- Plan 01: Constants + Model — ✅ COMPLETE 2026-04-30 (commit `eb66f96`)
+- Plan 03: CompanyProfileFormComponent — ✅ COMPLETE 2026-04-30 (commit `b6e885c`)
+- Plan 04: Routing Integration — ✅ COMPLETE 2026-04-30 (commit `b9e78bb`)
+- Plan 02: MarketplaceProfileService adapter (GQL read + Pipeline write) — **NEXT** 
+- Plan 05: Routing integration E2E test — deferred until Plan 02 complete
+
+**Build state after Plan 04:** `npx tsc --noEmit` clean, `npm run build` succeeded, route tests passing (3/3 grep assertions).
 
 ---
 
