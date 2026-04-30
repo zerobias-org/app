@@ -30,6 +30,7 @@ A transparent, task-gated marketplace where every boundary API operation require
 - **Org navigation:** Three-tier navigation — `/orgs` list, `/orgs/:orgId` read-only detail, `/org` for current org editing. Org switching stubbed (requires session auth).
 - **Vendor profile:** 6-section corporate profile on `/org` with CRUD, expiration indicators, renewal prompts. Vetting pre-fill suggestion panel with pointer-based attachments.
 - **Boundary model:** Internal/External org badges, engagement/project counts, boundary parties tab with roles on project detail.
+- **Onboarding (P28):** `/onboarding/company-profile` standalone form pre-fills 16 company_info sections from `MarketplaceProfileItem` GQL + Org fallbacks, saves dirty-diff via PipelineWriteService.pushEntities with `onboarding_complete` marker; skip routes to `/projects` without writing marker. Phase 27 guard will consume `getCompletionStatus()` to gate routing.
 - **Tests:** 94+ Bloom tests, 27 Wave 3 tests, roundtrip validation for all entities. Build errors in unrelated components block full `npm test`.
 - **Codebase:** ~77,000 LOC TypeScript, Angular 21 standalone components.
 - **Live:** Vercel deployment on `poc/sme-mart` branch.
@@ -56,13 +57,13 @@ A transparent, task-gated marketplace where every boundary API operation require
 - ✓ **FF-06** — 16 AWAITED call sites verified with concrete `<file>.ts:NN — surfaces via <mechanism>` citations in AUDIT.md (5 proper user-visible surface, 2 no UI consumer wired, 2 NgZone-only fallthrough captured by FF-POLISH-3, 9 admin-only acceptable) — Phase 20 — v1.4 — VALIDATED 2026-04-29 — see [`VERIFICATION.md`](phases/20-fire-and-forget-audit/VERIFICATION.md)
 - ✓ **FF-07** — WATCH-LIST pattern enforced: fire-and-forget `.catch(console.error)` on user-action paths is a BLOCK; `callSiteTag` parameter shape pulls callers into the await + try/catch contract; rejection-path specs gate the pattern at unit-test time — Phase 20 — v1.4 — VALIDATED 2026-04-29 — see [`VERIFICATION.md`](phases/20-fire-and-forget-audit/VERIFICATION.md)
 - ✓ **FF-08** — WATCH-LIST pattern enforced: round-trip-per-class-id parameterized spec block (`pipeline-write.service.spec.ts`) maps every className → canonical UUID; length + uniqueness drift guards catch silent regressions on future class additions — Phase 20 — v1.4 — VALIDATED 2026-04-29 — see [`VERIFICATION.md`](phases/20-fire-and-forget-audit/VERIFICATION.md), [`ROUND-TRIP-RESULTS.md`](phases/20-fire-and-forget-audit/ROUND-TRIP-RESULTS.md)
+- ✓ **CP-01..CP-08** — Company profile review/confirm form: standalone Angular 21 component at `/onboarding/company-profile` renders all 16 user-facing sections from COMPANY-INFO-CONVENTION; pre-fills via single GQL query for `MarketplaceProfileItem` + Org-fallback projection; saves dirty-diff via `PipelineWriteService.pushEntities('MarketplaceProfileItem', ...)` with deterministic `mpi-<orgId>-<section>` ids; appends `onboarding_complete` marker every save; skip routes to `/projects` without writing marker; `getCompletionStatus()` exposes the signal Phase 27's guard will consume — Phase 28 — v1.4 — VALIDATED 2026-04-30 — see [`VERIFICATION.md`](phases/28-company-profile-form/28-VERIFICATION.md)
 
 ### Active
 
 - [ ] Demo data visibility gate — Object.tag filtering, admin escape hatch (v1.4 P24)
 - [ ] Platform data audit — SDK inventory of pre-fillable fields (v1.4 P25)
 - [ ] Auth gate + onboarding routing + lazy default-engagement guard (v1.4 P27)
-- [ ] Company profile review/confirm form — pre-populated, skip-for-now (v1.4 P28)
 - [ ] Default project board + "Coming Soon" placeholders (v1.4 P30)
 - [ ] W3Geekery dogfood + production smoke test (v1.4 P31)
 - [ ] Task/subtask partitioning into demand/supply/transparency (CEO P0, deferred)
@@ -132,4 +133,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-24 after v1.4 milestone started*
+*Last updated: 2026-04-30 after Phase 28 (Company Profile Form) completion*
