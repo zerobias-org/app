@@ -3,29 +3,29 @@ gsd_state_version: 1.0
 milestone: v1.5
 milestone_name: **Tier Display / Terms of Service / ZB Branding**
 status: executing
-last_updated: "2026-04-30T21:29:01.239Z"
+last_updated: "2026-04-30T22:50:59.152Z"
 last_activity: 2026-04-30
 progress:
   total_phases: 19
   completed_phases: 9
   total_plans: 45
-  completed_plans: 40
+  completed_plans: 42
 ---
 
 # STATE.md -- Session Context
 
 **Session Name:** `poc/sme-mart`
 **Date Created:** 2026-04-24
-**Current Focus:** Phase 28 — company-profile-form
+**Current Focus:** Phase 27 — auth-onboarding-guard
 
 ---
 
 ## Current Position
 
 Milestone: v1.4 3P Onboarding & Default Engagement
-Phase: 29
-Plan: Not started
-Status: Ready to execute Plan 02 (MarketplaceProfileService adapter)
+Phase: 27 (auth-onboarding-guard) — EXECUTING
+Plan: 3 of 4
+Status: Ready to execute
 Last activity: 2026-04-30
 
 **Phase 20 closed 2026-04-29** (commits `977828c..904276d`):

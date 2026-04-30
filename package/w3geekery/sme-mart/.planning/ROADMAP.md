@@ -448,7 +448,7 @@
   5. Admin users skip onboarding form and go directly to admin dashboard
   6. Object.tag populated at ingest time for both new Engagement and SmeMartProject with validated shape
 
-**Plans:** TBD
+**Plans:** 1/4 plans executed
 
 **Estimates:** 8-12 hrs
 
@@ -557,7 +557,7 @@ This phase is intentionally deferred from v1.4. When v1.5 begins, Phase 29 work 
 | 24. Demo Data Visibility Gate | 0/? | Not started | — |
 | 25. Platform Data Audit | 3/5 | In progress | 2026-04-24 (Plans 01-03 complete) |
 | 26. Seed Provider (ZB-as-Provider) | 4/4 | Complete    | 2026-04-29 |
-| 27. Auth Gate + Routing | 0/? | Not started | — |
+| 27. Auth Gate + Routing | 1/4 | In Progress|  |
 | 28. Company Profile Form | 4/5 | Complete    | 2026-04-30 |
 | 29. DEFERRED TO v1.5 | — | Skipped | — |
 | 30. Default Project Board | 0/? | Not started | — |
