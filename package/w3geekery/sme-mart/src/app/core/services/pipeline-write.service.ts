@@ -7,7 +7,7 @@ import { environment } from '../../../environments/environment';
 // ---------------------------------------------------------------------------
 // SME Mart AuditgraphDB class IDs (deterministic — same across all environments)
 // ---------------------------------------------------------------------------
-const SME_MART_CLASS_IDS = {
+export const SME_MART_CLASS_IDS = {
   // Original 8 entities (migrated from Neon in Phases 2-4)
   Engagement:      '7711aa41-e55b-5cda-9b7a-35844a2006a1',
   Bid:             'ccddd2e5-e455-585e-9bb7-902903228b0d',
