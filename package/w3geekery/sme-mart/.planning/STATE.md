@@ -3,29 +3,30 @@ gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: 3P Onboarding & Default Engagement
 status: executing
-last_updated: "2026-04-29T22:30:00.000Z"
-last_activity: 2026-04-29
+last_updated: "2026-04-30T17:10:00.000Z"
+last_activity: 2026-04-30 -- Phase 28 Plan 01 complete
 progress:
   total_phases: 19
   completed_phases: 8
-  total_plans: 33
-  completed_plans: 34
+  total_plans: 41
+  completed_plans: 36
 ---
 
 # STATE.md -- Session Context
 
 **Session Name:** `poc/sme-mart`
 **Date Created:** 2026-04-24
-**Current Focus:** Phase 27 — auth-gate-+-onboarding-routing-+-lazy-guard
+**Current Focus:** Phase 28 — company-profile-form
 
 ---
 
 ## Current Position
 
 Milestone: v1.4 3P Onboarding & Default Engagement
-Phase: 27 (next — Auth Gate + Onboarding Routing + Lazy Guard)
-Status: Ready to plan Phase 27. Phase 20 (Fire-and-Forget Audit) closed 2026-04-29.
-Last activity: 2026-04-29
+Phase: 28 (company-profile-form) — EXECUTING
+Plan: 1 of 5 — COMPLETE
+Status: Phase 28 Plan 01 complete; ready for Plan 02
+Last activity: 2026-04-30 -- Phase 28 Plan 01 complete
 
 **Phase 20 closed 2026-04-29** (commits `977828c..904276d`):
 
@@ -145,7 +146,7 @@ Platform observations (carry-forward):
 | 25 | Platform Data Audit | 4-6 | 5 (PDA-01..05) | Plans 01-03 complete |
 | 26 | ZB-as-Provider Seed | 5-7 | 5 (SP-01,02,04,05,06) | ✅ Complete 2026-04-29 |
 | 27 | Auth Gate + Routing | 8-12 | 6 (AR-01..06) | Not started — **next** |
-| 28 | Company Profile Form | 6-10 | 8 (CP-01..08) | Not started |
+| 28 | Company Profile Form | 6-10 | 8 (CP-01..08) | Plan 01 complete (constants/model) |
 | 29 | DEFERRED TO v1.5 | — | — | Skipped |
 | 30 | Default Board + Coming Soon | 6-8 | 6 (PB-01..07) | Not started |
 | 31 | Dogfood + Smoke Test | 4-6 | 5 (V14-01..05) | Not started |
@@ -170,7 +171,7 @@ claude --resume poc/sme-mart
 
 **Next step:**
 
-`/gsd:plan-phase 27` -- start Phase 27 planning (Auth Gate + Onboarding Routing + Lazy Guard)
+`/gsd:execute-phase 28` (Plan 02) -- MarketplaceProfileService adapter for pre-fill/save logic
 
 **If starting fresh:**
 
@@ -183,5 +184,5 @@ claude --resume poc/sme-mart
 
 ---
 
-**Last Updated:** 2026-04-29 22:30 UTC
-**Milestone v1.4:** EXECUTING — Phase 20 closed (2026-04-29), Phase 26 closed (2026-04-29), Phase 25 Plans 01-03 complete; Phase 27 is next.
+**Last Updated:** 2026-04-30 17:10 UTC
+**Milestone v1.4:** EXECUTING — Phase 20 closed (2026-04-29), Phase 26 closed (2026-04-29), Phase 25 Plans 01-03 complete, **Phase 28 Plan 01 complete (2026-04-30)**; Phase 28 Plan 02 is next.
