@@ -23,25 +23,6 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { ZerobiasClientApp } from '@zerobias-com/zerobias-client';
 import { MarketplaceProfileService } from '../core/services/marketplace-profile.service';
 import { CompanyInfoStruct } from './company-info.model';
-import {
-  SECTION_LEGAL_NAME,
-  SECTION_DBA,
-  SECTION_LOGO_URL,
-  SECTION_SHORT_BLURB,
-  SECTION_LONG_DESCRIPTION,
-  SECTION_PRIMARY_CONTACT_USER_ID,
-  SECTION_PRIMARY_CONTACT_NAME,
-  SECTION_PRIMARY_CONTACT_EMAIL,
-  SECTION_WEBSITE,
-  SECTION_HQ_LOCATION_STREET,
-  SECTION_HQ_LOCATION_CITY,
-  SECTION_HQ_LOCATION_STATE,
-  SECTION_HQ_LOCATION_COUNTRY,
-  SECTION_HQ_LOCATION_POSTAL_CODE,
-  SECTION_YEARS_IN_BUSINESS,
-  SECTION_EMPLOYEE_COUNT,
-  USER_FACING_SECTIONS,
-} from './company-info-sections';
 
 /**
  * Custom validators for company profile form fields
