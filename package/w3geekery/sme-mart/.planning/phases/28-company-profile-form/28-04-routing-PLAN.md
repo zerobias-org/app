@@ -2,13 +2,14 @@
 phase: 28-company-profile-form
 plan: 04
 type: execute
-wave: 2
+wave: 4
 depends_on:
   - 28-03
 files_modified:
   - src/app/app.routes.ts
 autonomous: true
-requirements: []
+requirements:
+  - CP-06
 user_setup: []
 
 must_haves:
@@ -16,6 +17,7 @@ must_haves:
     - "Route /onboarding/company-profile is registered in the routing tree"
     - "CompanyProfileFormComponent is loaded at that route"
     - "Route is wired under AppShell (authenticated context)"
+    - "Route /projects exists (skip-for-now destination per CP-06) — verify it's already in the tree, no changes needed"
   artifacts:
     - path: "src/app/app.routes.ts"
       provides: "Route registration for onboarding path"

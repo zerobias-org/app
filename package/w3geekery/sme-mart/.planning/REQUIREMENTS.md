@@ -42,14 +42,14 @@ Requirements for v1.4 "3P Onboarding & Default Engagement". Each maps to roadmap
 
 ### Company Profile (Phase 28)
 
-- [ ] **CP-01**: Form renders every field in the `company_info` convention
-- [ ] **CP-02**: Pre-fillable fields populated on form mount from the correct SDK/GQL source per Phase 25 map
-- [ ] **CP-03**: Known-unknown fields show a "please provide" indicator + optional hint text
-- [ ] **CP-04**: Save writes all confirmed values to the platform via Phase 25-mapped endpoint(s)
-- [ ] **CP-05**: Post-save, onboarding-complete marker is set for the current user+org
-- [ ] **CP-06**: Skip-for-now escape exists; routes to Phase 30 WITHOUT setting the complete marker
-- [ ] **CP-07**: Subsequent logins with complete marker set -> Phase 27 routes directly to Phase 30
-- [ ] **CP-08**: Unit tests cover pre-fill, save, skip, repeat-login-skip flows
+- [x] **CP-01**: Form renders every field in the `company_info` convention
+- [x] **CP-02**: Pre-fillable fields populated on form mount from the correct SDK/GQL source per Phase 25 map
+- [x] **CP-03**: Known-unknown fields show a "please provide" indicator + optional hint text
+- [x] **CP-04**: Save writes all confirmed values to the platform via Phase 25-mapped endpoint(s)
+- [x] **CP-05**: Post-save, onboarding-complete marker is set for the current user+org
+- [x] **CP-06**: Skip-for-now escape exists; routes to Phase 30 WITHOUT setting the complete marker
+- [x] **CP-07**: Subsequent logins with complete marker set -> Phase 27 routes directly to Phase 30
+- [x] **CP-08**: Unit tests cover pre-fill, save, skip, repeat-login-skip flows
 
 ### Project Board (Phase 30)
 
@@ -151,14 +151,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AR-04 | Phase 27 | Pending |
 | AR-05 | Phase 27 | Pending |
 | AR-06 | Phase 27 | Pending |
-| CP-01 | Phase 28 | Pending |
-| CP-02 | Phase 28 | Pending |
-| CP-03 | Phase 28 | Pending |
-| CP-04 | Phase 28 | Pending |
-| CP-05 | Phase 28 | Pending |
-| CP-06 | Phase 28 | Pending |
-| CP-07 | Phase 28 | Pending |
-| CP-08 | Phase 28 | Pending |
+| CP-01 | Phase 28 | Complete |
+| CP-02 | Phase 28 | Complete |
+| CP-03 | Phase 28 | Complete |
+| CP-04 | Phase 28 | Complete |
+| CP-05 | Phase 28 | Complete |
+| CP-06 | Phase 28 | Complete |
+| CP-07 | Phase 28 | Complete |
+| CP-08 | Phase 28 | Complete |
 | PB-01 | Phase 30 | Pending |
 | PB-02 | Phase 30 | Pending |
 | PB-03 | Phase 30 | Pending |

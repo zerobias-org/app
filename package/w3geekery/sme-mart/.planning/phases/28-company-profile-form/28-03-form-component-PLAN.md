@@ -2,7 +2,7 @@
 phase: 28-company-profile-form
 plan: 03
 type: execute
-wave: 2
+wave: 3
 depends_on:
   - 28-01
   - 28-02
@@ -31,7 +31,7 @@ must_haves:
       exports: ["CompanyProfileFormComponent"]
     - path: "src/app/onboarding/company-profile-form.component.html"
       provides: "Form template with 16 sections, pre-fill annotations, error messages"
-      contains: ["matInput", "formControlName", "matError", "ngIf"]
+      contains: ["matInput", "formControlName", "matError", "@if", "@for"]
     - path: "src/app/onboarding/company-profile-form.component.scss"
       provides: "Styling (ngx-library defaults + minimal custom)"
       contains: ["scss"]
@@ -90,37 +90,40 @@ Output: Component + template + styles + unit tests covering CP-01 (form renders)
   <action>
     Create `src/app/onboarding/company-profile-form.component.ts` (standalone, Angular 21 patterns):
     
-    **Class decorator:**
+    **Class decorator (NO `CommonModule` — Angular 21 built-in control flow `@if`/`@for` removes the need for it; import `AsyncPipe` directly only if used):**
     ```typescript
     @Component({
       selector: 'app-company-profile-form',
       standalone: true,
       imports: [
-        CommonModule,
         ReactiveFormsModule,
         MatInputModule,
         MatSelectModule,
         MatButtonModule,
         MatFormFieldModule,
         MatProgressSpinnerModule,
+        MatAutocompleteModule,
+        AsyncPipe, // only if filteredMembers$ is bound via | async; otherwise drop
         // ngx-library components as needed
       ],
       templateUrl: './company-profile-form.component.html',
       styleUrl: './company-profile-form.component.scss',
     })
     ```
-    
-    **Constructor (DI via inject, no constructor params per Angular 21):**
+
+    **DI — field-level `inject()` only (Angular 21 / MODERNIZATION_GUIDE.md). NO constructor block at all unless required for non-DI work:**
     ```typescript
-    constructor(
-      private service = inject(MarketplaceProfileService),
-      private router = inject(Router),
-      private snackBar = inject(MatSnackBar),
-      private cdr = inject(ChangeDetectorRef),
-    ) {}
+    export class CompanyProfileFormComponent implements OnInit {
+      private readonly service = inject(MarketplaceProfileService);
+      private readonly router = inject(Router);
+      private readonly snackBar = inject(MatSnackBar);
+      private readonly cdr = inject(ChangeDetectorRef);
+      private readonly clientApi = inject(ZerobiasClientApi);
+      // no constructor
+    }
     ```
-    
-    OR use `private service = inject(MarketplaceProfileService);` inside the class.
+
+    Constructor injection (`constructor(private foo: Foo)` or `constructor(private foo = inject(Foo))`) is BANNED. Use field assignments with `inject()` exclusively.
     
     **Lifecycle:**
     
@@ -207,184 +210,223 @@ Output: Component + template + styles + unit tests covering CP-01 (form renders)
   <action>
     Create `src/app/onboarding/company-profile-form.component.html` with:
     
-    **Structure:**
+    **Structure (Angular 21 built-in control flow `@if`/`@for` — NO `*ngIf`/`*ngFor`, NO `CommonModule` import):**
     ```html
     <div class="company-profile-form">
       <!-- Loading state -->
-      <mat-spinner *ngIf="isLoading"></mat-spinner>
-      
+      @if (isLoading) {
+        <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+      }
+
       <!-- Error state -->
-      <div *ngIf="loadError" class="error-banner">
-        <p>{{ loadError }}</p>
-        <button mat-raised-button (click)="onRetryLoad()">Retry</button>
-      </div>
-      
-      <!-- Form sections (grouped by logical category) -->
-      <form [formGroup]="form" *ngIf="!isLoading && !loadError">
-        
-        <!-- Section: Company Basics -->
-        <fieldset>
-          <legend>Company Basics</legend>
-          
-          <!-- legal_name (required) -->
-          <mat-form-field>
-            <mat-label>Legal Business Name *</mat-label>
-            <input matInput formControlName="legalName">
-            <mat-hint *ngIf="isPreFilled('legalName')">(pre-filled from platform)</mat-hint>
-            <mat-error *ngIf="form.get('legalName')?.hasError('required')">Required</mat-error>
-          </mat-form-field>
-          
-          <!-- dba (optional) -->
-          <mat-form-field>
-            <mat-label>DBA / Doing Business As</mat-label>
-            <input matInput formControlName="dba" placeholder="please provide">
-            <mat-hint *ngIf="!isPreFilled('dba')">(please provide)</mat-hint>
-          </mat-form-field>
-          
-          <!-- logo_url (optional, URL) -->
-          <mat-form-field>
-            <mat-label>Logo URL</mat-label>
-            <input matInput formControlName="logoUrl" type="url" placeholder="https://...">
-            <mat-hint *ngIf="isPreFilled('logoUrl')">(pre-filled from platform)</mat-hint>
-            <mat-hint *ngIf="!isPreFilled('logoUrl')">(please provide)</mat-hint>
-            <mat-error *ngIf="form.get('logoUrl')?.hasError('pattern')">Must be valid HTTPS URL</mat-error>
-          </mat-form-field>
-          
-          <!-- short_blurb (optional, ≤ 500) -->
-          <mat-form-field>
-            <mat-label>Short Blurb (Company Tagline)</mat-label>
-            <textarea matInput formControlName="shortBlurb" rows="2" placeholder="please provide"></textarea>
-            <mat-hint>Max 500 characters</mat-hint>
-            <mat-error *ngIf="form.get('shortBlurb')?.hasError('maxLength')">Max 500 chars</mat-error>
-          </mat-form-field>
-          
-          <!-- long_description (optional, ≤ 5000) -->
-          <mat-form-field>
-            <mat-label>Company Description</mat-label>
-            <textarea matInput formControlName="longDescription" rows="4" placeholder="please provide"></textarea>
-            <mat-hint>Max 5000 characters (markdown allowed)</mat-hint>
-            <mat-error *ngIf="form.get('longDescription')?.hasError('maxLength')">Max 5000 chars</mat-error>
-          </mat-form-field>
-        </fieldset>
-        
-        <!-- Section: Primary Contact -->
-        <fieldset formGroupName="primaryContact">
-          <legend>Primary Contact</legend>
-          
-          <!-- primary_contact.user_id (member picker) -->
-          <mat-form-field>
-            <mat-label>Contact Person</mat-label>
-            <input matInput formControlName="userId" placeholder="Select from org members..." 
-                   (focus)="onPrimaryContactFocus()" [matAutocomplete]="memberAutocomplete">
-            <mat-autocomplete #memberAutocomplete="matAutocomplete" [displayWith]="displayMember">
-              <mat-option *ngFor="let member of filteredMembers$ | async" [value]="member.id" 
-                         (onSelectionChange)="onMemberSelected(member)">
-                {{ member.name }}
-              </mat-option>
-            </mat-autocomplete>
-            <mat-hint *ngIf="!isPreFilled('primaryContact.userId')">(please provide)</mat-hint>
-          </mat-form-field>
-          
-          <!-- primary_contact.name (read-only or derived) -->
-          <mat-form-field>
-            <mat-label>Name</mat-label>
-            <input matInput formControlName="name" readonly>
-            <mat-hint *ngIf="isPreFilled('primaryContact.name')">(auto-filled from selected member)</mat-hint>
-          </mat-form-field>
-          
-          <!-- primary_contact.email (read-only or derived) -->
-          <mat-form-field>
-            <mat-label>Email</mat-label>
-            <input matInput formControlName="email" type="email" readonly>
-            <mat-hint *ngIf="isPreFilled('primaryContact.email')">(auto-filled from selected member)</mat-hint>
-            <mat-error *ngIf="form.get('primaryContact')?.get('email')?.hasError('email')">Valid email required</mat-error>
-          </mat-form-field>
-        </fieldset>
-        
-        <!-- Section: Website -->
-        <fieldset>
-          <legend>Web Presence</legend>
-          
-          <!-- website (optional, URL) -->
-          <mat-form-field>
-            <mat-label>Website</mat-label>
-            <input matInput formControlName="website" type="url" placeholder="https://...">
-            <mat-hint *ngIf="!isPreFilled('website')">(please provide)</mat-hint>
-            <mat-error *ngIf="form.get('website')?.hasError('pattern')">Must be valid HTTPS URL</mat-error>
-          </mat-form-field>
-        </fieldset>
-        
-        <!-- Section: Headquarters Location -->
-        <fieldset formGroupName="hqLocation">
-          <legend>Headquarters Location</legend>
-          
-          <!-- hq_location.street -->
-          <mat-form-field>
-            <mat-label>Street Address</mat-label>
-            <input matInput formControlName="street" placeholder="please provide">
-          </mat-form-field>
-          
-          <!-- hq_location.city -->
-          <mat-form-field>
-            <mat-label>City</mat-label>
-            <input matInput formControlName="city" placeholder="please provide">
-          </mat-form-field>
-          
-          <!-- hq_location.state -->
-          <mat-form-field>
-            <mat-label>State/Region</mat-label>
-            <input matInput formControlName="state" placeholder="please provide">
-          </mat-form-field>
-          
-          <!-- hq_location.country -->
-          <mat-form-field>
-            <mat-label>Country</mat-label>
-            <input matInput formControlName="country" placeholder="please provide">
-          </mat-form-field>
-          
-          <!-- hq_location.postal_code -->
-          <mat-form-field>
-            <mat-label>Postal/ZIP Code</mat-label>
-            <input matInput formControlName="postalCode" placeholder="please provide">
-          </mat-form-field>
-        </fieldset>
-        
-        <!-- Section: Company Profile -->
-        <fieldset>
-          <legend>Company Profile</legend>
-          
-          <!-- years_in_business -->
-          <mat-form-field>
-            <mat-label>Years in Business</mat-label>
-            <input matInput formControlName="yearsInBusiness" type="number" min="0" placeholder="please provide">
-            <mat-error *ngIf="form.get('yearsInBusiness')?.hasError('min')">Must be ≥ 0</mat-error>
-          </mat-form-field>
-          
-          <!-- employee_count (select from allowlist) -->
-          <mat-form-field>
-            <mat-label>Employee Count</mat-label>
-            <mat-select formControlName="employeeCount">
-              <mat-option value="">-- please provide --</mat-option>
-              <mat-option value="1-10">1-10</mat-option>
-              <mat-option value="11-50">11-50</mat-option>
-              <mat-option value="51-200">51-200</mat-option>
-              <mat-option value="201-500">201-500</mat-option>
-              <mat-option value="500+">500+</mat-option>
-            </mat-select>
-          </mat-form-field>
-        </fieldset>
-        
-        <!-- Form actions -->
-        <div class="form-actions">
-          <button mat-raised-button color="primary" (click)="onSave()" [disabled]="form.invalid || isSaving">
-            <span *ngIf="!isSaving">Save Profile</span>
-            <span *ngIf="isSaving"><mat-spinner diameter="20"></mat-spinner> Saving...</span>
-          </button>
-          <button mat-stroked-button (click)="onSkip()">Skip for Now</button>
+      @if (loadError) {
+        <div class="error-banner">
+          <p>{{ loadError }}</p>
+          <button mat-raised-button (click)="onRetryLoad()">Retry</button>
         </div>
-      </form>
+      }
+
+      <!-- Form sections (grouped by logical category) -->
+      @if (!isLoading && !loadError) {
+        <form [formGroup]="form">
+
+          <!-- Section: Company Basics -->
+          <fieldset>
+            <legend>Company Basics</legend>
+
+            <!-- legal_name (required) -->
+            <mat-form-field>
+              <mat-label>Legal Business Name *</mat-label>
+              <input matInput formControlName="legalName">
+              @if (isPreFilled('legalName')) {
+                <mat-hint>(pre-filled from platform)</mat-hint>
+              }
+              @if (form.get('legalName')?.hasError('required')) {
+                <mat-error>Required</mat-error>
+              }
+            </mat-form-field>
+
+            <!-- dba (optional) -->
+            <mat-form-field>
+              <mat-label>DBA / Doing Business As</mat-label>
+              <input matInput formControlName="dba" placeholder="please provide">
+              @if (!isPreFilled('dba')) {
+                <mat-hint>(please provide)</mat-hint>
+              }
+            </mat-form-field>
+
+            <!-- logo_url (optional, URL) -->
+            <mat-form-field>
+              <mat-label>Logo URL</mat-label>
+              <input matInput formControlName="logoUrl" type="url" placeholder="https://...">
+              @if (isPreFilled('logoUrl')) {
+                <mat-hint>(pre-filled from platform)</mat-hint>
+              } @else {
+                <mat-hint>(please provide)</mat-hint>
+              }
+              @if (form.get('logoUrl')?.hasError('pattern')) {
+                <mat-error>Must be valid HTTPS URL</mat-error>
+              }
+            </mat-form-field>
+
+            <!-- short_blurb (optional, ≤ 500) -->
+            <mat-form-field>
+              <mat-label>Short Blurb (Company Tagline)</mat-label>
+              <textarea matInput formControlName="shortBlurb" rows="2" placeholder="please provide"></textarea>
+              <mat-hint>Max 500 characters</mat-hint>
+              @if (form.get('shortBlurb')?.hasError('maxLength')) {
+                <mat-error>Max 500 chars</mat-error>
+              }
+            </mat-form-field>
+
+            <!-- long_description (optional, ≤ 5000) -->
+            <mat-form-field>
+              <mat-label>Company Description</mat-label>
+              <textarea matInput formControlName="longDescription" rows="4" placeholder="please provide"></textarea>
+              <mat-hint>Max 5000 characters (markdown allowed)</mat-hint>
+              @if (form.get('longDescription')?.hasError('maxLength')) {
+                <mat-error>Max 5000 chars</mat-error>
+              }
+            </mat-form-field>
+          </fieldset>
+
+          <!-- Section: Primary Contact -->
+          <fieldset formGroupName="primaryContact">
+            <legend>Primary Contact</legend>
+
+            <!-- primary_contact.user_id (member picker) -->
+            <mat-form-field>
+              <mat-label>Contact Person</mat-label>
+              <input matInput formControlName="userId" placeholder="Select from org members..."
+                     (focus)="onPrimaryContactFocus()" [matAutocomplete]="memberAutocomplete">
+              <mat-autocomplete #memberAutocomplete="matAutocomplete" [displayWith]="displayMember">
+                @for (member of filteredMembers$ | async; track member.id) {
+                  <mat-option [value]="member.id" (onSelectionChange)="onMemberSelected(member)">
+                    {{ member.name }}
+                  </mat-option>
+                }
+              </mat-autocomplete>
+              @if (!isPreFilled('primaryContact.userId')) {
+                <mat-hint>(please provide)</mat-hint>
+              }
+            </mat-form-field>
+
+            <!-- primary_contact.name (read-only or derived) -->
+            <mat-form-field>
+              <mat-label>Name</mat-label>
+              <input matInput formControlName="name" readonly>
+              @if (isPreFilled('primaryContact.name')) {
+                <mat-hint>(auto-filled from selected member)</mat-hint>
+              }
+            </mat-form-field>
+
+            <!-- primary_contact.email (read-only or derived) -->
+            <mat-form-field>
+              <mat-label>Email</mat-label>
+              <input matInput formControlName="email" type="email" readonly>
+              @if (isPreFilled('primaryContact.email')) {
+                <mat-hint>(auto-filled from selected member)</mat-hint>
+              }
+              @if (form.get('primaryContact')?.get('email')?.hasError('email')) {
+                <mat-error>Valid email required</mat-error>
+              }
+            </mat-form-field>
+          </fieldset>
+
+          <!-- Section: Web Presence -->
+          <fieldset>
+            <legend>Web Presence</legend>
+
+            <!-- website (optional, URL) -->
+            <mat-form-field>
+              <mat-label>Website</mat-label>
+              <input matInput formControlName="website" type="url" placeholder="https://...">
+              @if (!isPreFilled('website')) {
+                <mat-hint>(please provide)</mat-hint>
+              }
+              @if (form.get('website')?.hasError('pattern')) {
+                <mat-error>Must be valid HTTPS URL</mat-error>
+              }
+            </mat-form-field>
+          </fieldset>
+
+          <!-- Section: Headquarters Location -->
+          <fieldset formGroupName="hqLocation">
+            <legend>Headquarters Location</legend>
+
+            <mat-form-field>
+              <mat-label>Street Address</mat-label>
+              <input matInput formControlName="street" placeholder="please provide">
+            </mat-form-field>
+
+            <mat-form-field>
+              <mat-label>City</mat-label>
+              <input matInput formControlName="city" placeholder="please provide">
+            </mat-form-field>
+
+            <mat-form-field>
+              <mat-label>State/Region</mat-label>
+              <input matInput formControlName="state" placeholder="please provide">
+            </mat-form-field>
+
+            <mat-form-field>
+              <mat-label>Country</mat-label>
+              <input matInput formControlName="country" placeholder="please provide">
+            </mat-form-field>
+
+            <mat-form-field>
+              <mat-label>Postal/ZIP Code</mat-label>
+              <input matInput formControlName="postalCode" placeholder="please provide">
+            </mat-form-field>
+          </fieldset>
+
+          <!-- Section: Company Profile -->
+          <fieldset>
+            <legend>Company Profile</legend>
+
+            <!-- years_in_business -->
+            <mat-form-field>
+              <mat-label>Years in Business</mat-label>
+              <input matInput formControlName="yearsInBusiness" type="number" min="0" placeholder="please provide">
+              @if (form.get('yearsInBusiness')?.hasError('min')) {
+                <mat-error>Must be >= 0</mat-error>
+              }
+            </mat-form-field>
+
+            <!-- employee_count (select from allowlist) -->
+            <mat-form-field>
+              <mat-label>Employee Count</mat-label>
+              <mat-select formControlName="employeeCount">
+                <mat-option value="">-- please provide --</mat-option>
+                <mat-option value="1-10">1-10</mat-option>
+                <mat-option value="11-50">11-50</mat-option>
+                <mat-option value="51-200">51-200</mat-option>
+                <mat-option value="201-500">201-500</mat-option>
+                <mat-option value="500+">500+</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </fieldset>
+
+          <!-- Form actions -->
+          <div class="form-actions">
+            <button mat-raised-button color="primary" (click)="onSave()" [disabled]="form.invalid || isSaving">
+              @if (!isSaving) {
+                <span>Save Profile</span>
+              } @else {
+                <span><mat-progress-spinner mode="indeterminate" diameter="20"></mat-progress-spinner> Saving...</span>
+              }
+            </button>
+            <button mat-stroked-button (click)="onSkip()">Skip for Now</button>
+          </div>
+        </form>
+      }
     </div>
     ```
+
+    Notes:
+    - `@if`/`@for`/`@else` are Angular 17+ built-in control flow; they do NOT require `CommonModule`.
+    - `@for` MUST include a `track` expression. Use `track member.id` for object lists; `track $index` only when no stable id.
+    - `<mat-progress-spinner>` is the canonical Material 17+ name. The legacy `<mat-spinner>` alias is deprecated — do not emit it.
     
     **Template logic:**
     - `isLoading`: show spinner during pre-fill load
@@ -465,7 +507,7 @@ Output: Component + template + styles + unit tests covering CP-01 (form renders)
       }
     }
     
-    mat-spinner {
+    mat-progress-spinner {
       margin: 2rem auto;
     }
     ```

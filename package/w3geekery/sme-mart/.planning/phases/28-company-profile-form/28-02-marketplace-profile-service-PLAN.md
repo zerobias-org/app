@@ -2,7 +2,7 @@
 phase: 28-company-profile-form
 plan: 02
 type: execute
-wave: 1
+wave: 2
 depends_on:
   - 28-01
 files_modified:
@@ -36,7 +36,7 @@ must_haves:
       via: "query() for MPI record reads"
     - from: "marketplace-profile.service.ts"
       to: "pipeline-write.service.ts"
-      via: "pushEntity() calls or direct SDK batch"
+      via: "pushEntities() — single batched call carrying [PIPELINE_WRITE_FAILURE] telemetry, callSiteTag, re-throw (Phase 20 contract)"
     - from: "marketplace-profile.service.ts"
       to: "company-info-sections.ts + company-info.model.ts"
       via: "section constant imports + type usage"
@@ -121,7 +121,28 @@ Output: Service + comprehensive unit tests covering CP-02, CP-04, CP-05, CP-08 f
     - Special case: empty/undefined user input on empty pre-fill = not dirty (user didn't type anything)
     - Special case: Org-fallback pre-fill + no user edit = NOT dirty (don't write a new MPI to shadow the org field)
     - Append `{ id: \`mpi-${orgId}-onboarding_complete\`, orgId, section: 'onboarding_complete', data: new Date().toISOString().split('T')[0], status: 'active' }`
-    - Call Pipeline.receive with the batch (Option B from 28-RESEARCH.md: `this.clientApi.platformClient.getPipelineApi().receive(PIPELINE_ID, { classId: MPI_CLASS_ID, tagIds: [], data: records }, false)`)
+    - **Write the batch via the existing `PipelineWriteService.pushEntities` wrapper** — one call carries the entire dirty array + the marker. This honors the Phase 20 locked error contract: `pushEntities` already wraps `pipelineApi.receive(PIPELINE_ID, batch)` with try/catch + `console.warn('[PIPELINE_WRITE_FAILURE]', { className, callSite, errorMessage, timestamp })` + re-throw + write-through cache. Do NOT call the raw SDK directly — that bypasses Phase 20 telemetry. Do NOT add a new `pushBatch` method — `pushEntities(className, data: object[], tagIds, callSiteTag)` already IS the batch path (it's the implementation `pushEntity` delegates to; see `pipeline-write.service.ts:133`).
+
+    Exact call site (inside `MarketplaceProfileService.save`):
+    ```typescript
+    try {
+      await this.pipelineWrite.pushEntities(
+        'MarketplaceProfileItem',
+        records, // dirty MPI records + onboarding_complete record
+        [],      // no tags on company-info batch
+        'mpi-company-profile-save', // explicit callSiteTag for Phase 20 telemetry
+      );
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to save profile: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err; // re-throw so the form component can stay on the form + offer retry
+    }
+    ```
+    
+    Mirror the snackbar pattern from `vendor-profile.service.ts:153-159` (existing convention: caller services own the user-facing snackbar; `pushEntities` owns telemetry + re-throw).
     
     **Dirty-diff detail:**
     - Snapshot the original state on form mount (caller passes it)
@@ -137,15 +158,20 @@ Output: Service + comprehensive unit tests covering CP-02, CP-04, CP-05, CP-08 f
     - Return true if at least one record exists with status='active', false otherwise
     - Used by Phase 27 routing guard (CP-07) — Phase 28 tests this in isolation
     
-    **Constructor + DI:**
+    **DI — field-level `inject()` only (Angular 21 / MODERNIZATION_GUIDE.md). No constructor params, no `@Injectable()` constructor block:**
     ```typescript
-    constructor(
-      private graphqlRead: GraphqlReadService,
-      private clientApi: ZerobiasClientApi,
-    ) {}
+    @Injectable({ providedIn: 'root' })
+    export class MarketplaceProfileService {
+      private readonly graphqlRead = inject(GraphqlReadService);
+      private readonly pipelineWrite = inject(PipelineWriteService);
+      private readonly clientApi = inject(ZerobiasClientApi);
+      private readonly snackBar = inject(MatSnackBar);
+
+      // methods below — no constructor needed
+    }
     ```
     
-    Per Angular 21 patterns (CLAUDE.md), use `inject()` in callers, not constructor injection.
+    Constructor injection (e.g. `constructor(private foo: Foo)` or `constructor(private foo = inject(Foo))`) is BANNED in this project. Use field assignments with `inject()` exclusively.
   </action>
   <verify>
     <automated>grep -E "^\s*(readProfileForOrg|save|getCompletionStatus)" src/app/core/services/marketplace-profile.service.ts | wc -l | grep -q "^3$"</automated>
@@ -190,10 +216,11 @@ Output: Service + comprehensive unit tests covering CP-02, CP-04, CP-05, CP-08 f
     - `it('save writes only dirty fields with correct record shape')` — user edits 3 fields
       - Set up original snapshot: { legalName: 'Acme', dba: '', website: '' }
       - Set up current state: { legalName: 'Acme Revised', dba: 'Acme LLC', website: 'https://acme.com' }
-      - Mock pipeline.receive (or spy on clientApi.platformClient.getPipelineApi().receive())
+      - Spy on `pipelineWrite.pushEntities` (the existing batched wrapper)
       - Call save(testOrgId, current, original)
-      - Assert exactly 4 calls to pushEntity (3 dirty + 1 onboarding_complete) OR one batch call with 4 records
+      - Assert ONE call to `pipelineWrite.pushEntities` with exactly 4 records (3 dirty + 1 onboarding_complete)
       - Assert records have correct id format: `mpi-<orgId>-<section>`, section, data, status='active'
+      - Assert callSiteTag arg === `'mpi-company-profile-save'` and tagIds arg === `[]`
     
     - `it('save skips org-fallback pre-fills if user did not edit')` — legal_name came from Org.name, user did not edit
       - Set up original snapshot: { legalName: 'Acme' } (pre-filled from org fallback)
@@ -236,47 +263,77 @@ Output: Service + comprehensive unit tests covering CP-02, CP-04, CP-05, CP-08 f
       - original.dba = '', current.dba = ''
       - Assert not dirty
     
-    **Mock setup (from 28-RESEARCH.md):**
+    **Mock setup (mirrors `vendor-profile.service.spec.ts` pattern):**
     ```typescript
     const mockGqlRead = {
-      query: vi.fn().mockResolvedValue({
+      query: jest.fn().mockResolvedValue({
         items: [...],
         page: { pageNumber: 1, pageSize: 50, totalCount: N },
       }),
     };
-    
+
+    const mockPipelineWrite = {
+      pushEntities: jest.fn().mockResolvedValue(undefined),
+    };
+
     const mockClientApi = {
-      platformClient: {
-        getPipelineApi: () => ({
-          receive: vi.fn().mockResolvedValue(void 0),
-        }),
-      },
       danaOld: {
         Org: {
-          getOrg: vi.fn().mockResolvedValue({ name: '...', avatarUrl: '...' }),
+          getOrg: jest.fn().mockResolvedValue({ name: '...', avatarUrl: '...' }),
         },
       },
     };
+
+    const mockSnackBar = { open: jest.fn() };
+
+    TestBed.configureTestingModule({
+      providers: [
+        MarketplaceProfileService,
+        { provide: GraphqlReadService, useValue: mockGqlRead },
+        { provide: PipelineWriteService, useValue: mockPipelineWrite },
+        { provide: ZerobiasClientApi, useValue: mockClientApi },
+        { provide: MatSnackBar, useValue: mockSnackBar },
+      ],
+    });
     ```
-    
-    Assertion example (CP-04):
+
+    Assertion example (CP-04 — single batched call):
     ```typescript
-    expect(pipelineReceiveSpy).toHaveBeenCalledWith(
-      PIPELINE_ID,
-      expect.objectContaining({
-        classId: MPI_CLASS_ID,
-        tagIds: [],
-        data: expect.arrayContaining([
-          expect.objectContaining({
-            id: expect.stringMatching(/^mpi-[0-9a-f-]+-legal_name$/),
-            section: 'legal_name',
-            data: 'Acme Revised',
-            status: 'active',
-          }),
-          // ... 3 more dirty + 1 onboarding_complete
-        ]),
-      }),
-      false,
+    expect(mockPipelineWrite.pushEntities).toHaveBeenCalledTimes(1);
+    expect(mockPipelineWrite.pushEntities).toHaveBeenCalledWith(
+      'MarketplaceProfileItem',
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: expect.stringMatching(/^mpi-[0-9a-f-]+-legal_name$/),
+          orgId: testOrgId,
+          section: 'legal_name',
+          data: 'Acme Revised',
+          status: 'active',
+        }),
+        // ... 2 more dirty fields
+        expect.objectContaining({
+          section: 'onboarding_complete',
+          data: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/),
+          status: 'active',
+        }),
+      ]),
+      [], // tagIds
+      'mpi-company-profile-save', // callSiteTag
+    );
+
+    // Verify exact record count (3 dirty + 1 onboarding_complete = 4)
+    const records = mockPipelineWrite.pushEntities.mock.calls[0][1];
+    expect(records).toHaveLength(4);
+    ```
+
+    Assertion example (CP-04 — error path, snackbar + re-throw):
+    ```typescript
+    mockPipelineWrite.pushEntities.mockRejectedValueOnce(new Error('Pipeline rejected'));
+    await expect(service.save(testOrgId, current, original)).rejects.toThrow('Pipeline rejected');
+    expect(mockSnackBar.open).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to save profile'),
+      'Dismiss',
+      { duration: 5000 },
     );
     ```
   </action>

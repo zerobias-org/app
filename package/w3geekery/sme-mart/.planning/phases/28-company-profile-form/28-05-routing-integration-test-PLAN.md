@@ -2,13 +2,14 @@
 phase: 28-company-profile-form
 plan: 05
 type: execute
-wave: 3
+wave: 5
 depends_on:
   - 28-02
   - 28-03
   - 28-04
 files_modified:
   - src/app/onboarding/company-profile-form.component.spec.ts
+  - .planning/phases/28-company-profile-form/28-VALIDATION.md
 autonomous: true
 requirements:
   - CP-07
@@ -121,32 +122,9 @@ Output: Updated spec file with routing-integration test + CP-08 flow documentati
     });
     ```
     
-    **Comment block documenting Phase 27 assumption (at top of file or in a separate note):**
-    ```typescript
-    /**
-     * PHASE 28 TEST SCOPE: Company Profile Form
-     * 
-     * Phase 28 owns:
-     * - CP-01: Form renders all 16 sections ✅
-     * - CP-02: Pre-fill from MPI + org fallback ✅
-     * - CP-03: "please provide" hints for empty fields ✅
-     * - CP-04: Save writes only dirty fields ✅
-     * - CP-05: onboarding_complete marker written on save ✅
-     * - CP-06: Skip-for-now routes to /projects ✅
-     * - CP-07: Completion status signal (Phase 27 guard uses this to route) ✅
-     * - CP-08: All four flows covered (pre-fill, save, skip, repeat-login-skip) ✅
-     * 
-     * Phase 27 OWNS:
-     * - Auth gate (redirect to /login if not authenticated)
-     * - Routing decision based on completion status
-     * - Guard implementation that uses marketplaceProfile.getCompletionStatus()
-     * 
-     * PHASE 28 / PHASE 27 INTEGRATION:
-     * Phase 28 test stubs Phase 27's routing decision for CP-07.
-     * Once Phase 27 is built, a manual or E2E test can verify the full flow:
-     * user logs in → completion status checked → routed to /onboarding/company-profile or /projects
-     */
-    ```
+    Do NOT add a multi-line block comment summarizing CP-01..CP-08 to the spec file. The spec file's describe() block names + 28-VALIDATION.md's `## CP-08 Flow Coverage Map` (added by Task 2) are sufficient. Spec files should be free of essay-length narrative comments.
+
+    A single one-line `// Phase 27 owns the guard; this test verifies the service signal only.` comment inside the new describe() block is acceptable.
   </action>
   <verify>
     <automated>npm test -- --include='src/app/onboarding/company-profile-form.component.spec.ts' -t "getCompletionStatus" --watch=false --browsers=ChromeHeadless</automated>
@@ -155,68 +133,39 @@ Output: Updated spec file with routing-integration test + CP-08 flow documentati
 </task>
 
 <task type="auto">
-  <name>Task 2: Add CP-08 flow coverage documentation to test file</name>
-  <files>src/app/onboarding/company-profile-form.component.spec.ts</files>
+  <name>Task 2: Append CP-08 Flow Coverage Map to 28-VALIDATION.md</name>
+  <files>.planning/phases/28-company-profile-form/28-VALIDATION.md</files>
   <read_first>
-    - src/app/onboarding/company-profile-form.component.spec.ts
-    - src/app/core/services/marketplace-profile.service.spec.ts
-    - .planning/phases/28-company-profile-form/28-VALIDATION.md (CP-08 definition)
+    - .planning/phases/28-company-profile-form/28-VALIDATION.md
+    - src/app/onboarding/company-profile-form.component.spec.ts (to read describe() block names)
+    - src/app/core/services/marketplace-profile.service.spec.ts (to read describe() block names)
   </read_first>
   <action>
-    Add to the top of `src/app/onboarding/company-profile-form.component.spec.ts` (after import statements):
-    
-    ```typescript
-    /**
-     * CP-08: All Four Flows Covered
-     * 
-     * Phase 28 unit tests cover the following flows:
-     * 
-     * 1. PRE-FILL FLOW (CP-02, tested in marketplace-profile.service.spec.ts)
-     *    - User loads form for the first time
-     *    - Service queries GQL for MPI records + org fallbacks
-     *    - Form binds struct-shaped CompanyInfoStruct
-     *    - Pre-fill is rendered with "(pre-filled from platform)" annotation
-     *    - User can edit pre-filled values
-     * 
-     * 2. SAVE FLOW (CP-04, CP-05, tested in marketplace-profile.service.spec.ts + this file)
-     *    - User edits some fields
-     *    - User clicks Save
-     *    - Form validates
-     *    - Service computes dirty-diff against original snapshot
-     *    - Service batches dirty records + onboarding_complete marker
-     *    - Pipeline.receive ingests batch (or pushEntity called N+1 times)
-     *    - On success: snackbar "Profile saved!", navigate to /projects
-     *    - On error: snackbar with error message, offer retry
-     *    - Org-fallback pre-fills (legal_name, logo_url) NOT written if unchanged
-     * 
-     * 3. SKIP-FOR-NOW FLOW (CP-06, tested in this file)
-     *    - User clicks Skip for Now
-     *    - Router navigates to /projects immediately
-     *    - Service.save() is NOT called
-     *    - onboarding_complete marker is NOT written
-     *    - Subsequent login will route back to /onboarding/company-profile (Phase 27 reads marker)
-     * 
-     * 4. REPEAT-LOGIN-SKIP FLOW (CP-07, tested in this file + marketplace-profile.service.spec.ts)
-     *    - User completes form and saves (or skips)
-     *    - onboarding_complete marker written (or not)
-     *    - User navigates away, logs out
-     *    - User logs back in
-     *    - Phase 27 guard queries completion status
-     *    - If complete: routes to /projects (skips /onboarding/company-profile)
-     *    - If incomplete: routes to /onboarding/company-profile (form shown again)
-     * 
-     * TEST COVERAGE:
-     * - Flow 1: marketplace-profile.service.spec.ts describe('readProfileForOrg')
-     * - Flow 2: marketplace-profile.service.spec.ts describe('save') + company-profile-form.component.spec.ts (user interaction)
-     * - Flow 3: company-profile-form.component.spec.ts describe('skip-for-now flow')
-     * - Flow 4: company-profile-form.component.spec.ts describe('routing integration') + marketplace-profile.service.spec.ts describe('getCompletionStatus')
-     */
+    Append a new section `## CP-08 Flow Coverage Map` to `.planning/phases/28-company-profile-form/28-VALIDATION.md` (place it just before `## Validation Sign-Off`). The four-flow narrative belongs in the validation artifact, NOT in the spec file. Spec files do not carry essay-length comments — describe() block names + the per-task verification map are sufficient on their own. (CP-08 only requires "all four flows are covered by *.spec.ts files"; the artifact itself is verified by the spec files passing, not by a comment.)
+
+    Section to append verbatim:
+
+    ```markdown
+    ---
+
+    ## CP-08 Flow Coverage Map
+
+    Phase 28 covers the four CP-08 flows across two spec files. This map is the single source of truth — do NOT duplicate it inside spec files.
+
+    | # | Flow | Owning describe() block | Spec file |
+    |---|------|------------------------|-----------|
+    | 1 | Pre-fill (MPI + org fallback + please-provide) | `describe('readProfileForOrg ...')` + `describe('pre-fill annotations (CP-03)')` | marketplace-profile.service.spec.ts + company-profile-form.component.spec.ts |
+    | 2 | Save (dirty-diff + batched pushEntities + onboarding_complete marker) | `describe('save (CP-04, CP-05)')` | marketplace-profile.service.spec.ts |
+    | 3 | Skip-for-now (router navigate, no write) | `describe('skip-for-now flow (CP-06)')` | company-profile-form.component.spec.ts |
+    | 4 | Repeat-login-skip (completion status signal Phase 27 will consume) | `describe('routing integration (CP-07: repeat-login-skip)')` + `describe('getCompletionStatus (CP-07)')` | company-profile-form.component.spec.ts + marketplace-profile.service.spec.ts |
+
+    Phase 27 owns the actual guard implementation that consumes `getCompletionStatus()` to decide routing. Phase 28 owns the signal contract + the unit tests that verify the signal returns the right boolean given input MPI records.
     ```
   </action>
   <verify>
-    <automated>grep -q "CP-08" src/app/onboarding/company-profile-form.component.spec.ts && grep -q "Four Flows" src/app/onboarding/company-profile-form.component.spec.ts</automated>
+    <automated>grep -q "## CP-08 Flow Coverage Map" .planning/phases/28-company-profile-form/28-VALIDATION.md && grep -q "Phase 27 owns the actual guard" .planning/phases/28-company-profile-form/28-VALIDATION.md</automated>
   </verify>
-  <done>CP-08 flow documentation added, all four flows listed with test-file references.</done>
+  <done>CP-08 Flow Coverage Map section added to 28-VALIDATION.md. No essay-length comment added to any spec file.</done>
 </task>
 
 </tasks>
