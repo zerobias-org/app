@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.5
 milestone_name: **Tier Display / Terms of Service / ZB Branding**
 status: executing
-last_updated: "2026-04-30T21:17:36.932Z"
+last_updated: "2026-04-30T21:23:45.000Z"
 last_activity: 2026-04-30
 progress:
   total_phases: 19
   completed_phases: 8
   total_plans: 45
-  completed_plans: 39
+  completed_plans: 40
 ---
 
 # STATE.md -- Session Context
@@ -42,10 +42,10 @@ Last activity: 2026-04-30
 - Plan 01: Constants + Model — ✅ COMPLETE 2026-04-30 (commit `eb66f96`)
 - Plan 03: CompanyProfileFormComponent — ✅ COMPLETE 2026-04-30 (commit `b6e885c`)
 - Plan 04: Routing Integration — ✅ COMPLETE 2026-04-30 (commit `b9e78bb`)
-- Plan 02: MarketplaceProfileService adapter (GQL read + Pipeline write) — **NEXT** 
-- Plan 05: Routing integration E2E test — deferred until Plan 02 complete
+- Plan 02: MarketplaceProfileService adapter (GQL read + Pipeline write) — ✅ COMPLETE 2026-04-30 (commit `2c1a2c0`)
+- Plan 05: Routing integration E2E test — ✅ COMPLETE 2026-04-30 (commits `216ab62`, `064705e`, `4d21f2c`)
 
-**Build state after Plan 04:** `npx tsc --noEmit` clean, `npm run build` succeeded, route tests passing (3/3 grep assertions).
+**Build state after Plan 05:** `npx tsc --noEmit` clean, all Phase 28 tests 25/25 passing (component + service specs).
 
 ---
 
