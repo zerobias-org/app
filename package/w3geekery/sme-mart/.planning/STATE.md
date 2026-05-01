@@ -9,7 +9,7 @@ progress:
   total_phases: 19
   completed_phases: 9
   total_plans: 45
-  completed_plans: 42
+  completed_plans: 41
 ---
 
 # STATE.md -- Session Context
@@ -193,4 +193,4 @@ claude --resume poc/sme-mart
 ---
 
 **Last Updated:** 2026-04-30 17:10 UTC
-**Milestone v1.4:** EXECUTING — Phase 20 closed (2026-04-29), Phase 26 closed (2026-04-29), Phase 25 Plans 01-03 complete, **Phase 28 Plan 01 complete (2026-04-30)**; Phase 28 Plan 02 is next.
+**Milestone v1.4:** EXECUTING — Phase 20 closed (2026-04-29), Phase 26 closed (2026-04-29), Phase 25 Plans 01-03 complete, Phase 28 closed (2026-04-30, 5/5 plans + 8/8 must-haves), **Phase 27 Wave 1 complete (27-01 + 27-02, 2026-04-30)**; Phase 27 Plan 03 (onboarding guard, checkpoint) is next.

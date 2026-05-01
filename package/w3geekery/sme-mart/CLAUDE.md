@@ -19,6 +19,7 @@ SME Mart is a **marketplace for Subject Matter Experts** in compliance/cybersecu
 | **Project & Milestone State** | [`.planning/PROJECT.md`](.planning/PROJECT.md), [`.planning/ROADMAP.md`](.planning/ROADMAP.md) |
 | **Plan Archive (historical)** | `.claude/plans-archive/` — old PLAN.md + 55 plan files (local-only, gitignored) |
 | **Source Paths (SDKs, repos)** | [`.planning/docs/SOURCE_PATHS.md`](.planning/docs/SOURCE_PATHS.md) |
+| **🛑 SDK / API Verification — READ FIRST for any "what's the API for X" question** | [`.planning/docs/SDK_VERIFICATION_SOURCES.md`](.planning/docs/SDK_VERIFICATION_SOURCES.md) — authoritative sources are ZB MCP (`zerobias_search`/`zerobias_describe`), actual ZB platform source, and actual SDK source. The deprecated Next.js prototype is NOT authoritative. Memory entries can be wrong — verify against MCP/SDK before citing. |
 | **Angular 21 Docs** | [`AGENTS.md`](AGENTS.md) — local docs index in `.angular-docs/` (refresh: `npx angular-agents-md`) |
 | **Next.js prototype** (archived) | `../sme-mart-nextjs-deprecated/` |
 | **ZeroBias UI** (Angular 21 reference) | `~/Projects/zb/ui` |
@@ -38,24 +39,32 @@ SME Mart is a **marketplace for Subject Matter Experts** in compliance/cybersecu
 | **zb-dx (Developer Experience)** | `~/Projects/zb/zerobias-org/zb-dx` — shared knowledge base for all ZB platform developers. **File friction with `/friction`, browse patterns, find integration guides.** See below. |
 | **LSP routing** | `~/.claude/rules/common/lsp-registry.md` — built-in `LSP` is the default for symbol queries; `mcp__vscode-mcp__*` only for specific triggers (see below) |
 
-## LSP routing — built-in `LSP` is the default
+## LSP routing — three routes, route by operation
 
-**Default rule: use the built-in `LSP` tool for symbol queries on `.ts`/`.tsx`/`.scss`/`.yaml`.** Reach for `mcp__vscode-mcp__*` only when one of these triggers applies:
+**Built-in `LSP` is the default for SINGLE-FILE symbol queries on `.ts`/`.tsx`/`.scss`/`.yaml`.** For cross-file references in TS, default to `mcp__vscode-mcp__*` — empirically the standalone route returns 0 in multi-project Angular CLI workspaces.
 
-1. **Angular component template (`.html` inside a component dir)** — built-in LSP can't drive ngserver; use `mcp__vscode-mcp__get_symbol_lsp_info` / `get_references`.
+Reach for **`mcp__vscode-mcp__*`** when:
+
+1. **Angular component template (`.html` inside a component dir)** — built-in LSP can't drive ngserver; use `mcp__vscode-mcp__get_symbol_lsp_info`.
 2. **Real-time diagnostics** ("did my edit just break TS / lint?") — use `mcp__vscode-mcp__get_diagnostics` (instant; replaces slow `tsc --noEmit` / `eslint .`).
 3. **Workspace-wide rename** with import updates — use `mcp__vscode-mcp__rename_symbol`.
-4. **Multi-project ref tracing** where built-in LSP returned incomplete results — switch only after observing the gap.
+4. **Cross-file `findReferences` in TypeScript** in this multi-project workspace — built-in route returns 0; use `mcp__vscode-mcp__get_symbol_lsp_info` (avoids the 8KB truncation bug `get_references` hits on heavy-ref symbols).
 
-For everything else — especially single-file hover/goToDefinition on plain `.ts` files — the built-in `LSP` tool is the right call. Lower latency, no 8KB response truncation bug, no VSCode dependency. **Don't drift to vscode-mcp because the tool names sound more capable.**
+Reach for **`mcp__cclsp__*`** when:
 
-For SCSS specifically, **always use built-in `LSP`** — VSCode's bundled CSS server is weaker than `some-sass-language-server` (no real cross-file `@use`/`@forward` resolution).
+5. **Fuzzy global symbol search by name** ("find me a class/function called X-ish") — use `mcp__cclsp__find_workspace_symbols`. Returns symbols + file paths + line numbers. Unique to cclsp.
+
+For everything else — especially single-file hover/goToDefinition on plain `.ts` files — the built-in `LSP` tool is the right call. Lower latency, no 8KB response truncation, no VSCode dependency. **Don't drift to vscode-mcp because the tool names sound more capable.**
+
+For SCSS:
+- **Single-file ops** (definition, hover, documentSymbol) — built-in `LSP` (some-sass-language-server) is better than VSCode's bundled CSS server.
+- **Cross-file `findReferences`** — empirically broken across all LSP routes (server-side limitation in SCSS LSPs). Fall back to `grep`. SCSS variable/mixin names are usually unique enough that grep noise is manageable.
 
 **Project status for vscode-mcp:**
 - `strictTemplates: true` is already enabled in this repo's `tsconfig.json`, so Angular template intelligence via vscode-mcp works out of the box.
 - vscode-mcp setup (extensions + MCP server registration): see [w3geekery/claude-code-lsps CLAUDE.md](https://github.com/w3geekery/claude-code-lsps/blob/main/CLAUDE.md).
 
-Full routing table, failure-mode anchors, and detailed rationale: `~/.claude/rules/common/lsp-registry.md` (auto-loaded into every Claude Code session).
+Full routing table, failure-mode anchors, empirical findings, and detailed rationale: `~/.claude/rules/common/lsp-registry.md` (auto-loaded into every Claude Code session). Benchmarks: `~/Projects/zb/ui/.planning/lsp-bench/REPORT.md`.
 
 ## zb-dx — ZeroBias Developer Experience
 
