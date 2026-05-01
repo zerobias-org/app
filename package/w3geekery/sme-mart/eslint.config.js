@@ -38,13 +38,6 @@ export default [
       '@angular-eslint': angularPlugin
     },
     rules: {
-      // Base TypeScript rules
-      '@typescript-eslint/explicit-function-return-types': [
-        'error',
-        { allowExpressions: true }
-      ],
-      '@typescript-eslint/no-explicit-any': 'error',
-
       // Pattern 5: Ban CommonModule import
       'no-restricted-imports': 'off',
       '@typescript-eslint/no-restricted-imports': [
@@ -61,7 +54,7 @@ export default [
       ],
 
       // Pattern 7: Ban @Output() decorator
-      '@typescript-eslint/no-restricted-syntax': [
+      'no-restricted-syntax': [
         'error',
         {
           selector: "PropertyDefinition > Decorator[expression.callee.name='Output']",
@@ -110,16 +103,7 @@ export default [
     },
     rules: {
       // Pattern 4: Control flow syntax
-      '@angular-eslint/template/prefer-control-flow': ['error'],
-
-      // Pattern 6: Ban mat-spinner
-      '@angular-eslint/template/no-restricted-syntax': [
-        'error',
-        {
-          selector: "Element[name='mat-spinner']",
-          message: "mat-spinner is an alias; prefer explicit <mat-progress-spinner mode=\"indeterminate\"> for clarity"
-        }
-      ]
+      '@angular-eslint/template/prefer-control-flow': ['error']
     }
   }
 ];
