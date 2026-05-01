@@ -29,6 +29,7 @@
     "build:vercel": "ng build --configuration vercel",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
+    "lint": "eslint . --max-warnings=0",
     "test:report": "node scripts/test-report.js",
     "e2e": "playwright test --config e2e/playwright.config.ts",
     "e2e:debug": "playwright test --config e2e/playwright.config.ts --debug",
