@@ -1,5 +1,4 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonModule } from '@angular/material/button';
 import { Router } from '@angular/router';
@@ -18,7 +17,7 @@ import { Router } from '@angular/router';
 @Component({
   selector: 'app-onboarding-bootstrap-shell',
   standalone: true,
-  imports: [CommonModule, MatProgressSpinnerModule, MatButtonModule],
+  imports: [MatProgressSpinnerModule, MatButtonModule],
   templateUrl: './onboarding-bootstrap-shell.component.html',
   styleUrls: ['./onboarding-bootstrap-shell.component.scss'],
 })
