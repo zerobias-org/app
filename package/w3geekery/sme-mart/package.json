@@ -35,7 +35,8 @@
     "e2e:debug": "playwright test --config e2e/playwright.config.ts --debug",
     "e2e:report": "playwright show-report e2e/e2e-results",
     "demo:seed": "dotenv -e .env.local -- npx ts-node scripts/demo/seed.ts",
-    "demo:cleanup": "dotenv -e .env.local -- npx ts-node scripts/demo/cleanup.ts"
+    "demo:cleanup": "dotenv -e .env.local -- npx ts-node scripts/demo/cleanup.ts",
+    "prepare": "husky"
   },
   "prettier": {
     "printWidth": 100,
@@ -103,7 +104,9 @@
     "dotenv": "^16.6.1",
     "dotenv-cli": "^11.0.0",
     "eslint": "^10.2.1",
+    "husky": "^9.1.7",
     "jsdom": "^27.1.0",
+    "lint-staged": "^15.5.2",
     "ts-node": "^10.9.2",
     "typescript": "~5.9.2",
     "typescript-eslint": "^8.59.1",

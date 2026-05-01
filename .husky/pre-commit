@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+cd package/w3geekery/sme-mart
+npx lint-staged
