@@ -6,6 +6,7 @@ import { ZerobiasClientApi, ZerobiasClientApp } from '@zerobias-com/zerobias-cli
 import { onboardingGuard } from './onboarding.guard';
 import { OnboardingBootstrapService } from '../services/onboarding-bootstrap.service';
 import { MarketplaceProfileService } from '../services/marketplace-profile.service';
+import { ProjectContextService } from '../services/project-context.service';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 describe('onboardingGuard', () => {
@@ -14,6 +15,8 @@ describe('onboardingGuard', () => {
   let clientApi: any;
   let bootstrapService: { ensureDefaultEngagement: ReturnType<typeof vi.fn> };
   let profileService: { getCompletionStatus: ReturnType<typeof vi.fn> };
+  let projectContext: { setIsAdmin: ReturnType<typeof vi.fn> };
+  let getRequestOrgMemberMock: ReturnType<typeof vi.fn>;
   let injector: Injector;
 
   const mockRoute = {} as ActivatedRouteSnapshot;
@@ -30,16 +33,24 @@ describe('onboardingGuard', () => {
     router = { createUrlTree: vi.fn() };
     bootstrapService = { ensureDefaultEngagement: vi.fn() };
     profileService = { getCompletionStatus: vi.fn() };
+    projectContext = { setIsAdmin: vi.fn() };
 
     app = {
       whoAmI: vi.fn(),
       getCurrentOrgId: vi.fn(),
     };
 
+    // Default admin probe: non-admin. Admin tests override the mockResolvedValue.
+    getRequestOrgMemberMock = vi.fn().mockResolvedValue({ admin: false });
+
     clientApi = {
+      toUUID: vi.fn((id: string) => id),
       danaClient: {
         getMeApi: vi.fn().mockReturnValue({
           listMyOrgs: vi.fn(),
+        }),
+        getOrgApi: vi.fn().mockReturnValue({
+          getRequestOrgMember: getRequestOrgMemberMock,
         }),
       },
     };
@@ -57,6 +68,7 @@ describe('onboardingGuard', () => {
         { provide: ZerobiasClientApi, useValue: clientApi },
         { provide: OnboardingBootstrapService, useValue: bootstrapService },
         { provide: MarketplaceProfileService, useValue: profileService },
+        { provide: ProjectContextService, useValue: projectContext },
       ],
     });
 
@@ -205,5 +217,74 @@ describe('onboardingGuard', () => {
       'user-123',
       'party-789',
     );
+  });
+
+  describe('admin branch (AR-02)', () => {
+    beforeEach(() => {
+      app.whoAmI.mockResolvedValue(mockWhoAmI);
+      app.getCurrentOrgId.mockReturnValue('org-456');
+      clientApi.danaClient.getMeApi().listMyOrgs.mockResolvedValue([
+        { id: 'org-456', partyId: 'party-789', name: 'Test Org' },
+      ]);
+    });
+
+    it('Test 10: admin user → routes to /admin', async () => {
+      getRequestOrgMemberMock.mockResolvedValue({ admin: true });
+
+      const result = await runInInjectionContext(injector, () =>
+        onboardingGuard(mockRoute, mockState),
+      );
+
+      expect(getRequestOrgMemberMock).toHaveBeenCalledWith('user-123');
+      expect(router.createUrlTree).toHaveBeenCalledWith(['/admin']);
+      expect(result.toString()).toContain('/admin');
+    });
+
+    it('Test 11: admin path does NOT invoke getCompletionStatus or bootstrap', async () => {
+      getRequestOrgMemberMock.mockResolvedValue({ admin: true });
+
+      await runInInjectionContext(injector, () => onboardingGuard(mockRoute, mockState));
+
+      expect(profileService.getCompletionStatus).not.toHaveBeenCalled();
+      expect(bootstrapService.ensureDefaultEngagement).not.toHaveBeenCalled();
+    });
+
+    it('Test 12: projectContext.setIsAdmin(true) is called for admin users', async () => {
+      getRequestOrgMemberMock.mockResolvedValue({ admin: true });
+
+      await runInInjectionContext(injector, () => onboardingGuard(mockRoute, mockState));
+
+      expect(projectContext.setIsAdmin).toHaveBeenCalledWith(true);
+    });
+
+    it('Test 13: projectContext.setIsAdmin(false) is called for non-admin users', async () => {
+      getRequestOrgMemberMock.mockResolvedValue({ admin: false });
+      bootstrapService.ensureDefaultEngagement.mockResolvedValue({
+        engagementId: 'eng-123',
+        projectId: 'proj-123',
+        created: false,
+      });
+      profileService.getCompletionStatus.mockResolvedValue(true);
+
+      await runInInjectionContext(injector, () => onboardingGuard(mockRoute, mockState));
+
+      expect(projectContext.setIsAdmin).toHaveBeenCalledWith(false);
+    });
+
+    it('Test 14: admin probe failure → defaults to non-admin and continues normal flow', async () => {
+      getRequestOrgMemberMock.mockRejectedValue(new Error('SDK call failed'));
+      bootstrapService.ensureDefaultEngagement.mockResolvedValue({
+        engagementId: 'eng-123',
+        projectId: 'proj-123',
+        created: false,
+      });
+      profileService.getCompletionStatus.mockResolvedValue(true);
+
+      await runInInjectionContext(injector, () => onboardingGuard(mockRoute, mockState));
+
+      expect(projectContext.setIsAdmin).toHaveBeenCalledWith(false);
+      expect(bootstrapService.ensureDefaultEngagement).toHaveBeenCalled();
+      expect(router.createUrlTree).toHaveBeenCalledWith(['/projects']);
+    });
   });
 });

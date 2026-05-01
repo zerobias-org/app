@@ -10,14 +10,15 @@ import { firstValueFrom } from 'rxjs';
 import { ZerobiasClientApi, ZerobiasClientApp } from '@zerobias-com/zerobias-client';
 import { OnboardingBootstrapService } from '../services/onboarding-bootstrap.service';
 import { MarketplaceProfileService } from '../services/marketplace-profile.service';
+import { ProjectContextService } from '../services/project-context.service';
 
 /**
  * Onboarding guard — functional CanActivateFn that orchestrates:
  * 1. Session check (redirect unauthenticated users to /login)
- * 2. Admin branch (isAdmin=true → /admin)
+ * 2. Admin branch — danaClient.getOrgApi().getRequestOrgMember(userId).admin -> /admin
  * 3. Bootstrap call (ensure default engagement exists)
  * 4. Completion status check (MarketplaceProfileService.getCompletionStatus)
- * 5. Routing decision (incomplete → /onboarding/company-profile, complete → /projects)
+ * 5. Routing decision (incomplete -> /onboarding/company-profile, complete -> /projects)
  *
  * Per Phase 27 CONTEXT.md and AR-02/04/05/09 requirements.
  */
@@ -29,6 +30,7 @@ export const onboardingGuard: CanActivateFn = async (
   const clientApi = inject(ZerobiasClientApi);
   const bootstrap = inject(OnboardingBootstrapService);
   const profileService = inject(MarketplaceProfileService);
+  const projectContext = inject(ProjectContextService);
 
   // Step 1: Check session validity
   // Get current user from whoAmI; org is available via getCurrentOrgId()
@@ -72,10 +74,22 @@ export const onboardingGuard: CanActivateFn = async (
     // Continue anyway - bootstrap will handle this
   }
 
-  // Step 2: Admin branch (AR-02 — admin role detection)
-  // Note: Admin detection will be enhanced once getPrincipal() API is available
-  // For now, all users proceed to bootstrap and profile flow
-  // TODO: Implement proper admin detection via getPrincipal().isAdmin when SDK supports it
+  // Step 2: Admin branch (AR-02) — danaOld.Org.getRequestOrgMember.admin
+  // Request-org-scoped via dana-org-id header (set by SDK). orgMemberId == user's principal id.
+  let isAdmin = false;
+  try {
+    const orgMember = await clientApi.danaClient
+      .getOrgApi()
+      .getRequestOrgMember(clientApi.toUUID(userId));
+    isAdmin = !!orgMember.admin;
+  } catch (err) {
+    console.warn('[ONBOARDING_GUARD] Admin check failed; defaulting to non-admin', err);
+  }
+  projectContext.setIsAdmin(isAdmin);
+
+  if (isAdmin) {
+    return router.createUrlTree(['/admin']);
+  }
 
   // Step 3: Ensure default engagement exists (calls OnboardingBootstrapService)
   try {
