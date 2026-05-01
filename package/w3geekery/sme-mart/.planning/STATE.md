@@ -24,8 +24,8 @@ progress:
 
 Milestone: v1.4 3P Onboarding & Default Engagement
 Phase: 27.5
-Plan: Not started
-Status: Ready to execute
+Plan: 01 — Complete (ESLint Foundation)
+Status: Executing (Wave 1 complete, Plan 02 next)
 Last activity: 2026-05-01
 
 **Phase 20 closed 2026-04-29** (commits `977828c..904276d`):
@@ -46,6 +46,16 @@ Last activity: 2026-05-01
 - Plan 05: Routing integration E2E test — ✅ COMPLETE 2026-04-30 (commits `216ab62`, `064705e`, `4d21f2c`)
 
 **Build state after Plan 05:** `npx tsc --noEmit` clean, all Phase 28 tests 25/25 passing (component + service specs).
+
+**Phase 27.5 Progress (2026-05-01):**
+
+- Plan 01: ESLint Foundation — ✅ COMPLETE 2026-05-01
+  - ESLint v10.2.1 + flat config with 6/7 modernization patterns
+  - npm run lint script + angular.json lint builder wired
+  - Both commands exit identically on violations (exit code 1)
+  - Pre-existing violations baseline: 1561 errors
+  - Unit tests: 1602/1602 passing (no regression)
+  - Commits: 5368aff, 49b1895, 7e41252, 5da666f, e840763
 
 ---
 
