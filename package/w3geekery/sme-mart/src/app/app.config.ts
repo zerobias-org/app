@@ -8,6 +8,7 @@ import {
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import { MAT_SNACK_BAR_DEFAULT_OPTIONS } from '@angular/material/snack-bar';
 import { TranslateModule } from '@ngx-translate/core';
 import { TranslateHttpLoader, provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 import { provideZbDefaults } from '@zerobias-org/ngx-library';
@@ -25,6 +26,8 @@ import {
 import { routes } from './app.routes';
 import { environment } from '../environments/environment';
 import { AppInitService } from './core/app-init.service';
+import { OnboardingBootstrapService } from './core/services/onboarding-bootstrap.service';
+import { MarketplaceProfileService } from './core/services/marketplace-profile.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -36,6 +39,12 @@ export const appConfig: ApplicationConfig = {
     // ngx-library Material defaults (form-field, paginator, ripple, tabs)
     ...provideZbDefaults(),
 
+    // Material snackbar defaults (5s duration for error/info messages)
+    {
+      provide: MAT_SNACK_BAR_DEFAULT_OPTIONS,
+      useValue: { duration: 5000 },
+    },
+
     // ZeroBias SDK DI — environment config + abstract class implementations
     { provide: 'environment', useValue: environment },
     { provide: ZerobiasClientOrgId, useClass: ZerobiasClientOrgIdService },
@@ -44,6 +53,10 @@ export const appConfig: ApplicationConfig = {
 
     // Auth bootstrap — blocks Angular bootstrap until init() resolves
     provideAppInitializer(() => inject(AppInitService).init()),
+
+    // Onboarding services (guard dependencies)
+    OnboardingBootstrapService,
+    MarketplaceProfileService,
 
     // ngx-translate — required by ngx-library table components
     ...provideTranslateHttpLoader(),
