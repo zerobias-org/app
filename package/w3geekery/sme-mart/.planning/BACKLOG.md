@@ -120,6 +120,20 @@ These depend on platform Task/Board/Boundary work. UI implementation deferred un
 
 ---
 
+## Angular 21 Modernization Polish (v1.5)
+
+**Purpose:** Deprecation cleanup surfaced incidentally while doing feature work. None block v1.4 ship; all are forward-compatibility hygiene against Angular's "intent to remove in v23" notices. Group as a dedicated modernization phase rather than bolting onto feature milestones (matches the policy in DECISIONS.md "v1.4 Test-Infra Deferral and Unit-Test Default" — feature milestones stay thematically coherent).
+
+| # | Concern | Surfaced in | Forward path | Est. |
+|---|---|---|---|---|
+| ANIM-01 | `provideAnimationsAsync` deprecated; `provideAnimations` also deprecated. Both flagged for removal in Angular v23. | Phase 27 Wave 3 commit `8a2d603` (incidental — `app.config.ts:10,37` was touched by guard wiring, not by animation work). Pre-existing since commit `be070b8` (Feb 2026). | Migrate to per-component `animate.enter` / `animate.leave` directives. Multi-component sweep + visual regression check on every Material transition consumer (dialogs, snackbars, menus, ripples, tabs). | medium-large |
+
+**Severity:** Forward-compat only. Currently on Angular 21; v23 removal gives runway. App functions today; deprecation warnings are noisy but non-blocking.
+
+**Related:** None yet — first entry in this cluster. Future Angular 21+ modernization items land here.
+
+---
+
 ## Cross-Engagement Multi-3PAO Audit Model (New 2026-04-13)
 
 From Brian's CEO notes + Miro board analysis. See [research doc](.planning/research/external/2026-04-13-ceo-miro-cross-engagement-audit-model.md). These reshape the current two-party model into a cross-engagement network with selective disclosure and scope-partitioned publishing.
