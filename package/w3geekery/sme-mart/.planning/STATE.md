@@ -57,6 +57,16 @@ Last activity: 2026-05-01
   - Unit tests: 1602/1602 passing (no regression)
   - Commits: 5368aff, 49b1895, 7e41252, 5da666f, e840763
 
+- Plan 02: Pre-Commit Hook Installation — ✅ COMPLETE 2026-05-01
+  - Installed husky@^9.1.7 and lint-staged@^15.5.2
+  - Created .husky/pre-commit hook (v9 pattern; runs npx lint-staged)
+  - Created .lintstagedrc.json targeting *.{ts,html} with eslint --max-warnings=0
+  - Rejection test: CommonModule import blocked (exit 1, rule name + file:line in output)
+  - Acceptance test: Signal-based component passes (exit 0, commit created and reverted cleanly)
+  - Latency measured: cold 3.914s, warm 4.687s (exceeds 3s target; flagged for Director review)
+  - Unit tests: 1602/1602 passing (no regression)
+  - Commits: 76eaaef, 28831b6
+
 ---
 
 ## Project Reference
