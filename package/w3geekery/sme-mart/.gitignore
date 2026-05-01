@@ -82,3 +82,4 @@ demo-seed-output.json
 .DS_Store
 Thumbs.db
 .vercel
+.claude/handoffs/
