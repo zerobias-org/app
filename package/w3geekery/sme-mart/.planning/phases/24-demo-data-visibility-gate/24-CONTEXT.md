@@ -64,6 +64,35 @@ Hide demo-seeded records from non-admin users in SME Mart UI. Admins retain full
 
 The pre-existing speculative description below (a/b/c bullets) is superseded by this pinning.
 
+#### Decision-Probe-1 RESULT (2026-05-01) — FAIL + deeper finding
+
+**Probe target:** boundary `c15fb2dc-4f8c-48b5-b27a-707bd516b005` (SME Marketplace DEV, W3Geekery org). Test corpus: 6 Engagements (1 tagged `a81cd320-...`, 5 with `tag: null`) + 19 SmeMartProjects (2 tagged `a81cd320-...`, 17 with `tag: null`). No records currently carry either demo UUID; the W3Geekery default tag `a81cd320-...` is the only positive tag in use.
+
+**Results:**
+
+| Filter | Returned | Expected | Verdict |
+|---|---|---|---|
+| `.eq.a81cd320-243e-44eb-bdd9-9824019ef3dd` (positive control) | 1 Engagement + 2 SmeMartProjects | 1 + 2 | ✅ works |
+| `.ne.81053c14-a8e5-4939-b538-c122c7d0eb1a` (single exclusion, demo UUID) | empty | 1 + 2 (none carry that UUID) | ❌ broken |
+| `.not in.81053c14-...,d618b602-...` (Approach A) | empty | 1 + 2 | ❌ broken |
+
+**Conclusions:**
+
+1. **`.ne.` and `.not in.` are broken on tag arrays in ZB GQL.** Both silently exclude all records — including ones whose tags don't match the excluded UUID. Negation operators on `tag` field are not implemented or are silently mis-implemented.
+2. **Even if `.ne.` worked, NULL semantics would still break the visibility goal.** Standard SQL: `NULL <> 'foo'` evaluates to NULL, not TRUE — meaning records with `tag: null` would be excluded by any `.ne.` filter. The W3Geekery boundary has 22/25 records with `tag: null` (legacy untagged demo data); these MUST remain visible to non-admin users post-Phase-24, but a `.ne.` filter would hide them.
+
+**Approach A and Approach B are BOTH non-viable.** Approach B (extending `GqlQueryOptions.filters` to support multiple `.ne.` literals) does not solve the underlying backend bug nor the NULL-handling problem. Plan 24-01 Task 5 should NOT be filled in with the original "extend filters shape" body — that body would implement a strategy that's still broken.
+
+**Phase 24 filter strategy needs redesign.** Director to convene gsd-plan with three viable redesign paths:
+
+- **Option X — Client-side filter (cheapest, ships in v1.4):** Service queries unfiltered. App-side filter strips records whose tag array contains a demo UUID. Simple, semantically correct, loses server-side pagination accuracy on large datasets. v1.4 dataset is small (<100 records) so pagination loss is negligible.
+- **Option Y — Positive include-tag (architectural cleanup, requires backfill):** Define a `marketplace` UUID. Every real (non-demo) class-Object gets it via Pipeline.receive. Backfill all existing untagged records via a one-shot script. Filter becomes `.eq.<marketplace>`. Scales correctly. Adds tagging discipline going forward. Requires migration work as a Phase 24 prerequisite or sub-plan.
+- **Option Z — Two-query union (server-side, no migration):** Service issues two queries — `(tag is null)` (if supported) and `.eq.<marketplace>` — unions in app layer. Pagination becomes complex. Requires verifying GQL `is null` predicate support; another probe.
+
+**Director's preliminary recommendation:** Option X for Phase 24 (cheapest path to ship the v1.4 visibility goal). Queue Option Y as a separate v1.5 phase for the architectural cleanup. Re-spec Plan 24-03 around client-side filtering. Plan 24-01 Task 5 stays empty / is removed in next gsd-plan revision.
+
+**Plan 24-03 remains BLOCKED until gsd-plan revises the filter strategy.**
+
 ### Admin Signal (LOCKED — verified by reading source 2026-04-30)
 
 - **API:** `ProjectContextService.isAdmin()` — Angular **Signal<boolean>**, NOT an Observable
@@ -75,14 +104,27 @@ The pre-existing speculative description below (a/b/c bullets) is superseded by 
 - **Phase 24 services MUST NOT re-call the admin SDK directly.** Always read via `ProjectContextService.isAdmin()`. Centralized signal prevents drift.
 - Memory entry `project_sme_mart_admin_detection.md` had the wrong API (`getPrincipal().isAdmin`) for ~7 days. Corrected 2026-04-30.
 
-### Object.tag Field Pattern (LOCKED — DECISIONS.md "Object.tag Field Shape", 2026-04-24)
+### Object.tag Field Pattern — REVISED 2026-05-01 (post-probe)
 
-- **Write at ingest:** `Pipeline.receive` payload includes `tag: [{ value: "<tag-uuid>" }]`
-- **Read filter (exclude):** GQL filter `tag: { value: ".ne.<tag-uuid>" }` — RFC4515 inverse
-- **Two UUIDs to exclude:** filter must NOT match EITHER global `demo` OR legacy `w3geekery.sme-mart.demo-seed`. Plan-author to choose between:
-  - (a) Two `.ne.` filters AND'd
-  - (b) Single `.not in.` filter (verify GQL support during research)
-  - (c) Server-side helper (verify backend support during research)
+- **Write at ingest (UNCHANGED, LOCKED — DECISIONS.md "Object.tag Field Shape", 2026-04-24):** `Pipeline.receive` payload includes `tag: [{ value: "<tag-uuid>" }]`. Demo seeder pushes the global `demo` UUID for new records (DG-01).
+- **Read filter strategy — Option X (CLIENT-SIDE POST-FILTER, LOCKED 2026-05-01):**
+  - Server-side queries fetch records **unfiltered** on `tag`. No `.ne.` / `.not in.` / negation predicate on the `tag` field.
+  - **Why server-side filtering is non-viable:** Decision-Probe-1 (2026-05-01) verified empirically that ZB GQL silently breaks negation on tag arrays — `.ne.` and `.not in.` both return empty regardless of actual tag values. Even if the backend bug were fixed, standard SQL NULL semantics would exclude `tag: null` records (22/25 in the W3Geekery boundary today), which are legitimate non-demo records that MUST remain visible to non-admins. See **Decision-Probe-1 RESULT** section above for full evidence.
+  - **Client-side post-filter (the gate):** App-side helper iterates fetched records and drops any whose `tag` array contains EITHER demo UUID:
+    - `81053c14-a8e5-4939-b538-c122c7d0eb1a` (global demo, marketplace tagType)
+    - `d618b602-21cc-40a1-a9fa-534b7bc1672c` (legacy `w3geekery.sme-mart.demo-seed`)
+  - **Records that PASS the filter (visible to all users):** `tag: null`, `tag: []`, or `tag: [<other-uuid>]` where no element matches a demo UUID. Only records actively carrying a demo UUID are stripped.
+  - **Admin signal short-circuit:** `ProjectContextService.isAdmin()` returns `true` → bypass post-filter entirely; admin sees the unfiltered server response. Returns `false` → apply post-filter.
+- **Pagination caveat (v1.4-acceptable):**
+  - The post-filter runs after `pageSize` records have already been fetched. If 3 of 25 returned records are demo, the user sees 22, not a back-filled 25. v1.4 dataset is < 100 records total per class — the under-fill is cosmetic and acceptable.
+  - DO NOT implement compensating over-fetch logic for v1.4. If pagination accuracy becomes user-visible, escalate to v1.5 (Option Y migration) rather than papering over it.
+  - Document this caveat in `24-SUMMARY.md` at phase close.
+- **Helper centralization (Phase 24 implementation):**
+  - `DemoVisibilityService.isLocalDemoTagged(record): boolean` — pure predicate over the record's `tag` field. Returns `true` iff any element's `value` matches a demo UUID. (Renamed from the now-defunct `buildExcludeFilter()` which produced a server-side filter object.)
+  - `DemoVisibilityService.applyVisibility<T>(records: T[]): T[]` — short-circuits on `isAdmin()`; otherwise filters out demo-tagged records.
+  - Services consume `applyVisibility(...)` once per fetched page right before returning to callers. No GQL filter merge.
+- **Per-service touch surface unchanged.** The 21 services from `24-RESEARCH.md` Touched Services Inventory still need wiring — the wiring shape changes from "merge filter into GQL options" to "wrap return value with applyVisibility()".
+- **Superseded:** the (a/b/c) bullets that lived here — "two `.ne.` filters AND'd / single `.not in.` filter / server-side helper" — were eliminated by Decision-Probe-1. None work. Do NOT revisit any server-side `tag` negation strategy unless Director redesigns under Option Y/Z (separate phase).
 
 ### Admin Delete-Demo Action (DG-04) — PINNED 2026-05-01 (Path c)
 
