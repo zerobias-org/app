@@ -106,7 +106,15 @@ A shared knowledge base for any developer building on `zerobias-sdk` / `zerobias
 
 ## Angular 21 Patterns
 
-**READ [`.planning/docs/MODERNIZATION_GUIDE.md`](.planning/docs/MODERNIZATION_GUIDE.md) before writing any component.** `@Input`/`@Output`/constructor injection are banned — use `input()`/`output()`/`inject()`. When modifying a file with old patterns, migrate what you touch.
+**READ [`.planning/docs/MODERNIZATION_GUIDE.md`](.planning/docs/MODERNIZATION_GUIDE.md) before writing any component.** `@Input`/`@Output`/constructor injection are banned — use `input()`/`output()`/`inject()`. See the guide for the full pattern list.
+
+**Machine-enforced (Phase 27.5, 2026-05-01):** ESLint config at [`eslint.config.js`](eslint.config.js) encodes the modernization rules. Every commit is gated by the pre-commit hook ([`../../../.husky/pre-commit`](../../../.husky/pre-commit) + [`.lintstagedrc.json`](.lintstagedrc.json)); every PR/push is gated by [`../../../.github/workflows/lint.yml`](../../../.github/workflows/lint.yml). Both gates run **diff-based** — they only check files in your change. Warnings are treated as failures (`--max-warnings=0`).
+
+**Touch It = Fix It.** When you modify a file, fix every modernization-rule violation in that file as part of the same change. Pre-existing violations in **untouched** files do not block your PR — they're tracked in [`.planning/phases/27.5-modernization-enforcement/INITIAL-AUDIT.md`](.planning/phases/27.5-modernization-enforcement/INITIAL-AUDIT.md) and `MODERN-CLEANUP-1` ([`.planning/BACKLOG.md`](.planning/BACKLOG.md)) for organic migration.
+
+**If lint fires on you,** see the troubleshooting section in [MODERNIZATION_GUIDE.md](.planning/docs/MODERNIZATION_GUIDE.md#if-lint-fires-on-you--troubleshooting-common-violations) for before/after fixes for the common rules.
+
+**Emergency bypass** (`git commit --no-verify`) is human-only and requires explicit authorization. Agents must never use it. If used, file an errata immediately under `.planning/director/errata/`.
 
 ## File Naming Convention
 
