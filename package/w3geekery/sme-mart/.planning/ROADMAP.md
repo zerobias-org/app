@@ -73,9 +73,12 @@
 - [x] **Phase 26: Seed Provider (ZB-as-Provider)** (Plan 01/3 complete 2026-04-28) — Create ZeroBias as provider with company_info convention (est. 5-7 hrs)
   - [x] **Plan 01 (Wave 1)** — Ratify company-info convention + lock platform-provider distinguisher (option-b: MPI provider_type section) (completed 2026-04-28)
 - [ ] **Phase 27: Auth Gate + Onboarding Routing + Lazy Guard** (TBD plans) — Authenticate users, route to onboarding or board, auto-create default engagement (est. 8-12 hrs)
-- 🔄 **Phase 27.5: Modernization Rule Enforcement** (INSERTED 2026-04-30, Plans 01-02 active) — ESLint + pre-commit hook + CI lint gate; convert prose patterns block into machine-enforced rules (est. 4-6 hrs)
+- [x] **Phase 27.5: Modernization Rule Enforcement** (INSERTED 2026-04-30, ALL COMPLETE 2026-05-01) — ESLint + pre-commit hook + CI lint gate; converted prose patterns block into machine-enforced rules. Verifier 8/8 ENF-* requirements ✅ (`.planning/phases/27.5-modernization-enforcement/27.5-VERIFICATION.md`). Director-approved pivots: Plan 03 lint-only diff-based CI (full `npm test` blocked by 1561 pre-existing violations + private-registry auth); Plan 04 inventory snapshot (INITIAL-AUDIT.md) instead of annotation sweep (~15-20 hrs avoided). Touch-It-Fix-It cleanup model adopted via MODERN-CLEANUP-1.
   - [x] **Plan 01 (Wave 1)** — ESLint Foundation: flat config + npm run lint + ng lint (completed 2026-05-01; 6/7 patterns configured; 1561 pre-existing violations documented)
   - [x] **Plan 02 (Wave 2)** — Pre-Commit Hook Installation: husky v9 + lint-staged gating violations at commit time; rejection + acceptance tests verified (completed 2026-05-01; latency 3.9-4.7s flagged for Director review)
+  - [x] **Plan 03 (Wave 3)** — CI Lint Gate (diff-based): `.github/workflows/lint.yml` runs `npx lint-staged --diff=...` on PR; tooling installed into RUNNER_TEMP to bypass workspace `.npmrc` private-registry auth blocker (Director-approved pivot from full `npm test` + lint)
+  - [x] **Plan 04 (Wave 4)** — Inventory Snapshot: INITIAL-AUDIT.md (12KB, 796 violations across 15 rules, methodology + per-rule top-10 violators); MODERN-CLEANUP-1 reframed from annotation sweep to touch-it-fix-it (Director-approved pivot)
+  - [x] **Plan 05 (Wave 5)** — Developer Guidance: MODERNIZATION_GUIDE.md Touch-It-Fix-It section + troubleshooting (8 BEFORE/AFTER fixes), CLAUDE.md machine-enforcement note + cross-links to all gates
 - [x] **Phase 28: Company Profile Review/Confirm Form** (5 plans, ALL COMPLETE 2026-04-30) — Pre-populate from platform data, confirm + save (est. 6-10 hrs)
   - [x] **Plan 01 (Wave 0)** — Constants + Model: 17 section-name constants + 4 TypeScript types (struct, record DTO, snapshot, dirty-fields) (completed 2026-04-30)
   - [x] **Plan 02 (Wave 1)** — MarketplaceProfileService adapter: GQL read + Pipeline write + dirty-diff + completion status (completed 2026-04-30)
@@ -579,6 +582,7 @@ This phase is intentionally deferred from v1.4. When v1.5 begins, Phase 29 work 
 | 25. Platform Data Audit | 3/5 | In progress | 2026-04-24 (Plans 01-03 complete) |
 | 26. Seed Provider (ZB-as-Provider) | 4/4 | Complete    | 2026-04-29 |
 | 27. Auth Gate + Routing | 3/4 | Complete    | 2026-05-01 |
+| 27.5. Modernization Enforcement | 5/5 | Complete    | 2026-05-01 |
 | 28. Company Profile Form | 4/5 | Complete    | 2026-04-30 |
 | 29. DEFERRED TO v1.5 | — | Skipped | — |
 | 30. Default Project Board | 0/? | Not started | — |

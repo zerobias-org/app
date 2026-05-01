@@ -1,31 +1,32 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.5
-milestone_name: **Tier Display / Terms of Service / ZB Branding**
+milestone: v1.4
+milestone_name: 3P Onboarding & Default Engagement
 status: executing
-last_updated: "2026-05-01T00:38:39.603Z"
+current_phase: 24
+last_updated: "2026-05-01T23:30:00.000Z"
 last_activity: 2026-05-01
 progress:
   total_phases: 20
-  completed_phases: 9
-  total_plans: 45
-  completed_plans: 43
+  completed_phases: 10
+  total_plans: 50
+  completed_plans: 48
 ---
 
 # STATE.md -- Session Context
 
 **Session Name:** `poc/sme-mart`
 **Date Created:** 2026-04-24
-**Current Focus:** Phase 27 — auth-onboarding-guard
+**Current Focus:** Phase 24 — Demo Data Visibility Gate (next-up, ready to execute)
 
 ---
 
 ## Current Position
 
 Milestone: v1.4 3P Onboarding & Default Engagement
-Phase: 27.5
-Plan: 01 — Complete (ESLint Foundation)
-Status: Executing (Wave 1 complete, Plan 02 next)
+Phase: 24 (next-up; Phase 27.5 closed 2026-05-01)
+Plan: TBD — Phase 24 re-spec'd around Option X, ready to execute
+Status: Executing (Phase 27.5 closed; Director fires `/gsd-execute-phase 24` next)
 Last activity: 2026-05-01
 
 **Phase 20 closed 2026-04-29** (commits `977828c..904276d`):
@@ -47,25 +48,18 @@ Last activity: 2026-05-01
 
 **Build state after Plan 05:** `npx tsc --noEmit` clean, all Phase 28 tests 25/25 passing (component + service specs).
 
-**Phase 27.5 Progress (2026-05-01):**
+**Phase 27.5 (Modernization Enforcement) — CLOSED 2026-05-01:**
 
-- Plan 01: ESLint Foundation — ✅ COMPLETE 2026-05-01
-  - ESLint v10.2.1 + flat config with 6/7 modernization patterns
-  - npm run lint script + angular.json lint builder wired
-  - Both commands exit identically on violations (exit code 1)
-  - Pre-existing violations baseline: 1561 errors
-  - Unit tests: 1602/1602 passing (no regression)
-  - Commits: 5368aff, 49b1895, 7e41252, 5da666f, e840763
-
-- Plan 02: Pre-Commit Hook Installation — ✅ COMPLETE 2026-05-01
-  - Installed husky@^9.1.7 and lint-staged@^15.5.2
-  - Created .husky/pre-commit hook (v9 pattern; runs npx lint-staged)
-  - Created .lintstagedrc.json targeting *.{ts,html} with eslint --max-warnings=0
-  - Rejection test: CommonModule import blocked (exit 1, rule name + file:line in output)
-  - Acceptance test: Signal-based component passes (exit 0, commit created and reverted cleanly)
-  - Latency measured: cold 3.914s, warm 4.687s (exceeds 3s target; flagged for Director review)
-  - Unit tests: 1602/1602 passing (no regression)
-  - Commits: 76eaaef, 28831b6
+- 5/5 plans complete; verifier 8/8 ENF-* requirements ✅
+- Verification report: `.planning/phases/27.5-modernization-enforcement/27.5-VERIFICATION.md`
+- Director-approved pivots:
+  1. Plan 03 — diff-based lint-only CI (`.github/workflows/lint.yml`) instead of full `npm test` + lint. Rationale: 1561 pre-existing violations + fork lacks ZB private-registry auth (Vault/ZB_TOKEN blocker); tooling installed into RUNNER_TEMP as workaround.
+  2. Plan 04 — inventory snapshot (INITIAL-AUDIT.md) instead of annotation sweep. Rationale: ~15-20 hrs avoided; Touch-It-Fix-It cleanup model adopted via reframed MODERN-CLEANUP-1 BACKLOG entry.
+- Plan 01: ESLint Foundation (commits 5368aff, 49b1895, 7e41252, 5da666f, e840763) — flat config, 6/7 patterns, 1561 pre-existing violations baselined
+- Plan 02: Pre-Commit Hook (commits 76eaaef, 28831b6) — husky v9 + lint-staged, latency 3.9-4.7s flagged
+- Plan 03: CI Lint Gate — `.github/workflows/lint.yml` with diff-based lint-staged + RUNNER_TEMP tooling
+- Plan 04: Inventory + BACKLOG reframe — INITIAL-AUDIT.md + MODERN-CLEANUP-1 (touch-it-fix-it)
+- Plan 05: Developer Guidance — MODERNIZATION_GUIDE.md Touch-It-Fix-It + troubleshooting (8 BEFORE/AFTER fixes); CLAUDE.md machine-enforcement note + cross-links
 
 ---
 
@@ -203,7 +197,7 @@ claude --resume poc/sme-mart
 
 **Next step:**
 
-`/gsd:execute-phase 28` (Plan 02) -- MarketplaceProfileService adapter for pre-fill/save logic
+`/gsd-execute-phase 24` -- Phase 24 (Demo Data Visibility Gate), re-spec'd around Option X, ready to execute. Director fires this as the next major action.
 
 **If starting fresh:**
 
@@ -216,5 +210,5 @@ claude --resume poc/sme-mart
 
 ---
 
-**Last Updated:** 2026-04-30 17:10 UTC
-**Milestone v1.4:** EXECUTING — Phase 20 closed (2026-04-29), Phase 26 closed (2026-04-29), Phase 25 Plans 01-03 complete, Phase 28 closed (2026-04-30, 5/5 plans + 8/8 must-haves), **Phase 27 Wave 1 complete (27-01 + 27-02, 2026-04-30)**; Phase 27 Plan 03 (onboarding guard, checkpoint) is next.
+**Last Updated:** 2026-05-01 23:30 UTC
+**Milestone v1.4:** EXECUTING — Phase 20 closed (2026-04-29), Phase 26 closed (2026-04-29), Phase 25 Plans 01-03 complete, Phase 28 closed (2026-04-30, 5/5 plans + 8/8 must-haves), Phase 27 closed (2026-05-01, AR-01..AR-06 validated), **Phase 27.5 closed (2026-05-01, 5/5 plans + 8/8 ENF-* requirements verified)**; Phase 24 (Demo Data Visibility Gate, re-spec'd around Option X) is next-up.
