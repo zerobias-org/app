@@ -80,9 +80,24 @@ export default [
     }
   },
 
-  // Spec-specific overrides (exemptions)
+  // Spec-specific configuration (separate tsconfig.spec.json)
   {
     files: ['**/*.spec.ts'],
+    languageOptions: {
+      parser: tseslint.parser,
+      parserOptions: {
+        project: './tsconfig.spec.json',
+        sourceType: 'module',
+        ecmaVersion: 'latest',
+        ecmaFeatures: {
+          jsx: true
+        }
+      }
+    },
+    plugins: {
+      '@typescript-eslint': tseslint.plugin,
+      '@angular-eslint': angularPlugin
+    },
     rules: {
       '@angular-eslint/prefer-standalone': 'off'
     }
