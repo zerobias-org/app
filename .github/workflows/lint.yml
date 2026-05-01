@@ -31,16 +31,19 @@ jobs:
           node-version-file: package/w3geekery/sme-mart/.nvmrc
 
       - name: Install lint tooling (public npm only, no auth)
+        # Versions pinned to match package.json devDependencies so CI runs
+        # against the same eslint stack developers use locally. All public
+        # registry packages — no @zerobias-* private deps, no auth required.
         run: |
           npm install --no-save \
             --registry=https://registry.npmjs.org \
-            eslint \
-            @angular-eslint/eslint-plugin \
-            @angular-eslint/eslint-plugin-template \
-            @angular-eslint/template-parser \
-            @typescript-eslint/parser \
-            @typescript-eslint/eslint-plugin \
-            typescript \
+            eslint@^10.2.1 \
+            @eslint/js@^10.0.1 \
+            typescript-eslint@^8.59.1 \
+            @angular-eslint/eslint-plugin@^21.3.1 \
+            @angular-eslint/eslint-plugin-template@^21.3.1 \
+            @angular-eslint/template-parser@^21.3.1 \
+            typescript@~5.9.2 \
             lint-staged
 
       - name: Lint changed files (diff-based)
