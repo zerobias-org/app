@@ -7,7 +7,9 @@
 
 ## Goal
 
-Hide demo-seeded records from non-admin users in SME Mart UI. Admins (via `getPrincipal().isAdmin`) retain full visibility and gain an explicit "delete demo data" escape hatch. Demo data stays on UAT — this is an application-layer gate, NOT a destructive cleanup.
+Hide demo-seeded records from non-admin users in SME Mart UI. Admins retain full visibility and gain an explicit "delete demo data" escape hatch. Demo data stays on UAT — this is an application-layer gate, NOT a destructive cleanup.
+
+**Admin signal source:** consume `ProjectContextService.isAdmin$` (or whatever the equivalent observable / signal is named — verify by reading the service after Phase 27 closure). The admin flag is hydrated by `onboardingGuard` (Phase 27 Wave 2 patch `d4c542e`) via the MCP-verified contract `clientApi.danaClient.getOrgApi().getRequestOrgMember(orgMemberId)` returning `OrgMemberExtendedWithAdminFlag.admin: boolean`. Phase 24 services MUST NOT re-call the admin SDK directly — read from `ProjectContextService` so the admin signal stays centralized and consistent.
 
 ## Architecture
 
@@ -15,7 +17,8 @@ Hide demo-seeded records from non-admin users in SME Mart UI. Admins (via `getPr
 - Demo data currently visible to everyone (seeded via `src/app/test-helpers/demo-data-seeder.ts` + `scripts/demo/helpers.ts` → Pipeline.receive for class Objects; `hydra.Resource.*` for hydra-side resources).
 - A hydra Tag `w3geekery.sme-mart.demo-seed` already marks hydra Resources created by the seeder.
 - Class-Object records (Engagement, SmeMartProject, Bid, etc.) have had no tagging mechanism until 2026-04-24 — now resolved: `Object.tag` field accepts `[{ value: "<tag-uuid>" }]` at Pipeline.receive ingest time (see DECISIONS.md "Object.tag Field Shape").
-- Admin detection locked: `getPrincipal().isAdmin` from `OrgPrincipalWithAdminFlag` (see `project_sme_mart_admin_detection.md`, DECISIONS.md).
+- Admin detection locked AND wired: `clientApi.danaClient.getOrgApi().getRequestOrgMember(orgMemberId)` returns `OrgMemberExtendedWithAdminFlag.admin: boolean` (MCP-verified via `mcp__zerobias__zerobias_describe danaOld.Org.getRequestOrgMember`). Hydrated by `onboardingGuard` into `ProjectContextService.setIsAdmin()` as of Phase 27 Wave 2 patch `d4c542e`. Memory `project_sme_mart_admin_detection.md` was wrong (cited non-existent `getPrincipal().isAdmin`); CORRECTED 2026-04-30. See DECISIONS.md + `.planning/docs/SDK_VERIFICATION_SOURCES.md`.
+- `/admin` route exists in app routing (Phase 27 Wave 3 commit `3756443`); admins land there post-onboarding-guard. Phase 24's admin delete-demo escape hatch route lives under `/admin` (e.g., `/admin/demo-data` — exact path is plan-author choice).
 - **2026-04-29 update — global `demo` tag is now available** in `marketplace` tagType (zerobias-com/tag PR #1, merged by Daniel Rojas). Phase 24 implementation should prefer the global `demo` tag over the existing `w3geekery.sme-mart.demo-seed` for new demo records. Look up the global `demo` tag UUID via `hydra.Tag.searchTags({ name: "demo", type: "marketplace" })`. Existing records tagged with `w3geekery.sme-mart.demo-seed` stay (UUID-churn migration not worth it); the visibility gate filters on EITHER tag UUID for the transition. See DECISIONS.md "Marketplace tagType Is Preferred for New Tags".
 
 ### Deliverables
@@ -30,14 +33,14 @@ Hide demo-seeded records from non-admin users in SME Mart UI. Admins (via `getPr
 
 - **DG-01:** `demo-data-seeder.ts` populates `Object.tag` with the demo-seed tag UUID on every class-Object Pipeline.receive push.
 - **DG-02:** Core listing/search services filter OUT demo-tagged records for non-admin users via GQL `.ne.` filter on the tag field.
-- **DG-03:** Admin (`getPrincipal().isAdmin === true`) retains full visibility — no filter applied.
+- **DG-03:** Admin (`projectContext.isAdmin$` emits `true`) retains full visibility — no filter applied. Subscribe via the centralized service; do NOT call the admin SDK directly in Phase 24 services.
 - **DG-04:** Admin delete-demo action exists, bulk-`markDeleted`s all demo-tagged records via Pipeline.receive, and clears hydra Resources tagged `w3geekery.sme-mart.demo-seed`.
 - **DG-05:** Unit tests cover the three gate scenarios.
 
 ## Dependencies
 
 - Object.tag mechanism — VALIDATED 2026-04-24 (DECISIONS.md "Object.tag Field Shape"). No schema work required.
-- `getPrincipal().isAdmin` — in place (SDK-provided).
+- Admin signal — `ProjectContextService.isAdmin$` (or equivalent — verify by reading the service after Phase 27 closure). DO NOT re-implement admin detection.
 - Existing hydra Tag `w3geekery.sme-mart.demo-seed` — need its UUID; look up via `hydra.Tag.searchTags({ name: "w3geekery.sme-mart.demo-seed" })` or check memory.
 - Retroactive re-push of existing demo records (director brief, runs alongside Phase 24 or before it).
 
