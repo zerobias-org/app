@@ -14,9 +14,6 @@ export const environment = {
   // AuditgraphDB Pipeline + Boundary (UAT — SME Marketplace DEV boundary, W3Geekery org)
   pipelineId: 'f6d1f579-fe02-4158-b99e-a55113fd70cb',
   boundaryId: 'c15fb2dc-4f8c-48b5-b27a-707bd516b005',
-  // Branded login configuration (Vercel points to UAT)
-  brandedLoginSubdomain: 'https://w3geekery.uat.zerobias.com',
-  defaultLoginUrl: 'https://uat.zerobias.com/login',
   featureFlags: {
     prefsBackend: 'localStorage' as 'localStorage' | 'pkv',
   },

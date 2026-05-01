@@ -3,14 +3,16 @@ import { ZerobiasClientApp } from '@zerobias-com/zerobias-client';
 import { TranslateService } from '@ngx-translate/core';
 import { SmeMartDbService } from './services/sme-mart-db.service';
 import { DemoModeService } from './services/demo-mode.service';
-import { environment } from '../../environments/environment';
 
 /**
  * Handles app initialization: i18n setup + ZeroBias auth bootstrap + DB connection.
  *
- * Called via `provideAppInitializer` in app.config.ts — Angular blocks
- * bootstrap until `init()` resolves, so by the time components render,
- * the user is authenticated and an org is selected.
+ * Called via `provideAppInitializer` in app.config.ts. The Zerobias SDK's
+ * `ZerobiasClientApp.whoAmI()` (used internally by `init`) handles the
+ * unauthenticated branch on its own — `redirectLogin()` sets
+ * `globalThis.location.href` to the same-origin login URL, which on a
+ * branded fork (e.g. `w3geekery.uat.zerobias.com`) lands the user at the
+ * branded login page automatically. We do not duplicate that path here.
  */
 @Injectable({ providedIn: 'root' })
 export class AppInitService {
@@ -22,19 +24,6 @@ export class AppInitService {
   async init(): Promise<boolean> {
     this.translate.setDefaultLang('en');
     this.translate.use('en');
-
-    // Check session status and redirect unauthenticated users to branded login.
-    // Probe whoAmI to detect 401; if unauthenticated, redirect to branded login URL
-    // with the current URL encoded as the redirect query parameter.
-    try {
-      const probe = await fetch(`${environment.apiHostname}/api/dana/me`, { credentials: 'include' });
-      if (probe.status === 401) {
-        this.redirectToBrandedLogin();
-      }
-    } catch (err) {
-      // Network error or other probe failure — log but don't block (SDK init will handle auth)
-      console.warn('[AppInit] Session probe failed:', err);
-    }
 
     const authResult = await this.app.init(
       (req: any) => req,
@@ -57,22 +46,5 @@ export class AppInitService {
     });
 
     return authResult;
-  }
-
-  /**
-   * Redirect unauthenticated user to branded login URL with return URL encoded.
-   * Uses brandedLoginSubdomain if available; falls back to defaultLoginUrl.
-   * Constructs: `<baseUrl>/login?redirect=<currentUrl>`
-   * Never returns (redirects at location.href level).
-   */
-  private redirectToBrandedLogin(): never {
-    const subdomain = environment.brandedLoginSubdomain ?? null;
-    const fallback = environment.defaultLoginUrl;
-    const baseUrl = subdomain ?? fallback;
-    const redirect = encodeURIComponent(location.href);
-    const target = `${baseUrl}/login?redirect=${redirect}`;
-    location.href = target;
-    // Resolve with a never-settling promise so Angular doesn't finish bootstrap before the redirect.
-    return new Promise<never>(() => {}) as never;
   }
 }
