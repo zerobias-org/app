@@ -221,6 +221,12 @@ Items deferred from the RFP gap analysis — revisit when Phase 1/2 plans are co
 | P3 | Site visit coordination through platform | Low | — |
 | CLEANUP-25 | Phase 25 audit residue cleanup — `markDeleted` for `mpi-test-a-cd7105df`, `mpi-test-b-cd7105df` (MarketplaceProfileItem class `7bcf86a5-91dc-520d-b9bf-e308b1078d46`) and `64047b6c-52e7-4592-ac1d-27f5020d1e01` TAG-SHAPE-TEST-C (SmeMartProject class `c66114a2-48e2-5b93-b7d6-7ccd6ef45a03`) | Low | Pipeline.receive requires non-empty `data`; piggyback on next real ingest per class. Pipeline `43f08afd-7ab9-4e99-a93c-619c46adaabe`. |
 
+## Modernization Cleanup (filed by Phase 27.5 — Modernization Rule Enforcement)
+
+| # | Item | Priority | Notes |
+|---|------|----------|-------|
+| MODERN-CLEANUP-2 | Pattern 6 — `<mat-spinner>` deprecated alias ban | Low | Phase 27.5 Plan 01 deferred this pattern; `@angular-eslint/eslint-plugin-template@21.3.1` ships no rule capable of banning a specific element name (no `no-restricted-syntax`, no `no-deprecated-element`, no equivalent). Existing handoff text-rule remains in force until enforcement lands. **Two implementation options to evaluate:** (1) base ESLint `no-restricted-syntax` against template AST `Element$1[name='mat-spinner']` — untested, ~30 min spike to verify selector resolves against angular-eslint template parser output; (2) tiny local ESLint plugin exposing `template/no-mat-spinner-alias` — ~45 min, deterministic, adds maintenance surface. Track existing `<mat-spinner>` instances in MODERN-CLEANUP-1's annotation pass output (Plan 04 audit) so the rule has a verified target list when implemented. |
+
 ## Platform Alignment
 
 | Item | Priority | Status | Notes |
