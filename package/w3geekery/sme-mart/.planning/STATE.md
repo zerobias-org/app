@@ -24,9 +24,9 @@ progress:
 ## Current Position
 
 Milestone: v1.4 3P Onboarding & Default Engagement
-Phase: 24 (next-up; Phase 27.5 closed 2026-05-01)
-Plan: TBD — Phase 24 re-spec'd around Option X, ready to execute
-Status: Executing (Phase 27.5 closed; Director fires `/gsd-execute-phase 24` next)
+Phase: 24 (executing; Plan 01 complete)
+Plan: 01 — Demo Visibility Service Foundation (Wave 0) — ✅ COMPLETE 2026-05-01
+Status: Executing (Plan 02 onwards — next)
 Last activity: 2026-05-01
 
 **Phase 20 closed 2026-04-29** (commits `977828c..904276d`):
@@ -60,6 +60,17 @@ Last activity: 2026-05-01
 - Plan 03: CI Lint Gate — `.github/workflows/lint.yml` with diff-based lint-staged + RUNNER_TEMP tooling
 - Plan 04: Inventory + BACKLOG reframe — INITIAL-AUDIT.md + MODERN-CLEANUP-1 (touch-it-fix-it)
 - Plan 05: Developer Guidance — MODERNIZATION_GUIDE.md Touch-It-Fix-It + troubleshooting (8 BEFORE/AFTER fixes); CLAUDE.md machine-enforcement note + cross-links
+
+**Phase 24 (Demo Data Visibility Gate) — EXECUTING:**
+
+- Plan 01: Demo Visibility Service Foundation (Wave 0) — ✅ COMPLETE 2026-05-01
+  - Task 1: Constants module (DEMO_TAG_UUID_LIST)
+  - Task 2: DemoVisibilityService with isLocalDemoTagged() + applyVisibility<T>()
+  - Task 3: Test helper (fakeProjectContextService mock)
+  - Task 4: Unit tests (12 test cases across 2 describe blocks)
+  - Requirements DG-01..DG-05 verified
+  - Commits: `eb66f96`, `c9b3e1f`, `d2e5f4a`, `2f8c6b9`
+  - Summary: `.planning/phases/24-demo-data-visibility-gate/24-01-SUMMARY.md`
 
 ---
 
