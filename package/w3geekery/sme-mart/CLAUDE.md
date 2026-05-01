@@ -138,6 +138,17 @@ Temporary hosting while the ZeroBias platform publishing path is WIP.
 - **Env vars:** `ZB_API_KEY`, `ZB_ORG_ID`, `ZB_TOKEN`, `GITHUB_TOKEN` (set in Vercel dashboard)
 - **Branch:** `poc/sme-mart` (auto-deploys on push)
 
+## Deployment Paths (LOCKED 2026-05-01)
+
+3P customer apps in `zerobias-org/app` deploy ONLY to: **uat, qa, prod**.
+
+- `dev` and `ci` are valid ZB **platform** environments (ZB itself runs there) but are NOT deploy targets for any 3P customer app in this repo.
+- Local dev server (`ng serve` via `npm run dev*`) can target ANY ZB env (dev/ci/uat/qa/prod) — that's local-machine testing against an upstream platform env, not a deployment of our app.
+- CI workflows MUST NOT reference `dev` or `ci` as deploy targets for this app.
+- Cross-fork PRs from `w3geekery/app:poc/sme-mart` target only `zerobias-org/app:{uat,qa,prod}`.
+
+Sweep tracker: BACKLOG.md `DEV-CI-PURGE-1` (strip remaining `build:dev` / `build:ci` script variants + branch→env mappings from app-root docs).
+
 ## Key Constraints
 
 - **No Nx** — plain Angular CLI (`ng serve`, `ng build`, `angular.json`)
