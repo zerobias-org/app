@@ -15,6 +15,10 @@ on:
       - qa
       - prod
 
+permissions:
+  contents: read
+  id-token: write  # required for Vault JWT auth
+
 defaults:
   run:
     working-directory: package/w3geekery/sme-mart
@@ -22,6 +26,13 @@ defaults:
 jobs:
   test-and-lint:
     runs-on: ubuntu-latest
+    # Job-level env mirrors zb/ui's pr-develop-tests.yml — needed by .npmrc
+    # auth tokens at install time. Vault override applied per-step below.
+    env:
+      NPM_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      ZB_TOKEN: ${{ secrets.ZB_TOKEN }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -33,8 +44,22 @@ jobs:
           cache: npm
           cache-dependency-path: package/w3geekery/sme-mart/package-lock.json
 
+      - name: Import secrets
+        uses: hashicorp/vault-action@v2.4.3
+        with:
+          method: jwt
+          url: ${{ secrets.VAULT_ADDR }}
+          role: publishing-role
+          path: gh-actions
+          secrets: |
+            operations-kv/data/ci/github readPackagesToken | READ_TOKEN ;
+
       - name: Install dependencies
         run: npm ci
+        env:
+          NPM_TOKEN: ${{ env.READ_TOKEN }}
+          GITHUB_TOKEN: ${{ env.READ_TOKEN }}
+          ZB_TOKEN: ${{ secrets.ZB_TOKEN }}
 
       - name: Lint
         run: npm run lint
