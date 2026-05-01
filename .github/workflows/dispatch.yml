@@ -2,7 +2,7 @@ name: Dispatch Deploys
 
 on:
   push:
-    branches: [main, qa, dev, uat]
+    branches: [main, uat, qa]
     paths:
       - 'package/*/*/**'
 
@@ -21,24 +21,27 @@ jobs:
           BRANCH=${GITHUB_REF##*/}
           echo "BRANCH_NAME=$BRANCH" >> $GITHUB_ENV
 
-          if [[ "$BRANCH" == "main" || "$BRANCH" == "uat" ]]; then
-            echo "AWS_ACCOUNT_NAME=prod" >> $GITHUB_ENV
-            if [[ "$BRANCH" == "uat" ]]; then
+          case "$BRANCH" in
+            main)
+              echo "ENV_NAME=prod" >> $GITHUB_ENV
+              echo "AWS_ACCOUNT_NAME=prod" >> $GITHUB_ENV
+              echo "DNS_HOST=app" >> $GITHUB_ENV
+              ;;
+            uat)
               echo "ENV_NAME=uat" >> $GITHUB_ENV
+              echo "AWS_ACCOUNT_NAME=prod" >> $GITHUB_ENV
               echo "DNS_HOST=uat" >> $GITHUB_ENV
-            else
-               echo "ENV_NAME=prod" >> $GITHUB_ENV
-               echo "DNS_HOST=app" >> $GITHUB_ENV
-            fi
-          else
-            echo "ENV_NAME=$BRANCH" >> $GITHUB_ENV
-            echo "AWS_ACCOUNT_NAME=dev" >> $GITHUB_ENV
-            if [[ "$BRANCH" == "dev" ]]; then
-              echo "DNS_HOST=ci" >> $GITHUB_ENV
-            else
+              ;;
+            qa)
+              echo "ENV_NAME=qa" >> $GITHUB_ENV
+              echo "AWS_ACCOUNT_NAME=dev" >> $GITHUB_ENV
               echo "DNS_HOST=qa" >> $GITHUB_ENV
-            fi
-          fi
+              ;;
+            *)
+              echo "::error::Unsupported branch '$BRANCH'. Supported: main, uat, qa"
+              exit 1
+              ;;
+          esac
 
       - name: Import secrets
         uses: hashicorp/vault-action@v2.4.3
