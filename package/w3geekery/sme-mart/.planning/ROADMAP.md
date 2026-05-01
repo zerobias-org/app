@@ -73,6 +73,7 @@
 - [x] **Phase 26: Seed Provider (ZB-as-Provider)** (Plan 01/3 complete 2026-04-28) — Create ZeroBias as provider with company_info convention (est. 5-7 hrs)
   - [x] **Plan 01 (Wave 1)** — Ratify company-info convention + lock platform-provider distinguisher (option-b: MPI provider_type section) (completed 2026-04-28)
 - [ ] **Phase 27: Auth Gate + Onboarding Routing + Lazy Guard** (TBD plans) — Authenticate users, route to onboarding or board, auto-create default engagement (est. 8-12 hrs)
+- [ ] **Phase 27.5: Modernization Rule Enforcement** (INSERTED 2026-04-30, TBD plans) — ESLint + pre-commit hook + CI lint gate; convert prose patterns block into machine-enforced rules (est. 4-6 hrs)
 - [x] **Phase 28: Company Profile Review/Confirm Form** (5 plans, ALL COMPLETE 2026-04-30) — Pre-populate from platform data, confirm + save (est. 6-10 hrs)
   - [x] **Plan 01 (Wave 0)** — Constants + Model: 17 section-name constants + 4 TypeScript types (struct, record DTO, snapshot, dirty-fields) (completed 2026-04-30)
   - [x] **Plan 02 (Wave 1)** — MarketplaceProfileService adapter: GQL read + Pipeline write + dirty-diff + completion status (completed 2026-04-30)
@@ -448,11 +449,29 @@
   5. Admin users skip onboarding form and go directly to admin dashboard
   6. Object.tag populated at ingest time for both new Engagement and SmeMartProject with validated shape
 
-**Plans:** 3/4 plans executed
+**Plans:** 3/4 plans complete
 
 **Estimates:** 8-12 hrs
 
 **UI hint**: yes
+
+---
+
+### Phase 27.5: Modernization Rule Enforcement (ESLint + pre-commit + CI gate) (INSERTED)
+
+**Goal:** Machine-enforced modernization rules at commit time and in CI so violations physically cannot land — convert the prose patterns block (CLAUDE.md / MODERNIZATION_GUIDE.md / handoff prompts) into ESLint rules wired into a pre-commit hook + CI lint gate.
+
+**Depends on:** Phase 27 (close before introducing a new gate mid-verification)
+
+**Requirements:** ENF-01, ENF-02, ENF-03, ENF-04, ENF-05, ENF-06, ENF-07, ENF-08
+
+**Brief:** `.planning/director/phase-27.5-brief.md`
+
+**Plans:** 0 plans (run `/gsd:plan-phase 27.5` to break down)
+
+**Estimates:** 4-6 hrs
+
+**UI hint**: no
 
 ---
 
@@ -557,7 +576,7 @@ This phase is intentionally deferred from v1.4. When v1.5 begins, Phase 29 work 
 | 24. Demo Data Visibility Gate | 0/? | Not started | — |
 | 25. Platform Data Audit | 3/5 | In progress | 2026-04-24 (Plans 01-03 complete) |
 | 26. Seed Provider (ZB-as-Provider) | 4/4 | Complete    | 2026-04-29 |
-| 27. Auth Gate + Routing | 3/4 | In Progress|  |
+| 27. Auth Gate + Routing | 3/4 | Complete    | 2026-05-01 |
 | 28. Company Profile Form | 4/5 | Complete    | 2026-04-30 |
 | 29. DEFERRED TO v1.5 | — | Skipped | — |
 | 30. Default Project Board | 0/? | Not started | — |

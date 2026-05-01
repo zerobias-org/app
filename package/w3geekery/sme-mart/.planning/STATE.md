@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 milestone: v1.5
 milestone_name: **Tier Display / Terms of Service / ZB Branding**
 status: executing
-last_updated: "2026-05-01T00:17:52.429Z"
+last_updated: "2026-05-01T00:38:39.603Z"
 last_activity: 2026-05-01
 progress:
-  total_phases: 19
+  total_phases: 20
   completed_phases: 9
   total_plans: 45
   completed_plans: 43
@@ -23,8 +23,8 @@ progress:
 ## Current Position
 
 Milestone: v1.4 3P Onboarding & Default Engagement
-Phase: 27 (auth-onboarding-guard) — EXECUTING
-Plan: 4 of 4
+Phase: 27.5
+Plan: Not started
 Status: Ready to execute
 Last activity: 2026-05-01
 
@@ -166,6 +166,10 @@ Platform observations (carry-forward):
 **Dependencies validated:** Phase 24/25 independent, Phase 27 depends on 24, Phase 28 depends on 25+26, Phase 30 depends on 26+27+28, Phase 31 depends on all prior
 
 **Phase 20 (Fire-and-Forget Audit)** ran interleaved with v1.4 onboarding work (commits `977828c..904276d`, closed 2026-04-29) and is no longer interleaved — it is closed.
+
+### Roadmap Evolution
+
+- Phase 27.5 inserted after Phase 27 (2026-04-30): Modernization Rule Enforcement — ESLint + pre-commit + CI gate (URGENT). Origin: Phase 27 Wave 2 imported `CommonModule` despite the rule being pasted in CONTEXT.md and handoff. Brief: `.planning/director/phase-27.5-brief.md`. Blocks Phase 30 + 31 plans until closed.
 
 ---
 

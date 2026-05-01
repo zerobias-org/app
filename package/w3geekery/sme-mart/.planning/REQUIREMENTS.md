@@ -33,12 +33,12 @@ Requirements for v1.4 "3P Onboarding & Default Engagement". Each maps to roadmap
 
 ### Auth & Routing (Phase 27)
 
-- [ ] **AR-01**: Unauthenticated users are redirected to the branded login URL on any SME Mart route
-- [ ] **AR-02**: Post-auth routing: unconfirmed profile -> Phase 28 form, confirmed profile -> Phase 30 board
-- [ ] **AR-03**: Lazy-on-load guard queries for the default ZB engagement; creates it via the full bootstrap recipe if missing; idempotent on retry
-- [ ] **AR-04**: Guard failure surfaces a user-friendly error + retry, not a crash
-- [ ] **AR-05**: Admin users (`getPrincipal().isAdmin`) skip onboarding form, go to admin dashboard
-- [ ] **AR-06**: Guard populates Object.tag at ingest time for both new Engagement and new SmeMartProject (validated `[{ value }]` shape)
+- [x] **AR-01**: Unauthenticated users are redirected to the branded login URL on any SME Mart route
+- [x] **AR-02**: Post-auth routing: unconfirmed profile -> Phase 28 form, confirmed profile -> Phase 30 board
+- [x] **AR-03**: Lazy-on-load guard queries for the default ZB engagement; creates it via the full bootstrap recipe if missing; idempotent on retry
+- [x] **AR-04**: Guard failure surfaces a user-friendly error + retry, not a crash
+- [x] **AR-05**: Admin users (`getPrincipal().isAdmin`) skip onboarding form, go to admin dashboard
+- [x] **AR-06**: Guard populates Object.tag at ingest time for both new Engagement and new SmeMartProject (validated `[{ value }]` shape)
 
 ### Company Profile (Phase 28)
 
@@ -145,12 +145,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SP-04 | Phase 26 | Complete |
 | SP-05 | Phase 26 | Complete |
 | SP-06 | Phase 26 | Complete |
-| AR-01 | Phase 27 | Pending |
-| AR-02 | Phase 27 | Pending |
-| AR-03 | Phase 27 | Pending |
-| AR-04 | Phase 27 | Pending |
-| AR-05 | Phase 27 | Pending |
-| AR-06 | Phase 27 | Pending |
+| AR-01 | Phase 27 | Complete |
+| AR-02 | Phase 27 | Complete |
+| AR-03 | Phase 27 | Complete |
+| AR-04 | Phase 27 | Complete |
+| AR-05 | Phase 27 | Complete |
+| AR-06 | Phase 27 | Complete |
 | CP-01 | Phase 28 | Complete |
 | CP-02 | Phase 28 | Complete |
 | CP-03 | Phase 28 | Complete |
