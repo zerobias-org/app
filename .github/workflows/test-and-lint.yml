@@ -1,0 +1,43 @@
+name: Test and Lint (sme-mart)
+
+# Runs on pull_request to ANY base branch and on push to feature branches.
+# Deployment branches (main/uat/qa/prod) are excluded from push trigger because
+# they're reached via PR review (which already runs this workflow). Director
+# directive 2026-05-01: dev is NOT and never will be a deploy path for any 3P
+# customer app in zerobias-org/app — see DEV-CI-PURGE-1 for the broader sweep.
+
+on:
+  pull_request:
+  push:
+    branches-ignore:
+      - main
+      - uat
+      - qa
+      - prod
+
+defaults:
+  run:
+    working-directory: package/w3geekery/sme-mart
+
+jobs:
+  test-and-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: package/w3geekery/sme-mart/.nvmrc
+          cache: npm
+          cache-dependency-path: package/w3geekery/sme-mart/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test
