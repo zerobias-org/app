@@ -1,5 +1,35 @@
 # Director Decisions
 
+## Object.tag Write Route — Embed-in-Data Only (2026-05-04)
+**Date:** 2026-05-04 (Director MCP probe discovery)
+**Decision:** All `Pipeline.receive` calls that write tags to objects MUST embed tags directly in the data payload as `tag: [{value: "<uuid>"}, ...]` BEFORE creating the SimpleBatch. The SimpleBatch constructor's 3rd argument (tagIds array) is batch/job metadata and does NOT populate Object.tag on GQL read-back. Pass an empty `[]` as the 3rd arg.
+
+**Pattern:**
+```typescript
+const existingTag = (data['tag'] as Array<{ value: string }> | undefined) ?? [];
+const merged = mergeTagValues(existingTag, tagIds);
+const ensured = {
+  ...data,
+  ...(tagIds.length > 0 ? { tag: merged } : {})
+};
+new SimpleBatch(classId, [ensured], []) // Pass empty [], tags in data
+```
+
+**Why:** 2026-05-04 empirical validation (Director MCP probe on UAT) confirmed: pushed SmeMartProject with tagIds route (SimpleBatch 3rd arg) → Object.tag read back as null. Pushed identical SmeMartProject with data-embedding route → Object.tag read back with correct UUID. SimpleBatch arg 3 serves internal Hub pipeline tracking only, not user-facing data assignment.
+
+**Affected Sites (Fixed 2026-05-04):**
+- `src/app/test-helpers/demo-data-seeder.ts` — Demo fixtures embed GLOBAL_DEMO tag in payload (was already correct)
+- `scripts/demo/helpers.ts` — pushEntity() now embeds tags in data (commit `aad578d`)
+- `src/app/core/services/pipeline-write.service.ts` — pushEntities() now embeds tags in data (commit `aad578d`)
+
+**Verification:** 15 round-trip tests added (scripts-demo-helpers.spec.ts) + 6 tag-embedding tests in pipeline-write.service.spec.ts. All passing. Object.tag confirmed populated on GQL read-back for all fixed sites.
+
+**Anti-pattern:** Passing tagIds to SimpleBatch 3rd argument, assuming it populates Object.tag. The pattern looks correct (there's a tagIds parameter) but silently fails — tag writes don't error, they just drop the tags. Always verify tag presence with round-trip test (write → GQL read → assert Object.tag is not null).
+
+**Prevention:** When adding new tag-write sites, include round-trip test: create object with tags → GQL query → assert `Object.tag.value` array contains expected UUIDs.
+
+---
+
 ## Phase 20 Telemetry `callSiteTag` Uses Post-Edit `await` Line Number
 **Date:** 2026-04-29
 **Decision:** The `callSiteTag` parameter passed to `pipelineWrite.pushEntity` / `pushEntities` / `deleteEntity` uses the line number where the `await` call lands AFTER the try/catch wrap, not the original pre-edit line number from AUDIT.md. Format remains `<service>.service:<line>`. Going forward, future audit-and-remediate phases that introduce telemetry tags follow the same convention: post-edit line, not audit-row anchor.
