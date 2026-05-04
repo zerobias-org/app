@@ -21,7 +21,7 @@ const angularEslintOverride = {
 export default [
   // Global ignores
   {
-    ignores: ['node_modules/**', 'dist/**', '.angular/**', '.next/**', 'scripts/**']
+    ignores: ['node_modules/**', 'dist/**', '.angular/**', '.next/**', 'scripts/**/*.mjs', 'scripts/**/*.js', 'scripts/**/*.py', 'scripts/**/*.sh']
   },
 
   // TypeScript configuration
@@ -77,6 +77,30 @@ export default [
           preferReadonlySignalProperties: true
         }
       ]
+    }
+  },
+
+  // scripts/demo CLI tools (separate scripts/demo/tsconfig.json)
+  // Baseline-only rule scope: Angular modernization rules disabled (no Angular code here).
+  // Revisit if scripts/demo grows Angular-shaped.
+  {
+    files: ['scripts/demo/**/*.ts'],
+    languageOptions: {
+      parser: tseslint.parser,
+      parserOptions: {
+        project: './scripts/demo/tsconfig.json',
+        sourceType: 'module',
+        ecmaVersion: 'latest'
+      }
+    },
+    plugins: {
+      '@typescript-eslint': tseslint.plugin,
+      '@angular-eslint': angularPlugin
+    },
+    rules: {
+      '@angular-eslint/prefer-standalone': 'off',
+      '@angular-eslint/prefer-inject': 'off',
+      '@angular-eslint/prefer-signals': 'off'
     }
   },
 

@@ -328,7 +328,6 @@ export async function createDocument(
   index: number,
 ): Promise<string> {
   const id = randomUUID();
-  const now = isoNow();
   const filename = index === 1 ? 'Scope-of-Work.pdf' : 'Requirements-Checklist.xlsx';
   const mimeType = index === 1
     ? 'application/pdf'
@@ -389,7 +388,6 @@ export async function createBid(
   vendorPartyId: string,
 ): Promise<string> {
   const id = randomUUID();
-  const now = isoNow();
   const data = {
     id,
     name: `Bid from ${vendorPartyId} on RFP ${rfpId}`,
