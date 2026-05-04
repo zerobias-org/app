@@ -17,6 +17,7 @@ import { SimpleBatch } from '@zerobias-com/platform-sdk';
 import { UUID, URL as ZbUrl } from '@zerobias-org/types-core-js';
 
 import { DemoConfig, DemoContext, DemoClassName } from './types';
+import { DEMO_TAG_UUIDS } from '../../src/app/core/constants/demo-tags';
 
 // ---------------------------------------------------------------------------
 // SME Mart AuditgraphDB class IDs (deterministic — same across environments)
@@ -316,7 +317,7 @@ export async function createRfp(context: DemoContext): Promise<string> {
     dateCreated: dateOnly(),
     dateLastModified: dateOnly(),
   };
-  await pushEntity(context, 'SmeMartProject', data, context.tagId ? [context.tagId] : []);
+  await pushEntity(context, 'SmeMartProject', data, [DEMO_TAG_UUIDS.GLOBAL_DEMO, ...(context.tagId ? [context.tagId] : [])]);
   console.info(`✓ RFP created: ${id}`);
   return id;
 }
@@ -353,7 +354,7 @@ export async function createDocument(
     dateCreated: dateOnly(),
     dateLastModified: dateOnly(),
   };
-  await pushEntity(context, 'SmeMartDocument', data, context.tagId ? [context.tagId] : []);
+  await pushEntity(context, 'SmeMartDocument', data, [DEMO_TAG_UUIDS.GLOBAL_DEMO, ...(context.tagId ? [context.tagId] : [])]);
   console.info(`✓ Document created: ${id} (${filename})`);
   return id;
 }
@@ -377,7 +378,7 @@ export async function inviteVendor(
     dateCreated: dateOnly(),
     dateLastModified: dateOnly(),
   };
-  await pushEntity(context, 'RfpInvitation', data, context.tagId ? [context.tagId] : []);
+  await pushEntity(context, 'RfpInvitation', data, [DEMO_TAG_UUIDS.GLOBAL_DEMO, ...(context.tagId ? [context.tagId] : [])]);
   console.info(`✓ Vendor invited: ${id}`);
   return id;
 }
@@ -410,7 +411,7 @@ export async function createBid(
     dateCreated: dateOnly(),
     dateLastModified: dateOnly(),
   };
-  await pushEntity(context, 'Bid', data, context.tagId ? [context.tagId] : []);
+  await pushEntity(context, 'Bid', data, [DEMO_TAG_UUIDS.GLOBAL_DEMO, ...(context.tagId ? [context.tagId] : [])]);
   console.info(`✓ Bid created: ${id}`);
   return id;
 }
@@ -438,7 +439,7 @@ export async function createFormSubmission(
     createdAt: now,
     updatedAt: now,
   };
-  await pushEntity(context, 'FormSubmission', data, context.tagId ? [context.tagId] : []);
+  await pushEntity(context, 'FormSubmission', data, [DEMO_TAG_UUIDS.GLOBAL_DEMO, ...(context.tagId ? [context.tagId] : [])]);
   console.info(`✓ Form submission created: ${id}`);
   return id;
 }
@@ -463,7 +464,7 @@ export async function createPilot(
     dateCreated: dateOnly(),
     dateLastModified: dateOnly(),
   };
-  await pushEntity(context, 'SmeMartProject', data, context.tagId ? [context.tagId] : []);
+  await pushEntity(context, 'SmeMartProject', data, [DEMO_TAG_UUIDS.GLOBAL_DEMO, ...(context.tagId ? [context.tagId] : [])]);
   console.info(`✓ Pilot created: ${id}`);
   return id;
 }
