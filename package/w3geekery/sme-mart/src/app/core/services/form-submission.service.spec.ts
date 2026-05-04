@@ -3,13 +3,15 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { FormSubmissionService } from './form-submission.service';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
+import { DemoVisibilityService } from './demo-visibility.service';
+import { ProjectContextService } from './project-context.service';
 import type { FormSubmission } from '../models/form-builder.model';
 import type { UUID } from '@zerobias-org/types-core-js';
 
 describe('FormSubmissionService', () => {
   let service: FormSubmissionService;
-  let pipelineWrite: { [key: string]: any };
-  let gqlRead: { [key: string]: any };
+  let pipelineWrite: ReturnType<typeof TestBed.inject<typeof PipelineWriteService>>;
+  let gqlRead: ReturnType<typeof TestBed.inject<typeof GraphqlReadService>>;
 
   beforeEach(() => {
     const pushEntityMock = vi.fn().mockResolvedValue(undefined);
@@ -47,8 +49,8 @@ describe('FormSubmissionService', () => {
 
   describe('create', () => {
     it('should create a new FormSubmission with draft status', async () => {
-      const projectId = '11111111-1111-1111-1111-111111111111' as any as UUID;
-      const bidId = '22222222-2222-2222-2222-222222222222' as any as UUID;
+      const projectId = '11111111-1111-1111-1111-111111111111' as unknown as UUID;
+      const bidId = '22222222-2222-2222-2222-222222222222' as unknown as UUID;
 
       const result = await service.create(projectId, bidId);
 
@@ -61,24 +63,24 @@ describe('FormSubmissionService', () => {
     });
 
     it('should reject if projectId is missing', async () => {
-      const bidId = '22222222-2222-2222-2222-222222222222' as any as UUID;
+      const bidId = '22222222-2222-2222-2222-222222222222' as unknown as UUID;
 
-      await expect(service.create('' as any as UUID, bidId)).rejects.toThrow(
+      await expect(service.create('' as unknown as UUID, bidId)).rejects.toThrow(
         /projectId and bidId are required/,
       );
     });
 
     it('should reject if bidId is missing', async () => {
-      const projectId = '11111111-1111-1111-1111-111111111111' as any as UUID;
+      const projectId = '11111111-1111-1111-1111-111111111111' as unknown as UUID;
 
-      await expect(service.create(projectId, '' as any as UUID)).rejects.toThrow(
+      await expect(service.create(projectId, '' as unknown as UUID)).rejects.toThrow(
         /projectId and bidId are required/,
       );
     });
 
     it('should call pushEntity with correct class ID and flat object', async () => {
-      const projectId = '11111111-1111-1111-1111-111111111111' as any as UUID;
-      const bidId = '22222222-2222-2222-2222-222222222222' as any as UUID;
+      const projectId = '11111111-1111-1111-1111-111111111111' as unknown as UUID;
+      const bidId = '22222222-2222-2222-2222-222222222222' as unknown as UUID;
 
       await service.create(projectId, bidId);
 
@@ -92,7 +94,7 @@ describe('FormSubmissionService', () => {
 
   describe('getById', () => {
     it('should fetch FormSubmission by id', async () => {
-      const id = '33333333-3333-3333-3333-333333333333' as any as UUID;
+      const id = '33333333-3333-3333-3333-333333333333' as unknown as UUID;
       const mockData = {
         id,
         projectId: '11111111-1111-1111-1111-111111111111',
@@ -113,7 +115,7 @@ describe('FormSubmissionService', () => {
     });
 
     it('should return null if FormSubmission not found', async () => {
-      const id = '33333333-3333-3333-3333-333333333333' as any as UUID;
+      const id = '33333333-3333-3333-3333-333333333333' as unknown as UUID;
 
       gqlRead['getById'].mockResolvedValue(null);
 
@@ -123,7 +125,7 @@ describe('FormSubmissionService', () => {
     });
 
     it('should parse JSON submissionData on retrieval', async () => {
-      const id = '33333333-3333-3333-3333-333333333333' as any as UUID;
+      const id = '33333333-3333-3333-3333-333333333333' as unknown as UUID;
       const submissionDataObj = { field1: 'value1', field2: 123 };
       const mockData = {
         id,
@@ -145,8 +147,8 @@ describe('FormSubmissionService', () => {
 
   describe('getByProjectAndBid', () => {
     it('should fetch FormSubmission by projectId and bidId', async () => {
-      const projectId = '11111111-1111-1111-1111-111111111111' as any as UUID;
-      const bidId = '22222222-2222-2222-2222-222222222222' as any as UUID;
+      const projectId = '11111111-1111-1111-1111-111111111111' as unknown as UUID;
+      const bidId = '22222222-2222-2222-2222-222222222222' as unknown as UUID;
       const mockData = {
         id: '33333333-3333-3333-3333-333333333333',
         projectId,
@@ -170,8 +172,8 @@ describe('FormSubmissionService', () => {
     });
 
     it('should return null if no FormSubmission found for project/bid pair', async () => {
-      const projectId = '11111111-1111-1111-1111-111111111111' as any as UUID;
-      const bidId = '22222222-2222-2222-2222-222222222222' as any as UUID;
+      const projectId = '11111111-1111-1111-1111-111111111111' as unknown as UUID;
+      const bidId = '22222222-2222-2222-2222-222222222222' as unknown as UUID;
 
       gqlRead['query'].mockResolvedValue({
         items: [],
@@ -186,7 +188,7 @@ describe('FormSubmissionService', () => {
 
   describe('update', () => {
     it('should update FormSubmission status and data', async () => {
-      const id = '33333333-3333-3333-3333-333333333333' as any as UUID;
+      const id = '33333333-3333-3333-3333-333333333333' as unknown as UUID;
       const mockData = {
         id,
         projectId: '11111111-1111-1111-1111-111111111111',
@@ -206,7 +208,7 @@ describe('FormSubmissionService', () => {
     });
 
     it('should throw if update fails to fetch updated entity', async () => {
-      const id = '33333333-3333-3333-3333-333333333333' as any as UUID;
+      const id = '33333333-3333-3333-3333-333333333333' as unknown as UUID;
 
       gqlRead['getById'].mockResolvedValue(null);
 
@@ -218,8 +220,8 @@ describe('FormSubmissionService', () => {
 
   describe('markReviewed', () => {
     it('should mark submission as reviewed with timestamp and reviewer', async () => {
-      const id = '33333333-3333-3333-3333-333333333333' as any as UUID;
-      const reviewedBy = '44444444-4444-4444-4444-444444444444' as any as UUID;
+      const id = '33333333-3333-3333-3333-333333333333' as unknown as UUID;
+      const reviewedBy = '44444444-4444-4444-4444-444444444444' as unknown as UUID;
       const mockData = {
         id,
         projectId: '11111111-1111-1111-1111-111111111111',
@@ -245,9 +247,9 @@ describe('FormSubmissionService', () => {
   describe('isDraft', () => {
     it('should return true for draft submissions', () => {
       const submission: FormSubmission = {
-        id: '33333333-3333-3333-3333-333333333333' as any as UUID,
-        projectId: '11111111-1111-1111-1111-111111111111' as any as UUID,
-        bidId: '22222222-2222-2222-2222-222222222222' as any as UUID,
+        id: '33333333-3333-3333-3333-333333333333' as unknown as UUID,
+        projectId: '11111111-1111-1111-1111-111111111111' as unknown as UUID,
+        bidId: '22222222-2222-2222-2222-222222222222' as unknown as UUID,
         submissionData: {},
         status: 'draft',
         createdAt: new Date(),
@@ -259,9 +261,9 @@ describe('FormSubmissionService', () => {
 
     it('should return false for non-draft submissions', () => {
       const submission: FormSubmission = {
-        id: '33333333-3333-3333-3333-333333333333' as any as UUID,
-        projectId: '11111111-1111-1111-1111-111111111111' as any as UUID,
-        bidId: '22222222-2222-2222-2222-222222222222' as any as UUID,
+        id: '33333333-3333-3333-3333-333333333333' as unknown as UUID,
+        projectId: '11111111-1111-1111-1111-111111111111' as unknown as UUID,
+        bidId: '22222222-2222-2222-2222-222222222222' as unknown as UUID,
         submissionData: {},
         status: 'submitted',
         createdAt: new Date(),
@@ -274,7 +276,7 @@ describe('FormSubmissionService', () => {
 
   describe('getFormSubmissionLock', () => {
     it('should return true if any submission exists for project', async () => {
-      const projectId = '11111111-1111-1111-1111-111111111111' as any as UUID;
+      const projectId = '11111111-1111-1111-1111-111111111111' as unknown as UUID;
 
       gqlRead['query'].mockResolvedValue({
         items: [{ id: '33333333-3333-3333-3333-333333333333' }],
@@ -287,7 +289,7 @@ describe('FormSubmissionService', () => {
     });
 
     it('should return false if no submissions exist for project', async () => {
-      const projectId = '11111111-1111-1111-1111-111111111111' as any as UUID;
+      const projectId = '11111111-1111-1111-1111-111111111111' as unknown as UUID;
 
       gqlRead['query'].mockResolvedValue({
         items: [],
@@ -300,7 +302,7 @@ describe('FormSubmissionService', () => {
     });
 
     it('should return false on query error', async () => {
-      const projectId = '11111111-1111-1111-1111-111111111111' as any as UUID;
+      const projectId = '11111111-1111-1111-1111-111111111111' as unknown as UUID;
 
       gqlRead['query'].mockRejectedValue(new Error('Query failed'));
 
@@ -312,7 +314,7 @@ describe('FormSubmissionService', () => {
 
   describe('listByProject', () => {
     it('should list all submissions for a project with pagination', async () => {
-      const projectId = '11111111-1111-1111-1111-111111111111' as any as UUID;
+      const projectId = '11111111-1111-1111-1111-111111111111' as unknown as UUID;
       const mockData = [
         {
           id: '33333333-3333-3333-3333-333333333333',
@@ -338,13 +340,94 @@ describe('FormSubmissionService', () => {
     });
 
     it('should return empty array on query error', async () => {
-      const projectId = '11111111-1111-1111-1111-111111111111' as any as UUID;
+      const projectId = '11111111-1111-1111-1111-111111111111' as unknown as UUID;
 
       gqlRead['query'].mockRejectedValue(new Error('Query failed'));
 
       const results = await service.listByProject(projectId);
 
       expect(results).toEqual([]);
+    });
+  });
+
+  describe('Demo Visibility (Option X - Client-Side Post-Filter)', () => {
+    let demoVisibility: ReturnType<typeof TestBed.inject<typeof DemoVisibilityService>>;
+
+    beforeEach(() => {
+      const demoVisibilityMock = {
+        applyVisibility: vi.fn((records) => records)
+      };
+      const projectContextMock = {
+        isAdmin: vi.fn().mockReturnValue(false)
+      };
+
+      TestBed.configureTestingModule({
+        providers: [
+          FormSubmissionService,
+          { provide: PipelineWriteService, useValue: pipelineWrite },
+          { provide: GraphqlReadService, useValue: gqlRead },
+          { provide: DemoVisibilityService, useValue: demoVisibilityMock },
+          { provide: ProjectContextService, useValue: projectContextMock }
+        ]
+      });
+
+      service = TestBed.inject(FormSubmissionService);
+      demoVisibility = TestBed.inject(DemoVisibilityService);
+    });
+
+    it('[DG-02] listByProject strips demo records for non-admin users', async () => {
+      const projectId = '22222222-2222-2222-2222-222222222222' as unknown as UUID;
+      const realSubmission: FormSubmission = {
+        id: 'real-1' as UUID,
+        projectId,
+        bidId: 'bid-1' as UUID,
+        submissionData: {},
+        status: 'draft',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        tag: null
+      };
+      const demoSubmission: FormSubmission = {
+        id: 'demo-1' as UUID,
+        projectId,
+        bidId: 'bid-2' as UUID,
+        submissionData: {},
+        status: 'draft',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        tag: [{ value: '81053c14-a8e5-4939-b538-c122c7d0eb1a' }]
+      };
+
+      gqlRead['query'].mockResolvedValue({
+        items: [realSubmission, demoSubmission],
+        page: { pageNumber: 1, pageSize: 10 }
+      });
+      demoVisibility.applyVisibility.mockImplementation((records: Array<Record<string, unknown> & { tag?: Array<{ value: string }> | null }>) =>
+        records.filter(r => !r.tag?.some((t) => [
+          '81053c14-a8e5-4939-b538-c122c7d0eb1a',
+          'd618b602-21cc-40a1-a9fa-534b7bc1672c'
+        ].includes(t.value)))
+      );
+
+      const result = await service.listByProject(projectId);
+
+      expect(demoVisibility.applyVisibility).toHaveBeenCalled();
+      expect(result.length).toBe(1);
+      expect(result[0].id).toBe('real-1');
+    });
+
+    it('[DG-02] includes tag field in GQL query for listByProject', async () => {
+      const projectId = '33333333-3333-3333-3333-333333333333' as unknown as UUID;
+
+      gqlRead['query'].mockResolvedValue({
+        items: [],
+        page: { pageNumber: 1, pageSize: 10 }
+      });
+
+      await service.listByProject(projectId);
+
+      const fieldList = gqlRead['query'].mock.calls[0][1];
+      expect(fieldList).toContain('tag');
     });
   });
 });

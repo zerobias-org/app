@@ -3,6 +3,7 @@ import { UUID } from '@zerobias-org/types-core-js';
 import { FormSubmission } from '../models/form-builder.model';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService, type GqlQueryOptions } from './graphql-read.service';
+import { DemoVisibilityService } from './demo-visibility.service';
 
 /**
  * FormSubmissionService — Phase 16 Form Builder
@@ -24,6 +25,7 @@ import { GraphqlReadService, type GqlQueryOptions } from './graphql-read.service
 export class FormSubmissionService {
   private readonly pipelineWrite = inject(PipelineWriteService);
   private readonly gqlRead = inject(GraphqlReadService);
+  private readonly demoVisibility = inject(DemoVisibilityService);
 
   /** Scalar fields for standard GQL queries */
   private readonly formSubmissionFields = [
@@ -37,6 +39,7 @@ export class FormSubmissionService {
     'reviewedBy',
     'createdAt',
     'updatedAt',
+    'tag',
   ];
 
   /**
@@ -54,7 +57,7 @@ export class FormSubmissionService {
     const id = crypto.randomUUID();
 
     const submission: FormSubmission = {
-      id: id as any as UUID,
+      id: id as unknown as UUID,
       projectId,
       bidId,
       submissionData: {},
@@ -106,7 +109,8 @@ export class FormSubmissionService {
 
       // Seed cache for next call
       this.pipelineWrite.seedCache('FormSubmission', String(id), result);
-      return this.parseFormSubmission(result);
+      const filtered = this.demoVisibility.applyVisibility([result as (Record<string, unknown> & { tag?: Array<{ value: string }> | null })]).map(item => this.parseFormSubmission(item))[0] ?? null;
+      return filtered;
     } catch {
       return null;
     }
@@ -138,7 +142,8 @@ export class FormSubmissionService {
       // Seed cache with the retrieved item
       const itemId = String(item['id']);
       this.pipelineWrite.seedCache('FormSubmission', itemId, item);
-      return this.parseFormSubmission(item);
+      const filtered = this.demoVisibility.applyVisibility([item as (Record<string, unknown> & { tag?: Array<{ value: string }> | null })]).map(i => this.parseFormSubmission(i))[0] ?? null;
+      return filtered;
     } catch {
       return null;
     }
@@ -245,7 +250,8 @@ export class FormSubmissionService {
         options,
       );
 
-      return result.items.map(item => this.parseFormSubmission(item));
+      const filtered = this.demoVisibility.applyVisibility(result.items as (Record<string, unknown> & { tag?: Array<{ value: string }> | null })[]);
+      return filtered.map(item => this.parseFormSubmission(item));
     } catch {
       return [];
     }
