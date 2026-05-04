@@ -297,6 +297,7 @@ export async function pushEntity(
   const batch = new SimpleBatch(
     new UUID(classId),
     [ensured],
+    [], // tagIds: batch/job metadata (does NOT populate Object.tag) — tags embedded in data instead
   );
   await pipelineApi.receive(new UUID(context.config.pipelineId), batch);
 }

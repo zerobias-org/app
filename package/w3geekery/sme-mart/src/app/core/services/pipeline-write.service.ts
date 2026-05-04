@@ -207,6 +207,7 @@ export class PipelineWriteService {
     const batch = new SimpleBatch(
       new UUID(classId),
       ensured,
+      [], // tagIds: batch/job metadata (does NOT populate Object.tag) — tags embedded in data instead
     );
 
     try {

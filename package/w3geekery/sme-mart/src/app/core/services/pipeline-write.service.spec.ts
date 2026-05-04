@@ -97,6 +97,71 @@ describe('PipelineWriteService', () => {
       expect(service.getCached('Review', 'r1')).not.toBeNull();
       expect(service.getCached('Review', 'r2')).not.toBeNull();
     });
+
+    // ── Tag Embedding (2026-05-04 defect-fix) ──
+    // SimpleBatch constructor's 3rd argument (tagIds) is batch/job metadata that does NOT
+    // populate Object.tag on GQL read-back. Tags MUST be embedded in the data payload.
+
+    it('should embed tagIds into data payload as tag: [{value}] entries', async () => {
+      const tagUuid = '81053c14-a8e5-4939-b538-c122c7d0eb1a';
+      await service.pushEntities('Engagement', [
+        { id: 'e1', name: 'Test' },
+      ], [tagUuid]);
+
+      expect(mockPipelineApi.receive).toHaveBeenCalledTimes(1);
+      const batch = mockPipelineApi.receive.mock.calls[0][1];
+      expect(batch.data[0].tag).toEqual([{ value: tagUuid }]);
+    });
+
+    it('should NOT add tag field if tagIds is empty', async () => {
+      await service.pushEntities('Engagement', [
+        { id: 'e1', name: 'Test' },
+      ], []);
+
+      const batch = mockPipelineApi.receive.mock.calls[0][1];
+      expect(batch.data[0].tag).toBeUndefined();
+    });
+
+    it('should merge new tagIds with existing tag entries in data payload', async () => {
+      const existingTag = '81053c14-a8e5-4939-b538-c122c7d0eb1a';
+      const newTag = 'd618b602-21cc-40a1-a9fa-534b7bc1672c';
+      await service.pushEntities('Engagement', [
+        { id: 'e1', name: 'Test', tag: [{ value: existingTag }] },
+      ], [newTag]);
+
+      const batch = mockPipelineApi.receive.mock.calls[0][1];
+      expect(batch.data[0].tag).toEqual([
+        { value: existingTag },
+        { value: newTag },
+      ]);
+    });
+
+    it('should deduplicate tags when merging', async () => {
+      const tag1 = '81053c14-a8e5-4939-b538-c122c7d0eb1a';
+      const tag2 = 'd618b602-21cc-40a1-a9fa-534b7bc1672c';
+      await service.pushEntities('Engagement', [
+        { id: 'e1', name: 'Test', tag: [{ value: tag1 }, { value: tag2 }] },
+      ], [tag1, tag2]); // both already present
+
+      const batch = mockPipelineApi.receive.mock.calls[0][1];
+      expect(batch.data[0].tag).toEqual([
+        { value: tag1 },
+        { value: tag2 },
+      ]); // no duplicates
+    });
+
+    it('should construct SimpleBatch with 2 args (classId, ensured) — no 3rd tagIds arg', async () => {
+      const tagUuid = '81053c14-a8e5-4939-b538-c122c7d0eb1a';
+      await service.pushEntities('Engagement', [
+        { id: 'e1', name: 'Test' },
+      ], [tagUuid]);
+
+      expect(mockPipelineApi.receive).toHaveBeenCalledTimes(1);
+      const [, batch] = mockPipelineApi.receive.mock.calls[0];
+      // SimpleBatch should have data + classId, but tagIds array should be empty
+      // (since we embed into data instead)
+      expect(batch.tagIds).toEqual([]); // no 3rd-arg tagIds pass
+    });
   });
 
   // ── pushEntity ──
@@ -266,6 +331,7 @@ describe('PipelineWriteService', () => {
     it.each(CASES)(
       'pushEntities(%s) routes batch to canonical classId %s',
       async (className, expectedClassId) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await service.pushEntities(className as any, [
           { id: `rt-${className}-001`, name: `rt-${className}-001` },
         ]);
@@ -304,7 +370,7 @@ describe('PipelineWriteService', () => {
 
       try {
         await service.pushEntities('Bid', [{ id: 'b1', name: 'Test' }], [], 'bid-submit.component.ts:142');
-      } catch (e) {
+      } catch (_e) { // eslint-disable-line @typescript-eslint/no-unused-vars
         // Expected — error is re-thrown
       }
 
@@ -338,7 +404,7 @@ describe('PipelineWriteService', () => {
 
       try {
         await service.pushEntities('Note', [{ id: 'n1', name: 'Test' }], [], 'notes.service:52');
-      } catch (e) {
+      } catch (_e) { // eslint-disable-line @typescript-eslint/no-unused-vars
         // Expected
       }
 
@@ -359,7 +425,7 @@ describe('PipelineWriteService', () => {
 
       try {
         await service.pushEntity('Review', { id: 'r1', name: 'Test' }, [], 'review-submit.component.ts:85');
-      } catch (e) {
+      } catch (_e) { // eslint-disable-line @typescript-eslint/no-unused-vars
         // Expected
       }
 
@@ -379,7 +445,7 @@ describe('PipelineWriteService', () => {
 
       try {
         await service.deleteEntities('Note', ['n1', 'n2'], 'note-delete.component.ts:99');
-      } catch (e) {
+      } catch (_e) { // eslint-disable-line @typescript-eslint/no-unused-vars
         // Expected
       }
 
@@ -401,7 +467,7 @@ describe('PipelineWriteService', () => {
 
       try {
         await service.deleteEntity('Engagement', 'e1', 'engagement-delete.component.ts:44');
-      } catch (e) {
+      } catch (_e) { // eslint-disable-line @typescript-eslint/no-unused-vars
         // Expected
       }
 
@@ -421,7 +487,7 @@ describe('PipelineWriteService', () => {
 
       try {
         await service.pushEntities('Bid', [{ id: 'b1', name: 'Test' }]);
-      } catch (e) {
+      } catch (_e) { // eslint-disable-line @typescript-eslint/no-unused-vars
         // Expected
       }
 
