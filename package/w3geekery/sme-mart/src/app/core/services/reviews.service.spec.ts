@@ -11,9 +11,11 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { ReviewsService } from './reviews.service';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
+import { DemoVisibilityService } from './demo-visibility.service';
+import { ProjectContextService } from './project-context.service';
 import { REVIEW_FIELD_MAPPING } from '../field-mappings';
 import { REVIEW_GQL_FIXTURE } from '../../test-helpers/gql-fixtures';
-import { fakePipelineWriteService, fakeGraphqlReadService } from '../../test-helpers/angular';
+import { fakePipelineWriteService, fakeGraphqlReadService, fakeProjectContextService } from '../../test-helpers/angular';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 describe('ReviewsService (Pipeline + GraphQL)', () => {
@@ -21,17 +23,21 @@ describe('ReviewsService (Pipeline + GraphQL)', () => {
   let pipelineWrite: ReturnType<typeof fakePipelineWriteService>;
   let graphqlRead: ReturnType<typeof fakeGraphqlReadService>;
   let mockSnackBar: { open: ReturnType<typeof vi.fn> };
+  let mockProjectContext: ReturnType<typeof fakeProjectContextService>;
 
   beforeEach(() => {
     pipelineWrite = fakePipelineWriteService();
     graphqlRead = fakeGraphqlReadService();
     mockSnackBar = { open: vi.fn() };
+    mockProjectContext = fakeProjectContextService(false); // non-admin by default
 
     TestBed.configureTestingModule({
       providers: [
         ReviewsService,
+        DemoVisibilityService,
         { provide: PipelineWriteService, useValue: pipelineWrite },
         { provide: GraphqlReadService, useValue: graphqlRead },
+        { provide: ProjectContextService, useValue: mockProjectContext },
         { provide: MatSnackBar, useValue: mockSnackBar },
       ],
     });
@@ -344,15 +350,18 @@ describe('ReviewsService (Pipeline + GraphQL)', () => {
 
       // Map Neon → GQL
       const gqlShape = REVIEW_FIELD_MAPPING.neonToGql;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const gqlData: Record<string, any> = {};
       for (const [neonField, gqlField] of Object.entries(gqlShape)) {
         if (neonField in neonOriginal) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           gqlData[gqlField] = (neonOriginal as any)[neonField];
         }
       }
 
       // Map GQL → Neon (reverse)
       const gqlReverseShape = REVIEW_FIELD_MAPPING.gqlToNeon;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const neonResult: Record<string, any> = {};
       for (const [gqlField, neonField] of Object.entries(gqlReverseShape)) {
         if (gqlField in gqlData) {
@@ -367,5 +376,98 @@ describe('ReviewsService (Pipeline + GraphQL)', () => {
       expect(neonResult['approved']).toBe(neonOriginal.approved);
       expect(neonResult['approved_by']).toBe(neonOriginal.approved_by);
     });
+  });
+});
+
+describe('Demo visibility (Phase 24 Plan 03)', () => {
+  let service: ReviewsService;
+  let graphqlRead: ReturnType<typeof fakeGraphqlReadService>;
+  let mockProjectContext: ReturnType<typeof fakeProjectContextService>;
+
+  const mockGqlReturn = [
+    { ...REVIEW_GQL_FIXTURE, id: '1', tag: null },
+    { ...REVIEW_GQL_FIXTURE, id: '2', tag: [{ value: 'a81cd320-243e-44eb-bdd9-9824019ef3dd' }] },
+    { ...REVIEW_GQL_FIXTURE, id: '3', tag: [{ value: '81053c14-a8e5-4939-b538-c122c7d0eb1a' }] },
+    { ...REVIEW_GQL_FIXTURE, id: '4', tag: [{ value: 'd618b602-21cc-40a1-a9fa-534b7bc1672c' }] },
+  ];
+
+  beforeEach(() => {
+    graphqlRead = fakeGraphqlReadService();
+    mockProjectContext = fakeProjectContextService(false); // non-admin by default
+
+    TestBed.configureTestingModule({
+      providers: [
+        ReviewsService,
+        DemoVisibilityService,
+        { provide: PipelineWriteService, useValue: fakePipelineWriteService() },
+        { provide: GraphqlReadService, useValue: graphqlRead },
+        { provide: ProjectContextService, useValue: mockProjectContext },
+        { provide: MatSnackBar, useValue: { open: vi.fn() } },
+      ],
+    });
+
+    service = TestBed.inject(ReviewsService);
+  });
+
+  it('[DG-02] strips demo records for non-admin in listAdminReviews', async () => {
+    graphqlRead.query.mockResolvedValue({
+      items: mockGqlReturn,
+      page: { pageNumber: 1, pageSize: 50, totalCount: 4 },
+    });
+
+    const result = await service.listAdminReviews();
+
+    expect(result.items.length).toBeLessThan(4);
+  });
+
+  it('[DG-03] admin sees all records including demo in listAdminReviews', async () => {
+    graphqlRead.query.mockResolvedValue({
+      items: mockGqlReturn,
+      page: { pageNumber: 1, pageSize: 50, totalCount: 4 },
+    });
+    mockProjectContext.setIsAdmin(true);
+
+    const result = await service.listAdminReviews();
+
+    expect(result.items.length).toBe(4);
+  });
+
+  it('[DG-02] does NOT add server-side tag negation filter', async () => {
+    graphqlRead.query.mockResolvedValue({
+      items: mockGqlReturn,
+      page: { pageNumber: 1, pageSize: 50, totalCount: 4 },
+    });
+
+    await service.listAdminReviews();
+
+    const callArgs = graphqlRead.query.mock.calls[0];
+    const filters = callArgs[2]?.filters ?? {};
+    const filterValues = Object.values(filters).join(' ');
+    expect(filterValues).not.toContain('.not in.');
+    expect(filterValues).not.toContain('.ne.');
+  });
+
+  it('requests tag field in GQL query', async () => {
+    graphqlRead.query.mockResolvedValue({
+      items: mockGqlReturn,
+      page: { pageNumber: 1, pageSize: 50, totalCount: 4 },
+    });
+
+    await service.listAdminReviews();
+
+    const callArgs = graphqlRead.query.mock.calls[0];
+    const fields = callArgs[1] as string[];
+    expect(fields).toContain('tag');
+  });
+
+  it('[DG-02] applies filter to listPendingReviews', async () => {
+    graphqlRead.query.mockResolvedValue({
+      items: mockGqlReturn,
+      page: { pageNumber: 1, pageSize: 50, totalCount: 4 },
+    });
+
+    const result = await service.listPendingReviews();
+
+    expect(result.items.length).toBeLessThan(4);
   });
 });

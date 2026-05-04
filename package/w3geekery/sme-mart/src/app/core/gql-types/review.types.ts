@@ -6,6 +6,7 @@
  */
 
 // Forward declare to avoid circular dependency
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type GqlEngagementResponse = any;
 
 /**
@@ -19,6 +20,7 @@ export interface GqlReviewResponse {
   id: string;
   name?: string; // Typically "Review of [provider] from [engagement]"
   description?: string;
+  tag?: Array<{ value: string }> | null; // Object tag array for demo-visibility gating
 
   // Review-specific fields
   providerId: string;
