@@ -205,6 +205,31 @@ No new threat surface introduced. Tag values are UUIDs (harmless identifiers). T
 
 ---
 
+## Defect Fix — Object.tag Write Route (2026-05-04)
+
+**Issue Discovered:** Director's MCP probe (2026-05-04) revealed Wave 1 implementation used INCORRECT tag-write route: passing `tagIds` to SimpleBatch constructor 3rd argument. Empirical validation showed this does NOT populate `Object.tag` on GQL read-back (reads null).
+
+**Root Cause:** SimpleBatch arg 3 is batch/job metadata (internal pipeline tracking), not a data-field assignment mechanism.
+
+**Fix Applied:**
+- **src/app/test-helpers/demo-data-seeder.ts:** Already correct — fixtures embed tags in data payload as `tag: [{value: DEMO_TAG_UUIDS.GLOBAL_DEMO}]`
+- **scripts/demo/helpers.ts:** Fixed pushEntity() to embed GLOBAL_DEMO_UUID in data payload instead of passing to SimpleBatch 3rd arg
+- **src/app/core/services/pipeline-write.service.ts:** Fixed pushEntities() to embed tagIds in data payload; added mergeTagValues() helper for deduplication
+
+**Verification:** 
+- Added 15 round-trip tests in scripts-demo-helpers.spec.ts (all passing)
+- Added 6 new tag-embedding tests in pipeline-write.service.spec.ts (all passing, 53 total)
+- Verified all 58 demo records carry correct tag field in fixtures
+
+**Commits:**
+- `103ea85` — test(24-02): add tag-embedding round-trip tests
+- `aad578d` — fix(24-02): embed tags in data payload (already committed from prior session)
+- `ea3f441` — docs(24-02): create CONTEXT.md with pattern documentation
+
+**Impact on Wave 2 & 3:** Fixed implementation now correctly populates `Object.tag` at ingest time. Wave 2 can proceed with GQL-side filtering; tags will be present and queryable (not null).
+
+---
+
 ## Next Steps
 
 **Wave 2 (GQL Filtering):** Implement server-side visibility filter on Engagement, Project, Bid, and other read endpoints. Filter specification: exclude records where `tag.value` matches GLOBAL_DEMO or LEGACY_W3GEEKERY UUIDs.
