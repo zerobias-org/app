@@ -21,6 +21,7 @@ import type {
   DemoServiceOffering,
   DemoReview,
 } from '../core/models';
+import { DEMO_TAG_UUIDS } from '../core/constants/demo-tags';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Engagement Fixtures
@@ -51,6 +52,7 @@ export const DEMO_ENGAGEMENTS: DemoEngagement[] = [
     zerobiasTaskId: 'fb45b170-aae7-4991-a6ab-fc33b73d062f',
     createdAt: new Date(2026, 1, 15).toISOString(),
     updatedAt: new Date(2026, 2, 10).toISOString(),
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
   {
     id: 'eng-002-fintech',
@@ -69,6 +71,7 @@ export const DEMO_ENGAGEMENTS: DemoEngagement[] = [
     zerobiasTaskId: '43ce8d38-6335-4ee7-a782-01b4257d7239',
     createdAt: new Date(2026, 1, 20).toISOString(),
     updatedAt: new Date(2026, 2, 11).toISOString(),
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
   {
     id: 'eng-003-startup-xyz',
@@ -87,6 +90,7 @@ export const DEMO_ENGAGEMENTS: DemoEngagement[] = [
     zerobiasTaskId: '371abdc5-1d31-479d-98e4-d83462592b46',
     createdAt: new Date(2026, 1, 25).toISOString(),
     updatedAt: new Date(2026, 2, 12).toISOString(),
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
   {
     id: 'eng-004-lakewood',
@@ -105,6 +109,7 @@ export const DEMO_ENGAGEMENTS: DemoEngagement[] = [
     zerobiasTaskId: '3ec47264-7ec0-46ce-bf24-6c4d087f89de',
     createdAt: new Date(2026, 2, 1).toISOString(),
     updatedAt: new Date(2026, 2, 13).toISOString(),
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
   {
     id: 'eng-005-healthtech',
@@ -123,6 +128,7 @@ export const DEMO_ENGAGEMENTS: DemoEngagement[] = [
     zerobiasTaskId: 'ff4f20f0-61d3-4723-9a35-c0d3eeb3d16c',
     createdAt: new Date(2026, 2, 2).toISOString(),
     updatedAt: new Date(2026, 2, 14).toISOString(),
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
 ];
 
@@ -169,6 +175,7 @@ export const DEMO_PROJECTS: DemoSmeMartProject[] = [
     timeline: '4 weeks',
     buyerZerobiasUserId: 'demo-buyer-pinnacle',
     buyerZerobiasOrgId: 'org-pinnacle-corp',
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
   {
     id: 'proj-002-pinnacle-type2',
@@ -183,6 +190,7 @@ export const DEMO_PROJECTS: DemoSmeMartProject[] = [
     timeline: '6 months',
     buyerZerobiasUserId: 'demo-buyer-pinnacle',
     buyerZerobiasOrgId: 'org-pinnacle-corp',
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
   // ── FinTech Inc: 1 project ──
   {
@@ -200,6 +208,7 @@ export const DEMO_PROJECTS: DemoSmeMartProject[] = [
     timeline: '3 months',
     buyerZerobiasUserId: 'buyer-fintech-002',
     buyerZerobiasOrgId: 'org-fintech-inc',
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
   // ── Startup XYZ: 1 project ──
   {
@@ -217,6 +226,7 @@ export const DEMO_PROJECTS: DemoSmeMartProject[] = [
     timeline: '10-12 weeks',
     buyerZerobiasUserId: 'buyer-startup-003',
     buyerZerobiasOrgId: 'org-startup-xyz',
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
   // ── Lakewood Health: 1 project ──
   {
@@ -234,6 +244,7 @@ export const DEMO_PROJECTS: DemoSmeMartProject[] = [
     timeline: '6 weeks',
     buyerZerobiasUserId: 'demo-buyer-lakewood',
     buyerZerobiasOrgId: 'org-lakewood-health',
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
   // ── HealthTech Co: 1 project ──
   {
@@ -251,6 +262,7 @@ export const DEMO_PROJECTS: DemoSmeMartProject[] = [
     timeline: '4 weeks',
     buyerZerobiasUserId: 'buyer-health-004',
     buyerZerobiasOrgId: 'org-healthtech',
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -270,6 +282,7 @@ export const DEMO_PROJECTS: DemoSmeMartProject[] = [
     timeline: '3-4 weeks',
     responseDeadline: '2026-04-15',
     questionsDeadline: '2026-04-08',
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
   {
     id: 'rfp-002-cloud-security',
@@ -283,6 +296,7 @@ export const DEMO_PROJECTS: DemoSmeMartProject[] = [
     budgetMax: 15000,
     timeline: '4-6 weeks',
     responseDeadline: '2026-04-10',
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
   {
     id: 'rfp-003-ai-vuln-triage',
@@ -297,6 +311,7 @@ export const DEMO_PROJECTS: DemoSmeMartProject[] = [
     timeline: '8-12 weeks',
     responseDeadline: '2026-04-20',
     questionsDeadline: '2026-04-10',
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
   {
     id: 'rfp-004-fedramp',
@@ -309,6 +324,7 @@ export const DEMO_PROJECTS: DemoSmeMartProject[] = [
     budgetMin: 30000,
     budgetMax: 50000,
     timeline: '12-16 weeks',
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
   {
     id: 'rfp-005-soc2-acme',
@@ -324,6 +340,7 @@ export const DEMO_PROJECTS: DemoSmeMartProject[] = [
     responseDeadline: '2026-04-12',
     buyerZerobiasUserId: 'buyer-acme-001',
     buyerZerobiasOrgId: 'org-acme-corp',
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
   {
     id: 'rfp-006-hipaa-risk',
@@ -339,6 +356,7 @@ export const DEMO_PROJECTS: DemoSmeMartProject[] = [
     responseDeadline: '2026-04-14',
     buyerZerobiasUserId: 'demo-buyer-lakewood',
     buyerZerobiasOrgId: 'org-lakewood-health',
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
   {
     id: 'rfp-007-phi-monitoring',
@@ -354,6 +372,7 @@ export const DEMO_PROJECTS: DemoSmeMartProject[] = [
     responseDeadline: '2026-04-18',
     buyerZerobiasUserId: 'demo-buyer-lakewood',
     buyerZerobiasOrgId: 'org-lakewood-health',
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
   {
     id: 'rfp-008-soc-monitoring',
@@ -369,6 +388,7 @@ export const DEMO_PROJECTS: DemoSmeMartProject[] = [
     responseDeadline: '2026-04-16',
     buyerZerobiasUserId: 'demo-buyer-lakewood',
     buyerZerobiasOrgId: 'org-lakewood-health',
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
   {
     id: 'rfp-009-security-training',
@@ -384,6 +404,7 @@ export const DEMO_PROJECTS: DemoSmeMartProject[] = [
     responseDeadline: '2026-04-15',
     buyerZerobiasUserId: 'buyer-enterprise-005',
     buyerZerobiasOrgId: 'org-enterprise-co',
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
   {
     id: 'rfp-010-devsecops',
@@ -399,6 +420,7 @@ export const DEMO_PROJECTS: DemoSmeMartProject[] = [
     responseDeadline: '2026-04-14',
     buyerZerobiasUserId: 'demo-buyer-pinnacle',
     buyerZerobiasOrgId: 'org-pinnacle-corp',
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
   {
     id: 'rfp-011-evidence-prep',
@@ -414,6 +436,7 @@ export const DEMO_PROJECTS: DemoSmeMartProject[] = [
     responseDeadline: '2026-04-10',
     buyerZerobiasUserId: 'demo-buyer-pinnacle',
     buyerZerobiasOrgId: 'org-pinnacle-corp',
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
 ];
 
@@ -452,6 +475,7 @@ export const DEMO_BIDS: DemoBid[] = [
     status: 'accepted',
     createdAt: new Date(2026, 2, 6).toISOString(),
     updatedAt: new Date(2026, 2, 8).toISOString(),
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
   {
     id: 'bid-002-marcus-crystal',
@@ -465,6 +489,7 @@ export const DEMO_BIDS: DemoBid[] = [
     status: 'rejected',
     createdAt: new Date(2026, 2, 6).toISOString(),
     updatedAt: new Date(2026, 2, 8).toISOString(),
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
   {
     id: 'bid-003-james-velvet',
@@ -479,6 +504,7 @@ export const DEMO_BIDS: DemoBid[] = [
     status: 'accepted',
     createdAt: new Date(2026, 2, 7).toISOString(),
     updatedAt: new Date(2026, 2, 9).toISOString(),
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
   {
     id: 'bid-004-bob-amber',
@@ -492,6 +518,7 @@ export const DEMO_BIDS: DemoBid[] = [
     status: 'pending',
     createdAt: new Date(2026, 2, 8).toISOString(),
     updatedAt: new Date(2026, 2, 8).toISOString(),
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
   {
     id: 'bid-005-carlos-amber',
@@ -505,6 +532,7 @@ export const DEMO_BIDS: DemoBid[] = [
     status: 'withdrawn',
     createdAt: new Date(2026, 2, 8).toISOString(),
     updatedAt: new Date(2026, 2, 10).toISOString(),
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
   {
     id: 'bid-006-alex-silver',
@@ -518,6 +546,7 @@ export const DEMO_BIDS: DemoBid[] = [
     status: 'accepted',
     createdAt: new Date(2026, 2, 9).toISOString(),
     updatedAt: new Date(2026, 2, 11).toISOString(),
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
   {
     id: 'bid-007-gina-coral',
@@ -531,6 +560,7 @@ export const DEMO_BIDS: DemoBid[] = [
     status: 'accepted',
     createdAt: new Date(2026, 2, 10).toISOString(),
     updatedAt: new Date(2026, 2, 12).toISOString(),
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -550,6 +580,7 @@ export const DEMO_BIDS: DemoBid[] = [
     status: 'pending',
     createdAt: new Date(2026, 2, 20).toISOString(),
     updatedAt: new Date(2026, 2, 20).toISOString(),
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
   {
     id: 'bid-009-carlos-cloud',
@@ -563,6 +594,7 @@ export const DEMO_BIDS: DemoBid[] = [
     status: 'pending',
     createdAt: new Date(2026, 2, 21).toISOString(),
     updatedAt: new Date(2026, 2, 21).toISOString(),
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
 
   // AI Vulnerability Triage Agent (rfp-003)
@@ -578,6 +610,7 @@ export const DEMO_BIDS: DemoBid[] = [
     status: 'pending',
     createdAt: new Date(2026, 2, 18).toISOString(),
     updatedAt: new Date(2026, 2, 18).toISOString(),
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
   {
     id: 'bid-011-sarah-vuln',
@@ -591,6 +624,7 @@ export const DEMO_BIDS: DemoBid[] = [
     status: 'pending',
     createdAt: new Date(2026, 2, 19).toISOString(),
     updatedAt: new Date(2026, 2, 19).toISOString(),
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
   {
     id: 'bid-012-clark-vuln',
@@ -604,6 +638,7 @@ export const DEMO_BIDS: DemoBid[] = [
     status: 'pending',
     createdAt: new Date(2026, 2, 20).toISOString(),
     updatedAt: new Date(2026, 2, 20).toISOString(),
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
 
   // SOC 2 Type II - Acme Corp (rfp-005)
@@ -619,6 +654,7 @@ export const DEMO_BIDS: DemoBid[] = [
     status: 'pending',
     createdAt: new Date(2026, 2, 22).toISOString(),
     updatedAt: new Date(2026, 2, 22).toISOString(),
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
   {
     id: 'bid-014-james-acme',
@@ -632,6 +668,7 @@ export const DEMO_BIDS: DemoBid[] = [
     status: 'pending',
     createdAt: new Date(2026, 2, 23).toISOString(),
     updatedAt: new Date(2026, 2, 23).toISOString(),
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
 
   // SOC Monitoring Healthcare (rfp-008)
@@ -647,6 +684,7 @@ export const DEMO_BIDS: DemoBid[] = [
     status: 'pending',
     createdAt: new Date(2026, 2, 22).toISOString(),
     updatedAt: new Date(2026, 2, 22).toISOString(),
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
 ];
 
@@ -680,6 +718,7 @@ export const DEMO_BID_RESPONSES: DemoBidResponse[] = [
     certificationRef: 'SOC 2 CC6.1',
     readyDate: '2026-05-01',
     updatedAt: new Date(2026, 2, 8).toISOString(),
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
   {
     id: 'bidr-002-gina-crystal-req2',
@@ -693,6 +732,7 @@ export const DEMO_BID_RESPONSES: DemoBidResponse[] = [
     certificationRef: 'SOC 2 A1.1',
     readyDate: '2026-05-15',
     updatedAt: new Date(2026, 2, 8).toISOString(),
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
   {
     id: 'bidr-003-james-velvet-req1',
@@ -706,6 +746,7 @@ export const DEMO_BID_RESPONSES: DemoBidResponse[] = [
     certificationRef: 'NIST CSF Identify',
     readyDate: '2026-06-01',
     updatedAt: new Date(2026, 2, 9).toISOString(),
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
 ];
 
@@ -748,6 +789,7 @@ export const DEMO_NOTES: DemoNote[] = [
     isMeetingMinutes: true,
     meetingDate: new Date(2026, 2, 6).toISOString(),
     meetingDurationMinutes: 60,
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
   {
     id: 'note-002-crystal-progress',
@@ -762,6 +804,7 @@ export const DEMO_NOTES: DemoNote[] = [
     archived: false,
     accessLevel: 'boundary',
     isMeetingMinutes: false,
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
   {
     id: 'note-003-velvet-strategy',
@@ -778,6 +821,7 @@ export const DEMO_NOTES: DemoNote[] = [
     isMeetingMinutes: true,
     meetingDate: new Date(2026, 2, 7).toISOString(),
     meetingDurationMinutes: 90,
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
   {
     id: 'note-004-silver-agenda',
@@ -791,6 +835,7 @@ export const DEMO_NOTES: DemoNote[] = [
     archived: false,
     accessLevel: 'boundary',
     isMeetingMinutes: false,
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
   {
     id: 'note-005-coral-findings',
@@ -805,6 +850,7 @@ export const DEMO_NOTES: DemoNote[] = [
     archived: false,
     accessLevel: 'boundary',
     isMeetingMinutes: false,
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
 ];
 
@@ -843,6 +889,7 @@ export const DEMO_NOTE_FOLDERS: DemoNoteFolder[] = [
     accessLevel: 'boundary',
     sortOrder: 1,
     color: '#1976d2',
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
   {
     id: 'folder-001-crystal-general',
@@ -854,6 +901,7 @@ export const DEMO_NOTE_FOLDERS: DemoNoteFolder[] = [
     updatedAt: new Date(2026, 2, 6).toISOString(),
     accessLevel: 'boundary',
     sortOrder: 0,
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
   // ── Velvet Summit notebook + subfolders ──
   {
@@ -867,6 +915,7 @@ export const DEMO_NOTE_FOLDERS: DemoNoteFolder[] = [
     accessLevel: 'boundary',
     sortOrder: 1,
     color: '#388e3c',
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
   {
     id: 'folder-002-velvet-general',
@@ -878,6 +927,7 @@ export const DEMO_NOTE_FOLDERS: DemoNoteFolder[] = [
     updatedAt: new Date(2026, 2, 7).toISOString(),
     accessLevel: 'boundary',
     sortOrder: 0,
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
   // ── Coral Meadow notebook + subfolders ──
   {
@@ -891,6 +941,7 @@ export const DEMO_NOTE_FOLDERS: DemoNoteFolder[] = [
     accessLevel: 'boundary',
     sortOrder: 1,
     color: '#d32f2f',
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
   {
     id: 'folder-005-coral-general',
@@ -902,6 +953,7 @@ export const DEMO_NOTE_FOLDERS: DemoNoteFolder[] = [
     updatedAt: new Date(2026, 2, 10).toISOString(),
     accessLevel: 'boundary',
     sortOrder: 0,
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
 ];
 
@@ -939,6 +991,7 @@ export const DEMO_DOCUMENTS: DemoSmeMartDocument[] = [
     createdAt: new Date(2026, 2, 6).toISOString(),
     updatedAt: new Date(2026, 2, 6).toISOString(),
     archived: false,
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
   {
     id: 'doc-002-crystal-wip',
@@ -956,6 +1009,7 @@ export const DEMO_DOCUMENTS: DemoSmeMartDocument[] = [
     createdAt: new Date(2026, 3, 1).toISOString(),
     updatedAt: new Date(2026, 3, 6).toISOString(),
     archived: false,
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
   {
     id: 'doc-003-velvet-plan',
@@ -973,6 +1027,7 @@ export const DEMO_DOCUMENTS: DemoSmeMartDocument[] = [
     createdAt: new Date(2026, 2, 7).toISOString(),
     updatedAt: new Date(2026, 2, 7).toISOString(),
     archived: false,
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
 ];
 
@@ -1008,6 +1063,7 @@ export const DEMO_SERVICE_OFFERINGS: DemoServiceOffering[] = [
     isActive: true,
     createdAt: new Date(2026, 1, 1).toISOString(),
     updatedAt: new Date(2026, 3, 1).toISOString(),
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
   {
     id: 'offering-002-james-grc',
@@ -1024,6 +1080,7 @@ export const DEMO_SERVICE_OFFERINGS: DemoServiceOffering[] = [
     isActive: true,
     createdAt: new Date(2026, 1, 1).toISOString(),
     updatedAt: new Date(2026, 3, 1).toISOString(),
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
   {
     id: 'offering-003-bob-agentic',
@@ -1039,6 +1096,7 @@ export const DEMO_SERVICE_OFFERINGS: DemoServiceOffering[] = [
     isActive: true,
     createdAt: new Date(2026, 1, 15).toISOString(),
     updatedAt: new Date(2026, 3, 1).toISOString(),
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
 ];
 
@@ -1068,6 +1126,7 @@ export const DEMO_REVIEWS: DemoReview[] = [
     approved: false,
     createdAt: new Date(2026, 3, 7).toISOString(),
     updatedAt: new Date(2026, 3, 7).toISOString(),
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
   {
     id: 'review-002-james-by-fintech',
@@ -1080,6 +1139,7 @@ export const DEMO_REVIEWS: DemoReview[] = [
     approved: false,
     createdAt: new Date(2026, 5, 8).toISOString(),
     updatedAt: new Date(2026, 5, 8).toISOString(),
+    tag: [{ value: DEMO_TAG_UUIDS.GLOBAL_DEMO }],
   },
 ];
 

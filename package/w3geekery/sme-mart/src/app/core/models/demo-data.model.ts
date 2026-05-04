@@ -28,6 +28,7 @@ export interface DemoEngagement {
   zerobiasTaskId: string;
   createdAt: string;
   updatedAt: string;
+  tag?: Array<{ value: string }>;
 }
 
 /**
@@ -55,6 +56,7 @@ export interface DemoBid {
   aiGeneratedAt?: string;
   createdAt: string;
   updatedAt: string;
+  tag?: Array<{ value: string }>;
 }
 
 /**
@@ -74,6 +76,7 @@ export interface DemoBidResponse {
   readyDate?: string;
   respondedAt?: string;
   updatedAt: string;
+  tag?: Array<{ value: string }>;
 }
 
 /**
@@ -102,6 +105,7 @@ export interface DemoNote {
   isMeetingMinutes: boolean;
   boundaryId?: string;
   projectId?: string;
+  tag?: Array<{ value: string }>;
 }
 
 /**
@@ -120,6 +124,7 @@ export interface DemoNoteFolder {
   accessLevel: 'personal' | 'boundary' | 'project';
   sortOrder: number;
   color?: string;
+  tag?: Array<{ value: string }>;
 }
 
 /**
@@ -146,6 +151,7 @@ export interface DemoSmeMartDocument {
   createdAt: string;
   updatedAt: string;
   archived: boolean;
+  tag?: Array<{ value: string }>;
 }
 
 /**
@@ -167,6 +173,7 @@ export interface DemoServiceOffering {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  tag?: Array<{ value: string }>;
 }
 
 /**
@@ -192,6 +199,7 @@ export interface DemoSmeMartProject {
   questionsDeadline?: string; // ISO 8601
   buyerZerobiasUserId?: string; // for RFP ownership display
   buyerZerobiasOrgId?: string;
+  tag?: Array<{ value: string }>;
 }
 
 /**
@@ -211,4 +219,5 @@ export interface DemoReview {
   approvedBy?: string;
   createdAt: string;
   updatedAt: string;
+  tag?: Array<{ value: string }>;
 }
