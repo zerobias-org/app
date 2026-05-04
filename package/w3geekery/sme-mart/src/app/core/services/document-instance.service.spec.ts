@@ -12,14 +12,16 @@ import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
 import { DocumentTemplateService } from './document-template.service';
 import { VariableSubstitutionService } from './variable-substitution.service';
-import type { DocumentTemplate, DocumentInstance, InstantiateTemplateDto, CustomVariable } from '../models';
+import { DemoVisibilityService } from './demo-visibility.service';
+import { ProjectContextService } from './project-context.service';
+import type { DocumentTemplate, DocumentInstance, InstantiateTemplateDto } from '../models';
 
 describe('DocumentInstanceService', () => {
   let service: DocumentInstanceService;
-  let pipelineWrite: any;
-  let graphqlRead: any;
-  let documentTemplateService: any;
-  let variableSubstitution: any;
+  let pipelineWrite: ReturnType<typeof TestBed.inject<typeof PipelineWriteService>>;
+  let graphqlRead: ReturnType<typeof TestBed.inject<typeof GraphqlReadService>>;
+  let documentTemplateService: ReturnType<typeof TestBed.inject<typeof DocumentTemplateService>>;
+  let variableSubstitution: ReturnType<typeof TestBed.inject<typeof VariableSubstitutionService>>;
 
   const mockTemplate: DocumentTemplate = {
     id: 'template-1',
@@ -349,6 +351,137 @@ describe('DocumentInstanceService', () => {
       expect(pipelineWrite.pushEntities).toHaveBeenCalled();
       const passedInstance = pipelineWrite.pushEntities.mock.calls[0][1][0];
       expect(passedInstance.status).toBe('deleted');
+    });
+  });
+
+  describe('Demo Visibility (Option X - Client-Side Post-Filter)', () => {
+    let demoVisibility: ReturnType<typeof TestBed.inject<typeof DemoVisibilityService>>;
+    let projectContext: ReturnType<typeof TestBed.inject<typeof ProjectContextService>>;
+
+    beforeEach(() => {
+      const demoVisibilityMock = {
+        applyVisibility: vi.fn((records) => records)
+      };
+      const projectContextMock = {
+        isAdmin: vi.fn().mockReturnValue(false)
+      };
+
+      TestBed.configureTestingModule({
+        providers: [
+          DocumentInstanceService,
+          { provide: PipelineWriteService, useValue: pipelineWrite },
+          { provide: GraphqlReadService, useValue: graphqlRead },
+          { provide: DocumentTemplateService, useValue: documentTemplateService },
+          { provide: VariableSubstitutionService, useValue: variableSubstitution },
+          { provide: DemoVisibilityService, useValue: demoVisibilityMock },
+          { provide: ProjectContextService, useValue: projectContextMock }
+        ]
+      });
+
+      service = TestBed.inject(DocumentInstanceService);
+      demoVisibility = TestBed.inject(DemoVisibilityService);
+      projectContext = TestBed.inject(ProjectContextService);
+    });
+
+    it('[DG-02] getByEngagement strips demo records for non-admin users', async () => {
+      const realInstance = { ...mockInstance, id: 'real-1', tag: null };
+      const demoGlobalInstance = {
+        ...mockInstance,
+        id: 'demo-global-1',
+        tag: [{ value: '81053c14-a8e5-4939-b538-c122c7d0eb1a' }]
+      };
+      const demoLegacyInstance = {
+        ...mockInstance,
+        id: 'demo-legacy-1',
+        tag: [{ value: 'd618b602-21cc-40a1-a9fa-534b7bc1672c' }]
+      };
+
+      graphqlRead.query.mockResolvedValue({
+        items: [realInstance, demoGlobalInstance, demoLegacyInstance],
+        page: { pageNumber: 1, pageSize: 100 }
+      });
+      demoVisibility.applyVisibility.mockImplementation((records: Array<DocumentInstance & { tag?: Array<{ value: string }> | null }>) =>
+        records.filter(r => !r.tag?.some((t) => [
+          '81053c14-a8e5-4939-b538-c122c7d0eb1a',
+          'd618b602-21cc-40a1-a9fa-534b7bc1672c'
+        ].includes(t.value)))
+      );
+
+      const result = await service.getByEngagement('eng-1');
+
+      expect(demoVisibility.applyVisibility).toHaveBeenCalled();
+      expect(result).toEqual([realInstance]);
+    });
+
+    it('[DG-03] getByEngagement includes demo records for admin users', async () => {
+      const realInstance = { ...mockInstance, id: 'real-1', tag: null };
+      const demoInstance = {
+        ...mockInstance,
+        id: 'demo-1',
+        tag: [{ value: '81053c14-a8e5-4939-b538-c122c7d0eb1a' }]
+      };
+
+      projectContext.isAdmin.mockReturnValue(true);
+      graphqlRead.query.mockResolvedValue({
+        items: [realInstance, demoInstance],
+        page: { pageNumber: 1, pageSize: 100 }
+      });
+      demoVisibility.applyVisibility.mockReturnValue([realInstance, demoInstance]);
+
+      const result = await service.getByEngagement('eng-1');
+
+      expect(demoVisibility.applyVisibility).toHaveBeenCalled();
+      expect(result).toHaveLength(2);
+    });
+
+    it('[DG-02/Regression] prevents server-side negation filters (Option X only)', async () => {
+      graphqlRead.query.mockResolvedValue({
+        items: [mockInstance],
+        page: { pageNumber: 1, pageSize: 100 }
+      });
+
+      await service.getByEngagement('eng-1');
+
+      const callArgs = graphqlRead.query.mock.calls[0];
+      const filters = callArgs[2]?.filters;
+      expect(filters).not.toHaveProperty('tag.not');
+      expect(filters).not.toHaveProperty('tag.ne');
+    });
+
+    it('[DG-02] includes tag field in GQL query', async () => {
+      graphqlRead.query.mockResolvedValue({
+        items: [mockInstance],
+        page: { pageNumber: 1, pageSize: 100 }
+      });
+
+      await service.getByEngagement('eng-1');
+
+      const fieldList = graphqlRead.query.mock.calls[0][1];
+      expect(fieldList).toContain('tag');
+    });
+
+    it('[DG-02] getInstancesByTemplate strips demo records for non-admin', async () => {
+      const realInstance = { ...mockInstance, id: 'real-1', tag: null };
+      const demoInstance = {
+        ...mockInstance,
+        id: 'demo-1',
+        tag: [{ value: '81053c14-a8e5-4939-b538-c122c7d0eb1a' }]
+      };
+
+      graphqlRead.query.mockResolvedValue({
+        items: [realInstance, demoInstance],
+        page: { pageNumber: 1, pageSize: 100 }
+      });
+      demoVisibility.applyVisibility.mockImplementation((records: Array<DocumentInstance & { tag?: Array<{ value: string }> | null }>) =>
+        records.filter(r => !r.tag?.some((t) => [
+          '81053c14-a8e5-4939-b538-c122c7d0eb1a',
+          'd618b602-21cc-40a1-a9fa-534b7bc1672c'
+        ].includes(t.value)))
+      );
+
+      const result = await service.getInstancesByTemplate('template-1', 'eng-1');
+
+      expect(result).toEqual([realInstance]);
     });
   });
 });
