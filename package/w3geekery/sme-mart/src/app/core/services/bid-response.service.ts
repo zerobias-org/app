@@ -123,7 +123,7 @@ export class BidResponseService {
     for (const r of responses) {
       const status = r.compliance_status;
       if (status in summary) {
-        (summary as Record<string, number>)[status]++;
+        summary[status as keyof ComplianceSummary]++;
       }
     }
 
