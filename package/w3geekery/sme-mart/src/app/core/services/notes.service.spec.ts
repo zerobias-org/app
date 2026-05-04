@@ -1,11 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { vi } from 'vitest';
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { NotesService } from './notes.service';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
 import { ImpersonationService } from './impersonation.service';
-import { fakePipelineWriteService, fakeGraphqlReadService, fakeImpersonation } from '../../test-helpers/angular';
+import { DemoVisibilityService } from './demo-visibility.service';
+import { ProjectContextService } from './project-context.service';
+import { fakePipelineWriteService, fakeGraphqlReadService, fakeImpersonation, fakeProjectContextService } from '../../test-helpers/angular';
 import type { GqlNoteResponse } from '../gql-types/note.types';
 
 describe('NotesService', () => {
@@ -323,6 +325,90 @@ describe('NotesService', () => {
           }),
         }),
       );
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Demo Visibility (Phase 24 Plan 03)
+  // ---------------------------------------------------------------------------
+
+  describe('demo visibility (Phase 24 Plan 03)', () => {
+    let mockProjectContextDV: ReturnType<typeof fakeProjectContextService>;
+    let mockGqlReadDV: ReturnType<typeof fakeGraphqlReadService>;
+
+    const mockGqlReturn = [
+      { id: '1', name: 'Real', tag: null, archived: false, engagementId: 'wr-001', content: 'Test', authorZerobiasUserId: 'u-1', accessLevel: 'boundary', isMeetingMinutes: false, createdAt: '', updatedAt: '' } as unknown as GqlNoteResponse,
+      { id: '2', name: 'Real w/ marketplace tag', tag: [{ value: 'a81cd320-243e-44eb-bdd9-9824019ef3dd' }], archived: false, engagementId: 'wr-001', content: 'Test', authorZerobiasUserId: 'u-2', accessLevel: 'boundary', isMeetingMinutes: false, createdAt: '', updatedAt: '' } as unknown as GqlNoteResponse,
+      { id: '3', name: 'Demo (global)', tag: [{ value: '81053c14-a8e5-4939-b538-c122c7d0eb1a' }], archived: false, engagementId: 'wr-001', content: 'Test', authorZerobiasUserId: 'u-3', accessLevel: 'boundary', isMeetingMinutes: false, createdAt: '', updatedAt: '' } as unknown as GqlNoteResponse,
+      { id: '4', name: 'Demo (legacy)', tag: [{ value: 'd618b602-21cc-40a1-a9fa-534b7bc1672c' }], archived: false, engagementId: 'wr-001', content: 'Test', authorZerobiasUserId: 'u-4', accessLevel: 'boundary', isMeetingMinutes: false, createdAt: '', updatedAt: '' } as unknown as GqlNoteResponse,
+    ];
+
+    beforeEach(() => {
+      mockProjectContextDV = fakeProjectContextService(false);
+      mockGqlReadDV = fakeGraphqlReadService();
+
+      TestBed.configureTestingModule({
+        providers: [
+          NotesService,
+          DemoVisibilityService,
+          { provide: ProjectContextService, useValue: mockProjectContextDV },
+          { provide: PipelineWriteService, useValue: fakePipelineWriteService() },
+          { provide: GraphqlReadService, useValue: mockGqlReadDV },
+          { provide: ImpersonationService, useValue: fakeImpersonation() },
+          { provide: MatSnackBar, useValue: { open: vi.fn() } },
+        ],
+      });
+      service = TestBed.inject(NotesService);
+    });
+
+    it('[DG-02] strips demo records for non-admin', async () => {
+      mockGqlReadDV.query.mockResolvedValue({
+        items: mockGqlReturn,
+        page: { pageNumber: 1, pageSize: 50, totalCount: 4 },
+      });
+      const result = await service.listNotes('wr-001');
+      expect(result.items.map(r => r.id)).toEqual(['1', '2']);
+    });
+
+    it('[DG-03] admin sees all records including demo', async () => {
+      mockProjectContextDV.setIsAdmin(true);
+      mockGqlReadDV.query.mockResolvedValue({
+        items: mockGqlReturn,
+        page: { pageNumber: 1, pageSize: 50, totalCount: 4 },
+      });
+      const result = await service.listNotes('wr-001');
+      expect(result.items.map(r => r.id)).toEqual(['1', '2', '3', '4']);
+    });
+
+    it('[DG-02] does NOT add server-side tag negation filter', async () => {
+      mockGqlReadDV.query.mockResolvedValue({
+        items: mockGqlReturn,
+        page: { pageNumber: 1, pageSize: 50, totalCount: 4 },
+      });
+      await service.listNotes('wr-001');
+      const callArgs = mockGqlReadDV.query.mock.calls[0];
+      const filters = callArgs[2]?.filters ?? {};
+      const filterValues = Object.values(filters).join(' ');
+      expect(filterValues).not.toContain('.not in.');
+      expect(filterValues).not.toContain('.ne.');
+    });
+
+    it('requests tag field in GQL query', async () => {
+      mockGqlReadDV.query.mockResolvedValue({
+        items: mockGqlReturn,
+        page: { pageNumber: 1, pageSize: 50, totalCount: 4 },
+      });
+      await service.listNotes('wr-001');
+      const callArgs = mockGqlReadDV.query.mock.calls[0];
+      const fields = callArgs[1] as string[];
+      expect(fields).toContain('tag');
+    });
+
+    it('[DG-02] returns null when non-admin fetches a demo record by id', async () => {
+      const demoNote: GqlNoteResponse = { id: '3', name: 'Demo', tag: [{ value: '81053c14-a8e5-4939-b538-c122c7d0eb1a' }], archived: false, engagementId: 'wr-001', content: 'Test', authorZerobiasUserId: 'u-3', accessLevel: 'boundary', isMeetingMinutes: false, createdAt: '', updatedAt: '' } as unknown as GqlNoteResponse;
+      mockGqlReadDV.getById.mockResolvedValue(demoNote);
+      const result = await service.getNoteById('3');
+      expect(result).toBeNull();
     });
   });
 });
