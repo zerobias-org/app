@@ -11,10 +11,13 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { BidsService } from './bids.service';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
+import { DemoVisibilityService } from './demo-visibility.service';
+import { ProjectContextService } from './project-context.service';
 import { NotificationService } from './notification.service';
 import { RfpInvitationService } from './rfp-invitation.service';
 import { SmeMartProjectService } from './sme-mart-project.service';
 import { BID_FIELD_MAPPING } from '../field-mappings';
+import { fakeProjectContextService } from '../../test-helpers/angular';
 import type { SmeMartProject } from '../models';
 
 describe('BidsService Field Mapping Tests', () => {
@@ -57,12 +60,18 @@ describe('BidsService Field Mapping Tests', () => {
 
 describe('BidsService CRUD with Error Handling', () => {
   let service: BidsService;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockPipeline: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockGql: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockNotifications: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockRfpInvitations: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockSmeMartProjects: any;
   let mockSnackBar: { open: ReturnType<typeof vi.fn> };
+  let mockProjectContext: ReturnType<typeof fakeProjectContextService>;
 
   beforeEach(() => {
     mockPipeline = {
@@ -79,12 +88,15 @@ describe('BidsService CRUD with Error Handling', () => {
     mockRfpInvitations = { findByProjectAndVendor: vi.fn().mockResolvedValue(null) };
     mockSmeMartProjects = { getProject: vi.fn().mockResolvedValue(null) };
     mockSnackBar = { open: vi.fn() };
+    mockProjectContext = fakeProjectContextService(false); // non-admin by default
 
     TestBed.configureTestingModule({
       providers: [
         BidsService,
+        DemoVisibilityService,
         { provide: PipelineWriteService, useValue: mockPipeline },
         { provide: GraphqlReadService, useValue: mockGql },
+        { provide: ProjectContextService, useValue: mockProjectContext },
         { provide: NotificationService, useValue: mockNotifications },
         { provide: RfpInvitationService, useValue: mockRfpInvitations },
         { provide: SmeMartProjectService, useValue: mockSmeMartProjects },
@@ -244,5 +256,92 @@ describe('BidsService Invitation Controls Logic (Plan 14 Wave 1)', () => {
     rejectedForBidding.forEach(status => {
       expect(allStatuses.includes(status)).toBe(true);
     });
+  });
+});
+
+describe('Demo visibility (Phase 24 Plan 03)', () => {
+  let service: BidsService;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let mockGql: any;
+  let mockProjectContext: ReturnType<typeof fakeProjectContextService>;
+
+  const BID_GQL_FIXTURE = {
+    id: 'bid-001',
+    name: 'Test Bid',
+    description: 'A bid for testing',
+    providerId: 'vendor-001',
+    status: 'pending',
+    dateCreated: '2026-04-01T00:00:00Z',
+    dateLastModified: '2026-04-01T00:00:00Z',
+  };
+
+  const mockGqlReturn = [
+    { ...BID_GQL_FIXTURE, id: '1', tag: null },
+    { ...BID_GQL_FIXTURE, id: '2', tag: [{ value: 'a81cd320-243e-44eb-bdd9-9824019ef3dd' }] },
+    { ...BID_GQL_FIXTURE, id: '3', tag: [{ value: '81053c14-a8e5-4939-b538-c122c7d0eb1a' }] },
+    { ...BID_GQL_FIXTURE, id: '4', tag: [{ value: 'd618b602-21cc-40a1-a9fa-534b7bc1672c' }] },
+  ];
+
+  beforeEach(() => {
+    mockGql = {
+      query: vi.fn().mockResolvedValue({ items: [], page: { totalCount: 0 } }),
+      getById: vi.fn().mockResolvedValue(null),
+      rawQuery: vi.fn().mockResolvedValue({ Bid: mockGqlReturn }),
+    };
+    mockProjectContext = fakeProjectContextService(false); // non-admin by default
+
+    TestBed.configureTestingModule({
+      providers: [
+        BidsService,
+        DemoVisibilityService,
+        { provide: PipelineWriteService, useValue: { getCached: vi.fn().mockReturnValue(null), seedCache: vi.fn(), pushEntity: vi.fn().mockResolvedValue(undefined) } },
+        { provide: GraphqlReadService, useValue: mockGql },
+        { provide: ProjectContextService, useValue: mockProjectContext },
+        { provide: NotificationService, useValue: { create: vi.fn().mockResolvedValue(undefined) } },
+        { provide: RfpInvitationService, useValue: { findByProjectAndVendor: vi.fn().mockResolvedValue(null) } },
+        { provide: SmeMartProjectService, useValue: { getProject: vi.fn().mockResolvedValue(null) } },
+        { provide: MatSnackBar, useValue: { open: vi.fn() } },
+      ],
+    });
+
+    service = TestBed.inject(BidsService);
+  });
+
+  it('[DG-02] strips demo records for non-admin', async () => {
+    mockGql.rawQuery.mockResolvedValue({ Bid: mockGqlReturn });
+
+    await service.listBidsByProject('proj-001');
+
+    expect(mockGql.rawQuery).toHaveBeenCalled();
+  });
+
+  it('[DG-03] admin sees all records including demo', async () => {
+    mockGql.rawQuery.mockResolvedValue({ Bid: mockGqlReturn });
+    mockProjectContext.setIsAdmin(true);
+
+    await service.listBidsByProject('proj-001');
+
+    expect(mockGql.rawQuery).toHaveBeenCalled();
+  });
+
+  it('[DG-02] does NOT add server-side tag negation filter', async () => {
+    mockGql.rawQuery.mockResolvedValue({ Bid: mockGqlReturn });
+
+    await service.listBidsByProject('proj-001');
+
+    const callArgs = mockGql.rawQuery.mock.calls[0];
+    const queryStr = callArgs[0] as string;
+    expect(queryStr).not.toContain('.not in.');
+    expect(queryStr).not.toContain('.ne.');
+  });
+
+  it('requests tag field in GQL query', async () => {
+    mockGql.rawQuery.mockResolvedValue({ Bid: mockGqlReturn });
+
+    await service.listBidsByProject('proj-001');
+
+    const callArgs = mockGql.rawQuery.mock.calls[0];
+    const queryStr = callArgs[0] as string;
+    expect(queryStr).toContain('tag');
   });
 });

@@ -5,6 +5,7 @@ import { GraphqlReadService, type GqlQueryOptions } from './graphql-read.service
 import { NotificationService } from './notification.service';
 import { RfpInvitationService } from './rfp-invitation.service';
 import { SmeMartProjectService } from './sme-mart-project.service';
+import { DemoVisibilityService } from './demo-visibility.service';
 import { BID_FIELD_MAPPING, mapNeonToGql, mapGqlToNeon } from '../field-mappings';
 import type { Bid, BidSummaryRow, BidWizardData } from '../models';
 import type { GqlBidResponse } from '../gql-types';
@@ -29,6 +30,7 @@ export class BidsService {
   private readonly rfpInvitations = inject(RfpInvitationService);
   private readonly smeMartProjects = inject(SmeMartProjectService);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly demoVisibility = inject(DemoVisibilityService);
 
   /** Scalar fields for standard queries (no link fields) */
   private readonly scalarBidFields = [
@@ -48,6 +50,7 @@ export class BidsService {
     'wizardStep',
     'dateCreated',
     'dateLastModified',
+    'tag',
   ];
 
   /** Fields including project link expansion — for rawQuery only */
@@ -63,6 +66,7 @@ export class BidsService {
   /**
    * List all bids for a given project (RFP).
    * Uses rawQuery because `project` is a link field requiring nested filter.
+   * Phase 24 Plan 03: Applies client-side demo-visibility post-filter before returning.
    */
   async listBidsByProject(projectId: string): Promise<Bid[]> {
     const fieldStr = this.allBidFields.join(' ');
@@ -71,7 +75,10 @@ export class BidsService {
     const data = await this.graphqlRead.rawQuery(query, 1, 100);
     const rawItems = (data['Bid'] as Record<string, unknown>[]) ?? [];
 
-    return rawItems.map(gql => this.flattenAndMap(gql));
+    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
+    const filteredGql = this.demoVisibility.applyVisibility(rawItems as (Record<string, unknown> & { tag?: Array<{ value: string }> | null })[]);
+
+    return filteredGql.map(gql => this.flattenAndMap(gql));
   }
 
   /**
@@ -388,6 +395,7 @@ export class BidsService {
     if (flat['project'] && typeof flat['project'] === 'object') {
       flat['project'] = (flat['project'] as Record<string, unknown>)['id'];
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return mapGqlToNeon<Bid>(flat as any, BID_FIELD_MAPPING.gqlToNeon);
   }
 

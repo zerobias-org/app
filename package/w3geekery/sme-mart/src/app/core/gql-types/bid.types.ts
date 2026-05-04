@@ -6,6 +6,7 @@
  */
 
 // Forward declare to avoid circular dependency
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type GqlEngagementResponse = any;
 
 /**
@@ -29,6 +30,7 @@ export interface GqlBidResponse {
   id: string;
   name?: string; // Typically derived from engagement title + provider
   description?: string;
+  tag?: Array<{ value: string }> | null; // Object tag array for demo-visibility gating
 
   // Bid-specific fields
   engagementId?: string; // Legacy — removed from schema in Plan 075
@@ -63,4 +65,5 @@ export interface GqlBidResponse {
 
 // Re-export BidResponse for nested relationship reference
 // (Full definition in bid-response.types.ts)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type GqlBidResponseResponse = any; // Placeholder for circular dependency
