@@ -10,12 +10,14 @@ import { TestBed } from '@angular/core/testing';
 import { DocumentTemplateService } from './document-template.service';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
+import { DemoVisibilityService } from './demo-visibility.service';
+import { ProjectContextService } from './project-context.service';
 import type { DocumentTemplate, CreateDocumentTemplateDto, CustomVariable } from '../models';
 
 describe('DocumentTemplateService', () => {
   let service: DocumentTemplateService;
-  let pipelineWrite: any;
-  let graphqlRead: any;
+  let pipelineWrite: ReturnType<typeof TestBed.inject<typeof PipelineWriteService>>;
+  let graphqlRead: ReturnType<typeof TestBed.inject<typeof GraphqlReadService>>;
 
   const mockTemplate: DocumentTemplate = {
     id: 'template-1',
@@ -304,6 +306,115 @@ describe('DocumentTemplateService', () => {
 
       expect(result.status).toBe('archived');
       expect(pipelineWrite.pushEntities).toHaveBeenCalled();
+    });
+  });
+
+  describe('Demo Visibility (Option X - Client-Side Post-Filter)', () => {
+    let demoVisibility: ReturnType<typeof TestBed.inject<typeof DemoVisibilityService>>;
+    let projectContext: ReturnType<typeof TestBed.inject<typeof ProjectContextService>>;
+
+    beforeEach(() => {
+      const demoVisibilityMock = {
+        applyVisibility: vi.fn((records) => records)
+      };
+      const projectContextMock = {
+        isAdmin: vi.fn().mockReturnValue(false)
+      };
+
+      TestBed.configureTestingModule({
+        providers: [
+          DocumentTemplateService,
+          { provide: PipelineWriteService, useValue: pipelineWrite },
+          { provide: GraphqlReadService, useValue: graphqlRead },
+          { provide: DemoVisibilityService, useValue: demoVisibilityMock },
+          { provide: ProjectContextService, useValue: projectContextMock }
+        ]
+      });
+
+      service = TestBed.inject(DocumentTemplateService);
+      demoVisibility = TestBed.inject(DemoVisibilityService);
+      projectContext = TestBed.inject(ProjectContextService);
+    });
+
+    it('[DG-02] listByOrg strips demo records for non-admin users', async () => {
+      const realTemplate = { ...mockTemplate, id: 'real-1', tag: null };
+      const demoGlobalTemplate = {
+        ...mockTemplate,
+        id: 'demo-global-1',
+        tag: [{ value: '81053c14-a8e5-4939-b538-c122c7d0eb1a' }]
+      };
+      const demoLegacyTemplate = {
+        ...mockTemplate,
+        id: 'demo-legacy-1',
+        tag: [{ value: 'd618b602-21cc-40a1-a9fa-534b7bc1672c' }]
+      };
+
+      graphqlRead.query.mockResolvedValue({
+        items: [realTemplate, demoGlobalTemplate, demoLegacyTemplate],
+        page: { pageNumber: 1, pageSize: 100 }
+      });
+      demoVisibility.applyVisibility.mockImplementation((records: Array<DocumentTemplate & { tag?: Array<{ value: string }> | null }>) =>
+        records.filter(r => !r.tag?.some((t) => [
+          '81053c14-a8e5-4939-b538-c122c7d0eb1a',
+          'd618b602-21cc-40a1-a9fa-534b7bc1672c'
+        ].includes(t.value)))
+      );
+
+      const result = await service.listByOrg('org-123');
+
+      expect(demoVisibility.applyVisibility).toHaveBeenCalled();
+      expect(result).toEqual([realTemplate]);
+    });
+
+    it('[DG-03] listByOrg includes demo records for admin users', async () => {
+      const realTemplate = { ...mockTemplate, id: 'real-1', tag: null };
+      const demoTemplate = {
+        ...mockTemplate,
+        id: 'demo-1',
+        tag: [{ value: '81053c14-a8e5-4939-b538-c122c7d0eb1a' }]
+      };
+
+      projectContext.isAdmin.mockReturnValue(true);
+      graphqlRead.query.mockResolvedValue({
+        items: [realTemplate, demoTemplate],
+        page: { pageNumber: 1, pageSize: 100 }
+      });
+      demoVisibility.applyVisibility.mockReturnValue([realTemplate, demoTemplate]);
+
+      const result = await service.listByOrg('org-123');
+
+      expect(demoVisibility.applyVisibility).toHaveBeenCalled();
+      expect(result).toHaveLength(2);
+    });
+
+    it('[DG-02] getById strips demo record for non-admin', async () => {
+      const demoTemplate = {
+        ...mockTemplate,
+        id: 'demo-1',
+        tag: [{ value: '81053c14-a8e5-4939-b538-c122c7d0eb1a' }]
+      };
+
+      graphqlRead.query.mockResolvedValue({
+        items: [demoTemplate],
+        page: { pageNumber: 1, pageSize: 1 }
+      });
+      demoVisibility.applyVisibility.mockReturnValue([]);
+
+      const result = await service.getById('demo-1');
+
+      expect(result).toBeNull();
+    });
+
+    it('[DG-02] includes tag field in GQL query', async () => {
+      graphqlRead.query.mockResolvedValue({
+        items: [mockTemplate],
+        page: { pageNumber: 1, pageSize: 100 }
+      });
+
+      await service.listByOrg('org-123');
+
+      const fieldList = graphqlRead.query.mock.calls[0][1];
+      expect(fieldList).toContain('tag');
     });
   });
 });
