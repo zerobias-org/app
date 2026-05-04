@@ -125,6 +125,12 @@ The pre-existing speculative description below (a/b/c bullets) is superseded by 
   - Services consume `applyVisibility(...)` once per fetched page right before returning to callers. No GQL filter merge.
 - **Per-service touch surface unchanged.** The 21 services from `24-RESEARCH.md` Touched Services Inventory still need wiring — the wiring shape changes from "merge filter into GQL options" to "wrap return value with applyVisibility()".
 - **Superseded:** the (a/b/c) bullets that lived here — "two `.ne.` filters AND'd / single `.not in.` filter / server-side helper" — were eliminated by Decision-Probe-1. None work. Do NOT revisit any server-side `tag` negation strategy unless Director redesigns under Option Y/Z (separate phase).
+- **Write-route anti-pattern (LOCKED 2026-05-04, Director MCP probe):** `SimpleBatch`'s third constructor arg AND the `Pipeline.receive` body's top-level `tagIds` field are **batch/job metadata, NOT a write into `Object.tag`**. Probe evidence:
+  - Probe Object `f125cd3b-f507-4052-a537-de32bc15bbd6` (tagIds at SimpleBatch 3rd arg) → `Object.tag = null` on GQL read-back.
+  - Probe Object `8a97f9b6-a5f0-4442-baa6-d91785f29074` (`tag: [{value}]` embedded in data) → `Object.tag` populated correctly.
+  - Sanity: `ea4db55f-...` SmeMartProject (2026-04-27 embed re-ingest) → populated correctly.
+  - Wave 1's first attempt at script-side tagging matched the (broken) `pushEntity` 3rd-arg pattern in `pipeline-write.service.ts`. Both sites fixed in commits `aad578d`/`103ea85` to embed in data; `tagIds` 3rd arg is now `[]` everywhere with self-documenting comment. See DECISIONS.md "Object.tag Write Route — Embed-in-Data Only" (2026-05-04, commit `d4e64c9`).
+  - **Test discipline lesson:** in-memory shape tests (verifying a `tag` key is set on a fixture object literal) DO NOT validate the platform contract. Future tag-write changes require either a round-trip integration test or a call-shape assertion that explicitly checks `data[i].tag` and asserts `tagIds` is NOT passed at the SimpleBatch level.
 
 ### Admin Delete-Demo Action (DG-04) — PINNED 2026-05-01 (Path c)
 
