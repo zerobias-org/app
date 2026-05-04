@@ -13,6 +13,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
 import { ImpersonationService } from './impersonation.service';
+import { DemoVisibilityService } from './demo-visibility.service';
 import { NOTE_FOLDER_FIELD_MAPPING, mapGqlToNeon } from '../field-mappings';
 import type { GqlNoteFolderResponse } from '../gql-types/note-folder.types';
 import type { NoteFolder } from '../models';
@@ -71,6 +72,7 @@ export class NoteFolderService {
   private readonly graphqlRead = inject(GraphqlReadService);
   private readonly impersonation = inject(ImpersonationService);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly demoVisibility = inject(DemoVisibilityService);
 
   /**
    * Create a new note folder.
@@ -140,7 +142,7 @@ export class NoteFolderService {
       'NoteFolder',
       // Object inherited: id, name, description, dateCreated, dateLastModified
       // Custom (from NoteFolder.yml): engagementId, parentId, color, sortOrder
-      ['id', 'name', 'description', 'engagementId', 'parentId', 'color', 'sortOrder', 'dateCreated', 'dateLastModified', 'dateDeleted'],
+      ['id', 'name', 'description', 'engagementId', 'parentId', 'color', 'sortOrder', 'dateCreated', 'dateLastModified', 'dateDeleted', 'tag'],
       {
         filters: {
           engagementId: `.eq.${engagementId}`,
@@ -149,8 +151,11 @@ export class NoteFolderService {
       },
     );
 
+    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
+    const filteredGql = this.demoVisibility.applyVisibility(result.items as (GqlNoteFolderResponse & { tag?: Array<{ value: string }> | null })[]);
+
     // Step 2: Filter deleted, then map to Neon type
-    const allFolders: NoteFolder[] = result.items
+    const allFolders: NoteFolder[] = filteredGql
       .filter(gqlFolder => {
         // GQL doesn't auto-filter by dateDeleted — exclude soft-deleted folders
         const deleted = (gqlFolder as unknown as Record<string, unknown>)['dateDeleted'];
@@ -163,10 +168,6 @@ export class NoteFolderService {
       });
 
     // Step 3: Build in-memory tree
-    const folderMap = new Map<string, NoteFolder>(
-      allFolders.map(f => [f.id, f]),
-    );
-
     // Filter root folders (no parent)
     const rootFolders = allFolders
       .filter(f => !f.parent_id)
