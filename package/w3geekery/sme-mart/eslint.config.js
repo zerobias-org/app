@@ -21,7 +21,7 @@ const angularEslintOverride = {
 export default [
   // Global ignores
   {
-    ignores: ['node_modules/**', 'dist/**', '.angular/**', '.next/**']
+    ignores: ['node_modules/**', 'dist/**', '.angular/**', '.next/**', 'scripts/**']
   },
 
   // TypeScript configuration
