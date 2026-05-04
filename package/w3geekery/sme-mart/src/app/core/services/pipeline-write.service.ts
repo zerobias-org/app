@@ -53,6 +53,44 @@ export type SmeMartClassName = keyof typeof SME_MART_CLASS_IDS;
 // ---------------------------------------------------------------------------
 const PIPELINE_ID = environment.pipelineId;
 
+// ---------------------------------------------------------------------------
+// Tag Field Helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Merge existing tag entries (from data payload) with new tag IDs.
+ * Returns a deduplicated, stable-ordered array of tag objects.
+ *
+ * @param existing Array of {value: string} entries already in the data
+ * @param newIds Array of UUID strings to add as tag values
+ * @returns Merged array: [existing entries, new entries], deduplicated
+ */
+function mergeTagValues(
+  existing: Array<{ value: string }> = [],
+  newIds: string[] = [],
+): Array<{ value: string }> {
+  const values = new Set<string>();
+  const result: Array<{ value: string }> = [];
+
+  // Add existing entries first, preserving order
+  for (const entry of existing) {
+    if (!values.has(entry.value)) {
+      values.add(entry.value);
+      result.push(entry);
+    }
+  }
+
+  // Add new IDs in order
+  for (const id of newIds) {
+    if (!values.has(id)) {
+      values.add(id);
+      result.push({ value: id });
+    }
+  }
+
+  return result;
+}
+
 /**
  * Pushes SME Mart entity data into AuditgraphDB via the Receiver Pipeline.
  *
@@ -126,7 +164,10 @@ export class PipelineWriteService {
    *
    * @param className Entity type
    * @param data Array of objects to push
-   * @param tagIds Optional tag IDs to associate with the batch
+   * @param tagIds Optional tag UUIDs to embed into each Object's `tag` field as `{ value: <uuid> }` entries.
+   *               Note: this populates `Object.tag` on GQL read-back; the SimpleBatch third-arg / Pipeline.receive
+   *               body-level `tagIds` field is batch/job metadata and does NOT populate `Object.tag`
+   *               (verified 2026-05-04 via Director MCP probe).
    * @param callSiteTag Optional explicit caller identifier for telemetry. If not provided,
    *                     derived from stack trace as fallback.
    */
@@ -141,19 +182,31 @@ export class PipelineWriteService {
 
     // Ensure every object has `name` (required by AuditgraphDB Object base class).
     // If not provided, derive from common fields or use className + id as fallback.
+    // Also embed tagIds into the data payload as `tag: [{value: <uuid>}]` entries.
     const ensured = (data as Record<string, unknown>[]).map(obj => {
-      if (obj['name']) return obj;
-      const name = obj['title'] || obj['coverLetter']?.toString().substring(0, 100)
-        || obj['reviewText']?.toString().substring(0, 100)
-        || obj['displayName'] || obj['category']
-        || `${className}-${obj['id'] ?? 'unknown'}`;
-      return { ...obj, name };
+      let result: Record<string, unknown> = obj['name'] ? { ...obj } : {
+        ...obj,
+        name: obj['title'] || obj['coverLetter']?.toString().substring(0, 100)
+          || obj['reviewText']?.toString().substring(0, 100)
+          || obj['displayName'] || obj['category']
+          || `${className}-${obj['id'] ?? 'unknown'}`,
+      };
+
+      // Embed tags into the data payload if any tagIds were provided
+      if (tagIds.length > 0) {
+        const existingTag = (result['tag'] as Array<{ value: string }> | undefined) ?? [];
+        result = {
+          ...result,
+          tag: mergeTagValues(existingTag, tagIds),
+        };
+      }
+
+      return result;
     });
 
     const batch = new SimpleBatch(
       new UUID(classId),
       ensured,
-      tagIds.map(id => new UUID(id)),
     );
 
     try {

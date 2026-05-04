@@ -165,6 +165,44 @@ export async function initContext(config: DemoConfig): Promise<DemoContext> {
 }
 
 // ---------------------------------------------------------------------------
+// Tag Field Helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Merge existing tag entries (from data payload) with new tag IDs.
+ * Returns a deduplicated, stable-ordered array of tag objects.
+ *
+ * @param existing Array of {value: string} entries already in the data
+ * @param newIds Array of UUID strings to add as tag values
+ * @returns Merged array: [existing entries, new entries], deduplicated
+ */
+function mergeTagValues(
+  existing: Array<{ value: string }> = [],
+  newIds: string[] = [],
+): Array<{ value: string }> {
+  const values = new Set<string>();
+  const result: Array<{ value: string }> = [];
+
+  // Add existing entries first, preserving order
+  for (const entry of existing) {
+    if (!values.has(entry.value)) {
+      values.add(entry.value);
+      result.push(entry);
+    }
+  }
+
+  // Add new IDs in order
+  for (const id of newIds) {
+    if (!values.has(id)) {
+      values.add(id);
+      result.push({ value: id });
+    }
+  }
+
+  return result;
+}
+
+// ---------------------------------------------------------------------------
 // Tags — org-scoped marker
 // ---------------------------------------------------------------------------
 
@@ -225,6 +263,11 @@ export async function tagResource(
 /**
  * Push a single entity through the Receiver Pipeline.
  * Mirrors PipelineWriteService.pushEntity in the Angular app.
+ *
+ * Tag embedding: tagIds are embedded into the data payload as `tag: [{value: <uuid>}]` entries.
+ * This populates `Object.tag` on GQL read-back. The SimpleBatch third-arg / Pipeline.receive
+ * body-level `tagIds` field is batch/job metadata and does NOT populate `Object.tag`
+ * (verified 2026-05-04 via Director MCP probe).
  */
 export async function pushEntity(
   context: DemoContext,
@@ -240,12 +283,20 @@ export async function pushEntity(
     ?? (data['title'] as string | undefined)
     ?? (data['displayName'] as string | undefined)
     ?? `${className}-${(data['id'] as string | undefined) ?? 'unknown'}`;
-  const ensured = { ...data, name };
+
+  // Embed tags into the data payload if any tagIds were provided
+  let ensured: Record<string, unknown> = { ...data, name };
+  if (tagIds.length > 0) {
+    const existingTag = (data['tag'] as Array<{ value: string }> | undefined) ?? [];
+    ensured = {
+      ...ensured,
+      tag: mergeTagValues(existingTag, tagIds),
+    };
+  }
 
   const batch = new SimpleBatch(
     new UUID(classId),
     [ensured],
-    tagIds.map(id => new UUID(id)),
   );
   await pipelineApi.receive(new UUID(context.config.pipelineId), batch);
 }
@@ -257,6 +308,11 @@ export async function pushEntity(
  * at least one item") even when `markDeleted` is populated — so we also pass
  * stub `{id, name}` rows for each deletion. Server treats `markDeleted` as
  * authoritative and prunes the referenced ids.
+ *
+ * Note: SimpleBatch constructor signature is (classId, data, tagIds, markDeleted).
+ * The tagIds (3rd arg) is kept as [] per the tag-embedding fix (2026-05-04):
+ * tagIds parameter does NOT populate Object.tag on GQL read-back. Since deleteEntities
+ * is a pure deletion path (no data to tag), the empty [] is correct and semantically sound.
  */
 export async function deleteEntities(
   context: DemoContext,
@@ -279,7 +335,6 @@ export async function deleteEntities(
   };
   const stubs = ids.map(buildStub);
 
-  // SimpleBatch constructor: (classId, data, tagIds, markDeleted)
   const batch = new SimpleBatch(new UUID(classId), stubs, [], ids);
   await pipelineApi.receive(new UUID(context.config.pipelineId), batch);
 }
