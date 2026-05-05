@@ -102,7 +102,7 @@ export class FormFieldRendererComponent implements OnInit {
   }
 
   getErrorMessage(): string | null {
-    if (!this.control?.errors) return null;
+    if (!this.control.errors) return null;
 
     if (this.control.errors['required']) return `${this.field().label} is required`;
     if (this.control.errors['minlength']) {
