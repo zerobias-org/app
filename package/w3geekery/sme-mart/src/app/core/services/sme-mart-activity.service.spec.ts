@@ -4,7 +4,10 @@ import { SmeMartActivityService } from './sme-mart-activity.service';
 import { SmeMartWorkflowService } from './sme-mart-workflow.service';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
-import type { GqlSmeMartActivityResponse, GqlSmeMartWorkflowResponse } from '../gql-types';
+import { DemoVisibilityService } from './demo-visibility.service';
+import { ProjectContextService } from './project-context.service';
+import { fakeProjectContextService } from '../../test-helpers/angular';
+import type { GqlSmeMartActivityResponse } from '../gql-types';
 
 type MockFn = ReturnType<typeof vi.fn>;
 
@@ -27,6 +30,7 @@ describe('SmeMartActivityService', () => {
   let service: SmeMartActivityService;
   let mockPipelineWrite: MockPipelineWrite;
   let mockGraphqlRead: MockGraphqlRead;
+  let mockProjectContext: ReturnType<typeof fakeProjectContextService>;
 
   beforeEach(() => {
     mockPipelineWrite = {
@@ -47,12 +51,16 @@ describe('SmeMartActivityService', () => {
       getWorkflow: vi.fn().mockResolvedValue(null),
     };
 
+    mockProjectContext = fakeProjectContextService(false);
+
     TestBed.configureTestingModule({
       providers: [
         SmeMartActivityService,
+        DemoVisibilityService,
         { provide: PipelineWriteService, useValue: mockPipelineWrite },
         { provide: GraphqlReadService, useValue: mockGraphqlRead },
         { provide: SmeMartWorkflowService, useValue: mockWorkflowService },
+        { provide: ProjectContextService, useValue: mockProjectContext },
       ],
     });
 
@@ -155,7 +163,7 @@ describe('SmeMartActivityService', () => {
         page: { pageNumber: 1, pageSize: 50, totalCount: 1 },
       };
 
-      mockGraphqlRead.query.mockResolvedValue(mockResponse as any);
+      mockGraphqlRead.query.mockResolvedValue(mockResponse);
 
       const result = await service.listActivities();
 
@@ -226,7 +234,7 @@ describe('SmeMartActivityService', () => {
 
       mockGraphqlRead.getById.mockResolvedValue(activity);
       const workflowService = TestBed.inject(SmeMartWorkflowService);
-      vi.spyOn(workflowService, 'getWorkflow').mockResolvedValue(workflow as any);
+      vi.spyOn(workflowService, 'getWorkflow').mockResolvedValue(workflow);
 
       const result = await service.getActivityWorkflow('activity-123');
 
@@ -248,6 +256,82 @@ describe('SmeMartActivityService', () => {
       mockGraphqlRead.getById.mockResolvedValue(activity);
 
       const result = await service.getActivityWorkflow('activity-123');
+
+      expect(result).toBeNull();
+    });
+  });
+
+  // ────────────────────────────────────────────────────────────────────────────
+  // Demo visibility (Phase 24 Plan 03)
+  // ────────────────────────────────────────────────────────────────────────────
+
+  describe('Demo visibility (Phase 24 Plan 03)', () => {
+    const baseActivity = {
+      name: 'Activity', type: 'task', workflowId: null, customFields: [],
+      createdAt: '2026-05-05T00:00:00Z', updatedAt: '2026-05-05T00:00:00Z',
+    };
+    const mockGqlReturn = [
+      { ...baseActivity, id: '1', name: 'Real', tag: null },
+      { ...baseActivity, id: '2', name: 'Real w/ marketplace tag', tag: [{ value: 'a81cd320-243e-44eb-bdd9-9824019ef3dd' }] },
+      { ...baseActivity, id: '3', name: 'Demo (global)', tag: [{ value: '81053c14-a8e5-4939-b538-c122c7d0eb1a' }] },
+      { ...baseActivity, id: '4', name: 'Demo (legacy)', tag: [{ value: 'd618b602-21cc-40a1-a9fa-534b7bc1672c' }] },
+    ];
+
+    it('[DG-02] strips demo records for non-admin', async () => {
+      mockGraphqlRead.query.mockResolvedValue({
+        items: mockGqlReturn,
+        page: { pageNumber: 1, pageSize: 50, totalCount: 4 },
+      });
+
+      const result = await service.listActivities();
+
+      expect(result.items.map((r: { id?: string }) => r.id)).toEqual(['1', '2']);
+    });
+
+    it('[DG-03] admin sees all records including demo', async () => {
+      mockProjectContext.setIsAdmin(true);
+      mockGraphqlRead.query.mockResolvedValue({
+        items: mockGqlReturn,
+        page: { pageNumber: 1, pageSize: 50, totalCount: 4 },
+      });
+
+      const result = await service.listActivities();
+
+      expect(result.items.map((r: { id?: string }) => r.id)).toEqual(['1', '2', '3', '4']);
+    });
+
+    it('[DG-02] does NOT add server-side tag negation filter', async () => {
+      mockGraphqlRead.query.mockResolvedValue({
+        items: mockGqlReturn,
+        page: { pageNumber: 1, pageSize: 50, totalCount: 4 },
+      });
+
+      await service.listActivities();
+
+      const callArgs = mockGraphqlRead.query.mock.calls[0];
+      const filters = (callArgs[2] as { filters?: Record<string, string> })?.filters ?? {};
+      const filterValues = Object.values(filters).join(' ');
+      expect(filterValues).not.toContain('.not in.');
+      expect(filterValues).not.toContain('.ne.');
+    });
+
+    it('requests tag field in GQL query', async () => {
+      mockGraphqlRead.query.mockResolvedValue({
+        items: mockGqlReturn,
+        page: { pageNumber: 1, pageSize: 50, totalCount: 4 },
+      });
+
+      await service.listActivities();
+
+      const fields = mockGraphqlRead.query.mock.calls[0][1] as string[];
+      expect(fields).toContain('tag');
+    });
+
+    it('[DG-02] returns null when non-admin fetches a demo record by id', async () => {
+      const demoRecord = { ...baseActivity, id: '3', name: 'Demo', tag: [{ value: '81053c14-a8e5-4939-b538-c122c7d0eb1a' }] };
+      mockGraphqlRead.getById.mockResolvedValueOnce(demoRecord);
+
+      const result = await service.getActivity('3');
 
       expect(result).toBeNull();
     });
