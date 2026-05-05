@@ -3,8 +3,11 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { SmeMartProjectService } from './sme-mart-project.service';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
+import { DemoVisibilityService } from './demo-visibility.service';
+import { ProjectContextService } from './project-context.service';
 import { SmeMartTagService } from './sme-mart-tag.service';
 import { SmeMartResourceService } from './sme-mart-resource.service';
+import { fakeProjectContextService } from '../../test-helpers/angular';
 import type { GqlSmeMartProjectResponse } from '../gql-types';
 
 type MockFn = ReturnType<typeof vi.fn>;
@@ -28,6 +31,7 @@ describe('SmeMartProjectService', () => {
   let service: SmeMartProjectService;
   let mockPipelineWrite: MockPipelineWrite;
   let mockGraphqlRead: MockGraphqlRead;
+  let mockProjectContext: ReturnType<typeof fakeProjectContextService>;
 
   beforeEach(() => {
     mockPipelineWrite = {
@@ -43,12 +47,15 @@ describe('SmeMartProjectService', () => {
       getById: vi.fn().mockResolvedValue(null),
       rawQuery: vi.fn().mockResolvedValue(null),
     };
+    mockProjectContext = fakeProjectContextService(false);
 
     TestBed.configureTestingModule({
       providers: [
         SmeMartProjectService,
+        DemoVisibilityService,
         { provide: PipelineWriteService, useValue: mockPipelineWrite },
         { provide: GraphqlReadService, useValue: mockGraphqlRead },
+        { provide: ProjectContextService, useValue: mockProjectContext },
         { provide: SmeMartTagService, useValue: { generateRfpTag: vi.fn(), createTag: vi.fn().mockResolvedValue(null) } },
         { provide: SmeMartResourceService, useValue: { linkResources: vi.fn().mockResolvedValue(undefined) } },
       ],
@@ -144,7 +151,7 @@ describe('SmeMartProjectService', () => {
         page: { pageNumber: 1, pageSize: 50, totalCount: 1 },
       };
 
-      mockGraphqlRead.query.mockResolvedValue(mockResponse as any);
+      mockGraphqlRead.query.mockResolvedValue(mockResponse);
 
       const result = await service.listProjects();
 
@@ -173,7 +180,7 @@ describe('SmeMartProjectService', () => {
         page: { pageNumber: 2, pageSize: 25, totalCount: 50 },
       };
 
-      mockGraphqlRead.query.mockResolvedValue(mockResponse as any);
+      mockGraphqlRead.query.mockResolvedValue(mockResponse);
 
       await service.listProjects({ pageNumber: 2, pageSize: 25 });
 
@@ -249,6 +256,117 @@ describe('SmeMartProjectService', () => {
     });
   });
 
+  describe('demo visibility (Phase 24 Plan 03)', () => {
+    const mockGqlReturn = [
+      { id: '1', name: 'Real', tag: null, status: 'draft' } as unknown as GqlSmeMartProjectResponse,
+      { id: '2', name: 'Real w/ marketplace tag', tag: [{ value: 'a81cd320-243e-44eb-bdd9-9824019ef3dd' }], status: 'draft' } as unknown as GqlSmeMartProjectResponse,
+      { id: '3', name: 'Demo (global)', tag: [{ value: '81053c14-a8e5-4939-b538-c122c7d0eb1a' }], status: 'draft' } as unknown as GqlSmeMartProjectResponse,
+      { id: '4', name: 'Demo (legacy)', tag: [{ value: 'd618b602-21cc-40a1-a9fa-534b7bc1672c' }], status: 'draft' } as unknown as GqlSmeMartProjectResponse,
+    ];
+
+    it('[DG-02] strips demo records for non-admin in listProjects', async () => {
+      mockGraphqlRead.query.mockResolvedValueOnce({
+        items: mockGqlReturn,
+        page: { pageNumber: 1, pageSize: 50, totalCount: 4 },
+      });
+
+      const result = await service.listProjects();
+
+      expect(result.items.map(r => r.id)).toEqual(['1', '2']);
+    });
+
+    it('[DG-03] admin sees all records including demo in listProjects', async () => {
+      mockProjectContext.setIsAdmin(true);
+      mockGraphqlRead.query.mockResolvedValueOnce({
+        items: mockGqlReturn,
+        page: { pageNumber: 1, pageSize: 50, totalCount: 4 },
+      });
+
+      const result = await service.listProjects();
+
+      expect(result.items.map(r => r.id)).toEqual(['1', '2', '3', '4']);
+    });
+
+    it('[DG-02] does NOT add server-side tag negation filter in listProjects', async () => {
+      mockGraphqlRead.query.mockResolvedValueOnce({
+        items: [],
+        page: { pageNumber: 1, pageSize: 50, totalCount: 0 },
+      });
+
+      await service.listProjects();
+
+      const callArgs = mockGraphqlRead.query.mock.calls[0];
+      const filters = callArgs[2]?.filters ?? {};
+      const filterValues = Object.values(filters).join(' ');
+      expect(filterValues).not.toContain('.not in.');
+      expect(filterValues).not.toContain('.ne.');
+    });
+
+    it('requests tag field in GQL query for listProjects', async () => {
+      mockGraphqlRead.query.mockResolvedValueOnce({
+        items: [],
+        page: { pageNumber: 1, pageSize: 50, totalCount: 0 },
+      });
+
+      await service.listProjects();
+
+      const callArgs = mockGraphqlRead.query.mock.calls[0];
+      const fields = callArgs[1] as string[];
+      expect(fields).toContain('tag');
+    });
+
+    it('[DG-02] strips demo records for non-admin in listProjectsByEngagement', async () => {
+      mockGraphqlRead.query.mockResolvedValueOnce({
+        items: mockGqlReturn,
+        page: { pageNumber: 1, pageSize: 50, totalCount: 4 },
+      });
+
+      const result = await service.listProjectsByEngagement('eng-123');
+
+      expect(result.items.map(r => r.id)).toEqual(['1', '2']);
+    });
+
+    it('[DG-03] admin sees all records including demo in listProjectsByEngagement', async () => {
+      mockProjectContext.setIsAdmin(true);
+      mockGraphqlRead.query.mockResolvedValueOnce({
+        items: mockGqlReturn,
+        page: { pageNumber: 1, pageSize: 50, totalCount: 4 },
+      });
+
+      const result = await service.listProjectsByEngagement('eng-123');
+
+      expect(result.items.map(r => r.id)).toEqual(['1', '2', '3', '4']);
+    });
+
+    it('[DG-02] does NOT add server-side tag negation filter in listProjectsByEngagement', async () => {
+      mockGraphqlRead.query.mockResolvedValueOnce({
+        items: [],
+        page: { pageNumber: 1, pageSize: 50, totalCount: 0 },
+      });
+
+      await service.listProjectsByEngagement('eng-123');
+
+      const callArgs = mockGraphqlRead.query.mock.calls[0];
+      const filters = callArgs[2]?.filters ?? {};
+      const filterValues = Object.values(filters).join(' ');
+      expect(filterValues).not.toContain('.not in.');
+      expect(filterValues).not.toContain('.ne.');
+    });
+
+    it('requests tag field in GQL query for listProjectsByEngagement', async () => {
+      mockGraphqlRead.query.mockResolvedValueOnce({
+        items: [],
+        page: { pageNumber: 1, pageSize: 50, totalCount: 0 },
+      });
+
+      await service.listProjectsByEngagement('eng-123');
+
+      const callArgs = mockGraphqlRead.query.mock.calls[0];
+      const fields = callArgs[1] as string[];
+      expect(fields).toContain('tag');
+    });
+  });
+
   describe('getProjectBoards', () => {
     it('should query boards with parentId filter', async () => {
       const mockResponse = {
@@ -263,7 +381,7 @@ describe('SmeMartProjectService', () => {
             createdAt: '2026-03-19T00:00:00Z',
             updatedAt: '2026-03-19T00:00:00Z',
           },
-        ] as any[],
+        ] as GqlSmeMartProjectResponse[],
         page: { pageNumber: 1, pageSize: 1000, totalCount: 1 },
       };
 

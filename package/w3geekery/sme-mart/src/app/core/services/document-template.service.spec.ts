@@ -19,6 +19,8 @@ describe('DocumentTemplateService', () => {
   let service: DocumentTemplateService;
   let pipelineWrite: ReturnType<typeof fakePipelineWriteService>;
   let graphqlRead: ReturnType<typeof fakeGraphqlReadService>;
+  let demoVisibility: { applyVisibility: ReturnType<typeof vi.fn> };
+  let projectContext: ReturnType<typeof fakeProjectContextService>;
 
   const mockTemplate: DocumentTemplate = {
     id: 'template-1',
@@ -38,6 +40,10 @@ describe('DocumentTemplateService', () => {
   beforeEach(() => {
     pipelineWrite = fakePipelineWriteService();
     graphqlRead = fakeGraphqlReadService();
+    demoVisibility = {
+      applyVisibility: vi.fn((records) => records)
+    };
+    projectContext = fakeProjectContextService(false);
 
     TestBed.configureTestingModule({
       providers: [
@@ -45,7 +51,8 @@ describe('DocumentTemplateService', () => {
         DemoVisibilityService,
         { provide: PipelineWriteService, useValue: pipelineWrite },
         { provide: GraphqlReadService, useValue: graphqlRead },
-        { provide: ProjectContextService, useValue: fakeProjectContextService(false) }
+        { provide: DemoVisibilityService, useValue: demoVisibility },
+        { provide: ProjectContextService, useValue: projectContext }
       ]
     });
 
@@ -300,28 +307,6 @@ describe('DocumentTemplateService', () => {
   });
 
   describe('Demo Visibility (Option X - Client-Side Post-Filter)', () => {
-    let demoVisibility: { applyVisibility: ReturnType<typeof vi.fn> };
-    let projectContext: ReturnType<typeof fakeProjectContextService>;
-
-    beforeEach(() => {
-      demoVisibility = {
-        applyVisibility: vi.fn((records) => records)
-      };
-      projectContext = fakeProjectContextService(false);
-
-      TestBed.configureTestingModule({
-        providers: [
-          DocumentTemplateService,
-          { provide: PipelineWriteService, useValue: pipelineWrite },
-          { provide: GraphqlReadService, useValue: graphqlRead },
-          { provide: DemoVisibilityService, useValue: demoVisibility },
-          { provide: ProjectContextService, useValue: projectContext }
-        ]
-      });
-
-      service = TestBed.inject(DocumentTemplateService);
-    });
-
     it('[DG-02] listByOrg strips demo records for non-admin users', async () => {
       const realTemplate = { ...mockTemplate, id: 'real-1', tag: null };
       const demoGlobalTemplate = {

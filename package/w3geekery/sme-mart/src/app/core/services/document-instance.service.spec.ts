@@ -23,6 +23,8 @@ describe('DocumentInstanceService', () => {
   let graphqlRead: ReturnType<typeof fakeGraphqlReadService>;
   let documentTemplateService: { getById: ReturnType<typeof vi.fn>; create: ReturnType<typeof vi.fn>; update: ReturnType<typeof vi.fn>; delete: ReturnType<typeof vi.fn>; listByOrg: ReturnType<typeof vi.fn>; publish: ReturnType<typeof vi.fn>; archive: ReturnType<typeof vi.fn> };
   let variableSubstitution: { parseCustomVariables: ReturnType<typeof vi.fn>; validateRequired: ReturnType<typeof vi.fn>; substitute: ReturnType<typeof vi.fn>; extractVariableNames: ReturnType<typeof vi.fn>; getBuiltInVariables: ReturnType<typeof vi.fn>; generatePreviewVariables: ReturnType<typeof vi.fn> };
+  let demoVisibility: { applyVisibility: ReturnType<typeof vi.fn> };
+  let projectContext: ReturnType<typeof fakeProjectContextService>;
 
   const mockTemplate: DocumentTemplate = {
     id: 'template-1',
@@ -61,6 +63,10 @@ describe('DocumentInstanceService', () => {
   beforeEach(() => {
     pipelineWrite = fakePipelineWriteService();
     graphqlRead = fakeGraphqlReadService();
+    demoVisibility = {
+      applyVisibility: vi.fn((records) => records)
+    };
+    projectContext = fakeProjectContextService(false);
 
     documentTemplateService = {
       getById: vi.fn(),
@@ -89,7 +95,8 @@ describe('DocumentInstanceService', () => {
         { provide: GraphqlReadService, useValue: graphqlRead },
         { provide: DocumentTemplateService, useValue: documentTemplateService },
         { provide: VariableSubstitutionService, useValue: variableSubstitution },
-        { provide: ProjectContextService, useValue: fakeProjectContextService(false) }
+        { provide: DemoVisibilityService, useValue: demoVisibility },
+        { provide: ProjectContextService, useValue: projectContext }
       ]
     });
 
@@ -345,30 +352,6 @@ describe('DocumentInstanceService', () => {
   });
 
   describe('Demo Visibility (Option X - Client-Side Post-Filter)', () => {
-    let demoVisibility: { applyVisibility: ReturnType<typeof vi.fn> };
-    let projectContext: ReturnType<typeof fakeProjectContextService>;
-
-    beforeEach(() => {
-      demoVisibility = {
-        applyVisibility: vi.fn((records) => records)
-      };
-      projectContext = fakeProjectContextService(false);
-
-      TestBed.configureTestingModule({
-        providers: [
-          DocumentInstanceService,
-          { provide: PipelineWriteService, useValue: pipelineWrite },
-          { provide: GraphqlReadService, useValue: graphqlRead },
-          { provide: DocumentTemplateService, useValue: documentTemplateService },
-          { provide: VariableSubstitutionService, useValue: variableSubstitution },
-          { provide: DemoVisibilityService, useValue: demoVisibility },
-          { provide: ProjectContextService, useValue: projectContext }
-        ]
-      });
-
-      service = TestBed.inject(DocumentInstanceService);
-    });
-
     it('[DG-02] getByEngagement strips demo records for non-admin users', async () => {
       const realInstance = { ...mockInstance, id: 'real-1', tag: null };
       const demoGlobalInstance = {

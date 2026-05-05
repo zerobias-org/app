@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService, type GqlQueryOptions } from './graphql-read.service';
+import { DemoVisibilityService } from './demo-visibility.service';
 import { SmeMartTagService } from './sme-mart-tag.service';
 import { SmeMartResourceService } from './sme-mart-resource.service';
 import { Memoize } from '../../shared/utils/memoize.decorator';
@@ -30,6 +31,7 @@ import type { GqlSmeMartProjectResponse, GqlSmeMartBoardResponse } from '../gql-
 export class SmeMartProjectService {
   private readonly pipelineWrite = inject(PipelineWriteService);
   private readonly graphqlRead = inject(GraphqlReadService);
+  private readonly demoVisibility = inject(DemoVisibilityService);
   private readonly tagService = inject(SmeMartTagService);
   private readonly resourceService = inject(SmeMartResourceService);
   private readonly snackBar = inject(MatSnackBar);
@@ -57,6 +59,7 @@ export class SmeMartProjectService {
     'wizardData',
     'dateCreated',
     'dateLastModified',
+    'tag',
   ];
 
   // ---------------------------------------------------------------------------
@@ -136,7 +139,10 @@ export class SmeMartProjectService {
       gqlOptions,
     );
 
-    const items = result.items.map(gql =>
+    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
+    const filteredGql = this.demoVisibility.applyVisibility(result.items as (GqlSmeMartProjectResponse & { tag?: Array<{ value: string }> | null })[]);
+
+    const items = filteredGql.map(gql =>
       mapGqlToNeon<SmeMartProject>(gql, SME_MART_PROJECT_FIELD_MAPPING.gqlToNeon),
     );
 
@@ -283,7 +289,10 @@ export class SmeMartProjectService {
       gqlOptions,
     );
 
-    const items = result.items.map(gql =>
+    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
+    const filteredGql = this.demoVisibility.applyVisibility(result.items as (GqlSmeMartProjectResponse & { tag?: Array<{ value: string }> | null })[]);
+
+    const items = filteredGql.map(gql =>
       mapGqlToNeon<SmeMartProject>(gql, SME_MART_PROJECT_FIELD_MAPPING.gqlToNeon),
     );
 
