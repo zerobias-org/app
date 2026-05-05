@@ -11,6 +11,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
+import { DemoVisibilityService } from './demo-visibility.service';
 import { ImpersonationService } from './impersonation.service';
 import { VETTING_ITEM_FIELD_MAPPING, mapGqlToNeon, mapNeonToGql } from '../field-mappings';
 import type { GqlVettingItemResponse } from '../gql-types/vetting-item.types';
@@ -44,6 +45,7 @@ export interface PilotCompletionSuggestion {
 export class VettingService {
   private readonly pipelineWrite = inject(PipelineWriteService);
   private readonly graphqlRead = inject(GraphqlReadService);
+  private readonly demoVisibility = inject(DemoVisibilityService);
   private readonly impersonation = inject(ImpersonationService);
   private readonly snackBar = inject(MatSnackBar);
 
@@ -70,7 +72,12 @@ export class VettingService {
       },
     );
 
-    const items = result.items
+    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
+    const filteredGql = this.demoVisibility.applyVisibility(
+      result.items as (GqlVettingItemResponse & { tag?: Array<{ value: string }> | null })[],
+    );
+
+    const items = filteredGql
       .filter(gql => !(gql as unknown as Record<string, unknown>)['dateDeleted'])
       .map(gql => this.fromGql(gql));
 
@@ -99,8 +106,14 @@ export class VettingService {
     );
     if (!gql) return null;
 
-    this.pipelineWrite.seedCache('EngagementVettingItem', id, gql as unknown as Record<string, unknown>);
-    return this.fromGql(gql);
+    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
+    const filtered = this.demoVisibility.applyVisibility(
+      [gql as GqlVettingItemResponse & { tag?: Array<{ value: string }> | null }],
+    )[0] ?? null;
+    if (!filtered) return null;
+
+    this.pipelineWrite.seedCache('EngagementVettingItem', id, filtered as unknown as Record<string, unknown>);
+    return this.fromGql(filtered);
   }
 
   /**
@@ -529,6 +542,7 @@ export class VettingService {
       'dateCreated',
       'dateLastModified',
       'dateDeleted',
+      'tag',
     ];
   }
 }

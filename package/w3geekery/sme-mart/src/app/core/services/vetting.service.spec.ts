@@ -9,8 +9,10 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { VettingService } from './vetting.service';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
+import { DemoVisibilityService } from './demo-visibility.service';
+import { ProjectContextService } from './project-context.service';
 import { ImpersonationService } from './impersonation.service';
-import { fakePipelineWriteService, fakeGraphqlReadService, fakeImpersonation } from '../../test-helpers/angular';
+import { fakePipelineWriteService, fakeGraphqlReadService, fakeImpersonation, fakeProjectContextService } from '../../test-helpers/angular';
 import { DEFAULT_VETTING_TEMPLATES } from '../models';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
@@ -52,18 +54,22 @@ describe('VettingService', () => {
   let pipelineWrite: ReturnType<typeof fakePipelineWriteService>;
   let graphqlRead: ReturnType<typeof fakeGraphqlReadService>;
   let mockSnackBar: { open: ReturnType<typeof vi.fn> };
+  let mockProjectContext: ReturnType<typeof fakeProjectContextService>;
 
   beforeEach(() => {
     pipelineWrite = fakePipelineWriteService();
     graphqlRead = fakeGraphqlReadService();
     mockSnackBar = { open: vi.fn() };
+    mockProjectContext = fakeProjectContextService(false);
 
     TestBed.configureTestingModule({
       providers: [
         VettingService,
+        DemoVisibilityService,
         { provide: PipelineWriteService, useValue: pipelineWrite },
         { provide: GraphqlReadService, useValue: graphqlRead },
         { provide: ImpersonationService, useValue: fakeImpersonation() },
+        { provide: ProjectContextService, useValue: mockProjectContext },
         { provide: MatSnackBar, useValue: mockSnackBar },
       ],
     });
@@ -551,6 +557,78 @@ describe('VettingService', () => {
         'Dismiss',
         expect.any(Object),
       );
+    });
+  });
+
+  // ── Demo visibility (Phase 24 Plan 03) ──
+
+  describe('Demo visibility (Phase 24 Plan 03)', () => {
+    const mockGqlReturn = [
+      { ...VETTING_GQL_FIXTURE, id: '1', name: 'Real', tag: null },
+      { ...VETTING_GQL_FIXTURE, id: '2', name: 'Real w/ marketplace tag', tag: [{ value: 'a81cd320-243e-44eb-bdd9-9824019ef3dd' }] },
+      { ...VETTING_GQL_FIXTURE, id: '3', name: 'Demo (global)', tag: [{ value: '81053c14-a8e5-4939-b538-c122c7d0eb1a' }] },
+      { ...VETTING_GQL_FIXTURE, id: '4', name: 'Demo (legacy)', tag: [{ value: 'd618b602-21cc-40a1-a9fa-534b7bc1672c' }] },
+    ];
+
+    it('[DG-02] strips demo records for non-admin', async () => {
+      graphqlRead.query.mockResolvedValue({
+        items: mockGqlReturn,
+        page: { pageNumber: 1, pageSize: 200, totalCount: 4 },
+      });
+
+      const result = await service.listVettingItems('eng-001');
+
+      expect(result.map((r: { id?: string }) => r.id)).toEqual(['1', '2']);
+    });
+
+    it('[DG-03] admin sees all records including demo', async () => {
+      mockProjectContext.setIsAdmin(true);
+      graphqlRead.query.mockResolvedValue({
+        items: mockGqlReturn,
+        page: { pageNumber: 1, pageSize: 200, totalCount: 4 },
+      });
+
+      const result = await service.listVettingItems('eng-001');
+
+      // Service sorts by category then name; all fixtures share category 'always'
+      // so they sort alphabetically: Demo (global), Demo (legacy), Real, Real w/...
+      expect(result.map((r: { id?: string }) => r.id)).toEqual(['3', '4', '1', '2']);
+    });
+
+    it('[DG-02] does NOT add server-side tag negation filter', async () => {
+      graphqlRead.query.mockResolvedValue({
+        items: mockGqlReturn,
+        page: { pageNumber: 1, pageSize: 200, totalCount: 4 },
+      });
+
+      await service.listVettingItems('eng-001');
+
+      const callArgs = graphqlRead.query.mock.calls[0];
+      const filters = (callArgs[2] as { filters?: Record<string, string> })?.filters ?? {};
+      const filterValues = Object.values(filters).join(' ');
+      expect(filterValues).not.toContain('.not in.');
+      expect(filterValues).not.toContain('.ne.');
+    });
+
+    it('requests tag field in GQL query', async () => {
+      graphqlRead.query.mockResolvedValue({
+        items: mockGqlReturn,
+        page: { pageNumber: 1, pageSize: 200, totalCount: 4 },
+      });
+
+      await service.listVettingItems('eng-001');
+
+      const fields = graphqlRead.query.mock.calls[0][1] as string[];
+      expect(fields).toContain('tag');
+    });
+
+    it('[DG-02] returns null when non-admin fetches a demo record by id', async () => {
+      const demoRecord = { ...VETTING_GQL_FIXTURE, id: '3', name: 'Demo', tag: [{ value: '81053c14-a8e5-4939-b538-c122c7d0eb1a' }] };
+      graphqlRead.getById.mockResolvedValueOnce(demoRecord);
+
+      const result = await service.getVettingItem('3');
+
+      expect(result).toBeNull();
     });
   });
 });
