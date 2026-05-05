@@ -344,6 +344,9 @@ describe('NotesService', () => {
     ];
 
     beforeEach(() => {
+      // Parent describe's beforeEach already instantiated TestBed; reset before
+      // reconfiguring with the demo-visibility provider set.
+      TestBed.resetTestingModule();
       mockProjectContextDV = fakeProjectContextService(false);
       mockGqlReadDV = fakeGraphqlReadService();
 

@@ -11,8 +11,14 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 describe('onboardingGuard', () => {
   let router: { createUrlTree: ReturnType<typeof vi.fn> };
-  let app: any;
-  let clientApi: any;
+  let app: { whoAmI: ReturnType<typeof vi.fn>; getCurrentOrgId: ReturnType<typeof vi.fn> };
+  let clientApi: {
+    toUUID: ReturnType<typeof vi.fn>;
+    danaClient: {
+      getMeApi: () => { listMyOrgs: ReturnType<typeof vi.fn> };
+      getOrgApi: () => { getRequestOrgMember: ReturnType<typeof vi.fn> };
+    };
+  };
   let bootstrapService: { ensureDefaultEngagement: ReturnType<typeof vi.fn> };
   let profileService: { getCompletionStatus: ReturnType<typeof vi.fn> };
   let projectContext: { setIsAdmin: ReturnType<typeof vi.fn> };
@@ -20,7 +26,9 @@ describe('onboardingGuard', () => {
   let injector: Injector;
 
   const mockRoute = {} as ActivatedRouteSnapshot;
-  const mockState = {} as RouterStateSnapshot;
+  // url='/' so the guard's alreadyAt(target) helper never short-circuits in
+  // these tests — every assertion expects a UrlTree redirect.
+  const mockState = { url: '/' } as RouterStateSnapshot;
 
   const mockWhoAmI = {
     id: 'user-123',
@@ -56,7 +64,7 @@ describe('onboardingGuard', () => {
     };
 
     // Setup default router behavior
-    router.createUrlTree.mockImplementation((path: string | any[]) => {
+    router.createUrlTree.mockImplementation((path: string | unknown[]) => {
       const pathStr = Array.isArray(path) ? path.join('/') : path;
       return { toString: () => pathStr };
     });
