@@ -264,13 +264,13 @@ export class OrgDocumentService {
   }
 
   /** Remove a share (unshare a document from a target). */
-  async unshareDocument(): Promise<void> {
+  async unshareDocument(_shareId: string): Promise<void> {
     // TODO(Plan 046): Implement share deletion in GQL schema and API
     // For now, this is a no-op placeholder
   }
 
   /** List all shares for a specific document via GraphQL. */
-  async listShares(): Promise<OrgDocumentShare[]> {
+  async listShares(_documentId: string): Promise<OrgDocumentShare[]> {
     // TODO(Plan 046): Implement share queries in GQL schema
     // For now, return empty list until SmeMartDocumentShare is indexed in GQL
     return [];

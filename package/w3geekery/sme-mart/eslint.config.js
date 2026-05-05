@@ -76,6 +76,20 @@ export default [
           preferQuerySignals: true,
           preferReadonlySignalProperties: true
         }
+      ],
+
+      // Allow `_`-prefixed params/vars for intentionally-unused (TS convention).
+      // Aligns with TypeScript ergonomics: methods with TODO bodies retain their
+      // public-API signature without firing no-unused-vars.
+      'no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+          destructuredArrayIgnorePattern: '^_'
+        }
       ]
     }
   },
