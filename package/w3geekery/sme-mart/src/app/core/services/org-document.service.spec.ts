@@ -6,17 +6,19 @@ import { OrgDocumentService } from './org-document.service';
 import { ZerobiasClientApi } from '@zerobias-com/zerobias-client';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
+import { DemoVisibilityService } from './demo-visibility.service';
 import { DocumentService } from './document.service';
 import { ImpersonationService } from './impersonation.service';
 import { SmeMartTagService } from './sme-mart-tag.service';
+import { ProjectContextService } from './project-context.service';
 import { TEST_ORG_ID, TEST_DOC_ID, TEST_USER_ID, TEST_ENG_ID } from '../../test-helpers/constants';
-import { fakeImpersonation, fakePipelineWriteService, fakeGraphqlReadService } from '../../test-helpers/angular';
+import { fakeImpersonation, fakePipelineWriteService, fakeGraphqlReadService, fakeProjectContextService } from '../../test-helpers/angular';
 import type { GqlDocumentResponse } from '../gql-types/document.types';
 
 type MockFn = ReturnType<typeof vi.fn>;
 
 interface MockDocService {
-  uploadProgress$: Subject<any>;
+  uploadProgress$: Subject<{ filename: string; percent: number; done: boolean }>;
   uploadBinary: MockFn;
   getPreviewUrl: MockFn;
   getDownloadUrl: MockFn;
@@ -29,6 +31,7 @@ interface MockClientApi {
   fileClient: { getFileApi: MockFn; getFolderApi: MockFn };
   hydraClient: { getResourceApi: MockFn };
   toUUID: MockFn;
+  fileApiMock?: unknown;
 }
 
 describe('OrgDocumentService', () => {
@@ -39,11 +42,13 @@ describe('OrgDocumentService', () => {
   let mockImpersonation: ReturnType<typeof fakeImpersonation>;
   let mockClientApi: MockClientApi;
   let mockSnackBar: { open: ReturnType<typeof vi.fn> };
+  let mockProjectContext: ReturnType<typeof fakeProjectContextService>;
 
   beforeEach(() => {
     mockPipeline = fakePipelineWriteService();
     mockGql = fakeGraphqlReadService();
     mockSnackBar = { open: vi.fn() };
+    mockProjectContext = fakeProjectContextService(false); // non-admin by default
 
     // Default GQL fixtures
     const documentFixture: GqlDocumentResponse = {
@@ -102,13 +107,15 @@ describe('OrgDocumentService', () => {
     };
 
     // Store the fileApiMock on the mockClientApi for access in tests
-    (mockClientApi as any).fileApiMock = fileApiMock;
+    (mockClientApi as unknown as { fileApiMock: typeof fileApiMock }).fileApiMock = fileApiMock;
 
     TestBed.configureTestingModule({
       providers: [
         OrgDocumentService,
+        DemoVisibilityService,
         { provide: PipelineWriteService, useValue: mockPipeline },
         { provide: GraphqlReadService, useValue: mockGql },
+        { provide: ProjectContextService, useValue: mockProjectContext },
         { provide: DocumentService, useValue: mockDocService },
         { provide: ImpersonationService, useValue: mockImpersonation },
         { provide: ZerobiasClientApi, useValue: mockClientApi },
@@ -189,7 +196,8 @@ describe('OrgDocumentService', () => {
 
     it('should handle FileService upload failure gracefully', async () => {
       // Configure the fileApi mock to reject
-      (mockClientApi as any).fileApiMock.create.mockRejectedValueOnce(new Error('FileService unavailable'));
+      const mockClient = mockClientApi as unknown as { fileApiMock: { create: MockFn } };
+      mockClient.fileApiMock.create.mockRejectedValueOnce(new Error('FileService unavailable'));
 
       const file = new File(['test'], 'test.pdf', { type: 'application/pdf' });
 
@@ -268,6 +276,66 @@ describe('OrgDocumentService', () => {
       expect(result).toHaveLength(1);
       expect(result[0].id).toBe(TEST_DOC_ID);
       expect(result[0].org_id).toBe(TEST_ORG_ID);
+    });
+  });
+
+  describe('demo visibility (Phase 24 Plan 03)', () => {
+    const mockGqlReturn = [
+      { id: '1', name: 'Real', tag: null },
+      { id: '2', name: 'Real w/ marketplace tag', tag: [{ value: 'a81cd320-243e-44eb-bdd9-9824019ef3dd' }] },
+      { id: '3', name: 'Demo (global)', tag: [{ value: '81053c14-a8e5-4939-b538-c122c7d0eb1a' }] },
+      { id: '4', name: 'Demo (legacy)', tag: [{ value: 'd618b602-21cc-40a1-a9fa-534b7bc1672c' }] },
+    ];
+
+    it('[DG-02] strips demo records for non-admin', async () => {
+      mockGql.query.mockResolvedValueOnce({
+        items: mockGqlReturn,
+        page: { pageNumber: 1, pageSize: 50, totalCount: 4 },
+      });
+
+      const result = await service.listDocuments(TEST_ORG_ID);
+
+      expect(result.map(r => r.id)).toEqual(['1', '2']);
+    });
+
+    it('[DG-03] admin sees all records including demo', async () => {
+      mockProjectContext.setIsAdmin(true);
+      mockGql.query.mockResolvedValueOnce({
+        items: mockGqlReturn,
+        page: { pageNumber: 1, pageSize: 50, totalCount: 4 },
+      });
+
+      const result = await service.listDocuments(TEST_ORG_ID);
+
+      expect(result.map(r => r.id)).toEqual(['1', '2', '3', '4']);
+    });
+
+    it('[DG-02] does NOT add server-side tag negation filter', async () => {
+      mockGql.query.mockResolvedValueOnce({
+        items: [],
+        page: { pageNumber: 1, pageSize: 50, totalCount: 0 },
+      });
+
+      await service.listDocuments(TEST_ORG_ID);
+
+      const callArgs = mockGql.query.mock.calls[0];
+      const filters = callArgs[2]?.filters ?? {};
+      const filterValues = Object.values(filters).join(' ');
+      expect(filterValues).not.toContain('.not in.');
+      expect(filterValues).not.toContain('.ne.');
+    });
+
+    it('requests tag field in GQL query', async () => {
+      mockGql.query.mockResolvedValueOnce({
+        items: [],
+        page: { pageNumber: 1, pageSize: 50, totalCount: 0 },
+      });
+
+      await service.listDocuments(TEST_ORG_ID);
+
+      const callArgs = mockGql.query.mock.calls[0];
+      const fields = callArgs[1] as string[];
+      expect(fields).toContain('tag');
     });
   });
 

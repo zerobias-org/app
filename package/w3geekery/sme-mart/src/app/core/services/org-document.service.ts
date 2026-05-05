@@ -15,6 +15,7 @@ import { Nmtoken } from '@zerobias-org/types-core-js';
 import { Md5 } from 'ts-md5';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService, type GqlQueryOptions } from './graphql-read.service';
+import { DemoVisibilityService } from './demo-visibility.service';
 import { DocumentService } from './document.service';
 import { ImpersonationService } from './impersonation.service';
 import { SmeMartTagService } from './sme-mart-tag.service';
@@ -57,6 +58,7 @@ export class OrgDocumentService {
   private readonly clientApi = inject(ZerobiasClientApi);
   private readonly pipelineWrite = inject(PipelineWriteService);
   private readonly graphqlRead = inject(GraphqlReadService);
+  private readonly demoVisibility = inject(DemoVisibilityService);
   private readonly docService = inject(DocumentService);
   private readonly impersonation = inject(ImpersonationService);
   private readonly tagService = inject(SmeMartTagService);
@@ -92,22 +94,23 @@ export class OrgDocumentService {
       // Ensure org folder in FileService
       const folderId = await this.ensureOrgFolder(orgId);
 
+      const createFileInput: Record<string, unknown> = {
+        name: filename,
+        description: opts.description || '',
+        folderId: folderId ? this.clientApi.toUUID(folderId) : undefined,
+        retentionPolicy: {},
+        syncPolicy: {},
+      };
       const fileView = await this.clientApi.fileClient
         .getFileApi()
-        .create({
-          name: filename,
-          description: opts.description || '',
-          folderId: folderId ? this.clientApi.toUUID(folderId) : undefined,
-          retentionPolicy: {},
-          syncPolicy: {},
-        } as any);
+        .create(createFileInput as unknown as Parameters<ReturnType<typeof this.clientApi.fileClient.getFileApi>['create']>[0]);
 
       zbFileId = fileView.id?.toString() || '';
       fileVersionId = await this.docService.uploadBinary(
         fileView, arrayBuffer, file.type, checksum, filename,
       );
-    } catch (fsErr: any) {
-      console.warn('[OrgDocumentService] FileService upload unavailable, storing metadata only:', fsErr.message);
+    } catch (fsErr: unknown) {
+      console.warn('[OrgDocumentService] FileService upload unavailable, storing metadata only:', (fsErr as Error).message);
       this.docService.uploadProgress$.next({ filename, percent: 50, done: false });
     }
 
@@ -183,8 +186,11 @@ export class OrgDocumentService {
       gqlOptions,
     );
 
+    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
+    const filteredItems = this.demoVisibility.applyVisibility(result.items as (GqlDocumentResponse & { tag?: Array<{ value: string }> | null })[]);
+
     // Transform GQL responses to OrgDocumentDetail
-    return result.items.map(gql => {
+    return filteredItems.map(gql => {
       const neonData = mapGqlToNeon<OrgDocumentDetail>(gql, DOCUMENT_FIELD_MAPPING.gqlToNeon);
       neonData.org_id = orgId;
       return neonData;
@@ -226,7 +232,10 @@ export class OrgDocumentService {
       },
     );
 
-    return result.items.map(gql => {
+    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
+    const filteredItems = this.demoVisibility.applyVisibility(result.items as (GqlDocumentResponse & { tag?: Array<{ value: string }> | null })[]);
+
+    return filteredItems.map(gql => {
       const neonData = mapGqlToNeon<OrgDocumentDetail>(gql, DOCUMENT_FIELD_MAPPING.gqlToNeon);
       neonData.org_id = orgId;
       return neonData;
@@ -255,13 +264,13 @@ export class OrgDocumentService {
   }
 
   /** Remove a share (unshare a document from a target). */
-  async unshareDocument(shareId: string): Promise<void> {
+  async unshareDocument(): Promise<void> {
     // TODO(Plan 046): Implement share deletion in GQL schema and API
     // For now, this is a no-op placeholder
   }
 
   /** List all shares for a specific document via GraphQL. */
-  async listShares(documentId: string): Promise<OrgDocumentShare[]> {
+  async listShares(): Promise<OrgDocumentShare[]> {
     // TODO(Plan 046): Implement share queries in GQL schema
     // For now, return empty list until SmeMartDocumentShare is indexed in GQL
     return [];
@@ -394,12 +403,13 @@ export class OrgDocumentService {
       const results = await this.clientApi.hydraClient
         .getResourceApi()
         .searchResources(undefined, undefined, [folderName], undefined, [new Nmtoken('folder')]);
-      const existing = results.items?.find((r: any) => r.name === folderName);
-      if (existing) return existing.id?.toString() || null;
+      const existing = (results.items as unknown[] ?? []).find((r: unknown) => (r as { name?: string }).name === folderName);
+      if (existing) return ((existing as { id?: { toString(): string } }).id?.toString() || null);
 
+      const createFolderInput: Record<string, unknown> = { name: folderName };
       const folder = await this.clientApi.fileClient
         .getFolderApi()
-        .create({ name: folderName } as any);
+        .create(createFolderInput as unknown as Parameters<ReturnType<typeof this.clientApi.fileClient.getFolderApi>['create']>[0]);
       return folder.id?.toString() || null;
     } catch (err) {
       console.warn('[OrgDocumentService] Failed to ensure org folder, uploading to root:', err);
@@ -431,6 +441,7 @@ export class OrgDocumentService {
       'viewUrl',
       'dateCreated',
       'dateLastModified',
+      'tag',
     ];
   }
 }
