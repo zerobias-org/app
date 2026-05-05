@@ -381,7 +381,7 @@ describe('SmeMartProjectService', () => {
             createdAt: '2026-03-19T00:00:00Z',
             updatedAt: '2026-03-19T00:00:00Z',
           },
-        ] as GqlSmeMartProjectResponse[],
+        ] as unknown as GqlSmeMartProjectResponse[],
         page: { pageNumber: 1, pageSize: 1000, totalCount: 1 },
       };
 
