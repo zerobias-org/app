@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService, type GqlQueryOptions } from './graphql-read.service';
+import { DemoVisibilityService } from './demo-visibility.service';
 import { SERVICE_OFFERING_FIELD_MAPPING, mapNeonToGql, mapGqlToNeon } from '../field-mappings';
 import type { QueryOptions } from '@zerobias-org/data-utils';
 import { PagedResults } from '@zerobias-org/types-core-js';
@@ -21,6 +22,7 @@ import type { GqlServiceOfferingResponse } from '../gql-types';
 export class ServiceOfferingsService {
   private readonly pipelineWrite = inject(PipelineWriteService);
   private readonly graphqlRead = inject(GraphqlReadService);
+  private readonly demoVisibility = inject(DemoVisibilityService);
   private readonly snackBar = inject(MatSnackBar);
 
   /**
@@ -45,8 +47,13 @@ export class ServiceOfferingsService {
       gqlOptions,
     );
 
+    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
+    const filteredGql = this.demoVisibility.applyVisibility(
+      result.items as (GqlServiceOfferingResponse & { tag?: Array<{ value: string }> | null })[],
+    );
+
     // Transform GQL responses to ServiceOffering (Neon shape)
-    const items = result.items.map(gql =>
+    const items = filteredGql.map(gql =>
       mapGqlToNeon<ServiceOffering>(gql, SERVICE_OFFERING_FIELD_MAPPING.gqlToNeon),
     );
 
@@ -70,8 +77,13 @@ export class ServiceOfferingsService {
       gqlOptions,
     );
 
+    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
+    const filteredGql = this.demoVisibility.applyVisibility(
+      result.items as (GqlServiceOfferingResponse & { tag?: Array<{ value: string }> | null })[],
+    );
+
     // Transform and return as array
-    return result.items.map(gql =>
+    return filteredGql.map(gql =>
       mapGqlToNeon<ServiceOffering>(gql, SERVICE_OFFERING_FIELD_MAPPING.gqlToNeon),
     );
   }
@@ -195,6 +207,7 @@ export class ServiceOfferingsService {
       'serviceRequirements',
       'dateCreated',
       'dateLastModified',
+      'tag',
     ];
   }
 }

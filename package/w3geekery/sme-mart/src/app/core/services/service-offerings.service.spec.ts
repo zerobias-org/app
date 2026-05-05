@@ -11,9 +11,11 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { ServiceOfferingsService } from './service-offerings.service';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
+import { DemoVisibilityService } from './demo-visibility.service';
+import { ProjectContextService } from './project-context.service';
 import { SERVICE_OFFERING_FIELD_MAPPING } from '../field-mappings';
 import { SERVICE_OFFERING_GQL_FIXTURE } from '../../test-helpers/gql-fixtures';
-import { fakePipelineWriteService, fakeGraphqlReadService } from '../../test-helpers/angular';
+import { fakePipelineWriteService, fakeGraphqlReadService, fakeProjectContextService } from '../../test-helpers/angular';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 describe('ServiceOfferingsService (Pipeline + GraphQL)', () => {
@@ -21,17 +23,21 @@ describe('ServiceOfferingsService (Pipeline + GraphQL)', () => {
   let pipelineWrite: ReturnType<typeof fakePipelineWriteService>;
   let graphqlRead: ReturnType<typeof fakeGraphqlReadService>;
   let mockSnackBar: { open: ReturnType<typeof vi.fn> };
+  let mockProjectContext: ReturnType<typeof fakeProjectContextService>;
 
   beforeEach(() => {
     pipelineWrite = fakePipelineWriteService();
     graphqlRead = fakeGraphqlReadService();
     mockSnackBar = { open: vi.fn() };
+    mockProjectContext = fakeProjectContextService(false);
 
     TestBed.configureTestingModule({
       providers: [
         ServiceOfferingsService,
+        DemoVisibilityService,
         { provide: PipelineWriteService, useValue: pipelineWrite },
         { provide: GraphqlReadService, useValue: graphqlRead },
+        { provide: ProjectContextService, useValue: mockProjectContext },
         { provide: MatSnackBar, useValue: mockSnackBar },
       ],
     });
@@ -301,16 +307,16 @@ describe('ServiceOfferingsService (Pipeline + GraphQL)', () => {
 
       // Map Neon → GQL
       const gqlShape = SERVICE_OFFERING_FIELD_MAPPING.neonToGql;
-      const gqlData: Record<string, any> = {};
+      const gqlData: Record<string, unknown> = {};
       for (const [neonField, gqlField] of Object.entries(gqlShape)) {
         if (neonField in neonOriginal) {
-          gqlData[gqlField] = (neonOriginal as any)[neonField];
+          gqlData[gqlField] = (neonOriginal as unknown as Record<string, unknown>)[neonField];
         }
       }
 
       // Map GQL → Neon (reverse)
       const gqlReverseShape = SERVICE_OFFERING_FIELD_MAPPING.gqlToNeon;
-      const neonResult: Record<string, any> = {};
+      const neonResult: Record<string, unknown> = {};
       for (const [gqlField, neonField] of Object.entries(gqlReverseShape)) {
         if (gqlField in gqlData) {
           neonResult[neonField] = gqlData[gqlField];
@@ -322,6 +328,78 @@ describe('ServiceOfferingsService (Pipeline + GraphQL)', () => {
       expect(neonResult['provider_id']).toBe(neonOriginal.provider_id);
       expect(neonResult['pricing_type']).toBe(neonOriginal.pricing_type);
       expect(neonResult['is_active']).toBe(neonOriginal.is_active);
+    });
+  });
+
+  // ── Demo visibility (Phase 24 Plan 03) ──
+
+  describe('Demo visibility (Phase 24 Plan 03)', () => {
+    const mockGqlReturn = [
+      { ...SERVICE_OFFERING_GQL_FIXTURE, id: '1', name: 'Real', tag: null },
+      { ...SERVICE_OFFERING_GQL_FIXTURE, id: '2', name: 'Real w/ marketplace tag', tag: [{ value: 'a81cd320-243e-44eb-bdd9-9824019ef3dd' }] },
+      { ...SERVICE_OFFERING_GQL_FIXTURE, id: '3', name: 'Demo (global)', tag: [{ value: '81053c14-a8e5-4939-b538-c122c7d0eb1a' }] },
+      { ...SERVICE_OFFERING_GQL_FIXTURE, id: '4', name: 'Demo (legacy)', tag: [{ value: 'd618b602-21cc-40a1-a9fa-534b7bc1672c' }] },
+    ];
+
+    it('[DG-02] strips demo records for non-admin', async () => {
+      graphqlRead.query.mockResolvedValue({
+        items: mockGqlReturn,
+        page: { pageNumber: 1, pageSize: 50, totalCount: 4 },
+      });
+
+      const result = await service.listServices();
+
+      expect(result.items.map((r: { id?: string }) => r.id)).toEqual(['1', '2']);
+    });
+
+    it('[DG-03] admin sees all records including demo', async () => {
+      mockProjectContext.setIsAdmin(true);
+      graphqlRead.query.mockResolvedValue({
+        items: mockGqlReturn,
+        page: { pageNumber: 1, pageSize: 50, totalCount: 4 },
+      });
+
+      const result = await service.listServices();
+
+      expect(result.items.map((r: { id?: string }) => r.id)).toEqual(['1', '2', '3', '4']);
+    });
+
+    it('[DG-02] does NOT add server-side tag negation filter', async () => {
+      graphqlRead.query.mockResolvedValue({
+        items: mockGqlReturn,
+        page: { pageNumber: 1, pageSize: 50, totalCount: 4 },
+      });
+
+      await service.listServices();
+
+      const callArgs = graphqlRead.query.mock.calls[0];
+      const filters = (callArgs[2] as { filters?: Record<string, string> })?.filters ?? {};
+      const filterValues = Object.values(filters).join(' ');
+      expect(filterValues).not.toContain('.not in.');
+      expect(filterValues).not.toContain('.ne.');
+    });
+
+    it('requests tag field in GQL query', async () => {
+      graphqlRead.query.mockResolvedValue({
+        items: mockGqlReturn,
+        page: { pageNumber: 1, pageSize: 50, totalCount: 4 },
+      });
+
+      await service.listServices();
+
+      const fields = graphqlRead.query.mock.calls[0][1] as string[];
+      expect(fields).toContain('tag');
+    });
+
+    it('[DG-02] strips demo records for non-admin in getServicesByProvider', async () => {
+      graphqlRead.query.mockResolvedValue({
+        items: mockGqlReturn,
+        page: { pageNumber: 1, pageSize: 100, totalCount: 4 },
+      });
+
+      const result = await service.getServicesByProvider('provider-1');
+
+      expect(result.map((r: { id?: string }) => r.id)).toEqual(['1', '2']);
     });
   });
 });
