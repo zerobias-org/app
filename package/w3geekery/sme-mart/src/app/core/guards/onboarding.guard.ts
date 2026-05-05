@@ -6,7 +6,7 @@ import {
   UrlTree,
   CanActivateFn,
 } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 import { ZerobiasClientApi, ZerobiasClientApp } from '@zerobias-com/zerobias-client';
 import { OnboardingBootstrapService } from '../services/onboarding-bootstrap.service';
 import { MarketplaceProfileService } from '../services/marketplace-profile.service';
@@ -24,7 +24,7 @@ import { ProjectContextService } from '../services/project-context.service';
  */
 export const onboardingGuard: CanActivateFn = async (
   _route: ActivatedRouteSnapshot,
-  _state: RouterStateSnapshot,
+  state: RouterStateSnapshot,
 ): Promise<boolean | UrlTree> => {
   const router = inject(Router);
   const clientApi = inject(ZerobiasClientApi);
@@ -32,11 +32,19 @@ export const onboardingGuard: CanActivateFn = async (
   const profileService = inject(MarketplaceProfileService);
   const projectContext = inject(ProjectContextService);
 
+  // Short-circuit helper: if the navigation already targets `target` (or a
+  // child of it), let it through. Without this the guard loops — every
+  // redirect re-fires the guard on the destination route and returns the
+  // same UrlTree, causing infinite navigation cancellation. Phase 27 shipped
+  // without it; surfaced 2026-05-05 by a working dev session showing 3
+  // SDK calls/sec with the URL stuck at `/`.
+  const alreadyAt = (target: string): boolean =>
+    state.url === target || state.url.startsWith(target + '/') || state.url.startsWith(target + '?');
+
   // Step 1: Check session validity
   // Get current user from whoAmI; org is available via getCurrentOrgId()
-  let userId: string;
-  let whoAmI: any;
   const app = inject(ZerobiasClientApp);
+  let whoAmI: { id?: unknown } | void | undefined;
 
   try {
     // Get whoAmI from the app directly (it returns a Promise)
@@ -51,7 +59,7 @@ export const onboardingGuard: CanActivateFn = async (
     return router.createUrlTree(['/login']);
   }
 
-  userId = String(whoAmI.id);
+  const userId = String(whoAmI.id);
 
   // Get current org context via ZerobiasClientApp method
   const orgId = app.getCurrentOrgId() || '';
@@ -65,9 +73,9 @@ export const onboardingGuard: CanActivateFn = async (
   try {
     const meApi = clientApi.danaClient.getMeApi();
     const orgs = await meApi.listMyOrgs();
-    const currentOrg = orgs?.find(o => String(o.id) === orgId);
-    if (currentOrg && (currentOrg as any).partyId) {
-      partyId = String((currentOrg as any).partyId);
+    const currentOrg = orgs?.find(o => String(o.id) === orgId) as { partyId?: unknown } | undefined;
+    if (currentOrg && currentOrg.partyId) {
+      partyId = String(currentOrg.partyId);
     }
   } catch (err) {
     console.warn('[ONBOARDING_GUARD] Failed to get partyId:', err);
@@ -88,7 +96,7 @@ export const onboardingGuard: CanActivateFn = async (
   projectContext.setIsAdmin(isAdmin);
 
   if (isAdmin) {
-    return router.createUrlTree(['/admin']);
+    return alreadyAt('/admin') ? true : router.createUrlTree(['/admin']);
   }
 
   // Step 3: Ensure default engagement exists (calls OnboardingBootstrapService)
@@ -106,14 +114,16 @@ export const onboardingGuard: CanActivateFn = async (
       completionStatus = await result;
     } else {
       // Observable path (fallback in case signature changes)
-      completionStatus = await firstValueFrom(result as any);
+      completionStatus = await firstValueFrom(result as Observable<boolean>);
     }
 
     // Step 5: Route based on completion (AR-05)
     if (!completionStatus) {
-      return router.createUrlTree(['/onboarding/company-profile']);
+      return alreadyAt('/onboarding/company-profile')
+        ? true
+        : router.createUrlTree(['/onboarding/company-profile']);
     } else {
-      return router.createUrlTree(['/projects']);
+      return alreadyAt('/projects') ? true : router.createUrlTree(['/projects']);
     }
 
     // TODO: per-app ToS gate (v1.5) — DECISIONS.md "Per-App ToS Architecture — Two-Layer"
@@ -121,8 +131,10 @@ export const onboardingGuard: CanActivateFn = async (
     // Bootstrap or completion-check failed (AR-09 — graceful error handling)
     // OnboardingBootstrapService already logged + snackbar; guard just redirects
     console.error('[ONBOARDING_GUARD] Bootstrap failed', { error: err });
-    return router.createUrlTree(['/onboarding/bootstrap'], {
-      queryParams: { error: 'bootstrap-failed' },
-    });
+    return alreadyAt('/onboarding/bootstrap')
+      ? true
+      : router.createUrlTree(['/onboarding/bootstrap'], {
+          queryParams: { error: 'bootstrap-failed' },
+        });
   }
 };
