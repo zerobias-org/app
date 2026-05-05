@@ -14,6 +14,7 @@ import { Injectable, inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
+import { DemoVisibilityService } from './demo-visibility.service';
 import { MARKETPLACE_PROFILE_ITEM_FIELD_MAPPING, mapGqlToNeon, mapNeonToGql } from '../field-mappings';
 import type { GqlMarketplaceProfileItemResponse } from '../gql-types/marketplace-profile-item.types';
 import type {
@@ -41,6 +42,7 @@ type SectionData =
 export class VendorProfileService {
   private readonly pipelineWrite = inject(PipelineWriteService);
   private readonly graphqlRead = inject(GraphqlReadService);
+  private readonly demoVisibility = inject(DemoVisibilityService);
   private readonly snackBar = inject(MatSnackBar);
 
   // ── Query ──
@@ -70,7 +72,12 @@ export class VendorProfileService {
       },
     );
 
-    const items = result.items
+    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
+    const filteredGql = this.demoVisibility.applyVisibility(
+      result.items as (GqlMarketplaceProfileItemResponse & { tag?: Array<{ value: string }> | null })[],
+    );
+
+    const items = filteredGql
       .filter(gql => !(gql as unknown as Record<string, unknown>)['dateDeleted'])
       .map(gql => this.fromGql(gql));
 
@@ -98,8 +105,14 @@ export class VendorProfileService {
     );
     if (!gql) return null;
 
-    this.pipelineWrite.seedCache('MarketplaceProfileItem', id, gql as unknown as Record<string, unknown>);
-    return this.fromGql(gql);
+    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
+    const filtered = this.demoVisibility.applyVisibility(
+      [gql as GqlMarketplaceProfileItemResponse & { tag?: Array<{ value: string }> | null }],
+    )[0] ?? null;
+    if (!filtered) return null;
+
+    this.pipelineWrite.seedCache('MarketplaceProfileItem', id, filtered as unknown as Record<string, unknown>);
+    return this.fromGql(filtered);
   }
 
   // ── Create ──
@@ -361,6 +374,7 @@ export class VendorProfileService {
       'dateCreated',
       'dateLastModified',
       'dateDeleted',
+      'tag',
     ];
   }
 }
