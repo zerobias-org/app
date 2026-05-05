@@ -12,12 +12,13 @@ import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
 import { DemoVisibilityService } from './demo-visibility.service';
 import { ProjectContextService } from './project-context.service';
+import { fakePipelineWriteService, fakeGraphqlReadService, fakeProjectContextService } from '../../test-helpers/angular';
 import type { DocumentTemplate, CreateDocumentTemplateDto, CustomVariable } from '../models';
 
 describe('DocumentTemplateService', () => {
   let service: DocumentTemplateService;
-  let pipelineWrite: ReturnType<typeof TestBed.inject<typeof PipelineWriteService>>;
-  let graphqlRead: ReturnType<typeof TestBed.inject<typeof GraphqlReadService>>;
+  let pipelineWrite: ReturnType<typeof fakePipelineWriteService>;
+  let graphqlRead: ReturnType<typeof fakeGraphqlReadService>;
 
   const mockTemplate: DocumentTemplate = {
     id: 'template-1',
@@ -35,31 +36,20 @@ describe('DocumentTemplateService', () => {
   };
 
   beforeEach(() => {
-    const pipelineWriteMock = {
-      pushEntities: vi.fn().mockResolvedValue(undefined),
-      pushEntity: vi.fn().mockResolvedValue(undefined),
-      deleteEntities: vi.fn().mockResolvedValue(undefined),
-      deleteEntity: vi.fn().mockResolvedValue(undefined),
-      getCached: vi.fn().mockReturnValue(null),
-      seedCache: vi.fn()
-    };
-    const graphqlReadMock = {
-      query: vi.fn(),
-      getById: vi.fn(),
-      rawQuery: vi.fn()
-    };
+    pipelineWrite = fakePipelineWriteService();
+    graphqlRead = fakeGraphqlReadService();
 
     TestBed.configureTestingModule({
       providers: [
         DocumentTemplateService,
-        { provide: PipelineWriteService, useValue: pipelineWriteMock },
-        { provide: GraphqlReadService, useValue: graphqlReadMock }
+        DemoVisibilityService,
+        { provide: PipelineWriteService, useValue: pipelineWrite },
+        { provide: GraphqlReadService, useValue: graphqlRead },
+        { provide: ProjectContextService, useValue: fakeProjectContextService(false) }
       ]
     });
 
     service = TestBed.inject(DocumentTemplateService);
-    pipelineWrite = TestBed.inject(PipelineWriteService);
-    graphqlRead = TestBed.inject(GraphqlReadService);
   });
 
   it('should be created', () => {
@@ -310,30 +300,26 @@ describe('DocumentTemplateService', () => {
   });
 
   describe('Demo Visibility (Option X - Client-Side Post-Filter)', () => {
-    let demoVisibility: ReturnType<typeof TestBed.inject<typeof DemoVisibilityService>>;
-    let projectContext: ReturnType<typeof TestBed.inject<typeof ProjectContextService>>;
+    let demoVisibility: { applyVisibility: ReturnType<typeof vi.fn> };
+    let projectContext: ReturnType<typeof fakeProjectContextService>;
 
     beforeEach(() => {
-      const demoVisibilityMock = {
+      demoVisibility = {
         applyVisibility: vi.fn((records) => records)
       };
-      const projectContextMock = {
-        isAdmin: vi.fn().mockReturnValue(false)
-      };
+      projectContext = fakeProjectContextService(false);
 
       TestBed.configureTestingModule({
         providers: [
           DocumentTemplateService,
           { provide: PipelineWriteService, useValue: pipelineWrite },
           { provide: GraphqlReadService, useValue: graphqlRead },
-          { provide: DemoVisibilityService, useValue: demoVisibilityMock },
-          { provide: ProjectContextService, useValue: projectContextMock }
+          { provide: DemoVisibilityService, useValue: demoVisibility },
+          { provide: ProjectContextService, useValue: projectContext }
         ]
       });
 
       service = TestBed.inject(DocumentTemplateService);
-      demoVisibility = TestBed.inject(DemoVisibilityService);
-      projectContext = TestBed.inject(ProjectContextService);
     });
 
     it('[DG-02] listByOrg strips demo records for non-admin users', async () => {
@@ -374,7 +360,7 @@ describe('DocumentTemplateService', () => {
         tag: [{ value: '81053c14-a8e5-4939-b538-c122c7d0eb1a' }]
       };
 
-      projectContext.isAdmin.mockReturnValue(true);
+      projectContext.setIsAdmin(true);
       graphqlRead.query.mockResolvedValue({
         items: [realTemplate, demoTemplate],
         page: { pageNumber: 1, pageSize: 100 }
