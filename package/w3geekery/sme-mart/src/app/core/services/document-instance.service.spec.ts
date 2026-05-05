@@ -14,14 +14,15 @@ import { DocumentTemplateService } from './document-template.service';
 import { VariableSubstitutionService } from './variable-substitution.service';
 import { DemoVisibilityService } from './demo-visibility.service';
 import { ProjectContextService } from './project-context.service';
+import { fakePipelineWriteService, fakeGraphqlReadService, fakeProjectContextService } from '../../test-helpers/angular';
 import type { DocumentTemplate, DocumentInstance, InstantiateTemplateDto } from '../models';
 
 describe('DocumentInstanceService', () => {
   let service: DocumentInstanceService;
-  let pipelineWrite: ReturnType<typeof TestBed.inject<typeof PipelineWriteService>>;
-  let graphqlRead: ReturnType<typeof TestBed.inject<typeof GraphqlReadService>>;
-  let documentTemplateService: ReturnType<typeof TestBed.inject<typeof DocumentTemplateService>>;
-  let variableSubstitution: ReturnType<typeof TestBed.inject<typeof VariableSubstitutionService>>;
+  let pipelineWrite: ReturnType<typeof fakePipelineWriteService>;
+  let graphqlRead: ReturnType<typeof fakeGraphqlReadService>;
+  let documentTemplateService: { getById: ReturnType<typeof vi.fn>; create: ReturnType<typeof vi.fn>; update: ReturnType<typeof vi.fn>; delete: ReturnType<typeof vi.fn>; listByOrg: ReturnType<typeof vi.fn>; publish: ReturnType<typeof vi.fn>; archive: ReturnType<typeof vi.fn> };
+  let variableSubstitution: { parseCustomVariables: ReturnType<typeof vi.fn>; validateRequired: ReturnType<typeof vi.fn>; substitute: ReturnType<typeof vi.fn>; extractVariableNames: ReturnType<typeof vi.fn>; getBuiltInVariables: ReturnType<typeof vi.fn>; generatePreviewVariables: ReturnType<typeof vi.fn> };
 
   const mockTemplate: DocumentTemplate = {
     id: 'template-1',
@@ -58,20 +59,10 @@ describe('DocumentInstanceService', () => {
   };
 
   beforeEach(() => {
-    const pipelineWriteMock = {
-      pushEntities: vi.fn().mockResolvedValue(undefined),
-      pushEntity: vi.fn().mockResolvedValue(undefined),
-      deleteEntities: vi.fn().mockResolvedValue(undefined),
-      deleteEntity: vi.fn().mockResolvedValue(undefined),
-      getCached: vi.fn().mockReturnValue(null),
-      seedCache: vi.fn()
-    };
-    const graphqlReadMock = {
-      query: vi.fn(),
-      getById: vi.fn(),
-      rawQuery: vi.fn()
-    };
-    const documentTemplateMock = {
+    pipelineWrite = fakePipelineWriteService();
+    graphqlRead = fakeGraphqlReadService();
+
+    documentTemplateService = {
       getById: vi.fn(),
       create: vi.fn(),
       update: vi.fn(),
@@ -80,7 +71,8 @@ describe('DocumentInstanceService', () => {
       publish: vi.fn(),
       archive: vi.fn()
     };
-    const variableSubstitutionMock = {
+
+    variableSubstitution = {
       parseCustomVariables: vi.fn(),
       validateRequired: vi.fn(),
       substitute: vi.fn(),
@@ -92,18 +84,16 @@ describe('DocumentInstanceService', () => {
     TestBed.configureTestingModule({
       providers: [
         DocumentInstanceService,
-        { provide: PipelineWriteService, useValue: pipelineWriteMock },
-        { provide: GraphqlReadService, useValue: graphqlReadMock },
-        { provide: DocumentTemplateService, useValue: documentTemplateMock },
-        { provide: VariableSubstitutionService, useValue: variableSubstitutionMock }
+        DemoVisibilityService,
+        { provide: PipelineWriteService, useValue: pipelineWrite },
+        { provide: GraphqlReadService, useValue: graphqlRead },
+        { provide: DocumentTemplateService, useValue: documentTemplateService },
+        { provide: VariableSubstitutionService, useValue: variableSubstitution },
+        { provide: ProjectContextService, useValue: fakeProjectContextService(false) }
       ]
     });
 
     service = TestBed.inject(DocumentInstanceService);
-    pipelineWrite = TestBed.inject(PipelineWriteService);
-    graphqlRead = TestBed.inject(GraphqlReadService);
-    documentTemplateService = TestBed.inject(DocumentTemplateService);
-    variableSubstitution = TestBed.inject(VariableSubstitutionService);
   });
 
   it('should be created', () => {
@@ -355,16 +345,14 @@ describe('DocumentInstanceService', () => {
   });
 
   describe('Demo Visibility (Option X - Client-Side Post-Filter)', () => {
-    let demoVisibility: ReturnType<typeof TestBed.inject<typeof DemoVisibilityService>>;
-    let projectContext: ReturnType<typeof TestBed.inject<typeof ProjectContextService>>;
+    let demoVisibility: { applyVisibility: ReturnType<typeof vi.fn> };
+    let projectContext: ReturnType<typeof fakeProjectContextService>;
 
     beforeEach(() => {
-      const demoVisibilityMock = {
+      demoVisibility = {
         applyVisibility: vi.fn((records) => records)
       };
-      const projectContextMock = {
-        isAdmin: vi.fn().mockReturnValue(false)
-      };
+      projectContext = fakeProjectContextService(false);
 
       TestBed.configureTestingModule({
         providers: [
@@ -373,14 +361,12 @@ describe('DocumentInstanceService', () => {
           { provide: GraphqlReadService, useValue: graphqlRead },
           { provide: DocumentTemplateService, useValue: documentTemplateService },
           { provide: VariableSubstitutionService, useValue: variableSubstitution },
-          { provide: DemoVisibilityService, useValue: demoVisibilityMock },
-          { provide: ProjectContextService, useValue: projectContextMock }
+          { provide: DemoVisibilityService, useValue: demoVisibility },
+          { provide: ProjectContextService, useValue: projectContext }
         ]
       });
 
       service = TestBed.inject(DocumentInstanceService);
-      demoVisibility = TestBed.inject(DemoVisibilityService);
-      projectContext = TestBed.inject(ProjectContextService);
     });
 
     it('[DG-02] getByEngagement strips demo records for non-admin users', async () => {
@@ -421,7 +407,7 @@ describe('DocumentInstanceService', () => {
         tag: [{ value: '81053c14-a8e5-4939-b538-c122c7d0eb1a' }]
       };
 
-      projectContext.isAdmin.mockReturnValue(true);
+      projectContext.setIsAdmin(true);
       graphqlRead.query.mockResolvedValue({
         items: [realInstance, demoInstance],
         page: { pageNumber: 1, pageSize: 100 }
