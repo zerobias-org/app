@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService, type GqlQueryOptions } from './graphql-read.service';
+import { DemoVisibilityService } from './demo-visibility.service';
 import { SME_MART_BOARD_FIELD_MAPPING, mapGqlToNeon } from '../field-mappings';
 import type { QueryOptions } from '@zerobias-org/data-utils';
 import { PagedResults } from '@zerobias-org/types-core-js';
@@ -24,6 +25,7 @@ import type { GqlSmeMartBoardResponse, GqlSmeMartActivityResponse } from '../gql
 export class SmeMartBoardService {
   private readonly pipelineWrite = inject(PipelineWriteService);
   private readonly graphqlRead = inject(GraphqlReadService);
+  private readonly demoVisibility = inject(DemoVisibilityService);
   private readonly snackBar = inject(MatSnackBar);
 
   private readonly boardFields = [
@@ -36,6 +38,7 @@ export class SmeMartBoardService {
     'description',
     'createdAt',
     'updatedAt',
+    'tag',
   ];
 
   /**
@@ -94,7 +97,13 @@ export class SmeMartBoardService {
 
     if (!board) return null;
 
-    return mapGqlToNeon<SmeMartBoard>(board, SME_MART_BOARD_FIELD_MAPPING.gqlToNeon);
+    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
+    const filtered = this.demoVisibility.applyVisibility(
+      [board as GqlSmeMartBoardResponse & { tag?: Array<{ value: string }> | null }],
+    )[0] ?? null;
+    if (!filtered) return null;
+
+    return mapGqlToNeon<SmeMartBoard>(filtered, SME_MART_BOARD_FIELD_MAPPING.gqlToNeon);
   }
 
   /**
@@ -115,7 +124,12 @@ export class SmeMartBoardService {
       gqlOptions,
     );
 
-    const items = result.items.map(gql =>
+    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
+    const filteredGql = this.demoVisibility.applyVisibility(
+      result.items as (GqlSmeMartBoardResponse & { tag?: Array<{ value: string }> | null })[],
+    );
+
+    const items = filteredGql.map(gql =>
       mapGqlToNeon<SmeMartBoard>(gql, SME_MART_BOARD_FIELD_MAPPING.gqlToNeon),
     );
 
@@ -209,7 +223,7 @@ export class SmeMartBoardService {
     );
 
     return result.items.map(gql =>
-      mapGqlToNeon<SmeMartActivity>(gql, { /* use ACTIVITY_FIELD_MAPPING */ } as any),
+      mapGqlToNeon<SmeMartActivity>(gql, { /* use ACTIVITY_FIELD_MAPPING */ } as Parameters<typeof mapGqlToNeon>[1]),
     );
   }
 
