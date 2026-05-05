@@ -5,7 +5,6 @@ import { NotesService } from './notes.service';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
 import { ImpersonationService } from './impersonation.service';
-import { NOTE_FIELD_MAPPING, mapGqlToNeon } from '../field-mappings';
 import type { NoteFolder, NoteFolderWithCounts, Note } from '../models';
 import type { GqlNoteResponse } from '../gql-types/note.types';
 
@@ -221,7 +220,7 @@ export class NoteHierarchyService {
   /**
    * Move all notes from one folder to another.
    */
-  async moveAllNotes(fromFolderId: string, toFolderId: string, engagementId: string): Promise<void> {
+  async moveAllNotes(fromFolderId: string, toFolderId: string, _engagementId: string): Promise<void> {
     // Query notes in the source folder via GQL
     const result = await this.graphqlRead.query<GqlNoteResponse>(
       'Note',

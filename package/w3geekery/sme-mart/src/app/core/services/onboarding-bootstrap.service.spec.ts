@@ -12,7 +12,15 @@ describe('OnboardingBootstrapService', () => {
   let pipelineWrite: ReturnType<typeof fakePipelineWriteService>;
   let graphqlRead: ReturnType<typeof fakeGraphqlReadService>;
   let snackBarMock: { open: ReturnType<typeof vi.fn> };
-  let clientApiMock: any;
+  type ApiMock = ReturnType<typeof vi.fn>;
+  let clientApiMock: {
+    danaClient: { getOrgApi: () => { getOrg: ApiMock } };
+    hydraClient: {
+      getTagApi: () => { searchTags: ApiMock; createTag: ApiMock };
+      getResourceApi: () => { tagResource: ApiMock; getResource: ApiMock };
+    };
+    platformClient: { getTaskApi: () => { create: ApiMock } };
+  };
 
   const testOrgId = 'org-123';
   const testUserId = 'user-123';

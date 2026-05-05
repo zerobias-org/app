@@ -84,7 +84,7 @@ export class MarketplaceProfileService {
       data: string;
       status: string;
       expiresAt?: string | null;
-    }> = [];
+    }>;
 
     try {
       const result = await this.graphqlRead.query<{

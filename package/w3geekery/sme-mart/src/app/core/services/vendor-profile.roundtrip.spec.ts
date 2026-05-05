@@ -185,21 +185,25 @@ describe('VendorProfileService — Roundtrip Field Validation', () => {
     Object.keys(gqlCache).forEach(key => delete gqlCache[key]);
 
     // Mock pushEntity to store in cache
-    pipelineWrite.pushEntity.mockImplementation((className, obj) => {
+    pipelineWrite.pushEntity.mockImplementation((className: string, obj: unknown) => {
       if (className === 'MarketplaceProfileItem') {
-        const id = (obj as any).id || `profile-${Date.now()}`;
+        const o = obj as Partial<GqlMarketplaceProfileItemResponse> & {
+          createdAt?: string;
+          updatedAt?: string;
+        };
+        const id = o.id || `profile-${Date.now()}`;
         // Transform domain→GQL for cache
         const gqlObj: GqlMarketplaceProfileItemResponse = {
-          id: (obj as any).id,
-          orgId: (obj as any).orgId,
-          section: (obj as any).section,
-          name: (obj as any).name,
-          description: (obj as any).description || null,
-          data: (obj as any).data,
-          expiresAt: (obj as any).expiresAt || null,
-          status: (obj as any).status,
-          dateCreated: (obj as any).dateCreated || (obj as any).createdAt,
-          dateLastModified: (obj as any).dateLastModified || (obj as any).updatedAt,
+          id: o.id as string,
+          orgId: o.orgId as string,
+          section: o.section as string,
+          name: o.name as string,
+          description: o.description || null,
+          data: o.data as string,
+          expiresAt: o.expiresAt || null,
+          status: o.status as string,
+          dateCreated: o.dateCreated || (o.createdAt as string),
+          dateLastModified: o.dateLastModified || (o.updatedAt as string),
         };
         gqlCache[id] = gqlObj;
       }

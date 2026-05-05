@@ -26,10 +26,10 @@ export class AppInitService {
     this.translate.use('en');
 
     const authResult = await this.app.init(
-      (req: any) => req,
-      (res: any) => res,
-      (reqErr: any) => reqErr,
-      (resErr: any) => resErr,
+      (req: unknown) => req,
+      (res: unknown) => res,
+      (reqErr: unknown) => reqErr,
+      (resErr: unknown) => resErr,
     );
 
     // Connect to Neon via Generic SQL Hub Module (non-blocking — don't fail app init)

@@ -8,10 +8,14 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 describe('AppInitService', () => {
   let service: AppInitService;
-  let mockApp: any;
-  let mockTranslate: any;
-  let mockDb: any;
-  let mockDemoMode: any;
+  let mockApp: { init: ReturnType<typeof vi.fn> };
+  let mockTranslate: { setDefaultLang: ReturnType<typeof vi.fn>; use: ReturnType<typeof vi.fn> };
+  let mockDb: { connect: ReturnType<typeof vi.fn> };
+  let mockDemoMode: {
+    init: ReturnType<typeof vi.fn>;
+    enabled: ReturnType<typeof vi.fn>;
+    canToggle: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(() => {
     mockApp = {

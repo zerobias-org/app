@@ -73,14 +73,14 @@ export class CompanyProfileFormComponent implements OnInit {
   private readonly zbApp = inject(ZerobiasClientApp);
 
   // State signals
-  form = signal<FormGroup>(new FormGroup({}));
-  isLoading = signal(true);
-  loadError = signal<string | null>(null);
-  isSaving = signal(false);
-  originalSnapshot = signal<Partial<CompanyInfoStruct> | null>(null);
+  readonly form = signal<FormGroup>(new FormGroup({}));
+  readonly isLoading = signal(true);
+  readonly loadError = signal<string | null>(null);
+  readonly isSaving = signal(false);
+  readonly originalSnapshot = signal<Partial<CompanyInfoStruct> | null>(null);
 
   // Pre-fill markers
-  preFilledFields = signal<Set<string>>(new Set());
+  readonly preFilledFields = signal<Set<string>>(new Set());
 
   ngOnInit(): void {
     this.initializeForm();
@@ -109,12 +109,12 @@ export class CompanyProfileFormComponent implements OnInit {
       // Track which fields were pre-filled
       const preFilled = new Set<string>();
       Object.keys(preFilledData).forEach(key => {
-        const value = (preFilledData as any)[key];
+        const value = (preFilledData as unknown as Record<string, unknown>)[key];
         if (value !== undefined && value !== null && value !== '') {
           if (typeof value === 'object') {
             // Handle nested objects
             Object.keys(value).forEach(nestedKey => {
-              const nestedValue = (value as any)[nestedKey];
+              const nestedValue = (value as Record<string, unknown>)[nestedKey];
               if (nestedValue !== undefined && nestedValue !== null && nestedValue !== '') {
                 preFilled.add(`${key}.${nestedKey}`);
               }

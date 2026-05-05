@@ -10,10 +10,14 @@ import { SECTION_ONBOARDING_COMPLETE } from '../../onboarding/company-info-secti
 
 describe('MarketplaceProfileService', () => {
   let service: MarketplaceProfileService;
-  let mockGqlRead: any;
-  let mockPipelineWrite: any;
-  let mockClientApi: any;
-  let mockSnackBar: any;
+  let mockGqlRead: { query: ReturnType<typeof vi.fn> };
+  let mockPipelineWrite: { pushEntities: ReturnType<typeof vi.fn> };
+  let mockClientApi: {
+    danaClient: {
+      getMeApi: () => { listMyOrgs: ReturnType<typeof vi.fn> };
+    };
+  };
+  let mockSnackBar: { open: ReturnType<typeof vi.fn> };
 
   const testOrgId = 'cd7105df-523d-5392-9f9a-3f83d3f30107';
 
@@ -272,7 +276,7 @@ describe('MarketplaceProfileService', () => {
       expect(records[0].section).toBe('onboarding_complete');
 
       // Verify no legal_name record
-      const legalNameRecord = records.find((r: any) => r.section === 'legal_name');
+      const legalNameRecord = records.find((r: { section: string }) => r.section === 'legal_name');
       expect(legalNameRecord).toBeUndefined();
     });
 
@@ -290,7 +294,7 @@ describe('MarketplaceProfileService', () => {
 
       // Assert: batch includes onboarding_complete with ISO date
       const [, records] = mockPipelineWrite.pushEntities.mock.calls[0];
-      const marker = records.find((r: any) => r.section === 'onboarding_complete');
+      const marker = records.find((r: { section: string }) => r.section === 'onboarding_complete');
 
       expect(marker).toBeDefined();
       expect(marker?.id).toBe(`mpi-${testOrgId}-${SECTION_ONBOARDING_COMPLETE}`);
@@ -388,7 +392,7 @@ describe('MarketplaceProfileService', () => {
 
       // Assert: no short_blurb record written, only onboarding_complete
       const [, records] = mockPipelineWrite.pushEntities.mock.calls[0];
-      const shortBlurbRecord = records.find((r: any) => r.section === 'short_blurb');
+      const shortBlurbRecord = records.find((r: { section: string }) => r.section === 'short_blurb');
       expect(shortBlurbRecord).toBeUndefined();
       expect(records).toHaveLength(1); // only onboarding_complete
     });
@@ -412,7 +416,7 @@ describe('MarketplaceProfileService', () => {
 
       // Assert: no dba record written (not dirty)
       const [, records] = mockPipelineWrite.pushEntities.mock.calls[0];
-      const dbaRecord = records.find((r: any) => r.section === 'dba');
+      const dbaRecord = records.find((r: { section: string }) => r.section === 'dba');
       expect(dbaRecord).toBeUndefined();
     });
 
@@ -435,7 +439,7 @@ describe('MarketplaceProfileService', () => {
 
       // Assert: years_in_business record written with string value
       const [, records] = mockPipelineWrite.pushEntities.mock.calls[0];
-      const yearsRecord = records.find((r: any) => r.section === 'years_in_business');
+      const yearsRecord = records.find((r: { section: string }) => r.section === 'years_in_business');
       expect(yearsRecord).toBeDefined();
       expect(yearsRecord?.data).toBe('10');
     });
@@ -467,9 +471,9 @@ describe('MarketplaceProfileService', () => {
 
       // Assert: all three primary_contact fields written (all dirty from userId change)
       const [, records] = mockPipelineWrite.pushEntities.mock.calls[0];
-      const userIdRecord = records.find((r: any) => r.section === 'primary_contact.user_id');
-      const nameRecord = records.find((r: any) => r.section === 'primary_contact.name');
-      const emailRecord = records.find((r: any) => r.section === 'primary_contact.email');
+      const userIdRecord = records.find((r: { section: string }) => r.section === 'primary_contact.user_id');
+      const nameRecord = records.find((r: { section: string }) => r.section === 'primary_contact.name');
+      const emailRecord = records.find((r: { section: string }) => r.section === 'primary_contact.email');
 
       expect(userIdRecord).toBeDefined();
       expect(nameRecord).toBeDefined();

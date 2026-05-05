@@ -13,10 +13,14 @@ import { vi, describe, it, expect, beforeEach } from 'vitest';
 describe('CompanyProfileFormComponent', () => {
   let component: CompanyProfileFormComponent;
   let fixture: ComponentFixture<CompanyProfileFormComponent>;
-  let mockService: any;
-  let mockRouter: any;
-  let mockSnackBar: any;
-  let mockZbApp: any;
+  let mockService: {
+    readProfileForOrg: ReturnType<typeof vi.fn>;
+    save: ReturnType<typeof vi.fn>;
+    getCompletionStatus: ReturnType<typeof vi.fn>;
+  };
+  let mockRouter: { navigate: ReturnType<typeof vi.fn> };
+  let mockSnackBar: { open: ReturnType<typeof vi.fn> };
+  let mockZbApp: { getCurrentOrgId: ReturnType<typeof vi.fn> };
 
   const mockOrgId = 'test-org-id-123';
   const mockPreFilledData: CompanyInfoStruct = {

@@ -48,9 +48,13 @@ function makeZbProvider(overrides: Partial<ProviderDirectoryRow> = {}): Provider
 describe('ProviderList', () => {
   let component: ProviderList;
   let fixture: ComponentFixture<ProviderList>;
-  let mockProviderService: any;
-  let mockCatalogService: any;
-  let mockPrefsService: any;
+  let mockProviderService: { loading: ReturnType<typeof signal>; listProviders: ReturnType<typeof vi.fn> };
+  let mockCatalogService: Record<string, ReturnType<typeof signal> | ReturnType<typeof vi.fn>>;
+  let mockPrefsService: {
+    catalogFilters: ReturnType<typeof signal>;
+    activeFilterCount: ReturnType<typeof computed>;
+    enabledFilters: ReturnType<typeof signal>;
+  };
 
   beforeEach(() => {
     const catalogFiltersSignal = signal({ ...DEFAULT_CATALOG_FILTERS });

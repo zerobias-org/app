@@ -370,7 +370,7 @@ describe('PipelineWriteService', () => {
 
       try {
         await service.pushEntities('Bid', [{ id: 'b1', name: 'Test' }], [], 'bid-submit.component.ts:142');
-      } catch (_e) { // eslint-disable-line @typescript-eslint/no-unused-vars
+      } catch (_e) {
         // Expected — error is re-thrown
       }
 
@@ -404,7 +404,7 @@ describe('PipelineWriteService', () => {
 
       try {
         await service.pushEntities('Note', [{ id: 'n1', name: 'Test' }], [], 'notes.service:52');
-      } catch (_e) { // eslint-disable-line @typescript-eslint/no-unused-vars
+      } catch (_e) {
         // Expected
       }
 
@@ -425,7 +425,7 @@ describe('PipelineWriteService', () => {
 
       try {
         await service.pushEntity('Review', { id: 'r1', name: 'Test' }, [], 'review-submit.component.ts:85');
-      } catch (_e) { // eslint-disable-line @typescript-eslint/no-unused-vars
+      } catch (_e) {
         // Expected
       }
 
@@ -445,7 +445,7 @@ describe('PipelineWriteService', () => {
 
       try {
         await service.deleteEntities('Note', ['n1', 'n2'], 'note-delete.component.ts:99');
-      } catch (_e) { // eslint-disable-line @typescript-eslint/no-unused-vars
+      } catch (_e) {
         // Expected
       }
 
@@ -467,7 +467,7 @@ describe('PipelineWriteService', () => {
 
       try {
         await service.deleteEntity('Engagement', 'e1', 'engagement-delete.component.ts:44');
-      } catch (_e) { // eslint-disable-line @typescript-eslint/no-unused-vars
+      } catch (_e) {
         // Expected
       }
 
@@ -487,7 +487,7 @@ describe('PipelineWriteService', () => {
 
       try {
         await service.pushEntities('Bid', [{ id: 'b1', name: 'Test' }]);
-      } catch (_e) { // eslint-disable-line @typescript-eslint/no-unused-vars
+      } catch (_e) {
         // Expected
       }
 

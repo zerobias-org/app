@@ -97,7 +97,7 @@ export class OnboardingBootstrapService {
         tagName,
         undefined, // id — auto-generated
         `Tag for ${orgName}'s default ZeroBias platform-services engagement.`,
-        orgId ? (orgId as any) : undefined, // Pass as-is for test compatibility
+        orgId ? (orgId as never) : undefined, // Pass as-is for test compatibility
         new Nmtoken(TAG_TYPE),
       );
 
@@ -125,16 +125,16 @@ export class OnboardingBootstrapService {
       const taskName = `Engagement coordination — ${orgName} <- ZeroBias`;
 
       const created = await this.clientApi.platformClient.getTaskApi().create({
-        activityId: 'e15830c8-4274-4d67-bf9b-c22b60001e32' as any, // global aha1
-        ownerId: orgId as any,
+        activityId: 'e15830c8-4274-4d67-bf9b-c22b60001e32' as never, // global aha1
+        ownerId: orgId as never,
         name: taskName,
         description: `Parent task for all ${orgName}↔ZeroBias coordination on the default ZB platform-services engagement.`,
         priority: 500,
-        assigned: partyId as any,
-        approvers: [partyId] as any,
-        notified: [partyId] as any,
+        assigned: partyId as never,
+        approvers: [partyId] as never,
+        notified: [partyId] as never,
         links: [],
-      } as any);
+      } as never);
 
       return String(created.id);
     } catch (err) {
@@ -204,9 +204,9 @@ export class OnboardingBootstrapService {
       // Probe: does the task already have this tag?
       const task = await this.clientApi.hydraClient
         .getResourceApi()
-        .getResource(taskId as any);
+        .getResource(taskId as never);
 
-      if (task && task.tags && task.tags.some((t: any) => String(t.id) === tagId)) {
+      if (task && task.tags && task.tags.some((t: { id: unknown }) => String(t.id) === tagId)) {
         // Already tagged
         return;
       }
@@ -214,7 +214,7 @@ export class OnboardingBootstrapService {
       // Tag the task
       await this.clientApi.hydraClient
         .getResourceApi()
-        .tagResource(taskId as any, [tagId] as any);
+        .tagResource(taskId as never, [tagId] as never);
     } catch (err) {
       console.warn('[ONBOARDING_GUARD_FAILURE]', {
         step: 'D',
@@ -289,7 +289,7 @@ export class OnboardingBootstrapService {
    */
   private async getOrgName(orgId: string): Promise<string> {
     // Pass orgId directly; API wrapper handles UUID conversion if needed
-    const org = await this.clientApi.danaClient.getOrgApi().getOrg(orgId as any);
+    const org = await this.clientApi.danaClient.getOrgApi().getOrg(orgId as never);
     return org.name;
   }
 }
