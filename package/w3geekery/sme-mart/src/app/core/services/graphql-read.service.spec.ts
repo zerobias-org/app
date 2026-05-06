@@ -84,6 +84,21 @@ describe('GraphqlReadService', () => {
       expect(call[4]).toBe(25); // pageSize
     });
 
+    it('should expand `tag` field into `tag { value }` for object-list selection', async () => {
+      mockBoundaryApi.boundaryExecuteRawQuery.mockResolvedValue(
+        makeGqlResult({ Review: [] }),
+      );
+
+      await service.query('Review', ['id', 'name', 'tag']);
+
+      const call = mockBoundaryApi.boundaryExecuteRawQuery.mock.calls[0];
+      // Args: uuid, rawQuery, includeRawData, pageNumber, pageSize, sort
+      const queryString = (call[1] as { query: string }).query;
+      expect(queryString).toContain('tag { value }');
+      // No bare `tag` selection (i.e., `tag` not followed by ` {`)
+      expect(queryString).not.toMatch(/\btag(?!\s*\{)/);
+    });
+
     it('should default to page 1 size 50 when not specified', async () => {
       mockBoundaryApi.boundaryExecuteRawQuery.mockResolvedValue(
         makeGqlResult({ Engagement: [] }),

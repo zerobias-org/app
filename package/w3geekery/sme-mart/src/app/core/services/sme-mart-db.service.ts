@@ -1,8 +1,9 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { DataProducerClient } from '@zerobias-org/data-utils';
 import type { ConnectionResult, QueryOptions } from '@zerobias-org/data-utils';
-import type { CollectionsApi as HubCollectionsApi } from '@zerobias-org/module-interface-dataproducer-hub-sdk';
+import type { CollectionsApi as HubCollectionsApi } from '@zerobias-org/hub-sdk-interface-dataproducer';
 import { URL as ZbURL, PagedResults } from '@zerobias-org/types-core-js';
+import { ZerobiasClientSessionId } from '@zerobias-com/zerobias-client';
 import { neon } from '@neondatabase/serverless';
 import { environment } from '../../../environments/environment';
 
@@ -34,6 +35,8 @@ import { environment } from '../../../environments/environment';
  */
 @Injectable({ providedIn: 'root' })
 export class SmeMartDbService {
+  private readonly sessionIdService = inject(ZerobiasClientSessionId);
+
   // Hub mode state
   private client: DataProducerClient | null = null;
   private objectIdCache = new Map<string, string>();
@@ -79,10 +82,10 @@ export class SmeMartDbService {
       this.mode.set('neon');
       console.log('[SmeMartDb] Connected in Neon direct mode');
       return { success: true };
-    } catch (err: any) {
+    } catch (err) {
       const result: ConnectionResult = {
         success: false,
-        error: `Neon connection failed: ${err.message}`,
+        error: `Neon connection failed: ${(err as Error).message}`,
       };
       this.connectionError.set(result.error!);
       return result;
@@ -103,7 +106,13 @@ export class SmeMartDbService {
     this.client = new DataProducerClient();
     const server = new ZbURL(`${window.location.origin}/api/hub`);
 
-    const result = await this.client.connect({ server, targetId });
+    // Pass session id so the Hub proxy gets `Authorization: session <id>`
+    // header in addition to the dana-session-id cookie. Mirrors the fix in
+    // zb/ui PR #140 (commit 8c2297136 in @zerobias-com/zerobias-angular-client).
+    // Without this, dana 401s the /api/hub/targets/<id>/metadata call when
+    // the cookie is missing or scoped wrong.
+    const session = this.sessionIdService.getCurrentSessionId() ?? undefined;
+    const result = await this.client.connect({ server, targetId, session });
 
     this.connected.set(result.success);
     this.mode.set('hub');
@@ -273,7 +282,9 @@ export class SmeMartDbService {
     const sql = this.getSql();
     // neon v1.x requires sql.query() for conventional function calls
     // This is safe because we control all inputs via quoteIdent/escapeValue
-    const result = await (sql as any).query(query, [], { fullResults: false });
+    const result = await (sql as unknown as {
+      query: (q: string, params: unknown[], opts: { fullResults: boolean }) => Promise<unknown>;
+    }).query(query, [], { fullResults: false });
     return result as T[];
   }
 

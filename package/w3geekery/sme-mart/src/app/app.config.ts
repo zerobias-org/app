@@ -16,11 +16,13 @@ import {
   ZerobiasClientApiService,
   ZerobiasClientAppService,
   ZerobiasClientOrgIdService,
+  ZerobiasClientSessionIdService,
 } from '@zerobias-com/zerobias-angular-client';
 import {
   ZerobiasClientApi,
   ZerobiasClientApp,
   ZerobiasClientOrgId,
+  ZerobiasClientSessionId,
 } from '@zerobias-com/zerobias-client';
 
 import { routes } from './app.routes';
@@ -48,6 +50,7 @@ export const appConfig: ApplicationConfig = {
     // ZeroBias SDK DI — environment config + abstract class implementations
     { provide: 'environment', useValue: environment },
     { provide: ZerobiasClientOrgId, useClass: ZerobiasClientOrgIdService },
+    { provide: ZerobiasClientSessionId, useClass: ZerobiasClientSessionIdService },
     { provide: ZerobiasClientApi, useClass: ZerobiasClientApiService },
     { provide: ZerobiasClientApp, useClass: ZerobiasClientAppService },
 
