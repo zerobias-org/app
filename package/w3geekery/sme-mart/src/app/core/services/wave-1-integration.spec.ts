@@ -14,7 +14,6 @@ import { GraphqlReadService } from './graphql-read.service';
 import { NotificationService } from './notification.service';
 import { SmeMartTagService } from './sme-mart-tag.service';
 import { SmeMartResourceService } from './sme-mart-resource.service';
-import { BID_GQL_FIXTURE } from '../../test-helpers/gql-fixtures';
 import { fakePipelineWriteService, fakeGraphqlReadService, fakeSmeMartTagService, fakeNotificationService } from '../../test-helpers/angular';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
@@ -62,6 +61,8 @@ describe('Wave 1 Integration: SmeMartProject → Bid Flow (Plan 075)', () => {
     expect(pipelineWrite.pushEntity).toHaveBeenCalledWith(
       'SmeMartProject',
       expect.objectContaining({ name: 'HIPAA Compliance Audit' }),
+      [],
+      expect.any(String), // callSiteTag
     );
 
     // Mock getById to return the created project (submitBid needs to fetch it)
@@ -95,6 +96,8 @@ describe('Wave 1 Integration: SmeMartProject → Bid Flow (Plan 075)', () => {
     expect(pipelineWrite.pushEntity).toHaveBeenCalledWith(
       'Bid',
       expect.objectContaining({ coverLetter: 'We can help' }),
+      [],
+      expect.any(String), // callSiteTag
     );
 
     // 3. Verify Pipeline was called twice (project + bid)

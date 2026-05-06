@@ -9,8 +9,10 @@
  */
 
 import { Injectable, inject } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
+import { DemoVisibilityService } from './demo-visibility.service';
 import { ImpersonationService } from './impersonation.service';
 import { SME_MART_TASK_FIELD_MAPPING, mapGqlToNeon } from '../field-mappings';
 import type { GqlSmeMartTaskResponse } from '../gql-types/sme-mart-task.types';
@@ -44,7 +46,9 @@ import { PagedResults } from '@zerobias-org/types-core-js';
 export class SmeMartTaskService {
   private readonly pipelineWrite = inject(PipelineWriteService);
   private readonly graphqlRead = inject(GraphqlReadService);
+  private readonly demoVisibility = inject(DemoVisibilityService);
   private readonly impersonation = inject(ImpersonationService);
+  private readonly snackBar = inject(MatSnackBar);
 
   /**
    * Create a new task.
@@ -78,10 +82,17 @@ export class SmeMartTaskService {
       SME_MART_TASK_FIELD_MAPPING.gqlToNeon,
     );
 
-    // Fire-and-forget push to Pipeline
-    this.pipelineWrite.pushEntity('SmeMartTask', gqlData).catch(err => {
-      console.error('[SmeMartTaskService] Failed to push task to pipeline:', err);
-    });
+    // Push to Pipeline with error surface
+    try {
+      await this.pipelineWrite.pushEntity('SmeMartTask', gqlData, [], 'sme-mart-task.service:82');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to save task: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     // Return optimistically
     return modelData;
@@ -95,13 +106,19 @@ export class SmeMartTaskService {
       'SmeMartTask',
       id,
       ['id', 'boardId', 'parentId', 'name', 'code', 'status', 'rank', 'priority',
-       'description', 'dueDate', 'activityId', 'customFields', 'createdAt', 'updatedAt'],
+       'description', 'dueDate', 'activityId', 'customFields', 'createdAt', 'updatedAt', 'tag'],
     );
 
     if (!task) return null;
 
+    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
+    const filtered = this.demoVisibility.applyVisibility(
+      [task as GqlSmeMartTaskResponse & { tag?: Array<{ value: string }> | null }],
+    )[0] ?? null;
+    if (!filtered) return null;
+
     return mapGqlToNeon<SmeMartTask>(
-      task,
+      filtered,
       SME_MART_TASK_FIELD_MAPPING.gqlToNeon,
     );
   }
@@ -119,7 +136,7 @@ export class SmeMartTaskService {
     const result = await this.graphqlRead.query<GqlSmeMartTaskResponse>(
       'SmeMartTask',
       ['id', 'boardId', 'parentId', 'name', 'code', 'status', 'rank', 'priority',
-       'description', 'dueDate', 'activityId', 'customFields', 'createdAt', 'updatedAt'],
+       'description', 'dueDate', 'activityId', 'customFields', 'createdAt', 'updatedAt', 'tag'],
       {
         filters: { boardId: `.eq.${boardId}` },
         pageNumber,
@@ -127,7 +144,12 @@ export class SmeMartTaskService {
       },
     );
 
-    const items = result.items.map(gql =>
+    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
+    const filteredGql = this.demoVisibility.applyVisibility(
+      result.items as (GqlSmeMartTaskResponse & { tag?: Array<{ value: string }> | null })[],
+    );
+
+    const items = filteredGql.map(gql =>
       mapGqlToNeon<SmeMartTask>(gql, SME_MART_TASK_FIELD_MAPPING.gqlToNeon),
     );
 
@@ -154,23 +176,24 @@ export class SmeMartTaskService {
     const result = await this.graphqlRead.query<GqlSmeMartTaskResponse>(
       'SmeMartTask',
       ['id', 'boardId', 'parentId', 'name', 'code', 'status', 'rank', 'priority',
-       'description', 'dueDate', 'activityId', 'customFields', 'createdAt', 'updatedAt'],
+       'description', 'dueDate', 'activityId', 'customFields', 'createdAt', 'updatedAt', 'tag'],
       {
         filters: { boardId: `.eq.${boardId}` },
         pageSize: 1000, // Fetch all for board
       },
     );
 
+    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
+    const filteredGql = this.demoVisibility.applyVisibility(
+      result.items as (GqlSmeMartTaskResponse & { tag?: Array<{ value: string }> | null })[],
+    );
+
     // Step 2: Map all results to model type
-    const allTasks: SmeMartTask[] = result.items.map(gqlTask =>
+    const allTasks: SmeMartTask[] = filteredGql.map(gqlTask =>
       mapGqlToNeon<SmeMartTask>(gqlTask, SME_MART_TASK_FIELD_MAPPING.gqlToNeon),
     );
 
     // Step 3: Build tree with cycle detection
-    const taskMap = new Map<string, SmeMartTask>(
-      allTasks.map(t => [t.id, t]),
-    );
-
     const visited = new Set<string>();
 
     const buildNode = (task: SmeMartTask): SmeMartTaskTreeNode => {
@@ -243,10 +266,17 @@ export class SmeMartTaskService {
       SME_MART_TASK_FIELD_MAPPING.gqlToNeon,
     );
 
-    // Fire-and-forget push
-    this.pipelineWrite.pushEntity('SmeMartTask', gqlData).catch(err => {
-      console.error('[SmeMartTaskService] Failed to push task update to pipeline:', err);
-    });
+    // Push to Pipeline with error surface
+    try {
+      await this.pipelineWrite.pushEntity('SmeMartTask', gqlData, [], 'sme-mart-task.service:257');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to update task: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     // Return optimistically
     return modelData;
@@ -258,10 +288,16 @@ export class SmeMartTaskService {
    * Returns immediately while Pipeline delete happens in background.
    */
   async deleteTask(taskId: string): Promise<void> {
-    // Fire-and-forget delete
-    this.pipelineWrite.deleteEntity('SmeMartTask', taskId).catch(err => {
-      console.error('[SmeMartTaskService] Failed to delete task:', err);
-    });
+    try {
+      await this.pipelineWrite.deleteEntity('SmeMartTask', taskId);
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to delete task: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
   }
 
   // ────────────────────────────────────────────────────────────────────────────

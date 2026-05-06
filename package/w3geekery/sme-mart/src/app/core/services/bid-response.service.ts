@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
+import { DemoVisibilityService } from './demo-visibility.service';
 import { BID_RESPONSE_FIELD_MAPPING, mapGqlToNeon, mapNeonToGql } from '../field-mappings';
 import type { BidResponse, ComplianceSummary } from '../models';
 
@@ -8,7 +9,7 @@ import type { BidResponse, ComplianceSummary } from '../models';
 const GQL_FIELDS = [
   'id', 'bidId', 'requirementId', 'complianceStatus', 'responseText',
   'estimatedHours', 'estimatedCost', 'certificationRef', 'readyDate',
-  'respondedAt', 'updatedAt',
+  'respondedAt', 'updatedAt', 'tag',
 ];
 
 /**
@@ -24,6 +25,7 @@ const GQL_FIELDS = [
 export class BidResponseService {
   private readonly pipeline = inject(PipelineWriteService);
   private readonly gql = inject(GraphqlReadService);
+  private readonly demoVisibility = inject(DemoVisibilityService);
 
   /** Load all responses for a bid. */
   async listByBid(bidId: string): Promise<BidResponse[]> {
@@ -32,7 +34,8 @@ export class BidResponseService {
       GQL_FIELDS,
       { filters: { bidId: `.eq.${bidId}` }, pageSize: 200 },
     );
-    return result.items.map(gql =>
+    const filtered = this.demoVisibility.applyVisibility(result.items as (Record<string, unknown> & { tag?: Array<{ value: string }> | null })[]);
+    return filtered.map(gql =>
       mapGqlToNeon<BidResponse>(gql, BID_RESPONSE_FIELD_MAPPING.gqlToNeon),
     );
   }
@@ -51,7 +54,8 @@ export class BidResponseService {
       },
     );
     if (!result.items.length) return null;
-    return mapGqlToNeon<BidResponse>(result.items[0], BID_RESPONSE_FIELD_MAPPING.gqlToNeon);
+    const filtered = this.demoVisibility.applyVisibility([result.items[0] as (Record<string, unknown> & { tag?: Array<{ value: string }> | null })]).map(item => mapGqlToNeon<BidResponse>(item, BID_RESPONSE_FIELD_MAPPING.gqlToNeon))[0] ?? null;
+    return filtered;
   }
 
   /** Create or update a response (upsert pattern). */
@@ -119,7 +123,7 @@ export class BidResponseService {
     for (const r of responses) {
       const status = r.compliance_status;
       if (status in summary) {
-        (summary as any)[status]++;
+        summary[status as keyof ComplianceSummary]++;
       }
     }
 

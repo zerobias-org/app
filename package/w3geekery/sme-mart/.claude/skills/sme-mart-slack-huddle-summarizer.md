@@ -52,7 +52,7 @@ Summary format should reflect that:
 
 ## Planning/Questions Doc Mapping
 
-**If Clark mentions the huddle maps to a planning or questions doc** (e.g., "these are answers to `.claude/notes/plans/brian-meeting-questions.md`"), **read that doc first** and structure the summary as answers to its numbered questions.
+**If Clark mentions the huddle maps to a planning or questions doc** (e.g., "these are answers to `.planning/notes/plans/brian-meeting-questions.md`"), **read that doc first** and structure the summary as answers to its numbered questions.
 
 - Each question in the doc gets a heading in the summary (e.g., `### A1. Workspace Portfolio — UI view`)
 - For each, state the decision, cite a direct quote if available, and flag any inferred/implied answers (don't promote implication to confirmation)
@@ -64,7 +64,7 @@ This pattern turns the summary into a working document that maps the conversatio
 ## Output
 
 - **Filename:** `YYYY-MM-DD-slack-huddle-<topic-slug>.md` (e.g. `2026-04-20-slack-huddle-task-partitions.md`)
-- **Location:** same as Teams — primary `~/.claude/timetracker/meetings/`, secondary `.claude/notes/meetings/`
+- **Location:** same as Teams — primary `~/.claude/timetracker/meetings/`, secondary `.planning/notes/meetings/`
 - **Header:** include `**Source:** Slack Huddle` and participants list; include `**Time:** HH:MM–HH:MM PT` if known from timer.
 
 ## Timer Note Heading

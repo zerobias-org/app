@@ -1,7 +1,9 @@
 import { Injectable, inject, signal } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService, type GqlQueryOptions } from './graphql-read.service';
 import { ImpersonationService } from './impersonation.service';
+import { DemoVisibilityService } from './demo-visibility.service';
 import { NOTE_FIELD_MAPPING, mapGqlToNeon } from '../field-mappings';
 import { PagedResults } from '@zerobias-org/types-core-js';
 import type { QueryOptions } from '@zerobias-org/data-utils';
@@ -27,6 +29,8 @@ export class NotesService {
   private readonly pipelineWrite = inject(PipelineWriteService);
   private readonly graphqlRead = inject(GraphqlReadService);
   private readonly impersonation = inject(ImpersonationService);
+  private readonly snackBar = inject(MatSnackBar);
+  private readonly demoVisibility = inject(DemoVisibilityService);
 
   readonly notes = signal<NoteWithTags[]>([]);
   readonly loading = signal(false);
@@ -34,8 +38,6 @@ export class NotesService {
   // ── CRUD ──
 
   async createNote(engagementId: string, data: CreateNoteRequest): Promise<Note> {
-    const userId = this.impersonation.effectiveUserId();
-
     // Build GQL data with camelCase field names
     // GQL uses `name` (Object base) and `content` (custom property)
     const gqlData: Record<string, unknown> = {
@@ -48,10 +50,17 @@ export class NotesService {
       archived: false,
     };
 
-    // Fire-and-forget Pipeline push
-    this.pipelineWrite.pushEntity('Note', gqlData).catch(err => {
-      console.error('Failed to push note to Pipeline:', err);
-    });
+    // Push to Pipeline with error surface
+    try {
+      await this.pipelineWrite.pushEntity('Note', gqlData, [], 'notes.service:52');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to save note: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     // Return optimistically (transform GQL to Neon shape)
     const neonData = mapGqlToNeon<Note>(gqlData, NOTE_FIELD_MAPPING.gqlToNeon);
@@ -85,10 +94,17 @@ export class NotesService {
       updatedByZerobiasUserId: userId,
     };
 
-    // Fire-and-forget Pipeline push
-    this.pipelineWrite.pushEntity('Note', gqlData).catch(err => {
-      console.error('Failed to update note in Pipeline:', err);
-    });
+    // Push to Pipeline with error surface
+    try {
+      await this.pipelineWrite.pushEntity('Note', gqlData, [], 'notes.service:89');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to update note: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     // Return optimistically
     const neonData = mapGqlToNeon<Note>(gqlData, NOTE_FIELD_MAPPING.gqlToNeon);
@@ -114,10 +130,17 @@ export class NotesService {
       updatedAt: new Date().toISOString(),
     };
 
-    // Fire-and-forget Pipeline push
-    this.pipelineWrite.pushEntity('Note', gqlData).catch(err => {
-      console.error('Failed to archive note in Pipeline:', err);
-    });
+    // Push to Pipeline with error surface
+    try {
+      await this.pipelineWrite.pushEntity('Note', gqlData, [], 'notes.service:118');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to delete note: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     // Return optimistically
     const neonData = mapGqlToNeon<Note>(gqlData, NOTE_FIELD_MAPPING.gqlToNeon);
@@ -132,8 +155,12 @@ export class NotesService {
     );
     if (!note) return null;
 
+    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
+    const filtered = this.demoVisibility.applyVisibility([note as GqlNoteResponse & { tag?: Array<{ value: string }> | null }])[0] ?? null;
+    if (!filtered) return null;
+
     // Transform GQL response to Note, then add tag support
-    const neonData = mapGqlToNeon<NoteWithTags>(note, NOTE_FIELD_MAPPING.gqlToNeon);
+    const neonData = mapGqlToNeon<NoteWithTags>(filtered, NOTE_FIELD_MAPPING.gqlToNeon);
     // Note: tags would come from hydra.TagApi if implemented separately
     return neonData;
   }
@@ -161,8 +188,11 @@ export class NotesService {
         gqlOptions,
       );
 
+      // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
+      const filteredGql = this.demoVisibility.applyVisibility(result.items as (GqlNoteResponse & { tag?: Array<{ value: string }> | null })[]);
+
       // Transform GQL responses to Note/NoteWithTags
-      const items = result.items.map(gql => mapGqlToNeon<NoteWithTags>(gql, NOTE_FIELD_MAPPING.gqlToNeon));
+      const items = filteredGql.map(gql => mapGqlToNeon<NoteWithTags>(gql, NOTE_FIELD_MAPPING.gqlToNeon));
       this.notes.set(items);
 
       return PagedResults.fromArray(items, pageNumber, pageSize, result.page.totalCount ?? items.length);
@@ -193,7 +223,10 @@ export class NotesService {
         gqlOptions,
       );
 
-      const items = result.items.map(gql => mapGqlToNeon<NoteWithTags>(gql, NOTE_FIELD_MAPPING.gqlToNeon));
+      // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
+      const filteredGql = this.demoVisibility.applyVisibility(result.items as (GqlNoteResponse & { tag?: Array<{ value: string }> | null })[]);
+
+      const items = filteredGql.map(gql => mapGqlToNeon<NoteWithTags>(gql, NOTE_FIELD_MAPPING.gqlToNeon));
       this.notes.set(items);
 
       return PagedResults.fromArray(items, pageNumber, pageSize, result.page.totalCount ?? items.length);
@@ -230,7 +263,10 @@ export class NotesService {
         gqlOptions,
       );
 
-      const items = result.items.map(gql => mapGqlToNeon<NoteWithTags>(gql, NOTE_FIELD_MAPPING.gqlToNeon));
+      // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
+      const filteredGql = this.demoVisibility.applyVisibility(result.items as (GqlNoteResponse & { tag?: Array<{ value: string }> | null })[]);
+
+      const items = filteredGql.map(gql => mapGqlToNeon<NoteWithTags>(gql, NOTE_FIELD_MAPPING.gqlToNeon));
       this.notes.set(items);
 
       return PagedResults.fromArray(items, pageNumber, pageSize, result.page.totalCount ?? items.length);
@@ -263,7 +299,10 @@ export class NotesService {
         gqlOptions,
       );
 
-      const items = result.items.map(gql => mapGqlToNeon<NoteWithTags>(gql, NOTE_FIELD_MAPPING.gqlToNeon));
+      // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
+      const filteredGql = this.demoVisibility.applyVisibility(result.items as (GqlNoteResponse & { tag?: Array<{ value: string }> | null })[]);
+
+      const items = filteredGql.map(gql => mapGqlToNeon<NoteWithTags>(gql, NOTE_FIELD_MAPPING.gqlToNeon));
       this.notes.set(items);
 
       return PagedResults.fromArray(items, pageNumber, pageSize, result.page.totalCount ?? items.length);
@@ -321,6 +360,7 @@ export class NotesService {
       'accessLevel',
       'dateCreated',
       'dateLastModified',
+      'tag',
     ];
   }
 }

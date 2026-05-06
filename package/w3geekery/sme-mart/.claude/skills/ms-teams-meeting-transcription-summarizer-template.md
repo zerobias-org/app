@@ -145,5 +145,5 @@ Example: "This project is a marketplace platform. Key concepts frequently discus
 
 > Where should meeting notes be saved?
 
-Default: `.claude/notes/meetings/`
+Default: `.planning/notes/meetings/`
 Filename pattern: `YYYY-MM-DD-<meeting-topic>.md`

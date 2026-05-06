@@ -1,6 +1,8 @@
 import { Injectable, inject } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService, type GqlQueryOptions } from './graphql-read.service';
+import { DemoVisibilityService } from './demo-visibility.service';
 import { SME_MART_WORKFLOW_FIELD_MAPPING, mapGqlToNeon } from '../field-mappings';
 import type { QueryOptions } from '@zerobias-org/data-utils';
 import { PagedResults } from '@zerobias-org/types-core-js';
@@ -23,6 +25,8 @@ import type { GqlSmeMartWorkflowResponse } from '../gql-types';
 export class SmeMartWorkflowService {
   private readonly pipelineWrite = inject(PipelineWriteService);
   private readonly graphqlRead = inject(GraphqlReadService);
+  private readonly demoVisibility = inject(DemoVisibilityService);
+  private readonly snackBar = inject(MatSnackBar);
 
   private readonly workflowFields = [
     'id',
@@ -31,6 +35,7 @@ export class SmeMartWorkflowService {
     'transitions',
     'createdAt',
     'updatedAt',
+    'tag',
   ];
 
   /**
@@ -50,9 +55,16 @@ export class SmeMartWorkflowService {
       updatedAt: now,
     };
 
-    this.pipelineWrite.pushEntity('SmeMartWorkflow', gqlData).catch(err => {
-      console.error('[WorkflowService] Failed to push workflow:', err);
-    });
+    try {
+      await this.pipelineWrite.pushEntity('SmeMartWorkflow', gqlData, [], 'sme-mart-workflow.service:53');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to create workflow: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     return {
       id: workflowId,
@@ -97,7 +109,10 @@ export class SmeMartWorkflowService {
       gqlOptions,
     );
 
-    const items = result.items.map(gql =>
+    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
+    const filteredItems = this.demoVisibility.applyVisibility(result.items as (GqlSmeMartWorkflowResponse & { tag?: Array<{ value: string }> | null })[]);
+
+    const items = filteredItems.map(gql =>
       mapGqlToNeon<SmeMartWorkflow>(gql, SME_MART_WORKFLOW_FIELD_MAPPING.gqlToNeon),
     );
 
@@ -137,9 +152,16 @@ export class SmeMartWorkflowService {
       updatedAt: updated.updatedAt,
     };
 
-    this.pipelineWrite.pushEntity('SmeMartWorkflow', gqlData).catch(err => {
-      console.error('[WorkflowService] Failed to push workflow update:', err);
-    });
+    try {
+      await this.pipelineWrite.pushEntity('SmeMartWorkflow', gqlData, [], 'sme-mart-workflow.service:148');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to update workflow: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     return updated;
   }

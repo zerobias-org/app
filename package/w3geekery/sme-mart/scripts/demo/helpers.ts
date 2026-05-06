@@ -17,6 +17,7 @@ import { SimpleBatch } from '@zerobias-com/platform-sdk';
 import { UUID, URL as ZbUrl } from '@zerobias-org/types-core-js';
 
 import { DemoConfig, DemoContext, DemoClassName } from './types';
+import { DEMO_TAG_UUIDS } from '../../src/app/core/constants/demo-tags';
 
 // ---------------------------------------------------------------------------
 // SME Mart AuditgraphDB class IDs (deterministic — same across environments)
@@ -164,6 +165,44 @@ export async function initContext(config: DemoConfig): Promise<DemoContext> {
 }
 
 // ---------------------------------------------------------------------------
+// Tag Field Helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Merge existing tag entries (from data payload) with new tag IDs.
+ * Returns a deduplicated, stable-ordered array of tag objects.
+ *
+ * @param existing Array of {value: string} entries already in the data
+ * @param newIds Array of UUID strings to add as tag values
+ * @returns Merged array: [existing entries, new entries], deduplicated
+ */
+function mergeTagValues(
+  existing: Array<{ value: string }> = [],
+  newIds: string[] = [],
+): Array<{ value: string }> {
+  const values = new Set<string>();
+  const result: Array<{ value: string }> = [];
+
+  // Add existing entries first, preserving order
+  for (const entry of existing) {
+    if (!values.has(entry.value)) {
+      values.add(entry.value);
+      result.push(entry);
+    }
+  }
+
+  // Add new IDs in order
+  for (const id of newIds) {
+    if (!values.has(id)) {
+      values.add(id);
+      result.push({ value: id });
+    }
+  }
+
+  return result;
+}
+
+// ---------------------------------------------------------------------------
 // Tags — org-scoped marker
 // ---------------------------------------------------------------------------
 
@@ -224,6 +263,11 @@ export async function tagResource(
 /**
  * Push a single entity through the Receiver Pipeline.
  * Mirrors PipelineWriteService.pushEntity in the Angular app.
+ *
+ * Tag embedding: tagIds are embedded into the data payload as `tag: [{value: <uuid>}]` entries.
+ * This populates `Object.tag` on GQL read-back. The SimpleBatch third-arg / Pipeline.receive
+ * body-level `tagIds` field is batch/job metadata and does NOT populate `Object.tag`
+ * (verified 2026-05-04 via Director MCP probe).
  */
 export async function pushEntity(
   context: DemoContext,
@@ -239,12 +283,21 @@ export async function pushEntity(
     ?? (data['title'] as string | undefined)
     ?? (data['displayName'] as string | undefined)
     ?? `${className}-${(data['id'] as string | undefined) ?? 'unknown'}`;
-  const ensured = { ...data, name };
+
+  // Embed tags into the data payload if any tagIds were provided
+  let ensured: Record<string, unknown> = { ...data, name };
+  if (tagIds.length > 0) {
+    const existingTag = (data['tag'] as Array<{ value: string }> | undefined) ?? [];
+    ensured = {
+      ...ensured,
+      tag: mergeTagValues(existingTag, tagIds),
+    };
+  }
 
   const batch = new SimpleBatch(
     new UUID(classId),
     [ensured],
-    tagIds.map(id => new UUID(id)),
+    [], // tagIds: batch/job metadata (does NOT populate Object.tag) — tags embedded in data instead
   );
   await pipelineApi.receive(new UUID(context.config.pipelineId), batch);
 }
@@ -256,6 +309,11 @@ export async function pushEntity(
  * at least one item") even when `markDeleted` is populated — so we also pass
  * stub `{id, name}` rows for each deletion. Server treats `markDeleted` as
  * authoritative and prunes the referenced ids.
+ *
+ * Note: SimpleBatch constructor signature is (classId, data, tagIds, markDeleted).
+ * The tagIds (3rd arg) is kept as [] per the tag-embedding fix (2026-05-04):
+ * tagIds parameter does NOT populate Object.tag on GQL read-back. Since deleteEntities
+ * is a pure deletion path (no data to tag), the empty [] is correct and semantically sound.
  */
 export async function deleteEntities(
   context: DemoContext,
@@ -278,7 +336,6 @@ export async function deleteEntities(
   };
   const stubs = ids.map(buildStub);
 
-  // SimpleBatch constructor: (classId, data, tagIds, markDeleted)
   const batch = new SimpleBatch(new UUID(classId), stubs, [], ids);
   await pipelineApi.receive(new UUID(context.config.pipelineId), batch);
 }
@@ -316,7 +373,7 @@ export async function createRfp(context: DemoContext): Promise<string> {
     dateCreated: dateOnly(),
     dateLastModified: dateOnly(),
   };
-  await pushEntity(context, 'SmeMartProject', data, context.tagId ? [context.tagId] : []);
+  await pushEntity(context, 'SmeMartProject', data, [DEMO_TAG_UUIDS.GLOBAL_DEMO, ...(context.tagId ? [context.tagId] : [])]);
   console.info(`✓ RFP created: ${id}`);
   return id;
 }
@@ -327,7 +384,6 @@ export async function createDocument(
   index: number,
 ): Promise<string> {
   const id = randomUUID();
-  const now = isoNow();
   const filename = index === 1 ? 'Scope-of-Work.pdf' : 'Requirements-Checklist.xlsx';
   const mimeType = index === 1
     ? 'application/pdf'
@@ -353,7 +409,7 @@ export async function createDocument(
     dateCreated: dateOnly(),
     dateLastModified: dateOnly(),
   };
-  await pushEntity(context, 'SmeMartDocument', data, context.tagId ? [context.tagId] : []);
+  await pushEntity(context, 'SmeMartDocument', data, [DEMO_TAG_UUIDS.GLOBAL_DEMO, ...(context.tagId ? [context.tagId] : [])]);
   console.info(`✓ Document created: ${id} (${filename})`);
   return id;
 }
@@ -377,7 +433,7 @@ export async function inviteVendor(
     dateCreated: dateOnly(),
     dateLastModified: dateOnly(),
   };
-  await pushEntity(context, 'RfpInvitation', data, context.tagId ? [context.tagId] : []);
+  await pushEntity(context, 'RfpInvitation', data, [DEMO_TAG_UUIDS.GLOBAL_DEMO, ...(context.tagId ? [context.tagId] : [])]);
   console.info(`✓ Vendor invited: ${id}`);
   return id;
 }
@@ -388,7 +444,6 @@ export async function createBid(
   vendorPartyId: string,
 ): Promise<string> {
   const id = randomUUID();
-  const now = isoNow();
   const data = {
     id,
     name: `Bid from ${vendorPartyId} on RFP ${rfpId}`,
@@ -410,7 +465,7 @@ export async function createBid(
     dateCreated: dateOnly(),
     dateLastModified: dateOnly(),
   };
-  await pushEntity(context, 'Bid', data, context.tagId ? [context.tagId] : []);
+  await pushEntity(context, 'Bid', data, [DEMO_TAG_UUIDS.GLOBAL_DEMO, ...(context.tagId ? [context.tagId] : [])]);
   console.info(`✓ Bid created: ${id}`);
   return id;
 }
@@ -438,7 +493,7 @@ export async function createFormSubmission(
     createdAt: now,
     updatedAt: now,
   };
-  await pushEntity(context, 'FormSubmission', data, context.tagId ? [context.tagId] : []);
+  await pushEntity(context, 'FormSubmission', data, [DEMO_TAG_UUIDS.GLOBAL_DEMO, ...(context.tagId ? [context.tagId] : [])]);
   console.info(`✓ Form submission created: ${id}`);
   return id;
 }
@@ -463,7 +518,7 @@ export async function createPilot(
     dateCreated: dateOnly(),
     dateLastModified: dateOnly(),
   };
-  await pushEntity(context, 'SmeMartProject', data, context.tagId ? [context.tagId] : []);
+  await pushEntity(context, 'SmeMartProject', data, [DEMO_TAG_UUIDS.GLOBAL_DEMO, ...(context.tagId ? [context.tagId] : [])]);
   console.info(`✓ Pilot created: ${id}`);
   return id;
 }

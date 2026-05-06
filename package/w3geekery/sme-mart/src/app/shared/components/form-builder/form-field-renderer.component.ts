@@ -1,6 +1,7 @@
 import { Component, input, ChangeDetectionStrategy, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormGroup } from '@angular/forms';
+import { ReactiveFormsModule, FormGroup, FormControl } from '@angular/forms';
+
+type SampleValue = string | number | boolean | null;
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -16,7 +17,6 @@ type FormMode = 'preview' | 'fill' | 'review';
   selector: 'app-form-field-renderer',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     MatFormFieldModule,
     MatInputModule,
@@ -30,20 +30,20 @@ type FormMode = 'preview' | 'fill' | 'review';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FormFieldRendererComponent implements OnInit {
-  field = input.required<FormFieldConfig>();
-  mode = input<FormMode>('fill');
-  formGroup = input.required<FormGroup>();
-  submission = input<Partial<FormSubmission>>({});
+  readonly field = input.required<FormFieldConfig>();
+  readonly mode = input<FormMode>('fill');
+  readonly formGroup = input.required<FormGroup>();
+  readonly submission = input<Partial<FormSubmission>>({});
 
   isReadOnly = false;
-  control: any;
+  control!: FormControl;
 
   ngOnInit(): void {
     this.isReadOnly = this.mode() === 'review';
-    this.control = this.formGroup().get(this.field().id);
+    this.control = this.formGroup().get(this.field().id) as FormControl;
   }
 
-  getSampleData(): any {
+  getSampleData(): SampleValue {
     const type = this.field().type;
     switch (type) {
       case 'text':
@@ -63,7 +63,7 @@ export class FormFieldRendererComponent implements OnInit {
     }
   }
 
-  getDisplayValue(): any {
+  getDisplayValue(): unknown {
     const submissionData = this.submission().submissionData || {};
     const value = submissionData[this.field().id];
 
@@ -82,17 +82,18 @@ export class FormFieldRendererComponent implements OnInit {
     return value;
   }
 
-  async handleFileUpload(event: any): Promise<void> {
-    const file = event.target.files?.[0];
+  async handleFileUpload(event: Event): Promise<void> {
+    const target = event.target as HTMLInputElement;
+    const file = target.files?.[0];
     if (!file) return;
 
     // TODO(v1.2): File upload integration
     // In v1.2, we capture filename/size only. File bytes are NOT uploaded to ZB FileService.
-    // See .claude/notes/zb-file-upload-sdk-reference.md for FileService SDK details.
+    // See .planning/notes/zb-file-upload-sdk-reference.md for FileService SDK details.
     // v1.3 will integrate the full FileService.create() → FileService.upload() flow.
 
     const fileRef: FileReference = {
-      fileId: crypto.randomUUID() as any,
+      fileId: crypto.randomUUID() as unknown as FileReference['fileId'],
       fileName: file.name,
       fileSize: file.size,
     };
@@ -101,7 +102,7 @@ export class FormFieldRendererComponent implements OnInit {
   }
 
   getErrorMessage(): string | null {
-    if (!this.control?.errors) return null;
+    if (!this.control.errors) return null;
 
     if (this.control.errors['required']) return `${this.field().label} is required`;
     if (this.control.errors['minlength']) {

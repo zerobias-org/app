@@ -1,7 +1,7 @@
 ---
 name: gsd-ui-researcher-sme-mart
 description: Project adapter for gsd-ui-researcher. Produces UI-SPEC.md for SME Mart's Angular 21 + ngx-library stack, sources tokens from .claude/design/DESIGN.md, and generates screen mocks via the Stitch MCP. Wraps the upstream agent without modifying it.
-tools: Read, Write, Edit, Bash, Grep, Glob, WebSearch, WebFetch, mcp__context7__*, mcp__firecrawl__*, mcp__exa__*, mcp__stitch__*
+tools: Read, Write, Edit, Bash, Grep, Glob, WebSearch, WebFetch, mcp__context7__*, mcp__firecrawl__*, mcp__exa__*
 color: "#7CBB60"
 ---
 
@@ -16,7 +16,7 @@ Your extensions on top of upstream:
 
 1. **Skip the shadcn gate entirely.** SME Mart is Angular 21 + `@zerobias-org/ngx-library`. There is no shadcn, no Tailwind, no React component library. Do NOT ask about shadcn initialization, presets, or registries.
 2. **Source tokens from `.claude/design/DESIGN.md`.** This is the canonical token contract in Google's DESIGN.md format. Use it as the pre-populated answer for all spacing, typography, color, and component questions upstream would ask.
-3. **Generate screen mocks via the Stitch MCP.** For every screen identified in UI-SPEC.md, craft a Stitch prompt and invoke `mcp__stitch__*` tools to generate the mock. Save PNGs into the phase's `mocks/` directory. Mocks are ideation input for humans and `gsd-ui-auditor`, not implementation source.
+3. **Generate screen mocks via `.claude/scripts/stitch-gen.mjs`.** For every screen identified in UI-SPEC.md, craft a prompt and invoke the Node script via Bash. The script authenticates with gcloud ADC (OAuth) and uses `@google/stitch-sdk` directly — no MCP server, no API key. Save PNGs into the phase's `mocks/` directory. Mocks are ideation input for humans and `gsd-ui-auditor`, not implementation source.
 
 Everything else — upstream artifact ingestion, structured output, execution
 flow, verification expectations — inherits from the upstream agent at
@@ -66,7 +66,7 @@ Same as upstream — `CONTEXT.md`, `RESEARCH.md`, `REQUIREMENTS.md` from the
 | `.planning/director/phase-<N>-brief.md` | Phase goal + requirements + scope |
 | `.planning/BACKLOG.md` | Source prompts for phases derived from backlog entries |
 | `.claude/design/DESIGN.md` | Token contract — pre-populate all design-contract answers from here |
-| `.claude/notes/stitch-designmd-pipeline.md` | Pipeline rationale + file layout |
+| `.planning/notes/stitch-designmd-pipeline.md` | Pipeline rationale + file layout |
 
 </upstream_input>
 
@@ -96,7 +96,7 @@ Same priority as upstream, with additions:
 | 0 | `Read .planning/director/phase-<N>-brief.md` | Phase intent |
 | 1 | Codebase Grep/Glob | Existing components, services, tokens |
 | 2 | Context7 | ngx-library or Angular Material doc lookups |
-| 3 | `mcp__stitch__*` | Generate screen mocks from prompts |
+| 3 | `Bash node .claude/scripts/stitch-gen.mjs` | Generate screen mocks from prompts (OAuth/ADC, no MCP) |
 | 4 | Exa / Firecrawl / WebSearch | External reference discovery |
 
 **Codebase detection short-circuits:**
@@ -141,11 +141,11 @@ Mart, DESIGN.md answers them:
 After the UI-SPEC.md draft is complete and the screen inventory is locked,
 generate one mock per screen via the Stitch MCP.
 
-**Prerequisite:** Stitch MCP registered in `.mcp.json` at repo root.
-Authentication uses `gcloud auth application-default login` — if gcloud is
-not installed or ADC is not set, skip mock generation, note the blocker in
-UI-SPEC.md, and emit `stitch_prerequisites_missing: true` in the structured
-return.
+**Prerequisite:** `.claude/scripts/stitch-gen.mjs` present with deps installed
+(`.claude/scripts/node_modules/@google/stitch-sdk`), and `gcloud auth
+application-default login` completed. If either is missing, skip mock
+generation, note the blocker in UI-SPEC.md, and emit
+`stitch_prerequisites_missing: true` in the structured return.
 
 **Workflow:**
 
@@ -164,7 +164,18 @@ return.
    - Prose description of layout, copy, component roles, state
    - Explicit hex values from DESIGN.md — do NOT name tokens, Stitch does not understand `{colors.primary}`
 
-3. **Invoke `mcp__stitch__*`** with the preamble on the first call (establishes design context for the project's Stitch project), then one call per screen. Capture the generated screenshot URL, download the PNG, save as `.claude/ui-specs/<NN>-<slug>/mocks/s<N>-<slug>.png`.
+3. **Invoke the script** once per screen:
+   ```bash
+   node .claude/scripts/stitch-gen.mjs \
+     --prompt-file <temp file with preamble + screen prompt> \
+     --out .claude/ui-specs/<NN>-<slug>/mocks/s<N>-<slug>.png \
+     --device desktop
+   ```
+   The script handles OAuth, Stitch project creation/reuse (ID persists in
+   `.claude/scripts/.stitch-project-id`), screen generation, and PNG
+   download. For the first screen, pass the Design System Preamble alone
+   (seeds the Stitch project's style); for S1..SN, concat the preamble + the
+   per-screen prompt in the temp file.
 
 4. **Log prompts** to `stitch-prompts.md` verbatim (without the `>` blockquote markers — Clark copy-pastes these). This lets the pipeline be rerun deterministically if tokens change.
 
@@ -280,7 +291,7 @@ open_questions: <count>
 
 | Failure | Cause | Recovery |
 |---------|-------|----------|
-| Stitch MCP unreachable | gcloud ADC not set / MCP server not started | Emit `stitch_prerequisites_missing: true`, skip mock generation, continue with UI-SPEC |
+| `stitch-gen.mjs` fails with auth error | gcloud ADC not set, expired, or missing cloud-platform scope | Have user run `gcloud auth application-default login` with cloud-platform scope checked. Emit `stitch_prerequisites_missing: true`, skip mock generation. |
 | DESIGN.md lint fails | Broken token ref or WCAG contrast failure | Do NOT generate mocks against a broken DESIGN.md. Fix DESIGN.md first. |
 | Stitch drift too large | Prompt lacks hex values / relies on token names | Rewrite prompt with explicit hex values from DESIGN.md; do not rely on semantic token names |
 | UI-SPEC refers to component not in ngx-library public-api | Hallucinated component name | Check `node_modules/@zerobias-org/ngx-library/src/public-api.ts` before naming |
@@ -292,9 +303,11 @@ open_questions: <count>
 
 - Upstream agent: `~/.claude/agents/gsd-ui-researcher.md`
 - DESIGN.md: `.claude/design/DESIGN.md`
-- Pipeline notes: `.claude/notes/stitch-designmd-pipeline.md`
-- Stitch MCP config: `.mcp.json` (project root)
-- Stitch MCP setup docs: https://stitch.withgoogle.com/docs/mcp/setup/
+- Pipeline notes: `.planning/notes/stitch-designmd-pipeline.md`
+- Stitch generation script: `.claude/scripts/stitch-gen.mjs`
+- Script deps: `.claude/scripts/package.json` (`@google/stitch-sdk`, `google-auth-library`)
+- Stitch SDK docs: https://github.com/google-labs-code/stitch-sdk
+- GCP project used: `clark-claude-tools` (billing), override via `GOOGLE_CLOUD_PROJECT` env var
 - ngx-library catalog: `node_modules/@zerobias-org/ngx-library/src/public-api.ts`
 - MEMORY.md "ngx-library" section for installed component list
 

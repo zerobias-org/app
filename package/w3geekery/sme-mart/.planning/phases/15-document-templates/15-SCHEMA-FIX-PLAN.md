@@ -51,7 +51,7 @@ Same rules as 16-00 rewrite. Non-negotiable.
 </hard_rules>
 
 <context>
-@.claude/docs/SCHEMA_CHANGE_PROCESS.md
+@.planning/docs/SCHEMA_CHANGE_PROCESS.md
 @.planning/phases/15-document-templates/15-CONTEXT.md
 @.planning/phases/15-document-templates/15-RESEARCH.md
 @.planning/director/WATCH-LIST.md
@@ -72,7 +72,7 @@ Same rules as 16-00 rewrite. Non-negotiable.
 <task type="manual">
   <name>Task 1: Read SCHEMA_CHANGE_PROCESS.md in full, examine existing field YAMLs</name>
   <action>
-Read `.claude/docs/SCHEMA_CHANGE_PROCESS.md` top to bottom.
+Read `.planning/docs/SCHEMA_CHANGE_PROCESS.md` top to bottom.
 
 Then examine at least 3 existing field YAMLs in `~/Projects/w3geekery/zerobias-org-forks/schema/package/w3geekery/smemart/fields/` to confirm the format. Specifically look for:
 - A string scalar field (for `name`, `description`, etc.)

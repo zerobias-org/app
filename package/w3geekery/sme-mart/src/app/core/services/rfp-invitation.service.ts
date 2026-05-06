@@ -9,16 +9,20 @@
  */
 
 import { Injectable, inject } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService, type GqlQueryOptions } from './graphql-read.service';
+import { DemoVisibilityService } from './demo-visibility.service';
 import { RFP_INVITATION_FIELD_MAPPING, mapNeonToGql, mapGqlToNeon } from '../field-mappings';
-import type { RfpInvitation, RfpInvitationStatus, CreateRfpInvitationRequest, UpdateRfpInvitationRequest, RequestInvitationRequest } from '../models';
+import type { RfpInvitation, CreateRfpInvitationRequest, RequestInvitationRequest } from '../models';
 import type { GqlRfpInvitationResponse } from '../gql-types';
 
 @Injectable({ providedIn: 'root' })
 export class RfpInvitationService {
   private readonly pipelineWrite = inject(PipelineWriteService);
   private readonly graphqlRead = inject(GraphqlReadService);
+  private readonly demoVisibility = inject(DemoVisibilityService);
+  private readonly snackBar = inject(MatSnackBar);
 
   /** Scalar fields for standard queries (no link fields) */
   private readonly scalarFields = [
@@ -32,6 +36,7 @@ export class RfpInvitationService {
     'requestReason',
     'createdAt',
     'updatedAt',
+    'tag',
   ];
 
   // ---------------------------------------------------------------------------
@@ -53,7 +58,12 @@ export class RfpInvitationService {
       gqlOptions,
     );
 
-    return result.items.map(gql => mapGqlToNeon<RfpInvitation>(gql, RFP_INVITATION_FIELD_MAPPING.gqlToNeon));
+    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
+    const filteredGql = this.demoVisibility.applyVisibility(
+      result.items as (GqlRfpInvitationResponse & { tag?: Array<{ value: string }> | null })[],
+    );
+
+    return filteredGql.map(gql => mapGqlToNeon<RfpInvitation>(gql, RFP_INVITATION_FIELD_MAPPING.gqlToNeon));
   }
 
   /**
@@ -71,7 +81,12 @@ export class RfpInvitationService {
       gqlOptions,
     );
 
-    return result.items.map(gql => mapGqlToNeon<RfpInvitation>(gql, RFP_INVITATION_FIELD_MAPPING.gqlToNeon));
+    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
+    const filteredGql = this.demoVisibility.applyVisibility(
+      result.items as (GqlRfpInvitationResponse & { tag?: Array<{ value: string }> | null })[],
+    );
+
+    return filteredGql.map(gql => mapGqlToNeon<RfpInvitation>(gql, RFP_INVITATION_FIELD_MAPPING.gqlToNeon));
   }
 
   /**
@@ -94,7 +109,12 @@ export class RfpInvitationService {
     );
 
     if (!result.items.length) return null;
-    return mapGqlToNeon<RfpInvitation>(result.items[0], RFP_INVITATION_FIELD_MAPPING.gqlToNeon);
+    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
+    const filtered = this.demoVisibility.applyVisibility(
+      [result.items[0] as GqlRfpInvitationResponse & { tag?: Array<{ value: string }> | null }],
+    )[0] ?? null;
+    if (!filtered) return null;
+    return mapGqlToNeon<RfpInvitation>(filtered, RFP_INVITATION_FIELD_MAPPING.gqlToNeon);
   }
 
   /**
@@ -114,8 +134,14 @@ export class RfpInvitationService {
     );
     if (!invitation) return null;
 
-    this.pipelineWrite.seedCache('RfpInvitation', id, invitation as unknown as Record<string, unknown>);
-    return mapGqlToNeon<RfpInvitation>(invitation, RFP_INVITATION_FIELD_MAPPING.gqlToNeon);
+    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
+    const filtered = this.demoVisibility.applyVisibility(
+      [invitation as GqlRfpInvitationResponse & { tag?: Array<{ value: string }> | null }],
+    )[0] ?? null;
+    if (!filtered) return null;
+
+    this.pipelineWrite.seedCache('RfpInvitation', id, filtered as unknown as Record<string, unknown>);
+    return mapGqlToNeon<RfpInvitation>(filtered, RFP_INVITATION_FIELD_MAPPING.gqlToNeon);
   }
 
   // ---------------------------------------------------------------------------
@@ -139,7 +165,7 @@ export class RfpInvitationService {
       updatedAt: new Date().toISOString(),
     };
 
-    this.pushInvitation(invitation);
+    await this.pushInvitation(invitation);
     return invitation;
   }
 
@@ -160,7 +186,7 @@ export class RfpInvitationService {
       updatedAt: new Date().toISOString(),
     };
 
-    this.pushInvitation(invitation);
+    await this.pushInvitation(invitation);
     return invitation;
   }
 
@@ -186,7 +212,7 @@ export class RfpInvitationService {
       updatedAt: new Date().toISOString(),
     };
 
-    this.pushInvitation(updated);
+    await this.pushInvitation(updated);
     return updated;
   }
 
@@ -208,7 +234,7 @@ export class RfpInvitationService {
       updatedAt: new Date().toISOString(),
     };
 
-    this.pushInvitation(updated);
+    await this.pushInvitation(updated);
     return updated;
   }
 
@@ -229,7 +255,7 @@ export class RfpInvitationService {
       updatedAt: new Date().toISOString(),
     };
 
-    this.pushInvitation(updated);
+    await this.pushInvitation(updated);
     return updated;
   }
 
@@ -251,7 +277,7 @@ export class RfpInvitationService {
       updatedAt: new Date().toISOString(),
     };
 
-    this.pushInvitation(updated);
+    await this.pushInvitation(updated);
     return updated;
   }
 
@@ -273,7 +299,7 @@ export class RfpInvitationService {
       updatedAt: new Date().toISOString(),
     };
 
-    this.pushInvitation(updated);
+    await this.pushInvitation(updated);
     return updated;
   }
 
@@ -281,10 +307,17 @@ export class RfpInvitationService {
   // Internal
   // ---------------------------------------------------------------------------
 
-  private pushInvitation(invitation: RfpInvitation): void {
+  private async pushInvitation(invitation: RfpInvitation): Promise<void> {
     const gqlData = mapNeonToGql<Record<string, unknown>>(invitation, RFP_INVITATION_FIELD_MAPPING.neonToGql);
-    this.pipelineWrite.pushEntity('RfpInvitation', gqlData).catch(err => {
-      console.error('[RfpInvitationService] Failed to push invitation:', err);
-    });
+    try {
+      await this.pipelineWrite.pushEntity('RfpInvitation', gqlData, [], 'rfp-invitation.service:286');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to save invitation: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
   }
 }

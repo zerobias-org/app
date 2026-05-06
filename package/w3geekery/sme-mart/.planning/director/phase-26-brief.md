@@ -11,45 +11,53 @@ Seed ZeroBias as a first-class marketplace provider identity in the SME Mart dat
 
 ## Architecture
 
-### Starting state
-- No `company_info` convention has been codified — each seeded provider uses ad-hoc fields.
-- ZeroBias is NOT yet represented as a marketplace provider on UAT; the walkthrough Engagement created 2026-04-23 has ZB-as-provider expressed only in the `name` field (no actual provider-side records).
-- `Object.tag` validated 2026-04-24 — can tag ZB-as-provider records with a "platform-provider" tag to distinguish from 3P marketplace providers.
-- Walkthrough records (`746010b7-...` Engagement, `ea4db55f-...` SmeMartProject) exist on UAT with empty `tag` fields — need retroactive tag push.
-- `TAG-SHAPE-TEST-C` residue (`64047b6c-...`) remains on UAT from the Object.tag experiment, needs cleanup.
+### Starting state (updated 2026-04-27 post-Phase-25 close)
+
+**Inputs ready from Phase 25:**
+- `COMPANY-INFO-CONVENTION-DRAFT.md` — rewritten with the canonical 17-section catalog. MarketplaceProfileItem confirmed as generic `(section, data)` discriminator class — every "field" is its own MPI record.
+- Pipeline.receive replace key validated as `id` only (per-section saves are independent). Deterministic id pattern: `mpi-<orgId>-<section>`.
+- MarketplaceProfileItem class id captured: `7bcf86a5-91dc-520d-b9bf-e308b1078d46`.
+- Pipeline UUID (UAT): `43f08afd-7ab9-4e99-a93c-619c46adaabe`.
+- `Object.tag` shape validated `[{value: "<tag-uuid>"}]`; set at Pipeline.receive ingest time.
+
+**Already done (during Phase 25 close):**
+- W3Geekery Engagement (`746010b7-...`) and default SmeMartProject (`ea4db55f-...`) re-ingested with `Object.tag` populated. Tag-filter discovery works uniformly. ✅ (was originally SP-04's "retroactive tag push" requirement)
+
+**Still pending:**
+- ZeroBias is NOT yet represented as a marketplace provider on UAT. No MPI records exist for ZB org (`57c741cf-a58e-5efc-bf2f-93c4f6cf76ec`) on UAT.
+- "Platform-provider" distinguishing mechanism — TBD: create a new hydra Tag for `platform-provider` scope, OR rely on `MarketplaceProfileItem.orgId == ZB_ORG_UUID` filter, OR a `provider_type` section on the MPI record. Decide in Plan 26-01.
+- Cleanup queue (CLEANUP-25 backlog row): `mpi-test-a-cd7105df`, `mpi-test-b-cd7105df`, `TAG-SHAPE-TEST-C` (`64047b6c-...`) — piggyback on the first real Pipeline.receive batch per class.
 
 ### Deliverables
 
-1. **`company_info` convention doc.** Short document (`.planning/director/COMPANY-INFO-CONVENTION.md`) defining how a provider Org represents itself: legal name, DBA, logo URL, short blurb, long description, primary contact, website, HQ location, years in business, employee-count bucket. This convention applies to ALL providers, not just ZB. Phase 28 (company profile form) collects exactly this shape on the buyer side.
-2. **Seed ZB-as-provider record.** Pipeline.receive push for a single `MarketplaceProfileItem` (or equivalent provider-identity record) representing ZeroBias as a provider org, populated per `company_info` convention, with `Object.tag` populated with a `platform-provider` tag UUID (to distinguish from 3P marketplace providers). No ServiceOffering records.
-3. **Catalog integration.** Ensure ZB-as-provider appears in any Browse Providers / Search Providers UI the same way demo providers do today — UNTAGGED by the demo-seed tag (so Phase 24 gate doesn't hide it from non-admins).
-4. **Retroactive tag push + residue cleanup.** One Pipeline.receive batch (class `c66114a2-...` SmeMartProject + Engagement class UUID) that:
-   - Re-pushes the W3Geekery default Engagement (`746010b7-...`) with `tag: [{ value: "a81cd320-243e-44eb-bdd9-9824019ef3dd" }]`.
-   - Re-pushes the W3Geekery default SmeMartProject (`ea4db55f-...`) with the same tag.
-   - `markDeleted: ["64047b6c-52e7-4592-ac1d-27f5020d1e01"]` to clean up the TAG-SHAPE-TEST-C experiment residue.
+1. **Ratify `company_info` convention.** Review `COMPANY-INFO-CONVENTION-DRAFT.md` against ZeroBias org's actual data shape. Confirm 17-section catalog + flat sub-section pattern is correct. Rename to drop `-DRAFT` suffix → `.planning/director/COMPANY-INFO-CONVENTION.md`. Phase 28 + Phase 22 (form-schema) consume the ratified version.
+2. **Decide platform-provider distinguisher.** Pick one of (a) new hydra tag named `sme-mart.provider.platform`, (b) MPI `provider_type` section with `data: "platform"`, or (c) hardcoded `orgId == ZB_ORG_UUID` filter in Browse Providers. Lock decision before seeding.
+3. **Seed ZB-as-provider records.** One Pipeline.receive batch on MarketplaceProfileItem class (`7bcf86a5-...`) with N records — one per company_info section — for ZeroBias org (`57c741cf-...`). Each record uses deterministic id `mpi-57c741cf-...-<section>`. Object.tag populated per the distinguisher decision in #2. Initial copy/branding can be placeholder (per "Out of scope" — copy-layer Brian asks don't block).
+4. **Browse Providers UI integration.** Verify the existing Browse Providers component renders the seeded ZB-as-provider record. UNTAGGED by `sme-mart.demo` so Phase 24 gate doesn't hide it from non-admins.
+5. **Cleanup pass on the seed batch.** Same Pipeline.receive batch (or a follow-on) includes `markDeleted: ["mpi-test-a-cd7105df", "mpi-test-b-cd7105df"]` for MarketplaceProfileItem class. The SmeMartProject TAG-SHAPE-TEST-C residue (`64047b6c-...`) cleanup goes on a separate batch since it's a different class — defer to next real SmeMartProject ingest or schedule a one-off.
 
 ## Requirements
 
-- **SP-01:** `COMPANY-INFO-CONVENTION.md` exists and is referenced by Phase 28 brief.
+- **SP-01:** `COMPANY-INFO-CONVENTION.md` exists (renamed from `-DRAFT`), ratified for Phase 26 + Phase 28 + Phase 22 consumption.
 - **SP-02:** ZeroBias appears as a provider in SME Mart UI (Browse Providers view lists it).
-- **SP-04:** Every seeded or re-pushed record carries the appropriate `Object.tag` — `platform-provider` for the ZB-as-provider identity record, `sme-mart.eng.w3geekery-default-zb` for the retroactively-tagged walkthrough Engagement + SmeMartProject.
-- **SP-05:** Walkthrough residue cleaned up: `TAG-SHAPE-TEST-C` (schema id `64047b6c-...`) `markDeleted` in the Pipeline.receive batch.
+- **SP-04:** Platform-provider distinguisher decided (tag, section, or filter) and applied consistently to seeded ZB records. (Original wording about retroactive walkthrough tagging RESOLVED — done during Phase 25 close 2026-04-27.)
+- **SP-05:** MPI cleanup residue (`mpi-test-a-cd7105df`, `mpi-test-b-cd7105df`) `markDeleted` in the seed Pipeline.receive batch. SmeMartProject `TAG-SHAPE-TEST-C` cleanup separate (different class) — see CLEANUP-25.
 - **SP-06:** Unit tests for the seed function + for Browse Providers rendering ZB-as-provider.
 
 **Removed from scope (see DECISIONS.md):** SP-03 (three ServiceOffering records with placeholder tiers) — deferred until Brian confirms tier structure.
 
 ## Dependencies
 
-- Phase 25 Platform Data Audit (informs what profile fields the `company_info` convention should cover — lands before Phase 26 plans).
+- Phase 25 Platform Data Audit ✅ COMPLETE — provides COMPANY-INFO-CONVENTION-DRAFT.md, validated MPI replace semantics, class IDs, deterministic id pattern.
 - Object.tag mechanism (validated; see DECISIONS.md).
 - Existing SME Mart `MarketplaceProfileItem` class + Browse Providers UI.
 
 ## Verification
 
-- Navigate to Browse Providers in the UAT app; confirm ZeroBias is listed as a provider and `company_info` fields render correctly (name, blurb, website, etc.).
-- Query via GQL: `MarketplaceProfileItem(tag: { value: ".eq.<platform-provider-tag-uuid>" }) { ... }` returns the seeded ZB-as-provider record.
-- Query W3Geekery default Engagement + SmeMartProject via `platform.Object.getVersionByObjectIdOrVersionId` — confirm `tag` array is now populated (was null pre-Phase-26).
-- Confirm `TAG-SHAPE-TEST-C` no longer appears in GQL `SmeMartProject` result (post-`markDeleted`).
+- Navigate to Browse Providers in the UAT app; confirm ZeroBias is listed as a provider and rendered fields (legal_name, logo_url, short_blurb, etc.) match what was seeded.
+- Query via GQL: `MarketplaceProfileItem(orgId: ".eq.57c741cf-a58e-5efc-bf2f-93c4f6cf76ec") { id, section, data }` returns N records — one per seeded section.
+- Verify Object.tag (or chosen distinguisher) on the seeded records: `MarketplaceProfileItem(tag: {value: ".eq.<platform-provider-tag-uuid>"}) { id, section }` if tag-based; or section-presence check if section-based.
+- Confirm `mpi-test-a-cd7105df` and `mpi-test-b-cd7105df` no longer appear in GQL MarketplaceProfileItem result (post-`markDeleted` in seed batch).
 
 ## Out of scope
 

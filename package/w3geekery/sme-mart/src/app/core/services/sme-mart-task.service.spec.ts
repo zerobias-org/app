@@ -6,12 +6,15 @@
 
 import { TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { SmeMartTaskService } from './sme-mart-task.service';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
+import { DemoVisibilityService } from './demo-visibility.service';
+import { ProjectContextService } from './project-context.service';
 import { ImpersonationService } from './impersonation.service';
+import { fakeProjectContextService } from '../../test-helpers/angular';
 import type { GqlSmeMartTaskResponse } from '../gql-types/sme-mart-task.types';
-import type { SmeMartTask } from '../models/sme-mart-task.model';
 
 type MockFn = ReturnType<typeof vi.fn>;
 
@@ -38,6 +41,8 @@ describe('SmeMartTaskService', () => {
   let mockPipelineWrite: MockPipelineWrite;
   let mockGraphqlRead: MockGraphqlRead;
   let mockImpersonation: MockImpersonation;
+  let mockSnackBar: { open: ReturnType<typeof vi.fn> };
+  let mockProjectContext: ReturnType<typeof fakeProjectContextService>;
 
   beforeEach(() => {
     mockPipelineWrite = {
@@ -49,19 +54,24 @@ describe('SmeMartTaskService', () => {
       seedCache: vi.fn(),
     };
     mockGraphqlRead = {
-      query: vi.fn().mockResolvedValue({ items: [] }),
+      query: vi.fn().mockResolvedValue({ items: [], page: { totalCount: 0 } }),
       getById: vi.fn().mockResolvedValue(null),
     };
     mockImpersonation = {
       effectiveUserId: vi.fn().mockReturnValue('user-123'),
     };
+    mockSnackBar = { open: vi.fn() };
+    mockProjectContext = fakeProjectContextService(false); // non-admin by default
 
     TestBed.configureTestingModule({
       providers: [
         SmeMartTaskService,
+        DemoVisibilityService,
         { provide: PipelineWriteService, useValue: mockPipelineWrite },
         { provide: GraphqlReadService, useValue: mockGraphqlRead },
         { provide: ImpersonationService, useValue: mockImpersonation },
+        { provide: ProjectContextService, useValue: mockProjectContext },
+        { provide: MatSnackBar, useValue: mockSnackBar },
       ],
     });
 
@@ -72,7 +82,7 @@ describe('SmeMartTaskService', () => {
   // createTask
   // ────────────────────────────────────────────────────────────────────────────
 
-  it('should create a task and push to pipeline fire-and-forget', async () => {
+  it('should create a task and push to pipeline with await', async () => {
     mockPipelineWrite.pushEntity.mockResolvedValue(undefined);
 
     const result = await service.createTask({
@@ -88,20 +98,28 @@ describe('SmeMartTaskService', () => {
     expect(mockPipelineWrite.pushEntity).toHaveBeenCalledWith(
       'SmeMartTask',
       expect.objectContaining({ boardId: 'board-1', name: 'Task 1', code: 'T1' }),
+      [],
+      'sme-mart-task.service:82',
     );
   });
 
-  it('should return task optimistically before pipeline completes', async () => {
-    mockPipelineWrite.pushEntity.mockImplementation(() => new Promise(() => {})); // Never completes
+  it('should surface error to user on Pipeline rejection in createTask', async () => {
+    const mockError = new Error('Save failed');
+    mockPipelineWrite.pushEntity.mockRejectedValueOnce(mockError);
 
-    const taskPromise = service.createTask({
-      boardId: 'board-1',
-      name: 'Task 1',
-      code: 'T1',
-    });
+    await expect(
+      service.createTask({
+        boardId: 'board-1',
+        name: 'Task 1',
+        code: 'T1',
+      })
+    ).rejects.toThrow(mockError);
 
-    const result = await Promise.race([taskPromise, Promise.resolve('completed')]);
-    expect(result).not.toBe('completed'); // Task returned immediately
+    expect(mockSnackBar.open).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to save task'),
+      'Dismiss',
+      expect.any(Object),
+    );
   });
 
   // ────────────────────────────────────────────────────────────────────────────
@@ -333,7 +351,7 @@ describe('SmeMartTaskService', () => {
       page: { pageNumber: 1, pageSize: 1000, totalCount: 2 },
     });
 
-    const tree = await service.getTaskTree('board-1');
+    await service.getTaskTree('board-1');
 
     // Should detect cycle and warn
     expect(consoleWarnSpy).toHaveBeenCalledWith(
@@ -358,6 +376,23 @@ describe('SmeMartTaskService', () => {
     expect(mockPipelineWrite.pushEntity).toHaveBeenCalledWith(
       'SmeMartTask',
       expect.objectContaining({ id: 'task-1', name: 'Updated Task' }),
+      [],
+      'sme-mart-task.service:257',
+    );
+  });
+
+  it('should surface error to user on Pipeline rejection in updateTask', async () => {
+    const mockError = new Error('Update failed');
+    mockPipelineWrite.pushEntity.mockRejectedValueOnce(mockError);
+
+    await expect(
+      service.updateTask('task-1', { name: 'Updated Task' })
+    ).rejects.toThrow(mockError);
+
+    expect(mockSnackBar.open).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to update task'),
+      'Dismiss',
+      expect.any(Object),
     );
   });
 
@@ -371,5 +406,95 @@ describe('SmeMartTaskService', () => {
     await service.deleteTask('task-1');
 
     expect(mockPipelineWrite.deleteEntity).toHaveBeenCalledWith('SmeMartTask', 'task-1');
+  });
+
+  it('should surface error to user on Pipeline rejection in deleteTask', async () => {
+    const mockError = new Error('Delete failed');
+    mockPipelineWrite.deleteEntity.mockRejectedValueOnce(mockError);
+
+    await expect(service.deleteTask('task-1')).rejects.toThrow(mockError);
+
+    expect(mockSnackBar.open).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to delete task'),
+      'Dismiss',
+      expect.any(Object),
+    );
+  });
+
+  // ────────────────────────────────────────────────────────────────────────────
+  // Demo visibility (Phase 24 Plan 03)
+  // ────────────────────────────────────────────────────────────────────────────
+
+  describe('Demo visibility (Phase 24 Plan 03)', () => {
+    const baseTask = {
+      boardId: 'board-1', parentId: null, name: 'Task', code: 'T', status: 'todo',
+      rank: 0, priority: null, description: null, dueDate: null, activityId: null,
+      customFields: [], createdAt: '2026-05-05T00:00:00Z', updatedAt: '2026-05-05T00:00:00Z',
+    };
+    const mockGqlReturn = [
+      { ...baseTask, id: '1', name: 'Real', tag: null },
+      { ...baseTask, id: '2', name: 'Real w/ marketplace tag', tag: [{ value: 'a81cd320-243e-44eb-bdd9-9824019ef3dd' }] },
+      { ...baseTask, id: '3', name: 'Demo (global)', tag: [{ value: '81053c14-a8e5-4939-b538-c122c7d0eb1a' }] },
+      { ...baseTask, id: '4', name: 'Demo (legacy)', tag: [{ value: 'd618b602-21cc-40a1-a9fa-534b7bc1672c' }] },
+    ];
+
+    it('[DG-02] strips demo records for non-admin', async () => {
+      mockGraphqlRead.query.mockResolvedValue({
+        items: mockGqlReturn,
+        page: { pageNumber: 1, pageSize: 50, totalCount: 4 },
+      });
+
+      const result = await service.listTasks('board-1');
+
+      expect(result.items.map((r: { id?: string }) => r.id)).toEqual(['1', '2']);
+    });
+
+    it('[DG-03] admin sees all records including demo', async () => {
+      mockProjectContext.setIsAdmin(true);
+      mockGraphqlRead.query.mockResolvedValue({
+        items: mockGqlReturn,
+        page: { pageNumber: 1, pageSize: 50, totalCount: 4 },
+      });
+
+      const result = await service.listTasks('board-1');
+
+      expect(result.items.map((r: { id?: string }) => r.id)).toEqual(['1', '2', '3', '4']);
+    });
+
+    it('[DG-02] does NOT add server-side tag negation filter', async () => {
+      mockGraphqlRead.query.mockResolvedValue({
+        items: mockGqlReturn,
+        page: { pageNumber: 1, pageSize: 50, totalCount: 4 },
+      });
+
+      await service.listTasks('board-1');
+
+      const callArgs = mockGraphqlRead.query.mock.calls[0];
+      const filters = (callArgs[2] as { filters?: Record<string, string> })?.filters ?? {};
+      const filterValues = Object.values(filters).join(' ');
+      expect(filterValues).not.toContain('.not in.');
+      expect(filterValues).not.toContain('.ne.');
+    });
+
+    it('requests tag field in GQL query', async () => {
+      mockGraphqlRead.query.mockResolvedValue({
+        items: mockGqlReturn,
+        page: { pageNumber: 1, pageSize: 50, totalCount: 4 },
+      });
+
+      await service.listTasks('board-1');
+
+      const fields = mockGraphqlRead.query.mock.calls[0][1] as string[];
+      expect(fields).toContain('tag');
+    });
+
+    it('[DG-02] returns null when non-admin fetches a demo record by id', async () => {
+      const demoRecord = { ...baseTask, id: '3', name: 'Demo', tag: [{ value: '81053c14-a8e5-4939-b538-c122c7d0eb1a' }] };
+      mockGraphqlRead.getById.mockResolvedValueOnce(demoRecord);
+
+      const result = await service.getTask('3');
+
+      expect(result).toBeNull();
+    });
   });
 });

@@ -25,31 +25,31 @@ Requirements for v1.4 "3P Onboarding & Default Engagement". Each maps to roadmap
 
 ### Seed Provider (Phase 26)
 
-- [ ] **SP-01**: `COMPANY-INFO-CONVENTION.md` exists and is referenced by Phase 28 brief
-- [ ] **SP-02**: ZeroBias appears as a provider in SME Mart UI (Browse Providers view lists it)
-- [ ] **SP-04**: Every seeded record carries appropriate Object.tag (`platform-provider` for ZB-as-provider, `sme-mart.eng.w3geekery-default-zb` for W3Geekery default-engagement records)
-- [ ] **SP-05**: Walkthrough residue `TAG-SHAPE-TEST-C` (schema id `64047b6c-...`) cleaned up via `markDeleted`
-- [ ] **SP-06**: Unit tests for seed function + Browse Providers rendering ZB-as-provider
+- [x] **SP-01**: `COMPANY-INFO-CONVENTION.md` exists and is referenced by Phase 28 brief
+- [x] **SP-02**: ZeroBias appears as a provider in SME Mart UI (Browse Providers view lists it)
+- [x] **SP-04**: Every seeded record carries appropriate Object.tag (`platform-provider` for ZB-as-provider, `sme-mart.eng.w3geekery-default-zb` for W3Geekery default-engagement records)
+- [x] **SP-05**: Walkthrough residue `TAG-SHAPE-TEST-C` (schema id `64047b6c-...`) cleaned up via `markDeleted`
+- [x] **SP-06**: Unit tests for seed function + Browse Providers rendering ZB-as-provider
 
 ### Auth & Routing (Phase 27)
 
-- [ ] **AR-01**: Unauthenticated users are redirected to the branded login URL on any SME Mart route
-- [ ] **AR-02**: Post-auth routing: unconfirmed profile -> Phase 28 form, confirmed profile -> Phase 30 board
-- [ ] **AR-03**: Lazy-on-load guard queries for the default ZB engagement; creates it via the full bootstrap recipe if missing; idempotent on retry
-- [ ] **AR-04**: Guard failure surfaces a user-friendly error + retry, not a crash
-- [ ] **AR-05**: Admin users (`getPrincipal().isAdmin`) skip onboarding form, go to admin dashboard
-- [ ] **AR-06**: Guard populates Object.tag at ingest time for both new Engagement and new SmeMartProject (validated `[{ value }]` shape)
+- [x] **AR-01**: Unauthenticated users are redirected to the branded login URL on any SME Mart route
+- [x] **AR-02**: Post-auth routing: unconfirmed profile -> Phase 28 form, confirmed profile -> Phase 30 board
+- [x] **AR-03**: Lazy-on-load guard queries for the default ZB engagement; creates it via the full bootstrap recipe if missing; idempotent on retry
+- [x] **AR-04**: Guard failure surfaces a user-friendly error + retry, not a crash
+- [x] **AR-05**: Admin users (`getPrincipal().isAdmin`) skip onboarding form, go to admin dashboard
+- [x] **AR-06**: Guard populates Object.tag at ingest time for both new Engagement and new SmeMartProject (validated `[{ value }]` shape)
 
 ### Company Profile (Phase 28)
 
-- [ ] **CP-01**: Form renders every field in the `company_info` convention
-- [ ] **CP-02**: Pre-fillable fields populated on form mount from the correct SDK/GQL source per Phase 25 map
-- [ ] **CP-03**: Known-unknown fields show a "please provide" indicator + optional hint text
-- [ ] **CP-04**: Save writes all confirmed values to the platform via Phase 25-mapped endpoint(s)
-- [ ] **CP-05**: Post-save, onboarding-complete marker is set for the current user+org
-- [ ] **CP-06**: Skip-for-now escape exists; routes to Phase 30 WITHOUT setting the complete marker
-- [ ] **CP-07**: Subsequent logins with complete marker set -> Phase 27 routes directly to Phase 30
-- [ ] **CP-08**: Unit tests cover pre-fill, save, skip, repeat-login-skip flows
+- [x] **CP-01**: Form renders every field in the `company_info` convention
+- [x] **CP-02**: Pre-fillable fields populated on form mount from the correct SDK/GQL source per Phase 25 map
+- [x] **CP-03**: Known-unknown fields show a "please provide" indicator + optional hint text
+- [x] **CP-04**: Save writes all confirmed values to the platform via Phase 25-mapped endpoint(s)
+- [x] **CP-05**: Post-save, onboarding-complete marker is set for the current user+org
+- [x] **CP-06**: Skip-for-now escape exists; routes to Phase 30 WITHOUT setting the complete marker
+- [x] **CP-07**: Subsequent logins with complete marker set -> Phase 27 routes directly to Phase 30
+- [x] **CP-08**: Unit tests cover pre-fill, save, skip, repeat-login-skip flows
 
 ### Project Board (Phase 30)
 
@@ -74,7 +74,25 @@ Deferred from v1.3 and v1.4. Tracked but not in current roadmap.
 
 ### Hardening & Productivity (deferred v1.3 phases 20-23)
 
-- **FF-01..05**: Fire-and-forget `pushEntity` audit + telemetry + remediation (Phase 20)
+#### Fire-and-Forget Audit (Phase 20) — ✅ VALIDATED 2026-04-29
+
+Phase 20 was executed interleaved with v1.4 work and closed at HEAD `89e7c13` + Wave 3 (this commit). All FF-* requirements are validated.
+
+- **FF-01**: ✅ Validated — `.planning/phases/20-fire-and-forget-audit/AUDIT.md` 60-row call-site table (44 fire-and-forget + 16 awaited). Each row carries file:line, className, criticality, complexity, user-action, error-surface citation.
+- **FF-02**: ✅ Validated — AUDIT.md "Class-ID Verification Table" verified all 23 `SME_MART_CLASS_IDS` entries against `platform.Class.getClass` on UAT 2026-04-29. 23/23 canonical, no fictional/drifted consts.
+- **FF-03**: ✅ Validated — `pipeline-write.service.ts` `pushEntities`/`pushEntity`/`deleteEntities`/`deleteEntity` rejection paths emit `[PIPELINE_WRITE_FAILURE] {className, callSite, errorMessage, timestamp}` structured event via `console.warn`, then re-throw. 8 specs in `pipeline-write.service.spec.ts` describe('Telemetry Instrumentation (FF-03)') verify the contract.
+- **FF-04**: ✅ Validated — Wave 2 across 33 CRITICAL+SIMPLE sites: replaced fire-and-forget with `await` + `try/catch` + `MatSnackBar` toast + explicit `callSiteTag` + re-throw. Each remediated service has a rejection-path spec; note-folder coverage gap closed by Wave 3 specs (`describe('Pipeline rejection error surface (Phase 20 Wave 3)')`).
+- **FF-05**: ✅ Validated — `.planning/BACKLOG.md` "Fire-and-Forget Remediation Polish (v1.5)" contains FF-POLISH-1/2/3 covering bid-submit retry UX, vetting batch per-item handling, and submit-button-disable sweep across forms. The 9 MEDIUM collaboration sites also got the SIMPLE remediation in Wave 2 (Brian-acknowledged scope expansion).
+- **FF-06**: ✅ Validated — AUDIT.md AWAITED rows 45-60 (16 sites) carry concrete `<file>.ts:NN — surfaces via <mechanism>` citations after Wave 3 prose cleanup. Honest tally: 5 sites with proper user-visible surface, 2 with no UI consumer wired today, 2 with NgZone-only fallthrough (captured in FF-POLISH-3), 9 with admin-only `console.error` swallow (acceptable).
+- **FF-07**: ✅ Validated — Pattern is documented in AUDIT.md "Wave 2 Remediation Grouping" and codified in `pipeline-write.service.ts` itself (the `callSiteTag` parameter shape forces callers into the await + try/catch contract). Future fire-and-forget regressions are caught at code review time and at unit-test time (every Wave-2 service has a rejection-path spec gated on the new pattern).
+- **FF-08**: ✅ Validated — `pipeline-write.service.spec.ts` `describe('Class-id round-trip for all 23 SME_MART_CLASS_IDS (Phase 20 Wave 3)')` parameterized `it.each` block enforces each className → canonical UUID mapping at unit-test time. Belt-and-suspenders length and uniqueness assertions catch silent drift if a new class is added without updating the test table or a copy-paste duplicates a UUID/name. See `.planning/phases/20-fire-and-forget-audit/ROUND-TRIP-RESULTS.md`.
+
+**Closure deliverables:** [AUDIT.md](phases/20-fire-and-forget-audit/AUDIT.md), [PHASE-20-SUMMARY.md](phases/20-fire-and-forget-audit/PHASE-20-SUMMARY.md), [ROUND-TRIP-RESULTS.md](phases/20-fire-and-forget-audit/ROUND-TRIP-RESULTS.md), [UAT-SOAK-READY.md](phases/20-fire-and-forget-audit/UAT-SOAK-READY.md).
+
+**UAT 1-week soak runs post-merge, NOT phase-close blocking** — Director reviews Day 7.
+
+#### Other Hardening & Productivity (deferred)
+
 - **OD-01..05**: Org Documents Center completion -- folders, color/tag, template surfacing, preview (Phase 21)
 - **FT-01..09**: Form Template Library -- save/reuse/fork, `FormTemplate` schema class (Phase 22)
 - **TC-01..05**: Transparency Controls UI-SPEC lock + opportunistic implementation (Phase 23)
@@ -122,25 +140,25 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PDA-03 | Phase 25 | Pending |
 | PDA-04 | Phase 25 | Pending |
 | PDA-05 | Phase 25 | Pending |
-| SP-01 | Phase 26 | Pending |
-| SP-02 | Phase 26 | Pending |
-| SP-04 | Phase 26 | Pending |
-| SP-05 | Phase 26 | Pending |
-| SP-06 | Phase 26 | Pending |
-| AR-01 | Phase 27 | Pending |
-| AR-02 | Phase 27 | Pending |
-| AR-03 | Phase 27 | Pending |
-| AR-04 | Phase 27 | Pending |
-| AR-05 | Phase 27 | Pending |
-| AR-06 | Phase 27 | Pending |
-| CP-01 | Phase 28 | Pending |
-| CP-02 | Phase 28 | Pending |
-| CP-03 | Phase 28 | Pending |
-| CP-04 | Phase 28 | Pending |
-| CP-05 | Phase 28 | Pending |
-| CP-06 | Phase 28 | Pending |
-| CP-07 | Phase 28 | Pending |
-| CP-08 | Phase 28 | Pending |
+| SP-01 | Phase 26 | Complete |
+| SP-02 | Phase 26 | Complete |
+| SP-04 | Phase 26 | Complete |
+| SP-05 | Phase 26 | Complete |
+| SP-06 | Phase 26 | Complete |
+| AR-01 | Phase 27 | Complete |
+| AR-02 | Phase 27 | Complete |
+| AR-03 | Phase 27 | Complete |
+| AR-04 | Phase 27 | Complete |
+| AR-05 | Phase 27 | Complete |
+| AR-06 | Phase 27 | Complete |
+| CP-01 | Phase 28 | Complete |
+| CP-02 | Phase 28 | Complete |
+| CP-03 | Phase 28 | Complete |
+| CP-04 | Phase 28 | Complete |
+| CP-05 | Phase 28 | Complete |
+| CP-06 | Phase 28 | Complete |
+| CP-07 | Phase 28 | Complete |
+| CP-08 | Phase 28 | Complete |
 | PB-01 | Phase 30 | Pending |
 | PB-02 | Phase 30 | Pending |
 | PB-03 | Phase 30 | Pending |

@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+if ! git diff --cached --name-only | grep -q '^package/w3geekery/sme-mart/'; then
+  exit 0
+fi
+cd package/w3geekery/sme-mart
+npx lint-staged

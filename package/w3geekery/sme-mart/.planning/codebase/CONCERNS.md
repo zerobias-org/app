@@ -79,7 +79,7 @@
 - CI/dev environment being rebuilt with Hydra
 - UAT is temporary dev target (`npm run dev` → UAT)
 - ID mapping required between CI and UAT environments
-- Tracked in `.claude/notes/uat-migration-tracker.md`
+- Tracked in `.planning/notes/uat-migration-tracker.md`
 - **Risk:** Stale CI IDs in code/config causing silent failures
 
 ## Architecture Risks

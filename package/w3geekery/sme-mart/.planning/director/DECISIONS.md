@@ -1,5 +1,156 @@
 # Director Decisions
 
+## Object.tag Write Route — Embed-in-Data Only (2026-05-04)
+**Date:** 2026-05-04 (Director MCP probe discovery)
+**Decision:** All `Pipeline.receive` calls that write tags to objects MUST embed tags directly in the data payload as `tag: [{value: "<uuid>"}, ...]` BEFORE creating the SimpleBatch. The SimpleBatch constructor's 3rd argument (tagIds array) is batch/job metadata and does NOT populate Object.tag on GQL read-back. Pass an empty `[]` as the 3rd arg.
+
+**Pattern:**
+```typescript
+const existingTag = (data['tag'] as Array<{ value: string }> | undefined) ?? [];
+const merged = mergeTagValues(existingTag, tagIds);
+const ensured = {
+  ...data,
+  ...(tagIds.length > 0 ? { tag: merged } : {})
+};
+new SimpleBatch(classId, [ensured], []) // Pass empty [], tags in data
+```
+
+**Why:** 2026-05-04 empirical validation (Director MCP probe on UAT) confirmed: pushed SmeMartProject with tagIds route (SimpleBatch 3rd arg) → Object.tag read back as null. Pushed identical SmeMartProject with data-embedding route → Object.tag read back with correct UUID. SimpleBatch arg 3 serves internal Hub pipeline tracking only, not user-facing data assignment.
+
+**Affected Sites (Fixed 2026-05-04):**
+- `src/app/test-helpers/demo-data-seeder.ts` — Demo fixtures embed GLOBAL_DEMO tag in payload (was already correct)
+- `scripts/demo/helpers.ts` — pushEntity() now embeds tags in data (commit `aad578d`)
+- `src/app/core/services/pipeline-write.service.ts` — pushEntities() now embeds tags in data (commit `aad578d`)
+
+**Verification:** 15 round-trip tests added (scripts-demo-helpers.spec.ts) + 6 tag-embedding tests in pipeline-write.service.spec.ts. All passing. Object.tag confirmed populated on GQL read-back for all fixed sites.
+
+**Anti-pattern:** Passing tagIds to SimpleBatch 3rd argument, assuming it populates Object.tag. The pattern looks correct (there's a tagIds parameter) but silently fails — tag writes don't error, they just drop the tags. Always verify tag presence with round-trip test (write → GQL read → assert Object.tag is not null).
+
+**Prevention:** When adding new tag-write sites, include round-trip test: create object with tags → GQL query → assert `Object.tag.value` array contains expected UUIDs.
+
+---
+
+## Phase 20 Telemetry `callSiteTag` Uses Post-Edit `await` Line Number
+**Date:** 2026-04-29
+**Decision:** The `callSiteTag` parameter passed to `pipelineWrite.pushEntity` / `pushEntities` / `deleteEntity` uses the line number where the `await` call lands AFTER the try/catch wrap, not the original pre-edit line number from AUDIT.md. Format remains `<service>.service:<line>`. Going forward, future audit-and-remediate phases that introduce telemetry tags follow the same convention: post-edit line, not audit-row anchor.
+**Why:** The earlier Director handoff for Wave 2 said "explicit `callSiteTag` matching `<service>.service:<original-line>`" intending audit-row anchors for telemetry stability. In practice, the first three Wave 2 services committed (`reviews.service:193/228`, `engagements.service:205`, etc.) already drifted from the AUDIT row references — the executor used post-edit lines because that's the line you actually see in the file when investigating a CloudWatch hit. The Wave 2 finish batch (`org-document`, `sme-mart-board`, `note-hierarchy`, `sme-mart-workflow`) continued the post-edit convention. Amending 4 of those 6 commits to backfill audit-row lines would (a) fight the established pattern across the rest of Wave 2, (b) cost churn for marginal benefit since the tag's job is uniqueness + searchability + roughly-locating-the-source — not byte-perfect AUDIT-row anchoring. The AUDIT row stays as the immutable design-time reference; the telemetry tag is a runtime locator pinned to whatever the file currently looks like. They serve different jobs and don't need to match.
+**Anti-pattern:** (a) Amending merged Wave 2 commits to "make the tags match AUDIT.md rows" — churn for no functional benefit. (b) Future agents seeing this drift in deployed code and "fixing" the tags to match AUDIT row references — that's backwards: the tag should reflect the current file state. (c) Demanding AUDIT-row line stability in future remediation phases — write the brief with "post-edit line" or just "the line of the await call" instead.
+
+## Marketplace Monetization Is a 3% Transactional Toll Only (current model)
+**Date:** 2026-04-28 (Brian meeting)
+**Decision:** SME Mart's monetization is a single-digit (~3%) "toll-booth" cut on every marketplace transaction — AWS / Apple App Store / Shopify pattern. Sellers publish their own pricing/charge models into SME Mart; buyers transact through the marketplace. Selling outside the marketplace is **banned + large fines** for participants. SME Mart itself charges no listing fees, no tier fees, no per-seat fees right now. **Tier-based listing fees are a possible future** ("e.g., ~$100/mo to post an app, possibly favoring smaller businesses") but explicitly out of scope until "obvious when we get there." There are no SME-Mart-internal pricing tiers (Free/Pro/Enterprise). Sellers define their own pricing on each ServiceOffering.
+**Why:** Brian directive 2026-04-28. The earlier brian-content-brief sections 1, 2, and 5 (tier structure, tier pricing, tier marketing copy) were premised on SME Mart having internal tiers — wrong premise. The toll-booth model means the platform is invisible to pricing; sellers price their offerings, the platform takes 3%, done.
+**Anti-pattern:** (a) Director or Claude reintroducing "SME Mart Free / Pro / Enterprise tiers" in any planning artifact — they don't exist. (b) Building a tier-display banner on the engagement/project board (Phase 29's old scope) — there's nothing to display. (c) Treating the ServiceOffering pricing field as a SME-Mart-imposed tier instead of seller-defined. (d) Conflating "ZB platform per-app pricing" (yes, exists per the ToS architecture decision) with "SME Mart marketplace tiers" (no, doesn't exist). Different things.
+
+## Per-App ToS Architecture — Two-Layer (Engagement MSA + Per-App ToS)
+**Date:** 2026-04-28 (Brian meeting)
+**Decision:** ZeroBias platform terms-of-service follows AWS's two-layer pattern:
+- **Engagement-level MSA** — required to have a ZB account at all. Analog: AWS account-level ToS. One MSA per ZeroBias-org relationship.
+- **Per-app/product ToS + consumption model + price model** — every ZB platform offering (Value Manager, Governance, **SME Mart itself**, etc.) is its own packaged product with its own ToS, consumption rules, and chargeback model. ZB will end up with ~30 declarative product packages.
+
+**SME Mart's ToS is one of those per-app ToS records.** It is NOT an SME-Mart-internal feature; it's an architectural concern for the entire ZB platform. SME Mart consumes the per-app ToS layer once it exists at the platform level.
+
+**Where the ToS content / EULA / MSA actually gets authored:** in the **W3Geekery↔ZeroBias engagement project notes** — not in SME Mart code or planning. Specifically, when the W3Geekery↔ZB engagement is stood up (W3Geekery as provider of dev services, ZB as buyer), Clark creates a dedicated workspace inside that engagement for "supporting all ZeroBias apps — content/assets gathering." The per-app ToS / EULA / MSA requirement-tasks for SME Mart, Value Manager, Governance, etc. all live in that one workspace. Brian responds to those tasks (eventually via his own Claude). One workspace covers content for all ZB apps.
+
+**Open meta-question (unresolved):** Does the requirement-task carry the content (Brian writes the ToS into the task body), or does the task point to an API that Brian writes to? Brian leans toward "task is a guide that *includes* the API for satisfaction." Worth resolving before building the requirement-task UI for this workflow. Tracked in BACKLOG / brian-content-brief follow-ups.
+**Why:** Brian directive 2026-04-28. The earlier brian-content-brief Section 3 ("Terms of Service / Privacy / EULA") presumed SME Mart owns its own ToS — wrong scope. ToS lives at the platform-app layer, with content authored in the W3Geekery↔ZB engagement workspace, dogfooding the construct.
+**Anti-pattern:** (a) Adding a ToS-link surface or ToS upload UI to SME Mart in v1.4 or v1.5 — that's the platform's job, not SME Mart's. (b) Authoring SME Mart's own ToS in the SME Mart repo or planning directory — write it as a requirement-task in the W3Geekery↔ZB engagement workspace (when stood up). (c) Treating the engagement-MSA as the same thing as the per-app ToS — they are two layers, both required. (d) Trying to ship Phase 29's "ToS link surface" in v1.5 without the platform-side per-app ToS layer existing first — the surface has nothing to surface yet.
+
+## Pilot vs Production Project Type Is a Type Flip on the Same Project
+**Date:** 2026-04-28 (Brian meeting)
+**Decision:** New ZeroBias signups land in a **pilot project** with thinner engagement requirements (no banking, lighter MSA). When the pilot graduates — additional details collected (banking, fuller MSA), Buyer commits to permanent — the **same project entity transitions from "pilot" type to "production" type**. The project is preserved across the transition. ID stays. History stays. Subprojects, tasks, workspaces, transparency entanglements — all stay. Only the `projectType` discriminator flips, and the additional engagement-level data fields populate.
+
+**Eventually onboarding adopts SME Mart's engagement→project flow** — replaces the current website-CRM-trial → manual-setup path. Every signup gets an org ("nobody will not have an org"), and every org gets a default pilot project. Graduation is a SINGLE action that flips type + collects fuller data.
+**Why:** Brian directive 2026-04-28. The natural alternative — create a new "production" project at graduation, archive the pilot — would lose history, break links, and require migration plumbing. Type-flip preserves everything.
+**Anti-pattern:** (a) Modeling pilot vs production as different `Project` schema CLASSES — they must be the same class with a `projectType` discriminator. (b) Creating a new project record at graduation — destroys continuity. (c) Building a "promote pilot to production" wizard that copies data into a new entity — wrong shape. The wizard should just collect the additional fields and flip the type. (d) Forgetting that demo-org seed engagements (W3Geekery, HIS, Work Worlds, etc.) need to model the pilot type explicitly — most demo data should ship as type=pilot until the org has gone through the graduation flow.
+
+## Brian-W3Geekery Collaborative Spec Lives in Project Notes (Dogfooding Directive)
+**Date:** 2026-04-28 (Brian meeting)
+**Decision:** Once the W3Geekery↔ZeroBias engagement + first project are live, **the project's notes app is the canonical place** where collaborative specification between Brian Hierholzer Inc. and W3Geekery happens. NOT Slack, NOT Director artifacts under `.planning/director/`, NOT brian-content-brief docs. Brian quote: "Let's try to use the construct that we're building so we can jump into the construct to build the construct." Brian going Claude-enabled soon — his Claude will respond to tasks/notes in the project, dogfooding the engagement-task-flow as the collab channel itself.
+**Why:** Brian directive 2026-04-28. Builds confidence in the construct by USING the construct for the most important conversation (CEO ↔ contractor on platform direction). Also forces the construct to actually work — if the project-notes flow can't carry Brian's design conversations, that's a real bug to surface, not a theoretical UX concern.
+**Anti-pattern:** (a) Continuing to file Brian-questions in `.planning/director/brian-content-brief-*.md` after the W3Geekery↔ZB project is live — those should migrate to the project-notes app. (b) Asking Brian for design input via Slack DM when the project-notes flow exists. (c) Treating Director artifacts as the system of record for Brian↔W3Geekery decisions — they're the system of record for SME Mart milestone state, not for cross-org spec conversation. (d) Carrying the brian-content-brief pattern forward into v1.5+ without migrating to project-notes. **Transitional rule:** until the W3Geekery↔ZB engagement+project is live (target: end of week 2026-04 per Action Item #3), keep using the existing brief; AFTER it's live, new Brian asks file as project-notes tasks, not brief sections.
+
+## Platform-Assigned Class IDs Are Not Deterministic UUID v5
+**Date:** 2026-04-28
+**Decision:** SME Mart class IDs are assigned by the platform's class-registration pipeline (dataloader / catalog publish), **not** derived as `uuidv5(schema-namespace, className)`. Any const in `pipeline-write.service.ts` carrying the comment `(deterministic UUID v5 from schema)` is suspect and must be verified against `platform.Class.getClass(<name>)` before being trusted.
+
+**Why:** 2026-04-28 audit of all 23 entries in `SME_MART_CLASS_IDS` against UAT (`platform.Class.getClass`) found 21 matches and **2 fictional consts** that do not correspond to any registered class:
+- `MarketplaceProfileItem`: codebase `ee1e68b7-...` is fictional; canonical platform-assigned ID is `7bcf86a5-91dc-520d-b9bf-e308b1078d46`.
+- `EngagementVettingItem`: codebase `66fa174f-...` is fictional; canonical is `21f5841f-dd27-53ef-a0f5-6a816ec7f7e1`.
+
+Both bug consts are commented as `(deterministic UUID v5 from schema)`. The UUID v5 derivations the original Plan 041 / Plan 063 authors computed do not match what the platform actually assigned at registration time. Pipeline.receive returns `"No such Class"` for both fictional values. Silent-failure pathways (fire-and-forget `.catch` in `vendor-profile.service` and `vetting.service`) hid this for the entire life of those plans — ZERO MPI writes and ZERO vetting-item writes through `PipelineWriteService` have ever landed on UAT.
+
+**How to apply:**
+- **Immediate:** Plan 26-04 (handed to gsd-plan 2026-04-28) corrects both consts in `pipeline-write.service.ts:33,36`, drops the misleading UUID-v5 comments, adds tests bound to canonical IDs, and verifies live writes via `vendor-profile.create` + `vetting.initializeVetting`.
+- **Systemic:** Phase 20 (Fire-and-Forget Audit, in v1.3 roadmap as TBD) is now confirmed-needed, not theoretical — its watch pattern (errata 011) has two real confirmed instances. Phase 20 should be planned and executed before Phase 27 (which adds the auth gate + onboarding routing whose lazy-engagement-guard will rely on round-trip writes succeeding).
+- **Verification rule for new entity types:** When adding a new class to `SME_MART_CLASS_IDS`, the plan's verification step MUST include `platform.Class.getClass(<name>)` and assert `classInfo.id === <const>`. Don't trust schema-derivation assumptions.
+- **Comment hygiene:** When fixing or adding consts, drop any "deterministic UUID v5" framing. Use "platform-assigned (verified via platform.Class.getClass)" with the verification date.
+
+**Audit results (kept for reference, all verified 2026-04-28 via platform.Class.getClass):**
+
+| Class | Codebase const | Platform-assigned | Match |
+|---|---|---|---|
+| Engagement | `7711aa41-...` | `7711aa41-...` | ✅ |
+| Bid | `ccddd2e5-...` | `ccddd2e5-...` | ✅ |
+| BidResponse | `a024a0b5-...` | `a024a0b5-...` | ✅ |
+| ServiceOffering | `ff689173-...` | `ff689173-...` | ✅ |
+| Note | `fe7c58a9-...` | `fe7c58a9-...` | ✅ |
+| NoteFolder | `4d50975e-...` | `4d50975e-...` | ✅ |
+| Review | `ef5d821a-...` | `ef5d821a-...` | ✅ |
+| SmeMartDocument | `e1497ca8-...` | `e1497ca8-...` | ✅ |
+| SmeMartProject | `c66114a2-...` | `c66114a2-...` | ✅ |
+| SmeMartBoard | `20be589b-...` | `20be589b-...` | ✅ |
+| SmeMartActivity | `36405d75-...` | `36405d75-...` | ✅ |
+| SmeMartWorkflow | `295938d2-...` | `295938d2-...` | ✅ |
+| SmeMartTask | `e15f1e0a-...` | `e15f1e0a-...` | ✅ |
+| ProjectPrd | `920fca70-...` | `920fca70-...` | ✅ |
+| PrdSection | `d30445f3-...` | `d30445f3-...` | ✅ |
+| ProjectPlan | `bc6159da-...` | `bc6159da-...` | ✅ |
+| PlanMilestone | `ac1a1cc8-...` | `ac1a1cc8-...` | ✅ |
+| **EngagementVettingItem** | **`66fa174f-...`** | **`21f5841f-...`** | ❌ FICTIONAL |
+| **MarketplaceProfileItem** | **`ee1e68b7-...`** | **`7bcf86a5-...`** | ❌ FICTIONAL |
+| RfpInvitation | `941cf01b-...` | `941cf01b-...` | ✅ |
+| DocumentTemplate | `d2493bf7-...` | `d2493bf7-...` | ✅ |
+| DocumentInstance | `3e1d232f-...` | `3e1d232f-...` | ✅ |
+| FormSubmission | `179bd4b1-...` | `179bd4b1-...` | ✅ |
+
+**Related:**
+- Errata 023 — full root-cause + fix-path narrative
+- Errata 011 — fire-and-forget masks errors (the parent watch pattern)
+- Phase 20 brief — fire-and-forget audit (now urgent, not theoretical)
+
+---
+
+## MarketplaceProfileItem Replace Semantics + Cleanup Residue
+**Date:** 2026-04-27
+**Decision:** Pipeline.receive replace key for `MarketplaceProfileItem` (class `7bcf86a5-91dc-520d-b9bf-e308b1078d46`) is **`id` only**. Per-section saves are safe — ingesting one MPI record does NOT clobber other MPI records of the same class with different ids.
+
+**Why:** Phase 28 form save flow needs to write per-field MPI records keyed by `(orgId, section)` without read-modify-write fan-out. This was the gating empirical question for Phase 28 design. Validated via UAT experiment 2026-04-27: ingested two records (`mpi-test-a-cd7105df` / section=test_a / data=A and `mpi-test-b-cd7105df` / section=test_b / data=B), both visible. Then ingested only `test_a` with data=A2; `test_a` updated, `test_b` survived.
+
+**How to apply:**
+- Phase 28 save flow: one `Pipeline.receive` batch per save click; data array contains one record per dirty form field; each record has a deterministic id derived from `(orgId, section)`.
+- Recommended id format: `mpi-<orgId>-<section>` (id field is `string`, not strict UUID). Example: `mpi-cd7105df-523d-5392-9f9a-3f83d3f30107-legal_name`.
+- Pre-fill flow: one GQL query — `MarketplaceProfileItem(orgId: ".eq.<id>") { section, data }` — group client-side by `section`, project to form model.
+
+**Test residue on UAT (cleanup queue):**
+- `mpi-test-a-cd7105df` (section=test_a, data=A2)
+- `mpi-test-b-cd7105df` (section=test_b, data=B)
+- Plus the pre-existing TAG-SHAPE-TEST-C SmeMartProject (`64047b6c-...`)
+- Cleanup path: include all three in `markDeleted` of a future Pipeline.receive batch (one batch per class). Pipeline.receive requires non-empty `data`, so cleanup goes alongside the next real ingest.
+
+## W3Geekery Object.tag Remediation
+**Date:** 2026-04-27
+**Decision:** Re-ingest the W3Geekery default-engagement records (`Engagement` `746010b7-...` and `SmeMartProject` `ea4db55f-...`) via Pipeline.receive with the validated Object.tag payload `tag: [{value: "a81cd320-..."}]`. Closes the gap accepted at walkthrough time (refinement #18 / line 188 of bootstrap brief).
+
+**Why:** The Phase 25 GQL audit confirmed `Engagement.tag = null` and the default SmeMartProject's `tag = null` — leftover from the original walkthrough's use of batch-level `tagIds` (which doesn't populate Object.tag) instead of per-record `data[i].tag`. The recipe was amended for future runs but W3Geekery records were never re-ingested. Three tag-related fields existed in three different states: `engagementTag` (string discriminator, set), `zerobiasTagId` (UUID scalar, set), `tag` (Object.tag array, NULL). This inconsistency would surprise any Phase 27 lazy-guard or batch reconciliation logic that uses `ClassName(tag: {value: ".eq.<id>"})` for discovery — works on freshly-recipe-correct orgs, silently fails on W3Geekery.
+
+**How to apply:** Verified via GQL re-query — both records now show `tag: [{value: "a81cd320-..."}]`. Tag-filter discovery returns 1 Engagement + 2 SmeMartProjects (TAG-SHAPE-TEST-C + the default project). Phase 27 lazy guard can rely on Object.tag being present uniformly. Bootstrap walkthrough updated with remediation note. No backlog row needed; one-shot fix complete.
+
+**Class IDs captured for batch use:**
+- Engagement class: `7711aa41-e55b-5cda-9b7a-35844a2006a1`
+- SmeMartProject class: `c66114a2-48e2-5b93-b7d6-7ccd6ef45a03`
+- Pipeline (UAT receiver): `43f08afd-7ab9-4e99-a93c-619c46adaabe`
+
 ## ServiceOfferings Defer With Brian — Data-Model Brian Asks Block, Copy/Branding Don't
 **Date:** 2026-04-24
 **Decision:** `ServiceOffering` records are NOT seeded in v1.4. All ServiceOffering work — including the previously-planned placeholder tier values (Free / Growth $99/mo / Enterprise $999/mo) — defers until Brian confirms the pricing structure. This supersedes the "placeholder tier values ship in Phase 26" clause from the "v1.4 Phase 29 Deferred to v1.5" decision below.
@@ -31,7 +182,49 @@ ServiceOffering tier structure is a data-model decision: it fixes the records we
 
 **Triggers for revisit:** Brian confirms tier structure (via meeting, Slack, or platform-task in the default ZB engagement). At that point, a follow-up phase or hotfix creates the ServiceOffering records and the tier-display surface.
 
+## Platform-Provider Distinguisher (Phase 26 Plan 01)
+**Date:** 2026-04-28
+**Decision:** Option B — MPI `provider_type` section with `data: "platform"` for ZeroBias org records.
 
+**Mechanism:** Add a section called `provider_type` to ZeroBias's MarketplaceProfileItem records with `data: "platform"`. Browse Providers + any future filter discovers platform providers via GQL `MarketplaceProfileItem(orgId: ".eq.<orgId>", section: ".eq.provider_type") { data }` or by filtering all-MPI-by-org for the section.
+
+**Why option-a was rejected:**
+- Option-a (hydra global tag `marketplace.platform_provider`) requires a new TagType `marketplace` to exist in `hydra.tag_type`.
+- Empirically verified 2026-04-27 that `platform.Tag.suggestTag` rejects unregistered types: API error: `type 'marketplace' is not valid - {boundary|client|environment|env-type|framework|module-deployment|other|product-segment|query-folder|region|service-segment}`.
+- Only way to register a new TagType is a PR to `zerobias-com/tag` adding a folder. That PR was opened 2026-04-27 as `zerobias-com/tag#1` (first PR ever on the repo) but cycle time is unknown — likely Daniel Rojas territory and could be days-to-weeks.
+
+**Why option-c was rejected:** Hardcoded `orgId === ZB_ORG_UUID` is env-fragile (UAT and prod ZB org UUIDs differ in non-aligned envs; brittle in tests).
+
+**Forward path:** `zerobias-com/tag#1` PR introduces `marketplace` type with `platform_provider` global tag; if/when merged + published, v1.5 can migrate via a one-shot `Pipeline.receive` batch (add `Object.tag`, drop section). Not blocking v1.4.
+
+**Anti-pattern note:** Introducing `provider_type` as a fully generic provider taxonomy (auditor / consultant / vendor / SME-individual / platform). For now the section ONLY distinguishes platform-provider from everything else; broader taxonomy is a v1.5+ design decision.
+
+**How to apply:**
+- Plan 26-02 seed batch includes one additional MPI record per ZB org: `{ section: "provider_type", data: "platform", ... }`
+- Phase 28 form schema must explicitly skip the `provider_type` section (one-line filter: `section !== 'provider_type'`)
+- Browse Providers (Plan 26-03): platform providers identified by presence of `provider_type` section in their MPI records
+
+**Test coverage:** Unit tests in 26-02 assert seed payload includes `provider_type` section; 26-03 tests assert Browse Providers correctly filters/displays based on the section.
+
+**Update 2026-04-29:** `zerobias-com/tag` PR #1 was merged by Daniel Rojas. `marketplace` tagType is now live, plus `platform_provider` and `demo` global tags. Option-a (tag-based platform-provider distinguisher) is now technically available. **Phase 26 keeps option-b as shipped** — no rework. The MPI section was deployed to UAT (PR #51/#52), verified, and works. Migrating now is pure churn. Tag-based path remains an option for v1.5 unification work or Phase 27+ if onboarding routing benefits from the platform-level tag. See companion entry "Marketplace tagType Is Preferred for New Tags" for forward-looking guidance on tagType selection.
+
+## Marketplace tagType Is Preferred for New Tags
+**Date:** 2026-04-29
+**Decision:** All NEW SME Mart tags going forward use `tagType: "marketplace"`. Existing tags created with `tagType: "other"` stay as-is — no migration. Tag NAMES retain the `sme-mart.` prefix for now. Tag-filter components in the app must accept BOTH `other` and `marketplace` types during the coexistence period.
+
+**Why now:** `zerobias-com/tag` PR #1 (Daniel Rojas merged 2026-04-29) registered `marketplace` as a valid tagType in `hydra.tag_type`, alongside two global tags (`platform_provider` and `demo`). Pre-PR, the only valid type for SME Mart's domain tags was `other` — generic, indistinguishable from any other use of `other` on the platform. Now there's a semantically correct type.
+
+**Why not migrate existing tags:** Tags are immutable post-ingest. "Renaming" or "retyping" requires creating a NEW tag (new UUID), re-ingesting every Object whose `Object.tag: [{value: <oldUuid>}]` references it, then deprecating the old tag. For SME Mart that's hundreds of records on UAT alone (engagements, projects, MPI rows, documents, etc.). Cost is high, benefit is purely cosmetic — a tag's UUID is what matters at query time, not its type or name. Skip the migration; let coexistence handle it.
+
+**Why keep the `sme-mart.` prefix:** `marketplace` tagType is platform-shared — any future marketplace product on ZB would also use it (vendor onboarding marketplace, credentialing marketplace, advisory marketplace). Until a second tenant emerges, the prefix is empty calories, but dropping it now would force a re-prefix migration if a tenant ever shows up. Cheaper to keep it. Revisit if/when multi-tenancy materializes.
+
+**How to apply:**
+- New tag creation (e.g., engagement tags, project tags, demo-data tags): `tagType: "marketplace"`, `name: "sme-mart.<scope>.<slug>"` (prefix retained).
+- Tag-filter code (services, components that look up tags by type): allow both `tagType in ("other", "marketplace")` during the transition. Filter UI may need to render unified.
+- Phase 24 (Demo Data Visibility Gate): use the new `demo` global tag (created by Daniel's PR) as the implementation primitive. Tag demo records at ingest with the `demo` global tag UUID; non-admin views filter on `tag.eq.<demo-uuid>`.
+- BACKLOG entry filed for v1.5 hygiene: refactor tag-filter components to canonicalize on `marketplace` once existing-tag remediation is feasible.
+
+**Anti-pattern:** Plans creating new tags with `tagType: "other"` going forward — that ignores the available semantically-correct type. Equally: trying to "fix" all old tags in a one-shot migration. Don't.
 
 ## Object.tag Field Shape — Validated via UAT Experiment
 **Date:** 2026-04-24

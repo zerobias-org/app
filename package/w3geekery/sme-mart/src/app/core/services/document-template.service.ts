@@ -10,18 +10,19 @@
 import { Injectable, inject } from '@angular/core';
 import type {
   DocumentTemplate,
-  CustomVariable,
   CreateDocumentTemplateDto,
   UpdateDocumentTemplateDto,
   DocumentTemplateStatus
 } from '../models';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService, type GqlQueryOptions } from './graphql-read.service';
+import { DemoVisibilityService } from './demo-visibility.service';
 
 @Injectable({ providedIn: 'root' })
 export class DocumentTemplateService {
   private readonly pipelineWrite = inject(PipelineWriteService);
   private readonly graphqlRead = inject(GraphqlReadService);
+  private readonly demoVisibility = inject(DemoVisibilityService);
 
   /** Scalar fields for standard queries */
   private readonly scalarFields = [
@@ -36,7 +37,8 @@ export class DocumentTemplateService {
     'orgId',
     'createdBy',
     'createdAt',
-    'updatedAt'
+    'updatedAt',
+    'tag'
   ];
 
   /**
@@ -109,7 +111,8 @@ export class DocumentTemplateService {
       gqlOptions,
     );
 
-    return result.items[0] ?? null;
+    const filtered = this.demoVisibility.applyVisibility([result.items[0] as (DocumentTemplate & { tag?: Array<{ value: string }> | null })].filter(Boolean))[0] ?? null;
+    return filtered;
   }
 
   /**
@@ -132,7 +135,7 @@ export class DocumentTemplateService {
       gqlOptions,
     );
 
-    return result.items;
+    return this.demoVisibility.applyVisibility(result.items as (DocumentTemplate & { tag?: Array<{ value: string }> | null })[]);
   }
 
   /**

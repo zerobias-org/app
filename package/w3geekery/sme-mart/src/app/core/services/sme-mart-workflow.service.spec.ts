@@ -1,8 +1,12 @@
 import { TestBed } from '@angular/core/testing';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { SmeMartWorkflowService } from './sme-mart-workflow.service';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
+import { DemoVisibilityService } from './demo-visibility.service';
+import { ProjectContextService } from './project-context.service';
+import { fakeProjectContextService } from '../../test-helpers/angular';
 import type { GqlSmeMartWorkflowResponse } from '../gql-types';
 
 type MockFn = ReturnType<typeof vi.fn>;
@@ -26,6 +30,8 @@ describe('SmeMartWorkflowService', () => {
   let service: SmeMartWorkflowService;
   let mockPipelineWrite: MockPipelineWrite;
   let mockGraphqlRead: MockGraphqlRead;
+  let mockSnackBar: { open: ReturnType<typeof vi.fn> };
+  let mockProjectContext: ReturnType<typeof fakeProjectContextService>;
 
   beforeEach(() => {
     mockPipelineWrite = {
@@ -41,12 +47,19 @@ describe('SmeMartWorkflowService', () => {
       getById: vi.fn().mockResolvedValue(null),
       rawQuery: vi.fn().mockResolvedValue(null),
     };
+    mockSnackBar = {
+      open: vi.fn(),
+    };
+    mockProjectContext = fakeProjectContextService(false);
 
     TestBed.configureTestingModule({
       providers: [
         SmeMartWorkflowService,
+        DemoVisibilityService,
         { provide: PipelineWriteService, useValue: mockPipelineWrite },
         { provide: GraphqlReadService, useValue: mockGraphqlRead },
+        { provide: ProjectContextService, useValue: mockProjectContext },
+        { provide: MatSnackBar, useValue: mockSnackBar },
       ],
     });
 
@@ -71,6 +84,8 @@ describe('SmeMartWorkflowService', () => {
       expect(mockPipelineWrite.pushEntity).toHaveBeenCalledWith(
         'SmeMartWorkflow',
         expect.objectContaining({ name: 'Standard Workflow' }),
+        [],
+        'sme-mart-workflow.service:53',
       );
     });
 
@@ -92,6 +107,24 @@ describe('SmeMartWorkflowService', () => {
 
       expect(result.statuses).toEqual([{ name: 'todo' }, { name: 'done' }]);
       expect(result.transitions).toEqual([{ from: 'todo', to: 'done' }]);
+    });
+
+    it('should surface error to user on Pipeline rejection for createWorkflow', async () => {
+      const mockError = new Error('Network failure');
+      mockPipelineWrite.pushEntity.mockRejectedValueOnce(mockError);
+
+      await expect(
+        service.createWorkflow({
+          name: 'Test Workflow',
+          statuses: [{ name: 'todo' }],
+        })
+      ).rejects.toThrow(mockError);
+
+      expect(mockSnackBar.open).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to create workflow'),
+        'Dismiss',
+        expect.any(Object),
+      );
     });
   });
 
@@ -143,12 +176,72 @@ describe('SmeMartWorkflowService', () => {
         page: { pageNumber: 1, pageSize: 50, totalCount: 1 },
       };
 
-      mockGraphqlRead.query.mockResolvedValue(mockResponse as any);
+      mockGraphqlRead.query.mockResolvedValue(mockResponse as unknown);
 
       const result = await service.listWorkflows();
 
       expect(result.items).toHaveLength(1);
       expect(result.items[0].name).toBe('Workflow 1');
+    });
+  });
+
+  describe('demo visibility (Phase 24 Plan 03)', () => {
+    const mockGqlReturn = [
+      { id: '1', name: 'Real', tag: null } as unknown as GqlSmeMartWorkflowResponse,
+      { id: '2', name: 'Real w/ marketplace tag', tag: [{ value: 'a81cd320-243e-44eb-bdd9-9824019ef3dd' }] } as unknown as GqlSmeMartWorkflowResponse,
+      { id: '3', name: 'Demo (global)', tag: [{ value: '81053c14-a8e5-4939-b538-c122c7d0eb1a' }] } as unknown as GqlSmeMartWorkflowResponse,
+      { id: '4', name: 'Demo (legacy)', tag: [{ value: 'd618b602-21cc-40a1-a9fa-534b7bc1672c' }] } as unknown as GqlSmeMartWorkflowResponse,
+    ];
+
+    it('[DG-02] strips demo records for non-admin', async () => {
+      mockGraphqlRead.query.mockResolvedValueOnce({
+        items: mockGqlReturn,
+        page: { pageNumber: 1, pageSize: 50, totalCount: 4 },
+      });
+
+      const result = await service.listWorkflows();
+
+      expect(result.items.map(r => r.id)).toEqual(['1', '2']);
+    });
+
+    it('[DG-03] admin sees all records including demo', async () => {
+      mockProjectContext.setIsAdmin(true);
+      mockGraphqlRead.query.mockResolvedValueOnce({
+        items: mockGqlReturn,
+        page: { pageNumber: 1, pageSize: 50, totalCount: 4 },
+      });
+
+      const result = await service.listWorkflows();
+
+      expect(result.items.map(r => r.id)).toEqual(['1', '2', '3', '4']);
+    });
+
+    it('[DG-02] does NOT add server-side tag negation filter', async () => {
+      mockGraphqlRead.query.mockResolvedValueOnce({
+        items: [],
+        page: { pageNumber: 1, pageSize: 50, totalCount: 0 },
+      });
+
+      await service.listWorkflows();
+
+      const callArgs = mockGraphqlRead.query.mock.calls[0];
+      const filters = callArgs[2]?.filters ?? {};
+      const filterValues = Object.values(filters).join(' ');
+      expect(filterValues).not.toContain('.not in.');
+      expect(filterValues).not.toContain('.ne.');
+    });
+
+    it('requests tag field in GQL query', async () => {
+      mockGraphqlRead.query.mockResolvedValueOnce({
+        items: [],
+        page: { pageNumber: 1, pageSize: 50, totalCount: 0 },
+      });
+
+      await service.listWorkflows();
+
+      const callArgs = mockGraphqlRead.query.mock.calls[0];
+      const fields = callArgs[1] as string[];
+      expect(fields).toContain('tag');
     });
   });
 
@@ -174,6 +267,8 @@ describe('SmeMartWorkflowService', () => {
       expect(mockPipelineWrite.pushEntity).toHaveBeenCalledWith(
         'SmeMartWorkflow',
         expect.objectContaining({ name: 'Updated Name' }),
+        [],
+        'sme-mart-workflow.service:148',
       );
     });
 
@@ -183,6 +278,30 @@ describe('SmeMartWorkflowService', () => {
       await expect(
         service.updateWorkflow('nonexistent', { name: 'Test' }),
       ).rejects.toThrow(/not found/);
+    });
+
+    it('should surface error to user on Pipeline rejection for updateWorkflow', async () => {
+      const existing: GqlSmeMartWorkflowResponse = {
+        id: 'workflow-123',
+        name: 'Original Name',
+        statuses: [{ name: 'todo' }],
+        createdAt: '2026-03-19T00:00:00Z',
+        updatedAt: '2026-03-19T00:00:00Z',
+      };
+
+      mockGraphqlRead.getById.mockResolvedValue(existing);
+      const mockError = new Error('Save failed');
+      mockPipelineWrite.pushEntity.mockRejectedValueOnce(mockError);
+
+      await expect(
+        service.updateWorkflow('workflow-123', { name: 'New Name' })
+      ).rejects.toThrow(mockError);
+
+      expect(mockSnackBar.open).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to update workflow'),
+        'Dismiss',
+        expect.any(Object),
+      );
     });
   });
 

@@ -1,6 +1,8 @@
 import { Injectable, inject } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService, type GqlQueryOptions } from './graphql-read.service';
+import { DemoVisibilityService } from './demo-visibility.service';
 import { SERVICE_OFFERING_FIELD_MAPPING, mapNeonToGql, mapGqlToNeon } from '../field-mappings';
 import type { QueryOptions } from '@zerobias-org/data-utils';
 import { PagedResults } from '@zerobias-org/types-core-js';
@@ -20,6 +22,8 @@ import type { GqlServiceOfferingResponse } from '../gql-types';
 export class ServiceOfferingsService {
   private readonly pipelineWrite = inject(PipelineWriteService);
   private readonly graphqlRead = inject(GraphqlReadService);
+  private readonly demoVisibility = inject(DemoVisibilityService);
+  private readonly snackBar = inject(MatSnackBar);
 
   /**
    * List all active service offerings.
@@ -43,8 +47,13 @@ export class ServiceOfferingsService {
       gqlOptions,
     );
 
+    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
+    const filteredGql = this.demoVisibility.applyVisibility(
+      result.items as (GqlServiceOfferingResponse & { tag?: Array<{ value: string }> | null })[],
+    );
+
     // Transform GQL responses to ServiceOffering (Neon shape)
-    const items = result.items.map(gql =>
+    const items = filteredGql.map(gql =>
       mapGqlToNeon<ServiceOffering>(gql, SERVICE_OFFERING_FIELD_MAPPING.gqlToNeon),
     );
 
@@ -68,8 +77,13 @@ export class ServiceOfferingsService {
       gqlOptions,
     );
 
+    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
+    const filteredGql = this.demoVisibility.applyVisibility(
+      result.items as (GqlServiceOfferingResponse & { tag?: Array<{ value: string }> | null })[],
+    );
+
     // Transform and return as array
-    return result.items.map(gql =>
+    return filteredGql.map(gql =>
       mapGqlToNeon<ServiceOffering>(gql, SERVICE_OFFERING_FIELD_MAPPING.gqlToNeon),
     );
   }
@@ -104,11 +118,18 @@ export class ServiceOfferingsService {
       updated_at: now,
     };
 
-    // Transform to GQL shape and push to Pipeline (fire-and-forget)
+    // Transform to GQL shape and push to Pipeline
     const gqlData = mapNeonToGql<GqlServiceOfferingResponse>(offering, SERVICE_OFFERING_FIELD_MAPPING.neonToGql);
-    this.pipelineWrite.pushEntity('ServiceOffering', gqlData as unknown as Record<string, unknown>).catch(err => {
-      console.error('Failed to push ServiceOffering to Pipeline:', err);
-    });
+    try {
+      await this.pipelineWrite.pushEntity('ServiceOffering', gqlData as unknown as Record<string, unknown>, [], 'service-offerings.service:109');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to save service offering: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     // Return optimistic response immediately
     return offering;
@@ -136,21 +157,35 @@ export class ServiceOfferingsService {
 
     // Push to Pipeline
     const gqlData = mapNeonToGql<GqlServiceOfferingResponse>(updated, SERVICE_OFFERING_FIELD_MAPPING.neonToGql);
-    this.pipelineWrite.pushEntity('ServiceOffering', gqlData as unknown as Record<string, unknown>).catch(err => {
-      console.error('Failed to update ServiceOffering in Pipeline:', err);
-    });
+    try {
+      await this.pipelineWrite.pushEntity('ServiceOffering', gqlData as unknown as Record<string, unknown>, [], 'service-offerings.service:148');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to update service offering: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     // Return optimistic response
     return updated;
   }
 
   /**
-   * Delete a service offering by pushing delete to Pipeline (fire-and-forget).
+   * Delete a service offering by pushing delete to Pipeline.
    */
   async deleteService(serviceId: string): Promise<void> {
-    this.pipelineWrite.deleteEntity('ServiceOffering', serviceId).catch(err => {
-      console.error('Failed to delete ServiceOffering from Pipeline:', err);
-    });
+    try {
+      await this.pipelineWrite.deleteEntity('ServiceOffering', serviceId);
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to delete service offering: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
   }
 
   /**
@@ -172,6 +207,7 @@ export class ServiceOfferingsService {
       'serviceRequirements',
       'dateCreated',
       'dateLastModified',
+      'tag',
     ];
   }
 }

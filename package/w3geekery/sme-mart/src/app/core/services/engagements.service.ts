@@ -1,6 +1,8 @@
 import { Injectable, inject, signal } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService, type GqlQueryOptions } from './graphql-read.service';
+import { DemoVisibilityService } from './demo-visibility.service';
 import { Memoize } from '../../shared/utils/memoize.decorator';
 import { ENGAGEMENT_FIELD_MAPPING, mapNeonToGql, mapGqlToNeon } from '../field-mappings';
 import type { QueryOptions } from '@zerobias-org/data-utils';
@@ -10,6 +12,7 @@ import type {
   EngagementSummaryRow,
   EngagementDetailRow,
 } from '../models';
+import type { RequestStatus } from '../models/enums';
 import type { GqlEngagementResponse } from '../gql-types';
 
 /**
@@ -25,6 +28,8 @@ import type { GqlEngagementResponse } from '../gql-types';
 export class EngagementsService {
   private readonly pipelineWrite = inject(PipelineWriteService);
   private readonly graphqlRead = inject(GraphqlReadService);
+  private readonly snackBar = inject(MatSnackBar);
+  private readonly demoVisibility = inject(DemoVisibilityService);
 
   readonly engagements = signal<EngagementSummaryRow[]>([]);
   readonly loading = signal(false);
@@ -56,8 +61,11 @@ export class EngagementsService {
         gqlOptions,
       );
 
+      // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
+      const filteredGql = this.demoVisibility.applyVisibility(result.items as (GqlEngagementResponse & { tag?: Array<{ value: string }> | null })[]);
+
       // Transform GQL responses to EngagementSummaryRow
-      const items = result.items.map(gql => this.transformGqlToEngagementSummary(gql));
+      const items = filteredGql.map(gql => this.transformGqlToEngagementSummary(gql as GqlEngagementResponse));
       this.engagements.set(items);
 
       return PagedResults.fromArray(items, pageNumber, pageSize, result.page.totalCount ?? items.length);
@@ -90,7 +98,10 @@ export class EngagementsService {
         gqlOptions,
       );
 
-      const items = result.items.map(gql => this.transformGqlToEngagementSummary(gql));
+      // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
+      const filteredGql = this.demoVisibility.applyVisibility(result.items as (GqlEngagementResponse & { tag?: Array<{ value: string }> | null })[]);
+
+      const items = filteredGql.map(gql => this.transformGqlToEngagementSummary(gql as GqlEngagementResponse));
       this.engagements.set(items);
 
       return PagedResults.fromArray(items, pageNumber, pageSize, result.page.totalCount ?? items.length);
@@ -112,9 +123,13 @@ export class EngagementsService {
 
     if (!engagement) return null;
 
+    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
+    const filtered = this.demoVisibility.applyVisibility([engagement as GqlEngagementResponse & { tag?: Array<{ value: string }> | null }])[0] ?? null;
+    if (!filtered) return null;
+
     // Transform to EngagementDetailRow
     // Note: bids array would come from nested GQL query or separate call
-    return this.transformGqlToEngagementDetail(engagement);
+    return this.transformGqlToEngagementDetail(filtered as GqlEngagementResponse);
   }
 
   /**
@@ -129,8 +144,12 @@ export class EngagementsService {
 
     if (!engagement) return null;
 
+    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
+    const filtered = this.demoVisibility.applyVisibility([engagement as GqlEngagementResponse & { tag?: Array<{ value: string }> | null }])[0] ?? null;
+    if (!filtered) return null;
+
     // Transform GQL response back to Engagement (Neon model)
-    return mapGqlToNeon<Engagement>(engagement, ENGAGEMENT_FIELD_MAPPING.gqlToNeon);
+    return mapGqlToNeon<Engagement>(filtered as GqlEngagementResponse, ENGAGEMENT_FIELD_MAPPING.gqlToNeon);
   }
 
   /**
@@ -159,7 +178,7 @@ export class EngagementsService {
       budget_min: null,
       budget_max: null,
       timeline: null,
-      status: 'in_progress' as any,
+      status: 'in_progress' as unknown as RequestStatus,
       engagement_tag: data.engagement_tag,
       zerobias_tag_id: data.zerobias_tag_id || null,
       zerobias_boundary_id: null,
@@ -169,9 +188,16 @@ export class EngagementsService {
     };
 
     const gqlData = mapNeonToGql<GqlEngagementResponse>(engagement, ENGAGEMENT_FIELD_MAPPING.neonToGql);
-    this.pipelineWrite.pushEntity('Engagement', gqlData as unknown as Record<string, unknown>).catch(err => {
-      console.error('Failed to push engagement to Pipeline:', err);
-    });
+    try {
+      await this.pipelineWrite.pushEntity('Engagement', gqlData as unknown as Record<string, unknown>, [], 'engagements.service:172');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to create engagement: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     return engagement;
   }
@@ -190,9 +216,16 @@ export class EngagementsService {
     const updated: Engagement = { ...current, ...data, updated_at: new Date().toISOString() };
 
     const gqlData = mapNeonToGql<GqlEngagementResponse>(updated, ENGAGEMENT_FIELD_MAPPING.neonToGql);
-    this.pipelineWrite.pushEntity('Engagement', gqlData as unknown as Record<string, unknown>).catch(err => {
-      console.error('Failed to update engagement in Pipeline:', err);
-    });
+    try {
+      await this.pipelineWrite.pushEntity('Engagement', gqlData as unknown as Record<string, unknown>, [], 'engagements.service:205');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to update engagement: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     return updated;
   }
@@ -201,14 +234,14 @@ export class EngagementsService {
    * Cancel an engagement.
    */
   async cancelEngagement(id: string): Promise<Engagement> {
-    return this.updateEngagement(id, { status: 'cancelled' as any });
+    return this.updateEngagement(id, { status: 'cancelled' as unknown as RequestStatus });
   }
 
   /**
    * Mark engagement as completed.
    */
   async completeEngagement(id: string): Promise<Engagement> {
-    return this.updateEngagement(id, { status: 'completed' as any });
+    return this.updateEngagement(id, { status: 'completed' as unknown as RequestStatus });
   }
 
   /**
@@ -231,6 +264,7 @@ export class EngagementsService {
       'zerobiasTagId',
       'buyerZerobiasUserId',
       'buyerZerobiasOrgId',
+      'tag',
       'dateCreated',
       'dateLastModified',
     ];

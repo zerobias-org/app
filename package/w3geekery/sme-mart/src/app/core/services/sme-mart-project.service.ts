@@ -1,6 +1,8 @@
 import { Injectable, inject } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService, type GqlQueryOptions } from './graphql-read.service';
+import { DemoVisibilityService } from './demo-visibility.service';
 import { SmeMartTagService } from './sme-mart-tag.service';
 import { SmeMartResourceService } from './sme-mart-resource.service';
 import { Memoize } from '../../shared/utils/memoize.decorator';
@@ -29,8 +31,10 @@ import type { GqlSmeMartProjectResponse, GqlSmeMartBoardResponse } from '../gql-
 export class SmeMartProjectService {
   private readonly pipelineWrite = inject(PipelineWriteService);
   private readonly graphqlRead = inject(GraphqlReadService);
+  private readonly demoVisibility = inject(DemoVisibilityService);
   private readonly tagService = inject(SmeMartTagService);
   private readonly resourceService = inject(SmeMartResourceService);
+  private readonly snackBar = inject(MatSnackBar);
 
   /** Scalar fields queryable via standard GraphqlReadService.query() */
   private readonly scalarFields = [
@@ -55,6 +59,7 @@ export class SmeMartProjectService {
     'wizardData',
     'dateCreated',
     'dateLastModified',
+    'tag',
   ];
 
   // ---------------------------------------------------------------------------
@@ -90,7 +95,7 @@ export class SmeMartProjectService {
       updatedAt: now,
     };
 
-    this.pushToGql(project);
+    await this.pushToGql(project);
     return project;
   }
 
@@ -134,7 +139,10 @@ export class SmeMartProjectService {
       gqlOptions,
     );
 
-    const items = result.items.map(gql =>
+    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
+    const filteredGql = this.demoVisibility.applyVisibility(result.items as (GqlSmeMartProjectResponse & { tag?: Array<{ value: string }> | null })[]);
+
+    const items = filteredGql.map(gql =>
       mapGqlToNeon<SmeMartProject>(gql, SME_MART_PROJECT_FIELD_MAPPING.gqlToNeon),
     );
 
@@ -169,7 +177,7 @@ export class SmeMartProjectService {
       updatedAt: new Date().toISOString(),
     };
 
-    this.pushToGql(updated);
+    await this.pushToGql(updated);
     return updated;
   }
 
@@ -281,7 +289,10 @@ export class SmeMartProjectService {
       gqlOptions,
     );
 
-    const items = result.items.map(gql =>
+    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
+    const filteredGql = this.demoVisibility.applyVisibility(result.items as (GqlSmeMartProjectResponse & { tag?: Array<{ value: string }> | null })[]);
+
+    const items = filteredGql.map(gql =>
       mapGqlToNeon<SmeMartProject>(gql, SME_MART_PROJECT_FIELD_MAPPING.gqlToNeon),
     );
 
@@ -341,7 +352,7 @@ export class SmeMartProjectService {
    * Push a SmeMartProject to Pipeline (full replace — all fields).
    * Fire-and-forget — caller returns optimistic result.
    */
-  private pushToGql(project: SmeMartProject): void {
+  private async pushToGql(project: SmeMartProject): Promise<void> {
     const gqlData = mapNeonToGql<Record<string, unknown>>(
       project,
       SME_MART_PROJECT_FIELD_MAPPING.neonToGql,
@@ -350,9 +361,16 @@ export class SmeMartProjectService {
     if (project.engagementId) {
       gqlData['engagement'] = project.engagementId;
     }
-    this.pipelineWrite.pushEntity('SmeMartProject', gqlData).catch(err => {
-      console.error('[ProjectService] Failed to push project:', err);
-    });
+    try {
+      await this.pipelineWrite.pushEntity('SmeMartProject', gqlData, [], 'sme-mart-project.service:345');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to save project: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
   }
 
   private generateUUID(): string {

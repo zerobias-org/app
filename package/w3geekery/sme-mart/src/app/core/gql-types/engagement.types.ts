@@ -15,6 +15,7 @@ export interface GqlEngagementResponse {
   id: string;
   name: string;
   description?: string;
+  tag?: Array<{ value: string }> | null; // Object tag array for demo-visibility gating
 
   // Engagement-specific fields (RFP fields removed in schema PR #20)
   buyerZerobiasUserId: string;
@@ -30,7 +31,7 @@ export interface GqlEngagementResponse {
 
   // Optional nested relationships
   // (populated only when explicitly queried)
-  notes?: any[]; // Engagement notes (GqlNoteResponse[])
-  documents?: any[]; // Uploaded documents (GqlDocumentResponse[])
-  reviews?: any[]; // Post-engagement reviews (GqlReviewResponse[])
+  notes?: Record<string, unknown>[]; // Engagement notes (GqlNoteResponse[])
+  documents?: Record<string, unknown>[]; // Uploaded documents (GqlDocumentResponse[])
+  reviews?: Record<string, unknown>[]; // Post-engagement reviews (GqlReviewResponse[])
 }

@@ -4,6 +4,48 @@
  */
 
 import { vi } from 'vitest';
+import { signal } from '@angular/core';
+
+// ---------------------------------------------------------------------------
+// Core SME Mart service mocks
+// ---------------------------------------------------------------------------
+
+/**
+ * Mock ProjectContextService with controllable isAdmin signal.
+ *
+ * Used by service specs that need to verify admin vs. non-admin behavior.
+ * The mock provides an Angular Signal that can be read via isAdmin() and
+ * updated via setIsAdmin(value) for testing signal flip scenarios.
+ *
+ * Usage:
+ *   const mockContext = fakeProjectContextService(false); // Non-admin by default
+ *   // ... inject into TestBed ...
+ *   mockContext.setIsAdmin(true); // Switch to admin mid-test
+ *   expect(...).toHaveBeenCalled();
+ */
+export function fakeProjectContextService(isAdminValue = false) {
+  const adminSignal = signal(isAdminValue);
+  return {
+    // Read the admin signal (matches ProjectContextService.isAdmin signature)
+    isAdmin: () => adminSignal(),
+    // Write the admin signal for test control (not on real service, test-only)
+    setIsAdmin: (value: boolean) => adminSignal.set(value),
+    // Stub other ProjectContextService methods (populated on-demand by tests)
+    project: signal(null),
+    projectName: signal(''),
+    engagementId: signal(null),
+    engagementName: signal(null),
+    currentUserId: signal(null),
+    status: signal('draft'),
+    statusColor: signal('default'),
+    refresh$: { subscribe: vi.fn().mockReturnValue({ unsubscribe: vi.fn() }) },
+    setProject: vi.fn(),
+    setEngagement: vi.fn(),
+    setCurrentUserId: vi.fn(),
+    requestRefresh: vi.fn(),
+    clear: vi.fn(),
+  };
+}
 
 // ---------------------------------------------------------------------------
 // Angular Material mocks
@@ -136,23 +178,24 @@ export function fakeDocumentService() {
  *   clientApi.hydraClient.getTagApi._api.createTag.mockResolvedValue({...});
  */
 export function fakeClientApi() {
-  const makeApi = () => new Proxy({} as Record<string | symbol, any>, {
-    get(target, prop) {
+  const makeApi = () => new Proxy({} as Record<string | symbol, unknown>, {
+    get(target: Record<string | symbol, unknown>, prop: string | symbol) {
       if (!(prop in target)) {
-        (target as any)[prop] = vi.fn();
+        target[prop] = vi.fn();
       }
-      return (target as any)[prop];
+      return target[prop];
     },
   });
 
-  const makeClient = () => new Proxy({} as Record<string | symbol, any>, {
-    get(target, prop) {
+  const makeClient = () => new Proxy({} as Record<string | symbol, unknown>, {
+    get(target: Record<string | symbol, unknown>, prop: string | symbol) {
       if (!(prop in target)) {
         const api = makeApi();
-        (target as any)[prop] = vi.fn(() => api);
-        (target as any)[prop]._api = api;
+        const mockFn = vi.fn(() => api);
+        (mockFn as unknown as { _api: unknown })._api = api;
+        target[prop] = mockFn;
       }
-      return (target as any)[prop];
+      return target[prop];
     },
   });
 
@@ -164,8 +207,8 @@ export function fakeClientApi() {
     hubClient: makeClient(),
     storeClient: makeClient(),
     danaClient: makeClient(),
-    toUUID: vi.fn((id: any) => id),
-    UUIDtoString: vi.fn((id: any) => id?.toString?.() ?? id),
+    toUUID: vi.fn((id: unknown) => id),
+    UUIDtoString: vi.fn((id: unknown) => (id as { toString?: () => string })?.toString?.() ?? id),
   };
 }
 

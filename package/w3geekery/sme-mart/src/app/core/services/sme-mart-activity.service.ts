@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService, type GqlQueryOptions } from './graphql-read.service';
+import { DemoVisibilityService } from './demo-visibility.service';
 import { SmeMartWorkflowService } from './sme-mart-workflow.service';
 import { SME_MART_ACTIVITY_FIELD_MAPPING, SME_MART_WORKFLOW_FIELD_MAPPING, mapGqlToNeon } from '../field-mappings';
 import type { QueryOptions } from '@zerobias-org/data-utils';
@@ -24,6 +25,7 @@ import type { GqlSmeMartActivityResponse, GqlSmeMartWorkflowResponse } from '../
 export class SmeMartActivityService {
   private readonly pipelineWrite = inject(PipelineWriteService);
   private readonly graphqlRead = inject(GraphqlReadService);
+  private readonly demoVisibility = inject(DemoVisibilityService);
   private readonly workflowService = inject(SmeMartWorkflowService, { optional: true });
 
   private readonly activityFields = [
@@ -34,6 +36,7 @@ export class SmeMartActivityService {
     'customFields',
     'createdAt',
     'updatedAt',
+    'tag',
   ];
 
   /**
@@ -81,7 +84,13 @@ export class SmeMartActivityService {
 
     if (!activity) return null;
 
-    return mapGqlToNeon<SmeMartActivity>(activity, SME_MART_ACTIVITY_FIELD_MAPPING.gqlToNeon);
+    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
+    const filtered = this.demoVisibility.applyVisibility(
+      [activity as GqlSmeMartActivityResponse & { tag?: Array<{ value: string }> | null }],
+    )[0] ?? null;
+    if (!filtered) return null;
+
+    return mapGqlToNeon<SmeMartActivity>(filtered, SME_MART_ACTIVITY_FIELD_MAPPING.gqlToNeon);
   }
 
   /**
@@ -102,7 +111,12 @@ export class SmeMartActivityService {
       gqlOptions,
     );
 
-    const items = result.items.map(gql =>
+    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
+    const filteredGql = this.demoVisibility.applyVisibility(
+      result.items as (GqlSmeMartActivityResponse & { tag?: Array<{ value: string }> | null })[],
+    );
+
+    const items = filteredGql.map(gql =>
       mapGqlToNeon<SmeMartActivity>(gql, SME_MART_ACTIVITY_FIELD_MAPPING.gqlToNeon),
     );
 

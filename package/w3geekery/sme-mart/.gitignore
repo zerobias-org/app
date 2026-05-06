@@ -58,6 +58,12 @@ __screenshots__/
 # See .planning/director/errata/015-env-neon-ts-committed-and-wiped.md for history.
 src/environments/environment.neon.ts
 
+# Husky hooks (tracked at git root, not here)
+.husky/
+
+# ESLint cache (lint-staged --cache, see .lintstagedrc.json)
+.eslintcache
+
 # Claude project files (local-only)
 .claude/.obsidian/
 .claude/diagrams/
@@ -67,9 +73,9 @@ src/environments/environment.neon.ts
 .claude/scripts/node_modules/
 .claude/scripts/.stitch-project-id
 .claude/plans/
-.claude/notes/plans/
-.claude/notes/meetings/**/*.docx
-.claude/notes/meetings/**/*.txt
+.planning/notes/plans/
+.planning/notes/meetings/**/*.docx
+.planning/notes/meetings/**/*.txt
 
 # GSD planning — tracked in git (no secrets; verified 2026-03-30)
 # .planning/
@@ -82,3 +88,4 @@ demo-seed-output.json
 .DS_Store
 Thumbs.db
 .vercel
+.claude/handoffs/

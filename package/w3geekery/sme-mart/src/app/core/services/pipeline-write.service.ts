@@ -7,7 +7,7 @@ import { environment } from '../../../environments/environment';
 // ---------------------------------------------------------------------------
 // SME Mart AuditgraphDB class IDs (deterministic — same across all environments)
 // ---------------------------------------------------------------------------
-const SME_MART_CLASS_IDS = {
+export const SME_MART_CLASS_IDS = {
   // Original 8 entities (migrated from Neon in Phases 2-4)
   Engagement:      '7711aa41-e55b-5cda-9b7a-35844a2006a1',
   Bid:             'ccddd2e5-e455-585e-9bb7-902903228b0d',
@@ -52,6 +52,44 @@ export type SmeMartClassName = keyof typeof SME_MART_CLASS_IDS;
 // Pipeline ID (from environment — per-environment, NOT deterministic)
 // ---------------------------------------------------------------------------
 const PIPELINE_ID = environment.pipelineId;
+
+// ---------------------------------------------------------------------------
+// Tag Field Helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Merge existing tag entries (from data payload) with new tag IDs.
+ * Returns a deduplicated, stable-ordered array of tag objects.
+ *
+ * @param existing Array of {value: string} entries already in the data
+ * @param newIds Array of UUID strings to add as tag values
+ * @returns Merged array: [existing entries, new entries], deduplicated
+ */
+function mergeTagValues(
+  existing: Array<{ value: string }> = [],
+  newIds: string[] = [],
+): Array<{ value: string }> {
+  const values = new Set<string>();
+  const result: Array<{ value: string }> = [];
+
+  // Add existing entries first, preserving order
+  for (const entry of existing) {
+    if (!values.has(entry.value)) {
+      values.add(entry.value);
+      result.push(entry);
+    }
+  }
+
+  // Add new IDs in order
+  for (const id of newIds) {
+    if (!values.has(id)) {
+      values.add(id);
+      result.push({ value: id });
+    }
+  }
+
+  return result;
+}
 
 /**
  * Pushes SME Mart entity data into AuditgraphDB via the Receiver Pipeline.
@@ -123,32 +161,70 @@ export class PipelineWriteService {
   /**
    * Push one or more objects of a given class into AuditgraphDB.
    * Objects are created or updated based on their `id` field (upsert).
+   *
+   * @param className Entity type
+   * @param data Array of objects to push
+   * @param tagIds Optional tag UUIDs to embed into each Object's `tag` field as `{ value: <uuid> }` entries.
+   *               Note: this populates `Object.tag` on GQL read-back; the SimpleBatch third-arg / Pipeline.receive
+   *               body-level `tagIds` field is batch/job metadata and does NOT populate `Object.tag`
+   *               (verified 2026-05-04 via Director MCP probe).
+   * @param callSiteTag Optional explicit caller identifier for telemetry. If not provided,
+   *                     derived from stack trace as fallback.
    */
   async pushEntities(
     className: SmeMartClassName,
     data: object[],
     tagIds: string[] = [],
+    callSiteTag?: string,
   ): Promise<void> {
     const classId = SME_MART_CLASS_IDS[className];
     const pipelineApi = this.clientApi.platformClient.getPipelineApi();
 
     // Ensure every object has `name` (required by AuditgraphDB Object base class).
     // If not provided, derive from common fields or use className + id as fallback.
+    // Also embed tagIds into the data payload as `tag: [{value: <uuid>}]` entries.
     const ensured = (data as Record<string, unknown>[]).map(obj => {
-      if (obj['name']) return obj;
-      const name = obj['title'] || obj['coverLetter']?.toString().substring(0, 100)
-        || obj['reviewText']?.toString().substring(0, 100)
-        || obj['displayName'] || obj['category']
-        || `${className}-${obj['id'] ?? 'unknown'}`;
-      return { ...obj, name };
+      let result: Record<string, unknown> = obj['name'] ? { ...obj } : {
+        ...obj,
+        name: obj['title'] || obj['coverLetter']?.toString().substring(0, 100)
+          || obj['reviewText']?.toString().substring(0, 100)
+          || obj['displayName'] || obj['category']
+          || `${className}-${obj['id'] ?? 'unknown'}`,
+      };
+
+      // Embed tags into the data payload if any tagIds were provided
+      if (tagIds.length > 0) {
+        const existingTag = (result['tag'] as Array<{ value: string }> | undefined) ?? [];
+        result = {
+          ...result,
+          tag: mergeTagValues(existingTag, tagIds),
+        };
+      }
+
+      return result;
     });
 
     const batch = new SimpleBatch(
       new UUID(classId),
       ensured,
-      tagIds.map(id => new UUID(id)),
+      [], // tagIds: batch/job metadata (does NOT populate Object.tag) — tags embedded in data instead
     );
-    await pipelineApi.receive(new UUID(PIPELINE_ID), batch);
+
+    try {
+      await pipelineApi.receive(new UUID(PIPELINE_ID), batch);
+    } catch (err) {
+      // FF-03: Telemetry instrumentation — log rejection with caller context
+      const callSite = callSiteTag || this.deriveCallSiteFromStack();
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      const event = {
+        className,
+        callSite,
+        errorMessage,
+        timestamp: new Date().toISOString(),
+      };
+      console.warn(`[PIPELINE_WRITE_FAILURE] ${JSON.stringify(event)}`);
+      throw err;  // Re-throw so caller can handle normally
+    }
 
     // Update cache with pushed objects (write-through, merge into existing)
     for (const obj of ensured) {
@@ -170,22 +246,28 @@ export class PipelineWriteService {
 
   /**
    * Push a single entity. Convenience wrapper around pushEntities.
+   *
+   * @param callSiteTag Optional explicit caller identifier for telemetry.
    */
   async pushEntity(
     className: SmeMartClassName,
     data: Record<string, unknown>,
     tagIds: string[] = [],
+    callSiteTag?: string,
   ): Promise<void> {
-    await this.pushEntities(className, [data], tagIds);
+    await this.pushEntities(className, [data], tagIds, callSiteTag);
   }
 
   /**
    * Mark entities as deleted in AuditgraphDB (differential mode).
    * Removes objects by their external IDs.
+   *
+   * @param callSiteTag Optional explicit caller identifier for telemetry.
    */
   async deleteEntities(
     className: SmeMartClassName,
     ids: string[],
+    callSiteTag?: string,
   ): Promise<void> {
     const classId = SME_MART_CLASS_IDS[className];
     const pipelineApi = this.clientApi.platformClient.getPipelineApi();
@@ -195,16 +277,64 @@ export class PipelineWriteService {
       [],       // no tags
       ids,      // markDeleted
     );
-    await pipelineApi.receive(new UUID(PIPELINE_ID), batch);
+
+    try {
+      await pipelineApi.receive(new UUID(PIPELINE_ID), batch);
+    } catch (err) {
+      // FF-03: Telemetry instrumentation — log rejection with caller context
+      const callSite = callSiteTag || this.deriveCallSiteFromStack();
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      const event = {
+        className,
+        callSite,
+        errorMessage,
+        timestamp: new Date().toISOString(),
+      };
+      console.warn(`[PIPELINE_WRITE_FAILURE] ${JSON.stringify(event)}`);
+      throw err;  // Re-throw so caller can handle normally
+    }
   }
 
   /**
    * Mark a single entity as deleted. Convenience wrapper.
+   *
+   * @param callSiteTag Optional explicit caller identifier for telemetry.
    */
   async deleteEntity(
     className: SmeMartClassName,
     id: string,
+    callSiteTag?: string,
   ): Promise<void> {
-    await this.deleteEntities(className, [id]);
+    await this.deleteEntities(className, [id], callSiteTag);
+  }
+
+  /**
+   * Derive call site from the stack trace as a fallback when callSiteTag is not provided.
+   * Extracts the first caller outside this service as a location hint.
+   *
+   * @internal
+   */
+  private deriveCallSiteFromStack(): string {
+    try {
+      const stack = new Error().stack || '';
+      const lines = stack.split('\n');
+      // Lines format: "    at FunctionName (file.ts:line:col)"
+      // Skip first 2 lines (Error.stack header + this function)
+      for (let i = 2; i < lines.length; i++) {
+        const line = lines[i];
+        if (line && !line.includes('pipeline-write.service.ts')) {
+          // Extract filename and line number
+          const match = line.match(/at\s+(\w+)?\s*\(([^:]+):(\d+):/);
+          if (match) {
+            const [, , file, lineNum] = match;
+            const filename = file.split('/').pop() || 'unknown';
+            return `${filename}:${lineNum}`;
+          }
+        }
+      }
+    } catch {
+      // Stack parsing failed
+    }
+    return 'unknown-callsite';
   }
 }

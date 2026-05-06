@@ -45,7 +45,7 @@ Submit a `MarketplaceProfileItem` GQL schema entity to `zerobias-org/schema:dev`
 **Downstream agents MUST read these before planning or implementing.**
 
 ### Schema Change Process
-- `.claude/docs/SCHEMA_CHANGE_PROCESS.md` — Full step-by-step: branch from upstream/dev, YAML rules, dataloader validation, cross-fork PR, post-merge reload timing
+- `.planning/docs/SCHEMA_CHANGE_PROCESS.md` — Full step-by-step: branch from upstream/dev, YAML rules, dataloader validation, cross-fork PR, post-merge reload timing
 
 ### Schema Repo & Package
 - `~/Projects/w3geekery/zerobias-org-forks/schema/package/w3geekery/smemart/` — Existing schema package (classes/, fields/, enums/ subdirectories)
@@ -56,14 +56,14 @@ Submit a `MarketplaceProfileItem` GQL schema entity to `zerobias-org/schema:dev`
 - `Engagement.yml` on `upstream/dev` — Example of class with multiple `linkTo` relationships and scalar fields.
 
 ### GQL Schema Howto
-- `.claude/notes/zb-graphql-custom-schema-howto.md` — YAML class/field/enum definitions, linkTo format, dataloader verification
-- `.claude/notes/zb-graphql-schema-extension-guide.md` — Platform internals (SchemaBuilder, catalog tables)
+- `.planning/notes/zb-graphql-custom-schema-howto.md` — YAML class/field/enum definitions, linkTo format, dataloader verification
+- `.planning/notes/zb-graphql-schema-extension-guide.md` — Platform internals (SchemaBuilder, catalog tables)
 
 ### Field Mappings (downstream — Phase 9 will need these)
 - `src/app/core/field-mappings.ts` — Existing field mapping constants for 17 entities. MarketplaceProfileItem mapping will be added in Phase 9.
 
 ### Dataloader Validation
-- `.claude/docs/SCHEMA_CHANGE_PROCESS.md` §3 — Scratch DB setup, dataloader command, `.dataloader-validated` marker
+- `.planning/docs/SCHEMA_CHANGE_PROCESS.md` §3 — Scratch DB setup, dataloader command, `.dataloader-validated` marker
 
 </canonical_refs>
 

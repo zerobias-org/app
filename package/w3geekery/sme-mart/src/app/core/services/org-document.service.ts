@@ -9,11 +9,13 @@
  */
 
 import { Injectable, inject } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { ZerobiasClientApi } from '@zerobias-com/zerobias-client';
 import { Nmtoken } from '@zerobias-org/types-core-js';
 import { Md5 } from 'ts-md5';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService, type GqlQueryOptions } from './graphql-read.service';
+import { DemoVisibilityService } from './demo-visibility.service';
 import { DocumentService } from './document.service';
 import { ImpersonationService } from './impersonation.service';
 import { SmeMartTagService } from './sme-mart-tag.service';
@@ -56,9 +58,11 @@ export class OrgDocumentService {
   private readonly clientApi = inject(ZerobiasClientApi);
   private readonly pipelineWrite = inject(PipelineWriteService);
   private readonly graphqlRead = inject(GraphqlReadService);
+  private readonly demoVisibility = inject(DemoVisibilityService);
   private readonly docService = inject(DocumentService);
   private readonly impersonation = inject(ImpersonationService);
   private readonly tagService = inject(SmeMartTagService);
+  private readonly snackBar = inject(MatSnackBar);
 
   // ---------------------------------------------------------------------------
   // Upload
@@ -90,26 +94,27 @@ export class OrgDocumentService {
       // Ensure org folder in FileService
       const folderId = await this.ensureOrgFolder(orgId);
 
+      const createFileInput: Record<string, unknown> = {
+        name: filename,
+        description: opts.description || '',
+        folderId: folderId ? this.clientApi.toUUID(folderId) : undefined,
+        retentionPolicy: {},
+        syncPolicy: {},
+      };
       const fileView = await this.clientApi.fileClient
         .getFileApi()
-        .create({
-          name: filename,
-          description: opts.description || '',
-          folderId: folderId ? this.clientApi.toUUID(folderId) : undefined,
-          retentionPolicy: {},
-          syncPolicy: {},
-        } as any);
+        .create(createFileInput as unknown as Parameters<ReturnType<typeof this.clientApi.fileClient.getFileApi>['create']>[0]);
 
       zbFileId = fileView.id?.toString() || '';
       fileVersionId = await this.docService.uploadBinary(
         fileView, arrayBuffer, file.type, checksum, filename,
       );
-    } catch (fsErr: any) {
-      console.warn('[OrgDocumentService] FileService upload unavailable, storing metadata only:', fsErr.message);
+    } catch (fsErr: unknown) {
+      console.warn('[OrgDocumentService] FileService upload unavailable, storing metadata only:', (fsErr as Error).message);
       this.docService.uploadProgress$.next({ filename, percent: 50, done: false });
     }
 
-    // Build GQL data with camelCase field names and push to Pipeline (fire-and-forget)
+    // Build GQL data with camelCase field names and push to Pipeline
     const userId = this.impersonation.effectiveUserId();
     const gqlData: Record<string, unknown> = {
       id: crypto.randomUUID(),
@@ -128,10 +133,17 @@ export class OrgDocumentService {
       updatedAt: new Date().toISOString(),
     };
 
-    // Fire-and-forget Pipeline push
-    this.pipelineWrite.pushEntity('SmeMartDocument', gqlData).catch(err => {
-      console.error('Failed to push document metadata to Pipeline:', err);
-    });
+    // Push to Pipeline
+    try {
+      await this.pipelineWrite.pushEntity('SmeMartDocument', gqlData, [], 'org-document.service:132');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to save document metadata: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     // Return optimistically (transform GQL to Neon shape for OrgDocument)
     const neonData = mapGqlToNeon<OrgDocument>(gqlData, DOCUMENT_FIELD_MAPPING.gqlToNeon);
@@ -174,8 +186,11 @@ export class OrgDocumentService {
       gqlOptions,
     );
 
+    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
+    const filteredItems = this.demoVisibility.applyVisibility(result.items as (GqlDocumentResponse & { tag?: Array<{ value: string }> | null })[]);
+
     // Transform GQL responses to OrgDocumentDetail
-    return result.items.map(gql => {
+    return filteredItems.map(gql => {
       const neonData = mapGqlToNeon<OrgDocumentDetail>(gql, DOCUMENT_FIELD_MAPPING.gqlToNeon);
       neonData.org_id = orgId;
       return neonData;
@@ -217,7 +232,10 @@ export class OrgDocumentService {
       },
     );
 
-    return result.items.map(gql => {
+    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
+    const filteredItems = this.demoVisibility.applyVisibility(result.items as (GqlDocumentResponse & { tag?: Array<{ value: string }> | null })[]);
+
+    return filteredItems.map(gql => {
       const neonData = mapGqlToNeon<OrgDocumentDetail>(gql, DOCUMENT_FIELD_MAPPING.gqlToNeon);
       neonData.org_id = orgId;
       return neonData;
@@ -246,13 +264,13 @@ export class OrgDocumentService {
   }
 
   /** Remove a share (unshare a document from a target). */
-  async unshareDocument(shareId: string): Promise<void> {
+  async unshareDocument(_shareId: string): Promise<void> {
     // TODO(Plan 046): Implement share deletion in GQL schema and API
     // For now, this is a no-op placeholder
   }
 
   /** List all shares for a specific document via GraphQL. */
-  async listShares(documentId: string): Promise<OrgDocumentShare[]> {
+  async listShares(_documentId: string): Promise<OrgDocumentShare[]> {
     // TODO(Plan 046): Implement share queries in GQL schema
     // For now, return empty list until SmeMartDocumentShare is indexed in GQL
     return [];
@@ -268,9 +286,16 @@ export class OrgDocumentService {
       archived: true,
       updatedAt: new Date().toISOString(),
     };
-    this.pipelineWrite.pushEntity('SmeMartDocument', updateData).catch(err => {
-      console.error('Failed to push document archive to Pipeline:', err);
-    });
+    try {
+      await this.pipelineWrite.pushEntity('SmeMartDocument', updateData, [], 'org-document.service:274');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to archive document: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
   }
 
   async restoreDocument(documentId: string): Promise<void> {
@@ -279,9 +304,16 @@ export class OrgDocumentService {
       archived: false,
       updatedAt: new Date().toISOString(),
     };
-    this.pipelineWrite.pushEntity('SmeMartDocument', updateData).catch(err => {
-      console.error('Failed to push document restore to Pipeline:', err);
-    });
+    try {
+      await this.pipelineWrite.pushEntity('SmeMartDocument', updateData, [], 'org-document.service:286');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to restore document: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -299,9 +331,16 @@ export class OrgDocumentService {
       documentType: updates.document_type,
       updatedAt: new Date().toISOString(),
     };
-    this.pipelineWrite.pushEntity('SmeMartDocument', updateData).catch(err => {
-      console.error('Failed to push document update to Pipeline:', err);
-    });
+    try {
+      await this.pipelineWrite.pushEntity('SmeMartDocument', updateData, [], 'org-document.service:300');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to update document: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     // Return optimistically (fetch from cache or construct)
     const doc = await this.getDocument(documentId);
@@ -364,12 +403,13 @@ export class OrgDocumentService {
       const results = await this.clientApi.hydraClient
         .getResourceApi()
         .searchResources(undefined, undefined, [folderName], undefined, [new Nmtoken('folder')]);
-      const existing = results.items?.find((r: any) => r.name === folderName);
-      if (existing) return existing.id?.toString() || null;
+      const existing = (results.items as unknown[] ?? []).find((r: unknown) => (r as { name?: string }).name === folderName);
+      if (existing) return ((existing as { id?: { toString(): string } }).id?.toString() || null);
 
+      const createFolderInput: Record<string, unknown> = { name: folderName };
       const folder = await this.clientApi.fileClient
         .getFolderApi()
-        .create({ name: folderName } as any);
+        .create(createFolderInput as unknown as Parameters<ReturnType<typeof this.clientApi.fileClient.getFolderApi>['create']>[0]);
       return folder.id?.toString() || null;
     } catch (err) {
       console.warn('[OrgDocumentService] Failed to ensure org folder, uploading to root:', err);
@@ -401,6 +441,7 @@ export class OrgDocumentService {
       'viewUrl',
       'dateCreated',
       'dateLastModified',
+      'tag',
     ];
   }
 }

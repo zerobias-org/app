@@ -29,7 +29,7 @@ Pipeline ingestion writes to AuditgraphDB directly without creating correspondin
    - Is there an automatic pipeline→hydra materialization path (flag, webhook, scheduler) we're missing?
    - If by design, what's the recommended pattern for tagging pipeline-stored entities?
 2. If platform-side fix is coming: wait and replace state-file cleanup with tag-driven in a follow-up.
-3. If by design: document the pattern in `.claude/notes/zb-graphql-custom-schema-howto.md` so every future tagging feature knows to use an alternative (e.g., hydra.Tag.searchTags via class-scoped search rather than resource lookup).
+3. If by design: document the pattern in `.planning/notes/zb-graphql-custom-schema-howto.md` so every future tagging feature knows to use an alternative (e.g., hydra.Tag.searchTags via class-scoped search rather than resource lookup).
 
 **Related:**
 - Memory note `project_sme_mart_prod_pipeline.md` already documents pipeline IDs and receive patterns

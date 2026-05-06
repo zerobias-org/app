@@ -7,17 +7,20 @@ import { ServiceCatalog } from './pages/services/service-catalog.component';
 import { RfpList } from './pages/rfps/rfp-list.component';
 import { RfpDetail } from './pages/rfps/rfp-detail.component';
 import { EngagementDetail } from './pages/engagements/engagement-detail.component';
-import { EngagementEdit } from './pages/engagements/engagement-edit.component';
 import { ENGAGEMENT_TAB_ROUTES } from './pages/engagements/engagement.routes';
 import { RfpWizard } from './pages/rfps/rfp-wizard/rfp-wizard.component';
 import { BidWizard } from './pages/rfps/bid-wizard/bid-wizard.component';
 import { BidComparisonPage } from './pages/rfps/bid-comparison-page.component';
 import { ComingSoon } from './pages/coming-soon/coming-soon.component';
+import { CompanyProfileFormComponent } from './onboarding/company-profile-form.component';
+import { onboardingGuard } from './core/guards/onboarding.guard';
+import { OnboardingBootstrapShellComponent } from './onboarding/onboarding-bootstrap-shell.component';
 
 export const routes: Routes = [
   {
     path: '',
     component: AppShell,
+    canActivate: [onboardingGuard],
     children: [
       { path: '', component: Home },
       { path: 'providers', component: ProviderList },
@@ -36,6 +39,16 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./pages/templates/template-editor.component').then(m => m.TemplateEditorComponent),
       },
+      {
+        path: 'onboarding',
+        children: [
+          // Bootstrap failure surface (no guard on this route — it IS the guard's error handler)
+          { path: 'bootstrap', component: OnboardingBootstrapShellComponent },
+          { path: 'company-profile', component: CompanyProfileFormComponent },
+        ],
+      },
+      // Projects board placeholder (Phase 30 will replace with full board)
+      { path: 'projects', component: ComingSoon, data: { title: 'Projects' } },
       // Legacy redirects
       { path: 'engagements', redirectTo: 'rfps', pathMatch: 'full' },
       {

@@ -8,8 +8,10 @@
  */
 
 import { Injectable, inject } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
+import { DemoVisibilityService } from './demo-visibility.service';
 import { ImpersonationService } from './impersonation.service';
 import { PROJECT_PRD_FIELD_MAPPING, PRD_SECTION_FIELD_MAPPING, mapGqlToNeon } from '../field-mappings';
 import type { GqlProjectPrdResponse, GqlPrdSectionResponse } from '../gql-types/project-prd.types';
@@ -41,7 +43,9 @@ import { PagedResults } from '@zerobias-org/types-core-js';
 export class ProjectPrdService {
   private readonly pipelineWrite = inject(PipelineWriteService);
   private readonly graphqlRead = inject(GraphqlReadService);
+  private readonly demoVisibility = inject(DemoVisibilityService);
   private readonly impersonation = inject(ImpersonationService);
+  private readonly snackBar = inject(MatSnackBar);
 
   // ────────────────────────────────────────────────────────────────────────────
   // ProjectPrd CRUD Methods
@@ -73,9 +77,16 @@ export class ProjectPrdService {
     );
 
     // Fire-and-forget push to Pipeline
-    this.pipelineWrite.pushEntity('ProjectPrd', gqlData).catch(err => {
-      console.error('[ProjectPrdService] Failed to push PRD to pipeline:', err);
-    });
+    try {
+      await this.pipelineWrite.pushEntity('ProjectPrd', gqlData, [], 'project-prd.service:76');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to create PRD: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     // Return optimistically
     return modelData;
@@ -88,13 +99,19 @@ export class ProjectPrdService {
     const prd = await this.graphqlRead.getById<GqlProjectPrdResponse>(
       'ProjectPrd',
       id,
-      ['id', 'parentId', 'title', 'summary', 'sourceDocuments', 'createdAt', 'updatedAt'],
+      ['id', 'parentId', 'title', 'summary', 'sourceDocuments', 'createdAt', 'updatedAt', 'tag'],
     );
 
     if (!prd) return null;
 
+    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
+    const filtered = this.demoVisibility.applyVisibility(
+      [prd as GqlProjectPrdResponse & { tag?: Array<{ value: string }> | null }],
+    )[0] ?? null;
+    if (!filtered) return null;
+
     return mapGqlToNeon<ProjectPrd>(
-      prd,
+      filtered,
       PROJECT_PRD_FIELD_MAPPING.gqlToNeon,
     );
   }
@@ -111,7 +128,7 @@ export class ProjectPrdService {
 
     const result = await this.graphqlRead.query<GqlProjectPrdResponse>(
       'ProjectPrd',
-      ['id', 'parentId', 'title', 'summary', 'sourceDocuments', 'createdAt', 'updatedAt'],
+      ['id', 'parentId', 'title', 'summary', 'sourceDocuments', 'createdAt', 'updatedAt', 'tag'],
       {
         filters: { parentId: `.eq.${projectId}` },
         pageNumber,
@@ -119,7 +136,12 @@ export class ProjectPrdService {
       },
     );
 
-    const items = result.items.map(gql =>
+    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
+    const filteredGql = this.demoVisibility.applyVisibility(
+      result.items as (GqlProjectPrdResponse & { tag?: Array<{ value: string }> | null })[],
+    );
+
+    const items = filteredGql.map(gql =>
       mapGqlToNeon<ProjectPrd>(gql, PROJECT_PRD_FIELD_MAPPING.gqlToNeon),
     );
 
@@ -161,9 +183,16 @@ export class ProjectPrdService {
     );
 
     // Fire-and-forget push
-    this.pipelineWrite.pushEntity('ProjectPrd', gqlData).catch(err => {
-      console.error('[ProjectPrdService] Failed to push PRD update to pipeline:', err);
-    });
+    try {
+      await this.pipelineWrite.pushEntity('ProjectPrd', gqlData, [], 'project-prd.service:164');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to update PRD: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     // Return optimistically
     return modelData;
@@ -213,9 +242,16 @@ export class ProjectPrdService {
     );
 
     // Fire-and-forget push
-    this.pipelineWrite.pushEntity('PrdSection', gqlData).catch(err => {
-      console.error('[ProjectPrdService] Failed to push section to pipeline:', err);
-    });
+    try {
+      await this.pipelineWrite.pushEntity('PrdSection', gqlData, [], 'project-prd.service:216');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to create PRD section: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     // Return optimistically
     return modelData;
@@ -267,9 +303,16 @@ export class ProjectPrdService {
     );
 
     // Fire-and-forget push
-    this.pipelineWrite.pushEntity('PrdSection', gqlData).catch(err => {
-      console.error('[ProjectPrdService] Failed to push section update to pipeline:', err);
-    });
+    try {
+      await this.pipelineWrite.pushEntity('PrdSection', gqlData, [], 'project-prd.service:270');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to update PRD section: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     // Return optimistically
     return modelData;

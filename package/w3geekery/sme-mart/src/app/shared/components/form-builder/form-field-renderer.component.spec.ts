@@ -432,11 +432,11 @@ describe('FormFieldRendererComponent', () => {
         target: {
           files: [mockFile],
         },
-      };
+      } as unknown as Event;
 
       await component.handleFileUpload(event);
 
-      const fileRef = formGroup.get('document')?.value as any;
+      const fileRef = formGroup.get('document')?.value as unknown as { fileId: unknown; fileName: string; fileSize: number };
       expect(fileRef).toBeTruthy();
       expect(fileRef.fileName).toBe('test.pdf');
       expect(fileRef.fileSize).toBe(7);

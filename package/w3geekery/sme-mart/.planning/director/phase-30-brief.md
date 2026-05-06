@@ -12,14 +12,24 @@ A functional default project board that the authenticated, onboarded user lands 
 ## Architecture
 
 ### Starting state
-- Phase 26 seeds the ZB-as-provider default project under the default engagement (`SmeMartProject` record exists, linked to the Engagement via `engagementId`).
-- Phase 27 routes confirmed users here.
-- Phase 28 sets the onboarding-complete marker that Phase 27 reads to send users here.
+- Phase 26 seeds the ZB-as-provider default project under the default engagement (`SmeMartProject` record exists, linked to the Engagement via `engagementId`). Post-2026-04-27 W3Geekery remediation, default projects also have `Object.tag` populated with the engagement tag UUID — so default-project discovery is queryable two ways: by `engagementId` link OR by `Object.tag .eq.` GQL filter against the engagement tag.
+- Phase 27 routes confirmed users here. **Plan MUST consume Phase 27's onboarding-complete redirect target as a locked contract input** rather than pinning a route name. Phase 27 Wave 3 (27-04 routing wire-up) is the source of truth for the actual route — verify against the merged Wave 3 commit before encoding.
+- Phase 28 (closed 2026-04-30) sets the onboarding-complete marker via `MarketplaceProfileService.getCompletionStatus()`. Phase 27 reads this to gate the redirect to the default project board.
 - 3 "Coming Soon" feature areas are scoped BY Clark direction:
   - **046** — Org Documents (document management, sharing)
   - **066** — Engagement Dashboard (aggregated engagement metrics)
   - **065** — Message Center (cross-party messaging)
 - Per DECISIONS.md, all 3 are v1.5+ real-build items.
+
+### Discovery contracts (consumed inputs)
+
+**Default engagement lookup** — `org -> default engagement` via Hydra Tag query: `Engagement(tag: { value: ".eq.<engagement-tag-UUID>" })`. The engagement tag UUID is per-org and seeded by Phase 26. Plan author should locate the existing helper if one exists (likely in `bootstrap-service` or `pipeline-write` neighborhood) — do NOT reinvent the GQL query.
+
+**Default project lookup** — once the engagement is resolved, `SmeMartProject(engagementId: "<engagement-uuid>")` returns the default project. Single-result expected; assertion >=1 record is fine.
+
+**Engagement header content** — `engagement.name` is canonically formatted `<Buyer Name> <- <Provider Name>` (ASCII reverse-arrow, supply-flow direction; see DECISIONS.md "Engagement Naming Convention"). Render as-is; do not reformat.
+
+**SmeMartProject rendering — DISCOVERY FLAG.** Plan author MUST first determine whether existing SmeMartProject component rendering exists in the app (search for `SmeMartProject` consumers, project-related routes, project-detail components). If it exists and is reusable, the 6–8 hr estimate holds. **If it does not exist or is too coupled to a different context to reuse, the estimate is invalid — surface as a plan-time blocker for Director re-scope.** Do not silently build a net-new project-detail component as part of this phase.
 
 ### Deliverables
 
@@ -31,14 +41,14 @@ A functional default project board that the authenticated, onboarded user lands 
    - Disabled-looking styling (grey-out, subtle lock/clock iconography).
    - Clear headline: "Org Documents — Coming Soon" (similar for 066 / 065).
    - Short paragraph explaining what the feature will do when available (1–2 sentences per surface).
-   - Optional: "Notify me when ready" button that either just toasts or files a tag on the user's MarketplaceProfileItem (implementation choice — simpler is better for v1.4).
+   - Optional: "Notify me when ready" button — **toast-only for v1.4** (e.g., MatSnackBar "We'll let you know when this is ready"). The tag-on-MPI variant adds Pipeline.receive complexity that is not justified for placeholder surfaces.
    - Links back to the default project board.
 3. **Navigation integration.** The 3 surfaces are reachable from the default project board (tabs, cards, sidebar — whichever fits existing SME Mart nav patterns). If a user deep-links to them outside the board, they render the same placeholder — not a 404.
 4. **Unit tests** for: default board renders with the seeded project, 3 Coming Soon components render their placeholder content, navigation links resolve correctly.
 
 ## Requirements
 
-- **PB-01:** Authenticated onboarded users land on `/default-project-board` (or equivalent route) per Phase 27 routing.
+- **PB-01:** Authenticated onboarded users land on `/projects`, the route slot reserved by Phase 27 Wave 3 (commit `3756443`). Phase 30 replaces the placeholder `ComingSoon` component at that route with the full default project board. The route MUST sit under `AppShell` so `onboardingGuard` continues to gate access.
 - **PB-02:** Default project content (name, description, any existing SmeMartProject widgets) renders for the seeded default project.
 - **PB-03:** 3 "Coming Soon" surfaces exist as components + routes, each with its own disabled-styled placeholder content.
 - **PB-04:** Coming-Soon surfaces are reachable from the board AND deep-linkable.

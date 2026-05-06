@@ -1019,7 +1019,7 @@ async submit(submissionId: UUID, formData: Record<string, unknown>, projectId: U
 - **Angular 21 Forms documentation** — Reactive Forms API, Validators (required, min, max, minLength, maxLength, pattern, email). Verified against `@angular/forms@21.1.0` in package.json.
 - **Angular Material 21 Form Field Components** — `mat-form-field`, `mat-input`, `mat-select`, `mat-checkbox`, `mat-expansion-panel`. Verified against `@angular/material@21.1.4`.
 - **Angular CDK 21 DragDrop** — `CdkDragDrop`, `cdkDrag`, `cdkDropList` directives. Verified against `@angular/cdk@21.1.4`.
-- **ZB FileService SDK Reference** — `.claude/notes/zb-file-upload-sdk-reference.md` (project-specific, HIGH confidence)
+- **ZB FileService SDK Reference** — `.planning/notes/zb-file-upload-sdk-reference.md` (project-specific, HIGH confidence)
 - **Phase 14 Context** — RfpInvitationService, access control gate pattern proven (16-CONTEXT.md section on canonical refs)
 - **Phase 15 Context** — DocumentTemplateService (CRUD + Pipeline pattern), DocumentInstanceService (schema integration pattern) proven
 - **Project CLAUDE.md** — Angular 21 patterns (inject, input/output, signals, OnPush, modern control flow) — verified against codebase

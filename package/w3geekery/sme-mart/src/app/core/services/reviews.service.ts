@@ -1,10 +1,12 @@
 import { Injectable, inject } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService, type GqlQueryOptions } from './graphql-read.service';
+import { DemoVisibilityService } from './demo-visibility.service';
 import { REVIEW_FIELD_MAPPING, mapNeonToGql, mapGqlToNeon } from '../field-mappings';
 import type { QueryOptions } from '@zerobias-org/data-utils';
 import { PagedResults } from '@zerobias-org/types-core-js';
-import type { Review, AdminReviewRow } from '../models';
+import type { Review } from '../models';
 import type { GqlReviewResponse } from '../gql-types';
 
 /**
@@ -20,10 +22,13 @@ import type { GqlReviewResponse } from '../gql-types';
 export class ReviewsService {
   private readonly pipelineWrite = inject(PipelineWriteService);
   private readonly graphqlRead = inject(GraphqlReadService);
+  private readonly snackBar = inject(MatSnackBar);
+  private readonly demoVisibility = inject(DemoVisibilityService);
 
   /**
    * List reviews for a specific provider, optionally filtered to approved only.
    * Queries GraphQL with providerId and optional approved filter, returns array (no pagination).
+   * Phase 24 Plan 03: Applies client-side demo-visibility post-filter before returning.
    */
   async listReviewsByProvider(providerId: string, approvedOnly = true): Promise<Review[]> {
     const filters: Record<string, string> = {
@@ -45,8 +50,11 @@ export class ReviewsService {
       gqlOptions,
     );
 
+    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
+    const filteredGql = this.demoVisibility.applyVisibility(result.items as (GqlReviewResponse & { tag?: Array<{ value: string }> | null })[]);
+
     // Transform and return as array
-    return result.items.map(gql =>
+    return filteredGql.map(gql =>
       mapGqlToNeon<Review>(gql, REVIEW_FIELD_MAPPING.gqlToNeon),
     );
   }
@@ -54,6 +62,7 @@ export class ReviewsService {
   /**
    * List all reviews for admin dashboard (no v_admin_reviews VIEW, use GQL query instead).
    * Queries GraphQL with pagination support.
+   * Phase 24 Plan 03: Applies client-side demo-visibility post-filter before returning.
    */
   async listAdminReviews(options?: QueryOptions): Promise<PagedResults<Review>> {
     const pageNumber = options?.pageNumber ?? 1;
@@ -71,8 +80,11 @@ export class ReviewsService {
       gqlOptions,
     );
 
+    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
+    const filteredGql = this.demoVisibility.applyVisibility(result.items as (GqlReviewResponse & { tag?: Array<{ value: string }> | null })[]);
+
     // Transform GQL responses to Review (Neon shape)
-    const items = result.items.map(gql =>
+    const items = filteredGql.map(gql =>
       mapGqlToNeon<Review>(gql, REVIEW_FIELD_MAPPING.gqlToNeon),
     );
 
@@ -82,6 +94,7 @@ export class ReviewsService {
   /**
    * List pending (unapproved) reviews for admin review workflow.
    * Queries GraphQL with approved=false filter.
+   * Phase 24 Plan 03: Applies client-side demo-visibility post-filter before returning.
    */
   async listPendingReviews(options?: QueryOptions): Promise<PagedResults<Review>> {
     const pageNumber = options?.pageNumber ?? 1;
@@ -99,8 +112,11 @@ export class ReviewsService {
       gqlOptions,
     );
 
+    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
+    const filteredGql = this.demoVisibility.applyVisibility(result.items as (GqlReviewResponse & { tag?: Array<{ value: string }> | null })[]);
+
     // Transform GQL responses to Review (Neon shape)
-    const items = result.items.map(gql =>
+    const items = filteredGql.map(gql =>
       mapGqlToNeon<Review>(gql, REVIEW_FIELD_MAPPING.gqlToNeon),
     );
 
@@ -138,18 +154,25 @@ export class ReviewsService {
       updated_at: now,
     };
 
-    // Transform to GQL shape and push to Pipeline (fire-and-forget)
+    // Transform to GQL shape and push to Pipeline
     const gqlData = mapNeonToGql<GqlReviewResponse>(review, REVIEW_FIELD_MAPPING.neonToGql);
-    this.pipelineWrite.pushEntity('Review', gqlData as unknown as Record<string, unknown>).catch(err => {
-      console.error('Failed to push Review to Pipeline:', err);
-    });
+    try {
+      await this.pipelineWrite.pushEntity('Review', gqlData as unknown as Record<string, unknown>, [], 'reviews.service:143');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to save review: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     // Return optimistic response immediately
     return review;
   }
 
   /**
-   * Approve a review and push approval metadata to Pipeline (fire-and-forget).
+   * Approve a review and push approval metadata to Pipeline.
    * Sets approved=true, approvedAt={now}, approvedBy={approverId}.
    * Returns optimistic updated Review.
    */
@@ -177,9 +200,16 @@ export class ReviewsService {
 
     // Push to Pipeline
     const gqlData = mapNeonToGql<GqlReviewResponse>(updated, REVIEW_FIELD_MAPPING.neonToGql);
-    this.pipelineWrite.pushEntity('Review', gqlData as unknown as Record<string, unknown>).catch(err => {
-      console.error('Failed to approve Review in Pipeline:', err);
-    });
+    try {
+      await this.pipelineWrite.pushEntity('Review', gqlData as unknown as Record<string, unknown>, [], 'reviews.service:193');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to approve review: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     // Return optimistic response
     return updated;
@@ -213,9 +243,16 @@ export class ReviewsService {
 
     // Push to Pipeline
     const gqlData = mapNeonToGql<GqlReviewResponse>(updated, REVIEW_FIELD_MAPPING.neonToGql);
-    this.pipelineWrite.pushEntity('Review', gqlData as unknown as Record<string, unknown>).catch(err => {
-      console.error('Failed to reject Review in Pipeline:', err);
-    });
+    try {
+      await this.pipelineWrite.pushEntity('Review', gqlData as unknown as Record<string, unknown>, [], 'reviews.service:228');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to reject review: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     // Return optimistic response
     return updated;
@@ -237,6 +274,7 @@ export class ReviewsService {
       'status',
       'dateCreated',
       'dateLastModified',
+      'tag',
     ];
   }
 }

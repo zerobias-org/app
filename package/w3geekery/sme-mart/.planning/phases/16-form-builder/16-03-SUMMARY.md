@@ -140,7 +140,7 @@ Implement DynamicFormRenderer with three distinct modes (preview, fill, review).
 ```typescript
 // TODO(v1.3): File upload integration
 // In v1.2, we capture filename/size only. File bytes are NOT uploaded to ZB FileService.
-// See .claude/notes/zb-file-upload-sdk-reference.md for FileService SDK details.
+// See .planning/notes/zb-file-upload-sdk-reference.md for FileService SDK details.
 // v1.3 will integrate the full FileService.create() → FileService.upload() flow.
 ```
 
@@ -223,7 +223,7 @@ None. Plan executed exactly as written with director corrections applied.
 - FormFieldRendererComponent.handleFileUpload() creates FileReference with `fileId`, `fileName`, `fileSize`
 - `fileId` is random UUID (not from FileService)
 - Actual file persistence deferred to v1.3
-- See `.claude/notes/zb-file-upload-sdk-reference.md` for FileService SDK details (FileService.create(), FileService.upload(), MD5 checksum, etc.)
+- See `.planning/notes/zb-file-upload-sdk-reference.md` for FileService SDK details (FileService.create(), FileService.upload(), MD5 checksum, etc.)
 
 **Impact:** Forms can capture file field values and store them in FormSubmission, but the file bytes are not persisted. Suitable for RFP demo/testing. Real deployment requires v1.3 FileService integration.
 

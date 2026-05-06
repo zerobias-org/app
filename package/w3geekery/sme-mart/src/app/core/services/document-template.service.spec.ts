@@ -10,12 +10,17 @@ import { TestBed } from '@angular/core/testing';
 import { DocumentTemplateService } from './document-template.service';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
+import { DemoVisibilityService } from './demo-visibility.service';
+import { ProjectContextService } from './project-context.service';
+import { fakePipelineWriteService, fakeGraphqlReadService, fakeProjectContextService } from '../../test-helpers/angular';
 import type { DocumentTemplate, CreateDocumentTemplateDto, CustomVariable } from '../models';
 
 describe('DocumentTemplateService', () => {
   let service: DocumentTemplateService;
-  let pipelineWrite: any;
-  let graphqlRead: any;
+  let pipelineWrite: ReturnType<typeof fakePipelineWriteService>;
+  let graphqlRead: ReturnType<typeof fakeGraphqlReadService>;
+  let demoVisibility: { applyVisibility: ReturnType<typeof vi.fn> };
+  let projectContext: ReturnType<typeof fakeProjectContextService>;
 
   const mockTemplate: DocumentTemplate = {
     id: 'template-1',
@@ -33,31 +38,25 @@ describe('DocumentTemplateService', () => {
   };
 
   beforeEach(() => {
-    const pipelineWriteMock = {
-      pushEntities: vi.fn().mockResolvedValue(undefined),
-      pushEntity: vi.fn().mockResolvedValue(undefined),
-      deleteEntities: vi.fn().mockResolvedValue(undefined),
-      deleteEntity: vi.fn().mockResolvedValue(undefined),
-      getCached: vi.fn().mockReturnValue(null),
-      seedCache: vi.fn()
+    pipelineWrite = fakePipelineWriteService();
+    graphqlRead = fakeGraphqlReadService();
+    demoVisibility = {
+      applyVisibility: vi.fn((records) => records)
     };
-    const graphqlReadMock = {
-      query: vi.fn(),
-      getById: vi.fn(),
-      rawQuery: vi.fn()
-    };
+    projectContext = fakeProjectContextService(false);
 
     TestBed.configureTestingModule({
       providers: [
         DocumentTemplateService,
-        { provide: PipelineWriteService, useValue: pipelineWriteMock },
-        { provide: GraphqlReadService, useValue: graphqlReadMock }
+        DemoVisibilityService,
+        { provide: PipelineWriteService, useValue: pipelineWrite },
+        { provide: GraphqlReadService, useValue: graphqlRead },
+        { provide: DemoVisibilityService, useValue: demoVisibility },
+        { provide: ProjectContextService, useValue: projectContext }
       ]
     });
 
     service = TestBed.inject(DocumentTemplateService);
-    pipelineWrite = TestBed.inject(PipelineWriteService);
-    graphqlRead = TestBed.inject(GraphqlReadService);
   });
 
   it('should be created', () => {
@@ -304,6 +303,89 @@ describe('DocumentTemplateService', () => {
 
       expect(result.status).toBe('archived');
       expect(pipelineWrite.pushEntities).toHaveBeenCalled();
+    });
+  });
+
+  describe('Demo Visibility (Option X - Client-Side Post-Filter)', () => {
+    it('[DG-02] listByOrg strips demo records for non-admin users', async () => {
+      const realTemplate = { ...mockTemplate, id: 'real-1', tag: null };
+      const demoGlobalTemplate = {
+        ...mockTemplate,
+        id: 'demo-global-1',
+        tag: [{ value: '81053c14-a8e5-4939-b538-c122c7d0eb1a' }]
+      };
+      const demoLegacyTemplate = {
+        ...mockTemplate,
+        id: 'demo-legacy-1',
+        tag: [{ value: 'd618b602-21cc-40a1-a9fa-534b7bc1672c' }]
+      };
+
+      graphqlRead.query.mockResolvedValue({
+        items: [realTemplate, demoGlobalTemplate, demoLegacyTemplate],
+        page: { pageNumber: 1, pageSize: 100 }
+      });
+      demoVisibility.applyVisibility.mockImplementation((records: Array<DocumentTemplate & { tag?: Array<{ value: string }> | null }>) =>
+        records.filter(r => !r.tag?.some((t) => [
+          '81053c14-a8e5-4939-b538-c122c7d0eb1a',
+          'd618b602-21cc-40a1-a9fa-534b7bc1672c'
+        ].includes(t.value)))
+      );
+
+      const result = await service.listByOrg('org-123');
+
+      expect(demoVisibility.applyVisibility).toHaveBeenCalled();
+      expect(result).toEqual([realTemplate]);
+    });
+
+    it('[DG-03] listByOrg includes demo records for admin users', async () => {
+      const realTemplate = { ...mockTemplate, id: 'real-1', tag: null };
+      const demoTemplate = {
+        ...mockTemplate,
+        id: 'demo-1',
+        tag: [{ value: '81053c14-a8e5-4939-b538-c122c7d0eb1a' }]
+      };
+
+      projectContext.setIsAdmin(true);
+      graphqlRead.query.mockResolvedValue({
+        items: [realTemplate, demoTemplate],
+        page: { pageNumber: 1, pageSize: 100 }
+      });
+      demoVisibility.applyVisibility.mockReturnValue([realTemplate, demoTemplate]);
+
+      const result = await service.listByOrg('org-123');
+
+      expect(demoVisibility.applyVisibility).toHaveBeenCalled();
+      expect(result).toHaveLength(2);
+    });
+
+    it('[DG-02] getById strips demo record for non-admin', async () => {
+      const demoTemplate = {
+        ...mockTemplate,
+        id: 'demo-1',
+        tag: [{ value: '81053c14-a8e5-4939-b538-c122c7d0eb1a' }]
+      };
+
+      graphqlRead.query.mockResolvedValue({
+        items: [demoTemplate],
+        page: { pageNumber: 1, pageSize: 1 }
+      });
+      demoVisibility.applyVisibility.mockReturnValue([]);
+
+      const result = await service.getById('demo-1');
+
+      expect(result).toBeNull();
+    });
+
+    it('[DG-02] includes tag field in GQL query', async () => {
+      graphqlRead.query.mockResolvedValue({
+        items: [mockTemplate],
+        page: { pageNumber: 1, pageSize: 100 }
+      });
+
+      await service.listByOrg('org-123');
+
+      const fieldList = graphqlRead.query.mock.calls[0][1];
+      expect(fieldList).toContain('tag');
     });
   });
 });

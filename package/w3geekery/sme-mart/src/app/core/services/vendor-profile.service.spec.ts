@@ -8,10 +8,12 @@ import { TestBed } from '@angular/core/testing';
 import { VendorProfileService } from './vendor-profile.service';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
-import { fakePipelineWriteService, fakeGraphqlReadService } from '../../test-helpers/angular';
+import { DemoVisibilityService } from './demo-visibility.service';
+import { ProjectContextService } from './project-context.service';
+import { fakePipelineWriteService, fakeGraphqlReadService, fakeProjectContextService } from '../../test-helpers/angular';
 import type { GqlMarketplaceProfileItemResponse } from '../gql-types/marketplace-profile-item.types';
-import type { MarketplaceProfileItem, InsuranceData, AttestationData, CorporateIdentityData } from '../models/marketplace-profile-item.model';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import type { InsuranceData, AttestationData, SectionType } from '../models/marketplace-profile-item.model';
+import { describe, it, expect, beforeEach } from 'vitest';
 
 // ── Test Fixtures ──
 
@@ -39,17 +41,6 @@ function createMockAttestationData(): AttestationData {
   };
 }
 
-function createMockCorporateIdentityData(): CorporateIdentityData {
-  return {
-    legalEntityName: 'Acme Security LLC',
-    businessType: 'llc',
-    foundedYear: 2015,
-    yearsInBusiness: 9,
-    certifications: ['ISO 27001'],
-    numberOfEmployees: 42,
-  };
-}
-
 function createMockGqlItem(
   overrides?: Partial<GqlMarketplaceProfileItemResponse>,
 ): GqlMarketplaceProfileItemResponse {
@@ -72,16 +63,20 @@ describe('VendorProfileService', () => {
   let service: VendorProfileService;
   let pipelineWrite: ReturnType<typeof fakePipelineWriteService>;
   let graphqlRead: ReturnType<typeof fakeGraphqlReadService>;
+  let mockProjectContext: ReturnType<typeof fakeProjectContextService>;
 
   beforeEach(() => {
     pipelineWrite = fakePipelineWriteService();
     graphqlRead = fakeGraphqlReadService();
+    mockProjectContext = fakeProjectContextService(false);
 
     TestBed.configureTestingModule({
       providers: [
         VendorProfileService,
+        DemoVisibilityService,
         { provide: PipelineWriteService, useValue: pipelineWrite },
         { provide: GraphqlReadService, useValue: graphqlRead },
+        { provide: ProjectContextService, useValue: mockProjectContext },
       ],
     });
 
@@ -140,7 +135,7 @@ describe('VendorProfileService', () => {
       graphqlRead.query.mockResolvedValue({
         items: [
           createMockGqlItem(),
-          { ...createMockGqlItem(), dateDeleted: '2026-03-20' } as any,
+          { ...createMockGqlItem(), dateDeleted: '2026-03-20' } as unknown as GqlMarketplaceProfileItemResponse,
         ],
         page: { pageNumber: 1, pageSize: 200, totalCount: 2 },
       });
@@ -180,7 +175,7 @@ describe('VendorProfileService', () => {
   describe('getProfileItem()', () => {
     it('should return cached item if available', async () => {
       const gqlFixture = createMockGqlItem();
-      pipelineWrite.getCached.mockReturnValue(gqlFixture as any);
+      pipelineWrite.getCached.mockReturnValue(gqlFixture as unknown as Record<string, unknown>);
 
       const result = await service.getProfileItem('profile-001');
 
@@ -244,14 +239,14 @@ describe('VendorProfileService', () => {
           section: 'insurance',
           name: 'Test',
           data: createMockInsuranceData(),
-        } as any),
+        } as Parameters<typeof service.createProfileItem>[1]),
       ).resolves.toBeTruthy(); // Should not throw
     });
 
     it('should validate section is one of 6 valid values', async () => {
       await expect(
         service.createProfileItem('org-001', {
-          section: 'invalid_section' as any,
+          section: 'invalid_section' as SectionType,
           name: 'Test',
           data: createMockInsuranceData(),
         }),
@@ -293,6 +288,8 @@ describe('VendorProfileService', () => {
           name: 'Test Item',
           section: 'insurance',
         }),
+        [],
+        expect.any(String), // callSiteTag
       );
     });
 
@@ -379,6 +376,8 @@ describe('VendorProfileService', () => {
           id: 'profile-001',
           status: 'archived',
         }),
+        [],
+        expect.any(String), // callSiteTag
       );
     });
 
@@ -426,6 +425,8 @@ describe('VendorProfileService', () => {
         expect.objectContaining({
           dateDeleted: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/),
         }),
+        [],
+        expect.any(String), // callSiteTag
       );
     });
 
@@ -522,7 +523,7 @@ describe('VendorProfileService', () => {
     it('should throw ValidationError for invalid section', async () => {
       await expect(
         service.createProfileItem('org-001', {
-          section: 'invalid' as any,
+          section: 'invalid' as SectionType,
           name: 'Test',
           data: createMockInsuranceData(),
         }),
@@ -550,6 +551,78 @@ describe('VendorProfileService', () => {
       graphqlRead.getById.mockResolvedValue(null);
 
       await expect(service.updateProfileItem('nonexistent', { name: 'Test' })).rejects.toThrow('not found');
+    });
+  });
+
+  // ── Demo visibility (Phase 24 Plan 03) ──
+
+  describe('Demo visibility (Phase 24 Plan 03)', () => {
+    const mockGqlReturn = [
+      createMockGqlItem({ id: '1', name: 'Real', tag: null } as Partial<GqlMarketplaceProfileItemResponse> & { tag: null }),
+      createMockGqlItem({ id: '2', name: 'Real w/ marketplace tag', tag: [{ value: 'a81cd320-243e-44eb-bdd9-9824019ef3dd' }] } as Partial<GqlMarketplaceProfileItemResponse> & { tag: Array<{ value: string }> }),
+      createMockGqlItem({ id: '3', name: 'Demo (global)', tag: [{ value: '81053c14-a8e5-4939-b538-c122c7d0eb1a' }] } as Partial<GqlMarketplaceProfileItemResponse> & { tag: Array<{ value: string }> }),
+      createMockGqlItem({ id: '4', name: 'Demo (legacy)', tag: [{ value: 'd618b602-21cc-40a1-a9fa-534b7bc1672c' }] } as Partial<GqlMarketplaceProfileItemResponse> & { tag: Array<{ value: string }> }),
+    ];
+
+    it('[DG-02] strips demo records for non-admin', async () => {
+      graphqlRead.query.mockResolvedValue({
+        items: mockGqlReturn,
+        page: { pageNumber: 1, pageSize: 200, totalCount: 4 },
+      });
+
+      const result = await service.listProfileItems('org-001');
+
+      // Service sorts by name; non-admin sees only id 1 ('Real') + id 2 ('Real w/...').
+      expect(result.map(r => r.id)).toEqual(['1', '2']);
+    });
+
+    it('[DG-03] admin sees all records including demo', async () => {
+      mockProjectContext.setIsAdmin(true);
+      graphqlRead.query.mockResolvedValue({
+        items: mockGqlReturn,
+        page: { pageNumber: 1, pageSize: 200, totalCount: 4 },
+      });
+
+      const result = await service.listProfileItems('org-001');
+
+      // Service sorts by name alphabetically: 'Demo (global)', 'Demo (legacy)', 'Real', 'Real w/ marketplace tag'
+      expect(result.map(r => r.id)).toEqual(['3', '4', '1', '2']);
+    });
+
+    it('[DG-02] does NOT add server-side tag negation filter', async () => {
+      graphqlRead.query.mockResolvedValue({
+        items: mockGqlReturn,
+        page: { pageNumber: 1, pageSize: 200, totalCount: 4 },
+      });
+
+      await service.listProfileItems('org-001');
+
+      const callArgs = graphqlRead.query.mock.calls[0];
+      const filters = (callArgs[2] as { filters?: Record<string, string> })?.filters ?? {};
+      const filterValues = Object.values(filters).join(' ');
+      expect(filterValues).not.toContain('.not in.');
+      expect(filterValues).not.toContain('.ne.');
+    });
+
+    it('requests tag field in GQL query', async () => {
+      graphqlRead.query.mockResolvedValue({
+        items: mockGqlReturn,
+        page: { pageNumber: 1, pageSize: 200, totalCount: 4 },
+      });
+
+      await service.listProfileItems('org-001');
+
+      const fields = graphqlRead.query.mock.calls[0][1] as string[];
+      expect(fields).toContain('tag');
+    });
+
+    it('[DG-02] returns null when non-admin fetches a demo record by id', async () => {
+      const demoRecord = createMockGqlItem({ id: '3', name: 'Demo', tag: [{ value: '81053c14-a8e5-4939-b538-c122c7d0eb1a' }] } as Partial<GqlMarketplaceProfileItemResponse> & { tag: Array<{ value: string }> });
+      graphqlRead.getById.mockResolvedValueOnce(demoRecord);
+
+      const result = await service.getProfileItem('3');
+
+      expect(result).toBeNull();
     });
   });
 });

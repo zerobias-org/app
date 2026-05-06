@@ -189,3 +189,15 @@ Reference: `.claude/post-mortems/2026-04-14-schema-inherited-props-drift.md`, er
 - [ ] Plan stubs data layer entirely — needs gap closure (budget 1 gap closure per phase)
 - [ ] Model interface doesn't match form fields — causes silent data loss
 - [ ] Executor goes silent during long tasks — user should nudge for progress
+
+## Personnel Identity Assurance (2026-05-05 — Brian "risk marketplace" framing)
+
+**Pattern:** Brian framed sme-mart as a "government-grade vetted marketplace, not just a marketplace." Future phases that touch profile / personnel / credential surfaces must consider person-level identity assurance (gov ID validation, background checks) — not just org-level corporate vetting. Existing `MarketplaceProfileItem.personnel` section + `EngagementVettingItem` flow are the foundation; gaps are tracked in backlog 027.
+
+- [ ] **Phase brief touches `MarketplaceProfileItem` (any section)** — FLAG. Confirm whether the brief should also surface identity-verified vs unverified status for the `personnel` section. If yes and not in scope, note as deferred dependency on backlog 027.
+- [ ] **Phase brief adds new fields to `PersonnelData`** — FLAG. Reserve namespace for `governmentIdRef` / `idVerifiedAt` / `idVerificationProvider` fields per backlog 027 so a later identity-verification integration doesn't have to reshape the model.
+- [ ] **Phase brief adds new vetting types to `EngagementVettingItem`** — FLAG. Confirm whether `background_check` and `government_identity` types should be added per Brian's risk-marketplace framing.
+- [ ] **Phase brief adds a new sign-up step or onboarding form** — FLAG. Confirm whether identity assurance (third-party verification handoff) should be wired in here, or explicitly deferred. Don't let identity-on-signup pile up as silent technical debt.
+- [ ] **Phase brief discusses freeform `credentials: string[]` editing on PersonnelData** — FLAG. Verifiable-credential providers (Credly, Accredible) may make freeform strings the wrong long-term shape. Note backlog 027 buy-vs-build evaluation as upstream dependency.
+
+Reference: backlog 027, `.planning/notes/meetings/2026-05-05-marketplace.md`.

@@ -1,0 +1,63 @@
+name: Lint
+
+on:
+  pull_request:
+  push:
+    branches-ignore:
+      - main
+      - uat
+      - qa
+      - prod
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: package/w3geekery/sme-mart
+
+    steps:
+      - name: Checkout (full history for diff)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: package/w3geekery/sme-mart/.nvmrc
+
+      - name: Install lint tooling (public npm only, no auth)
+        # Versions pinned to match package.json devDependencies so CI runs
+        # against the same eslint stack developers use locally.
+        #
+        # Installed into ${RUNNER_TEMP}/lint-tools (NOT the workspace) so
+        # npm doesn't try to resolve sme-mart's package.json devDeps, which
+        # include @zerobias-org/@zerobias-com private packages requiring
+        # auth. The next step symlinks the tooling into the workspace so
+        # eslint.config.js's ESM imports resolve normally.
+        working-directory: ${{ runner.temp }}
+        run: |
+          mkdir -p lint-tools && cd lint-tools
+          printf '%s\n' '{"name":"sme-mart-lint-tools","private":true,"type":"module"}' > package.json
+          npm install --no-save \
+            --registry=https://registry.npmjs.org \
+            eslint@^10.2.1 \
+            @eslint/js@^10.0.1 \
+            typescript-eslint@^8.59.1 \
+            @angular-eslint/eslint-plugin@^21.3.1 \
+            @angular-eslint/eslint-plugin-template@^21.3.1 \
+            @angular-eslint/template-parser@^21.3.1 \
+            typescript@~5.9.2 \
+            lint-staged
+
+      - name: Wire lint tooling into workspace
+        # Symlink so eslint.config.js's ESM imports + npx lint-staged in the
+        # workspace resolve to the temp-dir install.
+        run: ln -s "${RUNNER_TEMP}/lint-tools/node_modules" node_modules
+
+      - name: Lint changed files (diff-based)
+        run: npx lint-staged --diff="origin/${{ github.base_ref || 'poc/sme-mart' }}...HEAD"

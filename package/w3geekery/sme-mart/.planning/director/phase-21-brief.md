@@ -43,7 +43,7 @@ Loose, because we're time-boxing:
 - Phase 15 DocumentTemplate + DocumentInstance classes (shipped v1.2)
 - `@zerobias-com/hydra-sdk` Tag API (shipped)
 - Existing Notes-Center folder pattern (if it exists, reuse wholesale)
-- File SDK (MEMORY.md + `.claude/notes/zb-file-upload-sdk-reference.md`)
+- File SDK (MEMORY.md + `.planning/notes/zb-file-upload-sdk-reference.md`)
 
 ## Verification
 
@@ -60,6 +60,6 @@ Loose, because we're time-boxing:
 ## References
 
 - BACKLOG.md "046 remaining" entry
-- `.claude/notes/zb-file-upload-sdk-reference.md`
+- `.planning/notes/zb-file-upload-sdk-reference.md`
 - Phase 15 DocumentTemplate artifacts (`.planning/phases/15-*/`)
 - E1 gap analysis (19 new document types) — terminology table to be synthesized from RFP research docs

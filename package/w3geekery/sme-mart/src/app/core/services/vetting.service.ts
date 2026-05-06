@@ -8,8 +8,10 @@
  */
 
 import { Injectable, inject, signal } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { PipelineWriteService } from './pipeline-write.service';
-import { GraphqlReadService, type GqlQueryOptions } from './graphql-read.service';
+import { GraphqlReadService } from './graphql-read.service';
+import { DemoVisibilityService } from './demo-visibility.service';
 import { ImpersonationService } from './impersonation.service';
 import { VETTING_ITEM_FIELD_MAPPING, mapGqlToNeon, mapNeonToGql } from '../field-mappings';
 import type { GqlVettingItemResponse } from '../gql-types/vetting-item.types';
@@ -43,7 +45,9 @@ export interface PilotCompletionSuggestion {
 export class VettingService {
   private readonly pipelineWrite = inject(PipelineWriteService);
   private readonly graphqlRead = inject(GraphqlReadService);
+  private readonly demoVisibility = inject(DemoVisibilityService);
   private readonly impersonation = inject(ImpersonationService);
+  private readonly snackBar = inject(MatSnackBar);
 
   // ── Pilot Completion Suggestion Signal (Plan 077 Task 1) ──
 
@@ -68,7 +72,12 @@ export class VettingService {
       },
     );
 
-    const items = result.items
+    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
+    const filteredGql = this.demoVisibility.applyVisibility(
+      result.items as (GqlVettingItemResponse & { tag?: Array<{ value: string }> | null })[],
+    );
+
+    const items = filteredGql
       .filter(gql => !(gql as unknown as Record<string, unknown>)['dateDeleted'])
       .map(gql => this.fromGql(gql));
 
@@ -97,8 +106,14 @@ export class VettingService {
     );
     if (!gql) return null;
 
-    this.pipelineWrite.seedCache('EngagementVettingItem', id, gql as unknown as Record<string, unknown>);
-    return this.fromGql(gql);
+    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
+    const filtered = this.demoVisibility.applyVisibility(
+      [gql as GqlVettingItemResponse & { tag?: Array<{ value: string }> | null }],
+    )[0] ?? null;
+    if (!filtered) return null;
+
+    this.pipelineWrite.seedCache('EngagementVettingItem', id, filtered as unknown as Record<string, unknown>);
+    return this.fromGql(filtered);
   }
 
   /**
@@ -181,9 +196,16 @@ export class VettingService {
 
     // Push all items to pipeline in one batch
     const gqlItems = items.map(item => this.toGql(item));
-    this.pipelineWrite.pushEntities('EngagementVettingItem', gqlItems).catch(err => {
-      console.error('[VettingService] Failed to seed default vetting items:', err);
-    });
+    try {
+      await this.pipelineWrite.pushEntities('EngagementVettingItem', gqlItems, [], 'vetting.service:184');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to initialize vetting items: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     return items;
   }
@@ -223,9 +245,16 @@ export class VettingService {
     };
 
     const gqlData = this.toGql(item);
-    this.pipelineWrite.pushEntity('EngagementVettingItem', gqlData).catch(err => {
-      console.error('[VettingService] Failed to push vetting item:', err);
-    });
+    try {
+      await this.pipelineWrite.pushEntity('EngagementVettingItem', gqlData, [], 'vetting.service:226');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to add vetting item: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     return item;
   }
@@ -280,9 +309,16 @@ export class VettingService {
     }
 
     const gqlData = this.toGql(updated);
-    this.pipelineWrite.pushEntity('EngagementVettingItem', gqlData).catch(err => {
-      console.error('[VettingService] Failed to update vetting item:', err);
-    });
+    try {
+      await this.pipelineWrite.pushEntity('EngagementVettingItem', gqlData, [], 'vetting.service:295');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to update vetting item: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
 
     return updated;
   }
@@ -306,9 +342,16 @@ export class VettingService {
       dateDeleted: today,
     };
 
-    this.pipelineWrite.pushEntity('EngagementVettingItem', gqlData).catch(err => {
-      console.error('[VettingService] Failed to delete vetting item:', err);
-    });
+    try {
+      await this.pipelineWrite.pushEntity('EngagementVettingItem', gqlData, [], 'vetting.service:321');
+    } catch (err) {
+      this.snackBar.open(
+        `Failed to delete vetting item: ${(err as Error).message}`,
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
   }
 
   // ── Reference Counting (D-12, D-13) ──
@@ -499,6 +542,7 @@ export class VettingService {
       'dateCreated',
       'dateLastModified',
       'dateDeleted',
+      'tag',
     ];
   }
 }

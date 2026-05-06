@@ -10,8 +10,6 @@
 import { Injectable, inject } from '@angular/core';
 import type {
   DocumentInstance,
-  DocumentTemplate,
-  CustomVariable,
   InstantiateTemplateDto,
   DuplicateCheckResult,
   DocumentInstanceStatus
@@ -20,6 +18,7 @@ import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService, type GqlQueryOptions } from './graphql-read.service';
 import { DocumentTemplateService } from './document-template.service';
 import { VariableSubstitutionService } from './variable-substitution.service';
+import { DemoVisibilityService } from './demo-visibility.service';
 
 @Injectable({ providedIn: 'root' })
 export class DocumentInstanceService {
@@ -27,6 +26,7 @@ export class DocumentInstanceService {
   private readonly graphqlRead = inject(GraphqlReadService);
   private readonly documentTemplateService = inject(DocumentTemplateService);
   private readonly variableSubstitution = inject(VariableSubstitutionService);
+  private readonly demoVisibility = inject(DemoVisibilityService);
 
   /** Scalar fields for standard queries */
   private readonly scalarFields = [
@@ -43,7 +43,8 @@ export class DocumentInstanceService {
     'projectId',
     'status',
     'createdAt',
-    'updatedAt'
+    'updatedAt',
+    'tag'
   ];
 
   /**
@@ -160,7 +161,8 @@ export class DocumentInstanceService {
       gqlOptions,
     );
 
-    return result.items;
+    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
+    return this.demoVisibility.applyVisibility(result.items as (DocumentInstance & { tag?: Array<{ value: string }> | null })[]);
   }
 
   /**
@@ -184,7 +186,8 @@ export class DocumentInstanceService {
       gqlOptions,
     );
 
-    return result.items;
+    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
+    return this.demoVisibility.applyVisibility(result.items as (DocumentInstance & { tag?: Array<{ value: string }> | null })[]);
   }
 
   /**

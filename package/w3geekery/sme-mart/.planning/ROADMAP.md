@@ -54,7 +54,7 @@
   - [x] **Plan 02 (Wave 2)** — sme-mart-spa stack: build + upload + location block injection (completed 2026-04-17)
   - [x] **Plan 03 (Wave 2)** — sme-mart-login stack: build + upload + location block injection (completed 2026-04-17)
   - [x] **Plan 04 (Wave 3)** — STACKS.md documentation + smoke test suite (completed 2026-04-17)
-- [ ] **Phase 20: Fire-and-Forget Audit** (TBD plans) — Audit all `pushEntity` call sites, add telemetry, remediate CRITICAL+SIMPLE, defer complex to v1.4 (est. ~8 hrs)
+- [x] **Phase 20: Fire-and-Forget Audit** (3/3 plans) — COMPLETE 2026-04-29. Audited 60 `pushEntity` call sites (44 fire-and-forget + 16 awaited), added structured-event telemetry on receiver-rejection path, remediated 42 CRITICAL+MEDIUM call sites (await + try/catch + snackBar + re-throw + explicit `callSiteTag`), pinned all 23 class IDs with a round-trip drift gate. **Promoted from theoretical to confirmed-needed by errata 023** (2026-04-28): two fictional class IDs (MPI + EngagementVettingItem) caused silent production failures since Plan 041 / Plan 063, hidden by fire-and-forget `.catch`. UAT 1-week soak runs post-merge, non-blocking. Commits `977828c..904276d`. See [`PHASE-20-SUMMARY.md`](phases/20-fire-and-forget-audit/PHASE-20-SUMMARY.md).
 - [ ] **Phase 21: Org Documents Center Completion** (TBD plans) — Folders, colors, tags, templates, preview (est. ~20 hrs, time-boxed, scope trims on creep)
 - [ ] **Phase 22: Form Template Library** (TBD plans) — Save/reuse/fork form templates, library page, RFP wizard integration, new FormTemplate schema class (est. 22–32 hrs)
 - [ ] **Phase 23: Transparency Controls UI-SPEC + Opportunistic Implementation** (TBD plans) — Lock UI-SPEC and wireframes, research backend capabilities, code if feasible (est. 4–6 hrs if spec-only)
@@ -65,10 +65,26 @@
 <summary>🔄 v1.4 3P Onboarding & Default Engagement (Phases 24-28, 30-31) — ACTIVE 2026-04-24</summary>
 
 - [ ] **Phase 24: Demo Data Visibility Gate** (TBD plans) — Filter demo records from non-admin users via Object.tag; admin delete action (est. 4-6 hrs)
-- [ ] **Phase 25: Platform Data Audit** (TBD plans) — Inventory ZeroBias SDK data available for onboarding pre-fill (est. 4-6 hrs, research-as-phase)
-- [ ] **Phase 26: Seed Provider (ZB-as-Provider)** (TBD plans) — Create ZeroBias as provider with company_info convention (est. 5-7 hrs)
+- [x] **Phase 25: Platform Data Audit** (5 plans, Plan 01-04/5 complete 2026-04-24) — Inventory ZeroBias SDK data available for onboarding pre-fill (est. 4-6 hrs, research-as-phase)
+  - [x] **Plan 01 (Wave 0)** — Infrastructure scaffold: verify-inventory.sh, per-source template, index file (completed 2026-04-24)
+  - [x] **Plan 02 (Wave 1)** — SDK Sources audit: whoami, currentorg, orgsearch, usersearch, boundary, task (6 sources documented, completed 2026-04-24)
+  - [x] **Plan 03 (Wave 1 parallel)** — GQL Sources audit + pre-fill map synthesis: MarketplaceProfileItem fields resolve all Phase 28 form fields (completed 2026-04-24)
+  - [x] **Plan 04 (Wave 2)** — Pre-fill map synthesis + company_info convention draft: PLATFORM-DATA-INVENTORY.md refined with Known-Unknowns data-sparse guidance; COMPANY-INFO-CONVENTION-DRAFT.md created for Phase 26 ratification (completed 2026-04-24)
+- [x] **Phase 26: Seed Provider (ZB-as-Provider)** (Plan 01/3 complete 2026-04-28) — Create ZeroBias as provider with company_info convention (est. 5-7 hrs)
+  - [x] **Plan 01 (Wave 1)** — Ratify company-info convention + lock platform-provider distinguisher (option-b: MPI provider_type section) (completed 2026-04-28)
 - [ ] **Phase 27: Auth Gate + Onboarding Routing + Lazy Guard** (TBD plans) — Authenticate users, route to onboarding or board, auto-create default engagement (est. 8-12 hrs)
-- [ ] **Phase 28: Company Profile Review/Confirm Form** (TBD plans) — Pre-populate from platform data, confirm + save (est. 6-10 hrs)
+- [x] **Phase 27.5: Modernization Rule Enforcement** (INSERTED 2026-04-30, ALL COMPLETE 2026-05-01) — ESLint + pre-commit hook + CI lint gate; converted prose patterns block into machine-enforced rules. Verifier 8/8 ENF-* requirements ✅ (`.planning/phases/27.5-modernization-enforcement/27.5-VERIFICATION.md`). Director-approved pivots: Plan 03 lint-only diff-based CI (full `npm test` blocked by 1561 pre-existing violations + private-registry auth); Plan 04 inventory snapshot (INITIAL-AUDIT.md) instead of annotation sweep (~15-20 hrs avoided). Touch-It-Fix-It cleanup model adopted via MODERN-CLEANUP-1.
+  - [x] **Plan 01 (Wave 1)** — ESLint Foundation: flat config + npm run lint + ng lint (completed 2026-05-01; 6/7 patterns configured; 1561 pre-existing violations documented)
+  - [x] **Plan 02 (Wave 2)** — Pre-Commit Hook Installation: husky v9 + lint-staged gating violations at commit time; rejection + acceptance tests verified (completed 2026-05-01; latency 3.9-4.7s flagged for Director review)
+  - [x] **Plan 03 (Wave 3)** — CI Lint Gate (diff-based): `.github/workflows/lint.yml` runs `npx lint-staged --diff=...` on PR; tooling installed into RUNNER_TEMP to bypass workspace `.npmrc` private-registry auth blocker (Director-approved pivot from full `npm test` + lint)
+  - [x] **Plan 04 (Wave 4)** — Inventory Snapshot: INITIAL-AUDIT.md (12KB, 796 violations across 15 rules, methodology + per-rule top-10 violators); MODERN-CLEANUP-1 reframed from annotation sweep to touch-it-fix-it (Director-approved pivot)
+  - [x] **Plan 05 (Wave 5)** — Developer Guidance: MODERNIZATION_GUIDE.md Touch-It-Fix-It section + troubleshooting (8 BEFORE/AFTER fixes), CLAUDE.md machine-enforcement note + cross-links to all gates
+- [x] **Phase 28: Company Profile Review/Confirm Form** (5 plans, ALL COMPLETE 2026-04-30) — Pre-populate from platform data, confirm + save (est. 6-10 hrs)
+  - [x] **Plan 01 (Wave 0)** — Constants + Model: 17 section-name constants + 4 TypeScript types (struct, record DTO, snapshot, dirty-fields) (completed 2026-04-30)
+  - [x] **Plan 02 (Wave 1)** — MarketplaceProfileService adapter: GQL read + Pipeline write + dirty-diff + completion status (completed 2026-04-30)
+  - [x] **Plan 03 (Wave 3)** — CompanyProfileFormComponent: standalone, reactive form, pre-fill + save + skip flows (completed 2026-04-30)
+  - [x] **Plan 04 (Wave 4)** — Routing Integration: /onboarding/company-profile route registered in app.routes.ts (completed 2026-04-30)
+  - [x] **Plan 05 (Wave 5)** — Routing Integration Test: CP-07 getCompletionStatus test + CP-08 flow coverage map (completed 2026-04-30)
 - [ ] **Phase 29: DEFERRED TO v1.5** — Tier display, Terms of Service, ZB branding (intentionally skipped in v1.4)
 - [ ] **Phase 30: Default Project Board + Coming Soon Placeholders** (TBD plans) — Seeded project board with 3 feature stubs (est. 6-8 hrs)
 - [ ] **Phase 31: W3Geekery Dogfood + Production Smoke Test** (TBD plans) — End-to-end validation and production readiness (est. 4-6 hrs)
@@ -256,24 +272,28 @@
 
 ### Phase 20: Fire-and-Forget `pushEntity` Audit, Instrumentation + Opportunistic Remediation
 
-**Goal**: Audit all `pushEntity` call sites for silent-failure risk, add telemetry to measure real-world failure rates, and remediate any CRITICAL+SIMPLE cases in-phase. Complex remediations deferred to v1.4 as individual backlog entries.
+**Goal**: Audit all `pushEntity` / `pushEntities` call sites for silent-failure risk, add telemetry to measure real-world failure rates, and remediate any CRITICAL+SIMPLE cases in-phase. CRITICAL+COMPLEX remediations deferred to v1.5 as individual backlog entries. Director recommends executing before Phase 27 — final ordering is a GSD call.
 
-**Depends on**: None (self-contained audit + selective remediation)
+**Depends on**: None operationally. Plan 26-04 (canonical class-ID corrections, commit `b1e997b`, merged 2026-04-28) is the baseline Phase 20's class-ID re-verification audits against.
 
-**Requirements**: FF-01, FF-02, FF-03, FF-04, FF-05
+**Requirements**: FF-01..FF-08 (refreshed 2026-04-28 — see `.planning/director/phase-20-brief.md` for full text). Original FF-01..FF-05 retained; adds FF-06 (AWAITED-callers verification), FF-07 + FF-08 (WATCH-LIST patterns), and tightens FF-02 to mandate `platform.Class.getClass` re-verification of every `SME_MART_CLASS_IDS` entry at audit time.
 
-**Success Criteria** (what must be TRUE):
-  1. AUDIT.md exists in `.planning/phases/20-fire-and-forget-audit/` with 100% of `pushEntity` call sites cataloged (48+ identified), each rated for risk (CRITICAL/MEDIUM/LOW) + complexity (SIMPLE/MEDIUM/COMPLEX)
-  2. Telemetry ships — every `.catch()` fires a counted event to console + optional remote sink; UAT soak for 1 week confirms non-zero fire-and-forget failures occur in production
-  3. All CRITICAL+SIMPLE call sites have fire-and-forget removed and error state surfaced to users (toast, inline error, retry prompt); each error path covered by at least one spec
-  4. CRITICAL+MEDIUM and CRITICAL+COMPLEX call sites have individual backlog entries in `.planning/BACKLOG.md` with proposed fix approaches and complexity rationale
-  5. WATCH-LIST pattern updated: "Service method ends with `.catch(err => console.error(err))`" flagged as BLOCK for user-triggered actions going forward
+**Success Criteria** (what must be TRUE — see brief for full FF-01..FF-08 detail):
+  1. AUDIT.md exists in `.planning/phases/20-fire-and-forget-audit/` with 100% of `pushEntity` / `pushEntities` call sites cataloged (60 identified 2026-04-28; seed at `.planning/director/phase-20-call-site-audit.md`), each rated for criticality + remediation complexity
+  2. Class-ID safety re-verification table appended to AUDIT.md: every `SME_MART_CLASS_IDS` entry confirmed against `platform.Class.getClass(<name>)` at audit time, including any added since 2026-04-28
+  3. Telemetry ships — every fire-and-forget rejection produces a structured logged event tagged with `className`, `callSite`, error message, timestamp; UAT 1-week soak runs before phase close
+  4. All CRITICAL+SIMPLE call sites have fire-and-forget removed and error state surfaced to users; each error path covered by at least one spec with a correctly-shaped SDK mock (per `feedback_tests_passing_against_wrong_shape_mocks.md`)
+  5. AWAITED call sites verified — caller-surface check on each of the 16 awaited sites; any swallowing caller promoted to SIMPLE remediation list
+  6. CRITICAL+COMPLEX call sites have individual backlog entries in `.planning/BACKLOG.md` under a "Fire-and-Forget Remediation" section with proposed fix approaches and complexity rationale
+  7. WATCH-LIST patterns updated: `.catch(err => console.error(err))` is BLOCK for user-triggered actions; `(deterministic UUID v5 from schema)` comments on class-ID consts are SUSPECT — verify before trust
 
 **Plans**: TBD
 
-**Effort**: ~8 hours (audit+instrument ~5h + opportunistic remediation ~3h)
+**Effort**: ~10 hours (audit+instrument ~6h + opportunistic SIMPLE remediation ~4h)
 **Tech Stack**: TypeScript + grep + spec coverage analysis
-**Origin**: Errata 011 (director-flagged, v1.2 carry-forward)
+**Origin**: Errata 011 (director-flagged 2026-04-15) — promoted from theoretical risk to confirmed by Errata 023 (2026-04-28: two real production bugs — MPI + EngagementVettingItem fictional class IDs silently failing for months until Plan 26-04 corrected the consts)
+**Brief**: `.planning/director/phase-20-brief.md` (refreshed 2026-04-28 by Director Parks #2)
+**Audit seed**: `.planning/director/phase-20-call-site-audit.md` (60 sites: 44 fire-and-forget + 16 awaited; preliminary criticality classification)
 
 ---
 
@@ -410,7 +430,7 @@
   4. Walkthrough residue TAG-SHAPE-TEST-C cleaned up via markDeleted
   5. Unit tests for seed function and Browse Providers rendering
 
-**Plans:** TBD
+**Plans:** 4/4 plans complete
 
 **Estimates:** 5-7 hrs
 
@@ -434,11 +454,29 @@
   5. Admin users skip onboarding form and go directly to admin dashboard
   6. Object.tag populated at ingest time for both new Engagement and SmeMartProject with validated shape
 
-**Plans:** TBD
+**Plans:** 3/4 plans complete
 
 **Estimates:** 8-12 hrs
 
 **UI hint**: yes
+
+---
+
+### Phase 27.5: Modernization Rule Enforcement (ESLint + pre-commit + CI gate) (INSERTED)
+
+**Goal:** Machine-enforced modernization rules at commit time and in CI so violations physically cannot land — convert the prose patterns block (CLAUDE.md / MODERNIZATION_GUIDE.md / handoff prompts) into ESLint rules wired into a pre-commit hook + CI lint gate.
+
+**Depends on:** Phase 27 (close before introducing a new gate mid-verification)
+
+**Requirements:** ENF-01, ENF-02, ENF-03, ENF-04, ENF-05, ENF-06, ENF-07, ENF-08
+
+**Brief:** `.planning/director/phase-27.5-brief.md`
+
+**Plans:** 0 plans (run `/gsd:plan-phase 27.5` to break down)
+
+**Estimates:** 4-6 hrs
+
+**UI hint**: no
 
 ---
 
@@ -460,7 +498,7 @@
   7. Subsequent logins with complete marker → Phase 27 routes directly to Phase 30
   8. Unit tests cover pre-fill, save, skip, repeat-login-skip flows
 
-**Plans:** TBD
+**Plans:** 5/5 plans complete
 
 **Estimates:** 6-10 hrs
 
@@ -536,15 +574,16 @@ This phase is intentionally deferred from v1.4. When v1.5 begins, Phase 29 work 
 | 17. Demo Seed Scripts | 1/1 | Complete    | 2026-04-15 |
 | 18. Org Switcher | 5/5 | Complete    | 2026-04-16 |
 | 19. zbb Local Dev Stacks | 4/4 | Complete    | 2026-04-17 |
-| 20. Fire-and-Forget Audit | 0/? | Not started | — |
+| 20. Fire-and-Forget Audit | 3/3 | Complete    | 2026-04-29 (commits `977828c..904276d`) |
 | 21. Org Documents Center | 0/? | Not started | — |
 | 22. Form Template Library | 0/? | Not started | — |
 | 23. Transparency Controls UI-SPEC | 0/? | Not started | — |
 | 24. Demo Data Visibility Gate | 0/? | Not started | — |
-| 25. Platform Data Audit | 0/? | Not started | — |
-| 26. Seed Provider (ZB-as-Provider) | 0/? | Not started | — |
-| 27. Auth Gate + Routing | 0/? | Not started | — |
-| 28. Company Profile Form | 0/? | Not started | — |
+| 25. Platform Data Audit | 3/5 | In progress | 2026-04-24 (Plans 01-03 complete) |
+| 26. Seed Provider (ZB-as-Provider) | 4/4 | Complete    | 2026-04-29 |
+| 27. Auth Gate + Routing | 3/4 | Complete    | 2026-05-01 |
+| 27.5. Modernization Enforcement | 5/5 | Complete    | 2026-05-01 |
+| 28. Company Profile Form | 4/5 | Complete    | 2026-04-30 |
 | 29. DEFERRED TO v1.5 | — | Skipped | — |
 | 30. Default Project Board | 0/? | Not started | — |
 | 31. W3Geekery Dogfood + Smoke Test | 0/? | Not started | — |

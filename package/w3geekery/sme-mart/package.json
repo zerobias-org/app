@@ -29,12 +29,14 @@
     "build:vercel": "ng build --configuration vercel",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
+    "lint": "eslint . --max-warnings=0",
     "test:report": "node scripts/test-report.js",
     "e2e": "playwright test --config e2e/playwright.config.ts",
     "e2e:debug": "playwright test --config e2e/playwright.config.ts --debug",
     "e2e:report": "playwright show-report e2e/e2e-results",
     "demo:seed": "dotenv -e .env.local -- npx ts-node scripts/demo/seed.ts",
-    "demo:cleanup": "dotenv -e .env.local -- npx ts-node scripts/demo/cleanup.ts"
+    "demo:cleanup": "dotenv -e .env.local -- npx ts-node scripts/demo/cleanup.ts",
+    "prepare": "husky"
   },
   "prettier": {
     "printWidth": 100,
@@ -90,15 +92,24 @@
     "yaml": "^2.8.2"
   },
   "devDependencies": {
+    "@angular-eslint/builder": "^21.3.1",
+    "@angular-eslint/eslint-plugin": "^21.3.1",
+    "@angular-eslint/eslint-plugin-template": "^21.3.1",
+    "@angular-eslint/template-parser": "^21.3.1",
     "@angular/build": "^21.1.4",
     "@angular/cli": "^21.1.4",
     "@angular/compiler-cli": "^21.1.0",
+    "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.59.1",
     "dotenv": "^16.6.1",
     "dotenv-cli": "^11.0.0",
+    "eslint": "^10.2.1",
+    "husky": "^9.1.7",
     "jsdom": "^27.1.0",
+    "lint-staged": "^15.5.2",
     "ts-node": "^10.9.2",
     "typescript": "~5.9.2",
+    "typescript-eslint": "^8.59.1",
     "vitest": "^4.0.8"
   }
 }

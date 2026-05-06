@@ -443,9 +443,9 @@ None — all required YAML files are being created as part of this phase. No tes
   - `package/w3geekery/smemart/fields/*.yml` — Field definition patterns
   - `package/w3geekery/smemart/enums/*.yml` — Enum patterns
 
-- **`.claude/docs/SCHEMA_CHANGE_PROCESS.md`** — Full step-by-step workflow (project-local)
+- **`.planning/docs/SCHEMA_CHANGE_PROCESS.md`** — Full step-by-step workflow (project-local)
 
-- **`.claude/notes/zb-graphql-custom-schema-howto.md`** — YAML conventions, field types, enum format (project-local)
+- **`.planning/notes/zb-graphql-custom-schema-howto.md`** — YAML conventions, field types, enum format (project-local)
 
 - **ZeroBias platform dataloader** — Verified `v1.0.89` running locally; scratch DB verified running (PostgreSQL 17.6 on port 15432)
 

@@ -17,15 +17,28 @@ On first login, show the authenticated user a form pre-populated with everything
 - Phase 27's lazy guard has already ensured the user's Org has a default ZB engagement by the time this form renders.
 - Phase 27's onboarding routing sends first-time users HERE before anywhere else.
 
+### MarketplaceProfileItem storage shape (CRITICAL — corrected 2026-04-27)
+
+`MarketplaceProfileItem` does NOT have structured fields like `legalName`, `dba`, `logoUrl`. The class is generic with a `(section, data)` discriminator pattern. Each form field is its own MPI record:
+- `id` — deterministic per `(orgId, section)`. Format: `mpi-<orgId>-<section>` (e.g., `mpi-cd7105df-523d-5392-9f9a-3f83d3f30107-legal_name`). Schema accepts `string`, not strict UUID.
+- `orgId` — owning org id (scalar, indexed)
+- `section` — canonical field name from `COMPANY-INFO-CONVENTION.md` constants
+- `data` — string value. Per class spec: "JSON-serialized section-specific data blob". For plain string fields, pass plain. For structured values, prefer flat sub-sections (`primary_contact.email`) over JSON-encoded objects.
+- `status` — `active` (default), `expired`, `draft`, `archived`
+- `expiresAt` — optional ISO 8601 (used for credentials/insurance/cert items per the class description)
+
+**Pipeline.receive replace key is `id` only (validated 2026-04-27).** Per-section saves are independent — ingesting one MPI does not clobber others. See DECISIONS.md "MarketplaceProfileItem Replace Semantics".
+
 ### Deliverables
 
 1. **Review form component** (`src/app/onboarding/company-profile-form.component.ts` or similar) rendering fields per the `company_info` convention:
-   - Legal name, DBA, logo URL, short blurb, long description, primary contact, website, HQ location, years in business, employee-count bucket (exact set per Phase 26 convention).
-2. **Pre-fill logic** driven by Phase 25's pre-fill map. For each field, call the mapped SDK/GQL source and populate the form. Show "(pre-filled from platform)" indicator next to auto-filled fields; show "please provide" + a hint next to known-unknown fields.
-3. **Save handler** that writes confirmed values back via the appropriate endpoint (MarketplaceProfileItem create/update — exact operation per Phase 25 inventory). If the user made edits, only edited fields get overwritten; un-edited pre-fills are re-confirmed with the same value so we persist explicit user-confirmation state (even if no content changed).
-4. **Onboarding-complete marker.** Post-save, set some flag — likely a tag or a dedicated MarketplaceProfileItem field — indicating "this user has completed onboarding for this org." Phase 27's routing reads this flag to decide Phase 28 vs Phase 30 on subsequent logins.
-5. **"Skip for now" escape** — user can skip the form and go to Phase 30 anyway. Phase 30 shows a persistent "complete your profile" nudge until they do.
-6. **Unit tests** for: pre-fill mapping, save handler writes correct fields, onboarding-complete marker is set post-save, skip-for-now routes to Phase 30 without marking complete.
+   - Legal name, DBA, logo URL, short blurb, long description, primary contact (flattened: user_id/name/email), website, HQ location (flattened: street/city/state/country/postal_code), years in business, employee-count bucket. Exact set + flat sub-sections per Phase 26 convention.
+2. **Pre-fill logic** driven by Phase 25's pre-fill map. ONE GQL query: `MarketplaceProfileItem(orgId: ".eq.<currentOrgId>") { section, data }` → group by `section` client-side → project into form model. Per-field SDK fallbacks (e.g., `legal_name` ← `Org.name`, `logo_url` ← `Org.avatarUrl`) only apply when the corresponding MPI section has no record. Show "(pre-filled from platform)" next to auto-filled fields; "please provide" next to known-unknowns.
+3. **MarketplaceProfileService adapter** (`src/app/core/services/marketplace-profile.service.ts`) — the form binds to a struct-shaped model; the service translates between form model ↔ MPI record array. Read: query → group → project. Write: dirty fields → array of `{id, orgId, section, data, status: 'active'}` records → one `Pipeline.receive` batch. Pre-shape ids deterministically.
+4. **Save handler** uses the service. One `Pipeline.receive` per save click; data array contains only DIRTY fields (un-edited pre-fills don't need a write — replace is by id, so omitting them is a no-op). Class id: `7bcf86a5-91dc-520d-b9bf-e308b1078d46`. Pipeline id: per-environment from `environment.*.ts`.
+5. **Onboarding-complete marker.** Set as a dedicated MPI section (e.g., `section="onboarding_complete"`, `data="2026-04-27"` or boolean string) — uses the same write path as everything else. Phase 27's routing reads this section.
+6. **"Skip for now" escape** — user can skip the form and go to Phase 30 anyway. Phase 30 shows a persistent "complete your profile" nudge until they do. Skipping does NOT write the onboarding-complete marker.
+7. **Unit tests** for: pre-fill mapping, MPI record shape (id format, section names match constants), save handler writes correct fields with correct ids, onboarding-complete marker is set post-save, skip-for-now routes to Phase 30 without marking complete.
 
 ## Requirements
 

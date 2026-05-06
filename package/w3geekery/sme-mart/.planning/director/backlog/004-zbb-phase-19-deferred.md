@@ -24,7 +24,7 @@ Source: `.planning/phases/19-zbb-local-dev-stacks/19-HUMAN-UAT.md`
 
 ## Deferred — zbb friction findings (not yet escalated to zb-dx)
 
-`.claude/notes/zbb-friction-log.md` accumulated 14 findings during Phase 19. None have been promoted to `/friction` entries in `zb-dx` yet. Worth a pass to pick the top 2-3 and escalate to Kevin/Daniel so zbb improvements land before the next round of stack work.
+`.planning/notes/zbb-friction-log.md` accumulated 14 findings during Phase 19. None have been promoted to `/friction` entries in `zb-dx` yet. Worth a pass to pick the top 2-3 and escalate to Kevin/Daniel so zbb improvements land before the next round of stack work.
 
 Top candidates for escalation:
 - **011** — `zbb build` is Gradle-only, ignores `lifecycle.build:` from stack manifests.
@@ -45,4 +45,4 @@ Top candidates for escalation:
 
 - `zbb-stacks/STACKS.md`, `zbb-stacks/cloudfront-sim/*`, `zbb-stacks/sme-mart-spa/*`, `zbb-stacks/sme-mart-login/*` — stack definitions and setup scripts.
 - `src/environments/environment.stack.ts` — Angular env for the stack-mode build.
-- `.claude/notes/zbb-friction-log.md` — 14 findings, ready for escalation.
+- `.planning/notes/zbb-friction-log.md` — 14 findings, ready for escalation.

@@ -1,23 +1,27 @@
 import { TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { NoteFolderService, type NoteFolderTreeNode } from './note-folder.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { NoteFolderService } from './note-folder.service';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
 import { ImpersonationService } from './impersonation.service';
-import { fakePipelineWriteService, fakeGraphqlReadService } from '../../test-helpers/angular';
+import { DemoVisibilityService } from './demo-visibility.service';
+import { ProjectContextService } from './project-context.service';
+import { fakePipelineWriteService, fakeGraphqlReadService, fakeProjectContextService } from '../../test-helpers/angular';
 import type { GqlNoteFolderResponse } from '../gql-types/note-folder.types';
-import type { NoteFolder } from '../models';
 
 describe('NoteFolderService', () => {
   let service: NoteFolderService;
-  let mockPipeline: any;
-  let mockGraphql: any;
-  let mockImpersonation: any;
+  let mockPipeline: ReturnType<typeof fakePipelineWriteService>;
+  let mockGraphql: ReturnType<typeof fakeGraphqlReadService>;
+  let mockImpersonation: { effectiveUserId: ReturnType<typeof vi.fn> };
+  let mockSnackBar: { open: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     mockPipeline = fakePipelineWriteService();
     mockGraphql = fakeGraphqlReadService();
     mockImpersonation = { effectiveUserId: vi.fn().mockReturnValue('user-123') };
+    mockSnackBar = { open: vi.fn() };
 
     TestBed.configureTestingModule({
       providers: [
@@ -25,6 +29,7 @@ describe('NoteFolderService', () => {
         { provide: PipelineWriteService, useValue: mockPipeline },
         { provide: GraphqlReadService, useValue: mockGraphql },
         { provide: ImpersonationService, useValue: mockImpersonation },
+        { provide: MatSnackBar, useValue: mockSnackBar },
       ],
     });
 
@@ -60,6 +65,8 @@ describe('NoteFolderService', () => {
         sortOrder: 0,
         color: '#ff0000',
       }),
+      [],
+      expect.any(String), // callSiteTag
     );
 
     // Verify returned data has Neon field names (snake_case)
@@ -216,6 +223,8 @@ describe('NoteFolderService', () => {
         name: 'Renamed Folder',
         parentId: 'folder-2',
       }),
+      [],
+      expect.any(String), // callSiteTag
     );
 
     // Verify returned data has Neon field names
@@ -242,6 +251,8 @@ describe('NoteFolderService', () => {
         id: folderId,
         dateDeleted: expect.any(String),
       }),
+      [],
+      expect.any(String), // callSiteTag
     );
   });
 
@@ -377,5 +388,156 @@ describe('NoteFolderService', () => {
     expect(tree[0].children![0].id).toBe('folder-2');
     expect(tree[0].children![0].children![0].id).toBe('folder-3');
     expect(tree[0].children![0].children![0].children![0].id).toBe('folder-4');
+  });
+
+  // ──────────────────────────────────────────────────────────────────────────────
+  // Phase 20 Wave 3: Kill-network rejection paths
+  //
+  // For each remediated callSite (note-folder.service:107, :230, :260) verify
+  // that a Pipeline rejection (a) surfaces a MatSnackBar to the user and
+  // (b) re-throws so the caller observes the failure. This is the
+  // "snackbar reflects actual outcome" property — the Wave 2 contract.
+  // ──────────────────────────────────────────────────────────────────────────────
+
+  describe('Pipeline rejection error surface (Phase 20 Wave 3)', () => {
+    it('createFolder: surfaces snackbar and re-throws on Pipeline rejection (note-folder.service:107)', async () => {
+      const networkErr = new Error('Network unreachable');
+      mockPipeline.pushEntity.mockRejectedValueOnce(networkErr);
+
+      await expect(
+        service.createFolder('eng-001', { name: 'Folder X' }),
+      ).rejects.toThrow(networkErr);
+
+      expect(mockSnackBar.open).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to save folder'),
+        'Dismiss',
+        expect.objectContaining({ duration: 5000 }),
+      );
+    });
+
+    it('updateFolder: surfaces snackbar and re-throws on Pipeline rejection (note-folder.service:230)', async () => {
+      const networkErr = new Error('Network unreachable');
+      // updateFolder reads via GraphQL first (no cache), then pushes
+      mockGraphql.getById.mockResolvedValue({
+        id: 'folder-1',
+        engagementId: 'eng-001',
+        name: 'Original',
+        parentId: null,
+        accessLevel: 'boundary',
+        sortOrder: 0,
+      });
+      mockPipeline.pushEntity.mockRejectedValueOnce(networkErr);
+
+      await expect(
+        service.updateFolder('folder-1', { name: 'Renamed' }),
+      ).rejects.toThrow(networkErr);
+
+      expect(mockSnackBar.open).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to update folder'),
+        'Dismiss',
+        expect.objectContaining({ duration: 5000 }),
+      );
+    });
+
+    it('deleteFolder: surfaces snackbar and re-throws on Pipeline rejection (note-folder.service:260)', async () => {
+      const networkErr = new Error('Network unreachable');
+      mockGraphql.getById.mockResolvedValue({
+        id: 'folder-1',
+        engagementId: 'eng-001',
+        name: 'Original',
+        parentId: null,
+        accessLevel: 'boundary',
+        sortOrder: 0,
+      });
+      mockPipeline.pushEntity.mockRejectedValueOnce(networkErr);
+
+      await expect(service.deleteFolder('folder-1')).rejects.toThrow(networkErr);
+
+      expect(mockSnackBar.open).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to delete folder'),
+        'Dismiss',
+        expect.objectContaining({ duration: 5000 }),
+      );
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Demo Visibility (Phase 24 Plan 03)
+  // ---------------------------------------------------------------------------
+
+  describe('demo visibility (Phase 24 Plan 03)', () => {
+    let mockProjectContextDV: ReturnType<typeof fakeProjectContextService>;
+    let mockGqlReadDV: ReturnType<typeof fakeGraphqlReadService>;
+
+    const mockGqlReturn = [
+      { id: '1', name: 'Real', tag: null, engagementId: 'eng-1', parentId: null, dateDeleted: null } as unknown as GqlNoteFolderResponse,
+      { id: '2', name: 'Real w/ marketplace tag', tag: [{ value: 'a81cd320-243e-44eb-bdd9-9824019ef3dd' }], engagementId: 'eng-1', parentId: null, dateDeleted: null } as unknown as GqlNoteFolderResponse,
+      { id: '3', name: 'Demo (global)', tag: [{ value: '81053c14-a8e5-4939-b538-c122c7d0eb1a' }], engagementId: 'eng-1', parentId: null, dateDeleted: null } as unknown as GqlNoteFolderResponse,
+      { id: '4', name: 'Demo (legacy)', tag: [{ value: 'd618b602-21cc-40a1-a9fa-534b7bc1672c' }], engagementId: 'eng-1', parentId: null, dateDeleted: null } as unknown as GqlNoteFolderResponse,
+    ];
+
+    beforeEach(() => {
+      // Parent describe's beforeEach already instantiated TestBed; reset before
+      // reconfiguring with the demo-visibility provider set.
+      TestBed.resetTestingModule();
+      mockProjectContextDV = fakeProjectContextService(false);
+      mockGqlReadDV = fakeGraphqlReadService();
+
+      TestBed.configureTestingModule({
+        providers: [
+          NoteFolderService,
+          DemoVisibilityService,
+          { provide: ProjectContextService, useValue: mockProjectContextDV },
+          { provide: PipelineWriteService, useValue: fakePipelineWriteService() },
+          { provide: GraphqlReadService, useValue: mockGqlReadDV },
+          { provide: ImpersonationService, useValue: { effectiveUserId: vi.fn().mockReturnValue('user-123') } },
+          { provide: MatSnackBar, useValue: { open: vi.fn() } },
+        ],
+      });
+      service = TestBed.inject(NoteFolderService);
+    });
+
+    it('[DG-02] strips demo records for non-admin', async () => {
+      mockGqlReadDV.query.mockResolvedValue({
+        items: mockGqlReturn,
+        page: { pageNumber: 1, pageSize: 1000, totalCount: 4 },
+      });
+      const result = await service.getNoteFolderTree('eng-1');
+      expect(result.map(r => r.id)).toEqual(['1', '2']);
+    });
+
+    it('[DG-03] admin sees all records including demo', async () => {
+      mockProjectContextDV.setIsAdmin(true);
+      mockGqlReadDV.query.mockResolvedValue({
+        items: mockGqlReturn,
+        page: { pageNumber: 1, pageSize: 1000, totalCount: 4 },
+      });
+      const result = await service.getNoteFolderTree('eng-1');
+      expect(result.map(r => r.id)).toEqual(['1', '2', '3', '4']);
+    });
+
+    it('[DG-02] does NOT add server-side tag negation filter', async () => {
+      mockGqlReadDV.query.mockResolvedValue({
+        items: mockGqlReturn,
+        page: { pageNumber: 1, pageSize: 1000, totalCount: 4 },
+      });
+      await service.getNoteFolderTree('eng-1');
+      const callArgs = mockGqlReadDV.query.mock.calls[0];
+      const filters = callArgs[2]?.filters ?? {};
+      const filterValues = Object.values(filters).join(' ');
+      expect(filterValues).not.toContain('.not in.');
+      expect(filterValues).not.toContain('.ne.');
+    });
+
+    it('requests tag field in GQL query', async () => {
+      mockGqlReadDV.query.mockResolvedValue({
+        items: mockGqlReturn,
+        page: { pageNumber: 1, pageSize: 1000, totalCount: 4 },
+      });
+      await service.getNoteFolderTree('eng-1');
+      const callArgs = mockGqlReadDV.query.mock.calls[0];
+      const fields = callArgs[1] as string[];
+      expect(fields).toContain('tag');
+    });
   });
 });
