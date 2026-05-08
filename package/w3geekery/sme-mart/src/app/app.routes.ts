@@ -14,7 +14,7 @@ import { BidComparisonPage } from './pages/rfps/bid-comparison-page.component';
 import { ComingSoon } from './pages/coming-soon/coming-soon.component';
 import { CompanyProfileFormComponent } from './onboarding/company-profile-form.component';
 import { onboardingGuard } from './core/guards/onboarding.guard';
-import { OnboardingBootstrapShellComponent } from './onboarding/onboarding-bootstrap-shell.component';
+import { PlatformEngagementSetupComponent } from './onboarding/platform-engagement-setup.component';
 
 export const routes: Routes = [
   {
@@ -42,8 +42,9 @@ export const routes: Routes = [
       {
         path: 'onboarding',
         children: [
-          // Bootstrap failure surface (no guard on this route — it IS the guard's error handler)
-          { path: 'bootstrap', component: OnboardingBootstrapShellComponent },
+          // Platform-engagement provisioning surface (no guard on this route —
+          // it IS the guard's error handler and explicit setup destination)
+          { path: 'platform-engagement', component: PlatformEngagementSetupComponent },
           { path: 'company-profile', component: CompanyProfileFormComponent },
         ],
       },

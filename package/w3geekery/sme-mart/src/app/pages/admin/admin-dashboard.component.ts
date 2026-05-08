@@ -17,6 +17,7 @@ import { DatePipe } from '@angular/common';
 import { ZerobiasClientApp } from '@zerobias-com/zerobias-client';
 import { ZbSearchInputComponent, ZbEmptyStateContainerComponent } from '@zerobias-org/ngx-library';
 import { StarRating } from '../../shared/components/star-rating/star-rating.component';
+import { OrgProvisioningTabComponent } from './tabs/org-provisioning-tab.component';
 import { AdminService } from '../../core/services/admin.service';
 import { DemoModeService } from '../../core/services/demo-mode.service';
 import { SmeMartDbService } from '../../core/services/sme-mart-db.service';
@@ -53,6 +54,7 @@ import type {
     ZbSearchInputComponent,
     ZbEmptyStateContainerComponent,
     StarRating,
+    OrgProvisioningTabComponent,
   ],
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.scss',
@@ -158,8 +160,8 @@ export class AdminDashboard implements OnInit {
       await this.categoriesService.deleteCategory(cat.id);
       this.categoryTree.set(this.categoriesService.buildTree());
       this.snackBar.open('Category deleted', 'OK', { duration: 3000 });
-    } catch (err: any) {
-      this.snackBar.open(`Failed: ${err.message}`, 'Dismiss', { duration: 5000 });
+    } catch (err) {
+      this.snackBar.open(`Failed: ${(err as Error).message}`, 'Dismiss', { duration: 5000 });
     }
   }
 
@@ -174,8 +176,8 @@ export class AdminDashboard implements OnInit {
         await this.categoriesService.createCategory(result as Omit<Category, 'id'>);
         this.categoryTree.set(this.categoriesService.buildTree());
         this.snackBar.open('Category created', 'OK', { duration: 3000 });
-      } catch (err: any) {
-        this.snackBar.open(`Failed: ${err.message}`, 'Dismiss', { duration: 5000 });
+      } catch (err) {
+        this.snackBar.open(`Failed: ${(err as Error).message}`, 'Dismiss', { duration: 5000 });
       }
     });
   }
@@ -212,50 +214,50 @@ export class AdminDashboard implements OnInit {
   async bulkApproveReviews(): Promise<void> {
     const ids = [...this.selectedReviews()];
     if (!ids.length) return;
-    const user = await this.app.whoAmI() as any;
+    const user = await this.app.whoAmI() as { id?: unknown };
     try {
       await Promise.all(ids.map(id => this.reviewsService.approveReview(id, user.id?.toString() || '')));
       this.selectedReviews.set(new Set());
       await this.loadReviews();
       this.snackBar.open(`${ids.length} review(s) approved`, 'OK', { duration: 3000 });
-    } catch (err: any) {
-      this.snackBar.open(`Failed: ${err.message}`, 'Dismiss', { duration: 5000 });
+    } catch (err) {
+      this.snackBar.open(`Failed: ${(err as Error).message}`, 'Dismiss', { duration: 5000 });
     }
   }
 
   async bulkRejectReviews(): Promise<void> {
     const ids = [...this.selectedReviews()];
     if (!ids.length) return;
-    const user = await this.app.whoAmI() as any;
+    const user = await this.app.whoAmI() as { id?: unknown };
     try {
       await Promise.all(ids.map(id => this.reviewsService.rejectReview(id, user.id?.toString() || '')));
       this.selectedReviews.set(new Set());
       await this.loadReviews();
       this.snackBar.open(`${ids.length} review(s) rejected`, 'OK', { duration: 3000 });
-    } catch (err: any) {
-      this.snackBar.open(`Failed: ${err.message}`, 'Dismiss', { duration: 5000 });
+    } catch (err) {
+      this.snackBar.open(`Failed: ${(err as Error).message}`, 'Dismiss', { duration: 5000 });
     }
   }
 
   async approveReview(id: string): Promise<void> {
-    const user = await this.app.whoAmI() as any;
+    const user = await this.app.whoAmI() as { id?: unknown };
     try {
       await this.reviewsService.approveReview(id, user.id?.toString() || '');
       await this.loadReviews();
       this.snackBar.open('Review approved', 'OK', { duration: 3000 });
-    } catch (err: any) {
-      this.snackBar.open(`Failed: ${err.message}`, 'Dismiss', { duration: 5000 });
+    } catch (err) {
+      this.snackBar.open(`Failed: ${(err as Error).message}`, 'Dismiss', { duration: 5000 });
     }
   }
 
   async rejectReview(id: string): Promise<void> {
-    const user = await this.app.whoAmI() as any;
+    const user = await this.app.whoAmI() as { id?: unknown };
     try {
       await this.reviewsService.rejectReview(id, user.id?.toString() || '');
       await this.loadReviews();
       this.snackBar.open('Review rejected', 'OK', { duration: 3000 });
-    } catch (err: any) {
-      this.snackBar.open(`Failed: ${err.message}`, 'Dismiss', { duration: 5000 });
+    } catch (err) {
+      this.snackBar.open(`Failed: ${(err as Error).message}`, 'Dismiss', { duration: 5000 });
     }
   }
 
@@ -267,8 +269,8 @@ export class AdminDashboard implements OnInit {
     try {
       await this.demoMode.toggle(this.db);
       this.snackBar.open(`Demo mode ${this.demoMode.enabled() ? 'enabled' : 'disabled'}`, 'OK', { duration: 3000 });
-    } catch (err: any) {
-      this.snackBar.open(`Failed: ${err.message}`, 'Dismiss', { duration: 5000 });
+    } catch (err) {
+      this.snackBar.open(`Failed: ${(err as Error).message}`, 'Dismiss', { duration: 5000 });
     }
   }
 
@@ -288,13 +290,13 @@ export class AdminDashboard implements OnInit {
   }
 
   async saveSetting(key: string, value: unknown): Promise<void> {
-    const user = await this.app.whoAmI() as any;
+    const user = await this.app.whoAmI() as { id?: unknown };
     try {
       await this.adminService.updateSetting(key, value, user.id?.toString() || '');
       await this.loadSettings();
       this.snackBar.open('Setting saved', 'OK', { duration: 3000 });
-    } catch (err: any) {
-      this.snackBar.open(`Failed: ${err.message}`, 'Dismiss', { duration: 5000 });
+    } catch (err) {
+      this.snackBar.open(`Failed: ${(err as Error).message}`, 'Dismiss', { duration: 5000 });
     }
   }
 }

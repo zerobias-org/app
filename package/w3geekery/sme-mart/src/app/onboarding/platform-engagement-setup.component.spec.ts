@@ -1,90 +1,44 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Router } from '@angular/router';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonModule } from '@angular/material/button';
-import { OnboardingBootstrapShellComponent } from './onboarding-bootstrap-shell.component';
+import { MatIconModule } from '@angular/material/icon';
+import { PlatformEngagementSetupComponent } from './platform-engagement-setup.component';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
-describe('OnboardingBootstrapShellComponent', () => {
-  let component: OnboardingBootstrapShellComponent;
-  let fixture: ComponentFixture<OnboardingBootstrapShellComponent>;
-  let router: { navigate: ReturnType<typeof vi.fn> };
+describe('PlatformEngagementSetupComponent', () => {
+  let component: PlatformEngagementSetupComponent;
+  let fixture: ComponentFixture<PlatformEngagementSetupComponent>;
 
   beforeEach(async () => {
-    // Create mock router
-    router = { navigate: vi.fn() };
-
     await TestBed.configureTestingModule({
-      imports: [OnboardingBootstrapShellComponent, MatProgressSpinnerModule, MatButtonModule],
-      providers: [{ provide: Router, useValue: router }],
+      imports: [PlatformEngagementSetupComponent, MatButtonModule, MatIconModule],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(OnboardingBootstrapShellComponent);
+    fixture = TestBed.createComponent(PlatformEngagementSetupComponent);
     component = fixture.componentInstance;
-  });
-
-  it('Test 1: Component initializes with isLoading=true by default', () => {
     fixture.detectChanges();
-    expect(component.isLoading).toBe(true);
-    expect(component.errorMessage).toBeNull();
   });
 
-  it('Test 2: Query param ?error=bootstrap-failed sets errorMessage and isLoading=false', () => {
-    // Mock window.location.search
-    const originalLocation = window.location;
+  it('renders the holding-page heading', () => {
+    const heading = fixture.nativeElement.querySelector('h1');
+    expect(heading).toBeTruthy();
+    expect(heading.textContent).toContain('being set up');
+  });
+
+  it('refresh() triggers window.location.reload()', () => {
+    const reloadSpy = vi.fn();
     Object.defineProperty(window, 'location', {
-      value: { search: '?error=bootstrap-failed' },
+      value: { reload: reloadSpy },
       writable: true,
       configurable: true,
     });
 
-    try {
-      component.ngOnInit();
+    component.refresh();
 
-      expect(component.isLoading).toBe(false);
-      expect(component.errorMessage).toContain('encountered an issue');
-    } finally {
-      Object.defineProperty(window, 'location', {
-        value: originalLocation,
-        writable: true,
-        configurable: true,
-      });
-    }
+    expect(reloadSpy).toHaveBeenCalled();
   });
 
-  it('Test 3: dismissError() calls router.navigate to /login', () => {
-    component.dismissError();
-    expect(router.navigate).toHaveBeenCalledWith(['/login']);
-  });
-
-  it('Test 4: Template shows spinner during loading, hides on error', () => {
-    // Test 1: Loading state shows spinner
-    component.isLoading = true;
-    component.errorMessage = null;
-    fixture.detectChanges();
-    let spinnerEl = fixture.nativeElement.querySelector('mat-progress-spinner');
-    expect(spinnerEl).toBeTruthy();
-
-    // Test 2: Error state shows error message, no spinner
-    component.isLoading = false;
-    component.errorMessage = 'Test error';
-    fixture.changeDetectorRef.markForCheck();
-    fixture.detectChanges();
-
-    spinnerEl = fixture.nativeElement.querySelector('mat-progress-spinner');
+  it('does not render a spinner (no auto-fire provisioning)', () => {
+    const spinnerEl = fixture.nativeElement.querySelector('mat-progress-spinner');
     expect(spinnerEl).toBeFalsy();
-
-    const errorEl = fixture.nativeElement.querySelector('.error-text');
-    expect(errorEl).toBeTruthy();
-    expect(errorEl.textContent).toContain('Test error');
-  });
-
-  it('Test 5: Error message is rendered when errorMessage is set', () => {
-    component.isLoading = false;
-    component.errorMessage = 'Custom error message';
-    fixture.detectChanges();
-
-    const errorEl = fixture.nativeElement.querySelector('.error-text');
-    expect(errorEl.textContent).toContain('Custom error message');
   });
 });

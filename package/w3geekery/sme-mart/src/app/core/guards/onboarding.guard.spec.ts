@@ -4,7 +4,7 @@ import { Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/ro
 import { of } from 'rxjs';
 import { ZerobiasClientApi, ZerobiasClientApp } from '@zerobias-com/zerobias-client';
 import { onboardingGuard } from './onboarding.guard';
-import { OnboardingBootstrapService } from '../services/onboarding-bootstrap.service';
+import { PlatformEngagementProvisioner } from '../services/platform-engagement-provisioner.service';
 import { MarketplaceProfileService } from '../services/marketplace-profile.service';
 import { ProjectContextService } from '../services/project-context.service';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
@@ -19,7 +19,7 @@ describe('onboardingGuard', () => {
       getOrgApi: () => { getRequestOrgMember: ReturnType<typeof vi.fn> };
     };
   };
-  let bootstrapService: { ensureDefaultEngagement: ReturnType<typeof vi.fn> };
+  let provisioner: { isOrgProvisioned: ReturnType<typeof vi.fn> };
   let profileService: { getCompletionStatus: ReturnType<typeof vi.fn> };
   let projectContext: { setIsAdmin: ReturnType<typeof vi.fn> };
   let getRequestOrgMemberMock: ReturnType<typeof vi.fn>;
@@ -37,9 +37,8 @@ describe('onboardingGuard', () => {
   };
 
   beforeEach(() => {
-    // Create mocks
     router = { createUrlTree: vi.fn() };
-    bootstrapService = { ensureDefaultEngagement: vi.fn() };
+    provisioner = { isOrgProvisioned: vi.fn().mockResolvedValue(true) };
     profileService = { getCompletionStatus: vi.fn() };
     projectContext = { setIsAdmin: vi.fn() };
 
@@ -55,7 +54,9 @@ describe('onboardingGuard', () => {
       toUUID: vi.fn((id: string) => id),
       danaClient: {
         getMeApi: vi.fn().mockReturnValue({
-          listMyOrgs: vi.fn(),
+          listMyOrgs: vi.fn().mockResolvedValue([
+            { id: 'org-456', name: 'Test Org', slug: 'testorg', partyId: 'party-789' },
+          ]),
         }),
         getOrgApi: vi.fn().mockReturnValue({
           getRequestOrgMember: getRequestOrgMemberMock,
@@ -63,7 +64,6 @@ describe('onboardingGuard', () => {
       },
     };
 
-    // Setup default router behavior
     router.createUrlTree.mockImplementation((path: string | unknown[]) => {
       const pathStr = Array.isArray(path) ? path.join('/') : path;
       return { toString: () => pathStr };
@@ -74,7 +74,7 @@ describe('onboardingGuard', () => {
         { provide: Router, useValue: router },
         { provide: ZerobiasClientApp, useValue: app },
         { provide: ZerobiasClientApi, useValue: clientApi },
-        { provide: OnboardingBootstrapService, useValue: bootstrapService },
+        { provide: PlatformEngagementProvisioner, useValue: provisioner },
         { provide: MarketplaceProfileService, useValue: profileService },
         { provide: ProjectContextService, useValue: projectContext },
       ],
@@ -83,160 +83,51 @@ describe('onboardingGuard', () => {
     injector = TestBed.inject(Injector);
   });
 
-  it('Test 1: Valid session → routes based on completion status', async () => {
-    app.whoAmI.mockResolvedValue(mockWhoAmI);
-    app.getCurrentOrgId.mockReturnValue('org-456');
-    clientApi.danaClient.getMeApi().listMyOrgs.mockResolvedValue([
-      { id: 'org-456', partyId: 'party-789', name: 'Test Org' },
-    ]);
-    bootstrapService.ensureDefaultEngagement.mockResolvedValue({
-      engagementId: 'eng-123',
-      projectId: 'proj-123',
-      created: true,
-    });
-    profileService.getCompletionStatus.mockResolvedValue(false); // Incomplete
+  // ── Session checks ──
 
-    const result = await runInInjectionContext(injector, () => onboardingGuard(mockRoute, mockState));
-
-    expect(bootstrapService.ensureDefaultEngagement).toHaveBeenCalledWith('org-456', 'user-123', 'party-789');
-    expect(router.createUrlTree).toHaveBeenCalledWith(['/onboarding/company-profile']);
-    expect(result.toString()).toContain('/onboarding/company-profile');
-  });
-
-  it('Test 2: Complete profile → routes to /projects', async () => {
-    app.whoAmI.mockResolvedValue(mockWhoAmI);
-    app.getCurrentOrgId.mockReturnValue('org-456');
-    clientApi.danaClient.getMeApi().listMyOrgs.mockResolvedValue([
-      { id: 'org-456', partyId: 'party-789', name: 'Test Org' },
-    ]);
-    bootstrapService.ensureDefaultEngagement.mockResolvedValue({
-      engagementId: 'eng-123',
-      projectId: 'proj-123',
-      created: false,
-    });
-    profileService.getCompletionStatus.mockResolvedValue(true); // Complete
-
-    const result = await runInInjectionContext(injector, () => onboardingGuard(mockRoute, mockState));
-
-    expect(router.createUrlTree).toHaveBeenCalledWith(['/projects']);
-    expect(result.toString()).toContain('/projects');
-  });
-
-  it('Test 3: Bootstrap fails → routes to /onboarding/bootstrap with error param', async () => {
-    app.whoAmI.mockResolvedValue(mockWhoAmI);
-    app.getCurrentOrgId.mockReturnValue('org-456');
-    clientApi.danaClient.getMeApi().listMyOrgs.mockResolvedValue([
-      { id: 'org-456', partyId: 'party-789', name: 'Test Org' },
-    ]);
-    bootstrapService.ensureDefaultEngagement.mockRejectedValue(new Error('Bootstrap failed'));
-
-    const result = await runInInjectionContext(injector, () => onboardingGuard(mockRoute, mockState));
-
-    expect(router.createUrlTree).toHaveBeenCalledWith(['/onboarding/bootstrap'], {
-      queryParams: { error: 'bootstrap-failed' },
-    });
-    expect(result.toString()).toContain('/onboarding/bootstrap');
-  });
-
-  it('Test 4: Invalid session (whoAmI fails) → redirects to /login', async () => {
+  it('whoAmI fails → redirects to /login', async () => {
     app.whoAmI.mockRejectedValue(new Error('Unauthorized'));
 
-    const result = await runInInjectionContext(injector, () => onboardingGuard(mockRoute, mockState));
+    const result = await runInInjectionContext(injector, () =>
+      onboardingGuard(mockRoute, mockState),
+    );
 
     expect(router.createUrlTree).toHaveBeenCalledWith(['/login']);
     expect(result.toString()).toContain('/login');
   });
 
-  it('Test 5: whoAmI returns null → redirects to /login', async () => {
+  it('whoAmI returns null → redirects to /login', async () => {
     app.whoAmI.mockResolvedValue(null);
 
-    const result = await runInInjectionContext(injector, () => onboardingGuard(mockRoute, mockState));
+    const result = await runInInjectionContext(injector, () =>
+      onboardingGuard(mockRoute, mockState),
+    );
 
     expect(router.createUrlTree).toHaveBeenCalledWith(['/login']);
     expect(result.toString()).toContain('/login');
   });
 
-  it('Test 6: No orgId → redirects to /login', async () => {
+  it('No orgId → redirects to /login', async () => {
     app.whoAmI.mockResolvedValue(mockWhoAmI);
     app.getCurrentOrgId.mockReturnValue(null);
 
-    const result = await runInInjectionContext(injector, () => onboardingGuard(mockRoute, mockState));
+    const result = await runInInjectionContext(injector, () =>
+      onboardingGuard(mockRoute, mockState),
+    );
 
     expect(router.createUrlTree).toHaveBeenCalledWith(['/login']);
     expect(result.toString()).toContain('/login');
   });
 
-  it('Test 7: Completion status check error → routes to /onboarding/bootstrap', async () => {
-    app.whoAmI.mockResolvedValue(mockWhoAmI);
-    app.getCurrentOrgId.mockReturnValue('org-456');
-    clientApi.danaClient.getMeApi().listMyOrgs.mockResolvedValue([
-      { id: 'org-456', partyId: 'party-789', name: 'Test Org' },
-    ]);
-    bootstrapService.ensureDefaultEngagement.mockResolvedValue({
-      engagementId: 'eng-123',
-      projectId: 'proj-123',
-      created: true,
-    });
-    profileService.getCompletionStatus.mockRejectedValue(new Error('GQL query failed'));
+  // ── Admin signal (read-only) ──
 
-    await runInInjectionContext(injector, () => onboardingGuard(mockRoute, mockState));
-
-    expect(router.createUrlTree).toHaveBeenCalledWith(['/onboarding/bootstrap'], {
-      queryParams: { error: 'bootstrap-failed' },
-    });
-  });
-
-  it('Test 8: Observable return from getCompletionStatus (true) → routes to /projects', async () => {
-    app.whoAmI.mockResolvedValue(mockWhoAmI);
-    app.getCurrentOrgId.mockReturnValue('org-456');
-    clientApi.danaClient.getMeApi().listMyOrgs.mockResolvedValue([
-      { id: 'org-456', partyId: 'party-789', name: 'Test Org' },
-    ]);
-    bootstrapService.ensureDefaultEngagement.mockResolvedValue({
-      engagementId: 'eng-123',
-      projectId: 'proj-123',
-      created: false,
-    });
-    profileService.getCompletionStatus.mockReturnValue(of(true)); // Observable<true>
-
-    const result = await runInInjectionContext(injector, () => onboardingGuard(mockRoute, mockState));
-
-    expect(router.createUrlTree).toHaveBeenCalledWith(['/projects']);
-    expect(result.toString()).toContain('/projects');
-  });
-
-  it('Test 9: Bootstrap call with correct params', async () => {
-    app.whoAmI.mockResolvedValue(mockWhoAmI);
-    app.getCurrentOrgId.mockReturnValue('org-456');
-    clientApi.danaClient.getMeApi().listMyOrgs.mockResolvedValue([
-      { id: 'org-456', partyId: 'party-789', name: 'Test Org' },
-    ]);
-    bootstrapService.ensureDefaultEngagement.mockResolvedValue({
-      engagementId: 'eng-123',
-      projectId: 'proj-123',
-      created: true,
-    });
-    profileService.getCompletionStatus.mockResolvedValue(false);
-
-    await runInInjectionContext(injector, () => onboardingGuard(mockRoute, mockState));
-
-    expect(bootstrapService.ensureDefaultEngagement).toHaveBeenCalledWith(
-      'org-456',
-      'user-123',
-      'party-789',
-    );
-  });
-
-  describe('admin branch (AR-02)', () => {
+  describe('admin signal', () => {
     beforeEach(() => {
       app.whoAmI.mockResolvedValue(mockWhoAmI);
       app.getCurrentOrgId.mockReturnValue('org-456');
-      clientApi.danaClient.getMeApi().listMyOrgs.mockResolvedValue([
-        { id: 'org-456', partyId: 'party-789', name: 'Test Org' },
-      ]);
     });
 
-    it('Test 10: admin user → routes to /admin', async () => {
+    it('admin user → returns true (no force-redirect)', async () => {
       getRequestOrgMemberMock.mockResolvedValue({ admin: true });
 
       const result = await runInInjectionContext(injector, () =>
@@ -244,20 +135,11 @@ describe('onboardingGuard', () => {
       );
 
       expect(getRequestOrgMemberMock).toHaveBeenCalledWith('user-123');
-      expect(router.createUrlTree).toHaveBeenCalledWith(['/admin']);
-      expect(result.toString()).toContain('/admin');
+      expect(result).toBe(true);
+      expect(router.createUrlTree).not.toHaveBeenCalledWith(['/admin']);
     });
 
-    it('Test 11: admin path does NOT invoke getCompletionStatus or bootstrap', async () => {
-      getRequestOrgMemberMock.mockResolvedValue({ admin: true });
-
-      await runInInjectionContext(injector, () => onboardingGuard(mockRoute, mockState));
-
-      expect(profileService.getCompletionStatus).not.toHaveBeenCalled();
-      expect(bootstrapService.ensureDefaultEngagement).not.toHaveBeenCalled();
-    });
-
-    it('Test 12: projectContext.setIsAdmin(true) is called for admin users', async () => {
+    it('setIsAdmin(true) is called for admin users', async () => {
       getRequestOrgMemberMock.mockResolvedValue({ admin: true });
 
       await runInInjectionContext(injector, () => onboardingGuard(mockRoute, mockState));
@@ -265,13 +147,8 @@ describe('onboardingGuard', () => {
       expect(projectContext.setIsAdmin).toHaveBeenCalledWith(true);
     });
 
-    it('Test 13: projectContext.setIsAdmin(false) is called for non-admin users', async () => {
+    it('setIsAdmin(false) is called for non-admin users', async () => {
       getRequestOrgMemberMock.mockResolvedValue({ admin: false });
-      bootstrapService.ensureDefaultEngagement.mockResolvedValue({
-        engagementId: 'eng-123',
-        projectId: 'proj-123',
-        created: false,
-      });
       profileService.getCompletionStatus.mockResolvedValue(true);
 
       await runInInjectionContext(injector, () => onboardingGuard(mockRoute, mockState));
@@ -279,20 +156,97 @@ describe('onboardingGuard', () => {
       expect(projectContext.setIsAdmin).toHaveBeenCalledWith(false);
     });
 
-    it('Test 14: admin probe failure → defaults to non-admin and continues normal flow', async () => {
+    it('admin probe failure → defaults to non-admin and continues normal flow', async () => {
       getRequestOrgMemberMock.mockRejectedValue(new Error('SDK call failed'));
-      bootstrapService.ensureDefaultEngagement.mockResolvedValue({
-        engagementId: 'eng-123',
-        projectId: 'proj-123',
-        created: false,
-      });
       profileService.getCompletionStatus.mockResolvedValue(true);
 
       await runInInjectionContext(injector, () => onboardingGuard(mockRoute, mockState));
 
       expect(projectContext.setIsAdmin).toHaveBeenCalledWith(false);
-      expect(bootstrapService.ensureDefaultEngagement).toHaveBeenCalled();
-      expect(router.createUrlTree).toHaveBeenCalledWith(['/projects']);
+    });
+
+    it('admin path does NOT call provisioner.isOrgProvisioned or completion check', async () => {
+      getRequestOrgMemberMock.mockResolvedValue({ admin: true });
+
+      await runInInjectionContext(injector, () => onboardingGuard(mockRoute, mockState));
+
+      expect(provisioner.isOrgProvisioned).not.toHaveBeenCalled();
+      expect(profileService.getCompletionStatus).not.toHaveBeenCalled();
+    });
+  });
+
+  // ── Provisioning probe (read-only, never auto-creates) ──
+
+  describe('provisioning probe', () => {
+    beforeEach(() => {
+      app.whoAmI.mockResolvedValue(mockWhoAmI);
+      app.getCurrentOrgId.mockReturnValue('org-456');
+    });
+
+    it('non-admin + org NOT provisioned → redirects to /onboarding/platform-engagement', async () => {
+      provisioner.isOrgProvisioned.mockResolvedValue(false);
+
+      const result = await runInInjectionContext(injector, () =>
+        onboardingGuard(mockRoute, mockState),
+      );
+
+      expect(provisioner.isOrgProvisioned).toHaveBeenCalledWith('org-456', 'Test Org', 'testorg');
+      expect(router.createUrlTree).toHaveBeenCalledWith(['/onboarding/platform-engagement']);
+      expect(result.toString()).toContain('/onboarding/platform-engagement');
+    });
+
+    it('non-admin + probe returns false → completion is NOT checked (no fall-through)', async () => {
+      provisioner.isOrgProvisioned.mockResolvedValue(false);
+
+      await runInInjectionContext(injector, () => onboardingGuard(mockRoute, mockState));
+
+      expect(profileService.getCompletionStatus).not.toHaveBeenCalled();
+    });
+
+    it('non-admin + provisioned + profile complete → returns true (stays where user navigated)', async () => {
+      provisioner.isOrgProvisioned.mockResolvedValue(true);
+      profileService.getCompletionStatus.mockResolvedValue(true);
+
+      const result = await runInInjectionContext(injector, () =>
+        onboardingGuard(mockRoute, mockState),
+      );
+
+      expect(result).toBe(true);
+    });
+
+    it('non-admin + provisioned + profile incomplete → redirects to /onboarding/company-profile', async () => {
+      provisioner.isOrgProvisioned.mockResolvedValue(true);
+      profileService.getCompletionStatus.mockResolvedValue(false);
+
+      const result = await runInInjectionContext(injector, () =>
+        onboardingGuard(mockRoute, mockState),
+      );
+
+      expect(router.createUrlTree).toHaveBeenCalledWith(['/onboarding/company-profile']);
+      expect(result.toString()).toContain('/onboarding/company-profile');
+    });
+
+    it('completion check supports Observable<boolean> return shape', async () => {
+      provisioner.isOrgProvisioned.mockResolvedValue(true);
+      profileService.getCompletionStatus.mockReturnValue(of(true));
+
+      const result = await runInInjectionContext(injector, () =>
+        onboardingGuard(mockRoute, mockState),
+      );
+
+      expect(result).toBe(true);
+    });
+
+    it('completion check error → redirects to /onboarding/company-profile (not holding page)', async () => {
+      provisioner.isOrgProvisioned.mockResolvedValue(true);
+      profileService.getCompletionStatus.mockRejectedValue(new Error('GQL boundary down'));
+
+      const result = await runInInjectionContext(injector, () =>
+        onboardingGuard(mockRoute, mockState),
+      );
+
+      expect(router.createUrlTree).toHaveBeenCalledWith(['/onboarding/company-profile']);
+      expect(result.toString()).toContain('/onboarding/company-profile');
     });
   });
 });

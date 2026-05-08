@@ -18,7 +18,7 @@ export const environment = {
   // Generated from NEON_DATABASE_URL in .env.local via scripts/gen-neon-env.mjs
   neonConnectionString: NEON_DATABASE_URL,
   // AuditgraphDB Pipeline + Boundary (UAT — SME Marketplace DEV boundary, W3Geekery org)
-  pipelineId: 'f6d1f579-fe02-4158-b99e-a55113fd70cb',
+  pipelineId: '43f08afd-7ab9-4e99-a93c-619c46adaabe',
   boundaryId: 'c15fb2dc-4f8c-48b5-b27a-707bd516b005',
   // Feature flags
   featureFlags: {

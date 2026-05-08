@@ -7,41 +7,135 @@ import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
 import { slugify } from '../utils/slug';
 
-/** Tag type used for all onboarding bootstrap tags */
+/** Tag type used for the platform-engagement marketplace tag */
 const TAG_TYPE = 'marketplace';
 
 /**
- * OnboardingBootstrapService encapsulates the 5-call recipe (Steps A–E) for creating
- * a default ZeroBias engagement for an organization on first load.
+ * Supply-side slug used in the engagement-identity tag name.
+ * Per DECISIONS.md "Engagement Tag Naming: Identity Tag (`{supply}-to-{demand}`)" (2026-05-07).
+ * For the platform engagement, supply = ZeroBias.
+ */
+const PLATFORM_SUPPLY_SLUG = 'zerobias';
+
+/**
+ * Marketplace operator org UUID — owns all sme-mart.eng.* identity tags.
+ * Today this is W3Geekery (the org currently running SME Mart). When SME Mart graduates
+ * into the ZB platform, flip this to ZeroBias. Externalize to env config at that time
+ * (BACKLOG: marketplace-operator-config). Hardcoded here for now per Clark direction
+ * 2026-05-07 — env plumbing deferred.
+ */
+const MARKETPLACE_OPERATOR_ORG_ID = 'cd7105df-523d-5392-9f9a-3f83d3f30107'; // W3Geekery
+
+/**
+ * Display strings for the auto-provisioned Engagement record + its child Project.
+ * Easy-to-change so verbiage iterates without hunting through the recipe body.
+ * Both follow the supply-to-demand arrow convention from DECISIONS.md.
+ */
+const platformEngagementDescription = (orgName: string) =>
+  `Platform Services Engagement: ZeroBias ➡️ ${orgName}`;
+const PLATFORM_PROJECT_NAME = 'ZeroBias Platform';
+const platformProjectDescription = (orgName: string) =>
+  `${orgName}'s gateway into ZeroBias — tasks, notes, and communication tied to the ZeroBias ➡️ ${orgName} platform engagement live here.`;
+
+/**
+ * PlatformEngagementProvisioner provisions the org's "platform engagement" — the
+ * (org <-> ZeroBias) engagement for platform services, distinct from the org's
+ * vendor engagements with marketplace providers.
+ *
+ * 5-call recipe (Steps A–E):
+ *   A. Create hydra marketplace Tag for the engagement
+ *   B. Create platform coordination Task assigned to the user
+ *   C. Push the Engagement entity (tagged + task-linked)
+ *   D. Tag the coordination Task with the engagement tag
+ *   E. Push the engagement's "ZeroBias Platform" project
  *
  * Each step has an idempotency probe to detect and skip already-created resources,
- * enabling failure-resumable bootstrap on retry.
+ * enabling failure-resumable provisioning on retry.
  *
- * Per Phase 27 CONTEXT.md and bootstrap-w3geekery-engagement.md.
+ * Per Phase 27 CONTEXT.md.
  */
 @Injectable({ providedIn: 'root' })
-export class OnboardingBootstrapService {
+export class PlatformEngagementProvisioner {
   private readonly clientApi = inject(ZerobiasClientApi);
   private readonly pipelineWrite = inject(PipelineWriteService);
   private readonly graphqlRead = inject(GraphqlReadService);
   private readonly snackBar = inject(MatSnackBar);
 
   /**
-   * Ensures the current Org has a default ZeroBias engagement.
+   * Read-only: returns true iff the org has a provisioned platform engagement.
+   *
+   * Authoritative signal is the hydra marketplace Tag named
+   * `sme-mart.eng.zerobias-to-{orgSlug}` (per DECISIONS.md 2026-05-07 identity-tag
+   * convention: `{supply}-to-{demand}`). Tag is owned by the marketplace operator
+   * org (today W3Geekery) so probes from any operator-admin session resolve
+   * correctly. Hydra is independent of AuditgraphDB, so this probe is decoupled
+   * from GQL boundary failures.
+   *
+   * Slug source (in order): platform-canonical `orgSlug` from `Org.slug`, or
+   * `slugify(orgName)` fallback. Platform slug is preferred because it's
+   * lowercased nmtoken with no whitespace/punctuation surprises (e.g.
+   * "Brian Hierholzer Inc." -> platform=`brianhierholzer`, fallback=`brian-hierholzer-inc`).
+   *
+   * Returns `false` on probe error — caller treats "no tag found" and "probe
+   * failed" the same: route the user to the holding page; do not auto-create.
+   *
+   * Used by `onboardingGuard` to decide whether the user can use the app.
+   * NEVER triggers any create — pure read.
+   */
+  async isOrgProvisioned(orgId: string, orgName: string, orgSlug?: string): Promise<boolean> {
+    if (!orgId || !orgName) return false;
+    const slug = orgSlug || slugify(orgName);
+    const tagName = `sme-mart.eng.${PLATFORM_SUPPLY_SLUG}-to-${slug}`;
+    try {
+      const body = new TagSearchBody();
+      body.name = tagName;
+      const result = await this.clientApi.hydraClient
+        .getTagApi()
+        .searchTags(1, 1, undefined, body);
+      return !!(result && result.items && result.items.length > 0);
+    } catch (err) {
+      console.warn('[PLATFORM_ENGAGEMENT_PROBE_FAILED]', { orgId, error: err });
+      return false;
+    }
+  }
+
+  /**
+   * Ensures the target Org has a platform engagement.
    * Idempotent: fires at most once per Org. Failure-resumable: retries detect partial state.
    *
-   * @param currentOrgId — Buyer org UUID
-   * @param currentUserId — Buyer user UUID
-   * @param currentPartyId — Buyer user's party UUID (for task assignment)
+   * RACI on the coordination Task (verified 2026-05-06 via UAT smoke test):
+   *   - assigned    = target org's org-party (R: org collectively responsible — surfaces in Boundary Manager)
+   *   - accountable = target org's admin user-party (A: human signs off — surfaces in Governance with boundary filter)
+   *   - approvers   = []                                                       (C)
+   *   - notified    = []                                                       (I; accountable surfacing covers it)
+   *
+   * @param input.currentOrgId — Buyer org UUID
+   * @param input.currentOrgName — Buyer org display name (for tag/task/engagement strings)
+   * @param input.currentOrgSlug — Buyer org slug (preferred); falls back to slugify(orgName)
+   * @param input.buyerUserId — Buyer-side admin user principal UUID (stamped on engagement.buyerZerobiasUserId)
+   * @param input.assignedPartyId — Party UUID for task `assigned` (R) — typically the target org's org-party
+   * @param input.accountablePartyId — Party UUID for task `accountable` (A) — typically the buyer-side admin user's party
    * @returns { engagementId, projectId, created: boolean }
    * @throws Error if any step fails after snackbar
    */
-  async ensureDefaultEngagement(
-    currentOrgId: string,
-    currentUserId: string,
-    currentPartyId: string,
-  ): Promise<{ engagementId: string; projectId: string; created: boolean }> {
-    // Step 0: Discovery query — check if default engagement already exists
+  async ensurePlatformEngagement(input: {
+    currentOrgId: string;
+    currentOrgName: string;
+    currentOrgSlug?: string;
+    buyerUserId: string;
+    assignedPartyId: string;
+    accountablePartyId: string;
+  }): Promise<{ engagementId: string; projectId: string; created: boolean }> {
+    const {
+      currentOrgId,
+      currentOrgName,
+      currentOrgSlug,
+      buyerUserId,
+      assignedPartyId,
+      accountablePartyId,
+    } = input;
+
+    // Step 0: Discovery query — check if platform engagement already exists
     const existing = await this.graphqlRead.query<{
       id: string;
       tag: Array<{ value: string }>;
@@ -53,33 +147,36 @@ export class OnboardingBootstrapService {
       return { engagementId: existing.items[0].id, projectId: '', created: false };
     }
 
-    // Org slug for naming
-    const orgName = await this.getOrgName(currentOrgId);
-    const orgSlug = slugify(orgName);
+    const orgSlug = currentOrgSlug || slugify(currentOrgName);
 
     // Step A: Create hydra tag
-    const tagId = await this.ensureTag(orgSlug, currentOrgId, orgName);
+    const tagId = await this.ensureTag(orgSlug, currentOrgId, currentOrgName);
 
-    // Step B: Create coordination task
-    const taskId = await this.ensureTask(orgName, currentOrgId, currentPartyId);
+    // Step B: Create coordination task with proper RACI
+    const taskId = await this.ensureTask(currentOrgName, currentOrgId, assignedPartyId, accountablePartyId);
 
     // Step C: Ingest Engagement
-    const engagementId = await this.ensureEngagement(orgName, currentOrgId, currentUserId, tagId, taskId);
+    const engagementId = await this.ensureEngagement(currentOrgName, currentOrgId, buyerUserId, tagId, taskId);
 
     // Step D: Tag the task with the engagement tag
     await this.ensureTaskTagged(taskId, tagId);
 
     // Step E: Ingest SmeMartProject
-    const projectId = await this.ensureProject(orgName, engagementId, tagId);
+    const projectId = await this.ensureProject(currentOrgName, engagementId, tagId);
 
     return { engagementId, projectId, created: true };
   }
 
   /**
    * Step A: Create or reuse a hydra Tag for the engagement.
+   *
+   * Tag name follows the {supply}-to-{demand} identity convention (DECISIONS.md
+   * 2026-05-07). Tag ownerId is the marketplace operator org (W3Geekery today)
+   * so that probes from any operator-admin session resolve correctly — the prior
+   * scheme owned tags by the customer org, which made cross-customer probes blind.
    */
-  private async ensureTag(orgSlug: string, orgId: string, orgName: string): Promise<string> {
-    const tagName = `sme-mart.eng.${orgSlug}-default-zb`;
+  private async ensureTag(orgSlug: string, _orgId: string, orgName: string): Promise<string> {
+    const tagName = `sme-mart.eng.${PLATFORM_SUPPLY_SLUG}-to-${orgSlug}`;
     try {
       // Probe: does tag already exist?
       const body = new TagSearchBody();
@@ -92,12 +189,12 @@ export class OnboardingBootstrapService {
         return String(existing.items[0].id);
       }
 
-      // Create — per DECISIONS.md "Marketplace tagType Is Preferred"
+      // Create — per DECISIONS.md "Marketplace tagType Is Preferred" + 2026-05-07 ownership rule.
       const createBody = new CreateTagBody(
         tagName,
         undefined, // id — auto-generated
-        `Tag for ${orgName}'s default ZeroBias platform-services engagement.`,
-        orgId ? (orgId as never) : undefined, // Pass as-is for test compatibility
+        `Marketplace tag for the platform-services engagement: ZeroBias ➡️ ${orgName}.`,
+        MARKETPLACE_OPERATOR_ORG_ID as never,
         new Nmtoken(TAG_TYPE),
       );
 
@@ -105,12 +202,12 @@ export class OnboardingBootstrapService {
 
       return String(created.id);
     } catch (err) {
-      console.warn('[ONBOARDING_GUARD_FAILURE]', {
+      console.warn('[PLATFORM_ENGAGEMENT_FAILURE]', {
         step: 'A',
-        callSiteTag: 'onboarding-bootstrap:ensure-tag',
+        callSiteTag: 'platform-engagement:ensure-tag',
         error: err,
       });
-      this.snackBar.open('Onboarding in progress — please retry in a moment.', 'Dismiss', {
+      this.snackBar.open('Setup in progress — please retry in a moment.', 'Dismiss', {
         duration: 5000,
       });
       throw err;
@@ -119,8 +216,16 @@ export class OnboardingBootstrapService {
 
   /**
    * Step B: Create the engagement coordination Task (meta-tracker).
+   *
+   * RACI: assigned = org-party (R), accountable = user-party (A). C and I empty.
+   * See class-level docstring for verified surfacing behavior across platform views.
    */
-  private async ensureTask(orgName: string, orgId: string, partyId: string): Promise<string> {
+  private async ensureTask(
+    orgName: string,
+    orgId: string,
+    assignedPartyId: string,
+    accountablePartyId: string,
+  ): Promise<string> {
     try {
       const taskName = `Engagement coordination — ${orgName} <- ZeroBias`;
 
@@ -128,22 +233,23 @@ export class OnboardingBootstrapService {
         activityId: 'e15830c8-4274-4d67-bf9b-c22b60001e32' as never, // global aha1
         ownerId: orgId as never,
         name: taskName,
-        description: `Parent task for all ${orgName}↔ZeroBias coordination on the default ZB platform-services engagement.`,
+        description: `Parent task for all ZeroBias ➡️ ${orgName} platform-engagement coordination.`,
         priority: 500,
-        assigned: partyId as never,
-        approvers: [partyId] as never,
-        notified: [partyId] as never,
+        assigned: assignedPartyId as never,        // R
+        accountable: accountablePartyId as never,   // A
+        approvers: [],                              // C
+        notified: [],                               // I
         links: [],
       } as never);
 
       return String(created.id);
     } catch (err) {
-      console.warn('[ONBOARDING_GUARD_FAILURE]', {
+      console.warn('[PLATFORM_ENGAGEMENT_FAILURE]', {
         step: 'B',
-        callSiteTag: 'onboarding-bootstrap:ensure-task',
+        callSiteTag: 'platform-engagement:ensure-task',
         error: err,
       });
-      this.snackBar.open('Onboarding in progress — please retry in a moment.', 'Dismiss', {
+      this.snackBar.open('Setup in progress — please retry in a moment.', 'Dismiss', {
         duration: 5000,
       });
       throw err;
@@ -167,11 +273,11 @@ export class OnboardingBootstrapService {
       const engagement = {
         id: engagementId,
         name: `${orgName} <- ZeroBias`,
-        description: `Default ZeroBias platform-services engagement for ${orgName}. Compliance-driven invariant.`,
+        description: platformEngagementDescription(orgName),
         buyerZerobiasUserId: currentUserId,
         buyerZerobiasOrgId: currentOrgId,
         status: 'in_progress',
-        engagementTag: 'default-project',
+        engagementTag: 'platform-engagement',
         zerobiasTagId: tagId,
         zerobiasTaskId: taskId,
         dateCreated: dateStr,
@@ -183,13 +289,13 @@ export class OnboardingBootstrapService {
         'Engagement',
         [engagement],
         [],
-        'onboarding-bootstrap:create-engagement',
+        'platform-engagement:create-engagement',
       );
 
       return engagementId;
     } catch (err) {
       // pushEntities already logs [PIPELINE_WRITE_FAILURE]; just handle presentation
-      this.snackBar.open('Onboarding in progress — please retry in a moment.', 'Dismiss', {
+      this.snackBar.open('Setup in progress — please retry in a moment.', 'Dismiss', {
         duration: 5000,
       });
       throw err;
@@ -216,12 +322,12 @@ export class OnboardingBootstrapService {
         .getResourceApi()
         .tagResource(taskId as never, [tagId] as never);
     } catch (err) {
-      console.warn('[ONBOARDING_GUARD_FAILURE]', {
+      console.warn('[PLATFORM_ENGAGEMENT_FAILURE]', {
         step: 'D',
-        callSiteTag: 'onboarding-bootstrap:ensure-task-tagged',
+        callSiteTag: 'platform-engagement:ensure-task-tagged',
         error: err,
       });
-      this.snackBar.open('Onboarding in progress — please retry in a moment.', 'Dismiss', {
+      this.snackBar.open('Setup in progress — please retry in a moment.', 'Dismiss', {
         duration: 5000,
       });
       throw err;
@@ -229,7 +335,7 @@ export class OnboardingBootstrapService {
   }
 
   /**
-   * Step E: Ingest the default SmeMartProject record via Pipeline.
+   * Step E: Ingest the engagement's "ZeroBias Platform" project via Pipeline.
    */
   private async ensureProject(orgName: string, engagementId: string, tagId: string): Promise<string> {
     const projectId = crypto.randomUUID();
@@ -255,8 +361,8 @@ export class OnboardingBootstrapService {
       // Create
       const project = {
         id: projectId,
-        name: 'SME Mart Platform Development',
-        description: `Default project for ${orgName}'s ZeroBias platform-services engagement.`,
+        name: PLATFORM_PROJECT_NAME,
+        description: platformProjectDescription(orgName),
         status: 'active',
         projectType: 'project',
         engagementId,
@@ -271,25 +377,17 @@ export class OnboardingBootstrapService {
         'SmeMartProject',
         [project],
         [],
-        'onboarding-bootstrap:create-project',
+        'platform-engagement:create-project',
       );
 
       return projectId;
     } catch (err) {
       // pushEntities already logs [PIPELINE_WRITE_FAILURE]; just handle presentation
-      this.snackBar.open('Onboarding in progress — please retry in a moment.', 'Dismiss', {
+      this.snackBar.open('Setup in progress — please retry in a moment.', 'Dismiss', {
         duration: 5000,
       });
       throw err;
     }
   }
 
-  /**
-   * Helper: Fetch organization name from the Org API.
-   */
-  private async getOrgName(orgId: string): Promise<string> {
-    // Pass orgId directly; API wrapper handles UUID conversion if needed
-    const org = await this.clientApi.danaClient.getOrgApi().getOrg(orgId as never);
-    return org.name;
-  }
 }

@@ -1,43 +1,30 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { Router } from '@angular/router';
+import { MatIconModule } from '@angular/material/icon';
 
 /**
- * OnboardingBootstrapShellComponent — loading surface displayed while the guard runs
- * the 5-step bootstrap sequence to ensure the org has a default engagement.
+ * PlatformEngagementSetupComponent — holding page shown to users whose org
+ * does not yet have a provisioned platform engagement.
  *
- * Surfaces errors gracefully:
- * - If bootstrap succeeds, the guard routes away automatically
- * - If bootstrap fails, the guard routes here with ?error=bootstrap-failed query param
- * - User sees error message + Retry button
+ * The guard routes here when the hydra marketplace tag for the user's org is
+ * not found. Provisioning is admin-only (current scope) and is triggered from
+ * the SME Mart admin Provisioning tab. End users wait here until a ZeroBias
+ * admin has provisioned their org, then click Refresh.
  *
- * Per Phase 27 AR-04 (loading surface) and AR-09 (error handling).
+ * No spinner, no auto-poll, no auto-create. Just an informational surface.
  */
 @Component({
-  selector: 'app-onboarding-bootstrap-shell',
+  selector: 'app-platform-engagement-setup',
   standalone: true,
-  imports: [MatProgressSpinnerModule, MatButtonModule],
-  templateUrl: './onboarding-bootstrap-shell.component.html',
-  styleUrls: ['./onboarding-bootstrap-shell.component.scss'],
+  imports: [MatButtonModule, MatIconModule],
+  templateUrl: './platform-engagement-setup.component.html',
+  styleUrls: ['./platform-engagement-setup.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class OnboardingBootstrapShellComponent implements OnInit {
-  private router = inject(Router);
-
-  isLoading = true;
-  errorMessage: string | null = null;
-
-  ngOnInit() {
-    // Check for error query param — set by guard on bootstrap failure
-    const error = new URLSearchParams(window.location.search).get('error');
-    if (error === 'bootstrap-failed') {
-      this.isLoading = false;
-      this.errorMessage = 'Onboarding setup encountered an issue. Please try again.';
-    }
-  }
-
-  dismissError() {
-    // User clicked retry on error; redirect to login to restart the flow
-    this.router.navigate(['/login']);
+export class PlatformEngagementSetupComponent {
+  refresh(): void {
+    // Re-fires the onboardingGuard on next nav. Cheaper than full reload and
+    // doesn't lose any session state.
+    window.location.reload();
   }
 }

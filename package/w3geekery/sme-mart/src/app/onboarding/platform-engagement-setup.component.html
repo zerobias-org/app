@@ -1,15 +1,17 @@
-<div class="onboarding-shell-container">
-  @if (isLoading) {
-    <div class="loading-section">
-      <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
-      <p class="loading-text">Setting up your account...</p>
-    </div>
-  } @else if (errorMessage) {
-    <div class="error-section">
-      <p class="error-text">{{ errorMessage }}</p>
-      <button mat-raised-button color="primary" (click)="dismissError()">
-        Retry
-      </button>
-    </div>
-  }
+<div class="setup-shell">
+  <div class="setup-card">
+    <mat-icon class="setup-icon">hourglass_empty</mat-icon>
+    <h1>Your organization is being set up</h1>
+    <p>
+      A ZeroBias administrator is provisioning your organization on SME Mart.
+      You'll be able to use the application as soon as setup is complete.
+    </p>
+    <p class="setup-hint">
+      If this is taking longer than expected, contact your ZeroBias representative.
+    </p>
+    <button mat-raised-button color="primary" (click)="refresh()">
+      <mat-icon>refresh</mat-icon>
+      Check again
+    </button>
+  </div>
 </div>

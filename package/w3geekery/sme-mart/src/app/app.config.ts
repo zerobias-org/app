@@ -28,7 +28,7 @@ import {
 import { routes } from './app.routes';
 import { environment } from '../environments/environment';
 import { AppInitService } from './core/app-init.service';
-import { OnboardingBootstrapService } from './core/services/onboarding-bootstrap.service';
+import { PlatformEngagementProvisioner } from './core/services/platform-engagement-provisioner.service';
 import { MarketplaceProfileService } from './core/services/marketplace-profile.service';
 
 export const appConfig: ApplicationConfig = {
@@ -58,7 +58,7 @@ export const appConfig: ApplicationConfig = {
     provideAppInitializer(() => inject(AppInitService).init()),
 
     // Onboarding services (guard dependencies)
-    OnboardingBootstrapService,
+    PlatformEngagementProvisioner,
     MarketplaceProfileService,
 
     // ngx-translate — required by ngx-library table components
