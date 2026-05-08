@@ -9,8 +9,20 @@
 // Welcome Card (D-14)
 .welcome-card {
   margin-bottom: 16px;
-  background-color: #f5f5f5;
-  border-left: 4px solid #1976d2;
+  // Theme-aware: M3 primary container reads in both light + dark modes
+  background-color: var(--mat-sys-primary-container);
+  color: var(--mat-sys-on-primary-container);
+  border-left: 4px solid var(--mat-sys-primary);
+
+  // mat-card overrides text color via its own tokens; force inheritance
+  // on children so the theme-aware foreground actually paints.
+  mat-card-title,
+  mat-card-content,
+  mat-card-content p,
+  mat-card-content li,
+  mat-card-content strong {
+    color: inherit;
+  }
 
   mat-card-header {
     margin-bottom: 16px;

@@ -2,7 +2,6 @@ import {
   Component, inject, signal, computed, ChangeDetectionStrategy, OnInit, effect,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -11,7 +10,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ZbSimplePanelComponent, ZbAvatarLabelComponent, ZbCustomizableTableComponent } from '@zerobias-org/ngx-library';
 import { ZerobiasClientApp } from '@zerobias-com/zerobias-client';
-import { map, switchMap, from } from 'rxjs';
+import { map, switchMap, from, firstValueFrom } from 'rxjs';
 import { ZerobiasClientApi } from '@zerobias-com/zerobias-client';
 import { UUID } from '@zerobias-org/types-core-js';
 import { GraphqlReadService } from '../../core/services/graphql-read.service';
@@ -35,11 +34,11 @@ interface OrgGroup {
   memberCount?: number;
 }
 
-interface OrgDetail {
-  org: OrgInfo | null;
-  members: OrgMember[];
-  groups: OrgGroup[];
-  boundaries: any[];
+interface BoundaryInfo {
+  id: string;
+  name: string;
+  boundaryType?: string;
+  status?: string;
 }
 
 interface SmeMartProject {
@@ -50,17 +49,15 @@ interface SmeMartProject {
   description?: string;
 }
 
-interface EngagementGroup {
-  engagementId: string;
-  engagementName: string;
-  projects: SmeMartProject[];
+interface EngagementInfo {
+  id: string;
+  name?: string;
 }
 
 @Component({
   selector: 'app-org-detail',
   standalone: true,
   imports: [
-    CommonModule,
     RouterLink,
     MatButtonModule,
     MatIconModule,
@@ -99,25 +96,31 @@ export class OrgDetailComponent implements OnInit {
           return from(Promise.resolve([null, [], [], []]));
         }
 
-        // Load org from the list and find the one matching this ID
-        const orgsPromise = this.app.getOrgs()
-          .toPromise()
+        // Load org from the list and find the one matching this ID.
+        // getOrgs() returns a BehaviorSubject; use firstValueFrom (resolves on
+        // first emit), not toPromise (which only resolves on complete and so
+        // hangs forever on a Subject).
+        const orgsPromise = firstValueFrom(this.app.getOrgs())
           .then(orgs => {
-            const org = (orgs || []).find((o: any) => o.id === id) || null;
-            return org as any;
+            const list = (orgs ?? []) as Array<{ id?: unknown }>;
+            const org = list.find(o => String(o.id) === id) ?? null;
+            return org as OrgInfo | null;
           });
 
         // Load members and groups via clientApi.hydraClient
         const orgId = new UUID(id);
+        // SDK Group/GroupMember have id: UUID; map through unknown to project
+        // them onto our OrgMember/OrgGroup shapes (id: string for templating).
+        type SdkPaged = { items?: Array<Record<string, unknown>> };
         const membersPromise = this.clientApi.hydraClient?.getOrgApi?.()
           .listOrgMembers?.(orgId)
-          .then((result: any) => (result?.items || []))
-          .catch(() => []) || Promise.resolve([]);
+          .then((result: unknown) => ((result as SdkPaged)?.items ?? []) as unknown as OrgMember[])
+          .catch(() => [] as OrgMember[]) || Promise.resolve([] as OrgMember[]);
 
         const groupsPromise = this.clientApi.hydraClient?.getOrgApi?.()
           .listGroups?.(orgId)
-          .then((result: any) => (result?.items || []))
-          .catch(() => []) || Promise.resolve([]);
+          .then((result: unknown) => ((result as SdkPaged)?.items ?? []) as unknown as OrgGroup[])
+          .catch(() => [] as OrgGroup[]) || Promise.resolve([] as OrgGroup[]);
 
         // Load boundaries for this org (scoped by dana-org-id header)
         const boundariesPromise = this.clientApi.platformClient
@@ -147,11 +150,11 @@ export class OrgDetailComponent implements OnInit {
   readonly org = computed(() => this.orgData()[0] as OrgInfo | null);
   readonly members = computed(() => this.orgData()[1] as OrgMember[]);
   readonly groups = computed(() => this.orgData()[2] as OrgGroup[]);
-  readonly boundaries = computed(() => this.orgData()[3] as any[]);
+  readonly boundaries = computed(() => this.orgData()[3] as BoundaryInfo[]);
 
   // Projects management
   readonly projects = signal<SmeMartProject[]>([]);
-  readonly engagementMap = signal<Record<string, any>>({});
+  readonly engagementMap = signal<Record<string, EngagementInfo>>({});
   readonly projectsLoading = signal(false);
 
   readonly engagementGroups = computed(() => {
@@ -205,7 +208,7 @@ export class OrgDetailComponent implements OnInit {
 
       for (const engId of engagementIds) {
         try {
-          const eng = await this.graphqlRead.query<any>(
+          const eng = await this.graphqlRead.query<EngagementInfo>(
             'Engagement',
             ['id', 'name'],
             { filters: { id: `.eq.${engId}` }, pageSize: 1, pageNumber: 1 }

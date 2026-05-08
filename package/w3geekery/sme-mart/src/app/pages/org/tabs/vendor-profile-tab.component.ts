@@ -7,7 +7,7 @@ import {
   OnInit,
   OnDestroy,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { TitleCasePipe, DatePipe } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -20,7 +20,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subscription } from 'rxjs';
 import { ZerobiasClientApp } from '@zerobias-com/zerobias-client';
-import { ZbResourceStatusComponent } from '@zerobias-org/ngx-library';
+import { ZbResourceStatusComponent, ZbSnakeToSpacesPipe } from '@zerobias-org/ngx-library';
 import { VendorProfileService } from '../../../core/services/vendor-profile.service';
 import { VettingService } from '../../../core/services/vetting.service';
 import type {
@@ -43,7 +43,8 @@ const SECTION_ORDER: SectionType[] = [
   selector: 'app-vendor-profile-tab',
   standalone: true,
   imports: [
-    CommonModule,
+    TitleCasePipe,
+    DatePipe,
     ReactiveFormsModule,
     MatExpansionModule,
     MatSidenavModule,
@@ -54,6 +55,7 @@ const SECTION_ORDER: SectionType[] = [
     MatCardModule,
     MatProgressSpinnerModule,
     ZbResourceStatusComponent,
+    ZbSnakeToSpacesPipe,
     VendorProfileForm,
   ],
   templateUrl: './vendor-profile-tab.component.html',
