@@ -1,0 +1,118 @@
+<div class="provisioning-tab">
+  <div class="tab-header">
+    <div>
+      <h3>Platform Engagement Provisioning</h3>
+      <p class="hint">
+        Provisions an org's platform engagement (the org &lt;-&gt; ZeroBias engagement
+        for platform services) plus its supporting marketplace tag, coordination
+        task, and default project. Run once per customer org.
+      </p>
+    </div>
+    <button mat-stroked-button (click)="refresh()" [disabled]="isLoading()">
+      <mat-icon>refresh</mat-icon>
+      Refresh
+    </button>
+  </div>
+
+  @if (isLoading()) {
+    <div class="loading-row">
+      <mat-progress-spinner mode="indeterminate" diameter="32"></mat-progress-spinner>
+      <span>Loading organizations…</span>
+    </div>
+  } @else if (rows().length === 0) {
+    <p class="empty">No organizations found.</p>
+  } @else {
+    <table mat-table [dataSource]="rows()" class="full-width">
+      <!-- Org Name -->
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Org</th>
+        <td mat-cell *matCellDef="let row">{{ row.name }}</td>
+      </ng-container>
+
+      <!-- Org ID -->
+      <ng-container matColumnDef="id">
+        <th mat-header-cell *matHeaderCellDef>ID</th>
+        <td mat-cell *matCellDef="let row" class="id-cell">{{ row.id }}</td>
+      </ng-container>
+
+      <!-- Status -->
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let row">
+          @switch (row.status) {
+            @case ('unknown') { <span class="status-unknown">Checking…</span> }
+            @case ('provisioned') {
+              <span class="status-provisioned">
+                <mat-icon class="status-icon">check_circle</mat-icon>
+                Provisioned
+              </span>
+            }
+            @case ('not-provisioned') {
+              <span class="status-not-provisioned">
+                <mat-icon class="status-icon">cancel</mat-icon>
+                Not provisioned
+              </span>
+            }
+            @case ('in-progress') {
+              <span class="status-in-progress">
+                <mat-progress-spinner mode="indeterminate" diameter="20"></mat-progress-spinner>
+                Provisioning…
+              </span>
+            }
+            @case ('error') {
+              <span class="status-error" [title]="row.errorMessage">
+                <mat-icon class="status-icon">error</mat-icon>
+                Error
+              </span>
+            }
+          }
+        </td>
+      </ng-container>
+
+      <!-- Action -->
+      <ng-container matColumnDef="action">
+        <th mat-header-cell *matHeaderCellDef>Action</th>
+        <td mat-cell *matCellDef="let row">
+          @if (row.status === 'not-provisioned' || row.status === 'error') {
+            <div class="action-buttons">
+              <button
+                mat-stroked-button
+                (click)="dryRun(row)"
+                [disabled]="row.dryRunStatus === 'in-progress' || row.status === 'in-progress'"
+                [matTooltip]="row.dryRunError || 'Resolve UUIDs without writing'">
+                @if (row.dryRunStatus === 'in-progress') {
+                  <mat-progress-spinner mode="indeterminate" diameter="16"></mat-progress-spinner>
+                } @else if (row.dryRunStatus === 'success') {
+                  <mat-icon>check</mat-icon>
+                } @else if (row.dryRunStatus === 'failed') {
+                  <mat-icon>error_outline</mat-icon>
+                } @else {
+                  <mat-icon>science</mat-icon>
+                }
+                Dry Run
+              </button>
+              <button
+                mat-raised-button
+                color="primary"
+                (click)="provisionOrg(row)"
+                [disabled]="row.dryRunStatus !== 'success' || row.status === 'in-progress'"
+                [matTooltip]="row.dryRunStatus !== 'success' ? 'Run Dry Run first' : 'Provision platform engagement'">
+                <mat-icon>play_arrow</mat-icon>
+                Provision
+              </button>
+            </div>
+          } @else if (row.status === 'in-progress') {
+            <button mat-raised-button disabled>
+              Provisioning…
+            </button>
+          } @else if (row.status === 'provisioned') {
+            <span class="action-placeholder">—</span>
+          }
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    </table>
+  }
+</div>

@@ -1,8 +1,9 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { DataProducerClient } from '@zerobias-org/data-utils';
 import type { ConnectionResult, QueryOptions } from '@zerobias-org/data-utils';
-import type { CollectionsApi as HubCollectionsApi } from '@zerobias-org/module-interface-dataproducer-hub-sdk';
+import type { CollectionsApi as HubCollectionsApi } from '@zerobias-org/hub-sdk-interface-dataproducer';
 import { URL as ZbURL, PagedResults } from '@zerobias-org/types-core-js';
+import { ZerobiasClientSessionId } from '@zerobias-com/zerobias-client';
 import { neon } from '@neondatabase/serverless';
 import { environment } from '../../../environments/environment';
 
@@ -34,6 +35,8 @@ import { environment } from '../../../environments/environment';
  */
 @Injectable({ providedIn: 'root' })
 export class SmeMartDbService {
+  private readonly sessionIdService = inject(ZerobiasClientSessionId);
+
   // Hub mode state
   private client: DataProducerClient | null = null;
   private objectIdCache = new Map<string, string>();
@@ -79,10 +82,10 @@ export class SmeMartDbService {
       this.mode.set('neon');
       console.log('[SmeMartDb] Connected in Neon direct mode');
       return { success: true };
-    } catch (err: any) {
+    } catch (err) {
       const result: ConnectionResult = {
         success: false,
-        error: `Neon connection failed: ${err.message}`,
+        error: `Neon connection failed: ${(err as Error).message}`,
       };
       this.connectionError.set(result.error!);
       return result;
@@ -103,7 +106,13 @@ export class SmeMartDbService {
     this.client = new DataProducerClient();
     const server = new ZbURL(`${window.location.origin}/api/hub`);
 
-    const result = await this.client.connect({ server, targetId });
+    // Pass session id so the Hub proxy gets `Authorization: session <id>`
+    // header in addition to the dana-session-id cookie. Mirrors the fix in
+    // zb/ui PR #140 (commit 8c2297136 in @zerobias-com/zerobias-angular-client).
+    // Without this, dana 401s the /api/hub/targets/<id>/metadata call when
+    // the cookie is missing or scoped wrong.
+    const session = this.sessionIdService.getCurrentSessionId() ?? undefined;
+    const result = await this.client.connect({ server, targetId, session });
 
     this.connected.set(result.success);
     this.mode.set('hub');
@@ -185,14 +194,15 @@ export class SmeMartDbService {
     tableName: string,
     rowKey: string,
     data: Record<string, unknown>,
+    pkColumn = 'id',
   ): Promise<T> {
-    if (this.mode() === 'neon') return this.neonUpdateRow<T>(tableName, rowKey, data);
+    if (this.mode() === 'neon') return this.neonUpdateRow<T>(tableName, rowKey, data, pkColumn);
     const id = await this.resolveTableId(tableName);
     return this.getHubCollectionsApi().updateCollectionElement(id, rowKey, data as { [key: string]: object }) as Promise<T>;
   }
 
-  async deleteRow(tableName: string, rowKey: string): Promise<void> {
-    if (this.mode() === 'neon') return this.neonDeleteRow(tableName, rowKey);
+  async deleteRow(tableName: string, rowKey: string, pkColumn = 'id'): Promise<void> {
+    if (this.mode() === 'neon') return this.neonDeleteRow(tableName, rowKey, pkColumn);
     const id = await this.resolveTableId(tableName);
     return this.getHubCollectionsApi().deleteCollectionElement(id, rowKey);
   }
@@ -273,8 +283,31 @@ export class SmeMartDbService {
     const sql = this.getSql();
     // neon v1.x requires sql.query() for conventional function calls
     // This is safe because we control all inputs via quoteIdent/escapeValue
-    const result = await (sql as any).query(query, [], { fullResults: false });
-    return result as T[];
+    const raw = await (sql as unknown as {
+      query: (q: string, params: unknown[], opts: { fullResults: boolean }) => Promise<unknown>;
+    }).query(query, [], { fullResults: false });
+
+    // Normalize response shape. Some neon-serverless versions/configurations return
+    // the raw HTTP response wrapper {fields, rows, rowAsArray, ...} even with
+    // fullResults: false; others return rows directly. Handle both. When rowAsArray
+    // is true, rows come back as positional tuples — map them to keyed objects using
+    // the fields metadata.
+    if (Array.isArray(raw)) return raw as T[];
+    if (raw && typeof raw === 'object' && 'rows' in raw) {
+      const wrapper = raw as { rows: unknown[]; rowAsArray?: boolean; fields?: { name: string }[] };
+      const rows = wrapper.rows ?? [];
+      if (wrapper.rowAsArray && Array.isArray(wrapper.fields)) {
+        const names = wrapper.fields.map(f => f.name);
+        return rows.map((row) => {
+          if (!Array.isArray(row)) return row as T;
+          const obj: Record<string, unknown> = {};
+          row.forEach((v, i) => { obj[names[i]] = v; });
+          return obj as T;
+        });
+      }
+      return rows as T[];
+    }
+    return [] as T[];
   }
 
   private async neonListRows<T>(tableName: string, options?: QueryOptions): Promise<PagedResults<T>> {
@@ -328,19 +361,19 @@ export class SmeMartDbService {
     return rows[0];
   }
 
-  private async neonUpdateRow<T>(tableName: string, rowKey: string, data: Record<string, unknown>): Promise<T> {
+  private async neonUpdateRow<T>(tableName: string, rowKey: string, data: Record<string, unknown>, pkColumn = 'id'): Promise<T> {
     const entries = Object.entries(data).filter(([, v]) => v !== undefined);
     const setClauses = entries.map(([k, v]) => `${this.quoteIdent(k)} = ${this.sqlValue(v)}`).join(', ');
 
     const rows = await this.neonQuery<T>(
-      `UPDATE ${this.quoteIdent(tableName)} SET ${setClauses} WHERE id = '${this.escapeValue(rowKey)}' RETURNING *`,
+      `UPDATE ${this.quoteIdent(tableName)} SET ${setClauses} WHERE ${this.quoteIdent(pkColumn)} = '${this.escapeValue(rowKey)}' RETURNING *`,
     );
     return rows[0];
   }
 
-  private async neonDeleteRow(tableName: string, rowKey: string): Promise<void> {
+  private async neonDeleteRow(tableName: string, rowKey: string, pkColumn = 'id'): Promise<void> {
     await this.neonQuery(
-      `DELETE FROM ${this.quoteIdent(tableName)} WHERE id = '${this.escapeValue(rowKey)}'`,
+      `DELETE FROM ${this.quoteIdent(tableName)} WHERE ${this.quoteIdent(pkColumn)} = '${this.escapeValue(rowKey)}'`,
     );
   }
 

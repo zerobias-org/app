@@ -1,6 +1,6 @@
 ---
 id: "020"
-priority: high
+priority: critical
 scope: sme-mart + platform
 effort: large
 found: 2026-05-05
@@ -8,14 +8,30 @@ status: open
 promoted_to: null
 ---
 
-# Auto-create default engagement+project with ZeroBias.Org subsidiary on every customer onboarding
+# Auto-create default engagement+project with ZeroBias.Org Guild on every customer onboarding
 
-Today every new customer gets a default engagement+project pair with ZeroBias **Inc** (the platform parent). Brian raised in the 2026-05-05 marketplace meeting that the platform must ALSO auto-create a *second* default engagement+project pair with ZeroBias **.Org** — the subsidiary "community / standards body" entity. Both are real legal entities (own EIN/tax ID/MSA); both surface as marketplace providers; both follow the same engagement+project rules.
+Brian's 2026-05-06 Slack clarification (in response to the meeting follow-up) locks the onboarding shape:
 
-The .Org engagement also implies a separate licensing agreement / T&Cs that the customer must accept. Onboarding flow trigger is unresolved (signup vs first-sign-in vs explicit consent step).
+> "This will need to become part of normal onboarding with any new customer. It will be engagement for Zb core with default Proj 1. And a separate but required engagement will also be with guild (Zb-org) and set them up as member of Guild (Zb-org) and browse projects that guild -Zb org has in place... So they need to see as member of guild. They need to be able to browse projects and join each project they want to participate. There will be some very public projects they can jump into. And some they need to request access to."  — Brian, 2026-05-06
 
-**Why now:** Brian explicitly framed this as the headline of the 2026-05-05 meeting — "We have not considered the existence of the ZeroBias.Org community as part of every engagement and project." Listed as a foundational gap.
+**Two things must happen on every customer onboarding:**
 
-**Blocked by:** #021 (`member` user-role classification), #022 (Geekery → ZB.Org membership for dev validation), #024 (cross-env provisioning audit of ZB.Org).
+1. **Engagement for ZB Core with default Project 1** (today's existing behavior).
+2. **Separate REQUIRED engagement with the Guild (ZB.Org)** that:
+   - Sets the customer's users up as Guild members (see #021 — Guild member role).
+   - Grants the user access to **browse Guild projects** that ZB.Org publishes (some public/jump-in, some access-requested).
+   - Implies acceptance of a separate licensing agreement / T&Cs distinct from ZB Core's MSA.
 
-**See:** `.planning/notes/meetings/2026-05-05-marketplace.md`
+Both ZB Core and the Guild are real legal entities (own EIN/tax ID/MSA); both surface as marketplace providers; both follow the same engagement+project rules.
+
+The Guild engagement is what unlocks the customer's ability to PARTICIPATE in Guild projects (browsing, joining, contributing artifacts via the publishing pipeline — see #028).
+
+Onboarding flow trigger still unresolved (signup vs first-sign-in vs explicit consent step) given the separate licensing agreement.
+
+**Why now:** Brian called this "quite important data to capture" and explicitly tied it to the normal onboarding flow. Promoted to `critical` because every other Guild-related item (#021, #028, #029) depends on this engagement structure existing.
+
+**Blocked by:** #021 (Guild `member` user-role classification), #022 (Geekery → ZB.Org membership for dev validation), #024 (cross-env provisioning audit of ZB.Org).
+
+**See:**
+- `.planning/notes/meetings/2026-05-05-marketplace.md`
+- `.claude/research/2026-05-06-zerobias-org-community-precedents.md`

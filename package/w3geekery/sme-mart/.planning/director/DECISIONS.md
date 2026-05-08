@@ -1,5 +1,69 @@
 # Director Decisions
 
+## Engagement Tag Naming: Identity Tag (`{supply}-to-{demand}`) + Additive Classifier Tags (2026-05-07)
+**Date:** 2026-05-07
+**Decision:** Engagement hydra tags follow a two-layer pattern that mirrors the cardinality semantics of the underlying engagement classes.
+
+**Layer 1 — Identity tag (one per engagement-direction pair, kebab-only nmtoken-style):**
+
+```
+sme-mart.eng.{supply-org-slug}-to-{demand-org-slug}
+```
+
+Examples:
+- `sme-mart.eng.zerobias-to-w3geekery` — ZB platform engagement where W3Geekery is the buyer/demand-side
+- `sme-mart.eng.w3geekery-to-zerobias` — hypothetical inverse (ZB buys dev services from W3Geekery)
+- `sme-mart.eng.w3geekery-to-pinnaclecorp` — W3Geekery audits Pinnacle as supplier
+- `sme-mart.eng.zerobias-to-brianhierholzer` — Brian Hierholzer Inc.'s ZB platform engagement
+
+The arrow direction follows the locked **Engagement Naming Convention** (DECISIONS.md, 2026-04-23): supply flows from supplier to buyer/demand. `{supply}-to-{demand}` reads left-to-right matching that flow. Note: the engagement record's `name` field still uses the buyer-first reverse-arrow convention (`"<Buyer> <- <Provider>"`); the tag-name convention reads supply-first because the slug ordering matches the underlying directional intent without needing a reverse-arrow glyph in the machine identifier.
+
+**Layer 2 — Additive classifier tags (multi-tag per engagement, optional):**
+
+```
+sme-mart.eng.scope.{label}      e.g.  sme-mart.eng.scope.q4-2026
+                                       sme-mart.eng.scope.platform-services
+                                       sme-mart.eng.scope.audit
+sme-mart.eng.type.{label}       e.g.  sme-mart.eng.type.platform
+                                       sme-mart.eng.type.marketplace
+                                       sme-mart.eng.type.partnership
+```
+
+An Engagement Object can carry one identity tag plus N classifier tags. Searches compose: identity-tag-only finds all engagements between two parties; scope/type filters narrow within that set.
+
+**Cardinality semantics that drive the pattern:**
+
+| Engagement class | Cardinality per pair | Probe semantics |
+|---|---|---|
+| Platform engagement (ZB → customer) | **Singleton.** Brian's invariant: every ZB org has exactly one. | `searchTags(name="sme-mart.eng.zerobias-to-{slug}")` → 0 means not provisioned, 1 means provisioned. Linked Engagement Object is unique. |
+| Marketplace engagement (vendor → buyer) | **Multi-instance.** Same pair may transact many times across years/scopes. | Same identity tag may be linked to multiple Engagement Objects; UI lists them; classifier tags (e.g., `scope.q4-2026`) disambiguate. |
+
+**Why kebab-only nmtoken in the name (vs `->`, `=>`, emoji `➡️`):**
+- `->` works in JSON/MCP/grep-quoted contexts but `>` is shell-redirect-special — copy-paste into an unquoted shell command silently creates a file named after the right-hand side. Real footgun in standup-screenshot moments.
+- `➡️` is two codepoints (U+27A1 + U+FE0F variation selector). macOS keyboard appends VS-16 automatically; some intermediate transports normalize it; some don't. Codepoint-mismatch silent-failure is the same class of bug we just spent an hour debugging on Brian's tag (cross-org searchTags scope mismatch). Don't introduce another silent-equality footgun.
+- Kebab-only nmtoken — `A-Z 0-9 . _ -`, no whitespace, no shell-special chars — works identically across every surface (TS code, JSON, GraphQL filters, URL paths if needed, grep, shell, logs, copy-paste). Project convention from CLAUDE.md memory: *"use nmtoken-style names anyway for grep + URL + GQL filter safety."*
+
+**Where the visual arrow goes:** the tag's `description` field (free-form UTF-8, never used as an equality probe target). Example for the platform engagement default:
+
+```
+name:        sme-mart.eng.zerobias-to-brianhierholzer
+description: ZeroBias ➡️ Brian Hierholzer Inc. — platform engagement
+```
+
+Humans see the arrow in tag UIs; machines compare on the kebab name.
+
+**Migration impact:**
+- Existing 6 `sme-mart.eng.*` tags use the legacy kebab-with-`-default-zb` suffix. Per existing DECISIONS rule "Why not migrate existing tags" (line 217 region) tags are immutable post-ingest; the UUID is what matters at query time, not the name. Old tags stay on their legacy names; rename is purely cosmetic and not worth the churn.
+- Code change is in `provisioner.service.ts` only: tag-name template literal + `isOrgProvisioned` probe + spec sweep. Brian's existing tag `sme-mart.eng.brianhierholzer-default-zb` (UUID still resolvable) gets superseded by a freshly-created `sme-mart.eng.zerobias-to-brianhierholzer` tag on the next provisioning cycle for that org. Or: keep Brian's existing tag and update its name via `hydra.Tag.update` if that API exists (cleaner; preserves UUID + linkage).
+
+**Why:** Clark direction 2026-05-07. The previous `-default-zb` suffix did two jobs (marker for "this is THE platform engagement" + implicit ZB-as-provider). Splitting into directional identity (`{supply}-to-{demand}`) + flavor classifiers cleanly handles platform-singleton AND marketplace-multi-instance with one consistent pattern, and matches the project's locked Demand/Supply directional vocabulary.
+
+**Anti-pattern:**
+- (a) Stuffing scope/year/type discriminators into the identity tag name (`sme-mart.eng.w3geekery-to-zerobias.q4-2026`). Use additive classifier tags instead — composition matches the underlying multi-axis taxonomy.
+- (b) Putting `->`, `=>`, emoji, or whitespace in the tag NAME. Description field is the human-display surface; name is the machine identifier.
+- (c) Creating two platform engagements (`sme-mart.eng.zerobias-to-{slug}` linked twice) for the same org. That violates the singleton invariant. If platform-engagement scope changes (Q4-2026), update the existing Engagement Object (or audit-log the change), don't make a second one.
+- (d) Renaming legacy `-default-zb` tags via UUID-churn migration. Skip it; coexistence is fine.
+
 ## Object.tag Write Route — Embed-in-Data Only (2026-05-04)
 **Date:** 2026-05-04 (Director MCP probe discovery)
 **Decision:** All `Pipeline.receive` calls that write tags to objects MUST embed tags directly in the data payload as `tag: [{value: "<uuid>"}, ...]` BEFORE creating the SimpleBatch. The SimpleBatch constructor's 3rd argument (tagIds array) is batch/job metadata and does NOT populate Object.tag on GQL read-back. Pass an empty `[]` as the 3rd arg.

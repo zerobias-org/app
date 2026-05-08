@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { ZerobiasClientSessionId } from '@zerobias-com/zerobias-client';
 import { RfpDialog } from './rfp-dialog.component';
 import { SmeMartProjectService } from '../../../core/services/sme-mart-project.service';
 import { ImpersonationService } from '../../../core/services/impersonation.service';
@@ -27,6 +28,7 @@ describe('RfpDialog', () => {
         { provide: SmeMartProjectService, useValue: mockProjects },
         { provide: ImpersonationService, useValue: fakeImpersonation() },
         { provide: MatSnackBar, useValue: { open: vi.fn() } },
+        { provide: ZerobiasClientSessionId, useValue: { getCurrentSessionId: () => null } },
       ],
     });
 

@@ -1,19 +1,18 @@
 import '@angular/compiler';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { signal } from '@angular/core';
 import { of } from 'rxjs';
 import type { RfpInvitation } from '../../core/models';
 import { MyInvitationsComponent } from './my-invitations.component';
 import { RfpInvitationService } from '../../core/services/rfp-invitation.service';
-import { ZerobiasClientApi, ZerobiasClientApp } from '@zerobias-com/zerobias-client';
+import { ZerobiasClientApi, ZerobiasClientApp, ZerobiasClientSessionId } from '@zerobias-com/zerobias-client';
 
 describe('MyInvitationsComponent', () => {
   let component: MyInvitationsComponent;
   let fixture: ComponentFixture<MyInvitationsComponent>;
-  let mockInvitationService: any;
-  let mockZerobiasClientApi: any;
-  let mockZerobiasClientApp: any;
+  let mockInvitationService: { invitations: ReturnType<typeof vi.fn> };
+  let mockZerobiasClientApi: { platformClient: ReturnType<typeof vi.fn>; hubClient: ReturnType<typeof vi.fn> };
+  let mockZerobiasClientApp: { zerobiasClientApi: typeof mockZerobiasClientApi; getWhoAmI: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
     mockInvitationService = {
@@ -40,6 +39,7 @@ describe('MyInvitationsComponent', () => {
         { provide: RfpInvitationService, useValue: mockInvitationService },
         { provide: ZerobiasClientApi, useValue: mockZerobiasClientApi },
         { provide: ZerobiasClientApp, useValue: mockZerobiasClientApp },
+        { provide: ZerobiasClientSessionId, useValue: { getCurrentSessionId: () => null } },
       ],
     }).compileComponents();
 

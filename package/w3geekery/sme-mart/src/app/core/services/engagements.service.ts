@@ -38,7 +38,7 @@ export class EngagementsService {
    * List all published engagements with summary info (buyer, bid counts).
    * Queries GQL via GraphqlReadService, transforms responses to EngagementSummaryRow.
    */
-  async listEngagements(options?: QueryOptions & { statusFilter?: string }): Promise<PagedResults<EngagementSummaryRow>> {
+  async listEngagements(options?: QueryOptions & { statusFilter?: string; buyerOrgId?: string }): Promise<PagedResults<EngagementSummaryRow>> {
     this.loading.set(true);
     try {
       const pageNumber = options?.pageNumber ?? 1;
@@ -47,6 +47,9 @@ export class EngagementsService {
       const filters: Record<string, string> = {};
       if (options?.statusFilter) {
         filters['status'] = `.eq.${options.statusFilter}`;
+      }
+      if (options?.buyerOrgId) {
+        filters['buyerZerobiasOrgId'] = `.eq.${options.buyerOrgId}`;
       }
 
       const gqlOptions: GqlQueryOptions = {

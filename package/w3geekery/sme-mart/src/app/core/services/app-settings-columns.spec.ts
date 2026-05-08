@@ -66,7 +66,7 @@ describe('DemoModeService — app_settings column contract', () => {
 
   it('init() reads the setting with filter (key=...) — NOT (setting_key=...)', async () => {
     const db = makeMockDb();
-    await service.init(db);
+    await service.init(db as never);
 
     expect(db.searchRows).toHaveBeenCalled();
     const [tableName, filter] = db.searchRows.mock.calls[0];
@@ -81,7 +81,7 @@ describe('DemoModeService — app_settings column contract', () => {
       items: [{ id: 'r1', key: 'demo_mode_enabled', value: 'true' }],
     });
 
-    await service.init(db);
+    await service.init(db as never);
 
     expect(service.enabled()).toBe(true);
   });
@@ -89,8 +89,8 @@ describe('DemoModeService — app_settings column contract', () => {
   it('toggle() creates a row with `key` + `value` props — NOT `setting_key` + `setting_value`', async () => {
     const db = makeMockDb();
     db.searchRows.mockResolvedValue({ items: [] }); // no existing row → createRow path
-    await service.init(db);
-    await service.toggle(db);
+    await service.init(db as never);
+    await service.toggle(db as never);
 
     expect(db.createRow).toHaveBeenCalledTimes(1);
     const [tableName, payload] = db.createRow.mock.calls[0];
@@ -101,18 +101,24 @@ describe('DemoModeService — app_settings column contract', () => {
     expect(payload).not.toHaveProperty('setting_value');
   });
 
-  it('toggle() updates existing row with `value` prop — NOT `setting_value`', async () => {
+  it('toggle() updates existing row by `key` PK with pkColumn arg — NOT by `id`', async () => {
+    // app_settings has no `id` column; PK is `key`. Locked in 2026-05-07 after the
+    // demo-toggle was crashing in cross-org context with "Cannot read properties of
+    // undefined (reading 'replace')" — root cause was passing existing.id (always
+    // undefined) as rowKey to updateRow, which built `WHERE id = 'undefined'` and
+    // crashed in escapeValue. Fix: pass the key value + pkColumn='key' to updateRow.
     const db = makeMockDb();
     db.searchRows.mockResolvedValue({
-      items: [{ id: 'row-1', key: 'demo_mode_enabled', value: 'false' }],
+      items: [{ key: 'demo_mode_enabled', value: 'false' }],
     });
-    await service.init(db);
-    await service.toggle(db);
+    await service.init(db as never);
+    await service.toggle(db as never);
 
     expect(db.updateRow).toHaveBeenCalledTimes(1);
-    const [tableName, rowId, payload] = db.updateRow.mock.calls[0];
+    const [tableName, rowKey, payload, pkColumn] = db.updateRow.mock.calls[0];
     expect(tableName).toBe('app_settings');
-    expect(rowId).toBe('row-1');
+    expect(rowKey).toBe('demo_mode_enabled');
+    expect(pkColumn).toBe('key');
     expect(payload).toHaveProperty('value');
     expect(payload).not.toHaveProperty('setting_value');
   });

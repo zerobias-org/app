@@ -95,7 +95,7 @@
           <mat-expansion-panel class="section-panel">
             <mat-expansion-panel-header class="section-header">
               <div class="section-summary">
-                <span class="section-name">{{ section | titlecase }}</span>
+                <span class="section-name">{{ section | snakeToSpaces | titlecase }}</span>
                 <span class="item-count">{{ getItemsBySection(section).length }} items</span>
                 @if (getExpiredCount(section) > 0) {
                   <mat-chip class="expired-badge" disabled="true">

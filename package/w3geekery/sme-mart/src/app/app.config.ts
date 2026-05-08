@@ -16,17 +16,19 @@ import {
   ZerobiasClientApiService,
   ZerobiasClientAppService,
   ZerobiasClientOrgIdService,
+  ZerobiasClientSessionIdService,
 } from '@zerobias-com/zerobias-angular-client';
 import {
   ZerobiasClientApi,
   ZerobiasClientApp,
   ZerobiasClientOrgId,
+  ZerobiasClientSessionId,
 } from '@zerobias-com/zerobias-client';
 
 import { routes } from './app.routes';
 import { environment } from '../environments/environment';
 import { AppInitService } from './core/app-init.service';
-import { OnboardingBootstrapService } from './core/services/onboarding-bootstrap.service';
+import { PlatformEngagementProvisioner } from './core/services/platform-engagement-provisioner.service';
 import { MarketplaceProfileService } from './core/services/marketplace-profile.service';
 
 export const appConfig: ApplicationConfig = {
@@ -48,6 +50,7 @@ export const appConfig: ApplicationConfig = {
     // ZeroBias SDK DI — environment config + abstract class implementations
     { provide: 'environment', useValue: environment },
     { provide: ZerobiasClientOrgId, useClass: ZerobiasClientOrgIdService },
+    { provide: ZerobiasClientSessionId, useClass: ZerobiasClientSessionIdService },
     { provide: ZerobiasClientApi, useClass: ZerobiasClientApiService },
     { provide: ZerobiasClientApp, useClass: ZerobiasClientAppService },
 
@@ -55,7 +58,7 @@ export const appConfig: ApplicationConfig = {
     provideAppInitializer(() => inject(AppInitService).init()),
 
     // Onboarding services (guard dependencies)
-    OnboardingBootstrapService,
+    PlatformEngagementProvisioner,
     MarketplaceProfileService,
 
     // ngx-translate — required by ngx-library table components

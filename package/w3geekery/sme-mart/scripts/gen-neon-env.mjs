@@ -22,6 +22,9 @@ writeFileSync(outPath, content, 'utf-8');
 
 if (url) {
   console.log('[gen-neon-env] Wrote Neon connection string to environment.neon.ts');
-} else {
+} else if (!process.env.CI) {
+  // CI builds (UAT/QA/prod) don't use Neon direct mode — file is generated empty
+  // and the import is replaced via angular.json fileReplacements. Only warn in
+  // local dev where a missing NEON_DATABASE_URL is genuinely a misconfiguration.
   console.warn('[gen-neon-env] NEON_DATABASE_URL not set — Neon direct mode will not work');
 }
