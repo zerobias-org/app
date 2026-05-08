@@ -1,14 +1,13 @@
 import { Component, inject, signal, computed, ChangeDetectionStrategy, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormsModule } from '@angular/forms';
 import { ZbSearchInputComponent, ZbEmptyStateContainerComponent } from '@zerobias-org/ngx-library';
+import { ZerobiasClientApp } from '@zerobias-com/zerobias-client';
 import { EngagementCard } from '../../shared/components/engagement-card/engagement-card.component';
 import { EngagementsService } from '../../core/services/engagements.service';
-import { ImpersonationService } from '../../core/services/impersonation.service';
 import type { EngagementSummaryRow, RequestStatus } from '../../core/models';
 
 @Component({
@@ -29,9 +28,8 @@ import type { EngagementSummaryRow, RequestStatus } from '../../core/models';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MyEngagementList implements OnInit {
-  private readonly router = inject(Router);
   private readonly engagements = inject(EngagementsService);
-  private readonly impersonation = inject(ImpersonationService);
+  private readonly app = inject(ZerobiasClientApp);
 
   readonly loading = signal(true);
   readonly items = signal<EngagementSummaryRow[]>([]);
@@ -80,9 +78,11 @@ export class MyEngagementList implements OnInit {
 
   async loadData(): Promise<void> {
     try {
-      const result = await this.engagements.listEngagements({ pageSize: 200 });
-      // TODO: Filter by buyer/provider once buyerZerobiasUserId is added to GQL schema
-      // For now, show all engagements (field not in AuditgraphDB schema yet)
+      // Scope to engagements where the active org is the buyer. Provider-side view
+      // is a separate concern (no providerZerobiasOrgId field on the schema today;
+      // direction is implicit in the engagement name "<Buyer> <- <Provider>").
+      const buyerOrgId = String(this.app.getCurrentOrgId() ?? '') || undefined;
+      const result = await this.engagements.listEngagements({ pageSize: 200, buyerOrgId });
       this.items.set(result.items || []);
     } catch (err) {
       console.warn('[MyEngagementList] Failed to load:', err);
