@@ -31,6 +31,12 @@ const nextConfig: NextConfig = {
         source: "/api/:path*",
         destination: "https://api.uat.zerobias.com/:path*",
       },
+      // Customer-owned AuditCrowd backend (FastAPI). Local dev proxies to :8000;
+      // in prod this is our own host. Proves the "keep our backend" seam.
+      {
+        source: "/backend/:path*",
+        destination: "http://localhost:8000/:path*",
+      },
     ]
   },
 };
