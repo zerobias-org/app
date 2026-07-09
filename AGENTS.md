@@ -54,7 +54,7 @@ package/<org-slug>/<app-name>/
   for new apps: latest Next.js, the **v2 client** (`@zerobias-com/zerobias-client`)
   + per-service SDKs, platform-SSO auth, one-build-for-all-envs.
 - **`package/zerobias/data-explorer`** — production app using the DataProducer
-  interface (`@zerobias-org/data-utils`).
+  interface.
 - **`package/zerobias/example-nextjs`, `package/zerobias/example-angular`** —
   **v1 legacy** (old `@auditmation` client). Kept for reference; **do not model
   new apps on them**.
