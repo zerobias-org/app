@@ -228,6 +228,15 @@ Common message types: `APP_NAV`, `RESOURCE_NAV`, `LOGOUT`, `REFRESH_NAVIGATION`,
 
 ## App development best practices
 
+- **Docs & comments are the product (standing order)** — these example/demo
+  apps are the canonical teaching source a 3rd-party developer reads to adopt
+  the ZeroBias client/SDK. Comments, in-code LLM notes, and each app's
+  `AGENTS.md` / `docs/` exist to enable customers to adopt our patterns faster,
+  not merely to explain the code to maintainers. Keep them current **in lockstep
+  with every feature** — a new pattern lands together with its explanatory
+  comments, its doc entry, and its LLM notes in the *same* change. Never defer
+  to a batch "comment/doc pass" before promoting: that turns merge-up into a
+  heavy lift and lets the teaching drift out of sync with the code.
 - **Auth/session** — check auth state before API calls; handle session
   expiration gracefully; support both iframe and standalone modes.
 - **API calls** — always go through the client/SDK, never hand-roll `fetch` to
