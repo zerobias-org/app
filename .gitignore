@@ -2,3 +2,7 @@
 .idea
 .vscode
 
+# Local Claude / Director scratch (not shared)
+.planning/
+.claude/
+
