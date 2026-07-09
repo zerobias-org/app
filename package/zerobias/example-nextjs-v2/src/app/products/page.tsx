@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import type { ProductExtended } from "@zerobias-com/portal-sdk";
 import { useSession } from "@/context/session-context";
+import { toUserMessage } from "@/lib/errors";
 
 const PAGE_SIZE = 10;
 
@@ -29,7 +30,8 @@ export default function ProductsPage() {
           setError(null);
         })
         .catch((err) => {
-          setError(err instanceof Error ? err.message : String(err));
+          console.error("Products search failed", err);
+          setError(toUserMessage(err));
           setProducts([]);
         })
         .finally(() => setLoading(false));

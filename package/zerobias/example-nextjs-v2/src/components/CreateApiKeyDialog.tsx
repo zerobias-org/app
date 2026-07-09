@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ApiKeyWithData, CreateApiKeyBody } from "@zerobias-com/dana-sdk";
 import { DateTime } from "@zerobias-org/types-core-js";
 import { useSession } from "@/context/session-context";
+import { toUserMessage } from "@/lib/errors";
 
 type DurationType = "hours" | "days" | "years";
 const DURATION_TYPES: DurationType[] = ["hours", "days", "years"];
@@ -59,7 +60,8 @@ export function CreateApiKeyDialog({ onClose }: { onClose: () => void }) {
       setCreated(key);
       copy(key.data, "key");
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      console.error("Failed to create API key", err);
+      setError(toUserMessage(err));
     } finally {
       setCreating(false);
     }
