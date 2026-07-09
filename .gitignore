@@ -16,7 +16,9 @@ vercel.env
 **/.claude/.obsidian/
 **/.claude/.DS_Store
 **/.claude/scripts/node_modules/
-# **/.planning/
+
+# Director resume/planning scratch (local, not shared)
+.planning/
 
 # Deprecated Next.js prototype (archived, kept on disk for reference)
 package/w3geekery/sme-mart-nextjs-deprecated/
