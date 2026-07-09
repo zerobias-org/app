@@ -141,6 +141,31 @@ export default [
     }
   },
 
+  // Playwright e2e suite (separate e2e/tsconfig.json that includes e2e/**).
+  // Must come AFTER the **/*.spec.ts block so its `project` wins for e2e specs —
+  // tsconfig.spec.json does NOT include e2e/**, so without this they fail to parse.
+  // Not Angular code: disable the Angular modernization rules.
+  {
+    files: ['e2e/**/*.ts'],
+    languageOptions: {
+      parser: tseslint.parser,
+      parserOptions: {
+        project: './e2e/tsconfig.json',
+        sourceType: 'module',
+        ecmaVersion: 'latest'
+      }
+    },
+    plugins: {
+      '@typescript-eslint': tseslint.plugin,
+      '@angular-eslint': angularPlugin
+    },
+    rules: {
+      '@angular-eslint/prefer-standalone': 'off',
+      '@angular-eslint/prefer-inject': 'off',
+      '@angular-eslint/prefer-signals': 'off'
+    }
+  },
+
   // Template files
   {
     files: ['**/*.html'],
