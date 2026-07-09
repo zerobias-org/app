@@ -57,6 +57,14 @@ npm run preview    # serve dist/ locally
 The same `dist/` is promoted to uat / qa / prod — the client targets its own
 origin's `/api` at runtime. See [docs/environments-and-deploy.md](./docs/environments-and-deploy.md).
 
+## Test / lint / typecheck
+
+```bash
+npm test           # Vitest (unit tests)
+npm run lint       # ESLint
+npm run typecheck  # tsc --noEmit
+```
+
 ## Requirements
 
 - Node >= 22 (client engine requirement; see `.nvmrc`).

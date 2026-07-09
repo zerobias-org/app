@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Pkv } from "@zerobias-com/dana-sdk";
 import { useSession } from "@/context/session-context";
+import { toUserMessage } from "@/lib/errors";
 
 /**
  * Canonical read + write against the Principal Key-Value store.
@@ -27,9 +28,10 @@ export default function PkvPage() {
       .getPkvApi()
       .listPrincipalKeyValues(undefined, undefined, 50)
       .then((results) => setPairs(results.items))
-      .catch((err) =>
-        setError(err instanceof Error ? err.message : String(err)),
-      )
+      .catch((err) => {
+        console.error("Failed to list key-value pairs", err);
+        setError(toUserMessage(err));
+      })
       .finally(() => setLoading(false));
   }, [api]);
 
@@ -58,7 +60,8 @@ export default function PkvPage() {
       setValue('{ "example": true }');
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      console.error("Failed to save key-value pair", err);
+      setError(toUserMessage(err));
     } finally {
       setSaving(false);
     }

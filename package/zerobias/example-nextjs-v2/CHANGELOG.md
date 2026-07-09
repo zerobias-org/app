@@ -14,7 +14,17 @@ the changes into their own app easier.
 
 ## [Unreleased]
 
-_Nothing yet._
+### Added
+- **Unit test harness** — Vitest (`npm test` / `npm run test:watch`) with an
+  initial suite for the error mapper.
+- **`src/lib/errors.ts`** — `toUserMessage(err)` maps any thrown value to a
+  safe, user-facing message.
+
+### Changed
+- **Error handling** — the Products, PKV, and Create-API-Key views now show a
+  mapped, friendly message via `toUserMessage()` and log the raw error to the
+  console for developers, instead of rendering raw error text (which can leak
+  backend detail) directly in the UI.
 
 ## [0.1.0] - 2026-07-08
 
