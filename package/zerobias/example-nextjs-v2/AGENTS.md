@@ -21,6 +21,10 @@ older `example-nextjs`, which predates v2 and carries anti-patterns.
   **with teardown** — always `return () => sub.unsubscribe()` in `useEffect`.
 - **DO** keep all client usage in `"use client"` components. The client touches
   `window`/`WebSocket`; it must never run during static-export prerender.
+- **DO** keep comments, in-code LLM notes, and docs current **with every
+  feature** — this app is canonical teaching source; update them in the same
+  change, never a deferred pass (root
+  [AGENTS.md](../../../AGENTS.md) "App development best practices" standing order).
 - **DON'T** build a login page — the client redirects to platform SSO itself
   (see [docs/authentication.md](./docs/authentication.md)).
 - **DON'T** duplicate SDK model types (`WhoAmI`, `Org`, `ProductExtended`) with
