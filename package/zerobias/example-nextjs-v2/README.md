@@ -5,7 +5,8 @@ Canonical example of building a custom app on the **ZeroBias platform** with the
 statically exported for S3/CloudFront.
 
 > **Agents / contributors:** read **[AGENTS.md](./AGENTS.md)** first, then the
-> per-feature reference in **[docs/](./docs/)**.
+> per-feature reference in **[docs/](./docs/)**. What changed per version (and the
+> SDK calls/patterns each version introduces): **[CHANGELOG.md](./CHANGELOG.md)**.
 
 ## Phase 1 features
 
