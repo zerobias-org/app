@@ -18,10 +18,12 @@
     "@zerobias-com/zerobias-client": "^2.0.5",
     "@zerobias-org/types-core-js": "^2.0.3",
     "axios": "^1.16.0",
+    "lucide-react": "^1.24.0",
     "material-symbols": "^0.31.9",
     "next": "^16.2.10",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-select": "^5.10.2",
     "rxjs": "^7.8.1"
   },
   "devDependencies": {

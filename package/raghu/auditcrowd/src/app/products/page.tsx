@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import type { ProductExtended } from "@zerobias-com/portal-sdk";
 import { useSession } from "@/context/session-context";
+import AppToolbar from "@/components/ui/appToolbar";
 import { toUserMessage } from "@/lib/errors";
 
 const PAGE_SIZE = 10;
@@ -49,6 +50,9 @@ export default function ProductsPage() {
   };
 
   return (
+    <div className="ac-shell">
+      <AppToolbar />
+      <main className="ac-main ac-wrap">
     <div>
       <h1>Products Catalog</h1>
       <p className="subtitle">
@@ -134,6 +138,8 @@ export default function ProductsPage() {
           Next →
         </button>
       </div>
+    </div>
+      </main>
     </div>
   );
 }

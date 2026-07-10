@@ -41,6 +41,12 @@ const nextConfig: NextConfig = isLocalDev
       async rewrites() {
         return [
           { source: "/api/:path*", destination: `${devApiOrigin}/api/:path*` },
+          // Customer-owned AuditCrowd backend seam (FastAPI). Local dev proxies to
+          // :8000; deployed builds call it by absolute URL via NEXT_PUBLIC_BACKEND_BASE.
+          {
+            source: "/backend/:path*",
+            destination: `${process.env.NEXT_PUBLIC_DEV_BACKEND_ORIGIN ?? "http://localhost:8000"}/:path*`,
+          },
         ];
       },
     }

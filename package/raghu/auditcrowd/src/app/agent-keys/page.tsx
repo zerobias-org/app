@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { ApiKey, ApiKeyWithData, CreateApiKeyBody } from "@zerobias-com/dana-sdk";
 import { DateTime } from "@zerobias-org/types-core-js";
 import { useSession } from "@/context/session-context";
+import AppToolbar from "@/components/ui/appToolbar";
 import { toUserMessage } from "@/lib/errors";
 
 /**
@@ -104,6 +105,9 @@ export default function AgentKeysPage() {
   };
 
   return (
+    <div className="ac-shell">
+      <AppToolbar />
+      <main className="ac-main ac-wrap">
     <div>
       <h1>Agent Keys</h1>
       <p className="subtitle">
@@ -260,6 +264,8 @@ export default function AgentKeysPage() {
           </table>
         </div>
       )}
+    </div>
+      </main>
     </div>
   );
 }

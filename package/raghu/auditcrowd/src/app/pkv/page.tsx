@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Pkv } from "@zerobias-com/dana-sdk";
 import { useSession } from "@/context/session-context";
+import AppToolbar from "@/components/ui/appToolbar";
 import { toUserMessage } from "@/lib/errors";
 
 /**
@@ -68,6 +69,9 @@ export default function PkvPage() {
   };
 
   return (
+    <div className="ac-shell">
+      <AppToolbar />
+      <main className="ac-main ac-wrap">
     <div>
       <h1>Principal Key-Value</h1>
       <p className="subtitle">
@@ -137,6 +141,8 @@ export default function PkvPage() {
           </table>
         </div>
       )}
+    </div>
+      </main>
     </div>
   );
 }
