@@ -4,8 +4,8 @@ import { useRouter } from "next/navigation";
 import { ShieldCheck, ListChecks, Fingerprint, Layers, BadgeCheck } from "lucide-react";
 import AppToolbar from "@/components/ui/appToolbar";
 import { useCurrentUser } from "@/context/CurrentUserContext";
+import { backendHeaders } from "@/lib/backend";
 
-const ZB_KEY = process.env.NEXT_PUBLIC_API_KEY;
 const BACKEND = process.env.NEXT_PUBLIC_BACKEND_BASE ?? "/backend";
 
 function initials(name?: string): string {
@@ -169,7 +169,7 @@ export default function Dashboard() {
   async function openDetail(id: string) {
     setDetailOpen(true);
     setDetail(null);
-    const headers: Record<string, string> = ZB_KEY ? { Authorization: `APIKey ${ZB_KEY}` } : {};
+    const headers = backendHeaders();
     try {
       const r = await fetch(`${BACKEND}/zb/opportunity/${id}`, { headers });
       if (r.ok) setDetail(await r.json());
@@ -179,7 +179,7 @@ export default function Dashboard() {
   }
 
   useEffect(() => {
-    const headers: Record<string, string> = ZB_KEY ? { Authorization: `APIKey ${ZB_KEY}` } : {};
+    const headers = backendHeaders();
     // The customer-backend seam: our own AuditCrowd API validates the ZB identity.
     // Its success is what makes the "Live on the ZeroBias transparency architecture"
     // pill a REAL verification, not a static label.

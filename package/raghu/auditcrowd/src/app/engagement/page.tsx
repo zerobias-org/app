@@ -8,8 +8,8 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import AppToolbar from "@/components/ui/appToolbar";
+import { backendHeaders } from "@/lib/backend";
 
-const ZB_KEY = process.env.NEXT_PUBLIC_API_KEY;
 const BACKEND = process.env.NEXT_PUBLIC_BACKEND_BASE ?? "/backend";
 
 function isPendingVal(v: unknown): boolean {
@@ -45,7 +45,7 @@ function EngagementInner() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    const headers: Record<string, string> = ZB_KEY ? { Authorization: `APIKey ${ZB_KEY}` } : {};
+    const headers = backendHeaders();
     fetch(`${BACKEND}/zb/opportunity/${id}`, { headers }).then((r) => (r.ok ? r.json() : null)).then(setDetail).catch(() => {});
     fetch(`${BACKEND}/zb/contract/${id}`, { headers }).then((r) => (r.ok ? r.json() : null)).then(setContract).catch(() => {});
   }, [id]);
@@ -54,7 +54,7 @@ function EngagementInner() {
 
   async function accept() {
     setSubmitting(true);
-    const headers: Record<string, string> = ZB_KEY ? { Authorization: `APIKey ${ZB_KEY}` } : {};
+    const headers = backendHeaders();
     try {
       const r = await fetch(`${BACKEND}/zb/accept/${id}`, { method: "POST", headers });
       if (r.ok) setReceipt(await r.json());
