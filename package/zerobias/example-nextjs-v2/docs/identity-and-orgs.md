@@ -56,9 +56,10 @@ import type { Org, WhoAmI } from "@zerobias-com/dana-sdk";
   await app.selectOrg(org); // Promise<void>
   ```
 
-`OrgSwitcher` lists with `listOrgs`, renders a `<select>`, and calls `selectOrg`
-on change. Feature pages that are org-scoped (e.g. Products) re-query when
-`org.id` changes.
+`OrgSwitcher` lists with `listOrgs`, renders an accessible custom listbox (a
+WAI-ARIA `role="listbox"` — styled to match the portal, keyboard-navigable with
+arrow/Home/End/Enter/Escape), and calls `selectOrg` when a row is chosen. Feature
+pages that are org-scoped (e.g. Products) re-query when `org.id` changes.
 
 ## Sign out
 
