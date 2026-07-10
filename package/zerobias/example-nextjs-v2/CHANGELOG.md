@@ -14,6 +14,14 @@ the changes into their own app easier.
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-07-10
+
+### Added
+- **App version in the account menu.** The user dropdown shows the running app
+  version (e.g. `v0.2.2`) on the right of the Sign Out row. Sourced from
+  `package.json` at build via `NEXT_PUBLIC_APP_VERSION` (`next.config.ts`), so the
+  displayed version always matches the release — one source of truth.
+
 ## [0.2.1] - 2026-07-10
 
 ### Fixed

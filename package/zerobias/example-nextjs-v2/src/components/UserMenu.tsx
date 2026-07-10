@@ -7,6 +7,9 @@ import { OrgSwitcher } from "./OrgSwitcher";
 import { CreateApiKeyDialog } from "./CreateApiKeyDialog";
 import { CreateSharedSessionDialog } from "./CreateSharedSessionDialog";
 
+// Inlined at build from package.json (see next.config.ts).
+const APP_VERSION = process.env.NEXT_PUBLIC_APP_VERSION;
+
 function initials(name?: string): string {
   if (!name) return "?";
   const parts = name.trim().split(/[\s-]+/).filter(Boolean);
@@ -115,6 +118,9 @@ export function UserMenu() {
           <button className="menu-item" onClick={logout}>
             <span className="material-symbols-outlined">logout</span>
             <span className="menu-item-label">Sign Out</span>
+            {APP_VERSION && (
+              <span className="menu-item-version">v{APP_VERSION}</span>
+            )}
           </button>
         </div>
       )}
