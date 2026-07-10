@@ -5,6 +5,8 @@ import Image from "next/image";
 import type { ProductExtended } from "@zerobias-com/portal-sdk";
 import { useSession } from "@/context/session-context";
 import { toUserMessage } from "@/lib/errors";
+import { Spinner } from "@/components/Spinner";
+import { TableSkeleton } from "@/components/TableSkeleton";
 
 const PAGE_SIZE = 10;
 
@@ -55,7 +57,17 @@ export default function ProductsPage() {
         <code>portalClient.getProductApi().search(&#123;&#125;, page, size)</code>
       </p>
 
-      {error && <p className="state error">Error: {error}</p>}
+      {error && (
+        <p className="state error" role="alert">
+          Error: {error}
+        </p>
+      )}
+
+      {loading && (
+        <p className="state loading-line">
+          <Spinner diameter={18} /> Loading products…
+        </p>
+      )}
 
       <div className="table-scroll">
         <table className="table">
@@ -70,11 +82,7 @@ export default function ProductsPage() {
           </thead>
           <tbody>
             {loading ? (
-              <tr>
-                <td colSpan={5} className="state">
-                  Loading…
-                </td>
-              </tr>
+              <TableSkeleton rows={PAGE_SIZE} columns={5} firstColIcon />
             ) : products.length === 0 ? (
               <tr>
                 <td colSpan={5} className="state">

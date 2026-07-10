@@ -54,7 +54,11 @@ Read the doc for the feature you're touching before changing it:
 | Products catalog (read) | [docs/products-catalog.md](./docs/products-catalog.md) | `portalClient.getProductApi().search()` |
 | Principal Key-Value (read + write) | [docs/pkv.md](./docs/pkv.md) | `danaClient.getPkvApi().listPrincipalKeyValues()` / `.upsertPrincipalKeyValue()` |
 | Create API key | [docs/api-keys.md](./docs/api-keys.md) | `danaClient.getMeApi().createApiKey()` |
+| Shared session keys | [docs/shared-session-keys.md](./docs/shared-session-keys.md) | `danaClient.getMeApi().createSharedSessionKey()` |
+| Module chain (GitHub via Hub) | [docs/module-chain.md](./docs/module-chain.md) | `new GithubHubImpl().connect(new HubConnectionProfile(...))` |
+| Loading & status UI | [docs/loading-and-status.md](./docs/loading-and-status.md) | `PageLoader` (0 mark), `Spinner`, `TableSkeleton`, `ButtonLabel`, `StatusDot` |
 | Environments + deploy | [docs/environments-and-deploy.md](./docs/environments-and-deploy.md) | one build -> uat/qa/prod |
+| Theming (light/dark, portal parity) | [docs/theming.md](./docs/theming.md) | `dark-theme` class + `zb-theme-preference` (ports `ZbThemeService`) |
 
 ## Registries / install
 
@@ -75,8 +79,17 @@ npm run dev                               # http://localhost:3000
 - **Phase 1 (this milestone):** auth gate, identity + org switch, products
   search, PKV read/write, create API key.
 - **Phase 2:** GitHub module chain (product -> module -> connection -> scope ->
-  hub module client), shared-session key, Data Explorer (`@zerobias-org/data-utils`).
-- **Phase 2/3:** FileService example.
+  hub module client), shared-session key.
+- **Phase 3:** SDK building-blocks showcase in the ngx-library **side-panel
+  navigation** pattern (not top tabs). Under consideration:
+  - **Infinite-scroll** example against a cursor-wired search endpoint —
+    `PagedResults` already exposes the machinery (`pageToken`, `paginationMode`,
+    `asyncGenerator()`/`forEach()`). Note: `portalClient.getProductApi().search()`
+    is **offset-only** (no `count`, `link`, or `pageToken` returned), so the
+    Products page stays classic prev/next; this demo needs a different,
+    token-emitting endpoint.
+  - **Data Explorer** (`@zerobias-org/data-utils`).
+  - **FileService** example.
 
 Full plan: `.claude/plans/phase-1-canonical-usage.md` (git-ignored).
 

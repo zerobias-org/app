@@ -1,6 +1,6 @@
 {
   "name": "example-nextjs-v2",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "ZeroBias v2 client + SDK example app (Next.js). Canonical patterns for building a custom app on the ZeroBias platform.",
   "scripts": {
@@ -13,10 +13,12 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@auditlogic/hub-sdk-github-github": "^7.1.6",
     "@zerobias-com/dana-sdk": "^2.0.4",
     "@zerobias-com/portal-sdk": "^2.0.2",
     "@zerobias-com/zerobias-client": "^2.0.5",
     "@zerobias-org/types-core-js": "^2.0.3",
+    "@zerobias-org/util-connector": "^2.0.2",
     "axios": "^1.16.0",
     "material-symbols": "^0.31.9",
     "next": "^16.2.10",

@@ -4,6 +4,9 @@ import { useCallback, useEffect, useState } from "react";
 import { Pkv } from "@zerobias-com/dana-sdk";
 import { useSession } from "@/context/session-context";
 import { toUserMessage } from "@/lib/errors";
+import { Spinner } from "@/components/Spinner";
+import { TableSkeleton } from "@/components/TableSkeleton";
+import { ButtonLabel } from "@/components/ButtonLabel";
 
 /**
  * Canonical read + write against the Principal Key-Value store.
@@ -102,16 +105,23 @@ export default function PkvPage() {
             rows={3}
           />
         </div>
-        {error && <p className="error">{error}</p>}
+        {error && (
+          <p className="error" role="alert">
+            {error}
+          </p>
+        )}
         <button className="btn" disabled={saving || !key.trim()}>
-          {saving ? "Saving…" : "Save pair"}
+          <ButtonLabel label="Save pair" loading={saving} />
         </button>
       </form>
 
       <h2>Stored pairs</h2>
-      {loading ? (
-        <p className="state">Loading…</p>
-      ) : pairs.length === 0 ? (
+      {loading && (
+        <p className="state loading-line">
+          <Spinner diameter={18} /> Loading key-value pairs…
+        </p>
+      )}
+      {!loading && pairs.length === 0 ? (
         <p className="state">No key-value pairs yet.</p>
       ) : (
         <div className="table-scroll">
@@ -123,16 +133,20 @@ export default function PkvPage() {
               </tr>
             </thead>
             <tbody>
-              {pairs.map((p) => (
-                <tr key={p.key}>
-                  <td>
-                    <code>{p.key}</code>
-                  </td>
-                  <td>
-                    <code>{JSON.stringify(p.value)}</code>
-                  </td>
-                </tr>
-              ))}
+              {loading ? (
+                <TableSkeleton rows={5} columns={2} />
+              ) : (
+                pairs.map((p) => (
+                  <tr key={p.key}>
+                    <td>
+                      <code>{p.key}</code>
+                    </td>
+                    <td>
+                      <code>{JSON.stringify(p.value)}</code>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

@@ -5,6 +5,7 @@ import { ApiKeyWithData, CreateApiKeyBody } from "@zerobias-com/dana-sdk";
 import { DateTime } from "@zerobias-org/types-core-js";
 import { useSession } from "@/context/session-context";
 import { toUserMessage } from "@/lib/errors";
+import { ButtonLabel } from "@/components/ButtonLabel";
 
 type DurationType = "hours" | "days" | "years";
 const DURATION_TYPES: DurationType[] = ["hours", "days", "years"];
@@ -173,9 +174,13 @@ export function CreateApiKeyDialog({ onClose }: { onClose: () => void }) {
               </div>
             </div>
 
-            {error && <p className="error">{error}</p>}
+            {error && (
+              <p className="error" role="alert">
+                {error}
+              </p>
+            )}
             <button className="btn" disabled={creating || !name.trim()}>
-              {creating ? "Creating…" : "Create"}
+              <ButtonLabel label="Create" loading={creating} />
             </button>
           </form>
         )}

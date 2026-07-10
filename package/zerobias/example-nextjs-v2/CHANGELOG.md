@@ -14,17 +14,56 @@ the changes into their own app easier.
 
 ## [Unreleased]
 
-### Added
-- **Unit test harness** — Vitest (`npm test` / `npm run test:watch`) with an
-  initial suite for the error mapper.
+## [0.2.0] - 2026-07-09
+
+Phase 2 — the GitHub **module chain** and **shared-session key**, plus
+portal-parity theming, an accessible org switcher, the loading/status UI kit,
+error handling, and the unit-test harness.
+
+### Added — features and the calls they demonstrate
+
+- **Module chain — GitHub via the Hub** (`/module`, `src/app/module/page.tsx`) —
+  walks `product -> module -> connection -> scope -> hub client` and lists a
+  GitHub org's repositories through the Hub. The payoff hop:
+  `new GithubHubImpl().connect(new HubConnectionProfile(server, targetId, apiKey?, session?, orgId?))`,
+  then `getOrganizationApi().listMyOrganizations()` / `.listRepositories(...)`.
+  The Hub holds the GitHub credentials — the browser never sees a token. SDK:
+  **`@auditlogic/hub-sdk-github-github`** (+ `@zerobias-org/util-connector`).
+  See [docs/module-chain.md](./docs/module-chain.md).
+- **Shared-session keys** (`src/components/CreateSharedSessionDialog.tsx`) —
+  `danaClient.getMeApi().createSharedSessionKey(new CreateSharedSessionKeyBody(undefined, new Duration("PT<n>M")))`.
+  See [docs/shared-session-keys.md](./docs/shared-session-keys.md).
+- **Portal-parity theming** (`src/lib/theme.ts`) — a port of ngx-library's
+  `ZbThemeService`: a `useTheme` hook, `zb-theme-preference` storage, light
+  default + a `dark-theme` class on `<html>`/`<body>`, a pre-paint FOWT script,
+  and iframe `theme_change` follow. See [docs/theming.md](./docs/theming.md).
+- **Accessible org switcher** (`src/components/OrgSwitcher.tsx`) — a WAI-ARIA
+  listbox (keyboard nav, `aria-activedescendant`) replacing the native `<select>`,
+  driven by the pure `src/lib/listbox-nav.ts` helper.
+- **Loading & status UI kit** — `PageLoader` (the branded "0" preloader),
+  `Spinner` (mat-spinner equivalent), `TableSkeleton`, `ButtonLabel` (port of
+  `zb-ui-button-label`; also blocks repeat clicks), and `StatusDot` (port of
+  ngx-library `zb-resource-status` — connection status as a solid/outlined
+  colored dot, via the pure `src/lib/status-tone.ts` mapping). `ConnectionPicker`
+  renders the module chain's connections with status dots.
+  See [docs/loading-and-status.md](./docs/loading-and-status.md).
+- **Unit test harness** — Vitest (`npm test` / `npm run test:watch`) with suites
+  for `errors`, `listbox-nav`, and `status-tone` (26 tests).
 - **`src/lib/errors.ts`** — `toUserMessage(err)` maps any thrown value to a
   safe, user-facing message.
 
 ### Changed
+
 - **Error handling** — the Products, PKV, and Create-API-Key views now show a
   mapped, friendly message via `toUserMessage()` and log the raw error to the
   console for developers, instead of rendering raw error text (which can leak
   backend detail) directly in the UI.
+- **Loading feedback** — `AuthGate` shows the branded `PageLoader`; the Products
+  and PKV tables show skeleton rows + a spinner while loading; action buttons
+  swap their label for a spinner while an action runs.
+- **`.npmrc`** — sets `legacy-peer-deps=true`: the GitHub Hub SDK publishes stale
+  `^1.x` peerDependencies while its real deps are the v2 stack. To be dropped
+  once the SDK's peerDeps are corrected upstream.
 
 ## [0.1.0] - 2026-07-08
 

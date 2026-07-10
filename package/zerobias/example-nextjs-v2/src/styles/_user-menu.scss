@@ -151,12 +151,27 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.org-switch-item:hover {
+.org-switch-item:hover,
+.org-switch-item.active {
   background: var(--zb-menu-hover);
 }
 .org-switch-item.selected {
   color: var(--zb-primary);
   font-weight: 600;
+}
+// Focus moves into the list programmatically on open; the visible cue is the
+// highlighted row (`aria-activedescendant` -> `.active`), so hide the outline.
+.org-switch-list:focus {
+  outline: none;
+}
+// Loading row shown while the org list is still resolving.
+.org-switch-loading {
+  display: flex;
+  align-items: center;
+  gap: var(--zb-space-sm);
+  padding: 8px 10px;
+  font-size: var(--zb-font-size-sm);
+  color: var(--zb-secondary-text);
 }
 .ellipsis {
   overflow: hidden;
