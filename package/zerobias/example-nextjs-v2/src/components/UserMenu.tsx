@@ -1,9 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSession } from "@/context/session-context";
+import { useTheme } from "@/lib/theme";
 import { OrgSwitcher } from "./OrgSwitcher";
 import { CreateApiKeyDialog } from "./CreateApiKeyDialog";
+import { CreateSharedSessionDialog } from "./CreateSharedSessionDialog";
 
 function initials(name?: string): string {
   if (!name) return "?";
@@ -13,22 +15,18 @@ function initials(name?: string): string {
   return (first + last).toUpperCase() || "?";
 }
 
-type Theme = "dark" | "light";
-
+/**
+ * Account menu in the header. Presentation + local UI state only — it composes the two
+ * SDK-backed actions (`OrgSwitcher`, `CreateApiKeyDialog`) and drives the light/dark
+ * toggle through `useTheme` (the portal's `ZbThemeService` model — see src/lib/theme.ts).
+ */
 export function UserMenu() {
   const { user, org, logout } = useSession();
+  const { isDark, toggle } = useTheme();
   const [open, setOpen] = useState(false);
   const [showApiKey, setShowApiKey] = useState(false);
-  const [theme, setTheme] = useState<Theme>(() =>
-    typeof window !== "undefined"
-      ? ((localStorage.getItem("zb-theme") as Theme) || "dark")
-      : "dark",
-  );
+  const [showShare, setShowShare] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    document.documentElement.dataset.theme = theme;
-  }, [theme]);
 
   useEffect(() => {
     if (!open) return;
@@ -43,15 +41,6 @@ export function UserMenu() {
       document.removeEventListener("keydown", onKey);
     };
   }, [open]);
-
-  const toggleTheme = useCallback(() => {
-    setTheme((t) => {
-      const next: Theme = t === "dark" ? "light" : "dark";
-      document.documentElement.dataset.theme = next;
-      localStorage.setItem("zb-theme", next);
-      return next;
-    });
-  }, []);
 
   return (
     <div className="user-menu" ref={ref}>
@@ -100,15 +89,24 @@ export function UserMenu() {
             <span className="menu-item-label">Create New API Key</span>
           </button>
 
-          <button className="menu-item" onClick={toggleTheme}>
-            <span className="material-symbols-outlined">
-              {theme === "dark" ? "dark_mode" : "light_mode"}
-            </span>
-            <span className="menu-item-label">
-              {theme === "dark" ? "Dark Theme" : "Light Theme"}
-            </span>
+          <button
+            className="menu-item"
+            onClick={() => {
+              setShowShare(true);
+              setOpen(false);
+            }}
+          >
+            <span className="material-symbols-outlined">public</span>
+            <span className="menu-item-label">Share Session</span>
+          </button>
+
+          {/* Matches the portal: leading icon + label are STATIC; only the
+              toggle_on/toggle_off switch icon reflects the current theme. */}
+          <button className="menu-item" onClick={toggle}>
+            <span className="material-symbols-outlined">dark_mode</span>
+            <span className="menu-item-label">Dark Theme</span>
             <span className="material-symbols-outlined theme-switch">
-              {theme === "dark" ? "toggle_on" : "toggle_off"}
+              {isDark ? "toggle_on" : "toggle_off"}
             </span>
           </button>
 
@@ -123,6 +121,9 @@ export function UserMenu() {
 
       {showApiKey && (
         <CreateApiKeyDialog onClose={() => setShowApiKey(false)} />
+      )}
+      {showShare && (
+        <CreateSharedSessionDialog onClose={() => setShowShare(false)} />
       )}
     </div>
   );
