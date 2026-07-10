@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import { useSession } from "@/context/session-context";
+import { PageLoader } from "@/components/PageLoader";
 
 /**
  * Blocks the app until we have an authenticated user.
@@ -27,16 +28,16 @@ export function AuthGate({ children }: { children: ReactNode }) {
 
   return (
     <div className="gate">
-      <div className="gate-card">
-        <div className="spinner" aria-hidden />
-        <p>Connecting to ZeroBias…</p>
-        {slow && (
-          <p className="gate-hint">
-            Still connecting. If this persists you may not have a valid session
-            (prod) or API key (local dev). Check <code>.env.development</code>.
-          </p>
-        )}
-      </div>
+      <PageLoader
+        hint={
+          slow ? (
+            <>
+              Still connecting. If this persists you may not have a valid session
+              (prod) or API key (local dev). Check <code>.env.development</code>.
+            </>
+          ) : undefined
+        }
+      />
     </div>
   );
 }
