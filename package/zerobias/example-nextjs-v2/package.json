@@ -16,7 +16,7 @@
     "@auditlogic/hub-sdk-github-github": "^7.1.6",
     "@zerobias-com/dana-sdk": "^2.0.4",
     "@zerobias-com/portal-sdk": "^2.0.2",
-    "@zerobias-com/zerobias-client": "^2.0.5",
+    "@zerobias-com/zerobias-client": "^2.0.14",
     "@zerobias-org/types-core-js": "^2.0.3",
     "@zerobias-org/util-connector": "^2.0.2",
     "axios": "^1.16.0",
