@@ -20,6 +20,7 @@ import { env } from "./env";
 export class ZerobiasAppService {
   readonly api: ZerobiasClientApi;
   readonly app: ZerobiasClientApp;
+  private readonly sessionId: ZerobiasClientSessionId;
 
   private constructor() {
     const environment: ZbEnvironment = {
@@ -31,6 +32,7 @@ export class ZerobiasAppService {
 
     const orgId = new ZerobiasClientOrgId();
     const sessionId = new ZerobiasClientSessionId();
+    this.sessionId = sessionId;
     this.api = new ZerobiasClientApi(orgId, sessionId, environment);
     this.app = new ZerobiasClientApp(this.api, orgId, sessionId, environment);
   }
@@ -47,6 +49,21 @@ export class ZerobiasAppService {
     });
     // If there is no valid session (and we're not in local dev), init() has
     // already triggered the client's redirect to the platform login by now.
+
+    // Standalone (cookie-session) mode: the SDK writes sessionStorage['dana-session-id']
+    // ONLY from the portal-iframe postMessage, so a user who arrived via the platform
+    // login redirect holds a cookie but no header-transportable credential — and
+    // customer-backend calls (src/lib/backend.ts) would fall back to the backend's
+    // unattributed service identity. Hydrate it from Dana: GET /me/session returns the
+    // current session id, authenticated by the same-origin cookie.
+    if (!env.isLocalDev && !this.sessionId.getCurrentSessionId()) {
+      try {
+        const sid = await this.api.danaClient.getMeApi().ensureSession();
+        if (sid) this.sessionId.setCurrentSessionId(sid);
+      } catch {
+        // Backend calls stay unattributed; ZB SDK calls are unaffected (cookie).
+      }
+    }
   }
 
   static async create(): Promise<ZerobiasAppService> {
