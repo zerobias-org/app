@@ -15,7 +15,7 @@
   "dependencies": {
     "@zerobias-com/dana-sdk": "^2.0.4",
     "@zerobias-com/portal-sdk": "^2.0.2",
-    "@zerobias-com/zerobias-client": "^2.0.5",
+    "@zerobias-com/zerobias-client": "^2.0.14",
     "@zerobias-org/types-core-js": "^2.0.3",
     "axios": "^1.16.0",
     "lucide-react": "^1.24.0",
