@@ -14,6 +14,26 @@ the changes into their own app easier.
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-07-10
+
+### Added
+- **App version in the account menu.** The user dropdown shows the running app
+  version (e.g. `v0.2.2`) on the right of the Sign Out row. Sourced from
+  `package.json` at build via `NEXT_PUBLIC_APP_VERSION` (`next.config.ts`), so the
+  displayed version always matches the release — one source of truth.
+
+## [0.2.1] - 2026-07-10
+
+### Fixed
+- **Module chain — Hub connect 401 in the browser.** The GitHub Hub SDK client
+  (`GithubHubImpl`) is a separate HTTP client and does not inherit the platform
+  clients' auth interceptor, so its `connect()` call to
+  `/api/hub/targets/<id>/metadata` was sent with **no `Authorization` header** and
+  the dana proxy returned `401` on uat/prod (local dev was unaffected because it
+  authenticates with the API key). Fixed by passing the platform **session id**
+  (`api.getZerobiasSessionId()`) into `HubConnectionProfile`'s `session` arg, so
+  the SDK sends `Authorization: session <id>` like `danaClient` / `hubClient`.
+
 ## [0.2.0] - 2026-07-09
 
 Phase 2 — the GitHub **module chain** and **shared-session key**, plus

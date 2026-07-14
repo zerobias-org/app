@@ -219,13 +219,19 @@ export default function ModulePage() {
     const cached = clientsRef.current.get(targetId);
     if (cached) return cached; // reuse — don't reconnect for every list call
     // The Hub routes to the target connection/scope; it injects the stored
-    // GitHub credentials server-side. In local dev we authenticate the Hub call
-    // with the app's API key; in the browser session the platform cookie is used.
+    // GitHub credentials server-side. But WE still have to authenticate the Hub
+    // call itself — the Hub SDK client is a separate HTTP client, so it doesn't
+    // inherit the platform clients' auth interceptor. Local dev authenticates
+    // with the app's API key; in the browser we pass the platform SESSION id
+    // (`api.getZerobiasSessionId()`), which the SDK sends as
+    // `Authorization: session <id>` — matching danaClient/hubClient. Without it
+    // the request has no Authorization header and the dana proxy returns 401.
+    const sessionId = api!.getZerobiasSessionId();
     const profile = new HubConnectionProfile(
       getZerobiasClientUrl("hub", true, env.isLocalDev),
       api!.toUUID(targetId),
       env.isLocalDev ? env.apiKey : undefined,
-      undefined,
+      env.isLocalDev || !sessionId ? undefined : api!.toUUID(sessionId),
       org ? api!.toUUID(org.id) : undefined,
     );
     const client = new GithubHubImpl();
