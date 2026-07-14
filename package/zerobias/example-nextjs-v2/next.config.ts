@@ -1,4 +1,11 @@
 import type { NextConfig } from "next";
+import { createRequire } from "node:module";
+
+// App version, sourced from package.json at build so the UI (user menu footer)
+// shows the same version the release is tagged with — one source of truth.
+const { version } = createRequire(import.meta.url)("./package.json") as {
+  version: string;
+};
 
 /**
  * ONE config for every environment — no per-env file copying.
@@ -28,6 +35,8 @@ const base: NextConfig = {
   reactStrictMode: true,
   trailingSlash: true,
   skipTrailingSlashRedirect: true,
+  // Inlined into the client bundle so components can read the app version.
+  env: { NEXT_PUBLIC_APP_VERSION: version },
   // Static export cannot use the Next image optimizer.
   images: { unoptimized: true },
   // Pin the workspace root to this app so a stray parent lockfile doesn't

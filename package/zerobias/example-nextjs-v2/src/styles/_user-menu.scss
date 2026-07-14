@@ -213,6 +213,13 @@
   font-size: 26px;
   color: var(--zb-primary);
 }
+// App version, right-aligned in the Sign Out row (label's flex-grow pushes it).
+.menu-item .menu-item-version {
+  flex-shrink: 0;
+  font-size: var(--zb-font-size-xs);
+  color: var(--zb-secondary-text);
+  font-variant-numeric: tabular-nums;
+}
 
 // Avatar sizes (shared with header)
 .avatar-lg {
