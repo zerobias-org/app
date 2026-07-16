@@ -2,12 +2,11 @@ name: Dispatch Deploys
 
 on:
   push:
-    branches: [main, uat, qa]
+    branches: [main, uat, qa, dev]
     paths:
       - 'package/*/*/**'
 
 permissions:
-  id-token: write
   contents: read
   actions: write
 
@@ -15,44 +14,6 @@ jobs:
   detect-and-dispatch:
     runs-on: ubuntu-latest
     steps:
-      - name: Set environment context
-        shell: bash
-        run: |
-          BRANCH=${GITHUB_REF##*/}
-          echo "BRANCH_NAME=$BRANCH" >> $GITHUB_ENV
-
-          case "$BRANCH" in
-            main)
-              echo "ENV_NAME=prod" >> $GITHUB_ENV
-              echo "AWS_ACCOUNT_NAME=prod" >> $GITHUB_ENV
-              echo "DNS_HOST=app" >> $GITHUB_ENV
-              ;;
-            uat)
-              echo "ENV_NAME=uat" >> $GITHUB_ENV
-              echo "AWS_ACCOUNT_NAME=prod" >> $GITHUB_ENV
-              echo "DNS_HOST=uat" >> $GITHUB_ENV
-              ;;
-            qa)
-              echo "ENV_NAME=qa" >> $GITHUB_ENV
-              echo "AWS_ACCOUNT_NAME=dev" >> $GITHUB_ENV
-              echo "DNS_HOST=qa" >> $GITHUB_ENV
-              ;;
-            *)
-              echo "::error::Unsupported branch '$BRANCH'. Supported: main, uat, qa"
-              exit 1
-              ;;
-          esac
-
-      - name: Import secrets
-        uses: hashicorp/vault-action@v2.4.3
-        with:
-          method: jwt
-          url: ${{ secrets.VAULT_ADDR }}
-          role: publishing-role
-          path: gh-actions
-          secrets: |
-            operations-kv/data/aws/${{ env.AWS_ACCOUNT_NAME }} accountId | AWS_ACCOUNT_ID ;
-
       - name: Checkout code
         uses: actions/checkout@v4
         with:
@@ -65,19 +26,12 @@ jobs:
           files: |
             package/*/*/**
 
-      - name: Debug changed files
-        shell: bash
-        run: |
-          echo "🔎 All modified files:"
-          echo "${{ steps.changed.outputs.all_modified_files }}"
-
       - name: Dispatch deploy workflow for each app
         shell: bash
         run: |
-          set -x
           export GH_TOKEN="${{ secrets.GITHUB_TOKEN }}"
 
-          # Extract unique app directories (e.g., package/org/app1)
+          # Extract unique app directories (e.g., package/zerobias/data-explorer)
           echo "${{ steps.changed.outputs.all_modified_files }}" \
             | grep '^package/[^/]\+/[^/]\+/' \
             | awk -F/ '{print $1 "/" $2 "/" $3}' \
@@ -100,15 +54,7 @@ jobs:
             echo "🚀 Triggering deploy for $app_name (path: $app_path)"
 
             gh workflow run deploy.yml \
-              --ref "${GITHUB_REF_NAME}" \
+              --ref "${{ github.ref_name }}" \
               -f app-name="$app_name" \
-              -f app-path="$app_path" \
-              -f env-name="${ENV_NAME}" \
-              -f aws-account-id="${AWS_ACCOUNT_ID}" \
-              -f s3-bucket="app-${BUCKET_ENV}-zerobias.com"
+              -f app-path="$app_path"
           done < .changed_apps
-        env:
-          ENV_NAME: ${{ env.ENV_NAME }}
-          AWS_ACCOUNT_ID: ${{ env.AWS_ACCOUNT_ID }}
-          BUCKET_ENV: ${{ env.DNS_HOST }}
-          GITHUB_REF_NAME: ${{ github.ref_name }}
