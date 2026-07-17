@@ -14,6 +14,83 @@ the changes into their own app easier.
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-07-16
+
+Phase 3 — the app builds its **own** React components (no component library) and
+teaches the compliance API surface, **project -> board -> task**, both read and
+write. Writes use a **code-reveal** doctrine: create/edit demos never call the
+platform — they reveal the call, the real request object built from live input,
+and an obfuscated response fixture. See [docs/write-demos.md](./docs/write-demos.md)
+and [docs/component-strategy.md](./docs/component-strategy.md).
+
+### Added — features and the calls they demonstrate
+
+- **Token ingest pipeline** (`scripts/ingest-tokens.mjs`, `npm run ingest:tokens`)
+  — compiles ngx-library's theme the way its showcase does into
+  `src/styles/_tokens.generated.scss` (70 `--zb-*` over the `--mat-sys-*` layer)
+  + `_breakpoints.generated.scss`, hard-failing on any dangling `var()`. Angular
+  Material is a **build-time-only** devDep; the app ships no Angular. Replaces the
+  hand-authored `_tokens.scss`. See [docs/theming.md](./docs/theming.md).
+- **Sidebar shell** — `DemoNav` + a demo registry (`src/lib/demos.ts`) whose one
+  entry drives both the side rail and the home cards. Fixed 220px, matching the
+  showcase (no responsive collapse).
+- **`RemoteTable`** (`src/components/RemoteTable.tsx`) — server-driven table on the
+  two-call pattern `getXApi().searchOptions()` (per-column sort/filter metadata) +
+  `.search(body, page, size, sort)`. `Column.filterParam` carries the
+  column-name -> body-field mapping (the plural-filter trap: options key `status`,
+  the body wants `statuses`). **`MultiSelect`** (`src/components/MultiSelect.tsx`)
+  — a checkbox popover for multi-value filters (pure logic in `src/lib/multi-select.ts`).
+- **`MarkdownViewer`** (`react-markdown` + `remark-gfm` + `rehype-sanitize`,
+  XSS-safe) and **`MarkdownEditor`** (CodeMirror 6, source + live preview), plus a
+  shared read-only **`CodeBlock`** highlighter. The editor/viewer are tools for the
+  write-demo forms, not a standalone route.
+- **Read demos — Projects, Boards, Tasks** (`/projects`, `/boards`, `/tasks`) —
+  list (`RemoteTable`) + detail, cross-linked down the containment chain. Reads
+  live on `portalClient`. Project detail adds a structure panel
+  (`getProjectApi().getTree(id, true)` — full ancestry + descendants). Task detail
+  shows the **client split** (`portalClient.getTaskApi().get(id)` for the read,
+  `platformClient.getTaskApi().listSubtasks/listComments(id)` for the rest) and the
+  task's `nextTransitions`. Detail routes are query-param (`/x/detail?id=`) so the
+  static export needs no server-side dynamic routes.
+- **Write demos — code-reveal** (`docs/write-demos.md`) — a `Drawer` (scoped to the
+  region beside the rail, no scrim) hosting `CreateXForm` / `EditXForm`, a
+  `CallReveal` primitive (call as TS + real request payload + obfuscated fixture in
+  `src/lib/fixtures.ts`), and a `CommentComposer`. Constructing the real
+  `new NewX(...)` / `new UpdateX(...)` typechecks the shape against the installed
+  SDK (anti-rot); nothing is sent.
+  - **Projects** — `platformClient.getProjectApi().create(new NewProject(...))` and
+    `.update(id, new UpdateProject(...))` (partial delta). Sub-project = `parentId`.
+  - **Boards** — `getBoardApi().create(new NewBoard(name, status, boardType, ...))`
+    and `.update(id, new UpdateBoard(...))`. `projectId` places the board in a project.
+  - **Tasks** — `getTaskApi().create(new NewTask(...))`, whose **four required**
+    fields are the lesson: `activityId` (a task hangs off an activity) plus the
+    arrays `approvers[]`, `notified[]`, `links[]` (each a `new NewTaskLink(...)`).
+    Edit's money shot: **status is a workflow move** —
+    `.update(id, new UpdateTask({ transitionId }))` where `transitionId` is one of
+    the task's `nextTransitions`, never a status string.
+- **`src/lib/uuid-list.ts`** — `splitUuidList()` for the RACI / links inputs
+  (comma/whitespace split, de-duplicated). Unit-tested; suite now 41 tests.
+
+### Fixed
+
+- **Dev WebSocket reconnect spam.** The v2 client opens a session WebSocket when
+  `ZbEnvironment.socketUrlPath` is truthy. In local dev there is no ws server at
+  `localhost:3000/session`, so it failed and reconnect-looped forever, flooding the
+  console. `socketUrlPath` is now empty in local dev (disabling the socket); uat /
+  qa / prod keep the real `wss://<host>/api/session` channel.
+- **Header accent strip clipped by the sidebar.** Scoping the Drawer to `.app-shell`
+  (a positioned ancestor) made the shell paint over the header's cyan accent strip.
+  Fixed with an explicit `z-index` on `.app-header`.
+
+### Changed
+
+- **Favicon** — the account/browser-tab mark is now the ZeroBias logo, sourced from
+  the platform portal's CDN (`metadata.icons` in `src/app/layout.tsx`).
+
+### Deps
+
+- Runtime: `react-markdown`, `remark-gfm`, `rehype-sanitize`, `@codemirror/*`.
+
 ## [0.2.2] - 2026-07-10
 
 ### Added

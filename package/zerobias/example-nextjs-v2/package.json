@@ -1,6 +1,6 @@
 {
   "name": "example-nextjs-v2",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "private": true,
   "description": "ZeroBias v2 client + SDK example app (Next.js). Canonical patterns for building a custom app on the ZeroBias platform.",
   "scripts": {
