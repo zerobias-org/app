@@ -1,19 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { UserMenu } from "./UserMenu";
 
-const NAV = [
-  { href: "/", label: "Home" },
-  { href: "/products", label: "Products" },
-  { href: "/pkv", label: "Key-Value" },
-  { href: "/module", label: "Module" },
-];
-
+/**
+ * Top bar — brand on the left, org + user on the right.
+ *
+ * Demo navigation deliberately does NOT live here. It lives in the side rail
+ * (`DemoNav`), mirroring ngx-library's component-showcase shell. See
+ * docs/component-strategy.md.
+ */
 export function Header() {
-  const pathname = usePathname();
-
   return (
     <header className="app-header">
       <div className="app-header-left">
@@ -21,17 +18,6 @@ export function Header() {
           <span className="brand-mark">ZB</span>
           ZeroBias <span>v2 Example</span>
         </Link>
-        <nav className="app-nav">
-          {NAV.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={pathname === item.href ? "active" : ""}
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
       </div>
       <div className="app-header-right">
         <UserMenu />

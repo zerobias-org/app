@@ -1,0 +1,68 @@
+// Side navigation — mirrors ngx-library's component-showcase shell.
+//
+// The showcase's sidenav (its app.component.ts inline styles) is `mat-sidenav mode="side"
+// opened` at a FIXED 220px, with a `mat-nav-list` of icon+label items, and exactly one
+// piece of active-state styling: `.active { background: var(--zb-hover-overlay); }`.
+// It uses no media queries at all — it does not collapse. We mirror that (see
+// docs/component-strategy.md); a collapse would be an invention, not parity.
+//
+// Both tokens below (--zb-hover-overlay, --zb-divider) now come from the GENERATED portal
+// layer, so this nav's active state is the portal's, not an approximation.
+
+.app-shell {
+  --demo-nav-width: 220px; // the showcase's sidenav width; shared with the Drawer (see _drawer.scss)
+  display: flex;
+  min-height: calc(100vh - 64px); // 64px = .app-header height
+  position: relative; // positioning context for the Drawer, which spans the region beside the rail
+}
+
+.demo-nav {
+  flex: 0 0 var(--demo-nav-width); // the showcase's sidenav width, verbatim
+  width: var(--demo-nav-width);
+  border-right: 1px solid var(--zb-divider);
+  background: var(--zb-background);
+  padding: var(--zb-space-sm) 0;
+
+  ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  a {
+    display: flex;
+    align-items: center;
+    gap: var(--zb-space-md);
+    padding: 0 var(--zb-space-md);
+    height: 48px; // mat-list-item's single-line height
+    color: var(--zb-text);
+    text-decoration: none;
+    font-size: var(--zb-font-size-sm);
+  }
+
+  a:hover {
+    background: var(--zb-hover-overlay);
+    text-decoration: none;
+  }
+
+  // The showcase's entire active treatment. Nothing else — no bold, no accent bar.
+  a.active {
+    background: var(--zb-hover-overlay);
+  }
+
+  .material-symbols-outlined {
+    font-size: 20px;
+    color: var(--zb-secondary-text);
+  }
+
+  a.active .material-symbols-outlined {
+    color: var(--zb-primary);
+  }
+}
+
+// The demo pane. `.content` keeps its own max-width/padding; this just lets it fill
+// the space beside the rail.
+.app-shell .content {
+  flex: 1;
+  min-width: 0; // let wide tables scroll instead of blowing out the flex row
+}

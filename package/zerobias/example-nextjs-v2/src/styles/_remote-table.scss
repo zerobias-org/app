@@ -1,0 +1,147 @@
+// RemoteTable — a table remote-controlled by its API's search + *Options endpoints.
+//
+// Class names on the portable core mirror ngx-library's `zb-remote-table`
+// (`zb-remote-table-toolbar`, `-toolbar-row`, `-search`, `-chips`, `-table-container`,
+// `no-data`, `no-hover`) so the DOM reads the same as the portal's. Its `.mat-mdc-*` /
+// `.mdc-*` classes are deliberately NOT copied — they are Angular Material's internal
+// skins. See docs/component-strategy.md.
+//
+// Base `.table` / `.table-scroll` styling lives in _components.scss; this file adds only
+// what the toolbar, filters, chips and sortable headers need.
+
+.zb-remote-table-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--zb-space-md);
+  flex-wrap: wrap;
+  margin-bottom: var(--zb-space-md);
+}
+
+.zb-remote-table-toolbar-row {
+  display: flex;
+  align-items: center;
+  gap: var(--zb-space-md);
+  flex-wrap: wrap;
+}
+
+.zb-remote-table-search {
+  display: flex;
+  align-items: center;
+  gap: var(--zb-space-sm);
+  padding: 0 var(--zb-space-sm);
+  background: var(--zb-background-input);
+  border: 1px solid var(--zb-divider);
+  border-radius: var(--zb-radius-sm);
+
+  .material-symbols-outlined {
+    font-size: 20px;
+    color: var(--zb-secondary-text);
+  }
+
+  input {
+    height: 36px;
+    min-width: 220px;
+    border: 0;
+    outline: none;
+    background: transparent;
+    color: var(--zb-text);
+    font-size: var(--zb-font-size-sm);
+  }
+
+  &:focus-within {
+    border-color: var(--zb-primary);
+  }
+}
+
+// One control per column the server declared filterable.
+.dt-filter {
+  display: flex;
+  align-items: center;
+  gap: var(--zb-space-sm);
+  font-size: var(--zb-font-size-sm);
+  color: var(--zb-secondary-text);
+
+  // Single-value filters still use a native select.
+  select {
+    min-height: 36px;
+    padding: 0 var(--zb-space-sm);
+    background: var(--zb-background-input);
+    color: var(--zb-text);
+    border: 1px solid var(--zb-divider);
+    border-radius: var(--zb-radius-sm);
+    font-size: var(--zb-font-size-sm);
+  }
+
+  select:focus {
+    outline: none;
+    border-color: var(--zb-primary);
+  }
+}
+
+// Active filters, as removable chips (ngx's chips row).
+.zb-remote-table-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--zb-space-sm);
+  margin-bottom: var(--zb-space-md);
+}
+
+.chip.removable {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--zb-space-sm);
+  border: 1px solid var(--zb-divider);
+  background: var(--zb-background-card);
+  color: var(--zb-text);
+  cursor: pointer;
+
+  &:hover {
+    background: var(--zb-hover-overlay);
+  }
+}
+
+// Sortable headers. ngx uses matSortDisableClear — asc <-> desc only, never unsorted.
+.th-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--zb-space-xs);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--zb-text);
+  }
+}
+
+.th-sort-arrow {
+  color: var(--zb-primary);
+  min-width: 10px;
+}
+
+.table th[aria-sort="ascending"],
+.table th[aria-sort="descending"] {
+  color: var(--zb-text);
+}
+
+.table td.align-right,
+.table th.align-right {
+  text-align: right;
+}
+
+.table tr.clickable {
+  cursor: pointer;
+}
+
+.table.no-hover tbody tr:hover {
+  background: transparent;
+}
+
+.table.dense tbody td {
+  padding-top: var(--zb-space-sm);
+  padding-bottom: var(--zb-space-sm);
+}
