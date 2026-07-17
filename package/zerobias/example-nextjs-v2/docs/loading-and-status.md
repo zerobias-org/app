@@ -74,8 +74,9 @@ dot mode. Renders a resource's operational status as a small colored circle:
 - Color-only by design (the status word is wasted space next to a name); the
   label is on hover (`title`) and exposed to assistive tech (`aria-label`).
 
-Colors are ngx-library's own `--zb-color-*` tokens, mirrored verbatim in
-`src/styles/_tokens.scss` (green `--zb-color-success`, red `--zb-color-error`,
+Colors are ngx-library's own `--zb-color-*` tokens — no longer hand-mirrored, but
+**compiled straight out of ngx-library** into `src/styles/_tokens.generated.scss`
+by `npm run ingest:tokens` (green `--zb-color-success`, red `--zb-color-error`,
 amber `--zb-color-warning`, blue `--zb-color-info`, grey `--zb-color-gray`), with
 text from the matching `--zb-text-on-*-bg` token. The dot geometry (14px hole,
 3px ring, `content-box`) matches ngx's `size-default` circle exactly.

@@ -58,7 +58,9 @@ Read the doc for the feature you're touching before changing it:
 | Module chain (GitHub via Hub) | [docs/module-chain.md](./docs/module-chain.md) | `new GithubHubImpl().connect(new HubConnectionProfile(...))` |
 | Loading & status UI | [docs/loading-and-status.md](./docs/loading-and-status.md) | `PageLoader` (0 mark), `Spinner`, `TableSkeleton`, `ButtonLabel`, `StatusDot` |
 | Environments + deploy | [docs/environments-and-deploy.md](./docs/environments-and-deploy.md) | one build -> uat/qa/prod |
-| Theming (light/dark, portal parity) | [docs/theming.md](./docs/theming.md) | `dark-theme` class + `zb-theme-preference` (ports `ZbThemeService`) |
+| Theming (light/dark, portal parity) | [docs/theming.md](./docs/theming.md) | `dark-theme` class + `zb-theme-preference` (ports `ZbThemeService`); tokens are GENERATED — `npm run ingest:tokens` |
+| Component strategy (build our own; why) | [docs/component-strategy.md](./docs/component-strategy.md) | no component-library dependency — mirror ngx-library's markup, ingest its tokens |
+| Write demos (create/edit; code-reveal) | [docs/write-demos.md](./docs/write-demos.md) | writes are never executed — reveal the call + live-built request payload + obfuscated response fixture |
 
 ## Registries / install
 
@@ -81,7 +83,13 @@ npm run dev                               # http://localhost:3000
 - **Phase 2:** GitHub module chain (product -> module -> connection -> scope ->
   hub module client), shared-session key.
 - **Phase 3:** SDK building-blocks showcase in the ngx-library **side-panel
-  navigation** pattern (not top tabs). Under consideration:
+  navigation** pattern (not top tabs). Components are **hand-built React in this
+  repo** — no component-library dependency, mirroring ngx-library's markup/SCSS
+  and ingesting its tokens. Read [docs/component-strategy.md](./docs/component-strategy.md)
+  before proposing a component library (Angular Elements, web components, and a
+  Stencil reproduction have all been evaluated and rejected — with reasons).
+  Build components to be **reused across demos** (one `DataTable` with sorting +
+  paging, not a per-demo table). Under consideration:
   - **Infinite-scroll** example against a cursor-wired search endpoint —
     `PagedResults` already exposes the machinery (`pageToken`, `paginationMode`,
     `asyncGenerator()`/`forEach()`). Note: `portalClient.getProductApi().search()`

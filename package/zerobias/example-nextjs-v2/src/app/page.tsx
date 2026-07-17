@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useSession } from "@/context/session-context";
+import { DEMOS } from "@/lib/demos";
 
 function CodeGlyph() {
   return (
@@ -17,26 +18,8 @@ function CodeGlyph() {
   );
 }
 
-const DEMOS = [
-  {
-    href: "/products",
-    title: "Products Catalog",
-    body: "Read-only, paginated search of the ZeroBias catalog.",
-    call: "portalClient.getProductApi().search()",
-  },
-  {
-    href: "/pkv",
-    title: "Principal Key-Value",
-    body: "Read and write per-principal key-value pairs.",
-    call: "danaClient.getPkvApi().upsertPrincipalKeyValue()",
-  },
-  {
-    href: "/module",
-    title: "Module Usage — GitHub",
-    body: "Product → module → connection → scope → Hub client; list an org's repos.",
-    call: "new GithubHubImpl().connect(HubConnectionProfile)",
-  },
-];
+// Demos come from the registry (src/lib/demos.ts) — the same list the side nav renders,
+// so a new demo appears in both places from one edit.
 
 export default function Home() {
   const { user, org } = useSession();

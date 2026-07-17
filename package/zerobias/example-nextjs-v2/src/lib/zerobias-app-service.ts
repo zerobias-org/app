@@ -24,7 +24,14 @@ export class ZerobiasAppService {
   private constructor() {
     const environment: ZbEnvironment = {
       production: env.production,
-      socketUrlPath: "/session",
+      // The live session WebSocket. In uat/qa/prod the platform serves it (wss://<host>/api/session)
+      // and the client uses it for session/org push events. In LOCAL DEV there is no ws server at
+      // localhost:3000/session, so the client would fail to connect and reconnect-spam the console
+      // forever. `ClientApp.init` only opens the socket when `socketUrlPath` is truthy
+      // (`!!this.environment.socketUrlPath`), so leaving it empty in local dev disables the socket
+      // (and the reconnect loop) entirely. Nothing else reads it — the URL is only built inside the
+      // connect path we're skipping.
+      socketUrlPath: env.isLocalDev ? "" : "/session",
       isLocalDev: env.isLocalDev,
       localPortalOrigin: env.localPortalOrigin,
     };
