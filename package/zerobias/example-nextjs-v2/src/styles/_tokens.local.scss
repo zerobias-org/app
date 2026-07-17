@@ -1,0 +1,60 @@
+// App-local design tokens — the ones the ZeroBias portal has NO opinion about.
+//
+// The portal's tokens are GENERATED into _tokens.generated.scss (do not hand-edit those).
+// This file is the small, deliberately hand-authored remainder: spacing, fonts, and a few
+// app-only surfaces the portal simply does not define. Anything the portal DOES define must
+// come from the generated layer, so a portal change reaches us on the next `npm run
+// ingest:tokens` instead of drifting silently.
+//
+// Dropped when this file was created (defined but referenced nowhere):
+//   --zb-status-blue, --zb-status-orange, --zb-status-purple, --zb-status-warning,
+//   --zb-text-on-primary, --zb-weight-brand
+//
+// TODO: --zb-status-* likely duplicates the portal's --zb-severity-* family, which the
+// generated layer now provides. Align on the portal's and delete these once the components
+// that use them are reviewed.
+
+// Theme-independent values + app-local surfaces the portal does not define.
+// Safe on :root — none of these reference a themed token.
+:root {
+  --zb-toolbar-bg: #000000; // portal `portal-toolbar` — black in BOTH themes
+  --zb-background-elevated: #ffffff;
+  --zb-background-input: #ffffff;
+  --zb-primary-contrast: #ffffff;
+  --zb-focus-ring: rgba(3, 175, 240, 0.5);
+  --zb-font-body: var(--font-roboto), Roboto, system-ui, sans-serif;
+  --zb-font-brand: var(--zb-font-body);
+  --zb-weight-heading: 400;
+  --zb-space-xs: 4px;
+  --zb-space-sm: 8px;
+  --zb-space-md: 16px;
+  --zb-space-lg: 32px;
+  --zb-status-success: #1f9e6a;
+  --zb-status-error: #cc0000;
+  --zb-status-info: #2a6fd6;
+  --zb-status-neutral: #6b778c;
+}
+
+// Tokens DERIVED from themed portal tokens must be declared on `body`, NOT `:root`.
+//
+// A custom property containing var() is substituted on the element where it is DECLARED.
+// The generated layer puts light on `html` and dark on `body.dark-theme` (that is
+// ngx-library's own contract — we mirror it, we do not change it). So declaring
+// `--zb-menu-bg: var(--zb-background-card)` on `:root` (= html) locks in the LIGHT card
+// colour forever: body's dark override lands too late, and the value inherits down already
+// substituted. That shipped a white dropdown with white text in dark mode.
+//
+// Declared on `body`, substitution happens on the same element that carries the dark
+// override, so these resolve correctly in BOTH themes with no duplication.
+body {
+  --zb-menu-bg: var(--zb-background-card);
+  --zb-menu-divider: var(--zb-divider);
+  --zb-menu-hover: var(--zb-hover-overlay);
+  --zb-menu-input-bg: var(--zb-background-input);
+}
+
+// App-local dark values (the portal has no opinion on these two surfaces).
+body.dark-theme {
+  --zb-background-elevated: #4a4a4a;
+  --zb-background-input: #2b2b2b;
+}

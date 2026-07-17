@@ -133,7 +133,7 @@
 // fill + colored ring) = transitional state such as `standby` — the same
 // solid-vs-outlined distinction ngx-library's dot makes, so `up` and `standby`
 // (both green) stay distinguishable. Colors are ngx-library's `--zb-color-*`
-// tokens (mirrored in _tokens.scss), theme-invariant like the portal.
+// tokens, compiled from it into _tokens.generated.scss, theme-invariant like the portal.
 .status-dot {
   display: inline-block;
   flex: none;
@@ -308,7 +308,8 @@
 
 // ---------- Buttons ----------
 .btn,
-.btn-ghost {
+.btn-ghost,
+.btn-stroked {
   font: inherit;
   font-family: var(--zb-font-body);
   cursor: pointer;
@@ -345,6 +346,24 @@
   opacity: 0.4;
   cursor: default;
   color: var(--zb-secondary-text);
+}
+
+// Stroked / outlined (mirrors Angular Material's mat-stroked-button): transparent fill, themed
+// border + text, faint overlay on hover.
+.btn-stroked {
+  background: transparent;
+  color: var(--zb-primary);
+  border-color: var(--zb-primary);
+  font-weight: 600;
+}
+.btn-stroked:hover:not(:disabled) {
+  background: var(--zb-hover-overlay);
+}
+.btn-stroked:disabled {
+  opacity: 0.45;
+  cursor: default;
+  color: var(--zb-secondary-text);
+  border-color: var(--zb-divider);
 }
 
 .toolbar {
