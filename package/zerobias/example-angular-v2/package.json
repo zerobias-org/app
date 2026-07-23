@@ -1,0 +1,75 @@
+{
+  "name": "example-angular-v2",
+  "version": "0.2.0",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve",
+    "build": "ng build",
+    "watch": "ng build --watch --configuration development",
+    "test": "ng test"
+  },
+  "prettier": {
+    "printWidth": 100,
+    "singleQuote": true,
+    "overrides": [
+      {
+        "files": "*.html",
+        "options": {
+          "parser": "angular"
+        }
+      }
+    ]
+  },
+  "private": true,
+  "packageManager": "npm@10.9.4",
+  "dependencies": {
+    "@acrodata/code-editor": "^0.6.0",
+    "@angular/animations": "^21.1.0",
+    "@angular/cdk": "^21.1.0",
+    "@angular/common": "^21.1.0",
+    "@angular/compiler": "^21.1.0",
+    "@angular/core": "^21.1.0",
+    "@angular/forms": "^21.1.0",
+    "@angular/material": "^21.1.0",
+    "@angular/platform-browser": "^21.1.0",
+    "@angular/router": "^21.1.0",
+    "@auditlogic/hub-sdk-github-github": "^7.1.7",
+    "@codemirror/lang-css": "^6.3.1",
+    "@codemirror/lang-html": "^6.4.11",
+    "@codemirror/lang-javascript": "^6.2.5",
+    "@codemirror/lang-json": "^6.0.2",
+    "@codemirror/lang-markdown": "^6.5.0",
+    "@codemirror/lang-python": "^6.2.1",
+    "@codemirror/lang-sql": "^6.10.0",
+    "@codemirror/lang-xml": "^6.1.0",
+    "@codemirror/lang-yaml": "^6.1.2",
+    "@codemirror/theme-one-dark": "^6.1.3",
+    "@milkdown/crepe": "^7.18.0",
+    "@milkdown/kit": "^7.18.0",
+    "@milkdown/theme-nord": "^7.18.0",
+    "@ngx-translate/core": "^15.0.0",
+    "@zerobias-com/dana-sdk": "^2.0.4",
+    "@zerobias-com/platform-sdk": "^2.0.10",
+    "@zerobias-com/portal-sdk": "^2.0.2",
+    "@zerobias-com/zerobias-client": "^2.0.14",
+    "@zerobias-org/ngx-library": "^0.2.42",
+    "@zerobias-org/types-core-js": "^2.0.3",
+    "@zerobias-org/util-connector": "^2.0.2",
+    "clipboard": "^2.0.11",
+    "dompurify": "^3.3.1",
+    "events": "^3.3.0",
+    "marked": "^17.0.0",
+    "ngx-infinite-scroll": "^21.0.0",
+    "ngx-markdown": "^21.0.1",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0"
+  },
+  "devDependencies": {
+    "@angular/build": "^21.1.4",
+    "@angular/cli": "^21.1.4",
+    "@angular/compiler-cli": "^21.1.0",
+    "jsdom": "^27.1.0",
+    "typescript": "~5.9.2",
+    "vitest": "^4.0.8"
+  }
+}
