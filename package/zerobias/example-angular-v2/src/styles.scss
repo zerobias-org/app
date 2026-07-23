@@ -1,0 +1,341 @@
+// Global styles + the ZeroBias theme. Setup is verbatim from the library's own
+// docs/CONSUMER_GUIDE.md (the M3 theme with light default + a `.dark-theme` override toggled by
+// ZbThemeService). The library's src/styles is on the SCSS include path via angular.json.
+@use '@angular/material' as mat;
+@use 'theme' as theme;
+@use 'theme-variables' as *;
+@use 'chips';
+@use 'checkbox';
+@use 'buttons';
+
+// Apply M3 themes
+html {
+  color-scheme: light;
+  @include mat.theme(theme.$theme);
+}
+
+// Apply ZeroBias CSS custom properties (mixins self-scope to `html` / `body.dark-theme`)
+@include zb-theme-variables-light(theme.$theme);
+@include zb-theme-variables-dark(theme.$altTheme);
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
+  background-color: var(--zb-background);
+  color: var(--zb-text);
+
+  &.dark-theme {
+    color-scheme: dark;
+    @include mat.theme(theme.$altTheme);
+  }
+}
+
+// --- Markdown rendering (shared/markdown-viewer) ---
+// Adapted from zb-ui-lib's zb-markdown-viewer theme. Global (not component-scoped) because
+// ngx-markdown injects raw HTML that Angular's view encapsulation can't reach. Pure --zb-* tokens,
+// so it themes light/dark with the rest of the app.
+.ngx-markdown-wrapper {
+  > :first-child { margin-top: 0; }
+  > :last-child { margin-bottom: 0; }
+
+  p { margin: 0 0 8px; line-height: 1.4; }
+
+  h1, h2, h3, h4, h5, h6 { margin: 0 0 12px; font-weight: 600; line-height: 1.3; }
+  h1 { font-size: 1.5em; }
+  h2 { font-size: 1.3em; }
+  h3 { font-size: 1.15em; }
+  h4 { font-size: 1em; }
+  h5, h6 { font-size: 0.95em; }
+
+  ul, ol { padding-left: 12px; margin: 0 0 8px 12px; }
+  li { margin: 0; line-height: 1.4; }
+  ol li { list-style-type: decimal; }
+
+  strong, b { font-weight: 600; }
+  em, i { font-style: italic; }
+  del, s { text-decoration: line-through; }
+
+  code {
+    background-color: var(--zb-background);
+    padding: 1px 4px;
+    border-radius: 2px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.9em;
+  }
+
+  pre {
+    background-color: var(--zb-background);
+    padding: 8px;
+    border-radius: 3px;
+    overflow-x: auto;
+    margin: 0 0 4px;
+    max-width: 100%;
+
+    code {
+      background: none;
+      padding: 0;
+      font-size: 12px;
+      line-height: 1.3;
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: var(--zb-text);
+    }
+  }
+
+  blockquote {
+    border-left: 3px solid var(--zb-primary);
+    margin: 0 0 8px;
+    padding-left: 10px;
+    color: var(--zb-secondary-text);
+
+    p { margin: 0; }
+  }
+
+  a { color: var(--zb-primary); text-decoration: underline; }
+
+  hr { border: none; border-top: 1px solid var(--zb-divider); margin: 8px 0; }
+
+  table {
+    border-collapse: collapse;
+    margin: 0 0 4px;
+
+    th, td { border: 1px solid var(--zb-divider); padding: 4px 8px; }
+    th { background-color: var(--zb-background); font-weight: 600; }
+  }
+
+  // GFM task-list checkboxes (rendered by marked as <input type=checkbox>)
+  li:has(input[type='checkbox']) {
+    list-style: none;
+    margin-left: -18px;
+
+    input[type='checkbox'] {
+      margin: 0 4px 0 0;
+      pointer-events: none;
+      vertical-align: middle;
+    }
+  }
+
+  img { max-width: 100%; height: auto; }
+}
+
+// --- Milkdown editor (shared/markdown-editor) ---
+// Adapted from zb-ui-lib's zb-markdown-textarea theme. Global because app-markdown-textarea uses
+// ViewEncapsulation.None and Milkdown/ProseMirror inject their own DOM the encapsulation can't reach.
+
+// Heading menu items render in the CDK overlay (outside the component), so they must be global.
+.heading-menu-item {
+  font-weight: 600;
+  &.h1 { font-size: 18px; }
+  &.h2 { font-size: 16px; }
+  &.h3 { font-size: 15px; }
+  &.h4 { font-size: 14px; }
+  &.h5 { font-size: 13px; }
+  &.h6 { font-size: 12px; }
+}
+
+app-markdown-textarea {
+  display: block;
+
+  .milkdown-wrapper {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    border: 1px solid var(--zb-divider);
+    border-radius: 4px;
+    overflow: hidden;
+    background-color: var(--zb-background-card);
+
+    .milkdown-static-toolbar {
+      display: flex;
+      align-items: center;
+      padding: 4px 8px;
+      background-color: var(--zb-background-card);
+      border-bottom: 1px solid var(--zb-divider);
+      flex-wrap: wrap;
+      gap: 2px;
+
+      .toolbar-group {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+
+        button {
+          width: 32px;
+          height: 32px;
+          line-height: 21px;
+
+          mat-icon {
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
+            line-height: 18px;
+          }
+
+          &:hover:not([disabled]) { background-color: var(--zb-background-hover); }
+          &[disabled] { opacity: 0.5; }
+        }
+
+        .heading-dropdown {
+          width: auto;
+          min-width: 40px;
+          padding: 0 4px;
+          font-size: 13px;
+          font-weight: 600;
+          color: var(--zb-text);
+
+          mat-icon { margin-left: -4px; }
+        }
+      }
+
+      .toolbar-divider {
+        width: 1px;
+        height: 24px;
+        background-color: var(--zb-divider);
+        margin: 0 4px;
+      }
+    }
+
+    .milkdown-editor-container {
+      flex-grow: 1;
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--zb-background);
+
+      app-milkdown-crepe {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        height: 100%;
+      }
+
+      .milkdown {
+        flex-grow: 1;
+        height: 100%;
+        background-color: var(--zb-background);
+
+        .editor { min-height: 100%; height: 100%; }
+
+        .ProseMirror {
+          min-height: 150px;
+          padding: 8px 10px;
+          font-size: 14px;
+          color: var(--zb-text);
+          outline: none;
+
+          &:focus { outline: none; }
+
+          p { margin: 0 0 8px; line-height: 24px; padding: 0; }
+
+          h1, h2, h3, h4, h5, h6 {
+            margin: 0 0 12px;
+            font-weight: 600;
+            line-height: 24px;
+            color: var(--zb-text);
+            padding: 0;
+          }
+          h1 { font-size: 1.5em; }
+          h2 { font-size: 1.3em; }
+          h3 { font-size: 1.15em; }
+          h4 { font-size: 1em; }
+          h5, h6 { font-size: 0.95em; }
+
+          ul, ol { list-style: none; padding-left: 12px; margin: 0 0 8px 12px; }
+          li { margin: 0; padding: 0; line-height: 24px; > p { margin: 0; padding: 0; } }
+
+          strong, b { font-weight: 600; }
+          em, i { font-style: italic; }
+          del, s { text-decoration: line-through; }
+
+          code {
+            background-color: var(--zb-background);
+            padding: 1px 4px;
+            border-radius: 2px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 0.9em;
+          }
+
+          pre {
+            background-color: var(--zb-background);
+            padding: 8px;
+            border-radius: 3px;
+            overflow-x: auto;
+            margin: 4px 0;
+
+            code { background: none; padding: 0; font-size: 12px; line-height: 1.3; }
+          }
+
+          .milkdown-code-block { padding: 8px; }
+
+          blockquote {
+            border-left: 3px solid var(--zb-primary);
+            margin: 0 0 8px;
+            padding-left: 10px;
+            color: var(--zb-secondary-text);
+            p { margin: 0; }
+          }
+
+          a { color: var(--zb-primary); text-decoration: underline; }
+
+          hr { border: none; border-top: 1px solid var(--zb-divider); margin: 8px 0; }
+
+          table {
+            border-collapse: collapse;
+            margin: 4px 0;
+
+            th, td { border: 1px solid var(--zb-divider); padding: 4px 8px; > p { margin: 0; padding: 0; } }
+            th { background-color: var(--zb-background); font-weight: 600; }
+          }
+
+          img { max-width: 100%; height: auto; }
+
+          // Hide Milkdown's own code-block tool buttons (we don't use them)
+          .milkdown-code-block .tools .tools-button-group,
+          .milkdown-code-block .tools .language-button { display: none; }
+        }
+      }
+    }
+  }
+}
+
+// --- Milkdown / Crepe dark theme ---
+// angular.json loads crepe's `nord` (light) theme globally. Its dark twin, `nord-dark`, is a
+// single `.milkdown { … }` block of CSS custom properties — nothing else — so instead of swapping
+// stylesheets at runtime we re-declare those properties scoped under the app's dark class.
+// ZbThemeService toggles `body.dark-theme` (and already watches the OS `system` preference), so
+// the editor follows the app's theme reactively with no JS and no extra bundle.
+//
+// Values vendored verbatim from:
+//   node_modules/@milkdown/crepe/lib/theme/nord-dark/style.css
+// Re-copy them if @milkdown/crepe is upgraded — this is the one spot that can drift.
+body.dark-theme .milkdown {
+  --crepe-color-background: #1b1c1d;
+  --crepe-color-on-background: #f8f9ff;
+  --crepe-color-surface: #111418;
+  --crepe-color-surface-low: #191c20;
+  --crepe-color-on-surface: #e1e2e8;
+  --crepe-color-on-surface-variant: #c3c6cf;
+  --crepe-color-outline: #8d9199;
+  --crepe-color-primary: #a1c9fd;
+  --crepe-color-secondary: #3c4858;
+  --crepe-color-on-secondary: #d7e3f8;
+  --crepe-color-inverse: #e1e2e8;
+  --crepe-color-on-inverse: #2e3135;
+  --crepe-color-inline-code: #ffb4ab;
+  --crepe-color-error: #ffb4ab;
+  --crepe-color-hover: #1d2024;
+  --crepe-color-selected: #32353a;
+  --crepe-color-inline-area: #111418;
+
+  --crepe-shadow-1:
+    0px 1px 2px 0px rgba(255, 255, 255, 0.3),
+    0px 1px 3px 1px rgba(255, 255, 255, 0.15);
+  --crepe-shadow-2:
+    0px 1px 2px 0px rgba(255, 255, 255, 0.3),
+    0px 2px 6px 2px rgba(255, 255, 255, 0.15);
+}

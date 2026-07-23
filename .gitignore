@@ -10,6 +10,8 @@ vercel.env
 **/.claude/plans/local/
 **/.claude/plans-archive/
 **/.claude/settings.local.json
+# Personal per-developer skill-gate hooks (depend on a user-level Claude skill; not for customer clones)
+**/.claude/hooks/architect-skill-*.sh
 **/.claude/ideas/
 **/.claude/scheduled_tasks.lock
 **/.claude/worktrees/
