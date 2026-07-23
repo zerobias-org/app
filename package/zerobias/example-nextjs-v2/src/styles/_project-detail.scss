@@ -1,0 +1,220 @@
+// Project detail — header + compliance context + tasks + members.
+// Mirrors the task-detail layout language; all surfaces use the generated portal tokens.
+
+.project-detail-back {
+  display: inline-block;
+  margin-bottom: var(--zb-space-md);
+  color: var(--zb-secondary-text);
+  font-size: var(--zb-font-size-sm);
+}
+
+.project-detail-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--zb-space-md);
+
+  h1 {
+    margin: 0;
+  }
+
+  // Keep the "+ Create Sub-Project" button from shrinking under a long name.
+  .btn,
+  .btn-stroked {
+    flex: none;
+  }
+}
+
+// Groups the name + status chip on the left so the action buttons can sit flush right.
+.project-detail-head-main {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--zb-space-md);
+}
+
+// Edit + Create Sub-Project sit together at the right of the header. Also reused on task detail
+// (status chip + Edit), hence align-items: center to line the chip up with the button.
+.project-detail-head-actions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--zb-space-sm);
+}
+
+.project-detail-code {
+  display: inline-block;
+  margin-right: var(--zb-space-sm);
+  font-family: var(--font-geist-mono, monospace);
+  font-size: var(--zb-font-size-sm);
+  color: var(--zb-primary);
+}
+
+.project-detail-desc {
+  margin: var(--zb-space-md) 0;
+}
+
+.project-detail-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--zb-space-md);
+  margin: var(--zb-space-lg) 0;
+  padding: var(--zb-space-md);
+  background: var(--zb-background-card);
+  border: 1px solid var(--zb-divider);
+  border-radius: var(--zb-radius-md);
+
+  dt {
+    font-size: var(--zb-font-size-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--zb-secondary-text);
+  }
+  dd {
+    margin: var(--zb-space-xs) 0 0;
+    color: var(--zb-text);
+  }
+}
+
+.project-detail-section {
+  margin-top: var(--zb-space-lg);
+
+  h2 {
+    display: flex;
+    align-items: center;
+    gap: var(--zb-space-sm);
+    margin-bottom: var(--zb-space-xs);
+  }
+  .count {
+    font-size: var(--zb-font-size-sm);
+    color: var(--zb-secondary-text);
+    font-weight: 400;
+  }
+  .subtitle {
+    margin-top: 0;
+  }
+}
+
+.project-detail-tasks {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--zb-space-md);
+    padding: var(--zb-space-sm) 0;
+    border-bottom: 1px solid var(--zb-divider);
+  }
+  a {
+    color: var(--zb-text);
+  }
+  a:hover {
+    color: var(--zb-primary);
+  }
+}
+
+.project-detail-members {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--zb-space-md);
+    padding: var(--zb-space-sm) 0;
+    border-bottom: 1px solid var(--zb-divider);
+  }
+}
+
+.project-detail-roles {
+  font-size: var(--zb-font-size-sm);
+  color: var(--zb-secondary-text);
+}
+
+.project-detail-hint {
+  margin: var(--zb-space-sm) 0;
+  font-size: var(--zb-font-size-sm);
+  color: var(--zb-secondary-text);
+}
+
+// getTree structure panel — nested project hierarchy.
+.project-tree {
+  margin: var(--zb-space-sm) 0 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    position: relative;
+  }
+}
+
+.project-tree-children {
+  margin: 0;
+  padding-left: var(--zb-space-lg);
+  list-style: none;
+  border-left: 1px solid var(--zb-divider);
+  margin-left: var(--zb-space-sm);
+}
+
+.project-tree-node {
+  display: flex;
+  align-items: baseline;
+  gap: var(--zb-space-sm);
+  padding: var(--zb-space-xs) var(--zb-space-sm);
+  border-radius: var(--zb-radius-sm);
+
+  &.current {
+    background: var(--zb-hover-overlay);
+  }
+}
+
+.project-tree-name {
+  color: var(--zb-text);
+  font-weight: 500;
+}
+a.project-tree-name:hover {
+  color: var(--zb-primary);
+}
+
+.project-tree-type,
+.project-tree-count {
+  font-size: var(--zb-font-size-xs);
+  color: var(--zb-secondary-text);
+}
+
+// Per-node "+" — opens the create drawer with this node as the parent. Dim until row hover.
+.project-tree-add {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin-left: var(--zb-space-xs);
+  background: none;
+  border: 0;
+  border-radius: var(--zb-radius-sm);
+  color: var(--zb-secondary-text);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+
+  .material-symbols-outlined {
+    font-size: 18px;
+  }
+  &:hover,
+  &:focus-visible {
+    color: var(--zb-primary);
+    opacity: 1;
+  }
+}
+
+.project-tree-node:hover .project-tree-add {
+  opacity: 1;
+}
+
+.project-tree-example {
+  opacity: 0.85;
+}

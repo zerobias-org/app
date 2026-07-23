@@ -1,0 +1,74 @@
+// Create/edit forms (in the Drawer) + the page-header row that hosts the "+ Create" button.
+// Inputs/selects/textareas are already styled globally in _components.scss; this is layout.
+
+@use "breakpoints.generated" as bp;
+
+// List-page header row: title on the left, "+ Create" button flush to the right.
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--zb-space-md);
+}
+
+// Form on the left (1/3), live code panel on the right (2/3). Stacks below the portal tablet
+// breakpoint.
+.create-form {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: var(--zb-space-lg);
+  align-items: start;
+
+  @include bp.tablet {
+    grid-template-columns: 1fr;
+  }
+}
+
+.create-form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--zb-space-md);
+  min-width: 0;
+}
+
+.create-form-code {
+  min-width: 0; // let the code blocks scroll horizontally instead of stretching the grid
+}
+
+.create-form-note {
+  margin: 0;
+  padding: var(--zb-space-sm) var(--zb-space-md);
+  font-size: var(--zb-font-size-sm);
+  color: var(--zb-secondary-text);
+  background: var(--zb-hover-overlay);
+  border-radius: var(--zb-radius-sm);
+}
+
+.field-req,
+.field-opt {
+  margin-left: var(--zb-space-xs);
+  font-size: var(--zb-font-size-xs);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.field-req {
+  color: var(--zb-primary);
+}
+.field-opt {
+  color: var(--zb-secondary-text);
+}
+
+// A short explanatory line under a field (e.g. the task transition teaching note).
+.field-hint {
+  margin: var(--zb-space-xs) 0 0;
+  font-size: var(--zb-font-size-sm);
+  color: var(--zb-secondary-text);
+}
+
+// Sub-title under a drawer title ("under <parent>").
+.drawer-context {
+  margin: 0 0 var(--zb-space-md);
+  color: var(--zb-secondary-text);
+  font-size: var(--zb-font-size-sm);
+}
