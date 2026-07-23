@@ -127,7 +127,7 @@ export function TaskDetail() {
         </div>
       )}
 
-      {/* The compliance context every task hangs in. `get()` inflates all of it. */}
+      {/* The context every task hangs in. `get()` inflates all of it. */}
       <dl className="task-detail-meta">
         <div>
           <dt>Activity</dt>

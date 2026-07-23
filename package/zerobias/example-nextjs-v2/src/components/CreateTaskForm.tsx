@@ -12,7 +12,7 @@ import { exampleTask } from "@/lib/fixtures";
  * CreateTaskForm — the code-reveal create demo for the richest write on the surface (see
  * docs/write-demos.md). `NewTask` has FOUR required fields, and that's the lesson:
  *
- *   activityId  — a task hangs off a compliance activity; it does not float.
+ *   activityId  — a task hangs off an activity; it does not float.
  *   approvers[] — RACI is first-class; these are party ids (may be empty, but must be present).
  *   notified[]  — same.
  *   links[]     — links to resources (each a NewTaskLink); may be empty.
@@ -117,7 +117,7 @@ export function CreateTaskForm({
             id="ct-activity"
             value={activityId}
             onChange={(e) => setActivityId(e.target.value)}
-            placeholder="the compliance activity this task hangs off"
+            placeholder="the activity this task hangs off"
             autoComplete="off"
           />
         </div>
