@@ -5,6 +5,7 @@ import "@/styles/main.scss";
 import { SessionProvider } from "@/context/session-context";
 import { AuthGate } from "@/components/AuthGate";
 import { Header } from "@/components/Header";
+import { DemoNav } from "@/components/DemoNav";
 
 const roboto = Roboto({
   subsets: ["latin"],
@@ -25,6 +26,13 @@ export const metadata: Metadata = {
   title: "ZeroBias v2 Example",
   description:
     "Canonical example of building a custom app on the ZeroBias platform with the v2 client + SDKs.",
+  // The ZeroBias mark, same source the platform portal uses (projects/portal/src/index.html in
+  // zb/com/ui): the CDN-hosted favicon. Emits <link rel="icon" type="image/png" href="…"/>.
+  icons: {
+    icon: [
+      { url: "https://cdn.zerobias.com/static/images/zerobias/favicon.png", type: "image/png" },
+    ],
+  },
 };
 
 // FOWT (Flash of Wrong Theme) prevention — a port of the portal's `index.html`
@@ -79,7 +87,13 @@ export default function RootLayout({
         <SessionProvider>
           <AuthGate>
             <Header />
-            <main className="content">{children}</main>
+            {/* Shell = the ngx-library showcase layout: a fixed 220px side rail of
+                demos, with the demo itself rendered beside it. Demo links live in
+                the rail, NOT the header (the header keeps brand + org + user). */}
+            <div className="app-shell">
+              <DemoNav />
+              <main className="content">{children}</main>
+            </div>
           </AuthGate>
         </SessionProvider>
       </body>

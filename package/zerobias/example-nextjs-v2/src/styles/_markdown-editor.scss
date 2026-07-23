@@ -1,0 +1,79 @@
+// MarkdownEditor — side-by-side source + preview, and the read-only CodeMirror code blocks
+// the viewer renders. Both lean on the generated portal tokens + breakpoints.
+
+@use "breakpoints.generated" as bp;
+
+.markdown-editor {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--zb-space-md);
+
+  // Below the portal's tablet breakpoint the two panes stack.
+  @include bp.tablet {
+    grid-template-columns: 1fr;
+  }
+}
+
+.markdown-editor-pane {
+  display: flex;
+  flex-direction: column;
+  min-width: 0; // let CodeMirror's horizontal scroll live inside the pane, not blow out the grid
+  border: 1px solid var(--zb-divider);
+  border-radius: var(--zb-radius-md);
+  overflow: hidden;
+  background: var(--zb-background-card);
+}
+
+.markdown-editor-label {
+  padding: var(--zb-space-xs) var(--zb-space-md);
+  font-size: var(--zb-font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--zb-secondary-text);
+  background: var(--zb-hover-overlay);
+  border-bottom: 1px solid var(--zb-divider);
+}
+
+.markdown-editor-source {
+  .cm-editor {
+    min-height: 260px;
+  }
+  .cm-scroller {
+    max-height: 480px;
+  }
+}
+
+.markdown-editor-preview {
+  padding: var(--zb-space-md);
+  overflow-y: auto;
+  max-height: 520px;
+}
+
+.markdown-editor-empty {
+  margin: 0;
+  color: var(--zb-secondary-text);
+  font-size: var(--zb-font-size-sm);
+}
+
+// Read-only code blocks rendered by MarkdownViewer (CodeMirror). oneDark supplies the fill and
+// syntax colors; this only frames the block so it sits like the other block elements.
+.markdown-body {
+  .markdown-codeblock {
+    margin: 0 0 0.8em;
+    border: 1px solid var(--zb-divider);
+    border-radius: var(--zb-radius-md);
+    overflow: hidden;
+
+    .cm-editor {
+      border-radius: inherit;
+    }
+    .cm-scroller {
+      padding: 0 var(--zb-space-sm);
+    }
+  }
+
+  // Shown only for the instant before the language grammar chunk resolves.
+  .markdown-codeblock-fallback {
+    margin: 0 0 0.8em;
+  }
+}

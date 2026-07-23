@@ -11,7 +11,7 @@ import { useSyncExternalStore } from "react";
  *  - Dark mode applies the **`dark-theme` class to `<body>`** (and to `<html>`
  *    via the FOWT-prevention script in `layout.tsx`) and sets
  *    `document.documentElement.style.colorScheme` — so light is the default and
- *    `.dark-theme` is the override (see `_tokens.scss`).
+ *    `.dark-theme` is the override (see `_tokens.generated.scss`).
  *  - **Standalone** (top-level window): resolves its own preference and, while
  *    the preference is `"system"`, follows the OS `prefers-color-scheme` setting.
  *  - **Embedded in the portal iframe**: does NOT self-apply on load; it listens

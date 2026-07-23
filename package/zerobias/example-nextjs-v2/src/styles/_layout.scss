@@ -1,6 +1,7 @@
 // App shell layout + the auth gate.
 
 .content {
+  position: relative; // positioning context for the Drawer (scoped to the content column)
   max-width: 1200px;
   margin: 0 auto;
   padding: var(--zb-space-lg) var(--zb-space-md);

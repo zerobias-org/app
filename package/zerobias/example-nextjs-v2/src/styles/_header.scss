@@ -3,6 +3,10 @@
 
 .app-header {
   position: relative;
+  // Above the positioned `.app-shell` (and its z-index:20 Drawer) so the cyan accent strip below
+  // the toolbar is never covered by the sidebar or the drawer. `.app-shell` became a positioned
+  // sibling (to host the Drawer), which would otherwise paint over this header in DOM order.
+  z-index: 30;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -61,31 +65,6 @@
 .brand span {
   color: var(--zb-secondary-text);
   font-weight: 500;
-}
-
-// Tab-style nav (cyan active underline, like the portal's Portfolio/Engagements).
-.app-nav {
-  display: flex;
-  gap: var(--zb-space-md);
-  height: 100%;
-}
-.app-nav a {
-  display: flex;
-  align-items: center;
-  height: 100%;
-  padding: 0 var(--zb-space-md); // portal tabs use 0 24px; 16px reads well in a top bar
-  color: var(--zb-secondary-text);
-  font-size: var(--zb-font-size-md); // 16px, like the portal Portfolio/Engagements tabs
-  font-weight: 500;
-  border-bottom: 3px solid transparent;
-}
-.app-nav a:hover {
-  color: #fff;
-  text-decoration: none;
-}
-.app-nav a.active {
-  color: var(--zb-primary);
-  border-bottom-color: var(--zb-primary);
 }
 
 .user-name {
