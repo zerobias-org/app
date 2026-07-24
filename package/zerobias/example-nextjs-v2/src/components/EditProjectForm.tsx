@@ -9,7 +9,7 @@ import {
 } from "@zerobias-com/platform-sdk";
 import type { ProjectExtended } from "@zerobias-com/portal-sdk";
 import type { EnumValue } from "@zerobias-org/types-core-js";
-import { CallReveal } from "@/components/CallReveal";
+import { CallReveal, objectLiteral } from "@/components/CallReveal";
 import { exampleUpdatedProject } from "@/lib/fixtures";
 
 /**
@@ -19,9 +19,10 @@ import { exampleUpdatedProject } from "@/lib/fixtures";
  *
  * The form is seeded from the record you're viewing. On each keystroke it rebuilds a real
  * `UpdateProject`, assigning only fields whose value differs from the original — unchanged fields
- * stay `undefined` and `JSON.stringify` (in CallReveal) drops them, so the Request panel shows the
- * exact delta the server would receive. Constructing `new UpdateProject()` and assigning typed
- * fields is what typechecks the shape against the installed SDK (anti-rot). Nothing is sent.
+ * stay absent and `objectLiteral` (in the call panel) drops them, so the call shows the exact delta
+ * the server would receive. A plain object typed as `UpdateProject` is what typechecks the shape
+ * against the installed SDK (anti-rot). `null` (clear a field) survives to the wire because nothing
+ * round-trips through a serializer. Nothing is sent.
  */
 
 const STATUSES = ProjectStatus.values;
@@ -39,11 +40,12 @@ export function EditProjectForm({ project }: { project: ProjectExtended }) {
   );
   const [description, setDescription] = useState(project.description ?? "");
 
-  // The REAL delta, rebuilt from live input. Only changed fields are assigned; the rest remain
-  // undefined and drop out of the serialized payload. `description` cleared to empty => null,
-  // which is how UpdateProject expresses "clear this field" (vs. undefined = "leave unchanged").
-  const request = useMemo(() => {
-    const delta = new UpdateProject();
+  // The REAL delta, rebuilt from live input. A plain object typed as `UpdateProject`: only changed
+  // fields are assigned, so an untouched field stays absent. `description` cleared to empty => null,
+  // which is how UpdateProject expresses "clear this field" (vs. absent = "leave unchanged") — and
+  // null survives to the wire because nothing round-trips through a serializer.
+  const request = useMemo<UpdateProject>(() => {
+    const delta: UpdateProject = {};
     const nextName = name.trim();
     if (nextName && nextName !== project.name) delta.name = nextName;
     if (String(status) !== String(project.status)) delta.status = status;
@@ -59,11 +61,11 @@ export function EditProjectForm({ project }: { project: ProjectExtended }) {
     [request],
   );
 
+  // The call WITH its live delta inline — one panel. The literal is rendered from the real
+  // `UpdateProject` above, so what is shown is exactly the delta that would be sent.
   const call = [
     `// UpdateProject is partial — send ONLY the fields that changed.`,
-    `const changes = new UpdateProject();`,
-    `changes.status = ProjectStatus.Active; // e.g. only the status changed`,
-    ``,
+    `const changes: UpdateProject = ${objectLiteral(request)};`,
     `const updated = await platformClient.getProjectApi().update(projectId, changes);`,
   ].join("\n");
 
@@ -151,7 +153,7 @@ export function EditProjectForm({ project }: { project: ProjectExtended }) {
       </div>
 
       <div className="create-form-code">
-        <CallReveal call={call} request={request} response={exampleUpdatedProject} />
+        <CallReveal call={call} response={exampleUpdatedProject} responseType="ProjectExtended" />
       </div>
     </form>
   );

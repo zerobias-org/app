@@ -5,7 +5,7 @@ import { BoardStatus, BoardType, NewBoard } from "@zerobias-com/platform-sdk";
 import type { EnumValue } from "@zerobias-org/types-core-js";
 import type { UUID } from "@zerobias-org/types-core-js";
 import { useSession } from "@/context/session-context";
-import { CallReveal } from "@/components/CallReveal";
+import { CallReveal, objectLiteral } from "@/components/CallReveal";
 import { exampleBoard } from "@/lib/fixtures";
 
 /**
@@ -30,9 +30,10 @@ export function CreateBoardForm({ projectId }: { projectId?: UUID }) {
   const [description, setDescription] = useState("");
   const [projectIdInput, setProjectIdInput] = useState("");
 
-  // The REAL request object, rebuilt from live input. Constructing NewBoard here is what typechecks
-  // the call shape against the installed platform-sdk. Nothing is sent.
-  const request = useMemo(() => {
+  // The REAL request object, rebuilt from live input. A plain object typed as `NewBoard` — the
+  // compiler enforces the model's required fields (a missing one is a build error). Values are the
+  // real SDK types (enum members, UUID); nothing is coerced here. Nothing is sent.
+  const request = useMemo<NewBoard>(() => {
     let projUuid: UUID | undefined = projectId;
     if (!projUuid) {
       const trimmed = projectIdInput.trim();
@@ -44,22 +45,19 @@ export function CreateBoardForm({ projectId }: { projectId?: UUID }) {
         }
       }
     }
-    return new NewBoard(
-      name.trim() || "Untitled board",
+    return {
+      name: name.trim() || "Untitled board",
       status,
       boardType,
-      description.trim() || undefined,
-      undefined, // boundaryId
-      projUuid, // projectId => the board's containing project
-      undefined, // userId
-    );
+      ...(description.trim() ? { description: description.trim() } : {}),
+      ...(projUuid ? { projectId: projUuid } : {}), // the board's containing project
+    };
   }, [name, status, boardType, description, projectIdInput, projectId, api]);
 
+  // The call WITH its payload inline — one panel. The literal is rendered from the real `NewBoard`
+  // above, so what is shown is exactly what was built.
   const call = [
-    `const board = new NewBoard(`,
-    `  name, status, boardType,`,
-    `  description, /* boundaryId */ undefined,${projectId ? " projectId," : ""}`,
-    `);`,
+    `const board: NewBoard = ${objectLiteral(request)};`,
     `const created = await platformClient.getBoardApi().create(board);`,
   ].join("\n");
 
@@ -146,7 +144,7 @@ export function CreateBoardForm({ projectId }: { projectId?: UUID }) {
       </div>
 
       <div className="create-form-code">
-        <CallReveal call={call} request={request} response={exampleBoard} />
+        <CallReveal call={call} response={exampleBoard} responseType="BoardExtended" />
       </div>
     </form>
   );

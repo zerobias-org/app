@@ -9,11 +9,13 @@
 
 import { history, defaultKeymap, historyKeymap, indentWithTab } from "@codemirror/commands";
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
-import { bracketMatching, LanguageDescription } from "@codemirror/language";
+import { bracketMatching, codeFolding, foldGutter, LanguageDescription } from "@codemirror/language";
 import { languages } from "@codemirror/language-data";
 import type { Extension } from "@codemirror/state";
 import { oneDark } from "@codemirror/theme-one-dark";
 import { drawSelection, EditorView, highlightSpecialChars, keymap, placeholder as cmPlaceholder } from "@codemirror/view";
+
+import { autoFoldBeyondDepth } from "./auto-fold";
 
 // Font + sizing shared by both configs. oneDark handles colors; this only aligns the
 // typography with the app so code reads like the rest of the portal's mono surfaces.
@@ -54,9 +56,19 @@ export function markdownEditorExtensions(placeholderText?: string): Extension[] 
  * Extensions for a read-only code block in the viewer. Async because the per-language grammar
  * is code-split — we only pull in the JSON/TS/etc. parser a document actually references.
  * An unknown or absent language falls back to plain (uncolored) mono text, still in oneDark.
+ *
+ * `opts.fold` enables code folding + a fold gutter and auto-folds JSON containers nested beyond
+ * depth 2 — used by CallReveal's response panel, where a live platform response can run ~900 lines
+ * and the reader only needs the envelope (`{ count, items: [ {…} ] }`) with each item one click away.
  */
-export async function codeBlockExtensions(lang?: string): Promise<Extension[]> {
+export async function codeBlockExtensions(
+  lang?: string,
+  opts?: { fold?: boolean },
+): Promise<Extension[]> {
   const base: Extension[] = [oneDark, sharedTheme, EditorView.editable.of(false)];
+  if (opts?.fold) {
+    base.push(codeFolding(), foldGutter(), autoFoldBeyondDepth(2));
+  }
   if (!lang) return base;
 
   const desc = LanguageDescription.matchLanguageName(languages, lang, true);

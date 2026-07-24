@@ -13,6 +13,9 @@ next-env.d.ts
 .env.development
 .env*.local
 
+# Claude Code local tooling / planning — internal, not shipped to consumers of this example
+.claude/
+
 # misc
 .DS_Store
 *.tsbuildinfo

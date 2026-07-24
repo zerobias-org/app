@@ -12,7 +12,7 @@
 .app-shell {
   --demo-nav-width: 220px; // the showcase's sidenav width; shared with the Drawer (see _drawer.scss)
   display: flex;
-  min-height: calc(100vh - 64px); // 64px = .app-header height
+  min-height: calc(100vh - 68px); // 64px toolbar + 4px .zb-ui-bar accent strip
   position: relative; // positioning context for the Drawer, which spans the region beside the rail
 }
 

@@ -10,14 +10,14 @@ import {
 import type { EnumValue } from "@zerobias-org/types-core-js";
 import type { UUID } from "@zerobias-org/types-core-js";
 import { useSession } from "@/context/session-context";
-import { CallReveal } from "@/components/CallReveal";
+import { CallReveal, objectLiteral } from "@/components/CallReveal";
 import { exampleProject } from "@/lib/fixtures";
 
 /**
  * CreateProjectForm — a code-reveal create demo (see docs/write-demos.md). It builds a REAL
  * `NewProject` from live input (so the payload is accurate and the shape is typechecked against
- * the installed SDK) and reveals the call + payload + an obfuscated response. It never calls
- * `create`.
+ * the installed SDK) and reveals the call — payload inline — plus an obfuscated response. It never
+ * calls `create`.
  *
  * `parentId`, when set, comes from the project you opened the drawer from — creating a sub-project
  * is just a `NewProject` with `parentId`. That's the whole "how do I nest a project" lesson.
@@ -36,9 +36,11 @@ export function CreateProjectForm({ parentId }: { parentId?: UUID }) {
   const [description, setDescription] = useState("");
   const [projectTypeId, setProjectTypeId] = useState("");
 
-  // The REAL request object, rebuilt from live input. Constructing NewProject here is what
-  // typechecks the call shape against the installed platform-sdk. Nothing is sent.
-  const request = useMemo(() => {
+  // The REAL request object, rebuilt from live input. A plain object typed as `NewProject` — the
+  // compiler enforces the model's required fields (a missing one is a build error, which
+  // `NewProject.newInstance(obj: any)` would NOT catch). Values are the real SDK types (enum
+  // members, UUID), so nothing is coerced or serialized here. Nothing is sent.
+  const request = useMemo<NewProject>(() => {
     let typeUuid: UUID | undefined;
     const trimmed = projectTypeId.trim();
     if (trimmed && api) {
@@ -48,23 +50,21 @@ export function CreateProjectForm({ parentId }: { parentId?: UUID }) {
         typeUuid = undefined; // not a UUID yet — omit rather than break the payload
       }
     }
-    return new NewProject(
-      name.trim() || "Untitled project",
+    return {
+      name: name.trim() || "Untitled project",
       status,
       visibility,
-      policy,
-      description.trim() || undefined,
-      undefined, // boundaryId
-      parentId, // set => this is a sub-project
-      typeUuid,
-    );
+      membershipPolicy: policy,
+      ...(description.trim() ? { description: description.trim() } : {}),
+      ...(parentId ? { parentId } : {}), // set => this is a sub-project
+      ...(typeUuid ? { projectTypeId: typeUuid } : {}),
+    };
   }, [name, status, visibility, policy, description, projectTypeId, parentId, api]);
 
+  // The call WITH its payload inline — one panel, not a signature plus a separate JSON blob. The
+  // literal is rendered from the real `NewProject` above, so what is shown is exactly what was built.
   const call = [
-    `const project = new NewProject(`,
-    `  name, status, visibility, membershipPolicy,`,
-    `  description, /* boundaryId */ undefined,${parentId ? " parentId," : ""}`,
-    `);`,
+    `const project: NewProject = ${objectLiteral(request)};`,
     `const created = await platformClient.getProjectApi().create(project);`,
   ].join("\n");
 
@@ -167,7 +167,7 @@ export function CreateProjectForm({ parentId }: { parentId?: UUID }) {
       </div>
 
       <div className="create-form-code">
-        <CallReveal call={call} request={request} response={exampleProject} />
+        <CallReveal call={call} response={exampleProject} responseType="ProjectExtended" />
       </div>
     </form>
   );

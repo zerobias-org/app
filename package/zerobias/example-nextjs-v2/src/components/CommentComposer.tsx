@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { NewTaskComment } from "@zerobias-com/platform-sdk";
 import type { UUID } from "@zerobias-org/types-core-js";
 import { MarkdownEditor } from "@/components/MarkdownEditor";
-import { CallReveal } from "@/components/CallReveal";
+import { CallReveal, objectLiteral } from "@/components/CallReveal";
 import { exampleTaskComment } from "@/lib/fixtures";
 
 /**
@@ -25,18 +25,20 @@ import { exampleTaskComment } from "@/lib/fixtures";
 export function CommentComposer({ taskId }: { taskId: UUID }) {
   const [markdown, setMarkdown] = useState("");
 
-  // The REAL request object, built from live input through the SDK class. Building it here is what
-  // typechecks the shape against the installed platform-sdk — the anti-rot guarantee. It is never
-  // sent anywhere.
-  const request = useMemo(
-    () => (markdown.trim() ? new NewTaskComment(undefined, markdown.trim()) : undefined),
+  // The REAL request object, built from live input. A plain object typed as `NewTaskComment` — the
+  // compiler enforces the shape against the installed platform-sdk (the anti-rot guarantee). It is
+  // never sent anywhere.
+  const request = useMemo<NewTaskComment | undefined>(
+    () => (markdown.trim() ? { commentMarkdown: markdown.trim() } : undefined),
     [markdown],
   );
 
+  // The call WITH its payload inline — one panel. The literal is rendered from the real
+  // `NewTaskComment` above, so what is shown is exactly what was built.
   const call = [
     `const taskId = "${taskId}";`,
     `// Comments are authored as Markdown; the platform stores commentMarkdown.`,
-    `const comment = new NewTaskComment(undefined, commentMarkdown);`,
+    `const comment: NewTaskComment = ${objectLiteral(request)};`,
     `const posted = await platformClient.getTaskApi().addComment(taskId, comment);`,
   ].join("\n");
 
@@ -55,7 +57,7 @@ export function CommentComposer({ taskId }: { taskId: UUID }) {
       />
 
       {request && (
-        <CallReveal call={call} request={request} response={exampleTaskComment} />
+        <CallReveal call={call} response={exampleTaskComment} responseType="TaskComment" />
       )}
     </div>
   );
