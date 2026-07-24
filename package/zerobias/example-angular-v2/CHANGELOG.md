@@ -17,6 +17,34 @@ still differs from — the Next.js reference.
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-07-24
+
+Closes the two parity gaps with `example-nextjs-v2` 0.4.0 in the code-reveal
+write demos.
+
+### Added
+
+- **Response type name + "TS" shape popover.** Each code-reveal response panel now
+  names the SDK class it returns (e.g. `Example response · ProjectExtended`) and
+  shows a small **TS** badge; hover (or click to pin) reveals a popover with the
+  REAL class shape and a copy button, so a dev can paste the type into their own
+  code as a reference. The shapes are extracted from the installed SDK's `.d.ts`
+  at build time (`scripts/extract-response-shapes.mjs` ->
+  `src/app/shared/call-reveal/response-shapes.generated.ts`, `npm run extract:shapes`)
+  — never hand-authored, so they cannot drift. Response types: `ProjectExtended` /
+  `BoardExtended` / `TaskExtended` (create+edit) and `TaskComment` (comment). New
+  standalone `TypeShapePopover` component (signals; hover-reveal + click-to-pin +
+  a 250ms close-delay/bridge so the cursor can reach the popover).
+
+### Changed
+
+- **`objectLiteral()` renders arrays and nested objects as real literals.**
+  `literalOf()` now has an `Array.isArray` branch (each element mapped through
+  `literalOf`; `[]` when empty) and an `inlineObjectLiteral` helper for nested plain
+  objects, so a populated `NewTask.approvers` reads as `["…", "…"]` and a link as
+  `[{ resourceId: "…" }]` instead of a comma-joined string. SDK value types (UUID /
+  enum / DateFormat) keep their meaningful-`toString` wire form.
+
 ## [0.2.0] - 2026-07-22
 
 Rounds out the **project -> board -> task** surface toward Next.js
