@@ -1,0 +1,19 @@
+@if (boards().length === 0) {
+  <div class="boards-empty">No boards</div>
+} @else {
+  <div class="boards-grid">
+    @for (board of boards(); track board.id) {
+      <app-board-card
+        class="board-card"
+        data-testid="board-card"
+        [class.pinned]="isPinned(board.id)"
+        [attr.data-board-id]="board.id"
+        [board]="board"
+        [isPinned]="isPinned(board.id)"
+        [maxPreviewTasks]="maxPreviewTasks()"
+        (pinToggled)="pinToggled.emit($event)"
+        (cardClicked)="cardClicked.emit($event)"
+      />
+    }
+  </div>
+}

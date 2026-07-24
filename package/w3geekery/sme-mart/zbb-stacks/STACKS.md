@@ -41,7 +41,7 @@ Access:
 
 ## Architecture
 
-**Unified-origin reverse proxy pattern** (reference: `~/Projects/zb/ui/scripts/gateway.js`)
+**Unified-origin reverse proxy pattern** (reference: `~/Projects/zb/com/ui/scripts/gateway.js`)
 
 ```
 Client (browser)
@@ -318,7 +318,7 @@ bash zbb-stacks/sme-mart-login/smoke.sh
 
 ## References
 
-- **Architecture pattern:** `~/Projects/zb/ui/scripts/gateway.js` (canonical unified-origin proxy)
+- **Architecture pattern:** `~/Projects/zb/com/ui/scripts/gateway.js` (canonical unified-origin proxy)
 - **zerobias-client auth flow:** `~/Projects/zb/clients/packages/client/src/lib/services/zerobias-client-app.ts` (redirectLogin, getCookieDomain)
 - **zbb design docs:** `~/Projects/zb/zerobias-org/util/packages/zbb/design/stacks-*.md`
 - **Phase 19 brief:** `.planning/director/phase-19-brief.md`

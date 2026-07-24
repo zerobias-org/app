@@ -1,4 +1,4 @@
-import { Page, Locator } from '@playwright/test';
+import { Page } from '@playwright/test';
 
 /**
  * Playwright helpers for `zb-simple-autocomplete` AND `zb-simple-multi-autocomplete`
@@ -165,7 +165,6 @@ export async function selectZbAutocompleteBySearch(
           '[zb-autocomplete] selectValue() missing — upgrade @zerobias-org/ngx-library to >= 0.2.30',
         );
       }
-      // eslint-disable-next-line no-new-func
       const matchFn = new Function('option', matchFnBody) as (opt: unknown) => boolean;
       const results = await new Promise<unknown[]>((resolve, reject) => {
         comp.searchFn!(term).subscribe({
@@ -356,7 +355,6 @@ export async function addZbMultiAutocompleteBySearch(
           '[zb-multi-autocomplete] addValue() missing — upgrade @zerobias-org/ngx-library to >= 0.2.32',
         );
       }
-      // eslint-disable-next-line no-new-func
       const matchFn = new Function('option', matchFnBody) as (opt: unknown) => boolean;
       const results = await new Promise<unknown[]>((resolve, reject) => {
         comp.searchFn!(term).subscribe({

@@ -2,24 +2,15 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { OrgListComponent } from './org-list.component';
 import { ZerobiasClientApi, ZerobiasClientApp } from '@zerobias-com/zerobias-client';
 import { UserPreferencesService } from '../../core/services/user-preferences.service';
-import { GraphqlReadService } from '../../core/services/graphql-read.service';
 import { of } from 'rxjs';
 
 describe('OrgListComponent', () => {
   let component: OrgListComponent;
   let fixture: ComponentFixture<OrgListComponent>;
-  let mockGraphqlRead: any;
-  let mockClientApi: any;
-  let mockApp: any;
+  let mockClientApi: { danaClient: { getMeApi: () => { listMyOrgs: () => Promise<unknown[]> } } };
+  let mockApp: { getWhoAmI: () => unknown; getCurrentOrgId: () => string };
 
   beforeEach(async () => {
-    mockGraphqlRead = {
-      query: () => Promise.resolve({
-        items: [],
-        page: { pageNumber: 1, pageSize: 1, totalCount: 0 }
-      })
-    };
-
     mockApp = {
       getWhoAmI: () => of({ ownerId: 'org-1', id: 'user-1' }),
       getCurrentOrgId: () => 'org-1'
@@ -45,7 +36,6 @@ describe('OrgListComponent', () => {
             setOrgListViewMode: () => {},
           },
         },
-        { provide: GraphqlReadService, useValue: mockGraphqlRead },
       ],
     }).compileComponents();
 
@@ -62,14 +52,10 @@ describe('OrgListComponent', () => {
     expect(Array.isArray(allOrgs)).toBe(true);
   });
 
-  it('should have orgMetrics signal', () => {
-    const metrics = component.orgMetrics();
-    expect(typeof metrics).toBe('object');
-  });
-
-  it('should have orgsWithMetadata computed signal', () => {
-    const withMetadata = component.orgsWithMetadata();
-    expect(Array.isArray(withMetadata)).toBe(true);
+  it('should expose a getDomain helper that prefers domains over supportEmail', () => {
+    expect(component.getDomain({ id: 'a', name: 'A', domains: ['w3geekery.com'] })).toBe('@w3geekery.com');
+    expect(component.getDomain({ id: 'b', name: 'B', supportEmail: 'help@example.com' })).toBe('help@example.com');
+    expect(component.getDomain({ id: 'c', name: 'C' })).toBe('');
   });
 
   it('should have filteredOrgs computed signal', () => {

@@ -1,8 +1,7 @@
 import '@angular/compiler';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router, ActivatedRoute } from '@angular/router';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';  // used for TestBed.inject()
+import { MatDialog } from '@angular/material/dialog';
 import { vi } from 'vitest';
 import { ProjectDetail } from './project-detail.component';
 import { SmeMartProjectService } from '../../core/services/sme-mart-project.service';
@@ -17,15 +16,18 @@ import { Subject, of } from 'rxjs';
 describe('ProjectDetail', () => {
   let component: ProjectDetail;
   let fixture: ComponentFixture<ProjectDetail>;
-  let mockRouter: any;
-  let mockActivatedRoute: any;
-  let mockProjectService: any;
-  let mockResourceService: any;
-  let mockVettingService: any;
-  let mockProjectContext: any;
-  let mockDialog: any;
-  let mockImpersonation: any;
-  let mockZerobiasClientApi: any;
+  // Test-only mock collaborators — concrete shapes vary per fixture; using
+  // `unknown` keeps the lint rule happy while still flagging real type bugs
+  // when fields are read.
+  let mockRouter: { navigate: ReturnType<typeof vi.fn>; navigateByUrl: ReturnType<typeof vi.fn>; events: unknown; createUrlTree: ReturnType<typeof vi.fn>; serializeUrl: ReturnType<typeof vi.fn> };
+  let mockActivatedRoute: unknown;
+  let mockProjectService: { getProject: ReturnType<typeof vi.fn>; updateProject: ReturnType<typeof vi.fn>; createProject: ReturnType<typeof vi.fn> };
+  let mockResourceService: { linkResources: ReturnType<typeof vi.fn> };
+  let mockVettingService: { pilotCompletionSuggestion: ReturnType<typeof vi.fn>; setPilotCompletionSuggestion: ReturnType<typeof vi.fn>; clearPilotCompletionSuggestion: ReturnType<typeof vi.fn> };
+  let mockProjectContext: { project: ReturnType<typeof vi.fn>; setProject: ReturnType<typeof vi.fn>; setCurrentUserId: ReturnType<typeof vi.fn>; engagementId: ReturnType<typeof vi.fn>; engagementName: ReturnType<typeof vi.fn>; projectName: ReturnType<typeof vi.fn>; status: ReturnType<typeof vi.fn>; clear: ReturnType<typeof vi.fn>; refresh$: unknown };
+  let mockDialog: { open: ReturnType<typeof vi.fn> };
+  let mockImpersonation: { effectiveUserId: ReturnType<typeof vi.fn> };
+  let mockZerobiasClientApi: { platformClient: ReturnType<typeof vi.fn>; hubClient: ReturnType<typeof vi.fn> };
   let refreshSubject: Subject<void>;
   let snackBarOpenSpy: ReturnType<typeof vi.spyOn>;
   let vettingSetSpy: ReturnType<typeof vi.spyOn>;
@@ -122,8 +124,11 @@ describe('ProjectDetail', () => {
     component = fixture.componentInstance;
 
     // Spy on the component's actual injected services (standalone component may get its own instances)
-    snackBarOpenSpy = vi.spyOn((component as any).snackBar, 'open').mockReturnValue({ onAction: () => of({}) } as any);
-    vettingSetSpy = vi.spyOn((component as any).vetting, 'setPilotCompletionSuggestion');
+    // Spy on the component's actual injected services (standalone component
+    // may get its own instances). Cast through unknown to reach private members.
+    const componentInternals = component as unknown as { snackBar: { open: (...args: unknown[]) => unknown }; vetting: { setPilotCompletionSuggestion: (...args: unknown[]) => unknown } };
+    snackBarOpenSpy = vi.spyOn(componentInternals.snackBar, 'open').mockReturnValue({ onAction: () => of({}) } as unknown as ReturnType<typeof componentInternals.snackBar.open>);
+    vettingSetSpy = vi.spyOn(componentInternals.vetting, 'setPilotCompletionSuggestion');
   });
 
   it('should create', () => {
@@ -224,7 +229,7 @@ describe('ProjectDetail', () => {
 
       await component.completePilot();
 
-      const callArgs = mockDialog.open.mock.lastCall;
+      const callArgs = mockDialog.open.mock.lastCall!;
       expect(callArgs[1].data.project).toEqual(project);
     });
 
@@ -350,7 +355,7 @@ describe('ProjectDetail', () => {
 
       await component.ngOnInit();
 
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['/my/engagements']);
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/engagements']);
     });
 
     it('should handle load error gracefully', async () => {
@@ -362,22 +367,6 @@ describe('ProjectDetail', () => {
       expect(component.loading()).toBe(false);
 
       expect(snackBarOpenSpy).toHaveBeenCalledWith(expect.stringContaining('Failed to load project'), 'Dismiss', { duration: 5000 });
-    });
-  });
-
-  describe('goToEngagement', () => {
-    it('should navigate to engagement detail', () => {
-      component.goToEngagement();
-
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['/engagements', 'eng-123']);
-    });
-
-    it('should navigate to engagements list if no engagementId', () => {
-      mockProjectContext.engagementId = vi.fn().mockReturnValue(null);
-
-      component.goToEngagement();
-
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['/my/engagements']);
     });
   });
 
@@ -488,7 +477,7 @@ describe('ProjectDetail', () => {
 
       await component.promoteToProject();
 
-      const call = mockProjectService.createProject.mock.lastCall[0];
+      const call = mockProjectService.createProject.mock.lastCall![0];
       expect(call.name).toBe('Test Pilot');
       expect(call.description).toBe('Test desc');
       expect(call.category).toBe('test-cat');
@@ -518,7 +507,7 @@ describe('ProjectDetail', () => {
 
       await component.promoteToProject();
 
-      const lastCall = mockProjectService.updateProject.mock.lastCall;
+      const lastCall = mockProjectService.updateProject.mock.lastCall!;
       expect(lastCall[0]).toBe('pilot-1');
       expect(lastCall[1]).toEqual(expect.objectContaining({ promotedProjectId: 'proj-456' }));
     });

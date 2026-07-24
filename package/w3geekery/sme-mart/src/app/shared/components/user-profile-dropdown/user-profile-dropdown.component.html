@@ -43,12 +43,12 @@
     <mat-icon>business</mat-icon>
     <span>My Organizations</span>
   </a>
-  <a mat-menu-item routerLink="/my/engagements">
+  <a mat-menu-item routerLink="/engagements">
     <mat-icon>work</mat-icon>
     <span>My Engagements</span>
   </a>
-  <a mat-menu-item routerLink="/my/projects">
-    <mat-icon>folder_special</mat-icon>
+  <a mat-menu-item routerLink="/projects">
+    <mat-icon>assignment</mat-icon>
     <span>My Projects</span>
   </a>
   <a mat-menu-item routerLink="/my-profile">
@@ -88,16 +88,8 @@
     </div>
   </mat-menu>
 
-  <mat-divider />
-  <div class="menu-section-label">Browse</div>
-  <a mat-menu-item routerLink="/providers">
-    <mat-icon>people</mat-icon>
-    <span>Browse Providers</span>
-  </a>
-  <a mat-menu-item routerLink="/catalog">
-    <mat-icon>category</mat-icon>
-    <span>Browse Catalog</span>
-  </a>
+  <!-- Phase 31-A: Browse section hidden for v1.4 dogfood. Restore when
+       /providers + /catalog are ready (post-099 + product decision). -->
 
   <mat-divider />
   <div class="menu-section-label">Help & Feedback</div>

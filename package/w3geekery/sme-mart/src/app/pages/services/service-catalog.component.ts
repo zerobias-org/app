@@ -103,7 +103,7 @@ export class ServiceCatalog implements OnInit {
     }
   }
 
-  onServiceSelect(service: ServiceOffering): void {
+  onServiceSelect(): void {
     // No-op for now — card has provider context menu
   }
 
@@ -135,7 +135,9 @@ export class ServiceCatalog implements OnInit {
     try {
       const provider = await this.providerProfiles.getProvider(providerId);
       if (provider) {
-        this.providerFilterName.set(provider.display_name);
+        // Use legalName from ProviderDetailView, fallback to provider ID
+        const name = provider.legalName || providerId;
+        this.providerFilterName.set(name);
       }
     } catch {
       this.providerFilterName.set(null);

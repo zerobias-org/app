@@ -1,0 +1,83 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.bd-loading {
+  display: flex;
+  justify-content: center;
+  padding: 3rem;
+}
+
+.bd-error {
+  padding: 1.5rem;
+  color: var(--mat-sys-error);
+}
+
+.bd-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--zb-background-card);
+  color: var(--zb-text);
+}
+
+.bd-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.95rem;
+}
+
+.bd-breadcrumb a {
+  color: var(--mat-sys-primary);
+  text-decoration: none;
+}
+
+.bd-breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+.bd-sep {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.bd-spacer {
+  flex: 1 1 auto;
+}
+
+.bd-container {
+  height: calc(100% - 64px);
+}
+
+.bd-config {
+  width: 320px;
+  padding: 1.5rem;
+}
+
+.bd-config-note {
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.9rem;
+}
+
+.bd-tasks {
+  padding: 1.5rem;
+}
+
+.bd-empty {
+  padding: 2rem;
+  text-align: center;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.bd-chip {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: var(--mat-sys-surface-variant);
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.85rem;
+}

@@ -42,30 +42,31 @@
     <div class="org-cards-grid">
       @for (org of filteredOrgs(); track org.id) {
         <div
-          [routerLink]="['/orgs', org.id]"
+          [routerLink]="['/orgs', org.slug || org.id]"
           class="org-card"
           [class.active]="isActive(org.id)"
         >
           <div class="card-header">
-            <h3 class="org-name">{{ org.name }}</h3>
-            <zb-resource-status [label]="org.badgeLabel" />
+            <zb-avatar-label
+              class="org-identity"
+              [src]="org.avatarUrl || ''"
+              [srcDefault]="'./assets/unknown-company.svg'"
+              [maintainAspectRatio]="true"
+              [label]="org.name"
+              [subText]="org.slug || ''"
+              [bold]="true"
+            />
+            @if (isActive(org.id)) {
+              <span class="zb-chip square dense generic light-green">Active</span>
+            }
           </div>
 
           @if (org.description) {
             <p class="org-description">{{ org.description }}</p>
           }
 
-          <div class="metrics-row">
-            <span>{{ org.metrics.engagementCount }} Engagements</span>
-            <span>·</span>
-            <span>{{ org.metrics.projectCount }} Projects</span>
-          </div>
-
           <div class="card-footer">
-            <div class="member-count">
-              <mat-icon>people</mat-icon>
-              <span>{{ getMemberCount(org) }} members</span>
-            </div>
+            <span class="org-domain">{{ getDomain(org) || '' }}</span>
             <mat-icon class="arrow">arrow_forward</mat-icon>
           </div>
         </div>
@@ -79,27 +80,34 @@
       <table class="org-table">
         <thead>
           <tr>
-            <th class="col-name">Organization Name</th>
-            <th class="col-badge">Type</th>
-            <th class="col-metrics">Metrics</th>
-            <th class="col-members">Members</th>
+            <th class="col-name">Organization</th>
+            <th class="col-badge"></th>
+            <th class="col-domain">Domain</th>
           </tr>
         </thead>
         <tbody>
           @for (org of filteredOrgs(); track org.id) {
             <tr
-              [routerLink]="['/orgs', org.id]"
+              [routerLink]="['/orgs', org.slug || org.id]"
               class="org-row"
               [class.active-row]="isActive(org.id)"
             >
-              <td class="col-name">{{ org.name }}</td>
+              <td class="col-name">
+                <zb-avatar-label
+                  [src]="org.avatarUrl || ''"
+                  [srcDefault]="'./assets/unknown-company.svg'"
+                  [maintainAspectRatio]="true"
+                  [label]="org.name"
+                  [subText]="org.slug || ''"
+                  [small]="true"
+                />
+              </td>
               <td class="col-badge">
-                <zb-resource-status [label]="org.badgeLabel" />
+                @if (isActive(org.id)) {
+                  <span class="zb-chip square dense generic light-green">Active</span>
+                }
               </td>
-              <td class="col-metrics">
-                {{ org.metrics.engagementCount }} E · {{ org.metrics.projectCount }} P
-              </td>
-              <td class="col-members">{{ getMemberCount(org) }}</td>
+              <td class="col-domain">{{ getDomain(org) || '—' }}</td>
             </tr>
           }
         </tbody>

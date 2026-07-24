@@ -132,9 +132,12 @@
         <span>Loading editor…</span>
       </div>
     }
-    @if (!previewMode() && !loading()) {
-      <div #editorRef class="milkdown-editor"></div>
-    }
+    <!-- #editorRef must stay in the DOM unconditionally — ngAfterViewInit
+         needs it to bootstrap Crepe, and that init is what flips loading()
+         to false. If we conditionally render via @if (!loading()), the
+         ViewChild query is undefined on first run and loading sticks. -->
+    <div #editorRef class="milkdown-editor"
+         [class.is-hidden]="loading() || previewMode()"></div>
     @if (previewMode() && !loading()) {
       <div class="preview-container" [innerHTML]="previewContent()"></div>
     }

@@ -1,11 +1,10 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { ZerobiasClientApi } from '@zerobias-com/zerobias-client';
 import type { TagView } from '@zerobias-com/hydra-sdk';
 import type { TaskExtended } from '@zerobias-com/platform-sdk';
 import { UUID } from '@zerobias-org/types-core-js';
 import { SmeMartTagService } from './sme-mart-tag.service';
 import {
-  isProtectedTag,
   parseHierarchyLevel,
   stripPrefix,
 } from '../utils/tag-prefix.util';
@@ -269,11 +268,17 @@ export class EngagementHierarchyService {
   // Hierarchy level display helpers
   // ---------------------------------------------------------------------------
 
-  /** Human-readable label for a hierarchy level */
+  /** Human-readable label for a hierarchy level.
+   *
+   * NOTE: the internal level identifier `'boundary'` is legacy from pre-D-46 — it
+   * represents the engagement itself, NOT a separate boundary entity. The user-
+   * facing label is "Engagement". Renaming the identifier across the codebase
+   * is deferred (touch-it=fix-it candidate).
+   */
   levelLabel(level: HierarchyLevel): string {
     switch (level) {
       case 'project': return 'Project';
-      case 'boundary': return 'Boundary';
+      case 'boundary': return 'Engagement';
       case 'task': return 'Task';
       case 'subtask': return 'SubTask';
     }

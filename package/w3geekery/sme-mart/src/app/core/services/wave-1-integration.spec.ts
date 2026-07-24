@@ -7,6 +7,8 @@
 
 import '@angular/compiler';
 import { TestBed } from '@angular/core/testing';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { ZerobiasClientApi } from '@zerobias-com/zerobias-client';
 import { SmeMartProjectService } from './sme-mart-project.service';
 import { BidsService } from './bids.service';
 import { PipelineWriteService } from './pipeline-write.service';
@@ -14,7 +16,9 @@ import { GraphqlReadService } from './graphql-read.service';
 import { NotificationService } from './notification.service';
 import { SmeMartTagService } from './sme-mart-tag.service';
 import { SmeMartResourceService } from './sme-mart-resource.service';
-import { fakePipelineWriteService, fakeGraphqlReadService, fakeSmeMartTagService, fakeNotificationService } from '../../test-helpers/angular';
+import { DemoVisibilityService } from './demo-visibility.service';
+import { ProjectContextService } from './project-context.service';
+import { fakePipelineWriteService, fakeGraphqlReadService, fakeSmeMartTagService, fakeNotificationService, fakeClientApi, fakeProjectContextService } from '../../test-helpers/angular';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 describe('Wave 1 Integration: SmeMartProject → Bid Flow (Plan 075)', () => {
@@ -31,11 +35,15 @@ describe('Wave 1 Integration: SmeMartProject → Bid Flow (Plan 075)', () => {
       providers: [
         SmeMartProjectService,
         BidsService,
+        DemoVisibilityService,
         { provide: PipelineWriteService, useValue: pipelineWrite },
         { provide: GraphqlReadService, useValue: graphqlRead },
         { provide: NotificationService, useValue: fakeNotificationService() },
         { provide: SmeMartTagService, useValue: fakeSmeMartTagService() },
         { provide: SmeMartResourceService, useValue: { linkResources: vi.fn().mockResolvedValue(undefined) } },
+        { provide: MatSnackBar, useValue: { open: vi.fn() } },
+        { provide: ZerobiasClientApi, useValue: fakeClientApi() },
+        { provide: ProjectContextService, useValue: fakeProjectContextService(false) },
       ],
     });
 

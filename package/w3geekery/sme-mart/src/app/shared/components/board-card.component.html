@@ -1,0 +1,46 @@
+<mat-card class="board-card-inner" [class.pinned]="isPinned()">
+  <mat-card-header>
+    <mat-card-title class="board-card-title">
+      <span>{{ board().name }}</span>
+      @if (board().isDefault) {
+        <mat-chip class="default-chip">Default</mat-chip>
+      }
+    </mat-card-title>
+    <mat-card-subtitle>
+      {{ board().boardType | titlecase }} &middot; {{ board().status | titlecase }}
+    </mat-card-subtitle>
+  </mat-card-header>
+
+  @if (board().description) {
+    <mat-card-content>
+      <p class="board-description">{{ board().description }}</p>
+    </mat-card-content>
+  }
+
+  <mat-card-actions class="board-card-actions">
+    <button
+      mat-icon-button
+      type="button"
+      data-testid="pin-button"
+      [class.pinned]="isPinned()"
+      [class.unpinned]="!isPinned()"
+      [attr.aria-label]="(isPinned() ? 'Unpin ' : 'Pin ') + board().name"
+      [attr.aria-expanded]="isPinned()"
+      (click)="onPin()"
+    >
+      <mat-icon>push_pin</mat-icon>
+    </button>
+    <button
+      mat-icon-button
+      type="button"
+      [attr.aria-label]="'Open ' + board().name"
+      (click)="onDrill()"
+    >
+      <mat-icon>open_in_new</mat-icon>
+    </button>
+  </mat-card-actions>
+
+  @if (isPinned()) {
+    <app-board-card-pinned-preview [maxTasks]="maxPreviewTasks()" [pinnedTaskCount]="0" />
+  }
+</mat-card>

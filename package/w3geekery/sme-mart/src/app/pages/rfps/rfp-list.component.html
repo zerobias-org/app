@@ -36,7 +36,7 @@
   <!-- Results grid -->
   <div listPageResults class="rfp-grid">
     @for (rfp of filteredRfps(); track rfp.id) {
-      <app-engagement-card [engagement]="rfp"></app-engagement-card>
+      <app-engagement-card [engagement]="rfp" [asRfp]="true"></app-engagement-card>
     }
   </div>
 </app-list-page>

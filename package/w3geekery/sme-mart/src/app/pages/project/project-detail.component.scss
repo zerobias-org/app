@@ -27,14 +27,14 @@ mat-tab-nav-panel,
   color: var(--zb-secondary-text);
 }
 
-.back-btn {
-  align-self: flex-start;
-}
-
 .project-header {
   margin-bottom: 1.5rem;
 
   &__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
     margin-bottom: 0.5rem;
   }
 

@@ -86,8 +86,9 @@
   align-items: center;
   gap: 0.25rem;
   padding: 1rem;
-  border-radius: 12px;
-  background: var(--mat-sys-surface-container, rgba(0, 0, 0, 0.03));
+  background-color: var(--zb-background-card, var(--mat-sys-surface));
+  border-radius: 5px;
+  box-shadow: var(--zb-card-shadow, 8px 8px 16px -6px rgb(0 0 0 / 10%));
 
   mat-icon {
     color: var(--zb-color-primary, #1976d2);

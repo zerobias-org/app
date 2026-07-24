@@ -99,8 +99,8 @@ export class EngagementTasksService {
     return tasks
       .filter((t): t is TaskExtended => t !== null)
       .sort((a, b) => {
-        const aTime = a.created instanceof Date ? a.created.getTime() : new Date(a.created).getTime();
-        const bTime = b.created instanceof Date ? b.created.getTime() : new Date(b.created).getTime();
+        const aTime = a.created.toDate().getTime();
+        const bTime = b.created.toDate().getTime();
         return aTime - bTime;
       });
   }

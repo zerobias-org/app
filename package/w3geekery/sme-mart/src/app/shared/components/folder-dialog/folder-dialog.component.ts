@@ -29,6 +29,11 @@ export interface FolderDialogData {
   existingFolder?: NoteFolder;
   /** Full folder tree for the parent selector. Only needed for create mode. */
   folderTree?: FolderTreeNode[];
+  /** What the user thinks they're creating. Optional — when omitted, the dialog
+   *  infers from parent: top-level (parentId === null) is presented as 'notebook',
+   *  anything nested as 'folder'. Notes UI uses this distinction for labels only;
+   *  the underlying data shape is identical. */
+  kind?: 'notebook' | 'folder';
 }
 
 /** Flattened option for the parent select dropdown. */
@@ -47,7 +52,7 @@ interface ParentOption {
     MatButtonModule, MatSnackBarModule, MatTooltipModule,
   ],
   template: `
-    <h2 mat-dialog-title>{{ isEdit ? 'Edit Folder' : 'New Folder' }}</h2>
+    <h2 mat-dialog-title>{{ isEdit ? ('Edit ' + kindLabel) : ('New ' + kindLabel) }}</h2>
     <mat-dialog-content>
       <form [formGroup]="form" (ngSubmit)="onSubmit()">
         @if (!isEdit && parentOptions.length > 0) {
@@ -64,7 +69,7 @@ interface ParentOption {
         }
 
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Folder Name</mat-label>
+          <mat-label>{{ kindLabel }} Name</mat-label>
           <input matInput formControlName="name" placeholder="e.g. Meeting Minutes" cdkFocusInitial>
         </mat-form-field>
         <mat-form-field appearance="outline" class="full-width">
@@ -157,6 +162,14 @@ export class FolderDialog {
 
   readonly submitting = signal(false);
   readonly isEdit = !!this.data.existingFolder;
+  /** Kind label inferred from parentId when not explicitly provided.
+   *  Top-level (parentId == null) is a notebook; nested is a folder. */
+  readonly kindLabel = (() => {
+    if (this.data.kind === 'notebook') return 'Notebook';
+    if (this.data.kind === 'folder') return 'Folder';
+    const parentId = this.data.existingFolder?.parent_id ?? this.data.parentId;
+    return parentId ? 'Folder' : 'Notebook';
+  })();
   readonly selectedColor = signal<string | null>(this.data.existingFolder?.color ?? null);
   readonly colors = FOLDER_COLORS;
 
@@ -199,8 +212,9 @@ export class FolderDialog {
         this.snackBar.open('Folder created', 'OK', { duration: 3000 });
         this.dialogRef.close(created);
       }
-    } catch (err: any) {
-      this.snackBar.open(`Failed: ${err.message}`, 'Dismiss', { duration: 5000 });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      this.snackBar.open(`Failed: ${msg}`, 'Dismiss', { duration: 5000 });
       this.submitting.set(false);
     }
   }

@@ -1,4 +1,4 @@
-import { Component, Input, ChangeDetectionStrategy, computed, signal } from '@angular/core';
+import { Component, inject, input, ChangeDetectionStrategy, computed } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
@@ -15,33 +15,30 @@ import type { EngagementSummaryRow, RequestStatus } from '../../../core/models';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EngagementCard {
-  private readonly _engagement = signal<EngagementSummaryRow | null>(null);
-  private readonly _currentProviderId = signal<string | null>(null);
+  private readonly router = inject(Router);
 
-  @Input({ required: true })
-  set engagement(value: EngagementSummaryRow) {
-    this._engagement.set(value);
-  }
+  readonly engagement = input.required<EngagementSummaryRow>();
+  readonly currentProviderId = input<string | null>(null);
+  // The card is shared between /rfps and /engagements lists. The parent list
+  // tells the card which context it is in — do NOT infer from a missing
+  // `engagement_tag` field (that broke on the new platform.Project data model
+  // which doesn't populate the legacy tag column on the transform path).
+  readonly asRfp = input<boolean>(false);
 
-  @Input()
-  set currentProviderId(value: string | null) {
-    this._currentProviderId.set(value);
-  }
-
-  readonly title = computed(() => this._engagement()?.title || '');
-  readonly description = computed(() => this._engagement()?.description || '');
-  readonly category = computed(() => this._engagement()?.category || '');
-  readonly status = computed(() => this._engagement()?.status || 'draft');
-  readonly engagementTag = computed(() => this._engagement()?.engagement_tag || null);
-  readonly createdAt = computed(() => this._engagement()?.created_at || '');
-  readonly bidCount = computed(() => this._engagement()?.bid_count || 0);
-  readonly budgetMin = computed(() => this._engagement()?.budget_min);
-  readonly budgetMax = computed(() => this._engagement()?.budget_max);
-  readonly budgetType = computed(() => this._engagement()?.budget_type);
-  readonly timeline = computed(() => this._engagement()?.timeline);
-  readonly buyerName = computed(() => this._engagement()?.buyer_display_name || 'Unknown');
-  readonly acceptedProviderName = computed(() => this._engagement()?.accepted_provider_name || null);
-  readonly isRfp = computed(() => !this.engagementTag());
+  readonly title = computed(() => this.engagement().title || '');
+  readonly description = computed(() => this.engagement().description || '');
+  readonly category = computed(() => this.engagement().category || '');
+  readonly status = computed(() => this.engagement().status || 'draft');
+  readonly engagementTag = computed(() => this.engagement().engagement_tag || null);
+  readonly createdAt = computed(() => this.engagement().created_at || '');
+  readonly bidCount = computed(() => this.engagement().bid_count || 0);
+  readonly budgetMin = computed(() => this.engagement().budget_min);
+  readonly budgetMax = computed(() => this.engagement().budget_max);
+  readonly budgetType = computed(() => this.engagement().budget_type);
+  readonly timeline = computed(() => this.engagement().timeline);
+  readonly buyerName = computed(() => this.engagement().buyer_display_name || 'Unknown');
+  readonly acceptedProviderName = computed(() => this.engagement().accepted_provider_name || null);
+  readonly isRfp = computed(() => this.asRfp());
   readonly lifecycleLabel = computed(() => this.isRfp() ? 'RFP' : 'Engagement');
 
   readonly statusColor = computed(() => {
@@ -56,18 +53,14 @@ export class EngagementCard {
   });
 
   readonly hasMyBid = computed(() => {
-    const providerId = this._currentProviderId();
-    const accepted = this._engagement()?.accepted_provider_id;
+    const providerId = this.currentProviderId();
+    const accepted = this.engagement().accepted_provider_id;
     return providerId ? accepted === providerId : false;
   });
 
-  constructor(private readonly router: Router) {}
-
   navigate(): void {
-    const engagement = this._engagement();
-    if (engagement) {
-      const path = this.isRfp() ? '/rfps' : '/my/engagements';
-      this.router.navigate([path, engagement.id]);
-    }
+    const e = this.engagement();
+    const path = this.isRfp() ? '/rfps' : '/engagements';
+    this.router.navigate([path, e.id]);
   }
 }

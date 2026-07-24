@@ -3,7 +3,7 @@ import { onboardingGuard } from './core/guards/onboarding.guard';
 import { AppShell } from './layout/app-shell.component';
 import { PlatformEngagementSetupComponent } from './onboarding/platform-engagement-setup.component';
 import { CompanyProfileFormComponent } from './onboarding/company-profile-form.component';
-import { ComingSoon } from './pages/coming-soon/coming-soon.component';
+import { MyProjectList } from './pages/my-projects/my-project-list.component';
 
 /**
  * App Routes Integration Tests — Verify guard attachment and route structure
@@ -77,15 +77,13 @@ describe('App Routes with Onboarding Guard', () => {
   });
 
   describe('Projects Route', () => {
-    it('/projects placeholder route exists', () => {
+    it('/projects route exists and serves the projects list', () => {
       const appShellRoute = routes.find(r => r.path === '');
       // /projects route should exist as AppShell child
       const projectsRoute = appShellRoute?.children?.find(r => r.path === 'projects');
       expect(projectsRoute).toBeTruthy();
-      // Component should be ComingSoon
-      expect(projectsRoute?.component).toBe(ComingSoon);
-      // Title data should be Projects
-      expect(projectsRoute?.data?.['title']).toBe('Projects');
+      // /projects now serves the real MyProjectList (was a ComingSoon placeholder before f0dbec80)
+      expect(projectsRoute?.component).toBe(MyProjectList);
     });
   });
 

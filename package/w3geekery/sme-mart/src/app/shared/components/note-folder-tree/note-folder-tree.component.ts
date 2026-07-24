@@ -1,6 +1,6 @@
 import {
-  Component, Input, Output, EventEmitter,
-  ChangeDetectionStrategy, signal, computed, inject, OnInit,
+  Component, input, output,
+  ChangeDetectionStrategy, signal, computed, effect, inject, OnInit,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
@@ -32,31 +32,24 @@ export class NoteFolderTree implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
 
-  private readonly _engagementId = signal('');
-  private readonly _notebookId = signal<string | null>(null);
+  // Signal inputs (modernization)
+  readonly engagementId = input.required<string>();
+  /** When set, only show folders belonging to this notebook (top-level folder). */
+  readonly notebookId = input<string | null>(null);
+  readonly selectedFolderId = input<string | null>(null);
+  readonly collapsed = input(false);
+
+  // Output signals
+  readonly folderSelected = output<string | null>();
+  readonly treeChanged = output<void>();
+  readonly toggleCollapse = output<void>();
+  readonly noteMovedToFolder = output<{ noteId: string; folderId: string }>();
+
+  // Internal mutable signal: component calls selectFolder() to write the
+  // current selection; sync from selectedFolderId input via effect.
   private readonly _selectedFolderId = signal<string | null>(null);
 
-  @Input({ required: true })
-  set engagementId(value: string) { this._engagementId.set(value); }
-
-  /** When set, only show folders belonging to this notebook (top-level folder). */
-  @Input()
-  set notebookId(value: string | null) { this._notebookId.set(value); }
-
-  @Input()
-  set selectedFolderId(value: string | null) { this._selectedFolderId.set(value); }
-
-  private readonly _collapsed = signal(false);
-
-  @Input()
-  set collapsed(value: boolean) { this._collapsed.set(value); }
-
-  @Output() folderSelected = new EventEmitter<string | null>();
-  @Output() treeChanged = new EventEmitter<void>();
-  @Output() toggleCollapse = new EventEmitter<void>();
-  @Output() noteMovedToFolder = new EventEmitter<{ noteId: string; folderId: string }>();
-
-  readonly isCollapsed = this._collapsed;
+  readonly isCollapsed = this.collapsed;
 
   private readonly _fullTree = signal<FolderTreeNode[]>([]);
   readonly loading = signal(false);
@@ -65,7 +58,12 @@ export class NoteFolderTree implements OnInit {
   readonly folderColors = this.prefs.folderColors;
 
   /** Default parent for new folders: the selected notebook, or null. */
-  readonly defaultParentId = this._notebookId;
+  readonly defaultParentId = this.notebookId;
+
+  constructor() {
+    // Sync selectedFolderId input -> internal mutable signal.
+    effect(() => this._selectedFolderId.set(this.selectedFolderId()));
+  }
 
   /** Currently dragged folder node (null when not dragging). */
   readonly draggedNode = signal<FolderTreeNode | null>(null);
@@ -74,7 +72,7 @@ export class NoteFolderTree implements OnInit {
 
   /** Filtered tree: only children of the selected notebook. Empty if none selected. */
   readonly tree = computed(() => {
-    const nbId = this._notebookId();
+    const nbId = this.notebookId();
     if (!nbId) return [];
     const notebook = this._fullTree().find(n => n.folder.id === nbId);
     return notebook ? notebook.children : [];
@@ -85,7 +83,7 @@ export class NoteFolderTree implements OnInit {
   }
 
   async loadTree(): Promise<void> {
-    const engId = this._engagementId();
+    const engId = this.engagementId();
     if (!engId) return;
 
     // Capture in-memory expanded state first, then merge with localStorage
@@ -106,7 +104,7 @@ export class NoteFolderTree implements OnInit {
       if (!this._selectedFolderId() && visible.length > 0) {
         this.selectFolder(visible[0].folder.id);
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('[NoteFolderTree] Failed to load folders:', err);
     } finally {
       this.loading.set(false);
@@ -141,7 +139,7 @@ export class NoteFolderTree implements OnInit {
     event.stopPropagation();
     node.expanded = !node.expanded;
     // Persist expanded state to localStorage
-    this.saveExpandedIds(this._engagementId());
+    this.saveExpandedIds(this.engagementId());
     // Trigger change detection by replacing the tree reference
     this._fullTree.set([...this._fullTree()]);
   }
@@ -216,8 +214,9 @@ export class NoteFolderTree implements OnInit {
       this.snackBar.open(`Moved "${dragged.folder.name}" into "${targetNode.folder.name}"`, 'OK', { duration: 3000 });
       this.loadTree();
       this.treeChanged.emit();
-    } catch (err: any) {
-      this.snackBar.open(`Failed to move folder: ${err.message}`, 'Dismiss', { duration: 5000 });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      this.snackBar.open(`Failed to move folder: ${msg}`, 'Dismiss', { duration: 5000 });
     }
   }
 
@@ -230,13 +229,13 @@ export class NoteFolderTree implements OnInit {
 
   openMoveToNotebook(node: FolderTreeNode, event: Event): void {
     event.stopPropagation();
-    const engId = this._engagementId();
+    const engId = this.engagementId();
     const dialogRef = this.dialog.open(MoveItemDialog, {
       data: {
         engagementId: engId,
         itemType: 'folder',
         currentFolderId: node.folder.parent_id,
-        currentNotebookId: this._notebookId(),
+        currentNotebookId: this.notebookId(),
         itemName: node.folder.name,
       } as MoveItemDialogData,
       width: '420px',
@@ -262,18 +261,19 @@ export class NoteFolderTree implements OnInit {
         }
         this.loadTree();
         this.treeChanged.emit();
-      } catch (err: any) {
-        this.snackBar.open(`Failed to move folder: ${err.message}`, 'Dismiss', { duration: 5000 });
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        this.snackBar.open(`Failed to move folder: ${msg}`, 'Dismiss', { duration: 5000 });
       }
     });
   }
 
   openCreateDialog(parentId?: string | null): void {
     // Default to selected folder, then notebook, then null (top level)
-    const resolvedParent = parentId ?? this._selectedFolderId() ?? this._notebookId() ?? null;
+    const resolvedParent = parentId ?? this._selectedFolderId() ?? this.notebookId() ?? null;
     const dialogRef = this.dialog.open(FolderDialog, {
       data: {
-        engagementId: this._engagementId(),
+        engagementId: this.engagementId(),
         parentId: resolvedParent,
         folderTree: this._fullTree(),
       } as FolderDialogData,
@@ -282,8 +282,12 @@ export class NoteFolderTree implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.loadTree();
+        // Optimistic insert: new folder shows immediately without waiting for
+        // Pipeline -> GQL indexing (typical lag ~1-3s). Background-reload at 3s
+        // reconciles against the authoritative tree.
+        this.insertFolderOptimistically(result);
         this.treeChanged.emit();
+        setTimeout(() => this.loadTree(), 3000);
       }
     });
   }
@@ -292,7 +296,7 @@ export class NoteFolderTree implements OnInit {
     event.stopPropagation();
     const dialogRef = this.dialog.open(FolderDialog, {
       data: {
-        engagementId: this._engagementId(),
+        engagementId: this.engagementId(),
         existingFolder: node.folder,
       } as FolderDialogData,
       width: '400px',
@@ -300,9 +304,72 @@ export class NoteFolderTree implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.loadTree();
+        this.updateFolderOptimistically(node.folder.id, result);
         this.treeChanged.emit();
+        setTimeout(() => this.loadTree(), 3000);
       }
+    });
+  }
+
+  // ── Optimistic tree mutations ──
+
+  /** Insert a newly created folder into the in-memory tree without re-querying
+   *  GQL. Public so parent components (notes-panel) can also push a freshly
+   *  created folder — e.g. the auto-"General" folder from ensureDefaultFolder.
+   */
+  insertFolderOptimistically(folder: { id: string; name: string; parent_id?: string | null; description?: string | null; color?: string | null; access_level?: string; sort_order?: number }): void {
+    const newNode: FolderTreeNode = {
+      folder: {
+        ...folder,
+        parent_id: folder.parent_id ?? null,
+        color: folder.color ?? null,
+        access_level: folder.access_level ?? 'boundary',
+        sort_order: folder.sort_order ?? 0,
+        note_count: 0,
+        subfolder_count: 0,
+      } as FolderTreeNode['folder'],
+      children: [],
+      level: 0,
+      expanded: false,
+    };
+
+    const currentTree = this._fullTree();
+    const parentId = folder.parent_id;
+
+    if (!parentId) {
+      // Root-level: add to the top of _fullTree.
+      this._fullTree.set([...currentTree, newNode]);
+    } else {
+      // Nested: walk the tree and insert under the matching parent.
+      const updatedTree = this.insertIntoTree(currentTree, parentId, newNode);
+      this._fullTree.set(updatedTree);
+    }
+  }
+
+  /** Update an existing folder's properties in the tree without re-querying. */
+  private updateFolderOptimistically(folderId: string, updated: { name?: string; description?: string; color?: string | null }): void {
+    const patchNode = (nodes: FolderTreeNode[]): FolderTreeNode[] =>
+      nodes.map(n => {
+        if (n.folder.id === folderId) {
+          return { ...n, folder: { ...n.folder, ...updated } };
+        }
+        return { ...n, children: patchNode(n.children) };
+      });
+    this._fullTree.set(patchNode(this._fullTree()));
+  }
+
+  private insertIntoTree(nodes: FolderTreeNode[], parentId: string, newNode: FolderTreeNode): FolderTreeNode[] {
+    return nodes.map(n => {
+      if (n.folder.id === parentId) {
+        newNode.level = n.level + 1;
+        return {
+          ...n,
+          folder: { ...n.folder, subfolder_count: (n.folder.subfolder_count ?? 0) + 1 },
+          children: [...n.children, newNode],
+          expanded: true,
+        };
+      }
+      return { ...n, children: this.insertIntoTree(n.children, parentId, newNode) };
     });
   }
 
@@ -350,8 +417,9 @@ export class NoteFolderTree implements OnInit {
       // GQL won't reflect the deletion immediately)
       this._fullTree.update(nodes => this.removeNodeById(nodes, node.folder.id));
       this.treeChanged.emit();
-    } catch (err: any) {
-      this.snackBar.open(`Failed to delete: ${err.message}`, 'Dismiss', { duration: 5000 });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      this.snackBar.open(`Failed to delete: ${msg}`, 'Dismiss', { duration: 5000 });
     }
   }
 

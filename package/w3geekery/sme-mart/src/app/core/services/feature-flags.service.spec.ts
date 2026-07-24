@@ -17,18 +17,19 @@ describe('FeatureFlagsService', () => {
   });
 
   describe('get()', () => {
-    it('should return default value for prefsBackend', () => {
-      expect(service.get('prefsBackend')).toBe('localStorage');
+    it('should return the configured value for prefsBackend', () => {
+      // Base environment.ts sets prefsBackend='pkv' (local dev proxies to UAT where PKV works).
+      expect(service.get('prefsBackend')).toBe('pkv');
     });
   });
 
   describe('isEnabled()', () => {
     it('should return true when flag matches value', () => {
-      expect(service.isEnabled('prefsBackend', 'localStorage')).toBe(true);
+      expect(service.isEnabled('prefsBackend', 'pkv')).toBe(true);
     });
 
     it('should return false when flag does not match value', () => {
-      expect(service.isEnabled('prefsBackend', 'pkv')).toBe(false);
+      expect(service.isEnabled('prefsBackend', 'localStorage')).toBe(false);
     });
   });
 });

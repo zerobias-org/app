@@ -4,7 +4,7 @@ import { EngagementsService } from '../../core/services/engagements.service';
 import { ProviderProfilesService } from './provider-profiles.service';
 import { OrgDocumentService } from './org-document.service';
 import { ImpersonationService } from './impersonation.service';
-import type { RfpData, RfpTaskGroup } from '../models/rfp.model';
+import type { RfpData } from '../models/rfp.model';
 import type { BidWizardData, TaskTypePricing } from '../models/bid.model';
 import type {
   BidGenerationContext,
@@ -65,12 +65,13 @@ export class BidAiService {
       const response = this.parseLlmResponse(rawJson);
       this.emitProgress('complete', 'AI draft ready for review.', 100);
       return response;
-    } catch (err: any) {
-      if (err.name === 'AbortError') {
+    } catch (err) {
+      const error = err as Error;
+      if (error.name === 'AbortError') {
         this.emitProgress('error', 'Generation cancelled.', 0);
         throw err;
       }
-      this.emitProgress('error', `AI generation failed: ${err.message}`, 0);
+      this.emitProgress('error', `AI generation failed: ${error.message}`, 0);
       throw err;
     } finally {
       this.abortController = null;
@@ -94,18 +95,17 @@ export class BidAiService {
     ]);
 
     const vendor: BidGenerationContext['vendor'] = {
-      displayName: provider?.display_name || 'Unknown Vendor',
-      headline: (provider as any)?.headline ?? undefined,
-      bio: (provider as any)?.bio ?? undefined,
+      displayName: provider?.legalName || 'Unknown Vendor',
+      headline: provider?.tagline ?? undefined,
+      bio: provider?.shortDescription ?? undefined,
     };
 
-    // Parse aggregated JSON from VIEW (skills, frameworks)
+    // Expertise arrives as typed ExpertiseItem[] on ProviderDetailView post-Phase-33
+    // (no VIEW-JSON to parse). parseViewJson remains defined on ProviderProfilesService
+    // per §7 disposition, but is no longer consumed here.
     if (provider) {
-      const parse = this.providerProfiles.parseViewJson.bind(this.providerProfiles);
-      const skills = parse<{ name: string }>((provider as any)?.skills_json);
-      if (skills.length) vendor.skills = skills.map(s => s.name);
-      const frameworks = parse<{ name: string }>((provider as any)?.frameworks_json);
-      if (frameworks.length) vendor.frameworks = frameworks.map(f => f.name);
+      if (provider.skills.length) vendor.skills = provider.skills.map(s => s.name);
+      if (provider.frameworks.length) vendor.frameworks = provider.frameworks.map(f => f.name);
     }
 
     // Load org docs summaries (best-effort, non-blocking)
@@ -132,7 +132,7 @@ export class BidAiService {
   private async loadRfpData(rfpId: string): Promise<BidGenerationContext['rfp']> {
     const rfp = await this.engagements.getEngagement(rfpId);
     const rawEngagement = await this.engagements.getEngagementRaw(rfpId);
-    const wizardData = (rawEngagement as any)?.rfp_wizard_data as RfpData | undefined;
+    const wizardData = (rawEngagement as { rfp_wizard_data?: RfpData } | null | undefined)?.rfp_wizard_data;
 
     return {
       title: rfp?.title || '',
@@ -226,6 +226,7 @@ export class BidAiService {
       jsonStr = fenceMatch[1].trim();
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO(MODERN-CLEANUP): untyped LLM JSON response shape; out of Phase 33 scope
     let parsed: any;
     try {
       parsed = JSON.parse(jsonStr);
@@ -252,6 +253,7 @@ export class BidAiService {
 
     // Map pricing breakdown
     if (Array.isArray(parsed.pricing_breakdown)) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO(MODERN-CLEANUP): untyped LLM JSON response row; out of Phase 33 scope
       const breakdown: TaskTypePricing[] = parsed.pricing_breakdown.map((row: any) => ({
         taskType: row.taskType || row.task_type || '',
         estimatedHours: Number(row.estimatedHours ?? row.estimated_hours ?? 0),

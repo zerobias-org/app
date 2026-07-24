@@ -6,7 +6,7 @@ import { EngagementDetail } from './engagement-detail.component';
 import { EngagementsService } from '../../core/services/engagements.service';
 import { ProviderProfilesService } from '../../core/services/provider-profiles.service';
 import { EngagementContextService } from '../../core/services/engagement-context.service';
-import { EngagementHierarchyService } from '../../core/services/engagement-hierarchy.service';
+import { EngagementHierarchyService, type HierarchyBreadcrumb } from '../../core/services/engagement-hierarchy.service';
 import { ImpersonationService } from '../../core/services/impersonation.service';
 import { ZerobiasClientApi } from '@zerobias-com/zerobias-client';
 import { makeEngagementDetailRow } from '../../test-helpers/factories';
@@ -82,9 +82,9 @@ describe('EngagementDetail', () => {
   });
 
   it('should have tab definitions', () => {
-    expect(component.tabs).toHaveLength(8);
+    expect(component.tabs).toHaveLength(7);
     expect(component.tabs.map(t => t.path)).toEqual([
-      'overview', 'projects', 'documents', 'details', 'tasks', 'vetting', 'timeline', 'notes',
+      'overview', 'projects', 'documents', 'boards', 'vetting', 'timeline', 'notes',
     ]);
   });
 
@@ -110,21 +110,18 @@ describe('EngagementDetail', () => {
       expect(mockCtx.setCurrentProviderId).toHaveBeenCalledWith('prov-001');
     });
 
-    it('should redirect to /rfps if not found', async () => {
+    it('should redirect to /engagements if not found', async () => {
       mockWorkRequests.getEngagement.mockResolvedValue(null);
       await component.ngOnInit();
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['/rfps']);
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/engagements']);
     });
 
-    it('should redirect to RFP route if no engagement_tag', async () => {
-      mockWorkRequests.getEngagement.mockResolvedValue(
-        makeEngagement({ engagement_tag: null }),
-      );
+    it('should load engagement normally even when engagement_tag is null (legacy RFP heuristic removed)', async () => {
+      const tagless = makeEngagement({ engagement_tag: null });
+      mockWorkRequests.getEngagement.mockResolvedValue(tagless);
       await component.ngOnInit();
-      expect(mockRouter.navigate).toHaveBeenCalledWith(
-        ['/rfps', 'wr-001'],
-        { replaceUrl: true },
-      );
+      expect(mockRouter.navigate).not.toHaveBeenCalled();
+      expect(mockCtx.setEngagement).toHaveBeenCalledWith(tagless);
     });
 
     it('should build breadcrumbs', async () => {
@@ -163,27 +160,20 @@ describe('EngagementDetail', () => {
   // Navigation
   // ---------------------------------------------------------------------------
 
-  describe('goBack', () => {
-    it('should navigate to /my/engagements', () => {
-      component.goBack();
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['/my/engagements']);
-    });
-  });
-
   describe('onBreadcrumbNavigate', () => {
     it('should not navigate for active crumb', () => {
-      component.onBreadcrumbNavigate({ level: 'boundary', label: 'Test', active: true } as any);
+      component.onBreadcrumbNavigate({ level: 'boundary', label: 'Test', active: true } as HierarchyBreadcrumb);
       expect(mockRouter.navigate).not.toHaveBeenCalled();
     });
 
     it('should navigate to my engagements for boundary/project level', () => {
-      component.onBreadcrumbNavigate({ level: 'boundary', label: 'Test', active: false } as any);
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['/my/engagements']);
+      component.onBreadcrumbNavigate({ level: 'boundary', label: 'Test', active: false } as HierarchyBreadcrumb);
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/engagements']);
     });
 
     it('should navigate for project level', () => {
-      component.onBreadcrumbNavigate({ level: 'project', label: 'Test', active: false } as any);
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['/my/engagements']);
+      component.onBreadcrumbNavigate({ level: 'project', label: 'Test', active: false } as HierarchyBreadcrumb);
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/engagements']);
     });
   });
 });

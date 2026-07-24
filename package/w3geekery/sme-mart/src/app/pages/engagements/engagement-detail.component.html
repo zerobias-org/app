@@ -4,9 +4,7 @@
   } @else if (!ctx.engagement()) {
     <p>Engagement not found.</p>
   } @else {
-    <button mat-button (click)="goBack()" class="back-btn">
-      <mat-icon>arrow_back</mat-icon> Back to Engagements
-    </button>
+    <app-page-breadcrumb [items]="pageBreadcrumb()" />
 
     @if (breadcrumbs().length > 0) {
       <app-hierarchy-breadcrumbs
@@ -17,19 +15,7 @@
 
     <div class="tc-header">
       <h2>{{ ctx.engagement()!.title }}</h2>
-      <mat-chip-set>
-        <mat-chip class="tag-chip"><code>{{ ctx.engagementTag() }}</code></mat-chip>
-        <mat-chip [class]="'status-' + ctx.status()">{{ ctx.status() | titlecase }}</mat-chip>
-        @if (vettingGate(); as gate) {
-          <mat-chip [class]="'vetting-' + gate" [matTooltip]="gate === 'verified' ? 'All vetting requirements met' : gate === 'blocked' ? 'Vetting has rejected/expired items' : 'Vetting in progress'">
-            @switch (gate) {
-              @case ('verified') { ✓ Vetted }
-              @case ('blocked') { ⚠ Vetting Blocked }
-              @case ('in_progress') { Vetting }
-            }
-          </mat-chip>
-        }
-      </mat-chip-set>
+      <zb-resource-status [label]="ctx.status()" [pill]="true" [showDot]="false" size="small" />
     </div>
 
     <nav mat-tab-nav-bar [tabPanel]="tabPanel" animationDuration="200ms">

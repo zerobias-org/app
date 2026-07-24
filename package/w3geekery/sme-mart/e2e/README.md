@@ -113,4 +113,4 @@ npx playwright show-trace e2e/test-results/<test-dir>/trace.zip
 
 - `.planning/notes/playwright-e2e-learnings-from-zb-ui.md` — full learnings
   from the `zb/ui` Boundary Manager E2E work
-- `~/Projects/zb/ui/e2e/` — reference implementation (Angular 21, same stack)
+- `~/Projects/zb/com/ui/e2e/` — reference implementation (Angular 21, same stack)

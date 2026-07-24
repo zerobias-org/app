@@ -11,7 +11,6 @@
     "prebuild": "dotenv -e .env.local -- node scripts/gen-neon-env.mjs",
     "prebuild:prod": "dotenv -e .env.local -- node scripts/gen-neon-env.mjs",
     "prebuild:uat": "dotenv -e .env.local -- node scripts/gen-neon-env.mjs",
-    "prebuild:vercel": "dotenv -e .env.local -- node scripts/gen-neon-env.mjs",
     "predev": "dotenv -e .env.local -- node scripts/gen-neon-env.mjs",
     "dev": "dotenv -e .env.local -- ng serve --proxy-config proxy-uat.conf.js",
     "predev:uat": "dotenv -e .env.local -- node scripts/gen-neon-env.mjs",
@@ -26,7 +25,6 @@
     "build:prod": "ng build --configuration production",
     "build:stack": "ng build --configuration stack --base-href=/sme-mart/ --output-path=dist/sme-mart",
     "build:uat": "ng build --configuration uat",
-    "build:vercel": "ng build --configuration vercel",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "lint": "eslint . --max-warnings=0",
@@ -54,6 +52,11 @@
     "fs": false
   },
   "packageManager": "npm@10.9.4",
+  "overrides": {
+    "@zerobias-org/types-core-js": "$@zerobias-org/types-core-js",
+    "@zerobias-org/util-connector": "1.0.40",
+    "@zerobias-org/util-connector@1.0.41": "1.0.40"
+  },
   "dependencies": {
     "@angular/cdk": "^21.1.4",
     "@angular/common": "^21.1.0",
@@ -80,9 +83,10 @@
     "@neondatabase/serverless": "^1.0.2",
     "@ngx-translate/core": "^15.0.0",
     "@ngx-translate/http-loader": "^17.0.0",
-    "@zerobias-com/zerobias-angular-client": "^1.1.38",
-    "@zerobias-org/data-utils": "^2.1.3",
-    "@zerobias-org/ngx-library": "^0.2.32",
+    "@zerobias-com/zerobias-angular-client": "^2.0.13",
+    "@zerobias-org/data-utils": "^2.1.7",
+    "@zerobias-org/ngx-library": "^0.2.40",
+    "@zerobias-org/types-core-js": "^2.0.0",
     "dompurify": "^3.3.1",
     "marked": "^17.0.3",
     "ngx-infinite-scroll": "^21.0.0",

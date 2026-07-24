@@ -103,6 +103,13 @@ app-markdown-editor {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
+
+    // Hidden while Crepe is bootstrapping (loading) or when preview is shown.
+    // Element stays in the DOM so the #editorRef ViewChild query can resolve;
+    // we just hide it visually so the spinner / preview block can occupy space.
+    &.is-hidden {
+      display: none;
+    }
   }
 
   .preview-container {

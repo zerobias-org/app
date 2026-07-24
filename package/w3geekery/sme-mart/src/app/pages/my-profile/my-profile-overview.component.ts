@@ -9,8 +9,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ProviderProfilesService } from '../../core/services/provider-profiles.service';
 import { ImpersonationService } from '../../core/services/impersonation.service';
-import { StarRating } from '../../shared/components/star-rating/star-rating.component';
-import type { ProviderDetailRow } from '../../core/models';
+import type { ProviderDetailView, OrgProfile } from '../../core/models';
 
 @Component({
   selector: 'app-my-profile-overview',
@@ -24,7 +23,6 @@ import type { ProviderDetailRow } from '../../core/models';
     MatCardModule,
     MatSelectModule,
     MatSnackBarModule,
-    StarRating,
   ],
   templateUrl: './my-profile-overview.component.html',
   styleUrl: './my-profile-overview.component.scss',
@@ -38,16 +36,13 @@ export class MyProfileOverview implements OnInit {
 
   readonly loading = signal(true);
   readonly saving = signal(false);
-  readonly profile = signal<ProviderDetailRow | null>(null);
+  readonly profile = signal<ProviderDetailView | null>(null);
   readonly initials = signal('');
 
   readonly form = this.fb.group({
-    display_name: ['', Validators.required],
-    headline: [''],
-    about: [''],
-    hourly_rate: [''],
-    availability_status: ['available'],
-    response_time: [''],
+    legalName: ['', Validators.required],
+    tagline: [''],
+    shortDescription: [''],
   });
 
   async ngOnInit() {
@@ -56,14 +51,11 @@ export class MyProfileOverview implements OnInit {
       const detail = await this.providerProfiles.getProviderByUserId(userId);
       if (detail) {
         this.profile.set(detail);
-        this.initials.set(this.getInitials(detail.display_name));
+        this.initials.set(this.getInitials(detail.legalName || ''));
         this.form.patchValue({
-          display_name: detail.display_name,
-          headline: detail.headline || '',
-          about: detail.about || '',
-          hourly_rate: detail.hourly_rate || '',
-          availability_status: detail.availability_status,
-          response_time: detail.response_time || '',
+          legalName: detail.legalName || '',
+          tagline: detail.tagline || '',
+          shortDescription: detail.shortDescription || '',
         });
       }
     } catch (err) {
@@ -79,7 +71,7 @@ export class MyProfileOverview implements OnInit {
 
     this.saving.set(true);
     try {
-      await this.providerProfiles.updateProfile(p.id, this.form.value as any);
+      await this.providerProfiles.updateProfile(p.id, this.form.value as Partial<OrgProfile>);
       this.snackBar.open('Profile saved', 'OK', { duration: 3000 });
     } catch (err) {
       console.error('[MyProfileOverview] Save failed:', err);

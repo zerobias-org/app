@@ -14,7 +14,6 @@ export interface ImpersonationUser {
   is_provider: boolean;
   is_buyer: boolean;
   headline: string | null;
-  hourly_rate: number | null;
 }
 
 const STORAGE_KEY = 'sme-mart.impersonation';
@@ -112,8 +111,7 @@ export class ImpersonationService implements OnDestroy {
           mu.avatar_url,
           EXISTS (SELECT 1 FROM provider_profiles pp WHERE pp.user_id = mu.id) AS is_provider,
           EXISTS (SELECT 1 FROM work_requests wr WHERE wr.buyer_user_id = mu.id) AS is_buyer,
-          pp.headline,
-          pp.hourly_rate
+          pp.headline
         FROM marketplace_users mu
         LEFT JOIN provider_profiles pp ON pp.user_id = mu.id
         ORDER BY mu.display_name`,

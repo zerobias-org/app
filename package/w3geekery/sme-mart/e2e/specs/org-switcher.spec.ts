@@ -1,3 +1,4 @@
+import type { Request } from '@playwright/test';
 import { test, expect } from '../fixtures/auth.fixture';
 import { OrgSwitcherPage } from '../page-objects/org-switcher.page';
 
@@ -58,14 +59,12 @@ test.describe('@org-switcher @smoke — User profile dropdown org switch', () =>
 
     // Capture request headers to verify dana-org-id header change (director note 4)
     let newOrgIdFromHeader: string | undefined;
-    let requestHeadersAfterSwitch: Record<string, string> = {};
 
-    const requestHandler = (request: any) => {
+    const requestHandler = (request: Request) => {
       const headers = request.headers();
       // Capture the first request after submenu open that has dana-org-id
       if (headers['dana-org-id'] && headers['dana-org-id'] !== initialOrgId) {
         newOrgIdFromHeader = headers['dana-org-id'];
-        requestHeadersAfterSwitch = headers;
       }
     };
 

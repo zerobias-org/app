@@ -77,7 +77,7 @@ export class VendorProfileTab implements OnInit, OnDestroy {
   readonly editingItem = signal<MarketplaceProfileItem | null>(null);
   readonly isLoading = signal(false);
   readonly currentOrgId = signal('');
-  readonly welcomeCardDismissed = signal(false);
+  readonly currentOrgName = signal('');
   readonly deletingItemId = signal<string | null>(null);
   readonly dismissedRenewalCard = signal(false);
 
@@ -112,11 +112,6 @@ export class VendorProfileTab implements OnInit, OnDestroy {
     this.items().filter(i => this.isExpiringSoon(i))
   );
 
-  // Computed: show welcome card only when empty and not dismissed
-  readonly hasAnyItems = computed(() => this.items().length > 0);
-  readonly showWelcomeCard = computed(
-    () => !this.hasAnyItems() && !this.welcomeCardDismissed()
-  );
 
   // Helper to get items by section
   getItemsBySection(section: SectionType): MarketplaceProfileItem[] {
@@ -132,6 +127,7 @@ export class VendorProfileTab implements OnInit, OnDestroy {
     this.sub = this.app.getCurrentOrg().subscribe(org => {
       if (org?.id) {
         this.currentOrgId.set(String(org.id));
+        this.currentOrgName.set(org.name ?? '');
         this.loadItems();
       }
     });
@@ -147,11 +143,6 @@ export class VendorProfileTab implements OnInit, OnDestroy {
       const orgId = this.currentOrgId();
       const items = await this.vendorProfileService.listProfileItems(orgId);
       this.items.set(items);
-
-      // Auto-dismiss welcome card if items exist
-      if (items.length > 0) {
-        this.welcomeCardDismissed.set(true);
-      }
     } catch (err) {
       console.error('[VendorProfileTab] Failed to load items:', err);
       this.snackBar.open('Failed to load profile items', 'OK');

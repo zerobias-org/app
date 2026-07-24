@@ -2,7 +2,6 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  background-color: white;
 }
 
 .form-header {
@@ -39,8 +38,8 @@
 }
 
 .renewal-notice {
-  background-color: #fff3cd;
-  border-left: 4px solid #ffc107;
+  background-color: var(--mat-sys-error-container);
+  border-left: 4px solid var(--mat-sys-error);
   padding: 12px;
   margin-bottom: 16px;
 
@@ -50,7 +49,7 @@
     p {
       margin: 0;
       font-size: 14px;
-      color: #666;
+      color: var(--mat-sys-on-error-container);
     }
   }
 }

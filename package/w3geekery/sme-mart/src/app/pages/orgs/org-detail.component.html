@@ -40,23 +40,29 @@
 
   <!-- Org Information Panel -->
   <zb-simple-panel title="Organization Information" mode="header-only">
+    <button
+      headerAction
+      mat-icon-button
+      type="button"
+      (click)="copyOrgId()"
+      [matTooltip]="'Copy organization ID'"
+      aria-label="Copy organization ID"
+    >
+      <mat-icon>content_copy</mat-icon>
+    </button>
     <div class="panel-content">
-      <div class="info-row">
-        <label>Name:</label>
-        <span>{{ org()?.name || '-' }}</span>
-      </div>
-      @if (org()?.description) {
+      <dl class="info-list">
         <div class="info-row">
-          <label>Description:</label>
-          <span>{{ org()?.description }}</span>
+          <dt>Name</dt>
+          <dd>{{ org()?.name || '-' }}</dd>
         </div>
-      }
-      @if (org()?.id) {
-        <div class="info-row">
-          <label>Organization ID:</label>
-          <span class="id-text">{{ org()?.id }}</span>
-        </div>
-      }
+        @if (org()?.description) {
+          <div class="info-row">
+            <dt>Description</dt>
+            <dd>{{ org()?.description }}</dd>
+          </div>
+        }
+      </dl>
     </div>
   </zb-simple-panel>
 
@@ -66,19 +72,21 @@
       @if (members().length === 0) {
         <p class="empty-message">No members found</p>
       } @else {
-        <div class="members-list">
+        <ul class="row-list">
           @for (member of members(); track member.id) {
-            <div class="member-item">
+            <li class="row-item">
               <zb-avatar-label
-                [label]="member.display_name || member.email"
-                [subText]="member.email"
+                [src]="member.avatarUrl || ''"
+                [label]="member.name || '(unnamed)'"
+                [subText]="member.email || (member.type | titlecase)"
+                [small]="true"
               />
-              @if (member.role) {
-                <span class="role-badge">{{ member.role }}</span>
+              @if (member.type && member.type !== 'USER') {
+                <span class="row-chip">{{ member.type | titlecase }}</span>
               }
-            </div>
+            </li>
           }
-        </div>
+        </ul>
       }
     </div>
   </zb-simple-panel>
@@ -89,16 +97,18 @@
       @if (groups().length === 0) {
         <p class="empty-message">No groups found</p>
       } @else {
-        <div class="groups-list">
+        <ul class="row-list">
           @for (group of groups(); track group.id) {
-            <div class="group-item">
-              <div class="group-info">
-                <h4 class="group-name">{{ group.name }}</h4>
-              </div>
-              <span class="member-count-badge">{{ group.memberCount || 0 }} members</span>
-            </div>
+            <li class="row-item">
+              <zb-avatar-label
+                [src]="group.avatarUrl || ''"
+                [label]="group.name"
+                [subText]="(group.boundaryGroupType || group.groupType || '') | titlecase"
+                [small]="true"
+              />
+            </li>
           }
-        </div>
+        </ul>
       }
     </div>
   </zb-simple-panel>

@@ -1,4 +1,8 @@
 import { TestBed } from '@angular/core/testing';
+import { ZerobiasClientApi, ZerobiasClientSessionId } from '@zerobias-com/zerobias-client';
+import { ZerobiasClientOrgIdService } from '@zerobias-com/zerobias-angular-client';
+
+const TEST_ORG_ID = 'aaaa1111-bbbb-2222-cccc-333344445555';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { SmeMartProjectService } from './sme-mart-project.service';
 import { PipelineWriteService } from './pipeline-write.service';
@@ -7,7 +11,7 @@ import { DemoVisibilityService } from './demo-visibility.service';
 import { ProjectContextService } from './project-context.service';
 import { SmeMartTagService } from './sme-mart-tag.service';
 import { SmeMartResourceService } from './sme-mart-resource.service';
-import { fakeProjectContextService } from '../../test-helpers/angular';
+import { fakeProjectContextService, fakeClientApi } from '../../test-helpers/angular';
 import type { GqlSmeMartProjectResponse } from '../gql-types';
 
 type MockFn = ReturnType<typeof vi.fn>;
@@ -32,6 +36,7 @@ describe('SmeMartProjectService', () => {
   let mockPipelineWrite: MockPipelineWrite;
   let mockGraphqlRead: MockGraphqlRead;
   let mockProjectContext: ReturnType<typeof fakeProjectContextService>;
+  let mockClientApi: ReturnType<typeof fakeClientApi>;
 
   beforeEach(() => {
     mockPipelineWrite = {
@@ -48,6 +53,7 @@ describe('SmeMartProjectService', () => {
       rawQuery: vi.fn().mockResolvedValue(null),
     };
     mockProjectContext = fakeProjectContextService(false);
+    mockClientApi = fakeClientApi();
 
     TestBed.configureTestingModule({
       providers: [
@@ -58,6 +64,9 @@ describe('SmeMartProjectService', () => {
         { provide: ProjectContextService, useValue: mockProjectContext },
         { provide: SmeMartTagService, useValue: { generateRfpTag: vi.fn(), createTag: vi.fn().mockResolvedValue(null) } },
         { provide: SmeMartResourceService, useValue: { linkResources: vi.fn().mockResolvedValue(undefined) } },
+        { provide: ZerobiasClientApi, useValue: mockClientApi },
+        { provide: ZerobiasClientSessionId, useValue: { getCurrentSessionId: () => null } },
+        { provide: ZerobiasClientOrgIdService, useValue: { getCurrentOrgId: () => TEST_ORG_ID } },
       ],
     });
 
@@ -136,59 +145,81 @@ describe('SmeMartProjectService', () => {
   });
 
   describe('listProjects', () => {
-    it('should query projects with default pagination', async () => {
-      const mockResponse = {
+    it('should query projects with default pagination (primary platform path)', async () => {
+      // D-15: Dual-read window: primary path tries platform.Project.list first
+      const mockPlatformResponse = {
         items: [
           {
             id: 'proj-1',
             name: 'Project 1',
             status: 'draft',
             startDate: '2026-03-19',
-            createdAt: '2026-03-19T00:00:00Z',
-            updatedAt: '2026-03-19T00:00:00Z',
-          } as GqlSmeMartProjectResponse,
+            tag: null,
+            tagId: '420b0753-e72c-4b81-8929-70508a119bf0',
+          },
         ],
-        page: { pageNumber: 1, pageSize: 50, totalCount: 1 },
+        pageSize: 50,
+        pageNumber: 1,
       };
 
-      mockGraphqlRead.query.mockResolvedValue(mockResponse);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ((mockClientApi as any).platformClient['getProjectApi']() as any).list.mockResolvedValue(mockPlatformResponse);
 
       const result = await service.listProjects();
 
       expect(result.items).toHaveLength(1);
       expect(result.items[0].name).toBe('Project 1');
-      expect(mockGraphqlRead.query).toHaveBeenCalledWith(
-        'SmeMartProject',
-        expect.any(Array),
-        expect.objectContaining({ pageNumber: 1, pageSize: 50 }),
-      );
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect(((mockClientApi as any).platformClient['getProjectApi']() as any).list).toHaveBeenCalledWith(1, 50, undefined, TEST_ORG_ID);
     });
 
-    it('should respect pagination options', async () => {
+    it('should respect pagination options (primary platform path)', async () => {
       // Create 25 items for page 2 (items 26-50)
       const pageItems = Array.from({ length: 25 }, (_, i) => ({
         id: `proj-${26 + i}`,
         name: `Project ${26 + i}`,
         status: 'active',
         startDate: '2026-03-19',
-        createdAt: '2026-03-19T00:00:00Z',
-        updatedAt: '2026-03-19T00:00:00Z',
-      } as GqlSmeMartProjectResponse));
+        tag: null,
+        tagId: '420b0753-e72c-4b81-8929-70508a119bf0',
+      }));
 
-      const mockResponse = {
+      const mockPlatformResponse = {
         items: pageItems,
-        page: { pageNumber: 2, pageSize: 25, totalCount: 50 },
+        pageSize: 25,
+        pageNumber: 2,
       };
 
-      mockGraphqlRead.query.mockResolvedValue(mockResponse);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ((mockClientApi as any).platformClient['getProjectApi']() as any).list.mockResolvedValue(mockPlatformResponse);
 
       await service.listProjects({ pageNumber: 2, pageSize: 25 });
 
-      expect(mockGraphqlRead.query).toHaveBeenCalledWith(
-        'SmeMartProject',
-        expect.any(Array),
-        expect.objectContaining({ pageNumber: 2, pageSize: 25 }),
-      );
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect(((mockClientApi as any).platformClient['getProjectApi']() as any).list).toHaveBeenCalledWith(2, 25, undefined, TEST_ORG_ID);
+    });
+
+    it('filters out non-Project-tier rows (errata 039 cross-contamination fix)', async () => {
+      // Mixed bag: depth-1 engagement, untagged, foreign tag, and the real
+      // Project-tier row. Only the last should pass the client-side tier filter.
+      const PROJECT_TIER_TAG_ID = '420b0753-e72c-4b81-8929-70508a119bf0';
+      const mockPlatformResponse = {
+        items: [
+          { id: 'eng-1', name: 'Engagement (depth-1)', status: 'active', tag: null, parentId: null },
+          { id: 'untagged', name: 'Untagged Project', status: 'active', tag: null },
+          { id: 'foreign', name: 'Foreign-tag Project', status: 'active', tag: null, tagId: '00000000-0000-0000-0000-000000000099' },
+          { id: 'project-tier', name: 'Project Tier Row', status: 'active', tag: null, tagId: PROJECT_TIER_TAG_ID },
+        ],
+        pageSize: 50,
+        pageNumber: 1,
+      };
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ((mockClientApi as any).platformClient['getProjectApi']() as any).list.mockResolvedValue(mockPlatformResponse);
+
+      const result = await service.listProjects();
+
+      expect(result.items.map(r => r.id)).toEqual(['project-tier']);
     });
   });
 
@@ -257,18 +288,26 @@ describe('SmeMartProjectService', () => {
   });
 
   describe('demo visibility (Phase 24 Plan 03)', () => {
-    const mockGqlReturn = [
-      { id: '1', name: 'Real', tag: null, status: 'draft' } as unknown as GqlSmeMartProjectResponse,
-      { id: '2', name: 'Real w/ marketplace tag', tag: [{ value: 'a81cd320-243e-44eb-bdd9-9824019ef3dd' }], status: 'draft' } as unknown as GqlSmeMartProjectResponse,
-      { id: '3', name: 'Demo (global)', tag: [{ value: '81053c14-a8e5-4939-b538-c122c7d0eb1a' }], status: 'draft' } as unknown as GqlSmeMartProjectResponse,
-      { id: '4', name: 'Demo (legacy)', tag: [{ value: 'd618b602-21cc-40a1-a9fa-534b7bc1672c' }], status: 'draft' } as unknown as GqlSmeMartProjectResponse,
+    // All four mocks carry the Project-tier tagId so they survive the
+    // tier filter; the demo-visibility post-filter is what's under test here.
+    const PROJECT_TIER_TAG_ID = '420b0753-e72c-4b81-8929-70508a119bf0';
+    const mockPlatformReturn = [
+      { id: '1', name: 'Real', tag: null, status: 'draft', tagId: PROJECT_TIER_TAG_ID },
+      { id: '2', name: 'Real w/ marketplace tag', tag: [{ value: 'a81cd320-243e-44eb-bdd9-9824019ef3dd' }], status: 'draft', tagId: PROJECT_TIER_TAG_ID },
+      { id: '3', name: 'Demo (global)', tag: [{ value: '81053c14-a8e5-4939-b538-c122c7d0eb1a' }], status: 'draft', tagId: PROJECT_TIER_TAG_ID },
+      { id: '4', name: 'Demo (legacy)', tag: [{ value: 'd618b602-21cc-40a1-a9fa-534b7bc1672c' }], status: 'draft', tagId: PROJECT_TIER_TAG_ID },
     ];
+    const mockGqlReturn = mockPlatformReturn as unknown as GqlSmeMartProjectResponse[];
 
     it('[DG-02] strips demo records for non-admin in listProjects', async () => {
-      mockGraphqlRead.query.mockResolvedValueOnce({
-        items: mockGqlReturn,
-        page: { pageNumber: 1, pageSize: 50, totalCount: 4 },
-      });
+      // D-15: Platform path returns success, post-filter strips demo tags
+      const mockPlatformResult = {
+        items: mockPlatformReturn,
+        pageSize: 50,
+        pageNumber: 1,
+      };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ((mockClientApi as any).platformClient['getProjectApi']() as any).list.mockResolvedValue(mockPlatformResult);
 
       const result = await service.listProjects();
 
@@ -277,10 +316,13 @@ describe('SmeMartProjectService', () => {
 
     it('[DG-03] admin sees all records including demo in listProjects', async () => {
       mockProjectContext.setIsAdmin(true);
-      mockGraphqlRead.query.mockResolvedValueOnce({
-        items: mockGqlReturn,
-        page: { pageNumber: 1, pageSize: 50, totalCount: 4 },
-      });
+      const mockPlatformResult = {
+        items: mockPlatformReturn,
+        pageSize: 50,
+        pageNumber: 1,
+      };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ((mockClientApi as any).platformClient['getProjectApi']() as any).list.mockResolvedValue(mockPlatformResult);
 
       const result = await service.listProjects();
 
@@ -288,24 +330,34 @@ describe('SmeMartProjectService', () => {
     });
 
     it('[DG-02] does NOT add server-side tag negation filter in listProjects', async () => {
-      mockGraphqlRead.query.mockResolvedValueOnce({
+      // D-15: With platform path primary, demo filtering is post-filter only (client-side).
+      // Platform API has no tag-negation filter concept.
+      const mockPlatformResult = {
         items: [],
-        page: { pageNumber: 1, pageSize: 50, totalCount: 0 },
-      });
+        pageSize: 50,
+        pageNumber: 1,
+      };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ((mockClientApi as any).platformClient['getProjectApi']() as any).list.mockResolvedValue(mockPlatformResult);
 
       await service.listProjects();
 
-      const callArgs = mockGraphqlRead.query.mock.calls[0];
-      const filters = callArgs[2]?.filters ?? {};
-      const filterValues = Object.values(filters).join(' ');
-      expect(filterValues).not.toContain('.not in.');
-      expect(filterValues).not.toContain('.ne.');
+      // Platform API call args: pageNumber, pageSize (no filters)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect(((mockClientApi as any).platformClient['getProjectApi']() as any).list).toHaveBeenCalledWith(1, 50, undefined, TEST_ORG_ID);
     });
 
-    it('requests tag field in GQL query for listProjects', async () => {
+    it('requests tag field in GQL query for listProjects (fallback path only)', async () => {
+      // D-15: Primary platform path doesn't request fields explicitly.
+      // Tag field is present in platform response. This test verifies the fallback (GQL) path
+      // would request the tag field if platform failed.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ((mockClientApi as any).platformClient['getProjectApi']() as any).list.mockRejectedValue(
+        new Error('platform timeout')
+      );
       mockGraphqlRead.query.mockResolvedValueOnce({
-        items: [],
-        page: { pageNumber: 1, pageSize: 50, totalCount: 0 },
+        items: mockGqlReturn,
+        page: { pageNumber: 1, pageSize: 50, totalCount: 4 },
       });
 
       await service.listProjects();

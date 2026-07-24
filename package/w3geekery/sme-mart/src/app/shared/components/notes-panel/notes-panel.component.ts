@@ -1,6 +1,6 @@
 import {
-  Component, Input, ChangeDetectionStrategy, OnInit, ViewChild,
-  signal, computed, inject,
+  Component, ChangeDetectionStrategy, OnInit,
+  input, viewChild, signal, computed, effect, inject,
 } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { DatePipe } from '@angular/common';
@@ -50,20 +50,22 @@ export class NotesPanel implements OnInit {
   private readonly snackBar = inject(MatSnackBar);
   private readonly dialog = inject(MatDialog);
 
-  @ViewChild(NoteFolderTree) folderTree?: NoteFolderTree;
-  @ViewChild(NotesNotebooksColumn) notebooksCol?: NotesNotebooksColumn;
+  // viewChild signal queries
+  readonly folderTree = viewChild(NoteFolderTree);
+  readonly notebooksCol = viewChild(NotesNotebooksColumn);
 
-  private readonly _engagementId = signal('');
-
-  @Input({ required: true })
-  set engagementId(value: string) { this._engagementId.set(value); }
-
+  // Signal inputs
+  readonly engagementId = input.required<string>();
   /** When set, shows only notes that contain an sme-doc:// link to this document ID. */
-  @Input()
-  set filterByDocumentId(value: string | null) {
-    if (value) {
-      this._docFilter.set(value);
-    }
+  readonly filterByDocumentId = input<string | null>(null);
+
+  constructor() {
+    // Mirror non-null filterByDocumentId into the internal _docFilter signal.
+    // (Component also clears _docFilter itself; can't bind input directly.)
+    effect(() => {
+      const v = this.filterByDocumentId();
+      if (v) this._docFilter.set(v);
+    });
   }
 
   readonly notes = signal<NoteWithTags[]>([]);
@@ -87,7 +89,7 @@ export class NotesPanel implements OnInit {
   readonly hasNoNotebooks = signal(false);
 
   readonly noteCount = computed(() => this.notes().length);
-  readonly engId = this._engagementId;
+  readonly engId = this.engagementId;
   readonly folderColors = this.prefs.folderColors;
   readonly draggedNoteId = signal<string | null>(null);
 
@@ -107,7 +109,7 @@ export class NotesPanel implements OnInit {
   }
 
   async loadNotes(): Promise<void> {
-    const engId = this._engagementId();
+    const engId = this.engagementId();
     if (!engId) return;
 
     const docFilter = this._docFilter();
@@ -132,7 +134,7 @@ export class NotesPanel implements OnInit {
         result = await this.notesService.listNotesByFolder(engId, folderId!, { pageNumber: 1, pageSize: 50 });
       }
       this.notes.set(result.items || []);
-    } catch (err: any) {
+    } catch (err) {
       console.error('[NotesPanel] Failed to load notes:', err);
       this.snackBar.open('Failed to load notes', 'Dismiss', { duration: 5000 });
     } finally {
@@ -163,11 +165,17 @@ export class NotesPanel implements OnInit {
 
     if (notebookId) {
       // Ensure notebook has at least one folder (creates "General" if empty)
-      const created = await this.hierarchy.ensureDefaultFolder(this._engagementId(), notebookId);
+      const created = await this.hierarchy.ensureDefaultFolder(this.engagementId(), notebookId);
       if (created) {
-        // Reload both trees so the new folder shows up
-        this.folderTree?.loadTree();
-        this.notebooksCol?.loadTree();
+        // Optimistic insert so the auto-created folder shows immediately,
+        // not after Pipeline indexing lag (1-3s) — same pattern as user-
+        // initiated folder creation.
+        this.folderTree()?.insertFolderOptimistically(created);
+        // Background reconcile at 3s.
+        setTimeout(() => {
+          this.folderTree()?.loadTree();
+          this.notebooksCol()?.loadTree();
+        }, 3000);
       }
 
       // Show notebook overview when selecting a notebook (Plan 062)
@@ -191,7 +199,7 @@ export class NotesPanel implements OnInit {
 
   /** Show notebook overview panel (Plan 062). */
   async onNotebookInfo(notebookId: string): Promise<void> {
-    const tree = await this.hierarchy.getFolderTree(this._engagementId());
+    const tree = await this.hierarchy.getFolderTree(this.engagementId());
     const node = tree.find(n => n.folder.id === notebookId) ?? null;
     this.overviewNotebookNode.set(node);
     this.selectedNoteId.set(null); // clear note selection
@@ -214,8 +222,8 @@ export class NotesPanel implements OnInit {
   }
 
   onFolderTreeChanged(): void {
-    this.folderTree?.loadTree();
-    this.notebooksCol?.loadTree();
+    this.folderTree()?.loadTree();
+    this.notebooksCol()?.loadTree();
   }
 
   toggleDrawer(): void {
@@ -237,14 +245,14 @@ export class NotesPanel implements OnInit {
   }
 
   private saveColumnState(col: string, expanded: boolean): void {
-    try { localStorage.setItem(`sme-mart.notes-col.${col}`, JSON.stringify(expanded)); } catch {}
+    try { localStorage.setItem(`sme-mart.notes-col.${col}`, JSON.stringify(expanded)); } catch { /* localStorage write quota / disabled — ignore */ }
   }
 
   private loadColumnState(col: string, fallback: boolean): boolean {
     try {
       const raw = localStorage.getItem(`sme-mart.notes-col.${col}`);
       if (raw !== null) return JSON.parse(raw);
-    } catch {}
+    } catch { /* localStorage read disabled — fall back */ }
     return fallback;
   }
 
@@ -254,7 +262,7 @@ export class NotesPanel implements OnInit {
   }
 
   async createNewNote(): Promise<void> {
-    const engId = this._engagementId();
+    const engId = this.engagementId();
     if (!engId) return;
 
     let targetFolderId = this.selectedFolderId();
@@ -316,9 +324,10 @@ export class NotesPanel implements OnInit {
       this.notes.update(list => [newNote, ...list]);
       this.selectedNoteId.set(newNote.id);
       this.overviewNotebookNode.set(null); // switch to editor
-      this.folderTree?.loadTree();
-    } catch (err: any) {
-      this.snackBar.open(`Failed to create note: ${err.message}`, 'Dismiss', { duration: 5000 });
+      this.folderTree()?.loadTree();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      this.snackBar.open(`Failed to create note: ${msg}`, 'Dismiss', { duration: 5000 });
     }
   }
 
@@ -351,9 +360,10 @@ export class NotesPanel implements OnInit {
       if (this.selectedNoteId() === event.noteId) {
         this.selectedNoteId.set(null);
       }
-      this.folderTree?.loadTree();
-    } catch (err: any) {
-      this.snackBar.open(`Failed to move note: ${err.message}`, 'Dismiss', { duration: 5000 });
+      this.folderTree()?.loadTree();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      this.snackBar.open(`Failed to move note: ${msg}`, 'Dismiss', { duration: 5000 });
     }
   }
 
@@ -363,7 +373,7 @@ export class NotesPanel implements OnInit {
     event.stopPropagation();
     const dialogRef = this.dialog.open(MoveItemDialog, {
       data: {
-        engagementId: this._engagementId(),
+        engagementId: this.engagementId(),
         itemType: 'note',
         currentFolderId: note.folder_id,
         currentNotebookId: this.selectedNotebookId(),
@@ -382,10 +392,11 @@ export class NotesPanel implements OnInit {
         if (this.selectedNoteId() === note.id) {
           this.selectedNoteId.set(null);
         }
-        this.folderTree?.loadTree();
-        this.notebooksCol?.loadTree();
-      } catch (err: any) {
-        this.snackBar.open(`Failed to move note: ${err.message}`, 'Dismiss', { duration: 5000 });
+        this.folderTree()?.loadTree();
+        this.notebooksCol()?.loadTree();
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        this.snackBar.open(`Failed to move note: ${msg}`, 'Dismiss', { duration: 5000 });
       }
     });
   }
@@ -398,7 +409,7 @@ export class NotesPanel implements OnInit {
 
     const dialogRef = this.dialog.open(MoveItemDialog, {
       data: {
-        engagementId: this._engagementId(),
+        engagementId: this.engagementId(),
         itemType: 'note',
         currentFolderId: note.folder_id,
         currentNotebookId: this.selectedNotebookId(),
@@ -416,16 +427,17 @@ export class NotesPanel implements OnInit {
         if (this.selectedNoteId() === note.id) {
           this.selectedNoteId.set(null);
         }
-        this.folderTree?.loadTree();
-        this.notebooksCol?.loadTree();
-      } catch (err: any) {
-        this.snackBar.open(`Failed to move note: ${err.message}`, 'Dismiss', { duration: 5000 });
+        this.folderTree()?.loadTree();
+        this.notebooksCol()?.loadTree();
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        this.snackBar.open(`Failed to move note: ${msg}`, 'Dismiss', { duration: 5000 });
       }
     });
   }
 
   onFolderDroppedOnNotebook(event: { folderId: string; notebookId: string }): void {
-    const engId = this._engagementId();
+    const engId = this.engagementId();
 
     const dialogRef = this.dialog.open(MoveItemDialog, {
       data: {
@@ -452,11 +464,12 @@ export class NotesPanel implements OnInit {
           await this.hierarchy.moveFolder(event.folderId, result.targetFolderId);
           this.snackBar.open('Folder moved', 'OK', { duration: 3000 });
         }
-        this.folderTree?.loadTree();
-        this.notebooksCol?.loadTree();
+        this.folderTree()?.loadTree();
+        this.notebooksCol()?.loadTree();
         this.loadNotes();
-      } catch (err: any) {
-        this.snackBar.open(`Failed to move: ${err.message}`, 'Dismiss', { duration: 5000 });
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        this.snackBar.open(`Failed to move: ${msg}`, 'Dismiss', { duration: 5000 });
       }
     });
   }
@@ -481,7 +494,7 @@ export class NotesPanel implements OnInit {
     if (this.selectedNoteId() === noteId) {
       this.selectedNoteId.set(null);
     }
-    this.folderTree?.loadTree();
+    this.folderTree()?.loadTree();
   }
 
   /** Navigate to the Documents tab with the linked document highlighted. */

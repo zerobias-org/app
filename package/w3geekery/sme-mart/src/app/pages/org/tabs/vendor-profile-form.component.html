@@ -1,7 +1,7 @@
 <div class="form-container">
   <!-- Form Header -->
   <div class="form-header">
-    <h2>{{ mode() === 'create' ? 'Add ' : 'Edit ' }}{{ section() | titlecase }} Item</h2>
+    <h2>{{ mode() === 'create' ? 'Add ' : 'Edit ' }}{{ section() | snakeToSpaces | titlecase }} Item</h2>
     <button mat-icon-button (click)="onCancel()" type="button" class="close-btn">
       <mat-icon>close</mat-icon>
     </button>

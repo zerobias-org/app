@@ -148,7 +148,7 @@ export class MarketplaceProfileService {
       yearsInBusiness: bySection.get('years_in_business')
         ? Number(bySection.get('years_in_business'))
         : undefined,
-      employeeCount: bySection.get('employee_count'),
+      employeeCount: bySection.get('employee_count') as CompanyInfoStruct['employeeCount'],
     };
 
     return struct;

@@ -11,7 +11,7 @@ import type { SmeMartProject } from '../../core/models';
   imports: [DatePipe, TitleCasePipe, MatCardModule, MatChipsModule, MatIconModule],
   template: `
     @if (project(); as proj) {
-      <mat-card class="project-card" appearance="outlined">
+      <mat-card class="project-card">
         <mat-card-header>
           <mat-icon mat-card-avatar class="project-icon">folder_special</mat-icon>
           <mat-card-title>{{ proj.name }}</mat-card-title>
@@ -52,10 +52,11 @@ import type { SmeMartProject } from '../../core/models';
   styles: [`
     .project-card {
       cursor: pointer;
-      transition: box-shadow 0.2s;
+      transition: box-shadow 0.13s linear, transform 0.13s linear;
 
       &:hover {
-        box-shadow: var(--mat-card-elevated-container-shadow, 0 2px 6px rgba(0, 0, 0, 0.15));
+        box-shadow: var(--zb-card-shadow-hover, 8px 8px 16px -4px rgb(0 0 0 / 30%));
+        transform: translateX(-2px) translateY(-2px);
       }
     }
 

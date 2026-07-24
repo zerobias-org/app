@@ -1,0 +1,40 @@
+<mat-dialog-content>
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="create-board-form">
+    <mat-form-field appearance="outline">
+      <mat-label>Board name</mat-label>
+      <input matInput formControlName="name" [disabled]="isSubmitting()" />
+      @if (form.controls.name.hasError('required')) {
+        <mat-error>Name is required</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Description</mat-label>
+      <textarea matInput formControlName="description" rows="4" [disabled]="isSubmitting()"></textarea>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Board type</mat-label>
+      <mat-select formControlName="boardType" [disabled]="isSubmitting()">
+        @for (opt of boardTypeOptions; track opt.value) {
+          <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    @if (submitError()) {
+      <p class="form-error">{{ submitError() }}</p>
+    }
+
+    <div class="form-actions">
+      <button mat-button type="button" (click)="onCancel()">Cancel</button>
+      <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid || isSubmitting()">
+        @if (isSubmitting()) {
+          <mat-spinner diameter="20" />
+        } @else {
+          Create Board
+        }
+      </button>
+    </div>
+  </form>
+</mat-dialog-content>

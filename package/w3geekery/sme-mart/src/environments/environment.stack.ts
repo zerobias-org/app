@@ -16,6 +16,6 @@ export const environment = {
   boundaryId: 'c15fb2dc-4f8c-48b5-b27a-707bd516b005',          // (same as dev environment.ts)
   neonConnectionString: NEON_DATABASE_URL,
   featureFlags: {
-    prefsBackend: 'localStorage' as 'localStorage' | 'pkv',
+    prefsBackend: 'pkv' as 'localStorage' | 'pkv',
   },
 };

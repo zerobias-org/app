@@ -12,6 +12,9 @@
   <!-- Results -->
   <div listPageResults>
     <div class="results-count">{{ filteredProviders().length }} providers found</div>
+    <!-- NOTE: Verified/asserted status chips are rendered in the provider-detail view (per UI-SPEC §2).
+         List view omits chips due to space constraints; users can view full expertise + provenance
+         status by navigating to the provider detail page. -->
     <div class="provider-grid">
       @for (provider of filteredProviders(); track provider.id) {
         <app-provider-card [provider]="provider" />

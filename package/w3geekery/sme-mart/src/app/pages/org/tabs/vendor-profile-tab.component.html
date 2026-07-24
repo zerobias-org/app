@@ -1,26 +1,24 @@
 <div class="vendor-profile-container">
-  <!-- Welcome Card (D-14) -->
-  @if (showWelcomeCard()) {
-    <mat-card class="welcome-card">
-      <mat-card-header>
-        <mat-card-title>Welcome to Corporate Profile</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <p>Build your marketplace profile to attract quality engagements. Update these 6 sections:</p>
-        <ul>
-          <li><strong>Corporate Identity:</strong> Legal name, business type, certifications</li>
-          <li><strong>Attestation:</strong> Service expertise, experience, client references</li>
-          <li><strong>Insurance:</strong> Coverage details and policy information</li>
-          <li><strong>Personnel:</strong> Key team members and credentials</li>
-          <li><strong>Reference:</strong> Client testimonials and project outcomes</li>
-          <li><strong>Financial:</strong> Business financials and stability indicators</li>
-        </ul>
-      </mat-card-content>
-      <mat-card-actions>
-        <button mat-raised-button color="primary" (click)="onWelcomeCardGetStarted()">Get Started</button>
-      </mat-card-actions>
-    </mat-card>
-  }
+  <!-- Welcome Card (Phase 31-B: always shown) -->
+  <mat-card class="welcome-card">
+    <mat-card-header>
+      <mat-card-title>Welcome to Corporate Profile</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <p>Build your marketplace profile to attract quality engagements. Update these 6 sections:</p>
+      <ul>
+        <li><strong>Corporate Identity:</strong> Legal name, business type, certifications</li>
+        <li><strong>Attestation:</strong> Service expertise, experience, client references</li>
+        <li><strong>Insurance:</strong> Coverage details and policy information</li>
+        <li><strong>Personnel:</strong> Key team members and credentials</li>
+        <li><strong>Reference:</strong> Client testimonials and project outcomes</li>
+        <li><strong>Financial:</strong> Business financials and stability indicators</li>
+      </ul>
+    </mat-card-content>
+    <mat-card-actions>
+      <button mat-raised-button color="primary" (click)="onWelcomeCardGetStarted()">Get Started</button>
+    </mat-card-actions>
+  </mat-card>
 
   <!-- Loading Spinner -->
   @if (isLoading()) {
@@ -43,7 +41,7 @@
             <ul>
               @for (item of expiredItems(); track item.id) {
                 <li class="renewal-item">
-                  <span>{{ item.name }} ({{ item.section | titlecase }})</span>
+                  <span>{{ item.name }} ({{ item.section | snakeToSpaces | titlecase }})</span>
                   <button mat-stroked-button (click)="openEditForm(item); dismissRenewalCard()" type="button">
                     Update Now
                   </button>
@@ -58,7 +56,7 @@
             <ul>
               @for (item of expiringSoonItems(); track item.id) {
                 <li class="renewal-item">
-                  <span>{{ item.name }} ({{ item.section | titlecase }}) — Expires: {{ item.expires_at | date }}</span>
+                  <span>{{ item.name }} ({{ item.section | snakeToSpaces | titlecase }}) — Expires: {{ item.expires_at | date }}</span>
                   <button mat-stroked-button (click)="openEditForm(item); dismissRenewalCard()" type="button">
                     Renew Soon
                   </button>
@@ -78,13 +76,16 @@
       #drawer
       position="end"
       [opened]="sidenavOpen()">
-      <app-vendor-profile-form
-        [mode]="formMode()"
-        [section]="selectedSection()"
-        [item]="editingItem()"
-        (save)="onFormSave($event)"
-        (close)="onFormClose()">
-      </app-vendor-profile-form>
+      @if (sidenavOpen()) {
+        <app-vendor-profile-form
+          [mode]="formMode()"
+          [section]="selectedSection()"
+          [item]="editingItem()"
+          [orgName]="currentOrgName()"
+          (save)="onFormSave($event)"
+          (close)="onFormClose()">
+        </app-vendor-profile-form>
+      }
     </mat-sidenav>
 
     <!-- Main Content -->
@@ -106,7 +107,7 @@
               <button
                 mat-icon-button
                 (click)="openAddForm(section); $event.stopPropagation()"
-                [title]="'Add ' + section + ' Item'"
+                [title]="'Add ' + (section | snakeToSpaces | titlecase) + ' Item'"
                 type="button">
                 <mat-icon>add</mat-icon>
               </button>

@@ -11,6 +11,8 @@ import { SmeMartTagService } from './sme-mart-tag.service';
 import { ZerobiasClientApi } from '@zerobias-com/zerobias-client';
 import { fakeSmeMartTagService } from '../../test-helpers/angular';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import type { TagView } from '@zerobias-com/hydra-sdk';
+import type { TaskExtended } from '@zerobias-com/platform-sdk';
 
 describe('EngagementHierarchyService', () => {
   let service: EngagementHierarchyService;
@@ -100,7 +102,7 @@ describe('EngagementHierarchyService', () => {
 
   describe('parseTag()', () => {
     it('should parse a valid hierarchy tag', () => {
-      const tag = { id: 'tag-1', name: 'sme-mart.proj.crystal-harbor', description: 'Test' } as any;
+      const tag = { id: 'tag-1', name: 'sme-mart.proj.crystal-harbor', description: 'Test' } as unknown as TagView;
       const result = service.parseTag(tag);
 
       expect(result).not.toBeNull();
@@ -109,7 +111,7 @@ describe('EngagementHierarchyService', () => {
     });
 
     it('should return null for non-hierarchy tag', () => {
-      const tag = { id: 'tag-2', name: 'random-tag' } as any;
+      const tag = { id: 'tag-2', name: 'random-tag' } as unknown as TagView;
       expect(service.parseTag(tag)).toBeNull();
     });
   });
@@ -119,7 +121,8 @@ describe('EngagementHierarchyService', () => {
   describe('levelLabel()', () => {
     it('should return human-readable labels', () => {
       expect(service.levelLabel('project')).toBe('Project');
-      expect(service.levelLabel('boundary')).toBe('Boundary');
+      // The legacy 'boundary' level key surfaces the engagement itself (renamed in f52c3f8).
+      expect(service.levelLabel('boundary')).toBe('Engagement');
       expect(service.levelLabel('task')).toBe('Task');
       expect(service.levelLabel('subtask')).toBe('SubTask');
     });
@@ -174,7 +177,7 @@ describe('EngagementHierarchyService', () => {
         { label: 'Task', level: 'task' as const, active: true },
       ];
 
-      const subtask = { id: 'st-1', name: 'Subtask 1' } as any;
+      const subtask = { id: 'st-1', name: 'Subtask 1' } as unknown as TaskExtended;
       const result = service.buildSubtaskBreadcrumbs(parent, subtask);
 
       expect(result).toHaveLength(3);

@@ -200,16 +200,195 @@
           }
         </mat-form-field>
 
-        <!-- employee_count (select from allowlist) -->
+        <!-- employee_count (select from 7 re-banded values per D-57) -->
         <mat-form-field>
           <mat-label>Employee Count</mat-label>
           <mat-select formControlName="employeeCount">
             <mat-option value="">-- please provide --</mat-option>
             <mat-option value="1-10">1-10</mat-option>
             <mat-option value="11-50">11-50</mat-option>
-            <mat-option value="51-200">51-200</mat-option>
-            <mat-option value="201-500">201-500</mat-option>
-            <mat-option value="500+">500+</mat-option>
+            <mat-option value="51-100">51-100</mat-option>
+            <mat-option value="101-500">101-500</mat-option>
+            <mat-option value="501-1000">501-1000</mat-option>
+            <mat-option value="1001-5000">1001-5000</mat-option>
+            <mat-option value="5000+">5000+</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- business_classification (select from 7 LOCKED values per D-57) -->
+        <mat-form-field>
+          <mat-label>Business Classification</mat-label>
+          <mat-select formControlName="businessClassification">
+            <mat-option value="">-- please provide --</mat-option>
+            @for (option of businessClassificationOptions; track option.key) {
+              <mat-option [value]="option.key">{{ option.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </fieldset>
+
+      <!-- Section: Insurance Coverage (corporate-profile) -->
+      <fieldset [formGroupName]="'insuranceCoverage'">
+        <legend>Insurance Coverage (Optional)</legend>
+        <mat-form-field>
+          <mat-label>Coverage Type</mat-label>
+          <input matInput formControlName="coverageType" placeholder="e.g., D&O, General Liability" />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Carrier Name</mat-label>
+          <input matInput formControlName="carrier" placeholder="Insurance company name" />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Policy Number</mat-label>
+          <input matInput formControlName="policyNumber" />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Coverage Amount</mat-label>
+          <input matInput formControlName="coverageAmount" type="number" />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Currency</mat-label>
+          <mat-select formControlName="currency">
+            <mat-option value="USD">USD</mat-option>
+            <mat-option value="EUR">EUR</mat-option>
+            <mat-option value="GBP">GBP</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Effective Date</mat-label>
+          <input matInput formControlName="effectiveDate" type="date" />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Expiration Date</mat-label>
+          <input matInput formControlName="expiresAt" type="date" />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Certificate URL</mat-label>
+          <input matInput formControlName="certificateUrl" type="url" />
+        </mat-form-field>
+      </fieldset>
+
+      <!-- Section: Client References (corporate-profile) -->
+      <fieldset [formGroupName]="'clientReference'">
+        <legend>Client Reference (Optional)</legend>
+        <mat-form-field>
+          <mat-label>Client Name</mat-label>
+          <input matInput formControlName="clientName" placeholder="Client organization name" />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Project Name</mat-label>
+          <input matInput formControlName="projectName" />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Contact Name</mat-label>
+          <input matInput formControlName="contactName" />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Contact Email</mat-label>
+          <input matInput formControlName="contactEmail" type="email" />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Contact Phone</mat-label>
+          <input matInput formControlName="contactPhone" type="tel" />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Relationship</mat-label>
+          <mat-select formControlName="relationship">
+            <mat-option value="vendor">Vendor</mat-option>
+            <mat-option value="partner">Partner</mat-option>
+            <mat-option value="contractor">Contractor</mat-option>
+            <mat-option value="consultant">Consultant</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Project Summary</mat-label>
+          <textarea matInput formControlName="summary" rows="3" placeholder="Case study or testimonial"></textarea>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Start Date</mat-label>
+          <input matInput formControlName="startDate" type="date" />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>End Date</mat-label>
+          <input matInput formControlName="endDate" type="date" />
+        </mat-form-field>
+      </fieldset>
+
+      <!-- Section: Personnel (corporate-profile) -->
+      <fieldset [formGroupName]="'personnel'">
+        <legend>Key Personnel (Optional)</legend>
+        <mat-form-field>
+          <mat-label>Full Name</mat-label>
+          <input matInput formControlName="fullName" />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Job Title</mat-label>
+          <input matInput formControlName="title" />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Specialization</mat-label>
+          <input matInput formControlName="specialization" />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Bio</mat-label>
+          <textarea matInput formControlName="bio" rows="3"></textarea>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Email</mat-label>
+          <input matInput formControlName="email" type="email" />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>LinkedIn URL</mat-label>
+          <input matInput formControlName="linkedinUrl" type="url" />
+        </mat-form-field>
+      </fieldset>
+
+      <!-- Section: Financial Profile (corporate-profile) -->
+      <fieldset [formGroupName]="'financialProfile'">
+        <legend>Financial Profile (Optional)</legend>
+        <mat-form-field>
+          <mat-label>Annual Revenue</mat-label>
+          <input matInput formControlName="annualRevenue" type="number" />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Revenue Currency</mat-label>
+          <mat-select formControlName="revenueCurrency">
+            <mat-option value="USD">USD</mat-option>
+            <mat-option value="EUR">EUR</mat-option>
+            <mat-option value="GBP">GBP</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Credit Score</mat-label>
+          <input matInput formControlName="creditScore" type="number" />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Credit Rating Agency</mat-label>
+          <input matInput formControlName="creditRatingAgency" placeholder="e.g., Dun & Bradstreet" />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Bank Name</mat-label>
+          <input matInput formControlName="bankName" />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>DUNS Number</mat-label>
+          <input matInput formControlName="dunsNumber" />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Year-End Month</mat-label>
+          <mat-select formControlName="yearEndMonth">
+            <mat-option value="January">January</mat-option>
+            <mat-option value="February">February</mat-option>
+            <mat-option value="March">March</mat-option>
+            <mat-option value="April">April</mat-option>
+            <mat-option value="May">May</mat-option>
+            <mat-option value="June">June</mat-option>
+            <mat-option value="July">July</mat-option>
+            <mat-option value="August">August</mat-option>
+            <mat-option value="September">September</mat-option>
+            <mat-option value="October">October</mat-option>
+            <mat-option value="November">November</mat-option>
+            <mat-option value="December">December</mat-option>
           </mat-select>
         </mat-form-field>
       </fieldset>
