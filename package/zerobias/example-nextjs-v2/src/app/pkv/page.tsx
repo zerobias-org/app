@@ -56,9 +56,11 @@ export default function PkvPage() {
 
     setSaving(true);
     try {
+      // A plain object literal — the `upsertPrincipalKeyValue(pkv: Pkv)` param types it, so the
+      // compiler enforces the model's fields (a missing/misnamed one is a build error).
       await api.danaClient
         .getPkvApi()
-        .upsertPrincipalKeyValue(new Pkv(key.trim(), parsed));
+        .upsertPrincipalKeyValue({ key: key.trim(), value: parsed });
       setKey("");
       setValue('{ "example": true }');
       await load();

@@ -26,23 +26,50 @@ export default function Home() {
 
   return (
     <div>
-      <h1>ZeroBias v2 Client Examples</h1>
-      <p className="subtitle">
-        Canonical patterns for building a custom app on the ZeroBias platform.
-        {user && (
-          <>
-            {" "}
-            Signed in as <strong>{user.name}</strong>
-            {org && (
-              <>
-                {" "}
-                in <strong>{org.name}</strong>
-              </>
-            )}
-            .
-          </>
-        )}
-      </p>
+      <section className="intro">
+        <h1>ZeroBias v2 — Next.js reference app</h1>
+        <p className="lead">
+          Built on <strong>Next.js</strong> (App Router, React) + the ZeroBias v2 client + SDKs. It
+          mirrors <code>example-angular-v2</code>: the{" "}
+          <strong>project → board → task</strong> surface, with read demos and code-reveal write
+          demos (which show the SDK call without ever issuing it).
+        </p>
+      </section>
+
+      <section className="session-card">
+        <div className="session-card-head">
+          <h2>Your session</h2>
+        </div>
+        <div className="session-card-body">
+          {user ? (
+            <>
+              <dl className="session-grid">
+                <div>
+                  <dt>Signed in as</dt>
+                  <dd>{user.name}</dd>
+                </div>
+                {user.emails?.length ? (
+                  <div>
+                    <dt>Email</dt>
+                    <dd>{String(user.emails[0])}</dd>
+                  </div>
+                ) : null}
+                <div>
+                  <dt>Organization</dt>
+                  <dd>{org?.name ?? "—"}</dd>
+                </div>
+              </dl>
+              <p className="session-hint">
+                The client bootstrapped on load and established this session (platform SSO when
+                deployed; an API key via the dev proxy locally). Every SDK call routes through{" "}
+                <code>useSession().api</code>.
+              </p>
+            </>
+          ) : (
+            <p className="session-hint">Resolving your session…</p>
+          )}
+        </div>
+      </section>
 
       <div className="app-cards">
         {DEMOS.map((d) => (

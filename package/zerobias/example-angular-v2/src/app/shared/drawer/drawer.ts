@@ -27,9 +27,9 @@ import { MatIconModule } from '@angular/material/icon';
   imports: [MatIconModule],
   template: `
     <div class="drawer-root" [class.open]="open()">
-      <aside class="drawer-panel" role="dialog" aria-modal="false" [attr.aria-label]="title()">
+      <aside class="drawer-panel" role="dialog" aria-modal="false" [attr.aria-label]="heading()">
         <header class="drawer-header">
-          <h2 class="drawer-title">{{ title() }}</h2>
+          <h2 class="drawer-title">{{ heading() }}</h2>
           <button type="button" class="drawer-close" (click)="close.emit()" aria-label="Close">
             <mat-icon>close</mat-icon>
           </button>
@@ -97,7 +97,13 @@ import { MatIconModule } from '@angular/material/icon';
 })
 export class Drawer {
   readonly open = input<boolean>(false);
-  readonly title = input<string>('');
+  /**
+   * The drawer's heading text (also its dialog aria-label). Named `heading`, NOT `title`, on
+   * purpose: `title` is a global HTML attribute, so an input named `title` bound statically
+   * (`<app-drawer title="…">`) ALSO lands on the host element as a real `title` attribute — which
+   * renders a native tooltip across the whole fixed-position drawer. `heading` avoids that collision.
+   */
+  readonly heading = input<string>('');
   readonly close = output<void>();
 
   @HostListener('document:keydown.escape')

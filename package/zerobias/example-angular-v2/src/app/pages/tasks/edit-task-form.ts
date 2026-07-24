@@ -103,7 +103,7 @@ export interface EditTaskBaseline {
       </div>
 
       <div class="form-code">
-        <app-call-reveal [call]="call()" [response]="exampleResponse" />
+        <app-call-reveal [call]="call()" [response]="exampleResponse" [responseType]="'TaskExtended'" />
       </div>
     </form>
   `,
