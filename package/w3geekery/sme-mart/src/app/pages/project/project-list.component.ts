@@ -32,7 +32,6 @@ const VIEW_PREF_KEY = 'sme-mart.project-list.viewMode';
   template: `
     <div class="project-list-page">
       <div class="project-list-header">
-        <h3>Projects</h3>
         <div class="project-list-controls">
           <mat-button-toggle-group
             [value]="projectTypeFilter()"
@@ -207,7 +206,7 @@ export class ProjectList implements OnInit {
       this.loading.set(true);
       // Get engagement ID from parent route (engagements/:id/projects)
       const engagementId = this.route.parent?.snapshot.params['id'];
-      const options: any = { pageSize: 100 };
+      const options: { pageSize: number; filters?: Record<string, string> } = { pageSize: 100 };
 
       // Apply projectType filter if set
       if (this.projectTypeFilter()) {

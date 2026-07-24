@@ -44,6 +44,23 @@ export const SME_MART_CLASS_IDS = {
 
   // Phase 16 — Form Builder
   FormSubmission: '179bd4b1-d1b1-5afc-99be-a5465a662ec6',
+
+  // Phase 33 — Provider expertise junctions (org-scoped; UUIDv5, env-stable UAT==prod; MCP-verified 2026-06-26)
+  ProviderSkill:          '91a32787-5d86-5d58-9143-152d1bc5dad2',
+  ProviderRole:           '6098fe68-f656-51fe-87d8-dde87b50efc6',
+  ProviderProduct:        '63cd2a00-1dc8-5152-9d36-eaf98abfa8ee',
+  ProviderFramework:      '47a4ce15-d87c-5eb7-b4ce-b5057da882be',
+  ProviderSegment:        '1b211929-39af-5d81-b205-3bf2c23d45d6',
+  ProviderServiceSegment: '5d698106-3a8a-530d-9060-52e1aa7ab134',  // matches D-56 anchor
+
+  // Phase 33 — Corporate-profile + classification typed classes (MCP-verified UAT==prod 2026-06-26)
+  OrgProfile:             '8001e339-2609-54ae-b407-9c2ab7ebf413',
+  Address:                'cce4037a-ed62-5aec-bcd3-cbc8afb0546d',
+  InsuranceCoverage:      '7b0b6b97-b99e-5267-9cf0-2dd3f5888997',
+  ClientReference:        '632ced7f-85d5-5f6e-9f99-8258001d14cc',
+  Personnel:              '23dd60e6-100d-5d65-bc09-af594215e27e',
+  FinancialProfile:       '5b4cba20-be1c-5747-b355-5ff18b7b76b5',
+  OrgSegment:             '780543c7-fbe5-5e8e-8bd5-5361689c1ce6',
 } as const;
 
 export type SmeMartClassName = keyof typeof SME_MART_CLASS_IDS;

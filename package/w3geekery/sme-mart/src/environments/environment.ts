@@ -22,8 +22,9 @@ export const environment = {
   boundaryId: 'c15fb2dc-4f8c-48b5-b27a-707bd516b005',
   // Feature flags
   featureFlags: {
-    /** User prefs backend: 'localStorage' (fast, no network) or 'pkv' (cross-device sync via ZB API).
-     *  Set to 'localStorage' while PKV returns 500 on UAT. Switch to 'pkv' when fixed. */
-    prefsBackend: 'localStorage' as 'localStorage' | 'pkv',
+    /** User prefs backend: 'localStorage' (fast, no network) or 'pkv' (cross-device sync via ZB API,
+     *  with localStorage fallback if PKV is unavailable).
+     *  PKV verified working on UAT/QA/prod 2026-05-22 (Andrey's env-var fix), so 'pkv' is the default. */
+    prefsBackend: 'pkv' as 'localStorage' | 'pkv',
   },
 };

@@ -1,3 +1,5 @@
+import { BusinessClassification, EMPLOYEE_COUNT_VALUES } from './company-info.model';
+
 export const SECTION_LEGAL_NAME = 'legal_name';
 export const SECTION_DBA = 'dba';
 export const SECTION_LOGO_URL = 'logo_url';
@@ -14,6 +16,7 @@ export const SECTION_HQ_LOCATION_COUNTRY = 'hq_location.country';
 export const SECTION_HQ_LOCATION_POSTAL_CODE = 'hq_location.postal_code';
 export const SECTION_YEARS_IN_BUSINESS = 'years_in_business';
 export const SECTION_EMPLOYEE_COUNT = 'employee_count';
+export const SECTION_BUSINESS_CLASSIFICATION = 'business_classification';
 
 // System section — written by Phase 28 save handler, read by Phase 27 routing guard
 export const SECTION_ONBOARDING_COMPLETE = 'onboarding_complete';
@@ -36,4 +39,24 @@ export const USER_FACING_SECTIONS = [
   SECTION_HQ_LOCATION_POSTAL_CODE,
   SECTION_YEARS_IN_BUSINESS,
   SECTION_EMPLOYEE_COUNT,
+  SECTION_BUSINESS_CLASSIFICATION,
 ] as const;
+
+/**
+ * businessClassification picklist — LOCKED 7 values per D-57
+ * Displayed in dropdown; key is the enum value, label is what appears to the user
+ */
+export const BUSINESS_CLASSIFICATION_OPTIONS = [
+  { key: BusinessClassification.NONPROFIT, label: 'Nonprofit / Not-for-profit' },
+  { key: BusinessClassification.GOVERNMENT, label: 'Government' },
+  { key: BusinessClassification.HOSPITAL_HEALTHCARE, label: 'Hospital/Healthcare Institution' },
+  { key: BusinessClassification.PUBLICLY_TRADED, label: 'Publicly-traded Company' },
+  { key: BusinessClassification.PE_BACKED, label: 'PE-backed Company' },
+  { key: BusinessClassification.PRIVATELY_HELD, label: 'Privately-held Company' },
+  { key: BusinessClassification.INDIVIDUAL_SOLE_PROPRIETOR, label: 'Individual / Sole Proprietor' },
+] as const;
+
+/**
+ * employeeCount picklist — 7 re-banded values per D-57
+ */
+export const EMPLOYEE_COUNT_OPTIONS = EMPLOYEE_COUNT_VALUES;

@@ -1,0 +1,36 @@
+:host {
+  display: block;
+  background-color: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+  padding: 24px 16px;
+  min-height: 100vh;
+}
+
+.page-title {
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--mat-sys-on-surface);
+  margin: 0 0 16px 0;
+  line-height: 1.2;
+}
+
+.page-description {
+  font-size: 0.875rem;
+  color: var(--mat-sys-on-surface-variant);
+  margin: 0 0 12px 0;
+  line-height: 1.5;
+  max-width: 600px;
+}
+
+.feature-code {
+  font-size: 0.75rem;
+  color: var(--mat-sys-outline);
+  margin-top: 16px;
+  opacity: 0.7;
+  font-family: monospace;
+}
+
+zb-empty-state-container {
+  // Delegate styling to ngx-library component.
+  // ZbEmptyStateContainerComponent applies its own Material theme via --mat-sys-* tokens.
+}

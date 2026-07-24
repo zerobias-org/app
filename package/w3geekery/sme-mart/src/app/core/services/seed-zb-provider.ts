@@ -18,6 +18,7 @@ export interface SeedSection {
 
 // Option-b distinguisher (Plan 26-01 DECISIONS.md): provider_type section identifies
 // platform providers. NO Object.tag, NO hardcoded orgId filter.
+// Phase 33 update: employeeCount re-banded to '101-500' (was '201-500'); businessClassification added
 export const SEED_SECTIONS: SeedSection[] = [
   { section: 'legal_name', data: 'ZeroBias' },
   { section: 'logo_url', data: 'https://zerobias.com/logo.png' },
@@ -28,7 +29,8 @@ export const SEED_SECTIONS: SeedSection[] = [
   },
   { section: 'website', data: 'https://zerobias.com' },
   { section: 'years_in_business', data: '10' },
-  { section: 'employee_count', data: '201-500' },
+  { section: 'employee_count', data: '101-500' },
+  { section: 'business_classification', data: 'PUBLICLY_TRADED' },
   { section: 'provider_type', data: 'platform' },
 ];
 

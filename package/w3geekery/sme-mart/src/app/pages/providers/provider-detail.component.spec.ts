@@ -6,40 +6,32 @@ import { ReviewsService } from '../../core/services/reviews.service';
 import { ActivatedRoute } from '@angular/router';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { of } from 'rxjs';
-import type { ProviderDetailRow } from '../../core/models';
+import type { ProviderDetailView, ExpertiseItem } from '../../core/models';
 
 const ZB_ORG = '57c741cf-a58e-5efc-bf2f-93c4f6cf76ec';
 
-function makeZbDetailProvider(overrides: Partial<ProviderDetailRow> = {}): ProviderDetailRow {
+function makeZbDetailProvider(overrides: Partial<ProviderDetailView> = {}): ProviderDetailView {
   return {
-    id: ZB_ORG,
-    user_id: null,
-    slug: 'zerobias',
-    zerobias_user_id: '',
-    zerobias_org_id: ZB_ORG,
-    display_name: 'ZeroBias',
-    headline: 'Cybersecurity & compliance automation',
-    about: 'ZeroBias is a platform for automating cybersecurity and compliance frameworks.',
-    avatar_url: 'https://zerobias.com/logo.png',
-    hourly_rate: null,
-    availability_status: null,
-    response_time: null,
-    total_jobs_completed: null,
-    total_earnings: null,
-    rating_average: null,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    user_email: null,
-    user_org_id: ZB_ORG,
-    skills: '[]',
-    roles: '[]',
-    products: '[]',
-    frameworks: '[]',
-    segments: '[]',
-    service_segments: '[]',
-    service_offerings: '[]',
-    reviews: '[]',
-    review_count: null,
+    id: 'profile-123',
+    orgId: ZB_ORG,
+    legalName: 'ZeroBias',
+    dba: null,
+    tagline: 'Cybersecurity & compliance automation',
+    shortDescription: 'Short description',
+    longDescription: 'ZeroBias is a platform for automating cybersecurity and compliance frameworks.',
+    website: 'https://zerobias.com',
+    logoUrl: 'https://zerobias.com/logo.png',
+    foundedYear: 2020,
+    employeeCount: '50-99',
+    businessClassification: 'SaaS',
+    verified: true,
+    skillCount: 5,
+    segments: [] as ExpertiseItem[],
+    serviceSegments: [] as ExpertiseItem[],
+    skills: [] as ExpertiseItem[],
+    roles: [] as ExpertiseItem[],
+    products: [] as ExpertiseItem[],
+    frameworks: [] as ExpertiseItem[],
     ...overrides,
   };
 }
@@ -93,17 +85,15 @@ describe('ProviderDetail', () => {
     fixture.detectChanges();
 
     const provider = component.provider();
-    expect(provider?.display_name).toBe('ZeroBias');
-    expect(provider?.headline).toBe('Cybersecurity & compliance automation');
-    expect(provider?.about).toBe('ZeroBias is a platform for automating cybersecurity and compliance frameworks.');
-    expect(provider?.avatar_url).toBe('https://zerobias.com/logo.png');
+    expect(provider?.legalName).toBe('ZeroBias');
+    expect(provider?.tagline).toBe('Cybersecurity & compliance automation');
+    expect(provider?.longDescription).toBe('ZeroBias is a platform for automating cybersecurity and compliance frameworks.');
+    expect(provider?.logoUrl).toBe('https://zerobias.com/logo.png');
   });
 
   it('renders gracefully with null reviews/skills/jobs', async () => {
     const zbDetail = makeZbDetailProvider({
-      reviews: '[]',
-      skills: '[]',
-      total_jobs_completed: null,
+      skills: [],
     });
     mockProviderService.getProvider.mockResolvedValue(zbDetail);
 
@@ -115,7 +105,7 @@ describe('ProviderDetail', () => {
       fixture.detectChanges();
     }).not.toThrow();
 
-    expect(component.provider()?.reviews).toBe('[]');
+    expect(component.provider()?.skills).toEqual([]);
     expect(component.reviews()).toEqual([]);
   });
 

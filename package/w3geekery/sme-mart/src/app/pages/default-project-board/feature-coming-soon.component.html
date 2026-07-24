@@ -1,0 +1,11 @@
+@if (comingSoonData(); as data) {
+  <zb-empty-state-container>
+    <h1 class="page-title">{{ data.title }}</h1>
+    <p class="page-description">{{ data.description }}</p>
+    <p class="feature-code">(Feature ID: {{ data.featureKey }})</p>
+  </zb-empty-state-container>
+} @else {
+  <zb-empty-state-container>
+    <h1 class="page-title">Loading...</h1>
+  </zb-empty-state-container>
+}

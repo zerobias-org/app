@@ -30,6 +30,10 @@ import { environment } from '../environments/environment';
 import { AppInitService } from './core/app-init.service';
 import { PlatformEngagementProvisioner } from './core/services/platform-engagement-provisioner.service';
 import { MarketplaceProfileService } from './core/services/marketplace-profile.service';
+import { PIN_STORAGE_TOKEN, type PinStorage } from './core/services/pin-storage.interface';
+import { LocalStoragePinStorage } from './core/services/pin-storage-local.service';
+import { PkvPinStorage } from './core/services/pin-storage-pkv.service';
+import { FeatureFlagsService } from './core/services/feature-flags.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -60,6 +64,15 @@ export const appConfig: ApplicationConfig = {
     // Onboarding services (guard dependencies)
     PlatformEngagementProvisioner,
     MarketplaceProfileService,
+
+    // Board pin-state storage — PKV-primary (cross-device) with localStorage fallback when
+    // prefsBackend='pkv'; localStorage-only otherwise. DI-only swap per D-Q10.
+    {
+      provide: PIN_STORAGE_TOKEN,
+      useFactory: (flags: FeatureFlagsService, pkv: PkvPinStorage, local: LocalStoragePinStorage): PinStorage =>
+        flags.get('prefsBackend') === 'pkv' ? pkv : local,
+      deps: [FeatureFlagsService, PkvPinStorage, LocalStoragePinStorage],
+    },
 
     // ngx-translate — required by ngx-library table components
     ...provideTranslateHttpLoader(),

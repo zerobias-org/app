@@ -1,114 +1,164 @@
-import { AvailabilityStatus, ProficiencyLevel } from './enums';
+import { ProficiencyLevel } from './enums';
 
-export interface ProviderProfile {
-  id: string;
-  user_id: string | null;
-  slug: string;
-  zerobias_user_id: string;
-  zerobias_org_id: string | null;
-  display_name: string;
-  headline: string | null;
-  about: string | null;
-  avatar_url: string | null;
-  hourly_rate: string | null;
-  availability_status: AvailabilityStatus | null;
-  response_time: string | null;
-  total_jobs_completed: number | null;
-  total_earnings: string | null;
-  rating_average: string | null;
-  created_at: string;
-  updated_at: string;
-}
+/**
+ * Phase 33 rewrite: org-scoped expertise junctions with Catalog FKs (no zerobias_ prefix)
+ * and verification provenance per D-53.
+ */
 
+// ProviderSkill: expertise junction (org-scoped)
 export interface ProviderSkill {
   id: string;
-  provider_id: string | null;
-  zerobias_skill_id: string;
-  skill_name: string;
-  proficiency_level: ProficiencyLevel | null;
-  years_experience: number | null;
-  verified: boolean;
+  orgId: string;                           // org-scoped (not provider_id)
+  skillId: string;                         // Catalog FK (not zerobias_skill_id)
+  proficiencyLevel: ProficiencyLevel | null;
+  yearsExperience: number | null;
+  verified: boolean;                       // per D-53: defaults false (asserted)
+  verificationSource: string | null;       // per D-53: defaults null
   created_at: string;
 }
 
+// ProviderRole: expertise junction (org-scoped)
 export interface ProviderRole {
   id: string;
-  provider_id: string | null;
-  zerobias_role_id: string;
-  role_name: string | null;
-  is_primary: boolean;
-  years_in_role: number | null;
+  orgId: string;
+  roleId: string;
+  isPrimary: boolean;
+  yearsInRole: number | null;
+  verified: boolean;
+  verificationSource: string | null;
   created_at: string;
 }
 
+// ProviderProduct: expertise junction (org-scoped)
 export interface ProviderProduct {
   id: string;
-  provider_id: string | null;
-  zerobias_product_id: string;
-  product_name: string | null;
-  proficiency_level: ProficiencyLevel | null;
-  years_experience: number | null;
+  orgId: string;
+  productId: string;
+  proficiencyLevel: ProficiencyLevel | null;
+  yearsExperience: number | null;
   certified: boolean;
-  certification_details: string | null;
+  certificationDetails: string | null;
+  verified: boolean;
+  verificationSource: string | null;
   created_at: string;
 }
 
+// ProviderFramework: expertise junction (org-scoped)
 export interface ProviderFramework {
   id: string;
-  provider_id: string | null;
-  zerobias_framework_id: string;
-  framework_name: string | null;
-  proficiency_level: ProficiencyLevel | null;
-  years_experience: number | null;
-  assessor_certified: boolean;
-  implementation_experience: boolean;
-  audit_experience: boolean;
+  orgId: string;
+  frameworkId: string;
+  proficiencyLevel: ProficiencyLevel | null;
+  yearsExperience: number | null;
+  assessorCertified: boolean;
+  implementationExperience: boolean;
+  auditExperience: boolean;
+  verified: boolean;
+  verificationSource: string | null;
   created_at: string;
 }
 
+// ProviderSegment: expertise junction — capability segment (org-scoped)
 export interface ProviderSegment {
   id: string;
-  provider_id: string | null;
-  zerobias_segment_id: string;
-  segment_name: string | null;
-  is_primary: boolean;
+  orgId: string;
+  segmentId: string;
+  isPrimary: boolean;
+  verified: boolean;
+  verificationSource: string | null;
   created_at: string;
 }
 
+// ProviderServiceSegment: expertise junction — service segment (org-scoped)
 export interface ProviderServiceSegment {
   id: string;
-  provider_id: string | null;
-  zerobias_service_segment_id: string;
-  service_segment_name: string | null;
-  is_primary: boolean;
+  orgId: string;
+  serviceSegmentId: string;
+  isPrimary: boolean;
+  verified: boolean;
+  verificationSource: string | null;
   created_at: string;
 }
 
-// VIEW model — v_provider_directory (consolidated read)
-export interface ProviderDirectoryRow extends ProviderProfile {
-  skills: string; // JSON array string — parse with JSON.parse()
-  roles: string;
-  products: string;
-  frameworks: string;
-  segments: string;
-  service_segments: string;
-  skill_count: number | null;
-  role_count: number | null;
-  service_count: number | null;
-  review_count: number | null;
+// OrgProfile: replaces ProviderProfile; 1:1 org record (per D-54, published schema 2.0.6)
+export interface OrgProfile {
+  id: string;
+  orgId: string;
+  legalName: string;
+  dba: string | null;
+  tagline: string | null;
+  shortDescription: string | null;
+  longDescription: string | null;
+  website: string | null;
+  logoUrl: string | null;
+  employeeCount: string | null;           // enum: re-banded in 2.0.6 per D-57
+  businessClassification: string | null;  // enum: 7 values per D-57
+  foundedYear: number | null;
+  primaryContactUserId: string | null;
+  verified: boolean;
+  verificationSource: string | null;
+  created_at: string;
 }
 
-// VIEW model — v_provider_detail (full profile)
-export interface ProviderDetailRow extends ProviderProfile {
-  user_email: string | null;
-  user_org_id: string | null;
-  skills: string;
-  roles: string;
-  products: string;
-  frameworks: string;
-  segments: string;
-  service_segments: string;
-  service_offerings: string;
-  reviews: string;
-  review_count: number | null;
+// OrgSegment: org classification segment (org-scoped, new in Phase 33)
+export interface OrgSegment {
+  id: string;
+  orgId: string;
+  segmentId: string;
+  isPrimary: boolean;
+  verified: boolean;
+  verificationSource: string | null;
+  created_at: string;
+}
+
+/**
+ * Display row for provider directory (list view).
+ * Exposes id/orgId for downstream callers.
+ */
+export interface ProviderDirectoryView {
+  id: string;
+  orgId: string;
+  legalName: string;
+  tagline: string | null;
+  logoUrl: string | null;
+  segmentCount: number;
+  skillCount: number;
+  verified: boolean;
+}
+
+/**
+ * Expertise item with resolved display name and verification status.
+ */
+export interface ExpertiseItem {
+  id: string;
+  name: string;
+  verified: boolean;
+  verificationSource: string | null;
+}
+
+/**
+ * Display row for provider detail (detail view).
+ * Exposes id/orgId + full expertise sections with resolved names.
+ */
+export interface ProviderDetailView {
+  id: string;
+  orgId: string;
+  legalName: string;
+  dba: string | null;
+  tagline: string | null;
+  shortDescription: string | null;
+  longDescription: string | null;
+  website: string | null;
+  logoUrl: string | null;
+  foundedYear: number | null;
+  employeeCount: string | null;
+  businessClassification: string | null;
+  verified: boolean;
+  skillCount: number;
+  segments: ExpertiseItem[];
+  serviceSegments: ExpertiseItem[];
+  skills: ExpertiseItem[];
+  roles: ExpertiseItem[];
+  products: ExpertiseItem[];
+  frameworks: ExpertiseItem[];
 }

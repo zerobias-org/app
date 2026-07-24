@@ -7,40 +7,21 @@ import { ActivatedRoute } from '@angular/router';
 import { signal, computed } from '@angular/core';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { of } from 'rxjs';
-import type { ProviderDirectoryRow } from '../../core/models';
+import type { ProviderDirectoryView } from '../../core/models';
 import { DEFAULT_ENABLED_FILTERS, DEFAULT_CATALOG_FILTERS } from '../../core/models';
 
 const ZB_ORG = '57c741cf-a58e-5efc-bf2f-93c4f6cf76ec';
 
-function makeZbProvider(overrides: Partial<ProviderDirectoryRow> = {}): ProviderDirectoryRow {
+function makeZbProvider(overrides: Partial<ProviderDirectoryView> = {}): ProviderDirectoryView {
   return {
-    id: ZB_ORG,
-    user_id: null,
-    slug: 'zerobias',
-    zerobias_user_id: '',
-    zerobias_org_id: ZB_ORG,
-    display_name: 'ZeroBias',
-    headline: 'Cybersecurity & compliance automation',
-    about: null,
-    avatar_url: 'https://cdn.example/zb.svg',
-    hourly_rate: null,
-    availability_status: null,
-    response_time: null,
-    total_jobs_completed: null,
-    total_earnings: null,
-    rating_average: null,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    skills: '[]',
-    roles: '[]',
-    products: '[]',
-    frameworks: '[]',
-    segments: '[]',
-    service_segments: '[]',
-    skill_count: null,
-    role_count: null,
-    service_count: null,
-    review_count: null,
+    id: 'provider-123',
+    orgId: ZB_ORG,
+    legalName: 'ZeroBias',
+    tagline: 'Cybersecurity & compliance automation',
+    logoUrl: 'https://cdn.example/zb.svg',
+    segmentCount: 0,
+    skillCount: 5,
+    verified: true,
     ...overrides,
   };
 }
@@ -112,7 +93,7 @@ describe('ProviderList', () => {
     fixture.detectChanges();
 
     expect(component.filteredProviders()).toContain(zbProvider);
-    expect(component.filteredProviders()[0].display_name).toBe('ZeroBias');
+    expect(component.filteredProviders()[0].legalName).toBe('ZeroBias');
   });
 
   it('shows loading state while loading() signal is true', () => {
@@ -131,11 +112,10 @@ describe('ProviderList', () => {
     expect(component.filteredProviders()).toEqual([]);
   });
 
-  it('does not crash when ProviderDirectoryRow has null rating/jobs/skills', async () => {
+  it('does not crash when ProviderDirectoryView has null optional fields', async () => {
     const zbProvider = makeZbProvider({
-      rating_average: null,
-      total_jobs_completed: null,
-      skills: '[]',
+      tagline: null,
+      logoUrl: null,
     });
     mockProviderService.listProviders.mockResolvedValue({ items: [zbProvider] });
 
@@ -148,7 +128,7 @@ describe('ProviderList', () => {
     }).not.toThrow();
 
     // Assert the computed filtered list handles nulls
-    expect(component.filteredProviders()[0].rating_average).toBeNull();
-    expect(component.filteredProviders()[0].total_jobs_completed).toBeNull();
+    expect(component.filteredProviders()[0].tagline).toBeNull();
+    expect(component.filteredProviders()[0].logoUrl).toBeNull();
   });
 });

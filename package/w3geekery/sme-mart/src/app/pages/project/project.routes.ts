@@ -4,6 +4,7 @@ import { ProjectOverviewTab } from './tabs/project-overview-tab.component';
 import { ProjectComingSoonTab } from './tabs/project-coming-soon-tab.component';
 import { ProjectPartiesTabComponent } from './tabs/project-parties-tab.component';
 import { ProjectInvitedVendorsTabComponent } from './tabs/project-invited-vendors-tab.component';
+import { ProjectBoardsTabComponent } from './tabs/project-boards-tab.component';
 
 /**
  * Top-level project routes.
@@ -16,7 +17,7 @@ export const PROJECT_ROUTES: Routes = [
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'overview' },
       { path: 'overview', component: ProjectOverviewTab },
-      { path: 'boards', component: ProjectComingSoonTab, data: { title: 'Boards' } },
+      { path: 'boards', component: ProjectBoardsTabComponent },
       { path: 'boards/:boardId', component: ProjectComingSoonTab, data: { title: 'Board' } },
       { path: 'prd', component: ProjectComingSoonTab, data: { title: 'PRD' } },
       { path: 'plan', component: ProjectComingSoonTab, data: { title: 'Plan' } },

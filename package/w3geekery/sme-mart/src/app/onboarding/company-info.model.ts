@@ -1,4 +1,23 @@
 /**
+ * businessClassification enum — 7 LOCKED values per D-57 (Director precision 2026-06-25)
+ */
+export enum BusinessClassification {
+  NONPROFIT = 'NONPROFIT',
+  GOVERNMENT = 'GOVERNMENT',
+  HOSPITAL_HEALTHCARE = 'HOSPITAL_HEALTHCARE',
+  PUBLICLY_TRADED = 'PUBLICLY_TRADED',
+  PE_BACKED = 'PE_BACKED',
+  PRIVATELY_HELD = 'PRIVATELY_HELD',
+  INDIVIDUAL_SOLE_PROPRIETOR = 'INDIVIDUAL_SOLE_PROPRIETOR',
+}
+
+/**
+ * employeeCount enum — 7 re-banded values per D-57 (published schema 2.0.6)
+ */
+export const EMPLOYEE_COUNT_VALUES = ['1-10', '11-50', '51-100', '101-500', '501-1000', '1001-5000', '5000+'] as const;
+export type EmployeeCountValue = typeof EMPLOYEE_COUNT_VALUES[number];
+
+/**
  * CompanyInfoStruct — the form's data model (struct-shaped, mirrors form bindings)
  * Uses camelCase field names for TypeScript/form binding convenience.
  */
@@ -6,23 +25,24 @@ export interface CompanyInfoStruct {
   legalName: string;           // required
   dba?: string;                // optional
   logoUrl?: string;            // optional, URL
-  shortBlurb?: string;         // optional, ≤ 500 chars
+  shortBlurb?: string;         // optional, ≤ 500 chars (maps to tagline)
   longDescription?: string;    // optional, ≤ 5000 chars
   primaryContact?: {
-    userId?: string;           // UUID
+    userId?: string;           // UUID (maps to primaryContactUserId)
     name?: string;
     email?: string;            // RFC5322
   };
   website?: string;            // optional, URL
   hqLocation?: {
-    street?: string;
+    street?: string;           // maps to street1
     city?: string;
-    state?: string;
+    state?: string;            // maps to region
     country?: string;
     postalCode?: string;
   };
-  yearsInBusiness?: number;    // optional, integer ≥ 0
-  employeeCount?: string;      // optional, one of: '1-10', '11-50', '51-200', '201-500', '500+'
+  yearsInBusiness?: number;    // optional, integer ≥ 0 (maps to foundedYear)
+  employeeCount?: EmployeeCountValue;      // optional, one of 7 re-banded values
+  businessClassification?: BusinessClassification;  // optional, one of 7 LOCKED values
 }
 
 /**

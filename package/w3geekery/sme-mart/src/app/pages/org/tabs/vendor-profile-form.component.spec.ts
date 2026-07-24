@@ -9,10 +9,11 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { vi } from 'vitest';
 import { VendorProfileForm } from './vendor-profile-form.component';
+import type { MarketplaceProfileItem } from '../../../core/models/marketplace-profile-item.model';
 
 describe('VendorProfileForm', () => {
-  let component: VendorProfileForm;
   let fixture: ComponentFixture<VendorProfileForm>;
+  let component: VendorProfileForm;
 
   const snackBarMock = {
     open: vi.fn(),
@@ -44,23 +45,72 @@ describe('VendorProfileForm', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should emit save event on form submit', () => {
-    // Implementation pending — Task 2
-  });
+  describe('Phase 31-B: legalEntityName pre-fill from orgName', () => {
+    it('pre-fills legalEntityName with orgName when create + corporate_identity', () => {
+      fixture.componentRef.setInput('mode', 'create');
+      fixture.componentRef.setInput('section', 'corporate_identity');
+      fixture.componentRef.setInput('orgName', 'Acme Corp');
+      fixture.detectChanges();
 
-  it('should emit close event on cancel', () => {
-    // Implementation pending — Task 2
-  });
+      const fg = component.form();
+      expect(fg).toBeTruthy();
+      expect(fg!.get('legalEntityName')?.value).toBe('Acme Corp');
+    });
 
-  it('should pre-fill form in edit mode', () => {
-    // Implementation pending — Task 2
-  });
+    it('does NOT overwrite legalEntityName from item.data when mode=edit', () => {
+      const item: MarketplaceProfileItem = {
+        id: 'item-1',
+        org_id: 'org-1',
+        section: 'corporate_identity',
+        name: 'Existing Entry',
+        description: '',
+        data: JSON.stringify({
+          legalEntityName: 'Existing LLC',
+          businessType: '',
+          foundedYear: 0,
+          yearsInBusiness: 0,
+          certifications: [],
+          numberOfEmployees: 0,
+        }),
+        status: 'active',
+        expires_at: null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      } as MarketplaceProfileItem;
 
-  it('should validate section-specific required fields', () => {
-    // Implementation pending — Task 2
-  });
+      fixture.componentRef.setInput('mode', 'edit');
+      fixture.componentRef.setInput('section', 'corporate_identity');
+      fixture.componentRef.setInput('orgName', 'Acme Corp');
+      fixture.componentRef.setInput('item', item);
+      fixture.detectChanges();
 
-  it('should show renewal notice when editing expired item', () => {
-    // Implementation pending — Task 5
+      const fg = component.form();
+      expect(fg).toBeTruthy();
+      expect(fg!.get('legalEntityName')?.value).toBe('Existing LLC');
+    });
+
+    it('orgName has no effect when section is not corporate_identity', () => {
+      fixture.componentRef.setInput('mode', 'create');
+      fixture.componentRef.setInput('section', 'attestation');
+      fixture.componentRef.setInput('orgName', 'Acme Corp');
+      fixture.detectChanges();
+
+      const fg = component.form();
+      expect(fg).toBeTruthy();
+      // attestation form has no legalEntityName control at all.
+      expect(fg!.get('legalEntityName')).toBeNull();
+      // serviceType is empty as before.
+      expect(fg!.get('serviceType')?.value).toBe('');
+    });
+
+    it('legalEntityName is empty when orgName is "" in create mode', () => {
+      fixture.componentRef.setInput('mode', 'create');
+      fixture.componentRef.setInput('section', 'corporate_identity');
+      fixture.componentRef.setInput('orgName', '');
+      fixture.detectChanges();
+
+      const fg = component.form();
+      expect(fg!.get('legalEntityName')?.value).toBe('');
+    });
   });
 });

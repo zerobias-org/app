@@ -1,0 +1,19 @@
+@if (boards().length > 1) {
+  <div class="board-switcher">
+    <button mat-button [matMenuTriggerFor]="boardMenu" aria-label="Switch board">
+      <span>{{ currentBoardName() }}</span>
+      <mat-icon>expand_more</mat-icon>
+    </button>
+    <mat-menu #boardMenu="matMenu">
+      @for (board of boards(); track board.id) {
+        <button
+          mat-menu-item
+          [attr.aria-current]="board.id === selectedBoardId() ? 'page' : null"
+          (click)="onBoardSelect(board.id)"
+        >
+          {{ board.name }}
+        </button>
+      }
+    </mat-menu>
+  </div>
+}

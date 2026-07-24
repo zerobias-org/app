@@ -7,7 +7,7 @@ import { ZbSearchInputComponent, ZbEmptyStateContainerComponent } from '@zerobia
 import { ProviderCard } from '../../shared/components/provider-card/provider-card.component';
 import { ProviderProfilesService } from '../../core/services/provider-profiles.service';
 import { CategoriesService } from '../../core/services/categories.service';
-import type { ProviderDirectoryRow, Category } from '../../core/models';
+import type { Category } from '../../core/models';
 
 @Component({
   selector: 'app-home',
@@ -30,7 +30,7 @@ export class Home implements OnInit {
   private readonly categoriesService = inject(CategoriesService);
 
   readonly loading = signal(true);
-  readonly featuredProviders = signal<ProviderDirectoryRow[]>([]);
+  readonly featuredProviders = signal<Array<{ id: string }>>([]);
   readonly categories = signal<Category[]>([]);
 
   readonly categoryIcons: Record<string, string> = {
@@ -46,8 +46,8 @@ export class Home implements OnInit {
 
   async ngOnInit() {
     try {
-      const [providers, cats] = await Promise.all([
-        this.providerProfiles.listProviders({ pageSize: 6 }),
+      const [providers] = await Promise.all([
+        this.providerProfiles.listProviders(undefined, 6),
         this.categoriesService.loadCategories(),
       ]);
       this.featuredProviders.set(providers.items || []);

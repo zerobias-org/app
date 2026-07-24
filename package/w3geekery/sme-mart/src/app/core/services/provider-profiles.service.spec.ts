@@ -59,28 +59,45 @@ describe('ProviderProfilesService — MPI/GQL read path', () => {
   // Test 1: listProviders() groups MPI rows by orgId and projects to ProviderDirectoryRow
   // ──────────────────────────────────────────────────────────────────
 
-  it('listProviders() groups MPI rows by orgId and projects to ProviderDirectoryRow', async () => {
-    // Mock MPI data for ZeroBias
-    const mpiSeed = (section: string, data: string) => ({
-      id: `mpi-${ZB_ORG}-${section}`,
-      orgId: ZB_ORG,
-      section,
-      data,
-      status: 'active',
-    });
+  it('listProviders() groups MPI rows by orgId and projects to ProviderDirectoryView', async () => {
+    // Mock OrgProfile data for ZeroBias
+    const profileId = '57c741cf-a58e-5efc-bf2f-93c4f6cf76ec';
 
-    mockBoundaryApi.boundaryExecuteRawQuery.mockResolvedValue({
+    mockBoundaryApi.boundaryExecuteRawQuery.mockResolvedValueOnce({
       data: {
-        MarketplaceProfileItem: [
-          mpiSeed('legal_name', 'ZeroBias'),
-          mpiSeed('short_blurb', 'Cybersecurity & compliance automation'),
-          mpiSeed('long_description', 'Long-form description here'),
-          mpiSeed('logo_url', 'https://cdn.example/zb.svg'),
-          mpiSeed('website', 'https://zerobias.com'),
-          mpiSeed('provider_type', 'platform'),
+        OrgProfile: [
+          {
+            id: profileId,
+            orgId: ZB_ORG,
+            legalName: 'ZeroBias',
+            dba: null,
+            tagline: 'Cybersecurity & compliance automation',
+            shortDescription: 'Short description here',
+            longDescription: 'Long-form description here',
+            website: 'https://zerobias.com',
+            logoUrl: 'https://cdn.example/zb.svg',
+            employeeCount: '50-99',
+            businessClassification: 'SaaS',
+            foundedYear: 2020,
+            primaryContactUserId: 'user-123',
+            verified: true,
+            verificationSource: 'admin',
+            created_at: '2024-01-01T00:00:00Z',
+          },
         ],
       },
-      gqlCount: { MarketplaceProfileItem: 6 },
+    });
+
+    // Mock expertise junction queries (segments, skills, etc.)
+    mockBoundaryApi.boundaryExecuteRawQuery.mockResolvedValue({
+      data: {
+        ProviderSkill: [],
+        ProviderRole: [],
+        ProviderProduct: [],
+        ProviderFramework: [],
+        ProviderSegment: [],
+        ProviderServiceSegment: [],
+      },
     });
 
     const result = await service.listProviders();
@@ -88,163 +105,216 @@ describe('ProviderProfilesService — MPI/GQL read path', () => {
     // Assert boundaryExecuteRawQuery was called
     expect(mockBoundaryApi.boundaryExecuteRawQuery).toHaveBeenCalled();
 
-    // Assert the returned item matches MPI projections
+    // Assert the returned item matches OrgProfile projections
     expect(result.items.length).toBeGreaterThan(0);
     const item = result.items[0];
-    expect(item.zerobias_org_id).toBe(ZB_ORG);
-    expect(item.display_name).toBe('ZeroBias');
-    expect(item.headline).toBe('Cybersecurity & compliance automation');
-    expect(item.avatar_url).toBe('https://cdn.example/zb.svg');
+    expect(item.orgId).toBe(ZB_ORG);
+    expect(item.legalName).toBe('ZeroBias');
+    expect(item.tagline).toBe('Cybersecurity & compliance automation');
+    expect(item.logoUrl).toBe('https://cdn.example/zb.svg');
 
-    // Assert MPI-only fields are null/empty
-    expect(item.rating_average).toBeNull();
-    expect(item.total_jobs_completed).toBeNull();
-    expect(item.skills).toBe('[]');
+    // Assert verification fields are present
+    expect(item.verified).toBe(true);
   });
 
   // ──────────────────────────────────────────────────────────────────
   // Test 2: listProviders() filters by provider_type=platform
   // ──────────────────────────────────────────────────────────────────
 
-  it('listProviders() filters by provider_type=platform (option-b locked decision)', async () => {
-    const mpiSeed = (orgId: string, section: string, data: string) => ({
-      id: `mpi-${orgId}-${section}`,
-      orgId,
-      section,
-      data,
-      status: 'active',
-    });
+  it('listProviders() returns multiple OrgProfile records', async () => {
+    const profileId = '57c741cf-a58e-5efc-bf2f-93c4f6cf76ec';
 
-    const zbOrgId = ZB_ORG;
-
-    // The service makes two queries: first to find provider_type=platform orgs,
-    // then to fetch all sections for those orgs.
-    // Both calls go through the same mock, so we use sequential returns.
     mockBoundaryApi.boundaryExecuteRawQuery.mockResolvedValueOnce({
       data: {
-        MarketplaceProfileItem: [
-          mpiSeed(zbOrgId, 'provider_type', 'platform'),
+        OrgProfile: [
+          {
+            id: profileId,
+            orgId: ZB_ORG,
+            legalName: 'ZeroBias',
+            dba: null,
+            tagline: 'Platform',
+            shortDescription: 'Platform description',
+            longDescription: null,
+            website: 'https://zerobias.com',
+            logoUrl: null,
+            employeeCount: null,
+            businessClassification: null,
+            foundedYear: null,
+            primaryContactUserId: null,
+            verified: false,
+            verificationSource: null,
+            created_at: '2024-01-01T00:00:00Z',
+          },
         ],
       },
-      gqlCount: { MarketplaceProfileItem: 1 },
     });
 
-    // Second call: fetch all sections for platform orgs
-    mockBoundaryApi.boundaryExecuteRawQuery.mockResolvedValueOnce({
+    // Mock expertise junctions (segments, skills, etc.)
+    mockBoundaryApi.boundaryExecuteRawQuery.mockResolvedValue({
       data: {
-        MarketplaceProfileItem: [
-          mpiSeed(zbOrgId, 'legal_name', 'ZeroBias'),
-          mpiSeed(zbOrgId, 'short_blurb', 'Platform'),
-          mpiSeed(zbOrgId, 'provider_type', 'platform'),
-        ],
+        ProviderSkill: [],
+        ProviderRole: [],
+        ProviderProduct: [],
+        ProviderFramework: [],
+        ProviderSegment: [],
+        ProviderServiceSegment: [],
       },
-      gqlCount: { MarketplaceProfileItem: 3 },
     });
 
     const result = await service.listProviders();
 
-    // Assert only ZB (platform provider) is returned
-    expect(result.items.length).toBe(1);
-    expect(result.items[0].zerobias_org_id).toBe(zbOrgId);
-    expect(result.items[0].display_name).toBe('ZeroBias');
+    // Assert OrgProfile records are returned
+    expect(result.items.length).toBeGreaterThan(0);
+    expect(result.items[0].orgId).toBe(ZB_ORG);
+    expect(result.items[0].legalName).toBe('ZeroBias');
   });
 
   // ──────────────────────────────────────────────────────────────────
   // Test 3: getProvider(orgId) returns ProviderDetailRow with all sections
   // ──────────────────────────────────────────────────────────────────
 
-  it('getProvider(orgId) returns ProviderDetailRow with all sections projected', async () => {
-    const mpiSeed = (section: string, data: string) => ({
-      id: `mpi-${ZB_ORG}-${section}`,
-      orgId: ZB_ORG,
-      section,
-      data,
-      status: 'active',
-    });
+  it('getProvider(orgId) returns ProviderDetailView with expertise sections', async () => {
+    const profileId = '57c741cf-a58e-5efc-bf2f-93c4f6cf76ec';
 
-    mockBoundaryApi.boundaryExecuteRawQuery.mockResolvedValue({
+    mockBoundaryApi.boundaryExecuteRawQuery.mockResolvedValueOnce({
       data: {
-        MarketplaceProfileItem: [
-          mpiSeed('legal_name', 'ZeroBias'),
-          mpiSeed('short_blurb', 'Cybersecurity & compliance automation'),
-          mpiSeed('long_description', 'Long-form about ZB'),
-          mpiSeed('logo_url', 'https://cdn.example/zb.svg'),
-          mpiSeed('website', 'https://zerobias.com'),
-          mpiSeed('provider_type', 'platform'),
+        OrgProfile: [
+          {
+            id: profileId,
+            orgId: ZB_ORG,
+            legalName: 'ZeroBias',
+            dba: null,
+            tagline: 'Cybersecurity & compliance automation',
+            shortDescription: 'Short description',
+            longDescription: 'Long-form about ZB',
+            website: 'https://zerobias.com',
+            logoUrl: 'https://cdn.example/zb.svg',
+            employeeCount: '100-500',
+            businessClassification: 'SaaS',
+            foundedYear: 2020,
+            primaryContactUserId: 'user-123',
+            verified: true,
+            verificationSource: 'admin',
+            created_at: '2024-01-01T00:00:00Z',
+          },
         ],
       },
-      gqlCount: { MarketplaceProfileItem: 6 },
+    });
+
+    // Mock expertise junctions
+    mockBoundaryApi.boundaryExecuteRawQuery.mockResolvedValue({
+      data: {
+        ProviderSkill: [],
+        ProviderRole: [],
+        ProviderProduct: [],
+        ProviderFramework: [],
+        ProviderSegment: [],
+        ProviderServiceSegment: [],
+      },
     });
 
     const result = await service.getProvider(ZB_ORG);
 
     expect(result).not.toBeNull();
-    expect(result?.display_name).toBe('ZeroBias');
-    expect(result?.headline).toBe('Cybersecurity & compliance automation');
-    expect(result?.about).toBe('Long-form about ZB');
-    expect(result?.avatar_url).toBe('https://cdn.example/zb.svg');
-    expect(result?.reviews).toBe('[]');
-    expect(result?.service_offerings).toBe('[]');
-    expect(result?.review_count).toBeNull();
+    expect(result?.legalName).toBe('ZeroBias');
+    expect(result?.tagline).toBe('Cybersecurity & compliance automation');
+    expect(result?.longDescription).toBe('Long-form about ZB');
+    expect(result?.logoUrl).toBe('https://cdn.example/zb.svg');
+    expect(result?.skills).toEqual([]);
+    expect(result?.verified).toBe(true);
   });
 
   // ──────────────────────────────────────────────────────────────────
   // Test 4: getProviderByUserId(userId) finds org via primary_contact.user_id
   // ──────────────────────────────────────────────────────────────────
 
-  it('getProviderByUserId(userId) finds org via primary_contact.user_id section', async () => {
+  it('getProviderByUserId(userId) finds org via primaryContactUserId', async () => {
     const testUserId = 'user-123';
+    const profileId = '57c741cf-a58e-5efc-bf2f-93c4f6cf76ec';
 
-    const mpiSeed = (section: string, data: string) => ({
-      id: `mpi-${ZB_ORG}-${section}`,
-      orgId: ZB_ORG,
-      section,
-      data,
-      status: 'active',
-    });
-
-    // First call: search for primary_contact.user_id matching the test user
+    // First call: search for org with matching primaryContactUserId
     mockBoundaryApi.boundaryExecuteRawQuery.mockResolvedValueOnce({
       data: {
-        MarketplaceProfileItem: [
-          mpiSeed('primary_contact.user_id', testUserId),
+        OrgProfile: [
+          {
+            id: profileId,
+            orgId: ZB_ORG,
+            legalName: '',
+            dba: null,
+            tagline: null,
+            shortDescription: null,
+            longDescription: null,
+            website: null,
+            logoUrl: null,
+            employeeCount: null,
+            businessClassification: null,
+            foundedYear: null,
+            primaryContactUserId: testUserId,
+            verified: false,
+            verificationSource: null,
+            created_at: '2024-01-01T00:00:00Z',
+          },
         ],
       },
-      gqlCount: { MarketplaceProfileItem: 1 },
     });
 
-    // Second call: fetch all sections for that org
+    // Second call: fetch full profile for that org
     mockBoundaryApi.boundaryExecuteRawQuery.mockResolvedValueOnce({
       data: {
-        MarketplaceProfileItem: [
-          mpiSeed('legal_name', 'ZeroBias'),
-          mpiSeed('short_blurb', 'Platform'),
-          mpiSeed('primary_contact.user_id', testUserId),
+        OrgProfile: [
+          {
+            id: profileId,
+            orgId: ZB_ORG,
+            legalName: 'ZeroBias',
+            dba: null,
+            tagline: 'Platform',
+            shortDescription: null,
+            longDescription: null,
+            website: null,
+            logoUrl: null,
+            employeeCount: null,
+            businessClassification: null,
+            foundedYear: null,
+            primaryContactUserId: testUserId,
+            verified: false,
+            verificationSource: null,
+            created_at: '2024-01-01T00:00:00Z',
+          },
         ],
       },
-      gqlCount: { MarketplaceProfileItem: 3 },
+    });
+
+    // Mock expertise junctions
+    mockBoundaryApi.boundaryExecuteRawQuery.mockResolvedValue({
+      data: {
+        ProviderSkill: [],
+        ProviderRole: [],
+        ProviderProduct: [],
+        ProviderFramework: [],
+        ProviderSegment: [],
+        ProviderServiceSegment: [],
+      },
     });
 
     const result = await service.getProviderByUserId(testUserId);
 
     expect(result).not.toBeNull();
-    expect(result?.display_name).toBe('ZeroBias');
-    expect(result?.zerobias_org_id).toBe(ZB_ORG);
+    expect(result?.legalName).toBe('ZeroBias');
+    expect(result?.orgId).toBe(ZB_ORG);
   });
 
   // ──────────────────────────────────────────────────────────────────
   // Test 4b: getProviderByUserId returns null when user-id section is absent
   // ──────────────────────────────────────────────────────────────────
 
-  it('getProviderByUserId returns null cleanly when user-id section is absent', async () => {
+  it('getProviderByUserId returns null when no org found for user', async () => {
     const testUserId = 'nonexistent-user';
 
     // Mock query returns empty result (user not found)
     mockBoundaryApi.boundaryExecuteRawQuery.mockResolvedValue({
       data: {
-        MarketplaceProfileItem: [],
+        OrgProfile: [],
       },
-      gqlCount: { MarketplaceProfileItem: 0 },
     });
 
     const result = await service.getProviderByUserId(testUserId);
@@ -256,53 +326,95 @@ describe('ProviderProfilesService — MPI/GQL read path', () => {
   // Test 5: searchProviders(filter, options) passes filter through to boundary query
   // ──────────────────────────────────────────────────────────────────
 
-  it('searchProviders(filter, options) passes the filter through to the boundary query', async () => {
-    const mpiSeed = (section: string, data: string) => ({
-      id: `mpi-${ZB_ORG}-${section}`,
-      orgId: ZB_ORG,
-      section,
-      data,
-      status: 'active',
-    });
+  it('searchProviders(query) filters results by legalName/tagline', async () => {
+    const profileId = '57c741cf-a58e-5efc-bf2f-93c4f6cf76ec';
 
-    mockBoundaryApi.boundaryExecuteRawQuery.mockResolvedValue({
+    mockBoundaryApi.boundaryExecuteRawQuery.mockResolvedValueOnce({
       data: {
-        MarketplaceProfileItem: [
-          mpiSeed('legal_name', 'ZeroBias'),
-          mpiSeed('provider_type', 'platform'),
+        OrgProfile: [
+          {
+            id: profileId,
+            orgId: ZB_ORG,
+            legalName: 'ZeroBias',
+            dba: null,
+            tagline: 'Zero Trust Platform',
+            shortDescription: null,
+            longDescription: null,
+            website: null,
+            logoUrl: null,
+            employeeCount: null,
+            businessClassification: null,
+            foundedYear: null,
+            primaryContactUserId: null,
+            verified: false,
+            verificationSource: null,
+            created_at: '2024-01-01T00:00:00Z',
+          },
         ],
       },
-      gqlCount: { MarketplaceProfileItem: 2 },
+    });
+
+    // Mock expertise junctions
+    mockBoundaryApi.boundaryExecuteRawQuery.mockResolvedValue({
+      data: {
+        ProviderSkill: [],
+        ProviderRole: [],
+        ProviderProduct: [],
+        ProviderFramework: [],
+        ProviderSegment: [],
+        ProviderServiceSegment: [],
+      },
     });
 
     const result = await service.searchProviders('Zero');
 
     expect(mockBoundaryApi.boundaryExecuteRawQuery).toHaveBeenCalled();
     // Result should contain ZB (matches "Zero" filter)
-    expect(result.items.some(p => p.display_name.includes('Zero'))).toBe(true);
+    expect(result.items.some(p => p.legalName.includes('Zero'))).toBe(true);
   });
 
   // ──────────────────────────────────────────────────────────────────
   // Test 6: listProviders() does NOT call SmeMartDbService.listRows
   // ──────────────────────────────────────────────────────────────────
 
-  it('listProviders() does NOT call SmeMartDbService.listRows (negative-shape contract)', async () => {
-    const mpiSeed = (section: string, data: string) => ({
-      id: `mpi-${ZB_ORG}-${section}`,
-      orgId: ZB_ORG,
-      section,
-      data,
-      status: 'active',
-    });
+  it('listProviders() does NOT call SmeMartDbService.listRows (uses GQL only)', async () => {
+    const profileId = '57c741cf-a58e-5efc-bf2f-93c4f6cf76ec';
 
-    mockBoundaryApi.boundaryExecuteRawQuery.mockResolvedValue({
+    mockBoundaryApi.boundaryExecuteRawQuery.mockResolvedValueOnce({
       data: {
-        MarketplaceProfileItem: [
-          mpiSeed('legal_name', 'ZeroBias'),
-          mpiSeed('provider_type', 'platform'),
+        OrgProfile: [
+          {
+            id: profileId,
+            orgId: ZB_ORG,
+            legalName: 'ZeroBias',
+            dba: null,
+            tagline: 'Platform',
+            shortDescription: null,
+            longDescription: null,
+            website: null,
+            logoUrl: null,
+            employeeCount: null,
+            businessClassification: null,
+            foundedYear: null,
+            primaryContactUserId: null,
+            verified: false,
+            verificationSource: null,
+            created_at: '2024-01-01T00:00:00Z',
+          },
         ],
       },
-      gqlCount: { MarketplaceProfileItem: 2 },
+    });
+
+    // Mock expertise junctions
+    mockBoundaryApi.boundaryExecuteRawQuery.mockResolvedValue({
+      data: {
+        ProviderSkill: [],
+        ProviderRole: [],
+        ProviderProduct: [],
+        ProviderFramework: [],
+        ProviderSegment: [],
+        ProviderServiceSegment: [],
+      },
     });
 
     await service.listProviders();
@@ -315,23 +427,44 @@ describe('ProviderProfilesService — MPI/GQL read path', () => {
   // Test 7: getProvider() does NOT read from v_provider_directory or v_provider_detail
   // ──────────────────────────────────────────────────────────────────
 
-  it('getProvider() does NOT read from Neon views (negative-shape contract)', async () => {
-    const mpiSeed = (section: string, data: string) => ({
-      id: `mpi-${ZB_ORG}-${section}`,
-      orgId: ZB_ORG,
-      section,
-      data,
-      status: 'active',
-    });
+  it('getProvider() uses GQL only (no Neon views)', async () => {
+    const profileId = '57c741cf-a58e-5efc-bf2f-93c4f6cf76ec';
 
-    mockBoundaryApi.boundaryExecuteRawQuery.mockResolvedValue({
+    mockBoundaryApi.boundaryExecuteRawQuery.mockResolvedValueOnce({
       data: {
-        MarketplaceProfileItem: [
-          mpiSeed('legal_name', 'ZeroBias'),
-          mpiSeed('long_description', 'About ZB'),
+        OrgProfile: [
+          {
+            id: profileId,
+            orgId: ZB_ORG,
+            legalName: 'ZeroBias',
+            dba: null,
+            tagline: 'Platform',
+            shortDescription: 'About ZB',
+            longDescription: null,
+            website: null,
+            logoUrl: null,
+            employeeCount: null,
+            businessClassification: null,
+            foundedYear: null,
+            primaryContactUserId: null,
+            verified: false,
+            verificationSource: null,
+            created_at: '2024-01-01T00:00:00Z',
+          },
         ],
       },
-      gqlCount: { MarketplaceProfileItem: 2 },
+    });
+
+    // Mock expertise junctions
+    mockBoundaryApi.boundaryExecuteRawQuery.mockResolvedValue({
+      data: {
+        ProviderSkill: [],
+        ProviderRole: [],
+        ProviderProduct: [],
+        ProviderFramework: [],
+        ProviderSegment: [],
+        ProviderServiceSegment: [],
+      },
     });
 
     await service.getProvider(ZB_ORG);

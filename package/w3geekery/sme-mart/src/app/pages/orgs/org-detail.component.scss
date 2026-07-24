@@ -64,103 +64,59 @@
   padding: 16px 0;
 }
 
-/* Info Rows */
+/* Info List (definition list inside Org Information panel) */
+.info-list {
+  margin: 0;
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  column-gap: 16px;
+  row-gap: 4px;
+  align-items: baseline;
+}
+
 .info-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--mat-sys-outline, #eee);
+  display: contents;
 
-  &:last-child {
-    border-bottom: none;
-  }
-
-  label {
+  dt {
     font-weight: 500;
-    color: var(--mat-sys-on-surface, #000);
-    min-width: 120px;
+    color: var(--mat-sys-on-surface);
+    padding: 8px 0;
   }
 
-  span {
-    color: var(--mat-sys-on-surface-variant, #666);
-    text-align: right;
-    flex: 1;
-    margin-left: 12px;
-  }
-
-  .id-text {
-    font-family: monospace;
-    font-size: 12px;
-  }
-}
-
-/* Members List */
-.members-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.member-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--mat-sys-outline, #eee);
-
-  &:last-child {
-    border-bottom: none;
-  }
-
-  .role-badge {
-    font-size: 12px;
-    padding: 2px 8px;
-    background-color: var(--mat-sys-surface-variant, #f5f5f5);
-    border-radius: 12px;
-    color: var(--mat-sys-on-surface-variant, #666);
-    margin-left: 8px;
-    flex-shrink: 0;
-  }
-}
-
-/* Groups List */
-.groups-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.group-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--mat-sys-outline, #eee);
-
-  &:last-child {
-    border-bottom: none;
-  }
-
-  .group-info {
-    flex: 1;
-  }
-
-  .group-name {
+  dd {
     margin: 0;
-    font-size: 14px;
-    font-weight: 500;
+    color: var(--mat-sys-on-surface-variant);
+    padding: 8px 0;
   }
+}
 
-  .member-count-badge {
-    font-size: 12px;
-    padding: 4px 8px;
-    background-color: var(--mat-sys-surface-variant, #f5f5f5);
-    border-radius: 12px;
-    color: var(--mat-sys-on-surface-variant, #666);
-    margin-left: 8px;
-    flex-shrink: 0;
+/* Generic row list (Members + Groups) */
+.row-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.row-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--mat-sys-outline);
+
+  &:last-child {
+    border-bottom: none;
   }
+}
+
+.row-chip {
+  font-size: 12px;
+  padding: 2px 8px;
+  background-color: var(--mat-sys-surface-variant);
+  border-radius: 12px;
+  color: var(--mat-sys-on-surface-variant);
+  flex-shrink: 0;
 }
 
 /* Projects Container */

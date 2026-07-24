@@ -75,27 +75,6 @@
               ],
               "outputHashing": "all"
             },
-            "vercel": {
-              "fileReplacements": [
-                {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.vercel.ts"
-                }
-              ],
-              "budgets": [
-                {
-                  "type": "initial",
-                  "maximumWarning": "30MB",
-                  "maximumError": "50MB"
-                },
-                {
-                  "type": "anyComponentStyle",
-                  "maximumWarning": "16kB",
-                  "maximumError": "32kB"
-                }
-              ],
-              "outputHashing": "all"
-            },
             "uat": {
               "fileReplacements": [
                 {

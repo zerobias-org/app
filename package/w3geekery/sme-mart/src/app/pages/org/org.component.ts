@@ -65,13 +65,13 @@ export class OrgPage implements OnInit, OnDestroy {
   readonly orgName = signal('Organization');
 
   readonly tabs: OrgTab[] = [
-    { label: 'Documents', icon: 'folder', path: 'documents' },
-    { label: 'Templates', icon: 'description', path: 'templates' },
+    { label: 'Corporate Profile', icon: 'business', path: 'profile' },
     { label: 'Engagements', icon: 'work', path: 'engagements' },
     { label: 'Projects', icon: 'assignment', path: 'projects' },
+    { label: 'Documents', icon: 'folder', path: 'documents' },
     { label: 'Members', icon: 'people', path: 'members' },
+    { label: 'Templates', icon: 'description', path: 'templates' },
     { label: 'Settings', icon: 'settings', path: 'settings' },
-    { label: 'Corporate Profile', icon: 'business', path: 'profile' },
   ];
 
   ngOnInit(): void {

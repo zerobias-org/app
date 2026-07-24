@@ -8,15 +8,15 @@
         <mat-card-content>
           <div class="profile-header">
             <div class="avatar-large">
-              @if (p.avatar_url) {
-                <img [src]="p.avatar_url" [alt]="p.display_name" />
+              @if (p.logoUrl) {
+                <img [src]="p.logoUrl" [alt]="p.legalName" />
               } @else {
                 <span class="initials">{{ initials() }}</span>
               }
             </div>
-            <h2 class="provider-name">{{ p.display_name }}</h2>
-            @if (p.headline) {
-              <p class="headline">{{ p.headline }}</p>
+            <h2 class="provider-name">{{ p.legalName }}</h2>
+            @if (p.tagline) {
+              <p class="headline">{{ p.tagline }}</p>
             }
           </div>
 
@@ -26,23 +26,15 @@
             @if (rating() !== null) {
               <div class="stat-item">
                 <app-star-rating [rating]="rating()!" size="sm" />
-                <span class="stat-label">{{ rating()!.toFixed(1) }} ({{ p.review_count }} reviews)</span>
+                <span class="stat-label">{{ rating()!.toFixed(1) }} ({{ reviews().length }} reviews)</span>
               </div>
             }
-            <div class="stat-item">
-              <mat-icon>work</mat-icon>
-              <span>{{ p.total_jobs_completed }} jobs completed</span>
-            </div>
-            @if (p.hourly_rate) {
+            @if (p.foundedYear) {
               <div class="stat-item">
-                <mat-icon>payments</mat-icon>
-                <span>${{ p.hourly_rate }}/hr</span>
+                <mat-icon>calendar_today</mat-icon>
+                <span>Founded {{ p.foundedYear }}</span>
               </div>
             }
-            <div class="stat-item">
-              <mat-icon>calendar_today</mat-icon>
-              <span>Member since {{ p.created_at | date:'mediumDate' }}</span>
-            </div>
           </div>
 
           <button mat-flat-button color="primary" class="hire-btn">
@@ -56,33 +48,103 @@
     <!-- Main content -->
     <div class="detail-main">
       <!-- About -->
-      @if (p.about) {
+      @if (p.longDescription) {
         <section class="detail-section">
           <h3>About</h3>
-          <p class="about-text">{{ p.about }}</p>
+          <p class="about-text">{{ p.longDescription }}</p>
         </section>
       }
 
       <!-- Skills & Expertise -->
-      @if (expertise().skills.length || expertise().roles.length || expertise().frameworks.length) {
+      @if (p.skills.length || p.roles.length || p.frameworks.length || p.products.length || p.segments.length || p.serviceSegments.length) {
         <section class="detail-section">
           <h3>Skills & Expertise</h3>
-          @if (expertise().skills.length) {
+          @if (p.skills.length) {
             <div class="expertise-group">
               <h4>Skills</h4>
               <mat-chip-set>
-                @for (skill of expertise().skills; track skill.zerobias_skill_id) {
-                  <mat-chip>{{ skill.skill_name }}</mat-chip>
+                @for (skill of p.skills; track skill.id) {
+                  <mat-chip>
+                    {{ skill.name }}
+                    <zb-resource-status
+                      [label]="skill.verified ? 'verified' : 'asserted'"
+                    ></zb-resource-status>
+                  </mat-chip>
                 }
               </mat-chip-set>
             </div>
           }
-          @if (expertise().roles.length) {
+          @if (p.roles.length) {
             <div class="expertise-group">
               <h4>Roles</h4>
               <mat-chip-set>
-                @for (role of expertise().roles; track role.zerobias_role_id) {
-                  <mat-chip [highlighted]="role.is_primary">{{ role.zerobias_role_id }}</mat-chip>
+                @for (role of p.roles; track role.id) {
+                  <mat-chip>
+                    {{ role.name }}
+                    <zb-resource-status
+                      [label]="role.verified ? 'verified' : 'asserted'"
+                    ></zb-resource-status>
+                  </mat-chip>
+                }
+              </mat-chip-set>
+            </div>
+          }
+          @if (p.products.length) {
+            <div class="expertise-group">
+              <h4>Products</h4>
+              <mat-chip-set>
+                @for (product of p.products; track product.id) {
+                  <mat-chip>
+                    {{ product.name }}
+                    <zb-resource-status
+                      [label]="product.verified ? 'verified' : 'asserted'"
+                    ></zb-resource-status>
+                  </mat-chip>
+                }
+              </mat-chip-set>
+            </div>
+          }
+          @if (p.frameworks.length) {
+            <div class="expertise-group">
+              <h4>Frameworks</h4>
+              <mat-chip-set>
+                @for (framework of p.frameworks; track framework.id) {
+                  <mat-chip>
+                    {{ framework.name }}
+                    <zb-resource-status
+                      [label]="framework.verified ? 'verified' : 'asserted'"
+                    ></zb-resource-status>
+                  </mat-chip>
+                }
+              </mat-chip-set>
+            </div>
+          }
+          @if (p.segments.length) {
+            <div class="expertise-group">
+              <h4>Segments</h4>
+              <mat-chip-set>
+                @for (segment of p.segments; track segment.id) {
+                  <mat-chip>
+                    {{ segment.name }}
+                    <zb-resource-status
+                      [label]="segment.verified ? 'verified' : 'asserted'"
+                    ></zb-resource-status>
+                  </mat-chip>
+                }
+              </mat-chip-set>
+            </div>
+          }
+          @if (p.serviceSegments.length) {
+            <div class="expertise-group">
+              <h4>Service Segments</h4>
+              <mat-chip-set>
+                @for (serviceSegment of p.serviceSegments; track serviceSegment.id) {
+                  <mat-chip>
+                    {{ serviceSegment.name }}
+                    <zb-resource-status
+                      [label]="serviceSegment.verified ? 'verified' : 'asserted'"
+                    ></zb-resource-status>
+                  </mat-chip>
                 }
               </mat-chip-set>
             </div>

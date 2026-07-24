@@ -3,22 +3,28 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Observable, of } from 'rxjs';
-import { ZbSimpleAutocompleteComponent } from '@zerobias-org/ngx-library';
+import { ZbSimpleAutocompleteComponent, ZbResourceStatusComponent } from '@zerobias-org/ngx-library';
 import { ProviderProfilesService } from '../../core/services/provider-profiles.service';
 import { ImpersonationService } from '../../core/services/impersonation.service';
 import { CatalogService } from '../../core/services/catalog.service';
-import type { ProviderDetailRow, CatalogItem } from '../../core/models';
+import type { CatalogItem, ProviderDetailView, ExpertiseItem } from '../../core/models';
 
 interface ExpertiseSection {
   title: string;
   type: 'skills' | 'roles' | 'products' | 'frameworks' | 'segments' | 'serviceSegments';
-  items: { id: string; name: string; zbId: string }[];
+  items: ExpertiseItem[];
 }
 
 @Component({
   selector: 'app-my-profile-expertise',
   standalone: true,
-  imports: [MatChipsModule, MatIconModule, MatSnackBarModule, ZbSimpleAutocompleteComponent],
+  imports: [
+    MatChipsModule,
+    MatIconModule,
+    MatSnackBarModule,
+    ZbSimpleAutocompleteComponent,
+    ZbResourceStatusComponent,
+  ],
   templateUrl: './my-profile-expertise.component.html',
   styleUrl: './my-profile-expertise.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -30,7 +36,7 @@ export class MyProfileExpertise implements OnInit {
   private readonly snackBar = inject(MatSnackBar);
 
   readonly loading = signal(true);
-  readonly profile = signal<ProviderDetailRow | null>(null);
+  readonly profile = signal<ProviderDetailView | null>(null);
   readonly sections = signal<ExpertiseSection[]>([]);
 
   // Search functions for autocomplete
@@ -81,59 +87,70 @@ export class MyProfileExpertise implements OnInit {
     try {
       switch (section.type) {
         case 'skills':
-          await this.providerProfiles.addSkill(p.id, {
-            zerobias_skill_id: selected.id,
-            skill_name: selected.name,
-            proficiency_level: null,
-            years_experience: null,
+          await this.providerProfiles.addSkill(p.orgId, {
+            orgId: p.orgId,
+            skillId: selected.id,
+            proficiencyLevel: 'intermediate',
+            yearsExperience: 0,
             verified: false,
+            verificationSource: null,
           });
           break;
         case 'roles':
-          await this.providerProfiles.addRole(p.id, {
-            zerobias_role_id: selected.id,
-            role_name: selected.name,
-            is_primary: false,
-            years_in_role: null,
+          await this.providerProfiles.addRole(p.orgId, {
+            orgId: p.orgId,
+            roleId: selected.id,
+            isPrimary: false,
+            yearsInRole: 0,
+            verified: false,
+            verificationSource: null,
           });
           break;
         case 'products':
-          await this.providerProfiles.addProduct(p.id, {
-            zerobias_product_id: selected.id,
-            product_name: selected.name,
-            proficiency_level: null,
-            years_experience: null,
+          await this.providerProfiles.addProduct(p.orgId, {
+            orgId: p.orgId,
+            productId: selected.id,
+            proficiencyLevel: 'intermediate',
+            yearsExperience: 0,
             certified: false,
-            certification_details: null,
+            certificationDetails: null,
+            verified: false,
+            verificationSource: null,
           });
           break;
         case 'frameworks':
-          await this.providerProfiles.addFramework(p.id, {
-            zerobias_framework_id: selected.id,
-            framework_name: selected.name,
-            proficiency_level: null,
-            years_experience: null,
-            assessor_certified: false,
-            implementation_experience: false,
-            audit_experience: false,
+          await this.providerProfiles.addFramework(p.orgId, {
+            orgId: p.orgId,
+            frameworkId: selected.id,
+            proficiencyLevel: 'intermediate',
+            yearsExperience: 0,
+            assessorCertified: false,
+            implementationExperience: false,
+            auditExperience: false,
+            verified: false,
+            verificationSource: null,
           });
           break;
         case 'segments':
-          await this.providerProfiles.addSegment(p.id, {
-            zerobias_segment_id: selected.id,
-            segment_name: selected.name,
-            is_primary: false,
+          await this.providerProfiles.addSegment(p.orgId, {
+            orgId: p.orgId,
+            segmentId: selected.id,
+            isPrimary: false,
+            verified: false,
+            verificationSource: null,
           });
           break;
         case 'serviceSegments':
-          await this.providerProfiles.addServiceSegment(p.id, {
-            zerobias_service_segment_id: selected.id,
-            service_segment_name: selected.name,
-            is_primary: false,
+          await this.providerProfiles.addServiceSegment(p.orgId, {
+            orgId: p.orgId,
+            serviceSegmentId: selected.id,
+            isPrimary: false,
+            verified: false,
+            verificationSource: null,
           });
           break;
       }
-      section.items.push({ id: crypto.randomUUID(), name: selected.name, zbId: selected.id });
+      section.items.push({ id: crypto.randomUUID(), name: selected.name, verified: false, verificationSource: null });
       this.sections.set([...this.sections()]);
       autocomplete?.writeValue(null);
     } catch (err) {
@@ -142,7 +159,7 @@ export class MyProfileExpertise implements OnInit {
     }
   }
 
-  async onRemove(section: ExpertiseSection, item: { id: string; name: string; zbId: string }): Promise<void> {
+  async onRemove(section: ExpertiseSection, item: ExpertiseItem): Promise<void> {
     try {
       switch (section.type) {
         case 'skills': await this.providerProfiles.deleteSkill(item.id); break;
@@ -161,51 +178,37 @@ export class MyProfileExpertise implements OnInit {
     }
   }
 
-  private buildSections(detail: ProviderDetailRow): void {
-    const parse = <T>(json: unknown): T[] => {
-      if (!json) return [];
-      try { return typeof json === 'string' ? JSON.parse(json) : json as T[]; } catch { return []; }
-    };
-
+  private buildSections(detail: ProviderDetailView): void {
     this.sections.set([
       {
-        title: 'Skills', type: 'skills',
-        items: parse<any>(detail.skills).map((s: any) => ({ id: s.id, name: s.skill_name, zbId: s.zerobias_skill_id })),
+        title: 'Skills',
+        type: 'skills',
+        items: detail.skills || [],
       },
       {
-        title: 'Roles', type: 'roles',
-        items: parse<any>(detail.roles).map((r: any) => ({
-          id: r.id, zbId: r.zerobias_role_id,
-          name: r.role_name || r.zerobias_role_id,
-        })),
+        title: 'Roles',
+        type: 'roles',
+        items: detail.roles || [],
       },
       {
-        title: 'Products', type: 'products',
-        items: parse<any>(detail.products).map((p: any) => ({
-          id: p.id, zbId: p.zerobias_product_id,
-          name: p.product_name || p.zerobias_product_id,
-        })),
+        title: 'Products',
+        type: 'products',
+        items: detail.products || [],
       },
       {
-        title: 'Frameworks', type: 'frameworks',
-        items: parse<any>(detail.frameworks).map((f: any) => ({
-          id: f.id, zbId: f.zerobias_framework_id,
-          name: f.framework_name || f.zerobias_framework_id,
-        })),
+        title: 'Frameworks',
+        type: 'frameworks',
+        items: detail.frameworks || [],
       },
       {
-        title: 'Segments', type: 'segments',
-        items: parse<any>(detail.segments).map((s: any) => ({
-          id: s.id, zbId: s.zerobias_segment_id,
-          name: s.segment_name || s.zerobias_segment_id,
-        })),
+        title: 'Segments',
+        type: 'segments',
+        items: detail.segments || [],
       },
       {
-        title: 'Service Segments', type: 'serviceSegments',
-        items: parse<any>(detail.service_segments).map((s: any) => ({
-          id: s.id, zbId: s.zerobias_service_segment_id,
-          name: s.service_segment_name || s.zerobias_service_segment_id,
-        })),
+        title: 'Service Segments',
+        type: 'serviceSegments',
+        items: detail.serviceSegments || [],
       },
     ]);
   }

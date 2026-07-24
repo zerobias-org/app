@@ -14,16 +14,19 @@ import { ProjectContextService } from '../services/project-context.service';
 
 /**
  * Onboarding guard — read-only CanActivateFn:
- *   1. Session check (redirect unauthenticated users to /login)
- *   2. Admin signal write (DemoVisibility + others read it). Admins navigate freely.
- *   3. Probe whether the org has a provisioned platform engagement (hydra tag).
- *      - Provisioned: check profile completion, route accordingly.
- *      - Not provisioned (or probe failed): route to /onboarding/platform-engagement
- *        holding page. NEVER auto-creates. Provisioning is admin-only and
- *        triggered explicitly from the admin Provisioning tab (or, in future,
- *        the zb/ui governance app — see BACKLOG ZBUI-PROVISIONING-ACTION).
+ *   1. Session check (redirect unauthenticated users to /login).
+ *   2. Org sanity check: if `sessionStorage` org-id points at an org the user
+ *      isn't a member of, recover via `app.selectOrg(orgs[0])` (errata 038).
+ *   3. Admin signal write (DemoVisibility + others read it). Admins navigate
+ *      freely, but if they're stuck on `/onboarding/*` they're redirected to
+ *      `/` (errata 037).
+ *   4. Probe whether the org has a provisioned platform engagement (hydra tag).
+ *      - Provisioned + complete profile: route forward (escape /onboarding/* if stuck).
+ *      - Provisioned + incomplete profile: route to /onboarding/company-profile.
+ *      - Not provisioned (or probe failed): route to /onboarding/platform-engagement.
+ *        NEVER auto-creates. Provisioning is admin-only via the admin tab.
  *
- * No mutations from this guard. Probes only.
+ * No mutations from this guard except the errata-038 recovery `selectOrg` call.
  */
 export const onboardingGuard: CanActivateFn = async (
   _route: ActivatedRouteSnapshot,
@@ -34,6 +37,7 @@ export const onboardingGuard: CanActivateFn = async (
   const provisioner = inject(PlatformEngagementProvisioner);
   const profileService = inject(MarketplaceProfileService);
   const projectContext = inject(ProjectContextService);
+  const app = inject(ZerobiasClientApp);
 
   // Short-circuit helper: if the navigation already targets `target` (or a
   // child of it), let it through — otherwise the guard loops on its own
@@ -42,10 +46,13 @@ export const onboardingGuard: CanActivateFn = async (
   const alreadyAt = (target: string): boolean =>
     state.url === target || state.url.startsWith(target + '/') || state.url.startsWith(target + '?');
 
-  // Step 1: Session check
-  const app = inject(ZerobiasClientApp);
-  let whoAmI: { id?: unknown } | void | undefined;
+  // Errata 037: a "happy" user (admin or fully provisioned with complete
+  // profile) should not be stuck on /onboarding/* paths. Redirect to `/`.
+  const escapeOnboardingIfHappy = (): UrlTree | true =>
+    state.url.startsWith('/onboarding/') ? router.createUrlTree(['/']) : true;
 
+  // Step 1: Session check
+  let whoAmI: { id?: unknown } | void | undefined;
   try {
     whoAmI = await app.whoAmI();
   } catch (err) {
@@ -63,29 +70,50 @@ export const onboardingGuard: CanActivateFn = async (
     return router.createUrlTree(['/login']);
   }
 
-  // Pull current org's name + slug (needed for hydra tag probe) from listMyOrgs.
-  // Slug is preferred over slugify(name) because it's platform-canonical
-  // (lowercased nmtoken) — e.g. "Brian Hierholzer Inc." -> slug `brianhierholzer`,
-  // not `brian-hierholzer-inc`.
+  // Step 2: Pull current org's name + slug from listMyOrgs. If the session
+  // org-id isn't in the user's org list, recover via selectOrg (errata 038).
   let orgName = '';
   let orgSlug: string | undefined;
+  let userIsMemberOfSessionOrg = true;
+  let userOrgs: Array<{ id?: unknown; name?: unknown; slug?: unknown }> = [];
   try {
     const meApi = clientApi.danaClient.getMeApi();
-    const orgs = await meApi.listMyOrgs();
-    const currentOrg = orgs?.find(o => String(o.id) === orgId) as
-      | { name?: unknown; slug?: unknown }
-      | undefined;
-    if (currentOrg && currentOrg.name) {
-      orgName = String(currentOrg.name);
-    }
-    if (currentOrg && currentOrg.slug) {
-      orgSlug = String(currentOrg.slug);
+    const orgs = (await meApi.listMyOrgs()) ?? [];
+    userOrgs = orgs as Array<{ id?: unknown; name?: unknown; slug?: unknown }>;
+    const currentOrg = userOrgs.find((o) => String(o.id) === orgId);
+    if (!currentOrg) {
+      userIsMemberOfSessionOrg = false;
+    } else {
+      if (currentOrg.name) orgName = String(currentOrg.name);
+      if (currentOrg.slug) orgSlug = String(currentOrg.slug);
     }
   } catch (err) {
     console.warn('[ONBOARDING_GUARD] Failed to read org name/slug from listMyOrgs:', err);
   }
 
-  // Step 2: Admin signal — read-only, populates ProjectContextService for
+  if (!userIsMemberOfSessionOrg) {
+    // Errata 038: session org-id is stale (user not a member). Recover by
+    // switching to the user's first available org; redirect to `/` so the
+    // guard re-runs with corrected session context. If user has zero orgs,
+    // bounce to /login.
+    console.warn(
+      '[ONBOARDING_GUARD] Session org',
+      orgId,
+      'is not in user org list — recovering by switching to first available org',
+    );
+    const firstOrg = userOrgs[0];
+    if (firstOrg) {
+      try {
+        await app.selectOrg(firstOrg as never);
+      } catch (err) {
+        console.error('[ONBOARDING_GUARD] selectOrg recovery failed', err);
+      }
+      return router.createUrlTree(['/']);
+    }
+    return router.createUrlTree(['/login']);
+  }
+
+  // Step 3: Admin signal — read-only, populates ProjectContextService for
   // downstream consumers (DemoVisibility, etc.). Failure defaults to false.
   let isAdmin = false;
   try {
@@ -99,11 +127,15 @@ export const onboardingGuard: CanActivateFn = async (
   projectContext.setIsAdmin(isAdmin);
 
   if (isAdmin) {
-    return true;
+    // Errata 037: admin on /onboarding/* gets redirected to `/`; admin
+    // anywhere else stays where they are.
+    return escapeOnboardingIfHappy();
   }
 
-  // Step 3: Authoritative provisioning probe — hydra marketplace tag.
-  // Decoupled from AuditgraphDB; if the tag exists, the org is provisioned.
+  // Step 4: Authoritative provisioning probe — hydra marketplace tag.
+  // Decoupled from AuditgraphDB; if the tag exists AND its Engagement Project
+  // exists, the org is provisioned (dual-namespace probe per D-49 + Project
+  // verification defends against orphan-tag false-positives; see commit 3a42e90).
   const isProvisioned = await provisioner.isOrgProvisioned(orgId, orgName, orgSlug);
 
   if (!isProvisioned) {
@@ -114,7 +146,7 @@ export const onboardingGuard: CanActivateFn = async (
       : router.createUrlTree(['/onboarding/platform-engagement']);
   }
 
-  // Step 4: Profile completion routes us within the provisioned app.
+  // Step 5: Profile completion routes us within the provisioned app.
   let completionStatus: boolean;
   try {
     const result = profileService.getCompletionStatus(orgId);
@@ -136,5 +168,7 @@ export const onboardingGuard: CanActivateFn = async (
       : router.createUrlTree(['/onboarding/company-profile']);
   }
 
-  return true;
+  // Errata 037: provisioned + complete profile on /onboarding/* should not be
+  // stuck there (e.g., user bookmarked the URL or arrived via back button).
+  return escapeOnboardingIfHappy();
 };

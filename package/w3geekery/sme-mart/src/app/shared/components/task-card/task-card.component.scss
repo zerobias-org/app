@@ -25,11 +25,12 @@ mat-card {
 
 .sub-card {
   cursor: pointer;
-  transition: box-shadow 0.2s ease, border-left-color 0.2s ease;
+  transition: box-shadow 0.13s linear, transform 0.13s linear, border-left-color 0.13s linear;
   border-left: 3px solid transparent;
 
   &:hover {
-    box-shadow: var(--mat-sys-level2, 0 1px 3px rgba(0, 0, 0, 0.12));
+    box-shadow: var(--zb-card-shadow-hover, 8px 8px 16px -4px rgb(0 0 0 / 30%));
+    transform: translateX(-2px) translateY(-2px);
   }
 
   &.expanded {

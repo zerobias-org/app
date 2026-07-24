@@ -32,6 +32,37 @@ body {
   }
 }
 
+// Lift mat-card onto the canonical card surface. Material's default
+// elevated container color maps to surface-container-low, which in
+// dark mode sits too close to --zb-background and leaves cards
+// nearly flat against the page. Routing to --zb-background-card
+// (theme-aware, flips light/dark via ngx-library) gives mat-card the
+// same visible lift as our hand-styled .org-card reference and the
+// zb/ui portal-app-card pattern. Mirrors how ngx-library overrides
+// --mat-dialog-container-color / --mat-menu-container-color.
+//
+// Declared at both `body` and `body.dark-theme` so it matches the
+// specificity at which `mat.theme()` emits the conflicting default
+// (mat.theme is invoked inside `html {}` for light and inside
+// `body.dark-theme {}` for dark — a :root override would only beat
+// the light variant).
+body,
+body.dark-theme {
+  --mat-card-elevated-container-color: var(--zb-background-card);
+}
+
+// Floating labels on appearance="outline" mat-form-fields straddle the input's
+// top border. When the form-field is the first interactive child inside
+// mat-dialog-content, the upper half of the label gets clipped against the
+// content edge. Add breathing room to the first form-field in every dialog so
+// floating labels render fully. Global / site-wide.
+.mat-mdc-dialog-content {
+  .mat-mdc-form-field:first-child,
+  form:first-child > .mat-mdc-form-field:first-of-type {
+    margin-top: 0.5rem;
+  }
+}
+
 // Resizable drawer (used by filter sidebars)
 .resizable-drawer {
   width: var(--drawer-width, 280px);

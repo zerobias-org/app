@@ -6,7 +6,7 @@ export const ORG_ROUTES: Routes = [
     path: '',
     component: OrgPage,
     children: [
-      { path: '', redirectTo: 'documents', pathMatch: 'full' },
+      { path: '', redirectTo: 'profile', pathMatch: 'full' },
       {
         path: 'documents',
         loadComponent: () =>

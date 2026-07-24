@@ -1,5 +1,5 @@
 /**
- * RFP (Request for Proposal) models for the multi-step wizard.
+ * RFP (Request for Project) models for the multi-step wizard.
  *
  * The wizard produces an RfpData object persisted to work_requests.rfp_wizard_data
  * as JSON. On publish, the data is used to create ZB Tasks, tags, and attachments.

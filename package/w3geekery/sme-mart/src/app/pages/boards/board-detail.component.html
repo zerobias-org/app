@@ -1,0 +1,112 @@
+@if (loading()) {
+  <div class="bd-loading">
+    <mat-spinner diameter="48" />
+  </div>
+} @else if (error()) {
+  <div class="bd-error">{{ error() }}</div>
+} @else if (board(); as b) {
+  <mat-toolbar class="bd-toolbar">
+    <button mat-icon-button (click)="goBack()" aria-label="Back">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+
+    <nav class="bd-breadcrumb" aria-label="Breadcrumb">
+      @for (crumb of breadcrumb(); track crumb.label; let last = $last) {
+        @if (crumb.url) {
+          <a [routerLink]="crumb.url">{{ crumb.label }}</a>
+        } @else {
+          <span [attr.aria-current]="last ? 'page' : null">{{ crumb.label }}</span>
+        }
+        @if (!last) {
+          <mat-icon class="bd-sep">chevron_right</mat-icon>
+        }
+      }
+    </nav>
+
+    <span class="bd-spacer"></span>
+
+    <app-board-switcher
+      [scope]="boardScope()"
+      [selectedBoardId]="currentBoardId()"
+      (boardChanged)="onBoardSelected($event)"
+    />
+
+    <button mat-icon-button [matMenuTriggerFor]="bdMenu" aria-label="Board actions">
+      <mat-icon>more_vert</mat-icon>
+    </button>
+    <mat-menu #bdMenu="matMenu">
+      <button mat-menu-item (click)="toggleConfigPanel()">
+        <mat-icon>settings</mat-icon>
+        <span>Board settings</span>
+      </button>
+      @if (isAdmin()) {
+        <button mat-menu-item (click)="openInZbPlatform()">
+          <mat-icon>open_in_new</mat-icon>
+          <span>Open in ZB Platform</span>
+        </button>
+      }
+    </mat-menu>
+  </mat-toolbar>
+
+  <mat-sidenav-container class="bd-container">
+    <mat-sidenav
+      position="end"
+      mode="over"
+      [opened]="configPanelOpen()"
+      (openedChange)="configPanelOpen.set($event)"
+    >
+      <div class="bd-config">
+        <h3>Board settings</h3>
+        <p class="bd-config-note">Configuration options arrive in a future release.</p>
+      </div>
+    </mat-sidenav>
+
+    <mat-sidenav-content>
+      <section class="bd-tasks">
+        <h2>Tasks</h2>
+        @if (tasks().length === 0) {
+          <div class="bd-empty">No tasks in this board</div>
+        } @else {
+          <zb-remote-table
+            [columns]="displayColumns"
+            [columnLabels]="columnLabels"
+            [data]="tasks()"
+            [loading]="loading()"
+            [rowClickEnabled]="true"
+            [selectableRows]="false"
+            (rowClick)="onTaskClick($event)"
+          >
+            <ng-container matColumnDef="priority">
+              <th mat-header-cell *matHeaderCellDef>Priority</th>
+              <td mat-cell *matCellDef="let task">{{ $any(task).priority?.label }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="activities">
+              <th mat-header-cell *matHeaderCellDef>Activity</th>
+              <td mat-cell *matCellDef="let task">
+                <span class="bd-chip">{{ $any(task).code }}</span>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="name">
+              <th mat-header-cell *matHeaderCellDef>Name</th>
+              <td mat-cell *matCellDef="let task">{{ $any(task).name }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef>Status</th>
+              <td mat-cell *matCellDef="let task">
+                <span class="bd-chip">{{ $any(task).status | snakeToSpaces }}</span>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="assigned">
+              <th mat-header-cell *matHeaderCellDef>Assigned</th>
+              <td mat-cell *matCellDef="let task">{{ $any(task).assigned?.contactName }}</td>
+            </ng-container>
+          </zb-remote-table>
+        }
+      </section>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+}

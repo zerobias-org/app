@@ -22,14 +22,16 @@
 }
 
 .document-row {
-  border: 1px solid var(--mat-sys-outline-variant);
-  border-radius: 8px;
+  background-color: var(--zb-background-card, var(--mat-sys-surface));
+  border: none;
+  border-radius: 5px;
   overflow: hidden;
-  transition: border-color 0.3s, background-color 0.3s;
+  box-shadow: var(--zb-card-shadow, 8px 8px 16px -6px rgb(0 0 0 / 10%));
 
   &.highlighted {
-    border-color: var(--mat-sys-primary);
-    background-color: color-mix(in srgb, var(--mat-sys-primary) 8%, transparent);
+    outline: 2px solid var(--mat-sys-primary);
+    outline-offset: -2px;
+    background-color: var(--mat-sys-primary-container);
   }
 }
 

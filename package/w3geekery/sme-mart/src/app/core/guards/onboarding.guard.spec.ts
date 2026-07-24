@@ -11,7 +11,11 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 describe('onboardingGuard', () => {
   let router: { createUrlTree: ReturnType<typeof vi.fn> };
-  let app: { whoAmI: ReturnType<typeof vi.fn>; getCurrentOrgId: ReturnType<typeof vi.fn> };
+  let app: {
+    whoAmI: ReturnType<typeof vi.fn>;
+    getCurrentOrgId: ReturnType<typeof vi.fn>;
+    selectOrg: ReturnType<typeof vi.fn>;
+  };
   let clientApi: {
     toUUID: ReturnType<typeof vi.fn>;
     danaClient: {
@@ -45,6 +49,7 @@ describe('onboardingGuard', () => {
     app = {
       whoAmI: vi.fn(),
       getCurrentOrgId: vi.fn(),
+      selectOrg: vi.fn().mockResolvedValue(undefined),
     };
 
     // Default admin probe: non-admin. Admin tests override the mockResolvedValue.
@@ -247,6 +252,141 @@ describe('onboardingGuard', () => {
 
       expect(router.createUrlTree).toHaveBeenCalledWith(['/onboarding/company-profile']);
       expect(result.toString()).toContain('/onboarding/company-profile');
+    });
+  });
+
+  // ── Errata 037: admin / happy-path users stuck on /onboarding/* ──
+
+  describe('errata 037 — escape /onboarding/* when user is past the gate', () => {
+    beforeEach(() => {
+      app.whoAmI.mockResolvedValue(mockWhoAmI);
+      app.getCurrentOrgId.mockReturnValue('org-456');
+    });
+
+    it('admin on /onboarding/platform-engagement → redirects to /', async () => {
+      getRequestOrgMemberMock.mockResolvedValue({ admin: true });
+      const stuckState = { url: '/onboarding/platform-engagement' } as RouterStateSnapshot;
+
+      const result = await runInInjectionContext(injector, () =>
+        onboardingGuard(mockRoute, stuckState),
+      );
+
+      expect(router.createUrlTree).toHaveBeenCalledWith(['/']);
+      expect(result.toString()).toContain('/');
+      // Probe NOT called — admin short-circuits past it (preserves prior behavior).
+      expect(provisioner.isOrgProvisioned).not.toHaveBeenCalled();
+    });
+
+    it('admin on /onboarding/company-profile → redirects to /', async () => {
+      getRequestOrgMemberMock.mockResolvedValue({ admin: true });
+      const stuckState = { url: '/onboarding/company-profile' } as RouterStateSnapshot;
+
+      const result = await runInInjectionContext(injector, () =>
+        onboardingGuard(mockRoute, stuckState),
+      );
+
+      expect(router.createUrlTree).toHaveBeenCalledWith(['/']);
+      expect(result.toString()).toContain('/');
+    });
+
+    it('admin on /services → returns true (no redirect; preserves prior behavior)', async () => {
+      getRequestOrgMemberMock.mockResolvedValue({ admin: true });
+      const okState = { url: '/services' } as RouterStateSnapshot;
+
+      const result = await runInInjectionContext(injector, () =>
+        onboardingGuard(mockRoute, okState),
+      );
+
+      expect(result).toBe(true);
+      expect(router.createUrlTree).not.toHaveBeenCalled();
+    });
+
+    it('non-admin + provisioned + complete profile on /onboarding/platform-engagement → redirects to /', async () => {
+      provisioner.isOrgProvisioned.mockResolvedValue(true);
+      profileService.getCompletionStatus.mockResolvedValue(true);
+      const stuckState = { url: '/onboarding/platform-engagement' } as RouterStateSnapshot;
+
+      const result = await runInInjectionContext(injector, () =>
+        onboardingGuard(mockRoute, stuckState),
+      );
+
+      expect(router.createUrlTree).toHaveBeenCalledWith(['/']);
+      expect(result.toString()).toContain('/');
+    });
+  });
+
+  // ── Errata 038: stale session-org (non-member) recovery ──
+
+  describe('errata 038 — non-member-of-session-org recovery', () => {
+    beforeEach(() => {
+      app.whoAmI.mockResolvedValue(mockWhoAmI);
+    });
+
+    it('session org-id not in listMyOrgs → selectOrg(firstOrg) + redirect to /', async () => {
+      // Session points at an org the user isn't a member of.
+      app.getCurrentOrgId.mockReturnValue('org-stale-not-mine');
+      const firstOrg = { id: 'org-456', name: 'Test Org', slug: 'testorg', partyId: 'party-789' };
+      clientApi.danaClient.getMeApi = vi.fn().mockReturnValue({
+        listMyOrgs: vi.fn().mockResolvedValue([firstOrg]),
+      });
+
+      const result = await runInInjectionContext(injector, () =>
+        onboardingGuard(mockRoute, mockState),
+      );
+
+      expect(app.selectOrg).toHaveBeenCalledWith(firstOrg);
+      expect(router.createUrlTree).toHaveBeenCalledWith(['/']);
+      expect(result.toString()).toContain('/');
+      // Downstream checks NOT called — we short-circuit on the recovery.
+      expect(getRequestOrgMemberMock).not.toHaveBeenCalled();
+      expect(provisioner.isOrgProvisioned).not.toHaveBeenCalled();
+    });
+
+    it('session org-id not in listMyOrgs AND user has zero orgs → redirect to /login', async () => {
+      app.getCurrentOrgId.mockReturnValue('org-stale-not-mine');
+      clientApi.danaClient.getMeApi = vi.fn().mockReturnValue({
+        listMyOrgs: vi.fn().mockResolvedValue([]),
+      });
+
+      const result = await runInInjectionContext(injector, () =>
+        onboardingGuard(mockRoute, mockState),
+      );
+
+      expect(app.selectOrg).not.toHaveBeenCalled();
+      expect(router.createUrlTree).toHaveBeenCalledWith(['/login']);
+      expect(result.toString()).toContain('/login');
+    });
+
+    it('selectOrg throws during recovery → still redirects to / (does not crash guard)', async () => {
+      app.getCurrentOrgId.mockReturnValue('org-stale-not-mine');
+      const firstOrg = { id: 'org-456', name: 'Test Org', slug: 'testorg', partyId: 'party-789' };
+      clientApi.danaClient.getMeApi = vi.fn().mockReturnValue({
+        listMyOrgs: vi.fn().mockResolvedValue([firstOrg]),
+      });
+      app.selectOrg.mockRejectedValue(new Error('selectOrg backend down'));
+      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+      const result = await runInInjectionContext(injector, () =>
+        onboardingGuard(mockRoute, mockState),
+      );
+
+      expect(router.createUrlTree).toHaveBeenCalledWith(['/']);
+      expect(result.toString()).toContain('/');
+      errorSpy.mockRestore();
+    });
+
+    it('happy path: session org is in listMyOrgs → no recovery, normal flow continues', async () => {
+      app.getCurrentOrgId.mockReturnValue('org-456');
+      // Default listMyOrgs returns [{ id: 'org-456', ... }] — user IS a member.
+      provisioner.isOrgProvisioned.mockResolvedValue(true);
+      profileService.getCompletionStatus.mockResolvedValue(true);
+
+      const result = await runInInjectionContext(injector, () =>
+        onboardingGuard(mockRoute, mockState),
+      );
+
+      expect(app.selectOrg).not.toHaveBeenCalled();
+      expect(result).toBe(true);
     });
   });
 });

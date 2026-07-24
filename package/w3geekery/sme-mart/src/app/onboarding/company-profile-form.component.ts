@@ -21,8 +21,11 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ZerobiasClientApp } from '@zerobias-com/zerobias-client';
+import { v4 as uuid } from 'uuid';
 import { MarketplaceProfileService } from '../core/services/marketplace-profile.service';
+import { PipelineWriteService } from '../core/services/pipeline-write.service';
 import { CompanyInfoStruct } from './company-info.model';
+import { BUSINESS_CLASSIFICATION_OPTIONS } from './company-info-sections';
 
 /**
  * Custom validators for company profile form fields
@@ -71,6 +74,7 @@ export class CompanyProfileFormComponent implements OnInit {
   private readonly snackBar = inject(MatSnackBar);
   private readonly fb = inject(FormBuilder);
   private readonly zbApp = inject(ZerobiasClientApp);
+  private readonly pipelineWrite = inject(PipelineWriteService);
 
   // State signals
   readonly form = signal<FormGroup>(new FormGroup({}));
@@ -81,6 +85,9 @@ export class CompanyProfileFormComponent implements OnInit {
 
   // Pre-fill markers
   readonly preFilledFields = signal<Set<string>>(new Set());
+
+  // Picklist options (LOCKED values per D-57)
+  readonly businessClassificationOptions = BUSINESS_CLASSIFICATION_OPTIONS;
 
   ngOnInit(): void {
     this.initializeForm();
@@ -159,6 +166,46 @@ export class CompanyProfileFormComponent implements OnInit {
       }),
       yearsInBusiness: ['', [minValidator(0)]],
       employeeCount: [''],
+      businessClassification: [''],
+      // Corporate-profile sections
+      insuranceCoverage: this.fb.group({
+        coverageType: [''],
+        carrier: [''],
+        policyNumber: [''],
+        coverageAmount: [''],
+        currency: ['USD'],
+        effectiveDate: [''],
+        expiresAt: [''],
+        certificateUrl: ['', [urlValidator]],
+      }),
+      clientReference: this.fb.group({
+        clientName: [''],
+        projectName: [''],
+        contactName: [''],
+        contactEmail: ['', [emailValidator]],
+        contactPhone: [''],
+        relationship: [''],
+        summary: [''],
+        startDate: [''],
+        endDate: [''],
+      }),
+      personnel: this.fb.group({
+        fullName: [''],
+        title: [''],
+        specialization: [''],
+        bio: [''],
+        email: ['', [emailValidator]],
+        linkedinUrl: ['', [urlValidator]],
+      }),
+      financialProfile: this.fb.group({
+        annualRevenue: [''],
+        revenueCurrency: ['USD'],
+        creditScore: [''],
+        creditRatingAgency: [''],
+        bankName: [''],
+        dunsNumber: [''],
+        yearEndMonth: [''],
+      }),
     });
   }
 
@@ -186,7 +233,11 @@ export class CompanyProfileFormComponent implements OnInit {
       const originalState = this.originalSnapshot() || {};
       const currentState = currentForm.value;
 
+      // Save company info via marketplace profile service
       await this.service.save(orgId, currentState, originalState);
+
+      // Save corporate-profile sections via Pipeline
+      await this.saveCorporateProfileSections(orgId, currentState);
 
       this.snackBar.open('Profile saved successfully!', 'Dismiss', {
         duration: 3000,
@@ -202,6 +253,107 @@ export class CompanyProfileFormComponent implements OnInit {
     } finally {
       this.isSaving.set(false);
     }
+  }
+
+  private async saveCorporateProfileSections(
+    orgId: string,
+    formValue: Record<string, unknown>,
+  ): Promise<void> {
+    // Save insurance coverage if data is provided
+    const insuranceData = formValue['insuranceCoverage'] as Record<string, unknown> | undefined;
+    if (insuranceData && this.hasData(insuranceData)) {
+      try {
+        const payload: Record<string, unknown> = {
+          id: uuid(),
+          name: `InsuranceCoverage-${orgId}-${uuid()}`,
+          orgId,
+          ...insuranceData,
+          verified: false,
+          verificationSource: null,
+        };
+        await this.pipelineWrite.pushEntity('InsuranceCoverage', payload, [], 'company-profile.insurance');
+      } catch (err) {
+        this.snackBar.open(
+          `Failed to save insurance coverage: ${(err as Error).message}`,
+          'Dismiss',
+          { duration: 5000 },
+        );
+        throw err;
+      }
+    }
+
+    // Save client reference if data is provided
+    const referenceData = formValue['clientReference'] as Record<string, unknown> | undefined;
+    if (referenceData && this.hasData(referenceData)) {
+      try {
+        const payload: Record<string, unknown> = {
+          id: uuid(),
+          name: `ClientReference-${orgId}-${uuid()}`,
+          orgId,
+          ...referenceData,
+          verified: false,
+          verificationSource: null,
+        };
+        await this.pipelineWrite.pushEntity('ClientReference', payload, [], 'company-profile.reference');
+      } catch (err) {
+        this.snackBar.open(
+          `Failed to save client reference: ${(err as Error).message}`,
+          'Dismiss',
+          { duration: 5000 },
+        );
+        throw err;
+      }
+    }
+
+    // Save personnel if data is provided
+    const personnelData = formValue['personnel'] as Record<string, unknown> | undefined;
+    if (personnelData && this.hasData(personnelData)) {
+      try {
+        const payload: Record<string, unknown> = {
+          id: uuid(),
+          name: `Personnel-${orgId}-${uuid()}`,
+          orgId,
+          ...personnelData,
+          verified: false,
+          verificationSource: null,
+        };
+        await this.pipelineWrite.pushEntity('Personnel', payload, [], 'company-profile.personnel');
+      } catch (err) {
+        this.snackBar.open(
+          `Failed to save personnel: ${(err as Error).message}`,
+          'Dismiss',
+          { duration: 5000 },
+        );
+        throw err;
+      }
+    }
+
+    // Save financial profile if data is provided
+    const financialData = formValue['financialProfile'] as Record<string, unknown> | undefined;
+    if (financialData && this.hasData(financialData)) {
+      try {
+        const payload: Record<string, unknown> = {
+          id: uuid(),
+          name: `FinancialProfile-${orgId}-${uuid()}`,
+          orgId,
+          ...financialData,
+          verified: false,
+          verificationSource: null,
+        };
+        await this.pipelineWrite.pushEntity('FinancialProfile', payload, [], 'company-profile.financial');
+      } catch (err) {
+        this.snackBar.open(
+          `Failed to save financial profile: ${(err as Error).message}`,
+          'Dismiss',
+          { duration: 5000 },
+        );
+        throw err;
+      }
+    }
+  }
+
+  private hasData(obj: Record<string, unknown>): boolean {
+    return Object.values(obj).some(val => val !== null && val !== undefined && val !== '');
   }
 
   async onSkip(): Promise<void> {

@@ -6,33 +6,28 @@
   } @else {
     <div class="project-header">
       <div class="project-header__top">
-        <button mat-button (click)="goToEngagement()" class="back-btn">
-          <mat-icon>arrow_back</mat-icon>
-          @if (ctx.engagementName()) {
-            Engagement: {{ ctx.engagementName() }}
-          } @else {
-            Back to Engagements
-          }
-        </button>
+        <app-page-breadcrumb [items]="breadcrumb()" />
 
-        <button mat-icon-button [matMenuTriggerFor]="projectActions">
-          <mat-icon>more_vert</mat-icon>
-        </button>
+        @if (hasProjectActions()) {
+          <button mat-icon-button [matMenuTriggerFor]="projectActions" aria-label="Project actions">
+            <mat-icon>more_vert</mat-icon>
+          </button>
 
-        <mat-menu #projectActions="matMenu">
-          @if (canCompletePilot()) {
-            <button mat-menu-item (click)="completePilot()">
-              <mat-icon>done</mat-icon>
-              <span>Mark Pilot Complete</span>
-            </button>
-          }
-          @if (canPromote()) {
-            <button mat-menu-item (click)="promoteToProject()" [disabled]="isPromoting()">
-              <mat-icon>{{ isPromoting() ? 'hourglass_empty' : 'arrow_upward' }}</mat-icon>
-              <span>{{ isPromoting() ? 'Promoting...' : 'Promote to Project' }}</span>
-            </button>
-          }
-        </mat-menu>
+          <mat-menu #projectActions="matMenu">
+            @if (canCompletePilot()) {
+              <button mat-menu-item (click)="completePilot()">
+                <mat-icon>done</mat-icon>
+                <span>Mark Pilot Complete</span>
+              </button>
+            }
+            @if (canPromote()) {
+              <button mat-menu-item (click)="promoteToProject()" [disabled]="isPromoting()">
+                <mat-icon>{{ isPromoting() ? 'hourglass_empty' : 'arrow_upward' }}</mat-icon>
+                <span>{{ isPromoting() ? 'Promoting...' : 'Promote to Project' }}</span>
+              </button>
+            }
+          </mat-menu>
+        }
       </div>
 
       <div class="project-header__title">

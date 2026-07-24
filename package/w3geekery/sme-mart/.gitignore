@@ -76,6 +76,8 @@ src/environments/environment.neon.ts
 .planning/notes/plans/
 .planning/notes/meetings/**/*.docx
 .planning/notes/meetings/**/*.txt
+# Raw transcript archive (inputs, not deliverables — summaries live alongside)
+.planning/notes/meetings/processed/
 
 # GSD planning — tracked in git (no secrets; verified 2026-03-30)
 # .planning/
@@ -87,5 +89,8 @@ demo-seed-output.json
 # System files
 .DS_Store
 Thumbs.db
-.vercel
+
+# Packed schema/package tarballs (build artifacts, not source)
+*.tgz
 .claude/handoffs/
+.claude/session-handoffs/

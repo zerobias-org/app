@@ -1,21 +1,18 @@
-import { Component, inject, signal, ChangeDetectionStrategy, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, signal, computed, ChangeDetectionStrategy, OnInit, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTabsModule } from '@angular/material/tabs';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { TitleCasePipe } from '@angular/common';
+import { ZbResourceStatusComponent } from '@zerobias-org/ngx-library';
 import { Subscription } from 'rxjs';
 import { EngagementsService } from '../../core/services/engagements.service';
 import { ProviderProfilesService } from '../../core/services/provider-profiles.service';
 import { EngagementContextService } from '../../core/services/engagement-context.service';
 import { EngagementHierarchyService, type HierarchyBreadcrumb } from '../../core/services/engagement-hierarchy.service';
 import { ImpersonationService } from '../../core/services/impersonation.service';
-import { VettingService } from '../../core/services/vetting.service';
-import type { VettingGateStatus } from '../../core/models';
 import { HierarchyBreadcrumbsComponent } from '../../shared/components/hierarchy-breadcrumbs/hierarchy-breadcrumbs.component';
+import { PageBreadcrumbComponent, type PageBreadcrumbItem } from '../../shared/components/page-breadcrumb/page-breadcrumb.component';
 
 interface TabDef {
   readonly path: string;
@@ -26,8 +23,7 @@ const TABS: readonly TabDef[] = [
   { path: 'overview', label: 'Overview' },
   { path: 'projects', label: 'Projects' },
   { path: 'documents', label: 'Documents' },
-  { path: 'details', label: 'Details' },
-  { path: 'tasks', label: 'Tasks' },
+  { path: 'boards', label: 'Boards' },
   { path: 'vetting', label: 'Vetting' },
   { path: 'timeline', label: 'Timeline' },
   { path: 'notes', label: 'Notes' },
@@ -40,14 +36,13 @@ const TABS: readonly TabDef[] = [
     RouterOutlet,
     RouterLink,
     RouterLinkActive,
-    MatChipsModule,
     MatIconModule,
     MatButtonModule,
     MatTabsModule,
-    MatTooltipModule,
     MatSnackBarModule,
-    TitleCasePipe,
     HierarchyBreadcrumbsComponent,
+    PageBreadcrumbComponent,
+    ZbResourceStatusComponent,
   ],
   templateUrl: './engagement-detail.component.html',
   styleUrl: './engagement-detail.component.scss',
@@ -61,15 +56,22 @@ export class EngagementDetail implements OnInit, OnDestroy {
   private readonly engagements = inject(EngagementsService);
   private readonly providerProfiles = inject(ProviderProfilesService);
   private readonly hierarchy = inject(EngagementHierarchyService);
-  private readonly vetting = inject(VettingService);
   readonly ctx = inject(EngagementContextService);
 
   private refreshSub?: Subscription;
 
   readonly loading = signal(true);
   readonly breadcrumbs = signal<HierarchyBreadcrumb[]>([]);
-  readonly vettingGate = signal<VettingGateStatus | null>(null);
   readonly tabs = TABS;
+
+  /** Page-level breadcrumb: Engagements > <Current Engagement Name>. */
+  readonly pageBreadcrumb = computed<PageBreadcrumbItem[]>(() => {
+    const eng = this.ctx.engagement();
+    return [
+      { label: 'Engagements', link: '/engagements' },
+      { label: eng?.title ?? 'Engagement' },
+    ];
+  });
 
   async ngOnInit(): Promise<void> {
     this.refreshSub = this.ctx.refresh$.subscribe(() => this.refresh());
@@ -80,15 +82,13 @@ export class EngagementDetail implements OnInit, OnDestroy {
 
       if (!eng) {
         this.snackBar.open('Engagement not found', 'OK', { duration: 3000 });
-        this.router.navigate(['/rfps']);
+        this.router.navigate(['/engagements']);
         return;
       }
 
-      // If this is actually an RFP (no tag), redirect to RFP route
-      if (!eng.engagement_tag) {
-        this.router.navigate(['/rfps', eng.id], { replaceUrl: true });
-        return;
-      }
+      // Note: the legacy "no engagement_tag -> /rfps" redirect was removed
+      // 2026-05-14. The new platform.Project data path does not populate
+      // engagement_tag on the transform; trust the route the user chose.
 
       // Push data to shared context
       this.ctx.setEngagement(eng);
@@ -105,9 +105,9 @@ export class EngagementDetail implements OnInit, OnDestroy {
 
       // Non-blocking async loads
       this.loadBreadcrumbs(eng);
-      this.loadVettingGate(eng.id);
-    } catch (err: any) {
-      this.snackBar.open(`Failed to load: ${err.message}`, 'Dismiss', { duration: 5000 });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      this.snackBar.open(`Failed to load: ${msg}`, 'Dismiss', { duration: 5000 });
     } finally {
       this.loading.set(false);
     }
@@ -122,14 +122,10 @@ export class EngagementDetail implements OnInit, OnDestroy {
   // Navigation
   // ===========================================================================
 
-  goBack(): void {
-    this.router.navigate(['/my/engagements']);
-  }
-
   onBreadcrumbNavigate(crumb: HierarchyBreadcrumb): void {
     if (crumb.active) return;
     if (crumb.level === 'boundary' || crumb.level === 'project') {
-      this.router.navigate(['/my/engagements']);
+      this.router.navigate(['/engagements']);
     }
   }
 
@@ -151,21 +147,11 @@ export class EngagementDetail implements OnInit, OnDestroy {
     }
   }
 
-  private async loadVettingGate(engagementId: string): Promise<void> {
-    try {
-      const summary = await this.vetting.getVettingSummary(engagementId);
-      this.vettingGate.set(summary.gateStatus);
-    } catch {
-      // Non-critical — vetting tab may not have items yet
-    }
-  }
-
   private async refresh(): Promise<void> {
     const id = this.route.snapshot.params['id'];
     const eng = await this.engagements.getEngagement(id);
     if (eng) {
       this.ctx.setEngagement(eng);
-      this.loadVettingGate(eng.id);
     }
   }
 }

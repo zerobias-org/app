@@ -29,7 +29,7 @@
       @for (svc of filteredServices(); track svc.id) {
         <app-service-card
           [service]="svc"
-          (serviceSelect)="onServiceSelect($event)"
+          (serviceSelect)="onServiceSelect()"
           (viewProviderServices)="onViewProviderServices($event)"
           (viewProviderProfile)="onViewProviderProfile($event)"
         />

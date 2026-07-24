@@ -5,10 +5,11 @@ import {
   output,
   signal,
   computed,
+  effect,
   ChangeDetectionStrategy,
   OnInit,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { TitleCasePipe, DatePipe } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -19,6 +20,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatCardModule } from '@angular/material/card';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { ZbSnakeToSpacesPipe } from '@zerobias-org/ngx-library';
 import type {
   MarketplaceProfileItem,
   SectionType,
@@ -43,7 +45,8 @@ type SectionData =
   selector: 'app-vendor-profile-form',
   standalone: true,
   imports: [
-    CommonModule,
+    TitleCasePipe,
+    DatePipe,
     ReactiveFormsModule,
     MatFormFieldModule,
     MatInputModule,
@@ -53,6 +56,7 @@ type SectionData =
     MatIconModule,
     MatSelectModule,
     MatCardModule,
+    ZbSnakeToSpacesPipe,
   ],
   templateUrl: './vendor-profile-form.component.html',
   styleUrl: './vendor-profile-form.component.scss',
@@ -66,6 +70,7 @@ export class VendorProfileForm implements OnInit {
   readonly mode = input<'create' | 'edit'>('create');
   readonly section = input<SectionType>('corporate_identity');
   readonly item = input<MarketplaceProfileItem | null>(null);
+  readonly orgName = input<string>('');
 
   // Output signals
   readonly save = output<CreateMarketplaceProfileItemRequest>();
@@ -81,6 +86,24 @@ export class VendorProfileForm implements OnInit {
     if (!item?.expires_at) return false;
     return new Date(item.expires_at) < new Date();
   });
+
+  constructor() {
+    // Phase 31-B: when orgName arrives after form init (parent's getCurrentOrg
+    // subscription resolves asynchronously), patch legalEntityName for new
+    // Corporate Identity entries. Edit mode is owned by populateForm().
+    effect(() => {
+      const name = this.orgName();
+      if (!name) return;
+      if (this.mode() !== 'create') return;
+      if (this.section() !== 'corporate_identity') return;
+      const fg = this.form();
+      if (!fg) return;
+      const control = fg.get('legalEntityName');
+      if (control && !control.value) {
+        control.setValue(name);
+      }
+    });
+  }
 
   ngOnInit(): void {
     this.form.set(this.createForm());
@@ -101,7 +124,7 @@ export class VendorProfileForm implements OnInit {
       case 'corporate_identity':
         return this.fb.group({
           ...baseFields,
-          legalEntityName: ['', Validators.required],
+          legalEntityName: [this.mode() === 'create' ? this.orgName() : '', Validators.required],
           businessType: [''],
           foundedYear: [''],
           yearsInBusiness: [''],

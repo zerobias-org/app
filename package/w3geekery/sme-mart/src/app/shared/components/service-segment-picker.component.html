@@ -1,0 +1,52 @@
+@if (loading()) {
+  <div class="loading-state">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Loading services...</p>
+  </div>
+} @else {
+  <div class="service-segment-picker">
+    <!-- Multi-select autocomplete input -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Search or browse services</mat-label>
+      <input matInput
+        #searchInput
+        type="text"
+        placeholder="Type to search services..."
+        (input)="onSearch(searchInput.value)"
+      />
+    </mat-form-field>
+
+    <!-- Display segments (filtered) -->
+    @if (displaySegments().length > 0) {
+      <div class="available-items">
+        @for (segment of displaySegments(); track segment.id) {
+          <mat-chip
+            (click)="onAddSegment(segment)"
+            [highlighted]="selectedSegmentIds().includes(segment.id)"
+          >
+            {{ segment.name }}
+          </mat-chip>
+        }
+      </div>
+    } @else if (searchTerm()) {
+      <p class="no-match">{{ noMatchMessage() }}</p>
+    } @else {
+      <p class="empty-state">No services selected. Start typing to search or browse services.</p>
+    }
+
+    <!-- Selected items as removable chips -->
+    @if (selectedSegments().length > 0) {
+      <div class="selected-items">
+        <p class="selected-label">Selected Services:</p>
+        <mat-chip-set>
+          @for (segment of selectedSegments(); track segment.id) {
+            <mat-chip (removed)="onRemove(segment)">
+              {{ segment.name }}
+              <mat-icon matChipRemove>cancel</mat-icon>
+            </mat-chip>
+          }
+        </mat-chip-set>
+      </div>
+    }
+  </div>
+}

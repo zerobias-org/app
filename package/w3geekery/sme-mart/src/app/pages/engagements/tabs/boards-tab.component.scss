@@ -1,0 +1,16 @@
+.boards-tab-header {
+  display: flex;
+  justify-content: flex-end;
+  padding: 1rem 1.5rem 0;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  padding: 3rem;
+}
+
+.error-message {
+  padding: 1.5rem;
+  color: var(--mat-sys-error);
+}

@@ -14,6 +14,9 @@
           @for (item of section.items; track item.id) {
             <mat-chip (removed)="onRemove(section, item)">
               {{ item.name }}
+              <zb-resource-status
+                [label]="item.verified ? 'verified' : 'asserted'"
+              ></zb-resource-status>
               <mat-icon matChipRemove>cancel</mat-icon>
             </mat-chip>
           }

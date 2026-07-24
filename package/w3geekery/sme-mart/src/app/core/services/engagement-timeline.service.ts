@@ -61,11 +61,11 @@ export class EngagementTimelineService {
     return {
       id: `comment-${comment.id.toString()}`,
       type: 'comment',
-      timestamp: comment.created instanceof Date ? comment.created : new Date(comment.created),
+      timestamp: comment.created.toDate(),
       actor: {
         name: comment.person?.name || 'You',
         imageUrl: comment.person?.imageUrl?.toString(),
-        userId: comment.personId.toString(),
+        userId: comment.personId?.toString() ?? '',
       },
       source: { taskId },
       payload: {
@@ -117,7 +117,7 @@ export class EngagementTimelineService {
       .map(c => {
         const commentId = c.id.toString();
         const attachments = attachmentMap.get(commentId) || [];
-        const timestamp = c.created instanceof Date ? c.created : new Date(c.created);
+        const timestamp = c.created.toDate();
         return {
           id: `comment-${commentId}`,
           type: 'comment' as const,
@@ -125,7 +125,7 @@ export class EngagementTimelineService {
           actor: {
             name: c.person?.name || 'Unknown',
             imageUrl: c.person?.imageUrl?.toString(),
-            userId: c.personId.toString(),
+            userId: c.personId?.toString() ?? '',
           },
           source: { taskId },
           payload: {
@@ -145,7 +145,7 @@ export class EngagementTimelineService {
     try {
       bids = typeof engagement.bids === 'string'
         ? JSON.parse(engagement.bids)
-        : (engagement.bids as any) || [];
+        : (engagement.bids as unknown as ParsedBid[]) || [];
     } catch { /* empty */ }
 
     for (const b of bids) {

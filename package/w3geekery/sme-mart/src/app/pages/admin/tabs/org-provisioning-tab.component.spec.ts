@@ -256,20 +256,18 @@ describe('OrgProvisioningTabComponent', () => {
         currentOrgId: TARGET_ORG,
         currentOrgName: 'Target Org',
         currentOrgSlug: 'targetorg',
-        buyerUserId: TARGET_USER_PRINCIPAL,
-        assignedPartyId: TARGET_ORG_PARTY,
-        accountablePartyId: TARGET_USER_PARTY,
       });
     });
 
-    it('switches back to original org BEFORE invoking the recipe (Pipeline.receive lives in W3Geekery)', async () => {
+    it('stays in target org context for the recipe call (errata 040: ownerId is session-derived)', async () => {
       await component.dryRun(component.rows()[0]);
       orgIdService.setCurrrenOrgId.mockClear();
 
       await component.provisionOrg(component.rows()[0]);
 
-      // Order: party-fetch in target → switch back to original → recipe.
-      // Find the LAST setCurrrenOrgId(originalOrgId) call BEFORE the recipe call.
+      // Order: party-fetch in target → recipe (still in target) → finally restore.
+      // The most recent pre-recipe switch must be to the TARGET org so that
+      // platform.Project.create gets the right session-derived ownerId.
       const recipeCallOrder = provisioner.ensurePlatformEngagement.mock.invocationCallOrder[0];
       const setOrgInvocations = orgIdService.setCurrrenOrgId.mock.invocationCallOrder;
       const setOrgCalls = orgIdService.setCurrrenOrgId.mock.calls;
@@ -279,9 +277,12 @@ describe('OrgProvisioningTabComponent', () => {
         .map((order: number, idx: number) => ({ order, args: setOrgCalls[idx] }))
         .filter((c: { order: number }) => c.order < recipeCallOrder);
 
-      // The most recent pre-recipe switch must be back to original org.
+      // The most recent pre-recipe switch must be to the target org (NOT the
+      // operator org). This is the errata-040 fix: previously the code switched
+      // back to operator before the recipe, which caused server-derived ownerId
+      // to land as operator org instead of target org.
       const lastPreRecipeSwitch = preRecipeSwitches[preRecipeSwitches.length - 1];
-      expect(lastPreRecipeSwitch.args[0]).toBe(ORIGINAL_ORG);
+      expect(lastPreRecipeSwitch.args[0]).toBe(TARGET_ORG);
     });
 
     it('always restores original org on recipe failure', async () => {
