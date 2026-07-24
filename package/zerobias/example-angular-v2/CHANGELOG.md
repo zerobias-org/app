@@ -35,9 +35,17 @@ write demos.
   `BoardExtended` / `TaskExtended` (create+edit) and `TaskComment` (comment). New
   standalone `TypeShapePopover` component (signals; hover-reveal + click-to-pin +
   a 250ms close-delay/bridge so the cursor can reach the popover).
+- **Copy buttons on the code panels.** Both CallReveal panels (the call + the response) now show a
+  copy button on hover — `zb-code-editor` ships none. New shared `CopyButton` component
+  (native Clipboard API), also used by the TS-shape popover.
 
 ### Fixed
 
+- **Products table rows double-height from the logo.** The product logo was a hand-rolled `<img>`
+  with only `object-fit`/`border-radius` (no height cap), so it inflated each row past the text
+  height. Replaced with the canonical zb-ui pattern `<img class="zb-ui-resource-image s20">` — the
+  fully-constrained (max/min/width/height = 20px) rule the real `zb/com/ui` catalog-app products
+  table uses, ported into `styles.scss` (ngx-library does not ship these global zb-ui classes).
 - **Stray native tooltip across the whole drawer.** The `Drawer` input was named `title`, which
   collides with the global HTML `title` attribute: a static `<app-drawer title="Edit project">`
   bound the input AND left a real `title` attribute on the fixed-position host, so hovering anything

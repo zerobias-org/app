@@ -6,6 +6,7 @@ import { ZbCodeEditorComponent } from '@zerobias-org/ngx-library';
 
 import { autoFoldBeyondDepth } from './auto-fold';
 import { TypeShapePopover } from './type-shape-popover';
+import { CopyButton } from './copy-button';
 
 /**
  * CallReveal — the code-reveal write-demo primitive (twin of example-nextjs-v2's `CallReveal.tsx`).
@@ -29,12 +30,15 @@ import { TypeShapePopover } from './type-shape-popover';
 @Component({
   selector: 'app-call-reveal',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ZbCodeEditorComponent, TypeShapePopover],
+  imports: [ZbCodeEditorComponent, TypeShapePopover, CopyButton],
   template: `
     <div class="call-reveal">
       <div class="block">
         <div class="label">The call</div>
-        <zb-code-editor [value]="callText()" [extensions]="tsExt" [readOnly]="true"></zb-code-editor>
+        <div class="panel-code">
+          <app-copy-button [value]="callText()" />
+          <zb-code-editor [value]="callText()" [extensions]="tsExt" [readOnly]="true"></zb-code-editor>
+        </div>
       </div>
 
       @if (response() !== undefined) {
@@ -51,7 +55,10 @@ import { TypeShapePopover } from './type-shape-popover';
               <span class="note">obfuscated fixture — no call is made</span>
             }
           </div>
-          <zb-code-editor [value]="responseText()" [extensions]="jsonExt" [readOnly]="true"></zb-code-editor>
+          <div class="panel-code">
+            <app-copy-button [value]="responseText()" />
+            <zb-code-editor [value]="responseText()" [extensions]="jsonExt" [readOnly]="true"></zb-code-editor>
+          </div>
         </div>
       }
     </div>
@@ -84,6 +91,22 @@ import { TypeShapePopover } from './type-shape-popover';
       border: 1px solid var(--zb-divider);
       border-radius: 6px;
       overflow: hidden;
+    }
+    /* Copy button floats top-right of each code panel, revealed on hover/focus (matches nextjs). */
+    .panel-code {
+      position: relative;
+    }
+    .panel-code app-copy-button {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      z-index: 2;
+      opacity: 0;
+      transition: opacity 0.12s ease;
+    }
+    .panel-code:hover app-copy-button,
+    .panel-code:focus-within app-copy-button {
+      opacity: 1;
     }
   `,
 })

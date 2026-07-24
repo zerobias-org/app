@@ -4,6 +4,7 @@ import { javascript } from '@codemirror/lang-javascript';
 import { ZbCodeEditorComponent } from '@zerobias-org/ngx-library';
 
 import { RESPONSE_SHAPES } from './response-shapes.generated';
+import { CopyButton } from './copy-button';
 
 /**
  * TypeShapePopover — a small "TS" badge shown next to a response's type name (twin of
@@ -19,7 +20,7 @@ import { RESPONSE_SHAPES } from './response-shapes.generated';
 @Component({
   selector: 'app-type-shape-popover',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ZbCodeEditorComponent],
+  imports: [ZbCodeEditorComponent, CopyButton],
   template: `
     <span class="type-popover-wrap" (mouseenter)="onEnter()" (mouseleave)="onLeave()">
       <button
@@ -38,9 +39,7 @@ import { RESPONSE_SHAPES } from './response-shapes.generated';
           <div class="type-popover-head">
             <code>{{ typeName() }}</code>
             <span class="type-popover-hint">&#64;zerobias-com/platform-sdk</span>
-            <button type="button" class="type-copy" (click)="copy()">
-              {{ copied() ? 'Copied' : 'Copy' }}
-            </button>
+            <app-copy-button [value]="shape()" />
           </div>
           <zb-code-editor [value]="shape()" [extensions]="tsExt" [readOnly]="true"></zb-code-editor>
         </div>
@@ -115,20 +114,6 @@ import { RESPONSE_SHAPES } from './response-shapes.generated';
       font-size: var(--zb-font-size-xs, 12px);
       color: var(--zb-secondary-text);
     }
-    .type-copy {
-      padding: 2px 8px;
-      border: 1px solid var(--zb-divider);
-      border-radius: 4px;
-      background: transparent;
-      color: var(--zb-secondary-text);
-      font-family: inherit;
-      font-size: var(--zb-font-size-xs, 12px);
-      cursor: pointer;
-    }
-    .type-copy:hover {
-      color: var(--zb-text);
-      border-color: var(--zb-primary);
-    }
     zb-code-editor {
       display: block;
       border: 1px solid var(--zb-divider);
@@ -146,7 +131,6 @@ export class TypeShapePopover {
 
   protected readonly hovered = signal(false);
   protected readonly pinned = signal(false);
-  protected readonly copied = signal(false);
   protected readonly open = computed(() => this.hovered() || this.pinned());
   protected readonly shape = computed(() => RESPONSE_SHAPES[this.typeName()] ?? '');
 
@@ -164,15 +148,5 @@ export class TypeShapePopover {
     if (this.closeTimer) clearTimeout(this.closeTimer);
     // Delay so the cursor can travel from the badge into the popover before it closes.
     this.closeTimer = setTimeout(() => this.hovered.set(false), 250);
-  }
-
-  async copy(): Promise<void> {
-    try {
-      await navigator.clipboard.writeText(this.shape());
-      this.copied.set(true);
-      setTimeout(() => this.copied.set(false), 1500);
-    } catch {
-      // Clipboard blocked (insecure context / permissions) — leave the button state unchanged.
-    }
   }
 }
