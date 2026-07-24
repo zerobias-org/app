@@ -72,15 +72,17 @@ src/environments/environment.neon.ts
 .claude/plans-archive/
 .claude/scripts/node_modules/
 .claude/scripts/.stitch-project-id
+.claude/settings.local.json*
 .claude/plans/
+.claude/ui-specs/
 .planning/notes/plans/
 .planning/notes/meetings/**/*.docx
 .planning/notes/meetings/**/*.txt
 # Raw transcript archive (inputs, not deliverables — summaries live alongside)
 .planning/notes/meetings/processed/
 
-# GSD planning — tracked in git (no secrets; verified 2026-03-30)
-# .planning/
+# GSD planning — tracked in git (no secrets; verified 2026-03-30) no more tracking.
+.planning/
 
 # Demo seed runtime artifacts (local-only)
 scripts/demo/.demo-state.json
@@ -94,3 +96,4 @@ Thumbs.db
 *.tgz
 .claude/handoffs/
 .claude/session-handoffs/
+
