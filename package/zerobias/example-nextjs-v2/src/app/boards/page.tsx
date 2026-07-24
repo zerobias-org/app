@@ -17,7 +17,7 @@ import { CreateBoardDrawer } from "@/components/CreateBoardDrawer";
 const PAGE_SIZE = 10;
 
 /**
- * Boards — the middle layer of the compliance containment chain (project -> board -> task), and
+ * Boards — the middle layer of the containment chain (project -> board -> task), and
  * the fourth RemoteTable consumer. Same server-driven two-call pattern:
  *
  *   portalClient.getBoardApi().searchOptions()               -> per-column sort/filter metadata
@@ -135,7 +135,7 @@ export default function BoardsPage() {
   return (
     <div>
       <div className="page-header">
-        <h1>Compliance Boards</h1>
+        <h1>Boards</h1>
         <button type="button" className="btn-stroked" onClick={() => setCreateOpen(true)}>
           + Create Board
         </button>

@@ -17,6 +17,51 @@ still differs from — the Next.js reference.
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-07-24
+
+Closes the two parity gaps with `example-nextjs-v2` 0.4.0 in the code-reveal
+write demos.
+
+### Added
+
+- **Response type name + "TS" shape popover.** Each code-reveal response panel now
+  names the SDK class it returns (e.g. `Example response · ProjectExtended`) and
+  shows a small **TS** badge; hover (or click to pin) reveals a popover with the
+  REAL class shape and a copy button, so a dev can paste the type into their own
+  code as a reference. The shapes are extracted from the installed SDK's `.d.ts`
+  at build time (`scripts/extract-response-shapes.mjs` ->
+  `src/app/shared/call-reveal/response-shapes.generated.ts`, `npm run extract:shapes`)
+  — never hand-authored, so they cannot drift. Response types: `ProjectExtended` /
+  `BoardExtended` / `TaskExtended` (create+edit) and `TaskComment` (comment). New
+  standalone `TypeShapePopover` component (signals; hover-reveal + click-to-pin +
+  a 250ms close-delay/bridge so the cursor can reach the popover).
+- **Copy buttons on the code panels.** Both CallReveal panels (the call + the response) now show a
+  copy button on hover — `zb-code-editor` ships none. New shared `CopyButton` component
+  (native Clipboard API), also used by the TS-shape popover.
+
+### Fixed
+
+- **Products table rows double-height from the logo.** The product logo was a hand-rolled `<img>`
+  with only `object-fit`/`border-radius` (no height cap), so it inflated each row past the text
+  height. Replaced with the canonical zb-ui pattern `<img class="zb-ui-resource-image s20">` — the
+  fully-constrained (max/min/width/height = 20px) rule the real `zb/com/ui` catalog-app products
+  table uses, ported into `styles.scss` (ngx-library does not ship these global zb-ui classes).
+- **Stray native tooltip across the whole drawer.** The `Drawer` input was named `title`, which
+  collides with the global HTML `title` attribute: a static `<app-drawer title="Edit project">`
+  bound the input AND left a real `title` attribute on the fixed-position host, so hovering anything
+  inside the drawer (surfaced by the new "TS" copy button) showed a browser tooltip like
+  "Edit project". Renamed the input to `heading` — no collision. (example-nextjs-v2 is unaffected;
+  React does not auto-apply a `title` prop to the DOM.)
+
+### Changed
+
+- **`objectLiteral()` renders arrays and nested objects as real literals.**
+  `literalOf()` now has an `Array.isArray` branch (each element mapped through
+  `literalOf`; `[]` when empty) and an `inlineObjectLiteral` helper for nested plain
+  objects, so a populated `NewTask.approvers` reads as `["…", "…"]` and a link as
+  `[{ resourceId: "…" }]` instead of a comma-joined string. SDK value types (UUID /
+  enum / DateFormat) keep their meaningful-`toString` wire form.
+
 ## [0.2.0] - 2026-07-22
 
 Rounds out the **project -> board -> task** surface toward Next.js

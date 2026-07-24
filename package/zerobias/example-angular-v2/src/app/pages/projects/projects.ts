@@ -56,7 +56,7 @@ import { CreateProjectForm } from './create-project-form';
       </p>
     </section>
 
-    <app-drawer [open]="createOpen()" title="Create project" (close)="createOpen.set(false)">
+    <app-drawer [open]="createOpen()" heading="Create project" (close)="createOpen.set(false)">
       @if (createOpen()) {
         <app-create-project-form />
       }

@@ -123,7 +123,7 @@ import { EditTaskForm } from './edit-task-form';
         <app-comment-composer [taskId]="t.id" />
       </section>
 
-      <app-drawer [open]="editOpen()" title="Edit task" (close)="editOpen.set(false)">
+      <app-drawer [open]="editOpen()" heading="Edit task" (close)="editOpen.set(false)">
         @if (editOpen()) {
           <app-edit-task-form [task]="t" />
         }

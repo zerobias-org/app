@@ -57,7 +57,7 @@ import { CreateTaskForm } from './create-task-form';
       </p>
     </section>
 
-    <app-drawer [open]="createOpen()" title="Create task" (close)="createOpen.set(false)">
+    <app-drawer [open]="createOpen()" heading="Create task" (close)="createOpen.set(false)">
       @if (createOpen()) {
         <app-create-task-form />
       }

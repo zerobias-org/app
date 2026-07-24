@@ -32,7 +32,7 @@ import { exampleTaskComment } from './fixtures';
       <app-markdown-textarea (change)="onChange($event.markdown)" />
 
       @if (request(); as req) {
-        <app-call-reveal [call]="call()" [response]="exampleTaskComment" />
+        <app-call-reveal [call]="call()" [response]="exampleTaskComment" [responseType]="'TaskComment'" />
       }
     </div>
   `,
