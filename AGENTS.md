@@ -21,7 +21,7 @@ of the ZeroBias platform without owning the auth or hosting infrastructure:
 - **Create custom UIs** without implementing authentication or hosting yourself.
 - **Leverage the ZeroBias client + SDKs** and community-generated module SDKs.
 - **Deploy automatically** — a PR merged to an environment branch publishes the
-  changed app to that environment.
+  changed app to that environment. **One app per PR** — see [Deploy](#deploy).
 - **Access platform capabilities** — connections, modules, schemas, queries, and
   more, through the client.
 
@@ -139,8 +139,18 @@ Each app folder must have:
 
 ## Deploy
 
+> ## ⛔ ONE app per PR — deploys are single-app by design
+>
+> **A PR (or promotion branch) must change exactly ONE
+> `package/<org>/<app>/` subtree. Do not put two apps in one PR — only one of
+> them will deploy.** This is intentional: essentially every change in this repo
+> is to a single app, and the pipeline is built for that. To ship two apps to
+> the same environment, open **two separate PRs** (one app subtree each) and
+> merge them one at a time. Same for env promotions (`uat → qa`, `uat → main`):
+> **one app per promotion branch.** Don't try to batch them.
+
 `.github/workflows/dispatch.yml` fires on push to `main` / `uat` / `qa`, finds
-each changed `package/<org>/<app>/**`, and dispatches `deploy.yml`, which runs
+the changed `package/<org>/<app>/**` app, and dispatches `deploy.yml`, which runs
 the `static-s3-app-release` action:
 
 ```
