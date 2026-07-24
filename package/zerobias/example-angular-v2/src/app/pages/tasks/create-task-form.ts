@@ -101,7 +101,7 @@ const PLACEHOLDER_ACTIVITY = '00000000-0000-0000-0000-000000000000';
       </div>
 
       <div class="form-code">
-        <app-call-reveal [call]="call()" [response]="exampleResponse" />
+        <app-call-reveal [call]="call()" [response]="exampleResponse" [responseType]="'TaskExtended'" />
       </div>
     </form>
   `,

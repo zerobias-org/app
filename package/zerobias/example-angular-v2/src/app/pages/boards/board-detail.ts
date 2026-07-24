@@ -89,7 +89,7 @@ const TASK_PREVIEW = 10;
         }
       </section>
 
-      <app-drawer [open]="editOpen()" title="Edit board" (close)="editOpen.set(false)">
+      <app-drawer [open]="editOpen()" heading="Edit board" (close)="editOpen.set(false)">
         @if (editOpen()) {
           <app-edit-board-form [board]="b" />
         }
