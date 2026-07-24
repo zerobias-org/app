@@ -1,5 +1,63 @@
 // Tables, cards, buttons, forms, chips — matched to the portal (zb-ui / ngx-library).
 
+// ---------- Home intro + session card (twin of example-angular-v2's Home) ----------
+.intro {
+  max-width: 900px;
+}
+.intro h1 {
+  margin: 0 0 var(--zb-space-sm);
+}
+.lead {
+  color: var(--zb-secondary-text);
+  font-size: var(--zb-font-size-lg);
+  line-height: 1.5;
+  margin: 0;
+}
+.session-card {
+  max-width: 900px;
+  margin-top: var(--zb-space-lg);
+  background: var(--zb-background-card);
+  border: 1px solid var(--zb-divider);
+  border-radius: var(--zb-radius-md);
+  overflow: hidden;
+}
+.session-card-head {
+  padding: var(--zb-space-sm) var(--zb-space-md);
+  border-bottom: 1px solid var(--zb-divider);
+}
+.session-card-head h2 {
+  margin: 0;
+  font-size: var(--zb-font-size-md);
+}
+.session-card-body {
+  padding: var(--zb-space-md);
+}
+.session-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--zb-space-md);
+  margin: 0;
+}
+.session-grid dt {
+  color: var(--zb-secondary-text);
+  font-size: var(--zb-font-size-sm);
+}
+.session-grid dd {
+  margin: 4px 0 0;
+  font-weight: 500;
+}
+.session-hint {
+  margin: var(--zb-space-md) 0 0;
+  color: var(--zb-secondary-text);
+  font-size: var(--zb-font-size-sm);
+  line-height: 1.5;
+}
+.session-hint code,
+.lead code {
+  font-family: var(--zb-font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  color: var(--zb-primary);
+}
+
 // ---------- App cards (home) — matches the portal home "My Apps" cards ----------
 .app-cards {
   display: grid;

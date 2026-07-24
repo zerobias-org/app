@@ -67,7 +67,7 @@ export interface EditBoardBaseline {
       </div>
 
       <div class="form-code">
-        <app-call-reveal [call]="call()" [response]="exampleResponse" />
+        <app-call-reveal [call]="call()" [response]="exampleResponse" [responseType]="'BoardExtended'" />
       </div>
     </form>
   `,

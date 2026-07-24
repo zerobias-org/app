@@ -17,7 +17,7 @@ import { CreateProjectDrawer } from "@/components/CreateProjectDrawer";
 const PAGE_SIZE = 10;
 
 /**
- * Projects — the top of the compliance containment chain, and the THIRD consumer of RemoteTable
+ * Projects — the top of the containment chain, and the THIRD consumer of RemoteTable
  * (after Products and Tasks). Same server-driven two-call pattern:
  *
  *   portalClient.getProjectApi().searchOptions()               -> per-column sort/filter metadata
@@ -144,7 +144,7 @@ export default function ProjectsPage() {
   return (
     <div>
       <div className="page-header">
-        <h1>Compliance Projects</h1>
+        <h1>Projects</h1>
         <button type="button" className="btn-stroked" onClick={() => setCreateOpen(true)}>
           + Create Project
         </button>

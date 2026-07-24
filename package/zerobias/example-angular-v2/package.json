@@ -1,12 +1,13 @@
 {
   "name": "example-angular-v2",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "extract:shapes": "node scripts/extract-response-shapes.mjs"
   },
   "prettier": {
     "printWidth": 100,

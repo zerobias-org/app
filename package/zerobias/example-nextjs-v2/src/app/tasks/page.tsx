@@ -17,7 +17,7 @@ import { CreateTaskDrawer } from "@/components/CreateTaskDrawer";
 const PAGE_SIZE = 10;
 
 /**
- * Compliance Tasks — the SECOND consumer of RemoteTable, and the point of building it as a
+ * Tasks — the SECOND consumer of RemoteTable, and the point of building it as a
  * reusable component: this page is almost entirely assembly. Same two-call pattern as
  * Products, against a completely different surface:
  *
@@ -39,7 +39,7 @@ const COLUMNS: Column<TaskExtended>[] = [
   {
     key: "activity",
     header: "Activity",
-    // Tasks hang off a compliance activity — they do not float. This is that link.
+    // Tasks hang off an activity — they do not float. This is that link.
     cell: (t) => t.activity?.name ?? "—",
   },
   {
@@ -141,7 +141,7 @@ export default function TasksPage() {
   return (
     <div>
       <div className="page-header">
-        <h1>Compliance Tasks</h1>
+        <h1>Tasks</h1>
         <button type="button" className="btn-stroked" onClick={() => setCreateOpen(true)}>
           + Create Task
         </button>

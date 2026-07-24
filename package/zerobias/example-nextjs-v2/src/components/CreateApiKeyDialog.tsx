@@ -53,10 +53,12 @@ export function CreateApiKeyDialog({ onClose }: { onClose: () => void }) {
     setError(null);
     setCreating(true);
     try {
-      const body = new CreateApiKeyBody(
-        name.trim(),
-        new DateTime(expirationFrom(dur, durationType)),
-      );
+      // A plain object typed as `CreateApiKeyBody` — the compiler enforces the model's fields
+      // (a missing one is a build error). Values are the real SDK types (DateTime).
+      const body: CreateApiKeyBody = {
+        name: name.trim(),
+        expiration: new DateTime(expirationFrom(dur, durationType)),
+      };
       const key = await api.danaClient.getMeApi().createApiKey(body);
       setCreated(key);
       copy(key.data, "key");

@@ -148,7 +148,7 @@ const TASK_PREVIEW = 10;
         }
       </section>
 
-      <app-drawer [open]="editOpen()" title="Edit project" (close)="editOpen.set(false)">
+      <app-drawer [open]="editOpen()" heading="Edit project" (close)="editOpen.set(false)">
         @if (editOpen()) {
           <app-edit-project-form [project]="p" />
         }

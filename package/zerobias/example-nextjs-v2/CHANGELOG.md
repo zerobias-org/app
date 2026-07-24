@@ -14,6 +14,71 @@ the changes into their own app easier.
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-07-23
+
+Phase 4 — parity pass against **example-angular-v2**: the code-reveal write demos
+now build every request as a **typed object literal** and show it **inline in the
+call** (one panel, not a signature beside a JSON blob), plus a portal-exact
+header, a home "Your session" landing, response auto-folding, and code-block copy
+buttons.
+
+### Changed — the code-reveal write-demo doctrine
+
+- **Request objects are now plain object literals typed to the model**, not
+  positional `new NewX(...)` / `new UpdateX(...)`. Typing the const
+  (`const project: NewProject = { … }`) makes the **compiler enforce the model's
+  required fields** — a missing one is a build error, which `newInstance(obj: any)`
+  would not catch. Values stay real SDK types: enum members via `Status.from(...)`,
+  ids via `toUUID(...)`, each `NewTaskLink` a `{ resourceId }` literal. Update
+  deltas are `const delta: UpdateX = {}` with only changed fields assigned; `null`
+  (clear/unassign) survives to the wire because nothing round-trips through a
+  serializer (no `applyNulls` workaround needed). Applied across all seven
+  code-reveal forms + `CommentComposer`, and to the two live writes the doctrine
+  also covers — `Pkv` (`upsertPrincipalKeyValue({ key, value })`) and
+  `CreateApiKeyBody`.
+- **`CallReveal` folds the payload into the call.** The separate "Request payload"
+  JSON panel is gone; a new `objectLiteral()` helper renders the REAL built object
+  as the literal a consumer assigns, so the code shown cannot drift from what the
+  app constructs. Arrays render as real `[...]` literals and nested plain objects as
+  `{ k: v }` (so `links: [{ resourceId: "…" }]` reads as code); SDK value types
+  (UUID / enum / DateTime) keep their wire-string form. Two panels now: **The call**
+  (payload inline) + **Example response**.
+- **"Compliance" prefix dropped** from project / board / task copy (titles,
+  demo-card titles, placeholders, doc comments). A project/board/task is a generic
+  container that can track compliance but isn't specifically for it. Mirrors
+  example-angular-v2.
+
+### Added
+
+- **Response type name + "TS" shape popover.** Each code-reveal response panel now names the SDK
+  class it returns (e.g. `Example response · ProjectExtended`) and shows a small **TS** badge; hover
+  (or click to pin) reveals a popover with the REAL class shape and a copy button, so a dev can paste
+  the type into their own code as a reference. The shapes are extracted from the installed SDK's
+  `.d.ts` at build time (`scripts/extract-response-shapes.mjs` -> `src/lib/response-shapes.generated.ts`,
+  `npm run extract:shapes`) — never hand-authored, so they cannot drift. Response types:
+  `ProjectExtended` / `BoardExtended` / `TaskExtended` (create+edit) and `TaskComment` (comment).
+- **Response JSON auto-folds beyond depth 2** (`src/lib/auto-fold.ts`) — a live
+  platform response can run ~900 lines (a 25-repo Hub listing); the response panel
+  now collapses every JSON container nested deeper than the envelope, leaving
+  `{ count, items: [ {…} ] }` legible with each item one click from expanding. Code
+  folding + a fold gutter are enabled on the response block (`CodeBlock fold`).
+- **Code-block copy buttons** — every `CodeBlock` (call-reveal panels and rendered
+  Markdown fenced code) has a copy affordance that reveals on hover/focus and copies
+  the raw source via the native Clipboard API.
+- **Home "Your session" landing** (`src/app/page.tsx`) — an intro blurb (the app's
+  purpose + the `project -> board -> task` teaching goal) and a session card
+  showing the signed-in user, email, and current org (from `useSession()`) with a
+  note on how the client bootstrapped. The demo-card grid stays below it.
+
+### Changed — UI
+
+- **Header matched to the portal exactly** (`Header.tsx`, `_header.scss`) — black
+  64px toolbar (8px gap, 8px left padding), the ZeroBias app-icon tile at 36px in
+  place of the "ZB" mark, brand in Roboto 16px / weight 400, and the 4px cyan->dark
+  accent as a **separate `.zb-ui-bar` element** below the toolbar (not a
+  border-bottom, which would make the bar 68px). App-shell height accounts for the
+  extra 4px.
+
 ## [0.3.0] - 2026-07-16
 
 Phase 3 — the app builds its **own** React components (no component library) and
