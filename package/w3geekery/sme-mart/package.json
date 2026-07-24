@@ -55,9 +55,11 @@
   "overrides": {
     "@zerobias-org/types-core-js": "$@zerobias-org/types-core-js",
     "@zerobias-org/util-connector": "1.0.40",
-    "@zerobias-org/util-connector@1.0.41": "1.0.40"
+    "@zerobias-org/util-connector@1.0.41": "1.0.40",
+    "@zerobias-com/zerobias-sdk": "2.0.13"
   },
   "dependencies": {
+    "@acrodata/code-editor": "^0.6.0",
     "@angular/cdk": "^21.1.4",
     "@angular/common": "^21.1.0",
     "@angular/compiler": "^21.1.0",
@@ -83,7 +85,7 @@
     "@neondatabase/serverless": "^1.0.2",
     "@ngx-translate/core": "^15.0.0",
     "@ngx-translate/http-loader": "^17.0.0",
-    "@zerobias-com/zerobias-angular-client": "^2.0.18",
+    "@zerobias-com/zerobias-angular-client": "^2.0.13",
     "@zerobias-org/data-utils": "^2.1.7",
     "@zerobias-org/ngx-library": "^0.2.43",
     "@zerobias-org/types-core-js": "^2.0.4",
