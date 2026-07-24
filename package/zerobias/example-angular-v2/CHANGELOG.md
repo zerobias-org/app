@@ -36,6 +36,15 @@ write demos.
   standalone `TypeShapePopover` component (signals; hover-reveal + click-to-pin +
   a 250ms close-delay/bridge so the cursor can reach the popover).
 
+### Fixed
+
+- **Stray native tooltip across the whole drawer.** The `Drawer` input was named `title`, which
+  collides with the global HTML `title` attribute: a static `<app-drawer title="Edit project">`
+  bound the input AND left a real `title` attribute on the fixed-position host, so hovering anything
+  inside the drawer (surfaced by the new "TS" copy button) showed a browser tooltip like
+  "Edit project". Renamed the input to `heading` — no collision. (example-nextjs-v2 is unaffected;
+  React does not auto-apply a `title` prop to the DOM.)
+
 ### Changed
 
 - **`objectLiteral()` renders arrays and nested objects as real literals.**
