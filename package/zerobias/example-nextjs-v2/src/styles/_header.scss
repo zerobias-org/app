@@ -2,30 +2,24 @@
 // signature cyan gradient accent strip and cyan active-tab underline.
 
 .app-header {
-  position: relative;
-  // Above the positioned `.app-shell` (and its z-index:20 Drawer) so the cyan accent strip below
-  // the toolbar is never covered by the sidebar or the drawer. `.app-shell` became a positioned
-  // sibling (to host the Drawer), which would otherwise paint over this header in DOM order.
-  z-index: 30;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--zb-space-md);
+  // Exact portal `.portal-toolbar`: black bar, 64px, 8px gap, 8px left padding, white text. The
+  // cyan accent is a SEPARATE 4px `.zb-ui-bar` below (not a border) so the toolbar stays 64px.
+  gap: 8px;
   height: 64px;
-  padding: 0 var(--zb-space-md);
+  padding: 0 var(--zb-space-md) 0 8px;
   background: var(--zb-toolbar-bg);
   color: #fff;
 }
 
-// The 4px cyan -> dark gradient strip under the toolbar.
-.app-header::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -4px;
+// Portal `.zb-ui-bar` — the 4px cyan -> dark accent strip under the toolbar. A real in-flow
+// element (matches the portal); the app-shell height accounts for the extra 4px.
+.zb-ui-bar {
+  width: 100%;
   height: 4px;
-  background: linear-gradient(90deg, var(--zb-primary) 25%, #232323 75%);
+  background: linear-gradient(90deg, rgba(3, 175, 240, 1) 25%, rgba(35, 35, 35, 1) 75%);
 }
 
 .app-header-left {
@@ -41,30 +35,34 @@
 }
 
 .brand {
-  display: flex;
+  // EXACT portal `h1.app-name` + `img.app-image` computed styles: Roboto, 16px, weight 400,
+  // line-height normal, letter-spacing normal, #fff; icon 36px with 6px side margins.
+  display: inline-flex;
   align-items: center;
-  gap: var(--zb-space-sm);
-  font-family: var(--zb-font-brand);
-  font-weight: 700; // echoes the portal's heavy Roboto app-title
-  font-size: var(--zb-font-size-md);
+  gap: 8px;
+  font-family: var(--font-roboto), Roboto, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: normal;
+  letter-spacing: normal;
   color: #fff;
 }
 .brand:hover {
   text-decoration: none;
 }
-.brand-mark {
-  display: grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  border-radius: var(--zb-radius-sm);
-  background: rgba(var(--zb-primary-rgb), 0.15);
-  color: var(--zb-primary);
-  font-weight: 700;
+.brand-icon {
+  display: block;
+  width: 36px;
+  height: 36px;
+  margin: 0 6px;
+  flex-shrink: 0;
 }
-.brand span {
+.brand-name {
+  color: #fff;
+}
+// The example app's extra descriptor (the portal has no subtitle) — same font, dimmed.
+.brand-sub {
   color: var(--zb-secondary-text);
-  font-weight: 500;
 }
 
 .user-name {

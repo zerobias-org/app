@@ -27,3 +27,128 @@
   color: var(--zb-secondary-text);
   opacity: 0.75;
 }
+
+// The response's SDK class name, shown beside "Example response" (e.g. "· ProjectExtended").
+.call-reveal-type {
+  text-transform: none;
+  letter-spacing: 0;
+  font-family: var(--zb-font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-size: var(--zb-font-size-xs);
+  color: var(--zb-primary);
+}
+
+// ---------- "TS" type-shape badge + hover popover ----------
+// The wrapper is the hover region AND the positioning context: the popover stays open while the
+// cursor is over either the badge or the popover itself (they share this element's hover).
+.type-popover-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.type-badge {
+  padding: 0 6px;
+  border: 1px solid var(--zb-divider);
+  border-radius: var(--zb-radius-sm);
+  background: transparent;
+  color: var(--zb-secondary-text);
+  font-family: var(--zb-font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+
+  &:hover,
+  &[aria-expanded="true"] {
+    color: var(--zb-primary);
+    border-color: var(--zb-primary);
+  }
+}
+
+.type-popover {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 40;
+  // The label ancestor uppercases its text; the type shape must render in real case.
+  text-transform: none;
+  letter-spacing: normal;
+
+  // Transparent bridge across the gap up to the badge, so moving the cursor from badge to popover
+  // never crosses un-hovered space (belt-and-suspenders with the JS close delay).
+  &::before {
+    content: "";
+    position: absolute;
+    top: -6px;
+    left: 0;
+    right: 0;
+    height: 6px;
+  }
+  width: min(520px, 80vw);
+  max-height: 380px;
+  overflow: auto;
+  padding: var(--zb-space-sm);
+  border: 1px solid var(--zb-divider);
+  border-radius: var(--zb-radius-md);
+  background: var(--zb-background-card);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
+  cursor: default;
+}
+
+.type-popover-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--zb-space-sm);
+  margin-bottom: var(--zb-space-xs);
+}
+.type-popover-head code {
+  font-family: var(--zb-font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-size: var(--zb-font-size-sm);
+  color: var(--zb-primary);
+}
+.type-popover-hint {
+  font-size: var(--zb-font-size-xs);
+  color: var(--zb-secondary-text);
+}
+
+// The copy button lives inside the CodeBlock; in the popover it's the primary action, so keep it
+// always visible instead of hover-revealed.
+.type-popover .codeblock-copy {
+  opacity: 1;
+}
+
+// ---------- Code block wrapper + copy button (every CodeBlock, in call-reveal AND markdown) ----------
+// The wrapper is the positioning context for the copy button, which floats in the top-right and
+// reveals on hover/focus so it never obscures the code at rest.
+.codeblock-wrap {
+  position: relative;
+
+  &:hover .codeblock-copy,
+  .codeblock-copy:focus-visible {
+    opacity: 1;
+  }
+}
+
+.codeblock-copy {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 2;
+  padding: 2px 8px;
+  border: 1px solid var(--zb-divider);
+  border-radius: var(--zb-radius-sm);
+  background: var(--zb-background-card);
+  color: var(--zb-secondary-text);
+  font-size: var(--zb-font-size-xs);
+  font-family: var(--zb-font-body);
+  line-height: 1.6;
+  cursor: pointer;
+  opacity: 0; // revealed on hover/focus of the block (rules above)
+  transition: opacity 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+
+  &:hover {
+    color: var(--zb-text);
+    border-color: var(--zb-primary);
+  }
+}

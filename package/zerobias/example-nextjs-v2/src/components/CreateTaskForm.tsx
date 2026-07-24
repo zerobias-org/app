@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { NewTask, NewTaskLink } from "@zerobias-com/platform-sdk";
 import type { UUID } from "@zerobias-org/types-core-js";
 import { useSession } from "@/context/session-context";
-import { CallReveal } from "@/components/CallReveal";
+import { CallReveal, objectLiteral } from "@/components/CallReveal";
 import { splitUuidList } from "@/lib/uuid-list";
 import { exampleTask } from "@/lib/fixtures";
 
@@ -48,9 +48,11 @@ export function CreateTaskForm({
   const [notifiedRaw, setNotifiedRaw] = useState("");
   const [linksRaw, setLinksRaw] = useState("");
 
-  // The REAL request object, rebuilt from live input. Constructing NewTask + NewTaskLink here is
-  // what typechecks the call shape against the installed platform-sdk. Nothing is sent.
-  const request = useMemo(() => {
+  // The REAL request object, rebuilt from live input. A plain object typed as `NewTask` — the
+  // compiler enforces the four required fields (activityId + the three arrays); an optional the user
+  // did not fill simply never appears. Values are the real SDK types (each link a `NewTaskLink`
+  // literal), so nothing is coerced here. Nothing is sent.
+  const request = useMemo<NewTask | null>(() => {
     if (!api) return null;
     const toU = (s: string): UUID | undefined => {
       try {
@@ -65,31 +67,28 @@ export function CreateTaskForm({
         return u ? [u] : [];
       });
 
-    const task = new NewTask(
-      toU(activityId) ?? api.toUUID(PLACEHOLDER_ACTIVITY), // required
-      toList(approversRaw), // required (may be empty)
-      toList(notifiedRaw), // required (may be empty)
-      toList(linksRaw).map((resourceId) => new NewTaskLink(resourceId)), // required (may be empty)
-    );
-    if (name.trim()) task.name = name.trim();
-    if (description.trim()) task.description = description.trim();
     const p = Number(priority);
-    if (priority.trim() && !Number.isNaN(p)) task.priority = p;
-    if (boardId) task.boardId = boardId;
     const asg = toU(assigned);
-    if (asg) task.assigned = asg;
     const acc = toU(accountable);
-    if (acc) task.accountable = acc;
+    const task: NewTask = {
+      activityId: toU(activityId) ?? api.toUUID(PLACEHOLDER_ACTIVITY), // required — hangs off an activity
+      approvers: toList(approversRaw), // required (may be empty)
+      notified: toList(notifiedRaw), // required (may be empty)
+      links: toList(linksRaw).map((resourceId): NewTaskLink => ({ resourceId })), // required (may be empty)
+      ...(name.trim() ? { name: name.trim() } : {}),
+      ...(description.trim() ? { description: description.trim() } : {}),
+      ...(priority.trim() && !Number.isNaN(p) ? { priority: p } : {}),
+      ...(boardId ? { boardId } : {}),
+      ...(asg ? { assigned: asg } : {}),
+      ...(acc ? { accountable: acc } : {}),
+    };
     return task;
   }, [api, activityId, approversRaw, notifiedRaw, linksRaw, name, description, priority, boardId, assigned, accountable]);
 
+  // The call WITH its payload inline — one panel. The literal is rendered from the real `NewTask`
+  // above, so what is shown is exactly what was built (and would be sent).
   const call = [
-    `const task = new NewTask(`,
-    `  activityId,                 // required — a task hangs off an activity`,
-    `  approvers, notified, links, // required arrays (may be empty)`,
-    `);`,
-    `task.name = name;             // everything else is optional`,
-    `task.priority = priority;${boardId ? "\ntask.boardId = boardId;" : ""}`,
+    `const task: NewTask = ${objectLiteral(request ?? undefined)};`,
     `const created = await platformClient.getTaskApi().create(task);`,
   ].join("\n");
 
@@ -225,7 +224,7 @@ export function CreateTaskForm({
       </div>
 
       <div className="create-form-code">
-        <CallReveal call={call} request={request ?? undefined} response={exampleTask} />
+        <CallReveal call={call} response={exampleTask} responseType="TaskExtended" />
       </div>
     </form>
   );

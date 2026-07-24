@@ -43,14 +43,6 @@ export const DEMOS: Demo[] = [
     call: "danaClient.getPkvApi().upsertPrincipalKeyValue()",
   },
   {
-    href: "/module",
-    label: "Module",
-    icon: "extension",
-    title: "Module Usage — GitHub",
-    body: "Product → module → connection → scope → Hub client; list an org's repos.",
-    call: "new GithubHubImpl().connect(HubConnectionProfile)",
-  },
-  {
     href: "/projects",
     label: "Projects",
     icon: "account_tree",
@@ -73,6 +65,16 @@ export const DEMOS: Demo[] = [
     title: "Tasks",
     body: "Search, sort and filter tasks — the remote-table pattern on a real work surface.",
     call: "portalClient.getTaskApi().search(body, page, size, sort)",
+  },
+  // Module is the advanced multi-hop demo — kept last so the project -> board -> task containment
+  // chain stays contiguous above it. Order matches example-angular-v2's NAV_ITEMS.
+  {
+    href: "/module",
+    label: "Module",
+    icon: "extension",
+    title: "Module Usage — GitHub",
+    body: "Product → module → connection → scope → Hub client; list an org's repos.",
+    call: "new GithubHubImpl().connect(HubConnectionProfile)",
   },
 ];
 

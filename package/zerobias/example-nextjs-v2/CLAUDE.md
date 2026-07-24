@@ -8,7 +8,10 @@ the per-feature reference docs under [`docs/`](./docs/).
 
 ## TODO — next time we work in this app
 
-- [ ] **Build every SDK request object as a plain object literal typed to the model, and merge the
+_All three items below were completed in **0.4.0** (Phase 4) — see [CHANGELOG.md](./CHANGELOG.md).
+Kept here (checked) for traceability; prune when convenient._
+
+- [x] **Build every SDK request object as a plain object literal typed to the model, and merge the
       request payload INTO the call panel.** Done in `../example-angular-v2`; this app is now behind.
       Two linked changes:
       1. **Build request objects as plain object literals typed to the model** —
@@ -32,7 +35,7 @@ the per-feature reference docs under [`docs/`](./docs/).
          panel cannot drift from what the code actually constructs) and drops `undefined` keys.
       Bump the version + CHANGELOG when it lands.
 
-- [ ] **Fix the top banner (header) to match the portal EXACTLY** — the same reconciliation just
+- [x] **Fix the top banner (header) to match the portal EXACTLY** — the same reconciliation just
       done in `example-angular-v2` (`app.component.html` / `app.component.scss`). Touch
       `src/styles/_header.scss` + `src/components/Header.tsx`.
       **Portal source of truth:** `zb/com/ui/projects/portal/src/app/app.component.scss`
@@ -48,7 +51,7 @@ the per-feature reference docs under [`docs/`](./docs/).
         (Material's toolbar forces weight 500 / line-height 32px onto descendant text — override all three.)
       Bump version + CHANGELOG when it lands.
 
-- [ ] **Add a "Your session" landing to the home page.** Port the home view built in
+- [x] **Add a "Your session" landing to the home page.** Port the home view built in
       `../example-angular-v2/src/app/pages/home/home.ts` — an intro blurb (what the app is + the
       `project → board → task` teaching goal) plus a **session card** showing the signed-in
       **user name, email, and current org** (from `useSession()`), with a short note on how the
