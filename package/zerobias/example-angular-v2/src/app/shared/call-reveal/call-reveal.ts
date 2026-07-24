@@ -5,6 +5,8 @@ import { json } from '@codemirror/lang-json';
 import { ZbCodeEditorComponent } from '@zerobias-org/ngx-library';
 
 import { autoFoldBeyondDepth } from './auto-fold';
+import { TypeShapePopover } from './type-shape-popover';
+import { CopyButton } from './copy-button';
 
 /**
  * CallReveal — the code-reveal write-demo primitive (twin of example-nextjs-v2's `CallReveal.tsx`).
@@ -28,26 +30,35 @@ import { autoFoldBeyondDepth } from './auto-fold';
 @Component({
   selector: 'app-call-reveal',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ZbCodeEditorComponent],
+  imports: [ZbCodeEditorComponent, TypeShapePopover, CopyButton],
   template: `
     <div class="call-reveal">
       <div class="block">
         <div class="label">The call</div>
-        <zb-code-editor [value]="callText()" [extensions]="tsExt" [readOnly]="true"></zb-code-editor>
+        <div class="panel-code">
+          <app-copy-button [value]="callText()" />
+          <zb-code-editor [value]="callText()" [extensions]="tsExt" [readOnly]="true"></zb-code-editor>
+        </div>
       </div>
 
       @if (response() !== undefined) {
         <div class="block">
           <div class="label">
+            @if (live()) { Response } @else { Example response }
+            @if (responseType(); as rt) {
+              <span class="type">· {{ rt }}</span>
+              <app-type-shape-popover [typeName]="rt" />
+            }
             @if (live()) {
-              Response
               <span class="note">actual response from the platform</span>
             } @else {
-              Example response
               <span class="note">obfuscated fixture — no call is made</span>
             }
           </div>
-          <zb-code-editor [value]="responseText()" [extensions]="jsonExt" [readOnly]="true"></zb-code-editor>
+          <div class="panel-code">
+            <app-copy-button [value]="responseText()" />
+            <zb-code-editor [value]="responseText()" [extensions]="jsonExt" [readOnly]="true"></zb-code-editor>
+          </div>
         </div>
       }
     </div>
@@ -69,11 +80,33 @@ import { autoFoldBeyondDepth } from './auto-fold';
       font-style: italic;
       font-size: var(--zb-font-size-xs, 12px);
     }
+    .type {
+      font-family: var(--zb-font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+      font-size: var(--zb-font-size-xs, 12px);
+      font-weight: 400;
+      color: var(--zb-primary);
+    }
     zb-code-editor {
       display: block;
       border: 1px solid var(--zb-divider);
       border-radius: 6px;
       overflow: hidden;
+    }
+    /* Copy button floats top-right of each code panel, revealed on hover/focus (matches nextjs). */
+    .panel-code {
+      position: relative;
+    }
+    .panel-code app-copy-button {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      z-index: 2;
+      opacity: 0;
+      transition: opacity 0.12s ease;
+    }
+    .panel-code:hover app-copy-button,
+    .panel-code:focus-within app-copy-button {
+      opacity: 1;
     }
   `,
 })
@@ -94,6 +127,11 @@ export class CallReveal {
   readonly call = input.required<string>();
   /** An obfuscated example response fixture. Omit to show only the call. */
   readonly response = input<unknown>(undefined);
+  /**
+   * The SDK class the call returns (e.g. `ProjectExtended`). When set, the response panel names the
+   * type and shows a "TS" badge whose popover reveals the real class shape (see TypeShapePopover).
+   */
+  readonly responseType = input<string | undefined>(undefined);
 
   /**
    * Write demos (the default) reveal a call that is NEVER made, so the response is a fixture.
@@ -115,17 +153,37 @@ export function truncateUuids(text: string): string {
   return text.replace(UUID_RE, (id) => `${id.slice(0, 8)}…`);
 }
 
-/** One value as it would appear in source. SDK enums / UUID / DateFormat stringify to wire form. */
+/**
+ * One value as it would appear in source. Arrays render as real `[...]` literals and nested plain
+ * objects as `{ k: v }` literals (so e.g. `links: [{ resourceId: "…" }]` reads as code, not a
+ * comma-joined string). SDK value types (UUID / enum / DateFormat) have a meaningful `toString` and
+ * render as their wire string.
+ */
 function literalOf(value: unknown): string {
   if (value === null) return 'null';
   if (typeof value === 'string') return JSON.stringify(value);
   if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+  if (Array.isArray(value)) {
+    return value.length ? `[${value.map(literalOf).join(', ')}]` : '[]';
+  }
   if (typeof value === 'object') {
-    const asString = String(value);
-    // UUID / enums / DateFormat have a meaningful toString; a plain object does not.
-    return asString === '[object Object]' ? JSON.stringify(value) : JSON.stringify(asString);
+    // A plain object renders as a nested `{ k: v }` literal; an SDK value type (UUID / enum /
+    // DateFormat) stringifies to "[object Object]" only if plain, otherwise to its wire value.
+    return String(value) === '[object Object]'
+      ? inlineObjectLiteral(value)
+      : JSON.stringify(String(value));
   }
   return JSON.stringify(String(value));
+}
+
+/** A nested object on one line — `{ key: value, ... }`; `undefined`-valued keys are dropped. */
+function inlineObjectLiteral(value: unknown): string {
+  const entries = Object.entries((value ?? {}) as Record<string, unknown>).filter(
+    ([, v]) => v !== undefined,
+  );
+  return entries.length
+    ? `{ ${entries.map(([k, v]) => `${k}: ${literalOf(v)}`).join(', ')} }`
+    : '{}';
 }
 
 /**

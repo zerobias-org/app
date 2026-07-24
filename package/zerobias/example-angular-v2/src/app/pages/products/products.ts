@@ -67,7 +67,7 @@ import type { RemoteTableColumnOptions } from '../../shared/remote-table-column-
         <th mat-header-cell *matHeaderCellDef class="logo-col">{{ displayColumnLabels['imageUrl'] }}</th>
         <td mat-cell *matCellDef="let p">
           @if (p.imageUrl) {
-            <img class="logo" [src]="p.imageUrl.toString()" [alt]="p.name" width="28" height="28" />
+            <img class="zb-ui-resource-image s20" [src]="p.imageUrl.toString()" [alt]="p.name" />
           }
         </td>
       </ng-container>
@@ -122,7 +122,6 @@ import type { RemoteTableColumnOptions } from '../../shared/remote-table-column-
     .lead { color: var(--zb-secondary-text); margin: 0 0 var(--zb-spacing-md); }
     code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--zb-primary); }
     .logo-col { width: 56px; }
-    .logo { border-radius: 4px; object-fit: contain; }
   `,
 })
 export class Products extends ZbRemoteTableContainerComponent {

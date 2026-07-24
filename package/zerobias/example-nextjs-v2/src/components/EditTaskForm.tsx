@@ -5,7 +5,7 @@ import { UpdateTask } from "@zerobias-com/platform-sdk";
 import type { TaskExtended } from "@zerobias-com/portal-sdk";
 import type { UUID } from "@zerobias-org/types-core-js";
 import { useSession } from "@/context/session-context";
-import { CallReveal } from "@/components/CallReveal";
+import { CallReveal, objectLiteral } from "@/components/CallReveal";
 import { exampleUpdatedTask } from "@/lib/fixtures";
 
 /**
@@ -15,7 +15,8 @@ import { exampleUpdatedTask } from "@/lib/fixtures";
  * The server runs the transition and returns the task in its new status.
  *
  * Like every edit demo this builds a DELTA — `UpdateTask` is partial, so only changed fields are
- * assigned (the rest stay `undefined` and drop from the serialized payload). Nothing is sent.
+ * assigned (the rest stay absent and `objectLiteral` drops them). A plain object typed as
+ * `UpdateTask` typechecks the shape; `null` (unassign a party) survives to the wire. Nothing is sent.
  */
 export function EditTaskForm({ task }: { task: TaskExtended }) {
   const { api } = useSession();
@@ -28,9 +29,10 @@ export function EditTaskForm({ task }: { task: TaskExtended }) {
 
   const transitions = task.nextTransitions ?? [];
 
-  // The REAL delta, rebuilt from live input. Only changed fields are assigned; the rest stay
-  // undefined and drop out of the serialized payload. `assigned`/`accountable` cleared => null.
-  const request = useMemo(() => {
+  // The REAL delta, rebuilt from live input. A plain object typed as `UpdateTask`: only changed
+  // fields are assigned; the rest stay absent. `assigned`/`accountable` cleared => null (unassign),
+  // which survives to the wire because nothing round-trips through a serializer.
+  const request = useMemo<UpdateTask | null>(() => {
     if (!api) return null;
     const toU = (s: string): UUID | undefined => {
       try {
@@ -39,7 +41,7 @@ export function EditTaskForm({ task }: { task: TaskExtended }) {
         return undefined;
       }
     };
-    const delta = new UpdateTask();
+    const delta: UpdateTask = {};
 
     if (transitionId) {
       const t = toU(transitionId);
@@ -85,11 +87,11 @@ export function EditTaskForm({ task }: { task: TaskExtended }) {
     [request],
   );
 
+  // The call WITH its live delta inline — one panel. `transitionId` shows up here the moment you
+  // pick a move (it must be one of task.nextTransitions), never a status string.
   const call = [
-    `// Status is a workflow transition, not a status string.`,
-    `const changes = new UpdateTask();`,
-    `changes.transitionId = transition.id; // one of task.nextTransitions`,
-    ``,
+    `// Status is a workflow transition, not a status string — transitionId is one of task.nextTransitions.`,
+    `const changes: UpdateTask = ${objectLiteral(request ?? undefined)};`,
     `const updated = await platformClient.getTaskApi().update(taskId, changes);`,
   ].join("\n");
 
@@ -197,7 +199,7 @@ export function EditTaskForm({ task }: { task: TaskExtended }) {
       </div>
 
       <div className="create-form-code">
-        <CallReveal call={call} request={request ?? undefined} response={exampleUpdatedTask} />
+        <CallReveal call={call} response={exampleUpdatedTask} responseType="TaskExtended" />
       </div>
     </form>
   );

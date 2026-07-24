@@ -54,7 +54,7 @@ import { CreateBoardForm } from './create-board-form';
       </p>
     </section>
 
-    <app-drawer [open]="createOpen()" title="Create board" (close)="createOpen.set(false)">
+    <app-drawer [open]="createOpen()" heading="Create board" (close)="createOpen.set(false)">
       @if (createOpen()) {
         <app-create-board-form />
       }
