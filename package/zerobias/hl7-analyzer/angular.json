@@ -1,0 +1,115 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "cli": {
+    "packageManager": "npm"
+  },
+  "newProjectRoot": "projects",
+  "projects": {
+    "hl7-analyzer": {
+      "projectType": "application",
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
+      "root": "",
+      "sourceRoot": "src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "browser": "src/main.ts",
+            "tsConfig": "tsconfig.app.json",
+            "inlineStyleLanguage": "scss",
+            "outputPath": {
+              "base": "dist",
+              "browser": ""
+            },
+            "baseHref": "/hl7-analyzer/",
+            "stylePreprocessorOptions": {
+              "includePaths": [
+                "node_modules/@zerobias-org/ngx-library/src/styles"
+              ]
+            },
+            "allowedCommonJsDependencies": [
+              "events",
+              "js-beautify",
+              "cron-parser",
+              "ip-num",
+              "vuln-vects",
+              "iso8601-duration",
+              "semver",
+              "qs",
+              "form-data"
+            ],
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "public"
+              },
+              {
+                "glob": "**/*",
+                "input": "node_modules/@zerobias-org/ngx-library/src/assets",
+                "output": "assets"
+              }
+            ],
+            "styles": [
+              "src/styles.scss"
+            ]
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "12mb",
+                  "maximumError": "14mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "8kb",
+                  "maximumError": "16kb"
+                }
+              ],
+              "outputHashing": "all"
+            },
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.development.ts"
+                }
+              ]
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "options": {
+            "proxyConfig": "proxy.conf.js",
+            "host": "0.0.0.0",
+            "allowedHosts": true
+          },
+          "configurations": {
+            "production": {
+              "buildTarget": "hl7-analyzer:build:production"
+            },
+            "development": {
+              "buildTarget": "hl7-analyzer:build:development"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test"
+        }
+      }
+    }
+  }
+}
