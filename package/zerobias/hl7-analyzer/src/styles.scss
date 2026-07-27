@@ -1,0 +1,36 @@
+// Global styles + the ZeroBias theme. Setup is verbatim from the library's own
+// docs/CONSUMER_GUIDE.md (the M3 theme with light default + a `.dark-theme` override toggled by
+// ZbThemeService). The library's src/styles is on the SCSS include path via angular.json.
+@use '@angular/material' as mat;
+@use 'theme' as theme;
+@use 'theme-variables' as *;
+@use 'chips';
+@use 'checkbox';
+@use 'buttons';
+
+// Apply M3 themes
+html {
+  color-scheme: light;
+  @include mat.theme(theme.$theme);
+}
+
+// Apply ZeroBias CSS custom properties (mixins self-scope to `html` / `body.dark-theme`)
+@include zb-theme-variables-light(theme.$theme);
+@include zb-theme-variables-dark(theme.$altTheme);
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
+  background-color: var(--zb-background);
+  color: var(--zb-text);
+
+  &.dark-theme {
+    color-scheme: dark;
+    @include mat.theme(theme.$altTheme);
+  }
+}
