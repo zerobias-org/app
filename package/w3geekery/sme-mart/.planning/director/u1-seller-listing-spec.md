@@ -16,20 +16,18 @@
 
 ---
 
-## ⚠ OPEN Q1 for Clark — ProviderProduct is NOT a goods donor (recommend correction)
+## Q1 — ProviderProduct is NOT a goods donor  **[LOCKED — Clark 2026-07-27: "don't absorb, this is a different thing"]**
 
-The MP-D1 decomposition + MODEL.md name **`ProviderProduct`** as the goods/licensed-good donor to absorb (that was the basis of "U1 = absorb ProviderProduct"). Grounding it against code, that's a mislabel:
+The MP-D1 decomposition + MODEL.md named **`ProviderProduct`** as the goods/licensed-good donor to absorb. Grounding it against code, that was a mislabel:
 
 `ProviderProduct` = `{ orgId, productId→Catalog, proficiencyLevel, yearsExperience, certified, certificationDetails, verified, verificationSource }` — an **expertise junction** (same shape/cluster as `ProviderSkill`/`ProviderFramework`). It means **"our org is certified in Product X,"** not "we sell Product X." No price, no offer, no listing.
 
-Absorbing it into `SellerListing.family=licensed-good` would **conflate expertise-in-a-product with a-product-for-sale** — two different things.
-
-**Recommendation:**
-- **Do NOT absorb `ProviderProduct`.** It stays an expertise junction (R3 / Cluster B / task-155 adoption, tied to U3's seller cluster).
+**Locked resolution:**
+- **`ProviderProduct` is NOT absorbed.** It stays an expertise junction (R3 / Cluster B / task-155 adoption, tied to U3's seller cluster).
 - **U1 absorbs `ServiceOffering`** (the one real listing donor — services) into `SellerListing`.
-- **licensed-good + productized families are GREENFIELD** — no sme-mart donor exists today; define them on the primitive and mock the authoring. (This matches U2's "largest greenfield" reality — there's no goods-commerce in code at all.)
+- **licensed-good + productized families are GREENFIELD** — no sme-mart donor exists today; define them on the primitive and mock the authoring. (Matches U2's "largest greenfield" reality — there's no goods-commerce in code at all.)
 
-*This revises the earlier "absorb ProviderProduct" call (and my #330 note to Parks). Confirm the correction and I'll update Parks + the tracker.*
+*Reverses the earlier "absorb ProviderProduct" call + my #330 note to Parks. Correction sent to Parks to fix MODEL.md's R1 donor list + the tracker.*
 
 ---
 
@@ -96,21 +94,24 @@ interface OfferRef { offerId: string; label?: string | null; }   // pointer only
 
 ---
 
-## ⚠ OPEN Q2 for Clark — the U1 ↔ U2 (Ledger) boundary
+## Q2 — the U1 ↔ U2 (Ledger) boundary  **[REFERRED TO PARKS — Clark 2026-07-27: seam/contract owner]**
 
-`offers[]`/`OfferRef` is where U1 (listing) meets U2 (commerce origination). Proposed split:
+`offers[]`/`OfferRef` is where U1 (listing, contracts C1+C2) meets U2 (commerce origination, C1). Parks owns the cross-app seam contracts (`tc-mesh-contracts.md`), so the cut is his to define. **My proposed split, sent to Parks for the C1 contract:**
 - **U1 builds:** the `offers: OfferRef[]` field + the `OfferRef` **pointer shape** (`offerId` + display `label`), so a listing can *carry* pricing pointers, and the listing-authoring UI can attach them (mocked offer picker).
 - **U2 builds:** the actual origination — order-intent emission, the Ledger settlement seam, and engagement/entitlement creation.
 
-So **U1 = the listing carries the pointer; U2 = the pointer does something.** Confirm this is the right cut (alternative: leave `offers[]` out of U1 entirely until U2 — I don't recommend it; the field is part of the listing shape MODEL.md centers on).
+So **U1 = the listing carries the pointer; U2 = the pointer acts.** Await Parks' C1 contract ruling before building the `offers[]` write path.
 
 ---
 
-## Deferred / to-confirm-at-build
+## Locked (Clark did not object, 2026-07-27)
 
-- **`fulfillment`** — stored enum, **validated against `family`** (service→engagement; licensed_good/productized→entitlement_grant). Not free-set. (Locking unless you object.)
-- **`verification: VerificationBadge`** — MODEL.md has a listing-level badge. Lean: **derive** listing standing from the seller's `SellerAttestation`/expertise + vetting (U3/U4) rather than store a separate badge; keep the field but populate it read-through. Confirm at U4.
-- **`terms: LegalFacet`** — define the field; mock a minimal per-item terms ref; the full ODRL/DPV legal facet is its own later design (cross-cutting), not U1.
+- **`fulfillment`** — stored enum, **validated against `family`** (service→engagement; licensed_good/productized→entitlement_grant). Not free-set.
+- **`verification: VerificationBadge`** — **derived** from the seller's `SellerAttestation`/expertise + vetting (U3/U4), not a separately-stored badge; keep the field, populate read-through. (Revisit exact derivation at U4.)
+- **`terms: LegalFacet`** — define the field; mock a minimal per-item terms ref; the full ODRL/DPV legal facet is its own later cross-cutting design, not U1.
+
+## To-confirm-at-build
+
 - **enum casing** — MODEL.md uses hyphen/space forms; code will use snake/camel. Normalize at build.
 - **`ownerId` link vs scalar** — scalar for the prototype; real link is backend's call at absorption (D-58 3-axis).
 
