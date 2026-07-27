@@ -180,6 +180,35 @@ For apps developed on a separate org fork that publish to the canonical
   - `… → zerobias-org/app:main` publishes to `https://app.zerobias.com/<app-name>`
 - Merging the PR triggers the auto-deploy to that environment.
 
+## Branching & workflow
+
+The repo ships apps continuously off **short-lived** branches. Keep each branch
+small and scoped so PRs stay single-app and divergence never piles up.
+
+**The model:**
+- **One unit of work = one short-lived feature branch → one PR → `uat`.** Branch
+  off current `uat` (or, for cross-fork apps, the fork's uat-synced base), do the
+  one thing, PR it, let it merge + deploy, then delete the branch.
+- **One app per PR** — hard rule; the pipeline deploys only the first changed app
+  (see [Deploy](#deploy)).
+- **Promote per app** — `uat → qa` and `uat → main` are separate one-app
+  promotion PRs.
+
+**Anti-pattern — long-lived per-app "trunk" branches.** Do **not** keep a single
+never-merged branch as an app's de-facto trunk. It silently accumulates divergence
+against `uat` (we hit an **863-commit, different-stack** gap this way) and turns
+every sync into a rewrite. When an app graduates from exploratory build to
+build-to-spec, switch it to the feature-branch-per-unit model above and retire the
+long-lived branch.
+
+**SME Mart specifically.** SME Mart is a **shipping app, live on demo** — the
+`poc/` name is historical, not a signal that it's throwaway code (it is the
+disposable Marketplace mockup + data-model *surface* per zb-mesh D-58, a separate
+point). Future SME Mart work is **one short-lived feature branch per buildable unit
+→ `uat` PR**; do not resurrect a long-lived `poc/sme-mart` trunk. The stale Next.js
+`poc/sme-mart` branch was retired 2026-07-27 (history preserved at tag
+`archive/poc-sme-mart-nextjs`).
+
 ## Key integration patterns
 
 > The code below shows the platform mechanics. The **current concrete
