@@ -1,0 +1,109 @@
+:host {
+  display: block;
+}
+
+.app-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  // Exact portal `.portal-toolbar`: black bar, 64px, 8px gap, white text. The cyan accent is a
+  // SEPARATE 4px `.zb-ui-bar` below (not a border) so the toolbar stays exactly 64px.
+  height: 64px;
+  gap: 8px;
+  padding: 0 0 0 8px;
+  background: #000;
+  color: #fff;
+
+  .spacer {
+    flex: 1 1 auto;
+  }
+}
+
+// Portal `.zb-ui-bar` — the 4px cyan -> dark accent strip under the toolbar.
+.zb-ui-bar {
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, rgba(3, 175, 240, 1) 25%, rgba(35, 35, 35, 1) 75%);
+}
+
+.brand {
+  // EXACT portal `h1.app-name` + `img.app-image` computed styles (from devtools):
+  //   Roboto, 16px, font-weight 400, line-height normal, letter-spacing normal, color #fff;
+  //   icon 36px with 6px side margins. These override the mat-toolbar's inherited title tokens
+  //   (which would otherwise force weight 500 / line-height 32px).
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: Roboto, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: normal;
+  letter-spacing: normal;
+  color: #fff;
+
+  .brand-icon {
+    display: block;
+    width: 36px;
+    height: 36px;
+    margin: 0 6px;
+    flex-shrink: 0;
+  }
+
+  .brand-name {
+    color: #fff;
+  }
+
+  // The example app's extra descriptor (the portal has no subtitle) — same font, dimmed.
+  .brand-sub {
+    color: var(--zb-secondary-text);
+  }
+}
+
+.app-shell {
+  // Fill the viewport below the 64px toolbar + 4px accent bar.
+  height: calc(100vh - 68px);
+  background: var(--zb-background);
+}
+
+.app-rail {
+  width: 220px;
+  border-right: 1px solid var(--zb-divider);
+  background: var(--zb-background);
+  padding: var(--zb-spacing-sm) 0;
+
+  nav {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.rail-link {
+  display: flex;
+  align-items: center;
+  gap: var(--zb-spacing-md);
+  height: 48px;
+  padding: 0 var(--zb-spacing-md);
+  color: var(--zb-text);
+  text-decoration: none;
+  font-size: var(--zb-font-size-sm);
+
+  mat-icon {
+    color: var(--zb-secondary-text);
+  }
+
+  &:hover {
+    background: var(--zb-table-row-hover);
+  }
+
+  &.active {
+    background: var(--zb-table-row-hover);
+
+    mat-icon {
+      color: var(--zb-primary);
+    }
+  }
+}
+
+.app-content {
+  padding: var(--zb-spacing-lg) var(--zb-spacing-md);
+}
