@@ -281,14 +281,42 @@ Behaviour of the real receiver that the code works around — see
 ## Build & deploy
 
 - `npm run build` → static bundle **flat in `dist/`** (`outputPath.browser: ""`),
-  `baseHref: /hl7-analyzer/`. That is what CI syncs to
-  `s3://app-<env>-zerobias.com/hl7-analyzer/`.
+  `baseHref: /hl7-analyzer/`. CI builds from source and syncs that to
+  `s3://<bucket>/hl7-analyzer` (`--delete`, scoped to this prefix); the bucket name comes from
+  Vault per environment. Your local `dist/` is never uploaded.
 - One build is promoted across uat / qa / prod — the v2 client resolves its API host from
   `location.host` at runtime, so no per-environment values are baked in. `ng serve` swaps
   `environments/environment.ts` for `environment.development.ts` via `fileReplacements`.
-- Node **22** (`.nvmrc`), committed `package-lock.json`, `npm ci` in CI.
+- Node **22** (`.nvmrc`), committed `package-lock.json`, `npm ci` in CI. Note CI's `setup-node`
+  actually reads the **repo-root** `.nvmrc` (`22.21.1`), not this one — see the repo
+  [AGENTS.md](../../../AGENTS.md#per-app-requirements-for-deploy-to-work).
+- The production build enforces a **12 MB warn / 14 MB error** initial budget (`angular.json`);
+  the default 500 kB budget is nowhere near enough for the v2 SDK bundle. Current initial total is
+  **9.72 MB raw / 947 kB transfer**, dominated by one ~9.4 MB SDK chunk. A dependency bump that adds
+  ~4 MB fails the CI build, not just the local one — check `npm run build` output before promoting.
 - **One app per PR.** A PR or promotion branch must change only `package/zerobias/hl7-analyzer/` —
   see the repo [AGENTS.md](../../../AGENTS.md#deploy).
+
+### The environment you deploy to must have an HL7 receiver connection
+
+The deployed app talks to whatever environment serves it (origin-relative `/api`), **not** to UAT —
+`proxy.conf.js` is `ng serve` only. So the app is only useful in an env where the signed-in org has
+a connection deployed from `@zerobias-org/module-hl7-v2`. Development ran against **UAT**. Deploying
+to qa or prod produces a working shell with an **empty feed picker** if no receiver is deployed
+there — which is a legitimate smoke test of auth/session/shell, but proves nothing about Messages or
+Channels. Confirm where the receiver lives before choosing the target branch.
+
+### Deep links are not served (CDN limitation)
+
+The CDN has no SPA fallback, so only the entry URL `https://<env>/hl7-analyzer` resolves to this
+app. Loading, refreshing, or bookmarking `/hl7-analyzer/messages`, `/hl7-analyzer/messages/detail`
+or `/hl7-analyzer/channels` returns **HTTP 200 serving the ZeroBias portal shell** instead — the
+CloudFront router falls through to the bucket-root `index.html`. Verified against the sibling
+`example-angular-v2` deployment on UAT; it affects every path-routed Angular app in this repo, not
+just this one. In-app `routerLink` navigation and the portal iframe are unaffected, so the app works
+normally once loaded — but tell testers to start at the entry URL and navigate, and don't hand out a
+`/channels` link. The mechanism and the three possible fixes are in the repo
+[AGENTS.md](../../../AGENTS.md#-deep-links-only-work-for-apps-that-emit-per-route-html).
 
 ## Tests
 

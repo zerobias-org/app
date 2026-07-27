@@ -14,7 +14,13 @@ collections, invokes the module's `er7` and `validate` functions, and reads sche
 anything back.
 
 Angular 21 (standalone, zoneless, signals) built on `@zerobias-org/ngx-library` and the ZeroBias v2
-client. Deployed at `app-<env>-zerobias.com/hl7-analyzer/`.
+client.
+
+**Deployed at `https://<env>.zerobias.com/hl7-analyzer` — start there and navigate.** Sub-page URLs
+(`/hl7-analyzer/messages`, `/hl7-analyzer/channels`) are not served directly: loading or refreshing
+one lands you on the ZeroBias portal instead, because the CDN has no single-page-app fallback.
+Navigation inside the app works normally; it is only the direct link that fails. See
+[AGENTS.md](./AGENTS.md#deep-links-are-not-served-cdn-limitation).
 
 ## Prerequisites
 
