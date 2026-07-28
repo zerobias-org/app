@@ -1,0 +1,1086 @@
+ 
+			STATE OF CALIFORNIA
+DEPARTMENT OF GENERAL SERVICES 
+PROCUREMENT DIVISION
+Request for Proposal
+Hospital Bed and Emergency Medical Services Data System (HBEDS) 
+
+Event ID# 0000037498
+February 23, 2026
+1.	Section 1 – Introduction and Overview	6
+1.1	Scope of the Request for Proposal (RFP)	6
+1.1	Authority of the RFP and Bidder Advisement	6
+1.2	Availability	7
+1.3	Procurement Official	7
+1.4	Key Action Dates	7
+1.5	Americans with Disabilities Act (ADA)	7
+2.	Section 2 – Rules Governing the Procurement Process	9
+2.1	Identification and Classification of RFP Requirements	9
+2.1.1	Requirements	9
+2.1.2	Desirable Items	9
+2.1.3	Mandatory Requirements	9
+2.1.4	Non-Mandatory Requirements	9
+2.1.5	Scored Requirements	9
+2.1.6	Narrative Responses	10
+2.2	Bidding Requirements and Conditions	10
+2.2.1	Validity of Proposal	10
+2.2.2	RFP Documents	10
+2.2.3	Questions Regarding the RFP	10
+2.2.4	Request to Change the Requirements of the RFP	11
+2.2.5	Bidders’ Conference	11
+2.2.6	Supplier’s Intention to Submit a Proposal	11
+2.2.7	Addenda	12
+2.2.8	Bonds	12
+2.2.9	Discounts	12
+2.2.10	Joint Proposals	12
+2.2.11	Exclusion for Conflict of Interest	12
+2.3	Proposal Process	13
+2.3.1	General	13
+2.3.2	Final Proposals	13
+2.3.2.1	Draft Proposal	13
+2.3.3	Public Record	13
+2.3.4	Submission of Proposals	13
+2.3.4.1	Preparation	14
+2.3.4.2	Bidder’s Cost	14
+2.3.4.3	Completion of Proposals	14
+2.3.4.4	False or Misleading Statements	14
+2.3.4.5	Signature of Proposal	14
+2.3.4.6	Delivery of Proposals	14
+2.3.4.7	Withdrawal and Resubmission/Modification of Proposals	15
+2.3.5	Rejection of Proposals	15
+2.3.6	Evaluation and Selection Process	15
+2.3.6.1	General	15
+2.3.6.2	Evaluation Questions	15
+2.3.6.3	Errors in the Final Proposals	15
+2.3.7	Award of Contract	16
+2.3.8	Debriefing	17
+2.4	Contractual Information	17
+2.4.1	Contract General Provisions, Terms, and Conditions	17
+2.4.2	Contract Documents	17
+2.5	Other Information	17
+2.5.1	Protests	17
+2.5.1.1	Requirements Protest	18
+2.5.1.2	Award Protest	18
+2.5.2	Disposition of Proposals	19
+3.	Section 3 – Bidding Requirements	20
+3.1	Technical Requirements	20
+3.1.1	Proposed Hospital Subscription Access and Hospital Onboarding Fees (M)	20
+3.1.2	Statement of Work (SOW) (M)	20
+3.1.3	Bidder Skills/Experience (M)	20
+3.1.4	Bidder’s Approach and Understanding (MS)	21
+3.1.5	Question & Demonstration Meeting (M&MS)	23
+3.1.6	Unspecified Subordinate Product (M)	24
+3.1.7	Title (Software/Firmware) (M)	24
+3.2	Administrative Requirements	24
+3.2.1	Pricing (MS)	24
+3.2.2	Seller’s Permit and Secretary of State (M)	24
+3.2.3	Payee Data Record (M)	25
+3.2.4	Authorized Reseller (M)	25
+3.2.5	Darfur Contracting Act (M)	25
+3.2.6	California Civil Rights Laws (M)	26
+3.2.7	Iran Contracting Act (M)	26
+3.2.8	Insurance Requirements (M)	26
+3.2.9	Executive Order N-6-22 – Russia Sanctions (M)	27
+3.2.10	Federal Debarment, Suspension, Ineligibility, and Voluntary Exclusion (M)	27
+3.2.11	Generative Artificial Intelligence (GenAI) Disclosure Notification (M)	27
+3.2.12	Declaration Forms (M)	28
+3.2.13	Socioeconomic Programs (NMS)	28
+3.2.14	Commercially Useful Function (CUF) (M)	30
+3.2.15	Subcontractors (M)	30
+3.2.15.1	Notice of Subcontractors (M)	31
+4.	Section 4 - Cost	32
+4.1	Cost Information Guidelines	32
+4.1.1	Structure of Attachment 1, Cost Workbook	32
+4.1.2	Quantities	32
+4.1.3	Required Information	32
+4.1.4	Pricing/Discount Format	33
+4.1.5	Sales Tax and FOB Delivery	33
+4.2	Cost Workbook Instructions	33
+4.2.1	Download and Save	33
+4.2.2	Cost Workbook Completion	33
+4.3	Cost Submittal	33
+5.	Section 5 – Proposal Format	34
+5.1	Proposal Delivery	34
+5.2	Emailed Proposal Format	34
+5.2.1	Electronic Document Formats	34
+5.3	Final Proposal Content	35
+5.3.1	Final Proposal Documents	35
+6.	Section 6 - Evaluation	38
+6.1	Receipt	38
+6.2	Evaluation of Final Proposals	38
+6.2.1	Evaluation of Proposals	38
+6.2.2	Cost Analysis	38
+6.3	Final Proposal Scoring Criteria	38
+6.3.1	Bidder’s Approach and Understanding Score Calculation	39
+6.3.2	Demonstration Score Calculation	40
+6.3.3	Cost Score Calculation	40
+6.3.4	Total Score	41
+6.3.5	Preference Calculation	42
+6.3.5.1	Small Business Preference Calculation	42
+6.3.5.2	DVBE Incentive Calculation	42
+6.3.5.3	TACPA Preference Calculations	42
+6.4	Selection and Award	43
+6.5	Tie Breaker	43
+6.6	Negotiations	43
+7.	Section 7 – Contract Requirements	44
+7.1	Inspection and Acceptance (M)	44
+7.2	Invoicing (M)	44
+7.3	Payments (M)	44
+7.3.1	State Financial Marketplace (M)	44
+7.3.2	Ad Hoc Reporting (M)	44
+7.4	GenAI Disclosure and Obligations	45
+7.5	Contract Termination/Expiration Termination Plan (M)	45
+8.	Section 8 – Attachments/Exhibits	46
+8.1	Attachments	46
+8.2	Exhibits	46
+
+
+Section 1 – Introduction and Overview 
+This Request for Proposal (hereafter called the RFP) is issued by the Department of General Services, Procurement Division (DGS-PD) on behalf of the California Department of Public Health (CDPH). The RFP solicits proposals from firms qualified to establish a contract to provide a data subscription for a pre-existing, Contractor-hosted Software as a Service (SaaS) solution that displays real‑time staffed bed availability by bed type on a secure dashboard accessible to participating hospitals and local and state government officials. The solution is referred to as the Hospital Bed and Emergency Medical Services Data System (HBEDS).
+
+Scope of the Request for Proposal (RFP) 
+The Scope of the RFP includes an HBEDS SaaS solution and services as defined in Exhibit A, Scope of Work (SOW).  
+
+The State intends that the selected Bidder will work in cooperation with the State to furnish quality software access and services at the lowest price available in a timely and efficient manner. The selected Bidder will be the primary point of contact for all contract requirements.
+
+Award will be made on an All or None basis to the Bidder who scores the highest number of points as described in Section 6, Evaluation.   Bidders must propose all line items to be evaluated for award. The State reserves the right to eliminate any specific line item from the final award.
+
+The contract term resulting from the RFP will be three (3) years.  The contract will also contain options to extend for two (2) additional one-year periods, or portion thereof. If a mutual agreement cannot be reached, the contract will expire at the end of the current contract term.  All terms and conditions will remain the same for the entire contract period, including any extension periods.
+
+Any contract executed as a result of the RFP may be amended by mutual consent of the State and the Contractor.
+
+Authority of the RFP and Bidder Advisement 
+The RFP is being conducted under the policies developed by the Department of General Services, Procurement Division (DGS-PD) as provided under PCC sections 12102, et seq and 12125, et seq. The RFP describes the software and services that must be included in the proposal, the format the proposal must follow, and how to properly submit a complete proposal. The RFP also addresses all requirements that Bidders must meet to be eligible for consideration as well as Bidders' responsibilities.
+ 
+If a Bidder expects to be afforded the benefits of the steps included in this RFP (i.e., drafts, questions regarding requirements, protest of requirements, debriefing), the Bidder must take responsibility to:
+
+Carefully read the entire RFP.
+Ask appropriate questions in a timely manner if clarification is necessary.
+Submit all required responses, complete to the best of the Bidder’s ability, by the required dates and times.
+Make sure that all procedures and requirements of the RFP are accurately followed and appropriately addressed. 
+
+Availability 
+Bidders may propose software and services that exceed the RFP requirements, however, software and services meeting the mandatory requirements must be available throughout the duration of the contract term.
+
+Procurement Official
+The Procurement Official contact information for the RFP is listed below:
+
+Eileen Tardiff
+Procurement Division
+Department of General Services
+707 Third Street, 2nd Floor
+West Sacramento, CA  95605
+Telephone: (279) 946-8013
+E-mail: Eileen.Tardiff@dgs.ca.gov 
+Proposal Submittal E-mail: TAU@dgs.ca.gov
+
+The Procurement Official shall be the single point of contact. All inquiries and questions must be emailed to this person only. Oral communications are discouraged and shall not be binding to the State. Bidders should only rely on written statements issued by the Procurement Official. 
+
+Proposal submittals shall be sent to the Proposal Submission E-mail address identified above and in accordance with Section 5, Proposal Format. 
+
+Key Action Dates
+The important dates and times by which actions must be taken or completed are identified in Attachment 2, Key Action Dates.  If the State finds it necessary to change any of these dates, the State will release an addendum identifying the changes.  All dates after the Final Proposal submissions are approximate and may be adjusted without addendum to the RFP.
+
+Americans with Disabilities Act (ADA)
+To meet and carry out compliance with the nondiscrimination requirements of Title II, Americans with Disabilities Act (ADA), it is the policy of the State to make every effort to ensure that its programs, activities, employment opportunities, and services are available to all persons, including persons with disabilities.
+
+For persons with a disability needing reasonable accommodation to participate in the procurement process, or for persons having questions regarding reasonable accommodation for the procurement process, please contact the Procurement Division at DGSFrontDesk@dgs.ca.gov  (main office). Procurement Division's TTY/TDD (telephone device for the deaf) and California Relay Service numbers are listed below.  You may also directly contact the Procurement Official for this procurement.
+
+IMPORTANT: To ensure that the State can meet your accommodation, it is best that requests are received at least 10 working days before the scheduled event (e.g., Bidder conference) or due date for procurement documents.
+
+The Procurement Division TTY telephone number is:
+
+Sacramento Office: (916) 376-1891
+
+The California Relay Service Telephone Numbers are:
+
+Voice: 1-800-735-2922 or 1-888-877-5379
+TTY: 1-800-735-2929 or 1-888-877-5378
+Speech to Speech: 1-800-854-7784
+
+
+Section 2 – Rules Governing the Procurement Process
+Section 2 describes the proposal steps and includes the Bidder’s and the State’s rights and responsibilities in the procurement process. Specific guidelines for the submission of the RFP response are found in Section 5, Proposal Format.
+
+Identification and Classification of RFP Requirements
+
+Requirements
+The RFP identifies the requirements Bidders must adhere to for submitting compliant proposals. The use of "shall," "must," or "will" (except to indicate simple futurity) in the RFP indicates a requirement which is mandatory. A deviation from a mandatory requirement is material if the deficient response is not in substantial accord with the RFP requirements, provides an advantage to one Bidder over other Bidders, or has a potentially significant effect on the delivery, quantity, or quality of items proposed, amount paid to the supplier, or on the cost to the State.  Material deviations cannot be waived. A deviation, if not material, may be waived by the State.  
+
+Desirable Items
+The words "should" or "may" in the RFP indicate desirable attributes or conditions but are non-mandatory in nature.  Deviation from, or omission of, such a desirable feature, will not in itself cause rejection of the proposal.
+
+Mandatory Requirements
+All items within the RFP labeled mandatory (M) are non-negotiable. A Pass/Fail evaluation will be utilized for all mandatory requirements. By signing the Agreement Cover Letter referenced in Section 2.3.4.5, Signature of Proposal and submission of a proposal response, the Bidder agrees to all mandatory RFP requirements. 
+
+Non-Mandatory Requirements
+The RFP may include both preference programs and product/contract performance items identified as non-mandatory (NM) requirements. Bidders are not required to comply with these requirements to be compliant with the RFP. However, if a Bidder applies for a preference, the Bidder must meet the applicable preference requirements and provide the required preference documentation as outlined in the relevant section. Bidders who offer the non-mandatory product/contract performance items in their proposal are required, if awarded, to provide those items for the duration of the resultant contract. 
+
+Scored Requirements
+The RFP may include both mandatory scored (MS) and non-mandatory scored (NMS) requirements. Mandatory scored requirements are non-negotiable. Mandatory and non-mandatory scored items will achieve points as identified Section 6, Evaluation, if the requirement is met. 
+
+
+Narrative Responses
+The RFP includes some items that require a narrative response. Those items have been listed on Attachment 3, Narrative Response. Bidders are to provide narrative responses on this attachment only, (unless otherwise stated) and only for the items requested. If necessary, Bidders may add attachments to the document to further explain its response. Attachment 3, Narrative Response, shall be submitted with the Bidder’s Final Proposal. 
+ 
+Bidding Requirements and Conditions 
+
+Validity of Proposal
+A Bidder's Final Proposal is an irrevocable offer for 120 calendar days following the scheduled date for Submission of Final Proposals in Attachment 2, Key Action Dates.  A Bidder may extend its offer in the event of a delay of contract award.
+
+RFP Documents
+If a Bidder discovers any ambiguity, conflict, discrepancy, omission, or other error in the RFP, attachments, or exhibits, the Bidder shall immediately notify the Procurement Official in accordance with Section 1.3, Procurement Official, in writing and request clarification or modification of the document. If necessary, modifications will be made by addenda issued pursuant to Section 2.2.7. Addenda.
+
+If the RFP contains an error known to the Bidder, or an error that reasonably should have been known, the Bidder shall submit a proposal at its own risk.  If the Bidder fails to notify the State of the error prior to the date fixed for submission of proposals, and is awarded the contract, the Bidder shall not be entitled to additional compensation or time by reason of the error or its later correction.
+	
+Questions Regarding the RFP
+Bidders requiring clarification of the intent or content of the RFP or on procedural matters regarding the competitive proposal process may request clarification by submitting questions in an email clearly referencing the Event ID number to the Procurement Official listed in Section 1.3, Procurement Official.  
+
+Question and Answer sets will be provided to all Bidders without identifying the submitters.    At the sole discretion of the State, questions may be paraphrased by the State for clarity and to maintain anonymity. Oral answers shall not be binding on the State.  
+
+A Bidder who desires clarification or further information on the content of the RFP, but whose questions relate to the proprietary aspect of that Bidder's proposal and which, if disclosed to other Bidders, would expose that Bidder's proposal, may submit such questions in the same manner as above but must mark such correspondences as "CONFIDENTIAL”.  The Bidder must explain why any questions are sensitive in nature.  
+
+
+If the State concurs that the disclosure of the question or answer would expose the proprietary nature of the proposal, the question will be answered, and both the question and answer will be kept in confidence.  If the State does not concur with the proprietary aspect of the question, the question will not be answered in this manner, and the Bidder will be so notified. To ensure a response, questions and clarifications must be received in writing by the scheduled date given in Attachment 2, Key Action Dates.
+
+Request to Change the Requirements of the RFP
+If the Bidder believes that one or more of the RFP requirements is onerous, unfair, or imposes unnecessary constraints to the Bidder in proposing less costly or alternate solutions, the Bidder may request a change to the RFP by submitting in writing the recommended change, the facts substantiating this belief, and justification for making the recommended change.  Such requests must be submitted to the Procurement Official by the date specified in Attachment 2, Key Action Dates.  
+
+Failure by any Bidder to raise any concern related to a solicitation requirement will be deemed a waiver of any claim regarding the contract award relating to the specific solicitation requirement.
+
+Bidders’ Conference
+A Bidders' Conference will be held, during which suppliers will be afforded the opportunity to meet with State personnel and discuss the content of the RFP and the procurement process.  Suppliers are encouraged to attend the Bidders’ Conference.  The time, date, and place of the conference are listed in Attachment 2, Key Action Dates. 
+ 
+Suppliers are encouraged to submit questions to the Procurement Official prior to the Bidders’ Conference so that the State can address them during the conference. The State may accept oral questions during the conference and will make a reasonable attempt to provide answers prior to the conclusion of the conference. Oral answers will not be binding. Following the conference, the State will publish a Question-and-Answer set addressing all submitted questions, both written and oral. 
+
+Supplier’s Intention to Submit a Proposal
+Suppliers who want to participate in the proposal process are asked to state their intention by submitting an email to the Procurement Official with the following elements:
+
+Company Name and address
+Contact name, email, and phone number
+
+Bidders that submit their intention to submit a proposal will be placed on a notification list to receive email notifications of any changes or clarifications to any part of the RFP. All addenda, Question and Answer Sets, and Requests for Change will be published on the California State Contracts Register located on Cal eProcure.
+
+	
+
+
+Addenda
+The State may modify the RFP prior to the Final Proposals due date by issuance of an addendum.  Addenda will be numbered consecutively.  Bidders are required to meet all requirements of the most current addendum, which includes using any updated forms, if applicable. If any supplier determines that an addendum unnecessarily restricts its ability to submit a proposal, the supplier is allowed five (5) working days to ask a question, request a change, or submit a protest to the addendum according to the instructions contained in Section 2.5.1, Protests. Working days are defined as Monday through Friday, excluding holidays.
+
+Bonds 
+Not Applicable.
+
+Discounts
+The Prompt Payment Act requires payment of properly submitted and undisputed invoices no later than 45 calendar days after delivery of product or receipt of an undisputed invoice, whichever is later. The State encourages Bidders to offer cash discounts for prompt or early payment.  When a testing period is required prior to acceptance by the State, the payment period shall begin after the specified testing period and subsequent acceptance by the State.  Payment is deemed to be made, for the purpose of earning the discount, on the date of mailing the State warrant or check.
+
+Cash discounts offered by Bidders for the prompt payment of invoices will not be considered in evaluating cost for award purposes; however, all offered discounts will be taken if the payment is made within the discount period, even though not considered in the evaluation of offers.
+
+Joint Proposals 
+Joint proposals are not acceptable for this solicitation.
+
+Exclusion for Conflict of Interest
+No consultant shall be paid out of State funds for developing recommendations on the acquisition of information technology (IT) products or services or assisting in the preparation of a feasibility study, if that consultant is to be a source of such acquisition or could otherwise directly and/or materially benefit from State adoption of such recommendations or the course of action recommended in the feasibility study.  Further, no consultant shall be paid out of State funds for developing recommendations on the disposal of State surplus IT products, if that consultant would directly and/or materially benefit from State adoption of such recommendations.
+
+
+Proposal Process
+
+General
+The procurement process to be used in this RFP consists of multiple steps. Refer to Attachment 2, Key Action Dates, to determine which steps are included in this RFP. 
+
+The Final Proposal is a mandatory step for all Bidders; all other steps are optional.  However, Bidders are strongly encouraged to follow the scheduled steps of this procurement to increase the chance of submitting a compliant Final Proposal.  
+
+Final Proposals
+Final Proposals must be complete with all required cost information, signatures, forms, and documentation.
+
+Draft Proposal 
+At the State’s sole discretion, it may declare the Final Proposal to be a Draft Proposal if the State determines that Final Proposals from all Bidders contain material deviations. Bidders may not protest the State’s determination that all proposals have material deviations. If all proposals are declared noncompliant, the State may issue an addendum to the RFP. Should this occur, confidential discussions will be held with Bidders who are interested in continuing to participate in the proposal process. Notifying the Bidder of defects is intended to minimize the risk that the Final Proposal will be deemed non-compliant; however, the State will not provide any warranty that all defects in the Draft Proposal have been detected. Notification of defects in the Draft Proposal will not preclude rejection of the Final Proposal if undiscovered defects contained in the declared Draft Proposal are later found in the Final Proposal. Oral statements made by either party during confidential discussions shall not be binding.
+
+Each Bidder will be notified of the due date for the submission of a new Final Proposal. This submission must conform to the requirements of the original RFP and, if applicable, any subsequent addenda. The new Final Proposals will be evaluated in accordance with Section 6, Evaluation.  
+
+Public Record
+Final proposals are public upon posting of Notice of Intent to Award.  Bidders should be aware that marking a document "confidential" or "proprietary" in a final proposal will not prevent that document from being released after notice of intent to award as part of the public record, in accordance with the California Public Records Act. 
+
+Submission of Proposals
+The instructions contained herein apply to the Final Proposal.  They also apply to the Draft Proposal, except as noted.
+
+
+Preparation
+Proposals are to be prepared in such a way as to provide a straightforward and concise description of capabilities to satisfy the requirements of the RFP.  Expensive bindings, colored displays, promotional materials, etc., are not necessary or desired.  Emphasis should be concentrated on conformance to the RFP instructions, responsiveness to the RFP requirements, and on completeness and clarity of content.
+
+Before submitting each document, the Bidder should carefully proof it for errors and adherence to the RFP requirements.
+
+Bidder’s Cost
+Costs for developing proposals are entirely the responsibility of the Bidder and shall not be chargeable to the State.
+
+Completion of Proposals 
+Proposals must be complete in all respects in accordance with Section 5, Proposal Format.  A Final Proposal may be rejected if it is conditional or incomplete, or if it contains any alterations of form or other irregularities of any kind.  A Final Proposal must be rejected if any such defect or irregularity constitutes a material deviation from the RFP requirements.  The Final Proposal must contain all costs required by the RFP in accordance with Section 4, Cost, and Section 5, Proposal Format. 
+
+False or Misleading Statements
+Proposals which contain false or misleading statements, or which provide references which do not support an attribute or condition claimed by the Bidder, may be rejected.  If, in the opinion of the State, such information was intended to mislead the State in its evaluation of the proposal, and the attribute, condition, or capability is a requirement of this RFP, it will be the basis for rejection of the proposal.
+
+Signature of Proposal
+All Bidders must complete the Agreement Cover Letter and include it with the proposal. The Agreement Cover Letter shall be signed by an individual who is authorized to contractually bind the firm submitting the proposal. An unsigned Agreement Cover Letter will result in the Final Proposal being rejected.
+
+Delivery of Proposals
+Bidders are required to deliver proposals no later than the specified date and time identified in Attachment 2, Key Action Dates and formatted in accordance with Section 5, Proposal Format. Bidders should ensure their email is set to receive a delivery receipt when submitting the electronic proposal. The Bidder shall bear all risks associated with delivery of proposals, including but not limited to, delivery delays due to file size, DGS server malfunction, etc. 
+
+Final Proposals not received by the date and time specified in Attachment 2, Key Action Dates will be rejected. If Final Proposals are submitted electronically through multiple emails, only emails received by the specified date and time will be accepted.
+
+In accordance with Section 5, Proposal Format, cost data must be in a separate attachment and clearly labeled.  If cost data is not submitted in this manner, the proposal may be rejected. Proposals submitted under improperly labeled documents may be rejected.
+
+Withdrawal and Resubmission/Modification of Proposals
+A Bidder may withdraw its Final Proposal at any time prior to the Final Proposal submission date and time specified in Attachment 2, Key Action Dates, by submitting via email a written notification of withdrawal in accordance with Section 2.3.4.5, Signature of Proposal.   The Bidder may thereafter submit a new or modified Final Proposal prior to the proposal submission due date and time.  Modification offered in any other manner, oral or written, will not be considered.  Other than as allowed by law, Final Proposals cannot be changed or withdrawn after the date and time designated for receipt, except as provided in accordance with Section 2.3.6.3, Errors in the Final Proposals.
+
+Rejection of Proposals
+The State may reject any or all proposals and may waive any immaterial deviation or defect in a proposal.  The State's waiver of any immaterial deviation or defect shall in no way modify the RFP documents or excuse the Bidder from full compliance with the RFP specifications if awarded the contract.
+
+Evaluation and Selection Process
+
+General 
+Proposals will be evaluated in accordance with Section 6, Evaluation.  
+
+Evaluation Questions 
+During the evaluation and selection process, DGS-PD may request the Bidder's representative to answer specific questions in writing to clarify its submitted information but will not allow the Bidder to change its proposal. Additionally, the State may ask the Bidder to clarify their submitted response if it contains conflicting information regarding a requirement for which compliance cannot be determined. Clarification will not be requested if the Bidder has been deemed non-compliant to other requirements.  
+
+Except for clerical errors, the State will not ask clarifying questions for proposals where the response to the requirement is non-compliant as this would result in a change to the proposal. 
+
+Errors in the Final Proposals
+An error in the Final Proposal may cause the rejection of that proposal; however, the State may, at its sole option, retain the proposal and make certain corrections.
+
+To determine if a correction is appropriate, the State will consider the conformance of the proposal to the format and content required by the RFP, and any unusual complexity of the format and content required by the RFP.
+
+If the Bidder's intent is clearly established based on review of the complete Final Proposal submittal, the State may at its sole option correct an error based on that established intent.
+
+If hard copies are submitted and there is a discrepancy between the Master copy and the additional copies, the Master copy shall have priority over the additional copies.
+
+The State may at its sole option correct obvious clerical errors, arithmetic errors, and discrepancies.  If necessary, the cost extensions and summary will be recomputed accordingly, if obviously misstated.  If the unit price is ambiguous, unintelligible, uncertain for any cause, or is omitted, it shall be the amount obtained by dividing the extended total price by the quantity of the item.
+
+The State may at its sole option correct errors of omission, and in the following two situations, the State will take the indicated action if the Bidder's intent is not clearly established by the complete proposal:
+
+If cost for an item is omitted from the cost data provided in the proposal it will be interpreted to mean that the item will be provided by the Bidder at no cost.
+If an item is not mentioned at all in the Final Proposal and is essential to satisfactory performance, the proposal will be interpreted to mean that the item will be provided at no cost.
+
+If the re-computations or interpretations, as applied in accordance with this section, result in significant changes in the amount of money to be paid to the Bidder (if awarded the contract), the Bidder will be given the opportunity to promptly establish the grounds justifying relief from its proposal. 
+
+It is absolutely essential that Bidders carefully review the cost elements in their final proposal since they will not have the option to correct errors after the date and time for submission of the final proposals.
+
+If prior to contract award, a Bidder discovers a mistake in their proposal which renders the Bidder unwilling to perform under any resulting contract, the Bidder must immediately notify the Procurement Official and request to withdraw the proposal. It shall be solely within the State’s discretion as to whether withdrawal will be permitted. If the solicitation’s evaluation and award methodology indicates an “all or none” award of the items, then any withdrawal must be for the entire proposal. If the solicitation’s evaluation and award methodology indicate an award by line item or combination of items, the State may consider permitting withdrawal of specific line items or combination of items.
+
+Award of Contract
+Award of contract, if made, will be in accordance with Section 6, Evaluation, to a responsible Bidder whose Final Proposal complies with all the requirements of the final RFP documents, including all addenda, except for such immaterial deviations as may be waived by the State.  
+
+The State reserves the right to modify or cancel in whole or in part the RFP.  
+
+Debriefing
+A debriefing may be held after contract award at the request of any Bidder. The discussion will be based primarily on the administrative, technical, and cost evaluations of the Bidder's Final Proposal.  A debriefing is not the forum to challenge the RFP specifications or requirements.
+
+Contractual Information 
+
+Contract General Provisions, Terms, and Conditions
+The State has contract general provisions to be used by State agencies when contracting for information technology (IT) good and services. The contract general provisions appropriate for the specific requirements of this RFP and resultant contract(s) are as follows:
+
+DGS PD 402-ITGP Cloud, Rev. 02/20/2025
+
+Bidder also agrees to comply with all applicable statues, rules, regulations, and orders of the United States and the State of California which may include, but are not limited to:
+
+Non-Discrimination Toward WTO GPA Signatories 
+Fair Employment and Housing Commission Regulations (Government Code Section 12990)
+Unfair Practices Act and Other Laws (Business and Professions Code Section 17000 et seq.)
+Tax delinquency (Public Contract Code Section 10295.4): FTB Top 500 Delinquent Taxpayers and CDTFA Top 500 Sales & Use Tax Delinquencies in California
+ 
+By signing the Agreement Cover Letter and submitting a proposal, Bidder agrees to all of the above terms and conditions without addition or modification.
+
+Contract Documents
+The contract to be awarded will include the RFP in its final form, the intended awardee’s final proposal, and the STD 213. The Standard Agreement shall be signed by all parties. 
+
+  Other Information
+
+Protests 
+Before a protest is submitted regarding any issue other than selection of the "successful Bidder," the Bidder must make full and timely use of the procedures in accordance with Section 2.2.3, Questions Regarding the RFP, and Section 2.2.4, Request to Change the Requirements of the RFP, to resolve any outstanding issues between the Bidder and the State.  This procurement procedure is designed to give the Bidder and the State adequate opportunity to submit questions and discuss the requirements before the Final Proposal is due.  The protest procedure is made available in the event that a Bidder cannot reach a fair agreement with the State after exhausting these procedures.  
+
+
+There are two types of protests:
+
+Requirements protests 
+Award protests 
+
+A protest shall be submitted according to the procedure below.
+
+Requirements Protest
+Protests regarding any issue other than selection of the "successful Bidder" are requirements protests and will be heard and resolved by the Deputy Director of the DGS-PD, whose decision will be final.
+
+All protests must be made in writing, signed by an individual authorized under Section 2.3.4.5, Signature of Proposal, and contain a statement of the reason for protest, citing the law, rule, regulation or procedures on which the protest is based.  The protestant must provide facts and evidence to support the claim.  
+
+Requirements Protests must be mailed or delivered to the address below and/or emailed to the Procurement Official identified in Section 1.3, Procurement Official.
+
+Street Address:
+Deputy Director
+Procurement Division
+707 3rd Street, 2nd floor
+West Sacramento, CA 95605
+
+All protests to the RFP requirements or procedures must be received by the Deputy Director of the Procurement Division as promptly as possible, but not later than the respective time and date specified in Attachment 2, Key Action Dates.
+
+Award Protest
+This solicitation/acquisition is being conducted under the provisions of the Alternative Protest Process (Public Contract Code Section 12125, et seq.) By submitting a bid or proposal to this solicitation, the bidder consents to participation in the Alternative Protest Process and agrees that all protests of the proposed award shall be resolved by binding arbitration pursuant to the California Code of Regulations, Title 1, Division 2, Chapter 5.
+
+A Notice of Intent to Award for this solicitation will be publicly posted in the Procurement Division website and sent via email to any bidder who submits a written request for notice and provided a valid email address.
+
+During the protest period, any participating bidder may protest the proposed award on the following grounds:
+  
+
+For major information technology acquisitions – that there was a violation of the solicitation procedure(s) and that the protesting bidder’s bid should have been selected; or
+For any other acquisition – that the protesting bidder’s bid or proposal should have been selected in accordance with the selection criteria in the solicitation document.
+
+A written Notice of Intent to Protest the proposed award of this solicitation must be received (email/fax acceptable) by the Coordinator before the close of business 5 p.m. PST/PDT on the 2nd working day after issuing the notice of intent, as specified in the solicitation. Failure to submit a timely, written Notice of Intent to Protest waives bidder’s right to protest.
+
+Bidder is to send the notice of protest to:
+
+Alternative Protest Process Coordinator/Support Services Unit
+Department of General Services
+Procurement Division
+Statewide Procurement Oversight, Consulting and Support Services Section
+707 Third Street, 2nd Floor South
+West Sacramento, CA  95605
+Fax: 916 / 376-6226
+Email: PDProtest@dgs.ca.gov
+
+Within seven (7) working days after the last day to submit a Notice of Intent to Protest, the Coordinator must receive from the protesting bidder the complete protest filing, including the signed, written detailed statement of protest, including exhibits, filing fee and deposit or small business certification as applicable. Untimely submission of the complete protest filing waives the bidder’s right to protest.  
+
+Protest bond requirement: bond amount for this Alternative Protest Process shall be 10 percent of the estimated contract value as specified in the solicitation. See California Code of Regulations, Title 1, Section 1418.
+
+Disposition of Proposals
+All materials submitted in response to the RFP will become the property of the State of California and will be returned only at the State's option and at the Bidder's expense.  At a minimum, the Master Copy of the Final Proposal will be retained for official files and will become a public record after the Notification of Intent to Award. However, materials the State considers confidential information (such as confidential financial information submitted to show Bidder responsibility) will be returned upon request of the Bidder.
+
+
+Section 3 – Bidding Requirements
+This section contains the technical and administrative proposal requirements pertaining to the RFP and will be applicable to the resulting contract.
+
+Prior to award of the contract, the State may require confirmation that the Bidder selected has all the resources to successfully perform under the contract. These include but are not limited to personnel in the numbers and with the skills required; equipment of appropriate type and in sufficient quantity; and experience in similar endeavors. If, during the evaluation process, the State is unable to assure itself of the Bidder's ability to perform under the contract if awarded, the State has the option of requesting from the Bidder any information that the State deems necessary to determine the Bidder's responsibility. If such information is required, the Bidder will be notified and will be permitted approximately five (5) working days to submit the requested information.
+
+Technical Requirements 
+
+Proposed Hospital Subscription Access and Hospital Onboarding Fees (M)
+This RFP requires Bidders to submit a proposal meeting all requirements as described in the RFP and all Exhibits/Attachments. All requirements listed within Section 3, Bidding Requirements, shall apply to all categories unless otherwise noted.  
+
+Bidders shall propose solutions for the categories listed below: 
+
+Quarterly per Hospital Subscription Access 
+Hospital Onboarding Fees
+
+Attachment 1, Cost Workbook must be completed in accordance with Section 4, Cost, and submitted in accordance with Section 5, Proposal Format. 
+
+Statement of Work (SOW) (M)
+Exhibit A, Statement of Work (SOW) comprises the minimum requirements for all line items included in this RFP. All line items shall meet or exceed the minimum requirements at time of proposal submittal and during the contract term.
+
+Bidder Skills/Experience (M)
+Bidders must provide a detailed response demonstrating their experience in the successful implementation of a solution with a similar scope as defined in this RFP. Specifically, Bidders shall address the three (3) parts of a project, as identified below, in Attachment 4, Bidder Skills and Experience. 
+
+Bidders may use one (1) project or multiple projects to demonstrate this experience, however, only one (1) project may be used per topic (i.e., do not use two separate projects to address topic 1). All projects must be within the last five (5) years from the proposal submission due date.  The project’s skills and experience topics are:
+
+
+Operational System: Bidder must describe a project which successfully implemented an operational hospital bed capacity system, or a comparable solution in a similar healthcare environment.  
+
+Client Onboarding and Deployment Capability: Bidder must describe a project which successfully implemented a solution demonstrating experience working with customers to establish a hospital bed capacity system, or a comparable solution within a similar healthcare environment.  
+
+Health Care/Emergency Medical Services (EMS) Engagement: Bidder must describe a project working with healthcare facilities or EMS providers, within the United States, with comparable operational needs.  
+
+Each project listed must include:
+ 
+Project Name/Description
+Start date and completion date of the project
+Total Years/months of the project
+Customer/Agency name
+Project Scope (i.e., fully detailed response to questions 1-3 above)
+Customer/Agency Name/Title, telephone number, and email address.
+
+The State may contact these customers/agencies to verify the information and experience as stated.  
+
+The Bidder’s Skills/Experience response should be submitted with the Bidder’s Final Proposal, or within five (5) working days after notification from the State.  
+
+Bidder’s Approach and Understanding (MS)
+Bidders must submit a written detailed response explaining the Bidder’s approach and understanding of the HBEDS project. The response must address the following: 
+
+Center for Disease Control and Prevention (CDC) Requirements 
+Describe the overall approach and/or method to satisfy the National Health Care Safety Network (NHSN) reporting requirements and California requirements outlined in Assembly Bill 177 (AB 177). The response should describe the understanding of the tasks and activities to perform the contract but, at minimum, must address how the Bidder will meet the following requirements: 
+ 
+Software must integrate with healthcare hospital Electronic Health Records (EHR)/Electronic Medical Records (EMR) systems for staffed bed availability by bed type. 
+Support integration with any EHR/EMR used in California. 
+Collect data elements required by CDC Hospital Bed Connectivity Project and CDC Hospital Respiratory Reporting program. 
+Meet all current and future CDC requirements for Bed Connectivity and Respiratory Reporting programs. 
+Collect data continuously, 24/7, in 15-minute increments. 
+Support data transmission through Secure File Transfer Protocol (SFTP), Application Programming Interface (API), or Fast Health Interoperability Resources (FHIR). 
+Ensure secure access with Single Sign On (SSO) using Security Assertion Markup Language OpenID Connect (OIDC)/Open Authorization 2 (OAuth2) protocols. 
+Transmit bed capacity data to CDC NHSN at least twice daily. 
+Comply with all current and future CDC data submission requirements. 
+Ensure 24/7 availability of real-time bed data. 
+Program Requirements 
+Describe the overall capability in procedures, methods, and approaches to meet the requirements for the HBEDS system and services as described in the RFP and all associated Exhibits/Attachments. The response, at minimum, must include how the Bidder will meet the following requirements: 
+ 
+Software must be a secure, web-based data subscription software that enables specified hospitals and other government stakeholders to view a dashboard that displays real-time staffed hospital bed availability by bed type.
+Collect participation agreements electronically and submit signed copies to CDPH. 
+Dashboard must allow filtering by hospital, bed type, and region. 
+Enable users to download historical data post-enrollment. 
+Grant access to authorized state and local agency users within 24 hours of request. 
+Require Multi Factor Authentication (MFA) for privileged access, sensitive data access, and official communication accounts. 
+Conduct webinars for stakeholders upon CDPH request. 
+Transmit data to CDPH via Application Programming Interface (API), every 15 minutes. 
+Provide help desk support and respond to user inquiries related to data access and functionality. 
+ 
+Hospital Requirements 
+Describe the approach for hospital outreach and coordination for onboarding and training in the use of the system. The response, at minimum, must include how the Bidder will meet the following requirements: 
+ 
+Provide an outreach plan for service enrollment with onboarding timeline and annual enrollment targets. 
+Provide virtual enrollment sessions for facilities. 
+Supply documentation and onboarding instructions. 
+Offer customer support for hospital IT staff and EHR report writers. 
+Conduct meetings with hospital staff as needed for enrollment and reporting requirements. 
+Support access management for healthcare hospital users. 
+Provide training materials, demonstration videos, and user manuals. 
+  
+
+Coordination Requirements 
+Describe the capability to effectively coordinate with CDPH staff, hospital networks and providers, and other CDPH partners in standing up the HBEDs program. The response, at minimum, must include how the Bidder will meet the following requirements: 
+ 
+Deliver a detailed HBEDS Activation Plan including schedule, milestones, and hospital participation agreement language to CDPH. 
+Automate bed reporting after hospital enrollment. 
+
+Bidder’s response should clearly identify Bidder’s company name and should not exceed 40 pages (average 10 pages per topic). In addition, the response should be single-spaced, 12 pt Arial font, and each topic and subtopic should be clearly identified within the response.  
+In preparing the response, Bidders should not simply restate or paraphrase information in the RFP and the SOW. Narratives will be evaluated and scored based on the completeness and detailed relevance of responses to the criteria listed above. Each item must be addressed to be considered responsive to the RFP. 
+
+Each response will be scored for completeness and relevance using the scoring criteria listed in Section 6.3.2, Bidder’s Approach and Understanding Score Calculation. The Bidder’s Approach and Understanding response must be submitted with the Bidder’s Final Proposal. 
+
+Question & Demonstration Meeting (M&MS)
+Following the evaluation of the administrative and technical responses, the State will invite compliant Bidders to participate in a two (2) hour question and product demonstration meeting. The meeting will be virtual and conducted via Teams or similar platform.  
+
+Invited Bidders will be notified via email of their scheduled date and time. The State reserves the right to request demonstration focus areas for each Bidder based on the content of their technical response and areas of interest identified during evaluation. 
+
+The State will make every effort to provide a minimum of two (2) day advanced notice. Bidders should plan accordingly to ensure availability upon notification. 
+
+Questions (M): The question portion of the meeting is intended to supplement and validate the Bidder’s technical response in accordance with Section 2.3.6.2 Evaluation Questions. The questions should be considered an expansion of, and support for the technical response, not a replacement or a re-presentation of written content as Bidders will only be allowed to clarify and supplement. Changes to responses will not be allowed in accordance with Section 2.3.6.2 Evaluation Questions. 
+
+Demonstration (MS): The demonstration portion of the meeting will allow the Bidder to demonstrate their solution. The Bidder may structure the demonstration to its discretion to highlight strengths and value; however, the objective is to demonstrate to the State the specific functional and technical areas required in the SOW. 
+
+
+At minimum, Bidders will be required to demonstrate the following:
+
+Secure login process
+15-minute interval updates of staffed beds by type
+Filtering functionality by hospital, bed type, and region
+Operational insights into emergency management - 
+Historical data search and download for bed capacity trends
+Surge capacity indicators for emergencies
+Geographic display of available beds
+CDC/NHSN reporting compliance
+
+The Demonstration will be scored for responsiveness and completeness using the scoring criteria listed in Section 6.3.3, Demonstration Score Calculation.
+
+The State may request clarification or additional information during or after the question and demonstration meeting. Failure to participate in the question and demonstration session will result in the proposal being considered non-responsive.  
+
+Unspecified Subordinate Product (M)
+It is the intent of the State to describe a complete working configuration. Any incidental items omitted from the RFP and/or SOW, but needed to make a complete working configuration, will be provided by the Bidder and will be included in the proposal price.
+
+Title (Software/Firmware) (M) 
+Bidder represents and warrants that it is the sole owner of the software or, if not the owner, has received all proper authorization from the owner to license the software/firmware product, and has the full right and power to grant the rights contained in this contract. Bidder further warrants and represents that the software/firmware package and its use will not violate or infringe upon any patent, copyright, trade secret, or other property right of any other person.
+
+Administrative Requirements
+
+Pricing (MS) 
+Pricing shall be proposed in Attachment 1, Cost Workbook and will be evaluated and scored in accordance with Section 6, Evaluation. 
+
+Seller’s Permit and Secretary of State (M)
+Bidders are required to provide their Seller’s Permit number and, if it is a corporation or limited liability company, their Secretary of State (SOS) certification number on Attachment 3, Narrative Response. If not included in the proposal response, Bidder shall provide it within five (5) working days after request from the State.
+
+A copy of the Seller’s Permit or certification of registration, and, if applicable, the permit or certification of all participating affiliates issued by the California Department of Tax and Fee Administration (CDTFA) must be provided prior to award. 
+
+SOS certification should be approved and in “Active” status at the time of final proposal due date. If a Bidder’s SOS certification is not in “Active” status on the final proposal submission date, the Bidder will have five (5) working days after notification from the State to provide an “Active” SOS certification. 
+
+Payee Data Record (M)
+Bidders must complete and submit a Payee Data Record (Std. 204) within five (5) working days after request from the State. The State will provide this document at the time of request.  
+
+Authorized Reseller (M)
+If the Bidder is not the OEM of the SaaS solution being proposed, the Bidder must provide, on OEM company letterhead, and signed by an authorized OEM representative, documentation identifying the Bidder as an authorized OEM reseller. The authorized reseller letter should be included with the proposal response. If the letter is not submitted with the proposal response, Bidder shall submit the letter within five (5) working days after request from the State.  The State has the option to follow-up and verify any Authorized Reseller letter.
+
+Darfur Contracting Act (M)
+Public Contract Code sections 10475 through 10481 apply to any company that currently or within the previous three (3) years has had business activities or other operations outside of the United States.  For such a company to bid on or submit a proposal for a State of California contract, the company must certify that it is either a) not a scrutinized company; or b) a scrutinized company that has been granted permission by the DGS to submit a proposal. 
+
+A scrutinized company is a company doing business in Sudan as defined in PCC section 10476.  Scrutinized companies are ineligible to, and cannot, bid on or submit a proposal for a contract with a State agency for goods or services PCC section 10477(a)), unless written permission from the Director of DGS to bid on this procurement has been granted (PCC section 10477(b)). 
+
+Bidders must indicate if it has had business activities or other operations outside of the United States in the last three (3) years on Attachment 3, Narrative Response. If a Bidder’s response is “Yes”, Bidder must submit a completed Darfur Contracting Act form.  The completed form should be included with the proposal response. If the completed form is not submitted with the proposal response, Bidder shall submit within five (5) working days after request from the State. 
+
+Failure to submit this form as required will result in the proposal being considered non-responsive.
+
+If a Bidder has not conducted business outside of the United States in the last three (3) years, the Darfur Contracting Act form is not required. 
+
+
+California Civil Rights Laws (M)
+Pursuant to Public Contract Code section 2010, any Bidder entering into or renewing a contract over $100,000 on or after January 1, 2017, must certify all of the following:
+
+That it is in compliance with the Unruh Civil Rights Act (Section 51 of the Civil Code).
+That it is in compliance with the California Fair Employment and Housing Act (Chapter 7 (commencing with section 12960) of Part 2.8 of Division 3 of Title 2 of the Government Code).
+(a) That any policy that they have against any sovereign nation or peoples recognized by the government of the United States, including, but not limited to, the nation and people of Israel, is not used to discriminate in violation of the Unruh Civil Rights Act (Section 51 of the Civil Code) or the California Fair Employment and Housing Act (Chapter 7 (commencing with Section 12960) of Part 2.8 of Division 3 of Title 2 of the Government Code).
+(b) Any policy adopted by a person or actions taken thereunder that are reasonably necessary to comply with federal or state sanctions or laws affecting sovereign nations or their nationals shall not be construed as unlawful discrimination in violation of the Unruh Civil Rights Act (section 51 of the Civil Code) or the California Fair Employment and Housing Act (Chapter 7 (commencing with section 12960) of Part 2.8 of Division 3 of Title 2 of the Government Code.
+
+Bidders are required to submit the California Civil Rights Laws Certification.  Failure to submit this form with the proposal will result in the proposal being considered non-responsive.
+
+Iran Contracting Act (M)
+Bidder must either a) certify it is not on the current list of persons engaged in investment activities in Iran created by DGS pursuant to PCC 2203(b) and is not a financial institution extending $20 million or more in credit to another person/vendor, for 45 days or more, if that other person/vendor will use the credit to provide goods or services in the energy sector in Iran and is identified on the current list of person engaged in investment activities in Iran created by DGS; or b) demonstrate it has been exempted from the certification requirement pursuant to PCC Section 2203(c) or (d). 
+
+The DGS list of entities prohibited from contracting with public entities in California in accordance with the Iranian Contracting Act, 2010, can be found at DGS Iran Contracting Act Ineligibility List.
+ 
+Bidder shall submit their response on Attachment 3, Narrative Response. Failure to submit a response will result in the proposal being considered non-responsive.
+
+Insurance Requirements (M)
+Unless otherwise stated in the SOW, insurance requirements shall be in accordance with DGS PD 402-ITGP Cloud, Rev. 02/20/2025, Section 14.1, Insurance.
+
+
+Executive Order N-6-22 – Russia Sanctions (M)
+On March 4, 2022, Governor Gavin Newsom issued Executive Order N-6-22 (the EO) regarding Economic Sanctions against Russia and Russian entities and individuals. “Economic Sanctions” refers to sanctions imposed by the U.S. government in response to Russia’s actions in Ukraine, as well as any sanctions imposed under state law. By submitting a bid or proposal, Contractor represents that it is not a target of Economic Sanctions. Should the State determine Contractor is a target of Economic Sanctions or is conducting prohibited transactions with sanctioned individuals or entities, that shall be grounds for rejection of the Contractor’s bid/proposal any time prior to contract execution, or, if determined after contract execution, shall be grounds for termination by the State.
+
+Federal Debarment, Suspension, Ineligibility, and Voluntary Exclusion (M)
+Expenditures from the resultant contract may involve Federal funds. The Federal Department of Labor requires all State agencies which are expending Federal funds to have in the contract file, a certification by the Contractor that they have not been debarred nor suspended from doing business with the Federal government. Bidders must submit the Federal Debarment Certification form. The completed form should be included with the proposal response. If the completed form is not submitted with the proposal response, Bidder shall submit within five (5) working days after request from the State. Failure to submit this form will result in the proposal being considered non-responsive.
+Generative Artificial Intelligence (GenAI) Disclosure Notification (M)
+The State of California seeks to realize the potential benefits of GenAI, through the development and deployment of GenAI, while balancing the risks of these technologies.
+
+Bidder/Offeror must notify the State in writing if it: (1) intends to provide GenAI as a deliverable to the State; or (2), intends to utilize GenAI, including GenAI from third parties, to complete all or a portion of any deliverable that materially impacts: (i) functionality of a State system, (ii) risk to the State, or (iii) Contract performance.  For avoidance of doubt, the term "materially impacts" shall have the meaning set forth in State Administrative Manual (SAM) 4986.2.
+
+Failure to report GenAI to the State may result in disqualification. The State reserves its right to seek any and all relief it may be entitled to as a result of such non-disclosure.
+Upon notification by a Bidder/Offeror of GenAI as required, the state reserves the right to incorporate GenAI Special Provisions into the final contract or reject bids/offers that present an unacceptable level of risk to the state.
+
+Government Code 11549.64 defines “Generative Artificial Intelligence (GenAI)” as an artificial intelligence system that can generate derived synthetic content, including text, images, video, and audio that emulates the structure and characteristics of the system’s training data.
+
+Bidder shall indicate on Attachment 3, Narrative Response if the Bidder intends to provide GenAI as a deliverable to the State or intends to complete all or a portion of any deliverable that has material impacts as specified above. If a response is not included in the bid response, Bidder shall provide it within five (5) working days after request from the State. Failure to submit required information will result in the bid being considered non-responsive.
+Declaration Forms (M)
+All Bidders must complete the Bidder Declaration Form (GSPD-05-105) and include it with the proposal response.  When completing the declaration, Bidders must identify all subcontractors they are entering into an agreement with to perform under the resultant contract. Bidders awarded a contract are contractually obligated to use the proposed subcontractors for the corresponding work identified unless the State agrees to a substitution, and it is incorporated by amendment to the contract.
+Bidders and/or subcontractors who have been certified by California as a DVBE (or who are bidding rental equipment and have obtained the participation of subcontractors certified by California as a DVBE) must also submit a completed Disabled Veteran Business Enterprise Declaration Form DGS PD 843.  All disabled veteran owners and disabled veteran managers of the DVBE(s) must sign the form. The completed form should be included with the proposal response. If the completed form is not submitted with the proposal response, Bidder shall submit within five (5) working days after request from the State.
+Socioeconomic Programs (NMS) 
+This solicitation may contain the following socioeconomic requirements and/or optional Bidder preferences and incentives. Points will be allocated in accordance with Section 6, Evaluation.
+Disabled Veteran Business Enterprise (DVBE) Program Requirements and DVBE Incentive 
+Small Business Preference
+Small Business Nonprofit Veteran Services Agencies (SB/NVSA)
+Non-Small Business Subcontractor Preference
+Target Area Contract Preference Act (TACPA) Preference
+All certified firms must perform a “commercially useful function” in the performance of the contract as defined in Government Code (GC) section 14837(d)(4).
+If claiming SB and/or DVBE participation, the relevant Bidder and/or subcontractor must be certified by California as an SB and/or DVBE.  Completed certification applications and required support documents must be submitted to the Office of Small Business and DVBE Services (OSDS) no later than 5:00 p.m. PT on the bid due date, and the OSDS must be able to approve the application as submitted.
+DVBE Program Requirements and DVBE Incentive: 
+This solicitation does not require a minimum DVBE participation percentage. The DVBE, participation requirement has been waived.
+
+This solicitation provides an incentive for DVBE participation. California DVBE Bid Incentive Instructions includes information about the DVBE incentive. If applicable, Bidders must claim this incentive on Attachment 3, Narrative Response. The DVBE Incentive Table listed below supersedes the table in the California DVBE Program Requirements. If applicable, Bidders must claim this incentive on Attachment 3, Narrative Response. 
+
+Small Business Preference (NMS)
+A 5 percent preference is available to Bidders certified as a small business in accordance with GC 14835 et seq.  If applicable, Bidders must claim this preference on Attachment 3, Narrative Response.
+The Small Business regulations concerning the application and calculation of the small business preference, small business certification, responsibilities of small business, department certification, and appeals can be viewed in the California Code of Regulations (Title 2, Division 2, Chapter 3, Subchapter 8, Section 1896 et seq.).
+Small Business Nonprofit Veteran Services Agencies (SB/NVSA) (NMS)
+SB/NVSA prime Bidders meeting requirements specified in the Military and Veterans Code (MVC) section 999.50 et seq. and obtaining a California certification as a small business are eligible for the 5 percent small business preference.  If applicable, claim the preference on Attachment 3, Narrative Response.  SB/NVSAs claiming the small business preference must possess certification by California prior to the day and time proposals are due.  Questions regarding certification should be directed to the OSDS at (916)375-4940.
+Non-Small Business Subcontractor Preference (NMS)
+A 5 percent preference is available to a non-small business claiming 25 percent California Certified small business subcontractor participation.  If applicable, claim the preference on Attachment 3, Narrative Response.
+Target Area Contract Preference Act (TACPA) Preference (NMS) 
+This solicitation provides for the optional TACPA preference. Bidders are not required to apply for this preference. Denial of the TACPA preference request is not a basis for rejection of the bid. Bidders are encouraged to carefully review the TACPA forms, requirements, and submittal instructions.
+Bidders desiring to claim the TACPA preference must complete the TACPA Preference Request Form (Std. 830) and include it with the bid response. 
+Additionally, the Manufacturer’s Summary Form (DGS PD 525) and Bidder’s Summary Form (DGS PD 526) should be submitted with the bid. If these forms are not included in the bid response, Bidder shall provide it within five (5) working days after request from the State to be considered for a preference. The State may request additional or missing information to determine eligibility. 
+
+The State as part of its evaluation process reserves the right to verify, validate, and clarify all information contained in the proposal. This may include, but is not limited to, information from Bidders, manufacturers, subcontractors, and any other sources available at the time of proposal evaluation. Bidder refusal to agree to and/or comply with these terms, or failure to provide additional supporting information at the State’s request may result in the denial of the preferences requested. 
+Contracts awarded with the applied preference will be monitored throughout the life of the contract for compliance with statutory, regulatory, and contractual requirements. The State will take appropriate corrective action and apply sanctions as necessary to enforce the preference program.
+Any questions regarding the TACPA preference should be directed to TACPA@dgs.ca.gov.
+
+Commercially Useful Function (CUF) (M)
+Bidders and/or subcontractors who have a California certification for one or more of the socio-economic programs (i.e., DVBE or small business), must perform a commercially useful function in the resulting contract.  CUF is defined in the Military and Veterans Code Section 999(b)(5)(B) for DVBE and in the Government Code Section 14837(d)(4)(A) for small business as consisting of all of the following: 
+
+responsibility for the execution of a distinct element of the work
+actually performing, managing, or supervising the work
+performing work that is normal for its business services and functions
+not further subcontracting work that is greater than that expected by normal industry standards
+responsible, with respect to any products, inventories, materials, and supplies required for the contract, for negotiating price, determining quality and quantity, ordering, installing (if applicable), and making payment
+
+A Contractor, subcontractor, or supplier is not considered to perform a CUF if their role is limited to that of an extra participant through which funds are passed in order to obtain the appearance of participation.
+
+At the State’s option, Bidders may be required to submit additional written clarifying information regarding CUF.  Failure to submit the requested written information, as specified, may be grounds for rejection of the proposal.
+
+Subcontractors (M)
+If a Bidder proposes the use of a subcontractor for a portion of the contract, the Bidder agrees that all requirements will be adhered to and that requirements will apply to subcontractors even if subcontractor concurrence is not specifically defined.  All subcontractors must comply fully with the administrative and technical requirements that are applicable with the portion of the work being delegated to the subcontractor.
+
+Bidders awarded a contract are contractually obligated to use the proposed subcontractors for the corresponding work identified unless the State agrees to a substitution, and it is incorporated by amendment to the contract.  The Contractor must have a written agreement from the State prior to replacement or substitution of any subcontractor.
+
+Notice of Subcontractors (M)
+Upon award to a Contractor, notice shall be given by the State to the subcontractors listed in the Bidder Declaration Form of their participation in the contract.  Notification to the subcontractor by the prime Contractor is encouraged immediately after award of an RFP.
+Section 4 - Cost
+Cost evaluation will be based on the highest points earned as calculated according to the methodology outlined in Section 6, Evaluation.
+ 
+The State’s intent is to structure the pricing format to facilitate a straightforward comparison among all Bidders to obtain the best market pricing.  Consequently, the State requires that each Bidder’s proposal be in the format outlined in this section.  Therefore, Bidders are advised that failure to comply with the instructions listed in this section, such as submission of incomplete offers or use of alternative pricing structures or different formats than the one requested, may result in the rejection of its proposals for non-responsiveness.
+
+It is imperative that no cost information be included in Volume 1 of the proposal. Cost information shall only be submitted in the Final Proposal, Volume 2 in accordance with Section 5, Proposal Format.
+
+Cost Information Guidelines
+Attachment 1, Cost Workbook, contains the cost worksheet that the Bidders shall use to enter cost information. The following worksheet contains line items for:
+
+Quarterly per Hospital Subscription Access
+Hospital Onboarding Fees
+
+Structure of Attachment 1, Cost Workbook
+Bidder shall enter all cost data on the worksheet provided in Attachment 1, Cost Workbook. 
+
+Prices quoted shall be all inclusive. Only the prices submitted on Attachment 1, Cost Workbook, shall be included in the awarded contract.  No other fees can be charged to the customer unless otherwise identified in the RFP.
+
+The State reserves the right to eliminate any line item from the final award.
+
+Quantities
+The quantities listed in Attachment 1, Cost Workbook, represent anticipated annual usage up to the maximum quantity shown. The State does not guarantee that these quantities will be purchased, and actual annual purchases may slightly vary. The State reserves the right to order less than the quantity shown for any line item in any given year.
+
+Additionally, quantities for onboarding hospital sites may be carried over to a subsequent year if necessary; however, in this circumstance, the price to complete the onboarding will be at the lower of the two annual prices for this deliverable. 
+
+Required Information
+Attachment 1, Cost Workbook must be filled out completely for each line item or the proposal may be rejected.  Yellow cells are mandatory and must be completed in each worksheet.  Modifying any other cell in any worksheet may disqualify the Bidder.
+
+Pricing/Discount Format
+All dollar figures must be entered to no more than two decimal places (e.g., $150.75). 
+
+Sales Tax and FOB Delivery
+Sales tax is not to be included in the pricing on Attachment 1, Cost Workbook.  If awarded the contract, sales tax should be added at time of invoicing.  The sales tax rate applied should be based on the rate of CDPH’s designated address. 
+
+Cost Workbook Instructions
+  
+Download and Save
+Download Attachment 1, Cost Workbook, from the Cal eProcure, California State Contracts Register.
+Rename the file and submit as specified in Section 5, Proposal Format.
+
+Cost Workbook Completion
+Attachment 1, Cost Workbook, consists of one worksheet.  The proposed subscriptions and onboarding fees pricing must be entered in each tab of Attachment 1, Cost Workbook.  The Bidder designates the price for each line item. 
+
+Bidders shall input the following for each worksheet (in yellow cells provided): 
+
+Bidder: Name of the Bidder submitting the proposal.
+Contract Unit Cost: The net price that Bidder is offering to the State for subscriptions and onboarding fees for each year. 
+
+The Extension price will auto populate. Bidders are encouraged to check all calculations for accuracy. 
+
+Cost Submittal
+Bidders are required to submit Attachment 1, Cost Workbook, with the proposal. Failure to submit this workbook with the proposal will result in the proposal being considered non-responsive. 
+Attachment 1, Cost Workbook shall be submitted as specified in Section 5, Proposal Format.
+
+Section 5 – Proposal Format
+The instructions below describe the required proposal format and presentation of the proposal data. Format instructions must be adhered to, and all required data must be provided. Each Bidder is responsible for providing sufficient information and documentation for its response to be thoroughly evaluated. Failure to do so may result in rejection of the proposal. 
+
+Proposal Delivery
+All proposals must be delivered by email and received by the date and time specified in Attachment 2, Key Action Dates. Final Proposals received after the required submission date and time will not be considered; therefore, it is the Bidder’s responsibility to make sure their Final Proposal, in its entirety, is received on time. Proposals must be submitted as follows:
+
+Proposals shall be sent to TAU@dgs.ca.gov. 
+Proposals shall not be sent to any other mailbox. 
+Only proposal submissions shall be sent to this mailbox.
+
+Final Proposals should be identified as follows:
+
+Emailed proposals should clearly identify in the Subject Line “Bidder name” – Final Proposal for Event ID 37498.” 
+
+Links to files stored on the internet (e.g., Google Drive, Dropbox) in lieu of attachments are not acceptable, and any documents stored at such links will not be reviewed.
+
+Emailed Proposal Format
+Emailed submissions should not exceed 10 megabytes (MB). The State’s mail server may automatically reject excessively large emails.  If file size exceeds the 10 megabytes (MB), then multiple emails should be submitted and labeled “Email 1 of 2”, “Email 2 of 2”, etc. Only emails received by the proposal due date and time will be accepted. 
+
+Hard copy proposals are discouraged. If a Bidder is unable to email their proposal submittal, Bidder shall notify the Procurement Official immediately, but no later than four (4) calendar days prior to proposal due date. Upon approval, Bidder may be allowed to submit a hard copy of their proposal. 
+
+Electronic Document Formats
+It is the Bidder’s responsibility to ensure that electronically submitted documents are readable by DGS-PD.  Required documents should be submitted in Microsoft Word, Microsoft Excel, or PDF, unless otherwise requested. 
+
+To ensure electronically submitted documents are readable, Bidders should submit electronic documents that meet the following standards:
+
+Microsoft – Office Suite Standard 2010 (Word, Excel, Power Point)
+Microsoft – Office Professional Plus 2010 (Word, Excel, Power Point, Access, OneNote, Publisher) 
+
+Electronic submissions not compatible with these standards and unable to be read may result in the proposal being rejected.
+
+Electronic document file names should be 25 characters or less. Zip files are discouraged. 
+
+Final Proposal Content
+Final Proposals must include separate attachments for the following:
+
+Volume 1 - Response to Requirements
+Volume 2 - Cost Data
+
+Volume 1 - Response to Requirements
+This volume must contain all responses to the administrative and technical requirements of the RFP including any technical literature. All applicable forms, except cost data, must be completed and included in this volume. 
+
+It is preferred that multiple documents for Volume 1 - Response to Requirements, are combined into a single PDF attachment. If submitting separate Volume 1 attachments, “Volume 1” must be in the file name. (Example: “Volume 1, Response to Requirements”; or “Volume 1, Narrative Response”). 
+
+Cost information must not be included in any attachments for Volume 1 - Response to Requirements. Bidder must leave blank or put “xxx” in place of any cost figures and percentage related to costs. If any cost is included in Volume 1, the proposal may be deemed non-compliant. 
+
+Volume 2 - Cost Data
+This volume must contain completed Attachment 1, Cost Workbook only. Bidders must submit this volume as a separate attachment. The Volume 2 attachment must contain “Volume 2” in the file name. (Example: “Volume 2, Cost, Bidder Name”)
+
+Bidders who have obtained approval from the Procurement Official to submit a hard copy proposal must also provide the Attachment 1, Cost Workbook in MS Excel format on Volume 2 USB for evaluation purposes.  
+
+Final Proposal Documents
+Bidders must include the following documents in the Final Proposal, or as required in the RFP: 
+
+Response to Requirements, Volume 1:
+
+ Required with Proposal Response
+Request with Proposal Response, required within five (5) working days after notification from the State 
+
+Cost Data, Volume 2:
+Required with Proposal Response 
+
+The State makes no warranty that the list of applicable documents, attachments, and exhibits is a full and comprehensive listing of every requirement specified in the RFP.  Checking off the items on the list does not establish your firm’s intent nor does it constitute responsiveness to the requirements.  The list is only a tool to assist participating Bidders in compiling their final proposal response.  Bidders are encouraged to carefully read the entire RFP.  The need to verify all documentation and responses prior to the submission of final proposals cannot be over emphasized.
+
+
+The State requests that Bidders do not submit unnecessary documentation in its final proposal.  The State expects only documentation which pertains to the requested/required information to be submitted as outlined in the RFP.  Additional information not specific to the requirements of the RFP should not be submitted (e.g. company literature, marketing materials, etc.).
+
+
+Section 6 - Evaluation
+This section describes how the State will evaluate Final Proposals. It is the State’s intent to conduct a comprehensive and impartial evaluation of all proposals received.  
+
+Receipt
+Each proposal will be dated and time marked as it is received. Emails will not be opened by the Procurement Official until the required proposal submission due date and time.
+
+Evaluation of Final Proposals
+
+Evaluation of Proposals
+The State will evaluate each proposal’s Volume 1 – Response to Requirements to determine its compliance to the RFP’s administrative and technical requirements. All mandatory requirements will be evaluated on a pass/fail basis. If a proposal fails to meet an RFP requirement, the State will determine if the deviation is material as defined in Section 2.1.1, Requirements.  A material deviation on a mandatory requirement, whether or not it is scored, will be cause for rejection of the proposal. If a deviation is determined to be immaterial, it will be processed as if no deviation had occurred. Scored requirements will be scored in accordance with Section 6.3, Final Proposal Scoring Criteria.
+
+Only those proposals that are administratively and technically compliant will proceed to the cost evaluation.
+
+Volume 2 - Cost Data shall remain unopened until the evaluation of all administrative and technical requirements is completed. Cost data will only be opened for responsive proposals from responsible Bidders. A public cost opening will be held through Microsoft Teams. All participating Bidders and interested parties shall be notified as to the date and time of the public cost opening and a link to join the Microsoft Teaming meeting will be provided. 
+
+Cost Analysis
+The required cost workbooks will be checked for mathematical accuracy. Errors and inconsistencies will be dealt with according to procedures contained in Section 2.3.6.3, Errors in the Final Proposals. 
+
+Final Proposal Scoring Criteria 
+The State will evaluate and score the responses of each Bidder’s Final Proposal to determine a Total Score. The maximum points are 1000, not including applicable preferences and incentives.   The Total Score includes three (3) scoring categories:
+
+The State will determine the Total Score for each category by aggregating the three (3) scoring categories. Scores will be rounded to two decimal places.  Scores will be calculated as described within this section.
+
+Bidder’s Approach and Understanding Score Calculation
+In accordance with Section 3.1.4, Bidder’s Approach and Understanding, points will be awarded for each of the four (4) topics as detailed in the table below. 
+
+ 
+Maximum points for each of the required Bidder’s response to the four (4) topics is 80 points, with a maximum value of 320 points total for the Bidder’s Approach and Understanding.
+
+Demonstration Score Calculation
+In accordance with Section 3.1.5 Question and Demonstration, subsection B, Demonstration, points will be awarded for demonstrating how elements of the Bidder’s proposed system will function. Points will be awarded as detailed in the table below.
+
+ 
+Maximum points for the Bidder Demonstration are 180 points.
+
+Cost Score Calculation 
+The Cost Score represents 50 percent of the total points available.  Attachment 1, Cost Workbook is used to determine the Cost Score.  The maximum points available for the Cost Score is 500 points.
+
+The points for the Cost Score will be calculated as follows:
+
+Step One: Total Cost - Determine the lowest total cost for all Bidders.  
+
+
+Example:
+In this example, Bidder 3 has the lowest total
+
+Step Two: For each Bidder’s Total Cost, use the lowest Total Cost as the NUMERATOR and the respective Bidder’s Total Cost as the DENOMINATOR. 
+
+Example for Total Cost
+
+Step Three: Multiply each Bidder’s Cost Factor by the points available to obtain the Bidder’s Cost Score Component.
+
+Example for Total Cost:
+
+Total Score 
+The Total Score will be calculated by aggregating each compliant Bidder’s Approach and Understanding Score, Demonstration Score, and Cost Score.
+
+
+Example for Total Score:
+
+These are the total scores before award of any preference and/or incentive points.
+
+Preference Calculation
+
+Small Business Preference Calculation
+If the Small Business (SB) preference is to be applied to a California-certified Small Business’ Total Score, the following formula will be utilized:
+
+SB Preference Points = (Highest Non-Small Business Total Score) multiplied by (5 percent) 
+SB Preference Points will be added to the total score of responsive proposals eligible to receive the preference.
+
+Example: 
+Highest non-small business’ Total Score: 1000 points 
+SB Preference: 1000 points multiplied by 0.05 = 50 points 
+The 50 points would be added to the total score for all eligible Bidders 
+
+DVBE Incentive Calculation
+If a DVBE Incentive is to be applied to a qualified Bidder’s total score, the Incentive calculation will be accordance with the California DVBE Bid Incentive Instructions.
+
+Example for Bidder Claiming 5 percent: 
+Highest Bidder’s Total Score: 1000 points 
+DVBE Incentive: 1000 points multiplied by 0.05 = 50 points 
+The 50 points would be added to the total score for all eligible Bidders claiming 5 percent participation.
+
+Note, if the Bidder with the highest point total is a small business the DVBE incentive only applies to a small business claiming the incentive. 
+	
+TACPA Preference Calculations
+The TACPA preference will be applied to a qualified Bidder’s total cost in accordance with Government Code Section 4530 et seq.
+
+
+Selection and Award
+The contract will be awarded on an “All or None” basis to the responsive and responsible Bidder with the highest Total Score, including all applicable preference points.
+
+Tie Breaker
+In the event of a tie, a coin toss will be a permissible tiebreaker. Such event will be conducted by the Procurement Official and observed by a State employee as witness.
+
+Negotiations
+The State may elect to enter into negotiations pursuant to Public Contract Code §6611, if conditions exist. Should the State elect to negotiate, the process shall be described in writing and provided to the parties involved prior to commencement of negotiations. 
+
+Section 7 – Contract Requirements
+This section, Exhibit A, Statement of Work (SOW), and all exhibits, contain the mandatory contract requirements that will apply to the contract resulting from the RFP. The prime Contractor shall be responsible for successful performance of the resulting contract.  The prime Contractor shall also be responsible for successful performance of all their subcontractors.
+
+Furthermore, the State will consider the prime Contractor to be the sole point of contact for contractual matters for the term of the contract and any extensions.
+
+All State policies, guidelines, and requirements apply to both the prime contractor and subcontractors.  The prime Contractor and subcontractors shall not in any way represent themselves in the name of the State of California without prior written approval.
+
+Inspection and Acceptance (M)
+Unless otherwise stated in the SOW, inspection and acceptance shall be in accordance with DGS PD 402-ITGP Cloud, Rev. 02/20/2025, Section 7, Inspection, Acceptance, and Rejection.
+
+Invoicing (M)
+Invoices shall be submitted in accordance with Exhibit A, Statement of Work (SOW) and Exhibit B, Budget Detail and Payment Provisions.
+
+Payments (M)
+Payment of invoices may be made by check or electronic funds transfer. Payments are to be made in accordance with DGS PD 402-ITGP Cloud, Rev. 02/20/2025, Section 15, Invoices; Payments; Tax & Audits, Exhibit A, Statement of Work (SOW), and Exhibit B, Budget Detail and Payment Provisions.
+
+State Financial Marketplace (M)
+The State reserves the right to select the form of payment for all procurements, be it either an outright purchase with payment rendered directly by the State, or a financing (using GS $Mart) or operating lease (using Lease $Mart) via the State Financial Marketplace (GS $Mart and/or Lease $Mart). If payment is via the financial marketplace, the Contractor will invoice the State, and the State will approve the invoice, and the selected Lender/Lessor will pay the Contractor on behalf of the State for all items listed on the State's procurement document.
+
+Ad Hoc Reporting (M)
+The Contractor shall have the ability to provide ad hoc reporting capabilities at no cost to the State. The Contractor shall permit and provide access to all data that pertains to any procurement action taken by the State. The State may make copies of procurement data in any form and the use of such data shall not be restricted.  
+
+Dependent on future reporting requirements, the State may ask for certain reports to become standard and issued to the State on a monthly or quarterly basis.  
+
+The State reserves the right to request any additional data elements, as deemed necessary.
+
+GenAI Disclosure and Obligations (M)
+Contractor shall comply with the GenAI Disclosure and Obligations requirements specified in DGS PD 402-ITGP Cloud, Rev. 02/20/2025, Section 22, Generative Artificial Intelligence.
+
+Contract Termination/Expiration Termination Plan (M)
+Contract termination must be completed in accordance with Exhibit A, Statement of Work (SOW). 
+
+
+
+
+
+
+
+Section 8 – Attachments/Exhibits 
+The following list identifies the applicable attachments/exhibits for this solicitation:
+
+Attachments
+
+Attachment 1: Cost Workbook
+Attachment 2: Key Action Dates 
+Attachment 3: Narrative Response
+Attachment 4: Skills and Experience Form
+
+Exhibits
+
+Exhibit A: Statement of Work (SOW)
+Exhibit A1: HBEDS CDC-NHSN Instruction Book
+Exhibit A2: HBEDS CDC-NHSN Required Data Elements
+Exhibit B: Budget Detail and Payment Provision 
+Exhibit B1: Federal Fund Provisions
+Exhibit C: Special Provisions 
+Exhibit D: Additional Provisions 
+Exhibit E: Information Privacy
+Exhibit F: Information Systems Security
+Exhibit G: Contractor’s Release
+
+
+
+
+[Table 1]
+Confirmed DVBE Participation | DVBE Incentive
+5.00% and above | 3%
+3.00% to 4.99% | 2%
+2.00% to 2.99% | 1%
+
+[Table 2]
+Description | Section
+Narrative Response | 2.1.6
+Agreement Cover Letter | 2.3.4.5
+Bidder’s Approach and Understanding | 3.1.4
+California Civil Rights Laws Certification form | 3.2.7
+Bidder Declaration Form (GSPD-05-105) | 3.2.13
+TACPA Request Form (Std. 830) (if claiming a TACPA preference only) | 3.2.14E
+
+[Table 3]
+Description | Section
+Bidder’s Skills and Experience | 3.1.3
+Authorized Reseller Letter (if applicable) | 3.2.5
+Darfur Contracting Act | 3.2.6
+Federal Debarment Certification | 3.2.11
+Disabled Veteran Business Enterprise Declaration Form DGS PD 843 (if applicable) | 3.2.14A
+Manufacturer’s Summary Form (DGS PD 525) Goods only (if applicable) | 3.2.14E
+Bidder’s Summary Form (DGS PD 526) Goods and services (if applicable) | 3.2.14E
+
+[Table 4]
+Description | Section
+Cost Workbook | 4.2
+
+[Table 5]
+Scoring Categories | Total Available Points
+Bidder’s Understanding and Approach/Interview Questions | 320
+Demonstration | 180
+Cost | 500
+Total Score | 1000
+
+[Table 6]
+Criteria | Rating | Maximum Score
+Demonstrates in the Bidder’s own words a thorough, detailed, and comprehensive understanding of 100% of the topic requirements. 
+Provides significant evidence, plans, and/or methods of the Bidder’s ability and intent to fully meet 100% of the topic requirements. 
+Provides an approach that is fully achievable, applies best practices, and is clear, concise, and logically organized. | Fully Meets | 80 points
+Demonstrates in the Bidder’s own words an understanding of 75% of the topic requirements. 
+Provides sufficient evidence, plans, and/or methods of the Bidder’s ability and intent to fully meet 75% of the topic requirements. 
+Provides an approach that is mostly achievable, applies best practices, and is clear, concise, and logically organized. | Mostly Meets | 60 points
+Demonstrates the Bidder’s understanding of 50% of the topic requirements. 
+Provides some evidence, plans, and/or methods of the Bidder’s ability and intent to fully meet 50% of the topic requirements. 
+Provides an approach that is partially achievable, applies best practices, and is clear, concise, and logically organized. | Partially Meets | 40 points
+Demonstrates the Bidder’s understanding of 25% of the topic requirements. 
+Provides minimal evidence, plans, and/or methods of the Bidder’s ability and intent to fully meet 25% of the topic requirements. 
+Provides an approach that is not achievable, does not apply best practices, and is not clear, concise, or logically organized. | Minimally Meets | 20 points
+Bidder’s response demonstrates no understanding of the topic requirements; not relevant.
+Provides no evidence, plans, and/or methods of the Bidder’s ability and intent to meet the topic requirements.
+Provides an approach that is not achievable, does not apply best practices, and is not clear, concise, or logically organized. | Does Not Meet | 0 points
+
+[Table 7]
+Criteria | Rating | Points
+Demonstrates a full understanding and achievement of the requirements set forth in Exhibit A, Statement of Work, while also exceeding expectations and delivering functionality which goes beyond the requirements. | Exceeds | 180 Points
+Demonstrates a full understanding and achievement of the requirements set forth in Exhibit A, Statement of Work. | Fully Meets | 140 Points
+Demonstrates a partial understanding and full achievement of the requirements set forth in Exhibit A, Statement of Work. | Partially Meets | 100 Points
+Demonstrates a basic understanding, while barely achieving the requirements set forth in Exhibit A, Statement of Work. | Minimally Meets | 50 Points
+Does not demonstrate an understanding of the requirements set forth in Exhibit A, Statement of Work. | Does not Meet | 0 Points
+
+[Table 8]
+Bidder | Total for each Bidder
+Bidder 1 | $275.00
+Bidder 2 | $300.00
+Bidder 3 | $255.00
+Bidder 4 | $350.00
+
+[Table 9]
+Bidder | Lowest Total Cost (NUMERATOR) divided by 
+Respective Bidder Total Cost (DENOMINATOR) | Cost Factor
+Bidder 1 | $255.00 divided by $275.00 | = 0.9272
+Bidder 2 | $255.00 divided by $300.00 | = 0.8500
+Bidder 3 | $255.00 divided by $255.00 | = 1.0000
+Bidder 4 | $255.00 divided by $350.00 | = 0.7285
+
+[Table 10]
+Bidder | Cost Factor for Total Cost
+(a) | Total Cost Maximum 
+Points Available
+(b) | Score for Item
+(a multiplied by b)
+Bidder 1 | 0.9272 | 500 | 463.60
+Bidder 2 | 0.8500 | 500 | 425.00
+Bidder 3 | 1.0000 | 500 | 500.00
+Bidder 4 | 0.7285 | 500 | 364.25
+
+[Table 11]
+Bidder | Approach and Understanding 
+(a) | Demonstration
+(b) | Cost (c) | Total Score
+(a + b + c)
+Bidder 1 | 280.00 | 50.00 | 463.60 | 793.60
+Bidder 2 | 320.00 | 140.00 | 425.00 | 885.00
+Bidder 3 | 230.00 | 100.00 | 500.00 | 830.00
+Bidder 4 | 300.00 | 180.00 | 364.25 | 844.25

@@ -1,0 +1,1734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plan 078 — Transparency Wireframes (In-Context)</title>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<style>
+  :root {
+    /* SME Mart / ngx-library theme tokens */
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface-2: #242836;
+    --surface-dim: #1e2130;
+    --border: #333848;
+    --text: #e4e4e7;
+    --text-dim: #8b8fa3;
+    --primary: #03aff0;       /* --mat-sys-primary */
+    --tertiary: #6aa84f;      /* --mat-sys-tertiary */
+    --error: #cc0000;         /* --mat-sys-error */
+    /* Party / role colors */
+    --demand: #f59e0b;
+    --demand-bg: rgba(245, 158, 11, 0.08);
+    --supply: #10b981;
+    --supply-bg: rgba(16, 185, 129, 0.08);
+    --bridge: #03aff0;
+    --bridge-bg: rgba(3, 175, 240, 0.10);
+    --audit: #ec4899;
+    --audit-bg: rgba(236, 72, 153, 0.08);
+    /* Status chip colors (from zb/ui) */
+    --chip-private-bg: #e9e9e9;
+    --chip-pending-bg: #d7e0ee;
+    --chip-verified-bg: #d8ecba;
+    --chip-rejected-bg: #eed5d1;
+    --chip-text: #0f0f10;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: Roboto, 'Helvetica Neue', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .material-icons { font-size: 18px; vertical-align: middle; }
+
+  /* ── Page shell ─────────────────────────────── */
+  .sketch-header {
+    padding: 24px 32px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .sketch-header h1 { font-size: 24px; font-weight: 600; }
+  .sketch-header .subtitle { color: var(--text-dim); font-size: 13px; margin-top: 4px; }
+
+  /* Top-level wireframe tabs */
+  .wf-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 2px solid var(--border);
+    padding: 0 32px;
+    background: var(--surface);
+  }
+  .wf-tab {
+    padding: 10px 20px;
+    cursor: pointer;
+    border: none;
+    background: none;
+    color: var(--text-dim);
+    font-size: 14px;
+    font-weight: 500;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+  .wf-tab:hover { color: var(--text); }
+  .wf-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+  .wf-content { display: none; padding: 0; }
+  .wf-content.active { display: block; }
+
+  /* ── Shared primitives ──────────────────────── */
+  .annotation {
+    background: rgba(255, 50, 50, 0.12);
+    border: 1px dashed #ff5555;
+    border-radius: 6px;
+    padding: 8px 12px;
+    color: #ff8888;
+    font-size: 12px;
+    margin: 8px 0 16px;
+    line-height: 1.4;
+  }
+  .annotation::before { content: '📌 '; }
+  .decision {
+    background: rgba(3, 175, 240, 0.10);
+    border-left: 3px solid var(--primary);
+    padding: 8px 12px;
+    font-size: 12px;
+    color: var(--primary);
+    margin: 8px 0 16px;
+    border-radius: 0 4px 4px 0;
+  }
+  .decision::before { content: '✅ DECISION: '; font-weight: 600; }
+  .open-q {
+    background: rgba(245, 158, 11, 0.10);
+    border-left: 3px solid var(--demand);
+    padding: 8px 12px;
+    font-size: 12px;
+    color: var(--demand);
+    margin: 8px 0 16px;
+    border-radius: 0 4px 4px 0;
+  }
+  .open-q::before { content: '❓ OPEN: '; font-weight: 600; }
+
+  /* Chip / badge */
+  .chip {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .chip-verified { background: var(--chip-verified-bg); color: var(--chip-text); }
+  .chip-pending  { background: var(--chip-pending-bg);  color: var(--chip-text); }
+  .chip-private  { background: var(--chip-private-bg);  color: var(--chip-text); }
+  .chip-rejected { background: var(--chip-rejected-bg); color: var(--chip-text); }
+  .chip-submitted { background: rgba(3, 175, 240, 0.25); color: var(--primary); }
+  .chip-active   { background: var(--tertiary); color: #fff; }
+  .chip-draft    { background: var(--chip-private-bg); color: var(--chip-text); }
+  .chip-open     { background: var(--chip-pending-bg); color: var(--chip-text); }
+  .chip-delivered { background: var(--chip-verified-bg); color: var(--chip-text); }
+  .chip-match    { background: rgba(16, 185, 129, 0.25); color: var(--supply); }
+  .chip-awaiting { background: rgba(245, 158, 11, 0.25); color: var(--demand); }
+  .chip-revoked  { background: var(--chip-rejected-bg); color: var(--error); }
+  .chip-read-only { background: var(--audit-bg); color: var(--audit); border: 1px solid var(--audit); }
+
+  /* Party dot */
+  .party-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 4px;
+    vertical-align: middle;
+  }
+  .dot-demand { background: var(--demand); }
+  .dot-supply { background: var(--supply); }
+  .dot-audit  { background: var(--audit); }
+
+  /* ── VIEW 1: Project Detail Shell ───────────── */
+  .project-shell {
+    background: var(--bg);
+    min-height: 100vh;
+  }
+  .project-page {
+    padding: 24px;
+    max-width: 1200px;
+  }
+
+  /* Back button */
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--text-dim);
+    font-size: 13px;
+    cursor: pointer;
+    margin-bottom: 8px;
+    background: none;
+    border: none;
+    font-family: inherit;
+  }
+  .back-btn:hover { color: var(--text); }
+
+  /* Project header */
+  .proj-header-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 4px;
+  }
+  .proj-header-title h2 {
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0;
+  }
+  .proj-desc {
+    color: var(--text-dim);
+    font-size: 13px;
+    max-width: 60ch;
+    margin-bottom: 16px;
+  }
+
+  /* Primary tabs (mimics mat-tab-nav-bar) */
+  .primary-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 2px solid var(--border);
+    margin-bottom: 0;
+  }
+  .p-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-dim);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    text-decoration: none;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    font-family: inherit;
+  }
+  .p-tab:hover { color: var(--text); }
+  .p-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+  .p-tab .material-icons { font-size: 18px; }
+  .more-chevron { font-size: 14px; margin-left: 2px; }
+
+  /* Tab content area */
+  .tab-content-area {
+    padding: 24px 0;
+  }
+
+  /* ── Transparency Tab Content ───────────────── */
+
+  /* Scorecards row */
+  .scorecards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .scorecard {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+  }
+  .scorecard-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+  }
+  .scorecard-value {
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--primary);
+    line-height: 1.2;
+  }
+  .scorecard-sub {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+  .score-bar {
+    height: 4px;
+    background: var(--surface-2);
+    border-radius: 2px;
+    margin-top: 8px;
+    overflow: hidden;
+  }
+  .score-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.3s;
+  }
+
+  /* Filter chips row */
+  .filter-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .filter-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-dim);
+    margin-right: 4px;
+  }
+  .filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+  .filter-chip:hover { border-color: var(--text-dim); }
+  .filter-chip.selected {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+  }
+  .filter-chip.disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+  .filter-chip .count {
+    font-size: 10px;
+    opacity: 0.7;
+  }
+
+  /* View toggle (Unresolved / Matched) */
+  .view-toggle {
+    display: flex;
+    gap: 0;
+    margin-bottom: 16px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    width: fit-content;
+  }
+  .view-toggle-btn {
+    padding: 6px 16px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    background: var(--surface);
+    color: var(--text-dim);
+    border: none;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+  .view-toggle-btn:not(:last-child) { border-right: 1px solid var(--border); }
+  .view-toggle-btn:hover { color: var(--text); }
+  .view-toggle-btn.active {
+    background: var(--primary);
+    color: #fff;
+  }
+  .view-toggle-btn .badge-count {
+    display: inline-block;
+    background: rgba(255,255,255,0.2);
+    padding: 0 6px;
+    border-radius: 8px;
+    font-size: 10px;
+    margin-left: 4px;
+  }
+
+  /* Entangled pairs table */
+  .ep-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .ep-table th {
+    text-align: left;
+    padding: 10px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-dim);
+    border-bottom: 2px solid var(--border);
+    background: var(--surface);
+  }
+  .ep-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  .ep-table tr:hover { background: var(--surface-dim); }
+  .ep-table tr.row-private {
+    opacity: 0.5;
+  }
+  .ep-table tr.row-private:hover { opacity: 0.7; }
+  .ep-table .clickable { cursor: pointer; }
+  .req-name { font-weight: 500; }
+  .req-id { font-size: 11px; color: var(--text-dim); }
+
+  /* ── VIEW 2: More dropdown mock ─────────────── */
+  .more-dropdown {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 0;
+    width: 220px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    position: absolute;
+    z-index: 10;
+  }
+  .more-dropdown .group-heading {
+    padding: 8px 16px 4px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-dim);
+  }
+  .more-dropdown .menu-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    font-size: 13px;
+    color: var(--text);
+    cursor: pointer;
+  }
+  .more-dropdown .menu-item:hover { background: var(--surface-2); }
+  .more-dropdown .menu-item.highlighted {
+    background: var(--surface-2);
+    font-weight: 500;
+  }
+  .more-dropdown .menu-item .material-icons { font-size: 18px; color: var(--text-dim); }
+  .more-dropdown .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 4px 0;
+  }
+
+  /* ── VIEW 3: Task pane with side panel ──────── */
+  .task-pane-layout {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 16px 0;
+  }
+  .task-main {
+    padding: 20px;
+    border-right: 1px solid var(--border);
+  }
+  .task-side {
+    padding: 16px;
+    background: var(--surface-dim);
+  }
+  .task-main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+  }
+  .task-main-id {
+    font-size: 12px;
+    color: var(--text-dim);
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .task-main-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .task-field {
+    margin-bottom: 10px;
+  }
+  .task-field-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-dim);
+    margin-bottom: 2px;
+  }
+  .task-field-value {
+    font-size: 13px;
+    color: var(--text);
+  }
+
+  /* Transparency controls side panel */
+  .tc-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .tc-panel-title {
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .tc-section-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-dim);
+    margin: 12px 0 6px;
+  }
+  .tc-toggle-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    font-size: 13px;
+    border-bottom: 1px solid rgba(51, 56, 72, 0.5);
+  }
+  .tc-toggle-row:last-child { border-bottom: none; }
+  .tc-toggle-label { color: var(--text); }
+  .tc-toggle-sublabel { font-size: 11px; color: var(--text-dim); }
+  /* Fake toggle */
+  .toggle {
+    width: 36px;
+    height: 20px;
+    border-radius: 10px;
+    position: relative;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .toggle::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #fff;
+    transition: left 0.15s;
+  }
+  .toggle.on {
+    background: var(--primary);
+  }
+  .toggle.on::after { left: 18px; }
+  .toggle.off {
+    background: var(--border);
+  }
+  .toggle.off::after { left: 2px; }
+
+  /* Visible-to chips */
+  .visible-to-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 4px;
+  }
+  .party-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  .party-chip-supply { background: var(--supply-bg); color: var(--supply); border: 1px solid var(--supply); }
+  .party-chip-audit  { background: var(--audit-bg);  color: var(--audit);  border: 1px solid var(--audit); }
+  .party-chip-demand { background: var(--demand-bg); color: var(--demand); border: 1px solid var(--demand); }
+
+  /* Entangled pair reference */
+  .ep-ref {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-top: 4px;
+    font-size: 12px;
+  }
+  .ep-ref-link {
+    color: var(--primary);
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 20px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    font-family: inherit;
+    transition: opacity 0.15s;
+  }
+  .btn:hover { opacity: 0.85; }
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-warn { background: var(--error); color: #fff; }
+  .btn-outline {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  /* ── VIEW 4: Entangled Pair Drawer ──────────── */
+  .ep-drawer {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin: 16px 0;
+    overflow: hidden;
+  }
+  .ep-drawer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-dim);
+  }
+  .ep-drawer-title {
+    font-size: 16px;
+    font-weight: 600;
+  }
+  .three-col {
+    display: grid;
+    grid-template-columns: 1fr 160px 1fr;
+    gap: 0;
+    align-items: stretch;
+  }
+  .col-demand {
+    background: var(--demand-bg);
+    border-right: 1px solid rgba(245, 158, 11, 0.3);
+    padding: 20px;
+  }
+  .col-bridge {
+    background: var(--bridge-bg);
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  .col-supply {
+    background: var(--supply-bg);
+    border-left: 1px solid rgba(16, 185, 129, 0.3);
+    padding: 20px;
+  }
+  .col-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+  }
+  .col-demand .col-label { color: var(--demand); }
+  .col-supply .col-label { color: var(--supply); }
+  .col-bridge .col-label { color: var(--bridge); }
+
+  .bridge-arrow {
+    color: var(--text-dim);
+    font-size: 12px;
+    margin: 4px 0;
+  }
+  .bridge-link-state {
+    margin: 12px 0;
+  }
+  .bridge-hash {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 8px;
+    word-break: break-all;
+  }
+
+  /* Audit trail */
+  .audit-trail {
+    padding: 16px 20px;
+    border-top: 1px solid var(--border);
+  }
+  .audit-trail-title {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+  }
+  .trail-entry {
+    display: flex;
+    gap: 8px;
+    padding: 4px 0;
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+  .trail-date {
+    flex-shrink: 0;
+    width: 80px;
+    color: var(--text-dim);
+  }
+
+  /* ── VIEW 5: Assessor View ─────────────────── */
+  .assessor-banner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    background: var(--audit-bg);
+    border: 1px solid var(--audit);
+    border-radius: 8px;
+    margin-bottom: 20px;
+  }
+  .assessor-banner-title {
+    font-size: 16px;
+    font-weight: 600;
+  }
+  .assessor-banner-sub {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+  .compliance-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .compliance-summary {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+  }
+  .boundary-bars {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+  }
+  .boundary-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .boundary-bar-label {
+    font-size: 12px;
+    width: 100px;
+    flex-shrink: 0;
+  }
+  .boundary-bar {
+    flex: 1;
+    height: 20px;
+    background: var(--surface-2);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .boundary-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+  }
+  .boundary-bar-count {
+    font-size: 11px;
+    color: var(--text-dim);
+    width: 60px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .visibility-note {
+    background: rgba(245, 158, 11, 0.08);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    border-radius: 6px;
+    padding: 12px 16px;
+    font-size: 12px;
+    color: var(--demand);
+    margin-top: 20px;
+  }
+  .visibility-note::before {
+    content: '⚠ VISIBILITY NOTE: ';
+    font-weight: 600;
+  }
+
+  /* ── Empty state ────────────────────────────── */
+  .empty-state {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--text-dim);
+  }
+  .empty-state .material-icons {
+    font-size: 48px;
+    margin-bottom: 12px;
+    opacity: 0.4;
+  }
+  .empty-state h3 {
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .empty-state p {
+    font-size: 13px;
+    max-width: 40ch;
+    margin: 0 auto;
+  }
+
+  /* ── Private notes callout ──────────────────── */
+  .private-notes-box {
+    background: var(--surface);
+    border: 1px dashed var(--border);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 8px;
+  }
+  .private-notes-box::before {
+    content: '🔒 ';
+  }
+
+  /* ── Supply-side panel ──────────────────────── */
+  .file-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    margin-bottom: 4px;
+    font-size: 12px;
+  }
+  .file-item-name { color: var(--text); }
+  .file-item-status { font-size: 10px; }
+
+  /* ── Section separator ─────────────────────── */
+  .section-sep {
+    border: none;
+    border-top: 1px dashed var(--border);
+    margin: 32px 0;
+  }
+
+  /* Utilities */
+  .mt-8  { margin-top: 8px; }
+  .mt-16 { margin-top: 16px; }
+  .mt-24 { margin-top: 24px; }
+  .mb-8  { margin-bottom: 8px; }
+  .mb-16 { margin-bottom: 16px; }
+  .flex-between { display: flex; justify-content: space-between; align-items: center; }
+</style>
+</head>
+<body>
+
+<div class="sketch-header">
+  <h1>Plan 078 — Transparency Wireframes</h1>
+  <div class="subtitle">Low-fidelity wireframes showing Transparency Center integration into actual SME Mart views. April 2026.</div>
+</div>
+
+<!-- Top-level wireframe tab nav -->
+<div class="wf-tabs">
+  <button class="wf-tab active" onclick="showTab('tab-project')">1. Project Detail</button>
+  <button class="wf-tab" onclick="showTab('tab-more-menu')">2. More Menu</button>
+  <button class="wf-tab" onclick="showTab('tab-task-demand')">3a. Task (Demand)</button>
+  <button class="wf-tab" onclick="showTab('tab-task-supply')">3b. Task (Supply)</button>
+  <button class="wf-tab" onclick="showTab('tab-ep-drawer')">4. Entangled Pair</button>
+  <button class="wf-tab" onclick="showTab('tab-assessor')">5. Assessor View</button>
+  <button class="wf-tab" onclick="showTab('tab-empty')">6. Empty State</button>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<!-- TAB 1: Project Detail — Transparency Tab            -->
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<div id="tab-project" class="wf-content active">
+  <div class="project-shell">
+    <div class="project-page">
+
+      <div class="annotation">
+        This wireframe shows the Transparency tab as it would appear within the real Project Detail page.
+        The shell (back button, header, tab bar, More menu) matches the actual <code>project-detail.component.ts</code> layout.
+        Clark's red-box annotation: "Link to current state for Project view."
+      </div>
+
+      <!-- Back button -->
+      <button class="back-btn">
+        <span class="material-icons">arrow_back</span>
+        Engagement: Acme Corp + CyberSec Partners
+      </button>
+
+      <!-- Project header -->
+      <div class="proj-header-title">
+        <h2>SOC2 Assessment</h2>
+        <span class="chip chip-active">Active</span>
+      </div>
+      <p class="proj-desc">Comprehensive SOC2 Type II assessment for Acme Corp, performed by CyberSec Partners.</p>
+
+      <!-- Primary tab bar (real structure) -->
+      <div class="primary-tabs">
+        <button class="p-tab">
+          <span class="material-icons">dashboard</span> Overview
+        </button>
+        <button class="p-tab">
+          <span class="material-icons">view_kanban</span> Boards
+        </button>
+        <button class="p-tab">
+          <span class="material-icons">sticky_note_2</span> Notes
+        </button>
+        <button class="p-tab">
+          <span class="material-icons">folder_open</span> Documents
+        </button>
+        <!-- More dropdown shows "Transparency" when active -->
+        <button class="p-tab active" style="margin-left: auto;">
+          <span class="material-icons">visibility</span>
+          Transparency
+          <span class="material-icons more-chevron">expand_more</span>
+        </button>
+      </div>
+
+      <div class="decision">
+        The "More" tab dynamically shows the active sub-tab label when one is selected (existing behavior in <code>project-detail.component.ts</code> via <code>activeMoreLabel()</code>).
+        When Transparency is active, More shows "Transparency" with the visibility icon.
+      </div>
+
+      <!-- ── Transparency tab content ────────── -->
+      <div class="tab-content-area">
+
+        <!-- Page heading -->
+        <div class="flex-between mb-16">
+          <div>
+            <h3 style="font-size: 20px; font-weight: 500;">Transparency</h3>
+            <p style="font-size: 13px; color: var(--text-dim); margin-top: 2px;">
+              Published evidence, requirements, and verification across all parties.
+            </p>
+          </div>
+        </div>
+
+        <!-- Summary scorecards -->
+        <div class="scorecards">
+          <div class="scorecard">
+            <div class="scorecard-label">Requirements</div>
+            <div class="scorecard-value">14</div>
+            <div class="scorecard-sub">9 verified, 3 pending, 2 open</div>
+            <div class="score-bar">
+              <div class="score-bar-fill" style="width: 64%; background: var(--tertiary);"></div>
+            </div>
+          </div>
+          <div class="scorecard">
+            <div class="scorecard-label">Evidence Items</div>
+            <div class="scorecard-value">11</div>
+            <div class="scorecard-sub">11 submitted, 3 unmatched reqs</div>
+            <div class="score-bar">
+              <div class="score-bar-fill" style="width: 78%; background: var(--primary);"></div>
+            </div>
+          </div>
+          <div class="scorecard">
+            <div class="scorecard-label">Boundary Coverage</div>
+            <div class="scorecard-value">4/6</div>
+            <div class="scorecard-sub">Infra + Apps pending</div>
+            <div class="score-bar">
+              <div class="score-bar-fill" style="width: 67%; background: var(--demand);"></div>
+            </div>
+          </div>
+          <div class="scorecard">
+            <div class="scorecard-label">Transparency Score</div>
+            <div class="scorecard-value" style="color: var(--tertiary);">72%</div>
+            <div class="scorecard-sub">% of reqs with verified evidence</div>
+            <div class="score-bar">
+              <div class="score-bar-fill" style="width: 72%; background: var(--tertiary);"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Boundary component filter chips -->
+        <div class="filter-row">
+          <span class="filter-label">Filter by Boundary Component</span>
+          <button class="filter-chip selected">All</button>
+          <button class="filter-chip">Policies <span class="count">(3)</span></button>
+          <button class="filter-chip">Legal Reqs <span class="count">(2)</span></button>
+          <button class="filter-chip">License Reqs <span class="count">(1)</span></button>
+          <button class="filter-chip">Standards <span class="count">(3)</span></button>
+          <button class="filter-chip">Technical <span class="count">(2)</span></button>
+          <button class="filter-chip disabled">Infra <span class="count">(0)</span></button>
+          <button class="filter-chip disabled">Apps <span class="count">(0)</span></button>
+        </div>
+
+        <!-- View toggle: Unresolved (default) / All Matched -->
+        <div class="view-toggle">
+          <button class="view-toggle-btn active">Unresolved <span class="badge-count">5</span></button>
+          <button class="view-toggle-btn">All Matched <span class="badge-count">9</span></button>
+          <button class="view-toggle-btn">All <span class="badge-count">14</span></button>
+        </div>
+
+        <div class="decision">
+          Clark's annotation on entangled pairs: "I like the idea of having partial view, perhaps in the list of 'unresolved items' there's a 'View Matched Items' button."
+          Implemented as a segmented toggle: <strong>Unresolved</strong> (default) | All Matched | All.
+          This surfaces the urgent items first without hiding the resolved ones.
+        </div>
+
+        <!-- Entangled pairs table -->
+        <table class="ep-table">
+          <thead>
+            <tr>
+              <th style="width: 25%;">Requirement</th>
+              <th style="width: 15%;">Demanded By</th>
+              <th style="width: 20%;">Evidence</th>
+              <th style="width: 15%;">Supplied By</th>
+              <th style="width: 12%;">Status</th>
+              <th style="width: 13%;">Component</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="clickable">
+              <td>
+                <div class="req-id">REQ-003</div>
+                <div class="req-name">Penetration test results</div>
+              </td>
+              <td><span class="party-dot dot-demand"></span> Acme Corp</td>
+              <td style="color: var(--text-dim); font-style: italic;">awaiting</td>
+              <td><span class="party-dot dot-supply"></span> CyberSec</td>
+              <td><span class="chip chip-pending">Pending</span></td>
+              <td>Technical</td>
+            </tr>
+            <tr class="clickable">
+              <td>
+                <div class="req-id">REQ-005</div>
+                <div class="req-name">E&amp;O insurance certificate</div>
+              </td>
+              <td><span class="party-dot dot-demand"></span> Acme Corp</td>
+              <td>eo-cert-2026.pdf</td>
+              <td><span class="party-dot dot-supply"></span> CyberSec</td>
+              <td><span class="chip chip-submitted">Submitted</span></td>
+              <td>Legal Reqs</td>
+            </tr>
+            <tr class="clickable">
+              <td>
+                <div class="req-id">REQ-007</div>
+                <div class="req-name">NDA execution</div>
+              </td>
+              <td><span class="party-dot dot-demand"></span> Acme Corp</td>
+              <td style="color: var(--text-dim); font-style: italic;">not published</td>
+              <td>—</td>
+              <td><span class="chip chip-open">Open</span></td>
+              <td>Legal Reqs</td>
+            </tr>
+            <tr class="clickable">
+              <td>
+                <div class="req-id">REQ-009</div>
+                <div class="req-name">Data processing agreement</div>
+              </td>
+              <td><span class="party-dot dot-demand"></span> Acme Corp</td>
+              <td style="color: var(--text-dim); font-style: italic;">awaiting</td>
+              <td><span class="party-dot dot-supply"></span> CyberSec</td>
+              <td><span class="chip chip-pending">Pending</span></td>
+              <td>Legal Reqs</td>
+            </tr>
+            <tr class="clickable row-private">
+              <td>
+                <div class="req-id">REQ-012</div>
+                <div class="req-name">Infrastructure audit plan</div>
+              </td>
+              <td><span class="party-dot dot-demand"></span> Acme Corp</td>
+              <td style="color: var(--text-dim); font-style: italic;">—</td>
+              <td>—</td>
+              <td><span class="chip chip-private">Private</span></td>
+              <td>Infra</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div style="font-size: 11px; color: var(--text-dim); margin-top: 8px; font-style: italic;">
+          Dimmed rows = requirement exists on demand-side board but hasn't been published. Only the demand party sees it.
+          Click any row to open the entangled pair detail drawer.
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<!-- TAB 2: More Menu — showing Transparency placement    -->
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<div id="tab-more-menu" class="wf-content">
+  <div class="project-page" style="padding: 32px;">
+
+    <div class="annotation">
+      Shows where "Transparency" lives in the Project Detail "More" dropdown.
+      Currently proposed for the <strong>Governance</strong> group (alongside Parties, Compliance, Reviews).
+      Alternatively could go under Tracking — awaiting Clark's decision.
+    </div>
+
+    <div class="open-q">
+      Tab placement: <strong>Governance</strong> group (my recommendation — transparency is about inter-party visibility) or <strong>Tracking</strong> group (UI-SPEC original proposal — transparency as a metrics view)?
+    </div>
+
+    <h3 class="mb-16">More Menu — Governance Group (Recommended)</h3>
+
+    <!-- Inline mock of More dropdown -->
+    <div style="position: relative; display: inline-block;">
+      <div class="more-dropdown" style="position: relative;">
+        <div class="group-heading">Work</div>
+        <div class="menu-item"><span class="material-icons">description</span> PRD</div>
+        <div class="menu-item"><span class="material-icons">timeline</span> Plan</div>
+        <div class="divider"></div>
+        <div class="group-heading">Tracking</div>
+        <div class="menu-item"><span class="material-icons">history</span> Timeline</div>
+        <div class="menu-item"><span class="material-icons">widgets</span> Dashboard</div>
+        <div class="menu-item"><span class="material-icons">payments</span> Financials</div>
+        <div class="divider"></div>
+        <div class="group-heading">Collaboration</div>
+        <div class="menu-item"><span class="material-icons">forum</span> Messages</div>
+        <div class="divider"></div>
+        <div class="group-heading">Governance</div>
+        <div class="menu-item"><span class="material-icons">group</span> Parties</div>
+        <div class="menu-item"><span class="material-icons">person_add</span> Invited Vendors</div>
+        <div class="menu-item highlighted" style="border-left: 2px solid var(--primary);">
+          <span class="material-icons" style="color: var(--primary);">visibility</span>
+          <span style="color: var(--primary); font-weight: 600;">Transparency</span>
+        </div>
+        <div class="menu-item"><span class="material-icons">verified_user</span> Compliance</div>
+        <div class="menu-item"><span class="material-icons">rate_review</span> Reviews</div>
+      </div>
+    </div>
+
+    <div class="decision mt-24">
+      Recommendation: Place between "Invited Vendors" and "Compliance" in Governance.
+      Rationale: Transparency is about inter-party data sharing (governance), not metrics (tracking).
+      Compliance and Reviews are its natural neighbors.
+    </div>
+
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<!-- TAB 3a: Demand-Side Task with Transparency Controls  -->
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<div id="tab-task-demand" class="wf-content">
+  <div class="project-page" style="padding: 32px;">
+
+    <div class="annotation">
+      Per-task Transparency Controls as a side panel on the task detail view.
+      Clark's annotation: "Look at current Task view also but yes we'll add this side-panel concept."
+      This is the <strong>demand side</strong> (buyer creates requirement, chooses what to publish).
+    </div>
+
+    <h3 class="mb-16">Demand-Side Task — "Penetration Test Results Required"</h3>
+
+    <div class="task-pane-layout">
+      <!-- Left: task detail (existing task view) -->
+      <div class="task-main">
+        <div class="task-main-header">
+          <div>
+            <div class="task-main-id">REQ-003</div>
+            <div class="task-main-title">Penetration Test Results Required</div>
+          </div>
+          <span class="chip chip-open">Open</span>
+        </div>
+
+        <div class="task-field">
+          <div class="task-field-label">Task Details</div>
+          <div class="task-field-value">
+            Annual penetration test must be conducted by a CREST-certified provider. Results must include
+            remediation plan for any critical findings.
+          </div>
+        </div>
+        <div class="task-field">
+          <div class="task-field-label">Assigned To</div>
+          <div class="task-field-value">Jane Smith (Buyer PM)</div>
+        </div>
+        <div class="task-field">
+          <div class="task-field-label">Due</div>
+          <div class="task-field-value">2026-05-15</div>
+        </div>
+        <div class="task-field">
+          <div class="task-field-label">Category</div>
+          <div class="task-field-value">Technical</div>
+        </div>
+
+        <div class="private-notes-box mt-16">
+          <strong>Private Notes</strong> (only you see this)<br>
+          Spoke with legal — we need this before the board meeting on June 1st.
+          Push back if they try to submit an automated scan instead of full pentest.
+        </div>
+      </div>
+
+      <!-- Right: Transparency Controls side panel -->
+      <div class="task-side">
+        <div class="tc-panel-header">
+          <div class="tc-panel-title">Transparency Controls</div>
+          <span style="font-size: 11px; color: var(--text-dim);">2 items private</span>
+        </div>
+
+        <div class="tc-section-label">What to Publish</div>
+
+        <div class="tc-toggle-row">
+          <div>
+            <div class="tc-toggle-label">Requirement description</div>
+            <div class="tc-toggle-sublabel">The task title and description</div>
+          </div>
+          <div class="toggle on"></div>
+        </div>
+        <div class="tc-toggle-row">
+          <div>
+            <div class="tc-toggle-label">Due date</div>
+            <div class="tc-toggle-sublabel">Deadline visibility</div>
+          </div>
+          <div class="toggle on"></div>
+        </div>
+        <div class="tc-toggle-row">
+          <div>
+            <div class="tc-toggle-label">Current task status</div>
+            <div class="tc-toggle-sublabel">Open → In Progress → Done</div>
+          </div>
+          <div class="toggle on"></div>
+        </div>
+        <div class="tc-toggle-row">
+          <div>
+            <div class="tc-toggle-label">Attachments</div>
+            <div class="tc-toggle-sublabel">2 files attached</div>
+          </div>
+          <div class="toggle off"></div>
+        </div>
+        <div class="tc-toggle-row">
+          <div>
+            <div class="tc-toggle-label">Assignee</div>
+            <div class="tc-toggle-sublabel">Who is responsible</div>
+          </div>
+          <div class="toggle off"></div>
+        </div>
+
+        <div class="tc-section-label mt-16">Visible To</div>
+        <div class="visible-to-chips">
+          <span class="party-chip party-chip-supply">
+            <span class="party-dot dot-supply"></span> CyberSec Partners (Supply)
+          </span>
+          <span class="party-chip party-chip-audit">
+            <span class="party-dot dot-audit"></span> AuditCo (Assessor)
+          </span>
+        </div>
+
+        <div class="tc-section-label mt-16">Entangled Pair</div>
+        <div class="ep-ref">
+          <div>
+            Linked to: <span class="ep-ref-link">SAT-003</span> on CyberSec's board
+          </div>
+          <span class="chip chip-awaiting">Preparing</span>
+        </div>
+
+        <button class="btn btn-primary mt-16" style="width: 100%;">
+          <span class="material-icons">visibility</span>
+          Publish to Transparency
+        </button>
+      </div>
+    </div>
+
+    <div style="font-size: 11px; color: var(--text-dim); margin-top: 8px;">
+      <strong>Toggle model:</strong> Each data point is independently publishable.
+      Private notes are NEVER publishable (no toggle shown).
+      Attachments and assignee default to private.
+      Description, due date, and status default to published for transparency requirements.
+    </div>
+
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<!-- TAB 3b: Supply-Side Task with Transparency Controls  -->
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<div id="tab-task-supply" class="wf-content">
+  <div class="project-page" style="padding: 32px;">
+
+    <div class="annotation">
+      Supply-side mirror — vendor sees the matching requirement and submits evidence.
+      Same side-panel concept, different controls: file selection + "Submit Evidence" CTA.
+    </div>
+
+    <h3 class="mb-16">Supply-Side Task — "Provide Penetration Test Results"</h3>
+
+    <div class="task-pane-layout">
+      <!-- Left: task detail -->
+      <div class="task-main">
+        <div class="task-main-header">
+          <div>
+            <div class="task-main-id">SAT-003</div>
+            <div class="task-main-title">Provide Penetration Test Results</div>
+          </div>
+          <span class="chip chip-pending">In Progress</span>
+        </div>
+
+        <div class="task-field">
+          <div class="task-field-label">Task Details</div>
+          <div class="task-field-value">
+            Upload CREST-certified penetration test results with remediation plan.
+          </div>
+        </div>
+        <div class="task-field">
+          <div class="task-field-label">Assigned To</div>
+          <div class="task-field-value">Mike Chen (Vendor Security Lead)</div>
+        </div>
+        <div class="task-field">
+          <div class="task-field-label">Due</div>
+          <div class="task-field-value">2026-05-10</div>
+        </div>
+        <div class="task-field">
+          <div class="task-field-label">Attachments (2)</div>
+          <div class="task-field-value">
+            <div class="file-item mt-8">
+              <span class="file-item-name">pentest-report-draft-v1.pdf</span>
+              <span class="chip chip-private" style="font-size: 9px;">Private</span>
+            </div>
+            <div class="file-item">
+              <span class="file-item-name">pentest-report-final.pdf</span>
+              <span class="chip chip-submitted" style="font-size: 9px;">Ready</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="private-notes-box mt-16">
+          <strong>Private Notes</strong> (only you see this)<br>
+          Draft had 2 critical findings — fixed before final version. Don't share draft.
+        </div>
+      </div>
+
+      <!-- Right: Transparency Controls side panel (supply variant) -->
+      <div class="task-side">
+        <div class="tc-panel-header">
+          <div class="tc-panel-title">Transparency Controls</div>
+          <button class="btn btn-primary" style="padding: 4px 12px; font-size: 11px;">
+            Submit Evidence
+          </button>
+        </div>
+
+        <div class="tc-section-label">Select What to Submit</div>
+
+        <div class="file-item mt-8">
+          <span class="file-item-name">pentest-report-final.pdf</span>
+          <div class="toggle on"></div>
+        </div>
+        <div class="file-item">
+          <span class="file-item-name">pentest-report-draft-v1.pdf</span>
+          <div class="toggle off"></div>
+        </div>
+        <div style="font-size: 10px; color: var(--text-dim); margin-top: 4px;">
+          1 of 2 files selected for submission
+        </div>
+
+        <div class="tc-section-label mt-16">Completion Status</div>
+        <div style="font-size: 13px;">
+          Work status: <span class="chip chip-pending" style="font-size: 10px;">In Progress</span>
+        </div>
+
+        <div class="tc-section-label mt-16">Matching Requirement</div>
+        <div class="ep-ref">
+          <div>
+            <span class="ep-ref-link">REQ-003</span>: Penetration Test Results Required<br>
+            <span style="font-size: 11px; color: var(--text-dim);">
+              <span class="party-dot dot-demand"></span> Demanded by Acme Corp
+            </span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<!-- TAB 4: Entangled Pair Detail Drawer                  -->
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<div id="tab-ep-drawer" class="wf-content">
+  <div class="project-page" style="padding: 32px;">
+
+    <div class="annotation">
+      Opens when clicking a row in the Transparency tab table.
+      Three-column layout: Demand | Transparency Bridge | Supply.
+      Clark's annotation: "I like the idea of having partial view" — this detail view shows one pair at a time.
+    </div>
+
+    <!-- ── Matched & Verified pair ──────── -->
+    <h3 class="mb-8">Matched &amp; Verified Pair</h3>
+
+    <div class="ep-drawer">
+      <div class="ep-drawer-header">
+        <div class="ep-drawer-title">Entangled Pair: Access Control Policy</div>
+        <div>
+          <span class="chip chip-verified">Verified</span>
+          <button style="background: none; border: none; color: var(--text-dim); cursor: pointer; margin-left: 8px;">
+            <span class="material-icons">close</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="three-col">
+        <!-- Demand column -->
+        <div class="col-demand">
+          <div class="col-label"><span class="party-dot dot-demand"></span> Demand (Acme Corp)</div>
+          <div class="task-main-id">REQ-001</div>
+          <div style="font-weight: 500; margin-bottom: 8px;">Access control policy required</div>
+          <div style="font-size: 12px; color: var(--text-dim); margin-bottom: 8px;">
+            Provider must demonstrate a documented access control policy covering role-based access, MFA,
+            privileged account management.
+          </div>
+          <div class="task-field">
+            <div class="task-field-label">Category</div>
+            <div class="task-field-value">Policies</div>
+          </div>
+          <div class="task-field">
+            <div class="task-field-label">Assigned</div>
+            <div class="task-field-value">Jane Smith</div>
+          </div>
+          <div class="task-field">
+            <div class="task-field-label">Verified</div>
+            <div class="task-field-value">2026-04-05</div>
+          </div>
+          <span class="chip chip-verified mt-8">Verified</span>
+        </div>
+
+        <!-- Bridge column -->
+        <div class="col-bridge">
+          <div class="col-label">Transparency</div>
+
+          <div class="bridge-arrow">▲</div>
+          <div style="font-size: 11px; color: var(--text-dim);">demand<br>requirement</div>
+
+          <div style="margin: 12px 0;">
+            <span class="chip chip-match">Match</span>
+          </div>
+
+          <div style="font-size: 11px; color: var(--text-dim);">satisfies<br>requirement</div>
+          <div class="bridge-arrow">▼</div>
+
+          <div style="font-size: 11px; color: var(--text-dim); margin-top: 12px;">Linked</div>
+          <div style="font-size: 12px;">2026-03-28</div>
+
+          <div class="bridge-hash mt-8">0x3f2a…b01c</div>
+
+          <div class="open-q" style="margin-top: 12px; text-align: left; font-size: 10px;">
+            Hash column: show as placeholder or hide until platform feature?
+          </div>
+        </div>
+
+        <!-- Supply column -->
+        <div class="col-supply">
+          <div class="col-label"><span class="party-dot dot-supply"></span> Supply (CyberSec Partners)</div>
+          <div class="task-main-id">SAT-001</div>
+          <div style="font-weight: 500; margin-bottom: 8px;">Access control policy v2.1</div>
+          <div style="font-size: 12px; color: var(--text-dim); margin-bottom: 8px;">
+            Published access control policy document covering RBAC, MFA enforcement, and PAM procedures.
+          </div>
+          <div class="task-field">
+            <div class="task-field-label">Evidence</div>
+            <div class="task-field-value" style="color: var(--primary);">access-control-policy-v2.1.pdf</div>
+          </div>
+          <div class="task-field">
+            <div class="task-field-label">Submitted</div>
+            <div class="task-field-value">2026-04-02</div>
+          </div>
+          <div class="task-field">
+            <div class="task-field-label">Assigned</div>
+            <div class="task-field-value">Mike Chen</div>
+          </div>
+          <span class="chip chip-delivered mt-8">Delivered</span>
+        </div>
+      </div>
+
+      <!-- Audit trail -->
+      <div class="audit-trail">
+        <div class="audit-trail-title">Audit Trail</div>
+        <div class="trail-entry">
+          <span class="trail-date">2026-03-26</span>
+          <span>Requirement created by Jane Smith (Acme Corp)</span>
+        </div>
+        <div class="trail-entry">
+          <span class="trail-date">2026-03-28</span>
+          <span>Satisfaction task auto-created on CyberSec board</span>
+        </div>
+        <div class="trail-entry">
+          <span class="trail-date">2026-04-02</span>
+          <span>Evidence submitted: access-control-policy-v2.1.pdf</span>
+        </div>
+        <div class="trail-entry">
+          <span class="trail-date">2026-04-05</span>
+          <span>Verified by Jane Smith (Acme Corp)</span>
+        </div>
+      </div>
+    </div>
+
+    <hr class="section-sep">
+
+    <!-- ── Unmatched / Pending pair ──────── -->
+    <h3 class="mb-8">Unmatched / Pending Pair</h3>
+
+    <div class="ep-drawer">
+      <div class="ep-drawer-header">
+        <div class="ep-drawer-title">Entangled Pair: Penetration Test Results</div>
+        <div>
+          <span class="chip chip-awaiting">Pending</span>
+          <button style="background: none; border: none; color: var(--text-dim); cursor: pointer; margin-left: 8px;">
+            <span class="material-icons">close</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="three-col">
+        <div class="col-demand">
+          <div class="col-label"><span class="party-dot dot-demand"></span> Demand (Acme Corp)</div>
+          <div class="task-main-id">REQ-003</div>
+          <div style="font-weight: 500; margin-bottom: 8px;">Penetration test results</div>
+          <div style="font-size: 12px; color: var(--text-dim);">Due: 2026-05-15</div>
+          <span class="chip chip-open mt-8">Open</span>
+        </div>
+
+        <div class="col-bridge">
+          <div class="col-label">Transparency</div>
+          <div style="margin: 16px 0;">
+            <span class="material-icons" style="font-size: 24px; color: var(--text-dim); opacity: 0.4;">hourglass_empty</span>
+          </div>
+          <div style="font-size: 11px; color: var(--text-dim);">awaiting<br>evidence</div>
+          <div style="margin-top: 12px;">
+            <span class="chip chip-awaiting">Pending</span>
+          </div>
+        </div>
+
+        <div class="col-supply">
+          <div class="col-label"><span class="party-dot dot-supply"></span> Supply (CyberSec Partners)</div>
+          <div class="task-main-id">SAT-003</div>
+          <div style="font-weight: 500; margin-bottom: 8px;">Preparing pentest results</div>
+          <div style="font-size: 12px; color: var(--text-dim);">0 items published</div>
+          <span class="chip chip-pending mt-8">In Progress</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<!-- TAB 5: Assessor (Read-Only) View                     -->
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<div id="tab-assessor" class="wf-content">
+  <div class="project-page" style="padding: 32px;">
+
+    <div class="annotation">
+      Party-role-scoped variant of the Transparency tab. When the current user's party role is Assessor/Auditor,
+      the same route renders this read-only view instead of the full interactive version.
+      All publish/toggle controls are hidden. Only published items appear.
+    </div>
+
+    <div class="open-q">
+      Assessor role detection: How does the app know the current user is an assessor?
+      Candidate: check party role in ProjectContextService (party.role === 'assessor' | 'auditor').
+      Needs platform verification — is party role already surfaced in the engagement/project context?
+    </div>
+
+    <!-- Assessor banner -->
+    <div class="assessor-banner">
+      <div>
+        <div class="assessor-banner-title">SOC2 Assessment — Transparency Report</div>
+        <div class="assessor-banner-sub">Read-only view for AuditCo</div>
+      </div>
+      <span class="chip chip-read-only">Auditor (Read-Only)</span>
+    </div>
+
+    <!-- Two-column: compliance summary + boundary bars -->
+    <div class="compliance-grid">
+      <div class="compliance-summary">
+        <div class="scorecard-label">Compliance Summary</div>
+        <div class="scorecard-value" style="font-size: 36px; margin: 8px 0;">64%</div>
+        <div class="scorecard-sub">Requirements verified</div>
+        <div style="display: flex; gap: 24px; margin-top: 12px;">
+          <div>
+            <div style="font-size: 24px; font-weight: 600;">14</div>
+            <div style="font-size: 11px; color: var(--text-dim);">Total requirements</div>
+          </div>
+          <div>
+            <div style="font-size: 24px; font-weight: 600; color: var(--demand);">3</div>
+            <div style="font-size: 11px; color: var(--text-dim);">Awaiting evidence</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="boundary-bars">
+        <div class="scorecard-label mb-8">By Boundary Component</div>
+
+        <div class="boundary-bar-row">
+          <div class="boundary-bar-label">Policies</div>
+          <div class="boundary-bar">
+            <div class="boundary-bar-fill" style="width: 100%; background: var(--tertiary);"></div>
+          </div>
+          <div class="boundary-bar-count">3/3 verified</div>
+        </div>
+        <div class="boundary-bar-row">
+          <div class="boundary-bar-label">Legal Reqs</div>
+          <div class="boundary-bar">
+            <div class="boundary-bar-fill" style="width: 50%; background: var(--demand);"></div>
+          </div>
+          <div class="boundary-bar-count">2/4 verified</div>
+        </div>
+        <div class="boundary-bar-row">
+          <div class="boundary-bar-label">Standards</div>
+          <div class="boundary-bar">
+            <div class="boundary-bar-fill" style="width: 67%; background: var(--tertiary);"></div>
+          </div>
+          <div class="boundary-bar-count">2/3 verified</div>
+        </div>
+        <div class="boundary-bar-row">
+          <div class="boundary-bar-label">Technical</div>
+          <div class="boundary-bar">
+            <div class="boundary-bar-fill" style="width: 33%; background: var(--demand);"></div>
+          </div>
+          <div class="boundary-bar-count">1/4 verified</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Requirements table (assessor sees only published items) -->
+    <table class="ep-table">
+      <thead>
+        <tr>
+          <th>Requirement</th>
+          <th>Component</th>
+          <th>Evidence</th>
+          <th>Status</th>
+          <th>Verified</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="req-name">Access control policy</td>
+          <td>Policies</td>
+          <td style="color: var(--primary);">access-control-policy-v2.1.pdf</td>
+          <td><span class="chip chip-verified">Verified</span></td>
+          <td style="font-size: 12px;">2026-04-05</td>
+        </tr>
+        <tr>
+          <td class="req-name">SOC2 Type II certificate</td>
+          <td>Standards</td>
+          <td style="color: var(--primary);">soc2-cert-2025.pdf</td>
+          <td><span class="chip chip-verified">Verified</span></td>
+          <td style="font-size: 12px;">2026-04-05</td>
+        </tr>
+        <tr>
+          <td class="req-name">E&amp;O insurance</td>
+          <td>Legal Reqs</td>
+          <td style="color: var(--primary);">eo-cert-2026.pdf</td>
+          <td><span class="chip chip-submitted">Under Review</span></td>
+          <td style="font-size: 12px; color: var(--text-dim);">—</td>
+        </tr>
+        <tr>
+          <td class="req-name">Penetration test results</td>
+          <td>Technical</td>
+          <td style="color: var(--text-dim); font-style: italic;">not yet submitted</td>
+          <td><span class="chip chip-awaiting">Awaiting</span></td>
+          <td style="font-size: 12px; color: var(--text-dim);">—</td>
+        </tr>
+        <tr>
+          <td class="req-name">Data processing agreement</td>
+          <td>Legal Reqs</td>
+          <td style="color: var(--text-dim); font-style: italic;">not yet submitted</td>
+          <td><span class="chip chip-awaiting">Awaiting</span></td>
+          <td style="font-size: 12px; color: var(--text-dim);">—</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Visibility note -->
+    <div class="visibility-note">
+      This view shows ONLY items that both parties have explicitly published to the transparency function.
+      Internal preparation work, private notes, draft documents, and unpublished tasks are not visible.
+      The assessor cannot see what requirements exist that haven't been published — only published pairs appear here.
+    </div>
+
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<!-- TAB 6: Empty State                                    -->
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<div id="tab-empty" class="wf-content">
+  <div class="project-page" style="padding: 32px;">
+
+    <div class="annotation">
+      What the Transparency tab shows when no requirements have been created or published yet.
+      Uses <code>ZbEmptyStateContainerComponent</code>.
+    </div>
+
+    <h3 class="mb-16">Empty State (No Requirements)</h3>
+
+    <!-- Scorecards at zero -->
+    <div class="scorecards">
+      <div class="scorecard">
+        <div class="scorecard-label">Requirements</div>
+        <div class="scorecard-value" style="color: var(--text-dim);">0</div>
+        <div class="scorecard-sub">No requirements created</div>
+      </div>
+      <div class="scorecard">
+        <div class="scorecard-label">Evidence Items</div>
+        <div class="scorecard-value" style="color: var(--text-dim);">0</div>
+        <div class="scorecard-sub">—</div>
+      </div>
+      <div class="scorecard">
+        <div class="scorecard-label">Boundary Coverage</div>
+        <div class="scorecard-value" style="color: var(--text-dim);">0/0</div>
+        <div class="scorecard-sub">—</div>
+      </div>
+      <div class="scorecard">
+        <div class="scorecard-label">Transparency Score</div>
+        <div class="scorecard-value" style="color: var(--text-dim);">—</div>
+        <div class="scorecard-sub">No data yet</div>
+      </div>
+    </div>
+
+    <!-- Empty state -->
+    <div class="empty-state">
+      <span class="material-icons">visibility_off</span>
+      <h3>No published items yet</h3>
+      <p>When parties publish requirements or evidence to the transparency function, entangled pairs will appear here.</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<!-- Tab switching script                                  -->
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<script>
+function showTab(id) {
+  document.querySelectorAll('.wf-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.wf-tab').forEach(el => el.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+
+</body>
+</html>

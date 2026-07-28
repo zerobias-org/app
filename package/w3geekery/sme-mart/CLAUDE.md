@@ -17,7 +17,7 @@ SME Mart is a **marketplace for Subject Matter Experts** in compliance/cybersecu
 | **UAT ID Reference** | [`.planning/notes/uat-migration-tracker.md`](.planning/notes/uat-migration-tracker.md) — CI→UAT ID mapping (migration complete) |
 | **Backlog (all pending work)** | [`.planning/BACKLOG.md`](.planning/BACKLOG.md) — select items for next GSD milestone |
 | **Project & Milestone State** | [`.planning/PROJECT.md`](.planning/PROJECT.md), [`.planning/ROADMAP.md`](.planning/ROADMAP.md) |
-| **Plan Archive (historical)** | `.claude/plans-archive/` — old PLAN.md + 55 plan files (local-only, gitignored) |
+| **Plan Archive (historical)** | `../../../.claude/sme-mart/plans-archive/` — old PLAN.md + 55 plan files (local-only, gitignored — not in any branch) |
 | **Source Paths (SDKs, repos)** | [`.planning/docs/SOURCE_PATHS.md`](.planning/docs/SOURCE_PATHS.md) |
 | **🛑 SDK / API Verification — READ FIRST for any "what's the API for X" question** | [`.planning/docs/SDK_VERIFICATION_SOURCES.md`](.planning/docs/SDK_VERIFICATION_SOURCES.md) — authoritative sources are ZB MCP (`zerobias_search`/`zerobias_describe`), actual ZB platform source, and actual SDK source. The deprecated Next.js prototype is NOT authoritative. Memory entries can be wrong — verify against MCP/SDK before citing. |
 | **🧭 RDF Compass — long-term shape constraint** | [`.planning/docs/RDF-COMPASS.md`](.planning/docs/RDF-COMPASS.md) — every Engagement / Project / Task / Vetting / Record design MUST satisfy the 5-question compass checklist (C-1..C-5) so SME Mart doesn't paint corners blocking the future OWL/SHACL/RDF/Holon/Hologram audit-trail container (Brian directive 2026-05-19). Apply at plan-phase + design review. |
@@ -39,7 +39,7 @@ SME Mart is a **marketplace for Subject Matter Experts** in compliance/cybersecu
 | **Permissions / RBAC** | [`.planning/notes/zb-permissions-reference.md`](.planning/notes/zb-permissions-reference.md) — **READ before any admin/permission check.** System roles (Organization Admin, Boundary Admin, etc.), auto-created groups per Org/Boundary, `searchRolesByPrincipal` / `searchRoles` / `searchOrgMembers` APIs with `via` resolution. Don't invent new roles — system roles cover the cases. |
 | **E2E Testing Guide** | [`.planning/notes/e2e-testing-guide.md`](.planning/notes/e2e-testing-guide.md) — **READ before writing Playwright tests.** Stack, auth model, gotchas, page object patterns, debugging playbook |
 | **Schema repo** | [`zerobias-org/schema`](https://github.com/zerobias-org/schema) — YAML schema packages (source of truth for GQL entities) |
-| **Post-mortems** | [`.claude/post-mortems/`](.claude/post-mortems/) — failure reports (see [`INDEX.md`](.claude/post-mortems/INDEX.md)). **Read before starting any schema change.** |
+| **Post-mortems** | [`../../../.claude/sme-mart/post-mortems/`](../../../.claude/sme-mart/post-mortems/) — failure reports (see [`INDEX.md`](../../../.claude/sme-mart/post-mortems/INDEX.md)). **Read before starting any schema change.** |
 | **zb-dx (Developer Experience)** | `~/Projects/zb/zerobias-org/zb-dx` — shared knowledge base for all ZB platform developers. **File friction with `/friction`, browse patterns, find integration guides.** See below. |
 | **LSP routing** | `~/.claude/rules/common/lsp-registry.md` — built-in `LSP` is the default for symbol queries; `mcp__vscode-mcp__*` only for specific triggers (see below) |
 
@@ -104,8 +104,8 @@ A shared knowledge base for any developer building on `zerobias-sdk` / `zerobias
 ## Skills
 
 - **`/angular-architect`** — invoke the global skill for general Angular 21 architecture questions
-- **`sme-mart-architect`** — project-level skill (`.claude/skills/`) with SME Mart-specific patterns: ngx-library, DataProducer, standalone components, no Nx. Invoke for implementation work.
-- **`/meta:director`** — Architect/QA role alongside GSD. Modes: `design`, `review`, `checkpoint`, `watch`, `retro`. Project adapter at `.claude/commands/meta/director.md` (upstream: `zerobias-org/meta-harness`). Director state lives in `.planning/director/`.
+- **`sme-mart-architect`** — project-level skill ([`../../../.claude/sme-mart/skills/`](../../../.claude/sme-mart/skills/)) with SME Mart-specific patterns: ngx-library, DataProducer, standalone components, no Nx. Invoke for implementation work.
+- **`/meta:director`** — Architect/QA role alongside GSD. Modes: `design`, `review`, `checkpoint`, `watch`, `retro`. Project adapter at [`../../../.claude/sme-mart/commands/meta/director.md`](../../../.claude/sme-mart/commands/meta/director.md) (upstream: `zerobias-org/meta-harness`). Director state lives in `.planning/director/`.
 - **`/meta:sync`** — Sync meta-harness upstream and merge changes into the project adapter. Run periodically (start of milestone or when Kevin mentions updates).
 
 ## Angular 21 Patterns
