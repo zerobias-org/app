@@ -65,8 +65,9 @@ canonical set; the reference for new work is always `example-nextjs-v2`.)
 ### Why the depth and the org-slug matter
 
 The deploy detector (`.github/workflows/dispatch.yml`) matches changed files
-against `package/*/*/**` and derives the app from the **first two path
-segments** (`awk -F/ '{print $1"/"$2"/"$3}'`). Consequences:
+against `package/*/*/**` and derives the app from the **first three path
+segments** — `package/<org>/<app>` (`awk -F/ '{print $1"/"$2"/"$3}'`).
+Consequences:
 
 - The app must be **exactly two levels** under `package/`. Shallower or deeper
   nesting is not detected/deployed.
@@ -128,8 +129,13 @@ SSO redirect, `nextPath`, the local-dev API-key interceptor) see
 
 Each app folder must have:
 
-- `.nvmrc` — Node **>= 22** (v2 client engine requirement). CI installs from
-  this. (Legacy v1 apps may pin an older version via their own `.nvmrc`.)
+- `.nvmrc` — Node **>= 22** (v2 client engine requirement). ⚠️ CI's `setup-node`
+  reads the **repo-root** `.nvmrc` (`22.21.1`), **not** the app's:
+  `node-version-file: '.nvmrc'` in the deploy action resolves from the workspace
+  root, and the step has no `working-directory`. The app's own `.nvmrc` governs
+  local dev only — pinning a newer Node in an app folder does **not** change the
+  CI build. Keep the two compatible, and bump the root file if an app genuinely
+  needs a newer runtime.
 - Committed `package-lock.json` — CI runs `npm ci`.
 - `.npmrc` — both `@zerobias-com` and `@zerobias-org` scopes resolve from
   `https://pkg.zerobias.org` with `${ZB_TOKEN}` (a single platform API key
@@ -148,20 +154,69 @@ Each app folder must have:
 > the same environment, open **two separate PRs** (one app subtree each) and
 > merge them one at a time. Same for env promotions (`uat → qa`, `uat → main`):
 > **one app per promotion branch.** Don't try to batch them.
+>
+> **Why only one deploys** (so nobody "fixes" the detector and assumes batching
+> is now safe): `tj-actions/changed-files` emits `all_modified_files` as a
+> **single space-separated line**, so `awk -F/` sees only the *first* file's path
+> and every changed app after the first is silently dropped. A two-app PR
+> deploys app #1 and says nothing about app #2 — no error, no warning.
 
-`.github/workflows/dispatch.yml` fires on push to `main` / `uat` / `qa`, finds
-the changed `package/<org>/<app>/**` app, and dispatches `deploy.yml`, which runs
-the `static-s3-app-release` action:
+`.github/workflows/dispatch.yml` fires on push to `main` / `uat` / `qa` / `dev`,
+finds the changed `package/<org>/<app>/**` app, and dispatches `deploy.yml`,
+which resolves the env from the branch, pulls the bucket / account / CloudFront
+distribution from **Vault** (`operations-kv/data/github/zb-org/app/<env>`), then
+runs the `static-s3-app-release` action:
 
 ```
-.nvmrc  ->  npm ci  ->  npm run build  ->  aws s3 sync <app>/dist  s3://app-<env>-zerobias.com/<app-name>/
+setup-node (root .nvmrc)  ->  npm ci  ->  npm run build   [in package/<org>/<app>]
+  ->  aws s3 sync <app>/dist  s3://<bucket>/<app-name>  --delete
+  ->  cloudfront create-invalidation  /<app-name>/*   (waits for completion)
+  ->  Slack #releases announcement
 ```
 
-| Branch | Env | Bucket |
+| Branch | `ENV_NAME` (Vault path + IAM role) | Serves at |
 |---|---|---|
-| `main` | prod | `app-app-zerobias.com` |
-| `uat`  | uat  | `app-uat-zerobias.com` |
-| `qa`   | qa   | `app-qa-zerobias.com` |
+| `main` | `prod` | `https://app.zerobias.com/<app-name>` |
+| `uat`  | **`demo`** | `https://uat.zerobias.com/<app-name>` |
+| `qa`   | `qa` | qa CDN |
+| `dev`  | `dev` | dev CDN |
+
+Note the `uat → demo` rename: the branch is `uat`, but the Vault path and the
+assumed role are `…/app/demo` and `gh-zb-org-app-demo-custom-ui`. Bucket names
+come from Vault, not from the workflow — don't assume `app-<branch>-zerobias.com`
+when debugging a failed deploy.
+
+The sync is `--delete` but scoped to the app's own `s3://<bucket>/<app-name>`
+prefix, so it can't disturb another app. Deploy is **build-from-source**: nothing
+about your local `dist/` is uploaded, and `dist/` stays gitignored.
+
+### ⚠️ Deep links only work for apps that emit per-route HTML
+
+The CDN has no SPA fallback (`custom_error_response` is commented out in
+`com/devops/modules/aws/ui/main.tf`). A CloudFront **viewer-request Lambda**
+(`default-app-vreq.tpl.mjs`) rewrites extension-less URIs by probing S3 in order:
+
+1. `<uri>.html` → 2. `<uri>/index.html` → 3. **bucket-root `/index.html`**
+
+Consequences, verified against UAT:
+
+- `/(<app-name>)/` **301-redirects** to `/<app-name>` (trailing slash stripped),
+  which resolves via rule 2 to the app's `index.html`. The entry URL is fine —
+  `<base href="/<app-name>/">` keeps assets resolving.
+- **Next.js static export works everywhere**: it emits `products.html` /
+  `products/index.html`, so rule 1/2 matches every route.
+- **A path-routed Angular SPA breaks on deep links.** Only one `index.html`
+  exists, so `/example-angular-v2/products` falls through to rule 3 and returns
+  **HTTP 200 serving the ZeroBias portal shell** (`<base href="/">`) — the wrong
+  app, with no error to make it obvious.
+
+In-app navigation (`routerLink`) is unaffected — it never hits the CDN — and the
+portal iframe always loads the entry URL, so this stays invisible until someone
+refreshes, bookmarks, shares a deep link, or gets bounced back by an SSO
+`nextPath` pointing at a sub-route. If a new Angular app needs working deep
+links, pick one: a post-build step that copies `index.html` to each route's
+`<route>/index.html`, Angular prerendering, or hash routing
+(`withHashLocation()`).
 
 **A commit to `main` is a production release.** For a new or risky app, land on
 a branch and push to `qa` first to smoke-test the deployed artifact, then promote
