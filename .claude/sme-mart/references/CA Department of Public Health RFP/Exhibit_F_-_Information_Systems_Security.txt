@@ -1,0 +1,662 @@
+
+
+
+
+Information Systems Security
+Requirements for Projects (ISO/SR1) version 5.5
+
+
+
+October 2025
+
+Contents
+
+
+Revision History
+
+
+
+
+
+
+Purpose
+This document provides the minimum security requirements mandated by the California Department of Public Health (CDPH) Information Security Office (ISO) for projects governed and/or subject to the policies and standards of CDPH. Projects that intend to deploy systems/applications into the CDPH system infrastructure, or will utilize CDPH information system services, are also subject to these minimum security requirements.
+
+This document is intended to assist CDPH and its service customers in understanding the criteria CDPH will use when evaluating and certifying the system design, security features and protocols used by project solutions utilizing CDPH services. These security
+requirements will also be used in conjunction with the CDPH ISO compliance review program of its information system services customers.
+
+This document will serve as a universal set of requirements which must be met regardless of physical hosting location or entities providing operations and maintenance responsibility. These requirements do not serve any specific project, nor do they
+prescribe any specific implementation technology.
+
+
+Scope of Requirements
+The information security requirements in this document are organized in five categories (sections) and address at a minimum:
+
+Administrative/ManagementSafeguards
+Technical and Operational Safeguards
+Solution Architecture
+Documentation of Solution
+ISO Notifications and Approvals
+
+Security Requirement (SR1) Key Dependencies
+
+
+Contact
+Chief Information Security Officer California Department of Public Health Information Security Office (ISO)
+
+cdph.infosecurityoffice@cdph.ca.gov
+
+Information Systems Security Requirements
+
+Administrative / Management Safeguards
+
+Workforce Confidentiality Statement
+All persons working with CDPH information must sign a Security and Confidentiality Acknowledgement Statement. The Statement must include, at a minimum: General Use, Security and Privacy safeguards, Unacceptable Use, Audit and Enforcement policies. (Contact the CDPH ISO for the current version of the Security & Confidentiality Acknowledgement Statement in use.)
+
+The Statement must be signed by the Project member prior to being granted access to the CDPH information. The Statement must be renewed annually.
+
+Access Authorization & Maintenance
+Project/Program must document and implement clearly defined rules and processes for vetting and granting authorization`s, as well as procedures for the supervision of workforce members who work with CDPH information or in locations where it might be accessed.
+
+On at least a semi-annual basis, Project/Program will review and remove all authorizations for individuals who have left the department, transferred to another unit, or assumed new job duties within CDPH.
+
+Information System Activity Review
+Project/Program must implement and document procedures to regularly review records of information system activity (such as audit logs, access reports, and security incident tracking reports).
+
+Project/Program must ensure any hosting or maintenance agreements clearly identify responsibility for this activity. Logs may be stored within the system, or preferably on a centralized logging server or service, and must be maintained for a minimum of six (6) years.
+
+Periodic System Security & Log Review
+All systems must allow for periodic system security reviews that provide assurance that management, operations, personnel, and technical controls are functioning effectively and providing adequate levels of protection.
+
+These reviews may include technical tools and security procedures (such as vulnerability
+
+assessment products and penetration testing).
+
+All systems processing and/or storing CDPH information must have a method or procedure in place to create and review system logs for unauthorized access. Logs may be stored within the system, or on a centralized logging server or service, and must be maintained for a minimum of six (6) years.
+
+Technology Recovery Plan
+Project/Program will establish procedures that allow facility and systems access in support of restoration of loss of information under the Technology Recovery Plan (TRP) and emergency mode operations plan in the event of an emergency.
+
+The restoration/recovery support procedures must be added to the existing TRP to restore any loss of information and assure continuity of availability following an interruption or disaster.
+
+Recovery procedures must be developed using the most current TRP template provided by the CDPH ISO to meet the requirements from SIMM Section 5325-A instructions and the State Administrative Manual (SAM) Section 5325.1 policy guidelines.
+
+All systems, as part of a new or existing project, must allow for periodic system recovery testing. The period between tests should be defined as part of the project and be consistent with relevant CDPH technology recovery standards. Such testing should provide assurances that plans and controls (management, operations, personnel, and technical) are functioning effectively and providing adequate levels of protection during an incident, disaster, or breach.
+
+Project/Program will conduct an annual Business Impact Analysis of the application to determine the Maximum Tolerable Downtime (MTD), cost of lost functionality, system component dependencies, business function dependencies, and business partner dependencies.
+
+Change Control
+All systems processing and/or storing CDPH information must have a documented change control procedure that ensures separation of duties and protects the confidentiality, integrity, and availability of information.
+
+Systems running within the CDPH environment and/or utilizing CDPH services must comply with CDPH standards for change control process and procedures.
+
+Supervision of Information
+Information classified as confidential, sensitive, or personal in paper form must not be left unattended at any time, unless it is locked in a file cabinet, file room, desk, or office.
+Unattended means that information is not being observed by an employee authorized to
+
+access the information. T h e classified information in paper form must also not be left unattended at any time in vehicles or planes, and must not be transported in checked-in baggage on commercial airplanes.
+
+Escorting Visitors
+Visitors to areas where information classified as confidential, sensitive, or personal is contained must be escorted and the classified information must be kept out of sight while visitors are in the area.
+
+Business Associate Compliance
+A Business Associate (BA) is defined as a person or an external entity, who, on behalf of a HIPAA-covered component of CDPH, but other than in the capacity of a member of the workforce of CDPH, creates, receives, maintains, or transmits Protected Health Information (PHI) for a function or activity. BAs may need access to health information to carry out, assist with the performance of, or perform certain functions or activities on behalf of CDPH, a contract or a written agreement with every BA is required in accordance with the CDPH Business Associate Policy.
+
+Incident Response Compliance
+Project/Program must develop, implement, and maintain the following artifacts in accordance with CDPH Incident Response Policy.
+
+An Incident Response Plan (IRP) that includes procedures for detecting, reporting, containing, analyzing, and mitigating security incidents. The IRP should be reviewed and updated at least annually.
+A dedicated Incident Response Team (IRT) that is responsible for implementing the IRP. The IRT should include representatives from various functional areas.
+The Incident Response Plan (IRP) should include or independently document and implement:
+A procedure for reporting security incidents to the appropriate personnel within CDPH. The incident reporting procedure should also address external reporting requirements.
+A procedure for investigating security incidents.
+A procedure for containing security incidents to prevent further damage or loss. The incident containment procedure should include procedure for isolating affected systems, shutting down network connections and blocking malicious activity.
+A procedure for mitigating the impact of security incidents, including procedure for restoring affected systems and data, and implementing corrective actions to prevent similar incidents from occurring in the future.
+A procedure for communicating with internal and external stakeholders during and after security incidents. The incident communication procedure should address communication channels, messaging, and frequency.
+
+A procedure for documenting security incidents, including procedure for maintaining incident logs, evidence, and reports. The incident documentation procedure should address retention periods and access controls.
+
+Technical and Operational Safeguards
+
+Endpoint Protection
+All systems must use the Enterprise Endpoint Security technologies to comply with the minimum capabilities for protection, detection, investigation, containment, and remediation, in accordance with SIMM 5355-A.
+
+Patch Management
+All systems must install and actively use a comprehensive third-party patch management program, and routinely update system and application software within two weeks of vendor release unless the CDPH ISO validates a patch is not applicable. Critical updates may require a more restrictive timeline. All security safeguards and precautions must be subject to the approval of the CDPH ISO.
+
+Encrypted Electronic Transmissions
+All information classified as confidential, sensitive, or personal must be encrypted during information/data transport (in transit) on all public telecommunications and network systems, and at all points not in the direct ownership and control of the Department, in accordance with CDPH Cryptographic Standards or using the latest FIPS 140 validated cryptographic modules.
+
+Encrypted Information Storage
+All information classified as confidential, sensitive, or personal must be encrypted when electronically stored (at rest), in accordance with CDPH Cryptographic Standards or using the latest FIPS 140 validated cryptographic modules.
+
+Workstation / Laptop Encryption
+All workstations and laptops must be encrypted, in accordance with CDPH Cryptographic Standards or using the latest FIPS 140 validated cryptographic modules.
+
+Removable Media Encryption
+All electronic files that contain classified CDPH information must be encrypted when stored on any removable media type device (such as USB thumb drives, CD/DVD, tape backup, etc.), in accordance with CDPH Cryptographic Standards or using the latest FIPS 140 validated cryptographic modules.
+
+The solution should follow best practices described in National Institute of Standards & Technology NIST SP800-111: Guide to Storage Encryption Technologies for End User Devices.
+
+Secure Connectivity
+All data in transit must be encrypted. All transmission and data-links between the information and application/system, and DBMS and the California Department of Technology (CDT) California Government Enterprise Network (CGEN), must be secured between transmission systems as required by regulation, policy and/or standard and as prescribed for the given application/system.
+
+Intrusion Detection and Prevention
+All systems that are accessible via the Internet, are critical, and/or contain classified information must install and actively use a CDPH ISO approved comprehensive third-party real-time intrusion detection and prevention solution. The solution must also report security events directly to a CDPH enterprise monitoring solution. All security safeguards and precautions must be subject to the approval of the CDPH ISO.
+
+Minimum Information Download
+In accordance with the principle of need-to-know, only the minimum amount of information required to perform necessary business functions should be copied or downloaded.
+
+Information Sanitization
+All classified CDPH information (electronic or paper) must be sanitized from systems when the information is no longer necessary. The sanitization method must conform to NIST Special Publication 800-88 Guidelines for Media Sanitization. Once information has been sanitized, the CDPH contract manager must be notified. If an agency or other entity is unable to sanitize the media in accordance with NIST 800-88 and provide notification, the media must be returned to CDPH after usage for sanitization in an approved manner.
+
+Removal of Information
+Classified CDPH information (electronic or paper) must not be removed from CDPH premises, or from the premises of an authorized vendor or contractor, without the written permission of the CDPH ISO.
+
+Faxing or Mailing of Information
+Facsimile transmissions containing classified CDPH information must not be left unattended if fax machines are not in a secure area. Facsimile transmissions must
+
+include a cover sheet that contains a security statement notifying persons receiving faxes in error to destroy them and notify the CDPH ISO immediately. Fax numbers must be verified before sending.
+
+Classified CDPH information must only be mailed using secure methods. Large volume mailings of classified CDPH information must be by a secure, bonded courier with signature required upon receipt. Disks and other transportable media sent through the mail must be encrypted with a CDPH ISO approved solution.
+
+Labeling of Information Assets
+CDPH information assets must be labeled to denote its classification, in accordance with CDPH Information Classification Policy section 3.4.
+Information Asset Type	Labeling Procedure
+
+Solution Architecture
+
+System Security Compliance
+All systems must comply with all applicable CDPH security policies and requirements, as well as those specified in the State Administrative Manual (SAM), Public Health Administrative Manual (PHAM), Health Insurance Portability and Accountability Act (HIPAA), Privacy Act, and any other applicable State or Federal regulation. All security safeguards and precautions must be subject to the approval of the CDPH ISO.
+
+Warning Banner
+All systems containing CDPH information must display a login warning banner stating that information is classified, activity is logged, and system use is for business purposes only. User must be directed to log off the system if they do not agree and comply with these requirements.
+
+The following warning banner must be used for all access points (such as desktops, laptops, web applications, mainframe applications, servers, and network devices):
+
+LOG OFF IMMEDIATELY, if you do not agree to the conditions stated in this warning.
+
+Layered Application Design
+Systems/Applications must be segmented into a layered application design separating, at a minimum, the Presentation, Application/Business Logic, and Data Access Logic, and Data Persistence/Database layers.
+
+The Presentation, Application/Business Logic, and Data Access Logic layers must be separated physically by a firewall regardless of physical implementation.
+
+Any system request made to the Business logic layer must be authenticated.
+
+The Data Access Logic Layer may take the form of stored procedures, database Application Programming Interface (API), Data Access Objects/Components, Data Access Middleware, Shared Data Services, or Secure Web Service. Any system request made to the Data Access logic layer must be authenticated and authorized. No direct access to the Data
+
+Persistence/Database layer will be permitted, except through the Data Access logic layer.
+All calls to the Data Persistence/Database layer will be made through the Data Access logic layer as a trusted sub-system that utilizes a single database access account to all transactions.
+
+The Data Access Logic Layer must take the form of stored procedures, database API, Data Access Objects/Components, Data Access Middleware, Shared Data Services, or Secure Web Service. System requests made to the Business logic and Data Access logic layers must be authenticated and authorized.
+
+If vendor-provided commercial off-the-shelf (COTS) packages, or components where physical separation of layers is not possible, then CDPH ISO approval is required.
+
+
+
+Application Container Security
+In application container technologies, sets of containers that work together to compose an application are referred to as microservices, this enhances flexibility and scalability. When adopting application container technologies in a microservices architecture, as opposed to monolithic architecture, project/program must comply with NIST SP800-190 Application Container Security Guide, to remediate specific security risks related to application container technologies, such as images, registry, orchestrator, container, and host OS.
+
+Web Application Firewall (WAF)
+Public-facing applications must leverage F5 Silverline web application firewall to defend against cybersecurity attacks such as Distributed Denial of Service (DDoS) and web exploits.
+
+Project/Program is fully responsible for the associated cost of the F5 Silverline WAF.
+
+Enrollment and Identity Proofing
+Enrollment and identity proofing of applicants that wish to gain access to public-facing systems/applications must comply with Identity Assurance Level (IAL) 2, in accordance with NIST SP800-63A Digital Identity Guidelines. IAL 2 requires evidence(s) supports the real-world existence of the claimed identity and verifies that the applicant is appropriately associated with this real-world identity. IAL 2 introduces the need for unsupervised remote or physically present identity proofing.
+
+
+Multi-factor Authentication
+[This section has been superseded by the Multi-Factor Authentication (MFA) policy #44 – Effective October 1st, 2025, the requirements previously described here are now covered in detail in the new policy.]
+To access systems/applications that store, process, or transmit confidential, sensitive, and/or personal information, it must comply with SIMM 5360-C Multi-factor Authentication (MFA) Standard and NIST SP800-63B Digital Identity Guidelines. The SIMM 5350-C provides steps for determining the Authenticator Assurance Level (AAL), and a set of permitted authenticator types for each AAL (0-3). Note: MFA requirement does not apply to AAL 0.
+All CDPH employees and contractors are required to leverage FIDO authentication. The FIDO authentication is AAL 3 compliance. FIDO certified devices such as YubiKeys and Windows Hello for Business (WHfB) are the mechanism for user authentication in the Department.
+
+Where necessary, Project/Program is fully responsible for the associated hardware cost for FIDO2-certified devices (e.g., YubiKeys).
+
+AAL 1	AAL 2	AAL 3
+
+AAL 1	AAL 2	AAL 3
+
+Application Security Verification Standard (ASVS)
+At a minimum, all custom web applications and/or web APIs that store, process, or transmit confidential, sensitive, and/or personal information, the design and development must comply with ASVS Level 2 based on OWASP ASVS version 4.0.3.
+
+ASVS Level 2 is appropriate for applications that handle significant business-to-business transactions, including those that process healthcare information, implement business-critical or sensitive functions.
+
+The following table listed of ASVS Level 2’s chapters and its sections:
+ASVS Level 2 Chapter	Section
+
+
+
+Mobile Application Security Verification Standard (MASVS)
+At a minimum, all custom native mobile applications that store, process, or transmit confidential, sensitive, and/or personal information, the design and development must comply with MASVS-L1+R security verification level based on OWASP MASVS version 2.0.
+
+MASVS-L1: Standard Security: A mobile app that achieves MASVS-L1 adheres to mobile application security best practices. It fulfills basic requirements in terms of code quality, handling of sensitive data, and interaction with the mobile environment. This level is appropriate for all mobile applications.
+
++R: Resiliency Against Reverse Engineering and Tampering: The mobile app has state-of-the-art security, and is also resilient against specific, clearly defined client-side attacks, such as tampering or reverse engineering to extract sensitive code or data.
+
+The following table listed of MASVS Level 1 and Resiliency requirements:
+
+MASVS Level 1 Chapter
+
+V2: Data Storage and Privacy Requirements
+
+V4: Authentication and Session Management Requirements
+
+V6: Platform Interaction Requirements
+ V8: Resilience Requirements	
+
+Low-Code/No-Code Software Development
+Low-Code/No-Code development (LCNC) platforms (e.g., MS Power Platform, Pega) provide a development environment used to create application software through a graphical user interface instead of traditional hand-coded computing programming. Such platforms reduce the amount of traditional hand-coding, enabling accelerated delivery of business applications.
+
+When adopting and developing a low-code/no-code business application, Project/Program must comply with the OWASP Low-Code/No-Code Top 10 security risks, to ensure these risks are being addressed during the software development.
+
+OWASP Low-Code/No-Code Top 10
+
+LCNC-SEC-02: Authorization Misuse
+LCNC-SEC-04: Authentication and Secure Communication Failures
+
+LCNC-SEC-06: Injection Handling Failures
+
+LCNC-SEC-08: Data and Secret Handling Failures
+
+  LCNC-SEC-10: Security Logging and Monitoring Failures	
+Dynamic Application Security Testing (DAST) must be performed during testing phrase of a software development. Any medium, high, and critical security findings must be remediated.
+
+Cloud Computing Security
+To use a cloud computing model to receive, process, store, access, protect and/or transmit data, all systems must comply with the Cloud Computing Policy, State Administrative Manual (SAM) Sections 4983-4983.1, and employ the capabilities, administrative and technical security requirements outlined in the CSP Security Standard.
+
+Live Data Usage
+Using live data (production data) for testing and training purposes is not allowed. Synthetic data must be used. If synthetic data cannot be generated and/or used, a de-identification process against the live data must be done to reduce privacy risks to individuals.
+
+The de-identification process removes identifying information from a dataset so that individual data cannot be linked with specific individuals. Refer to CHHS Data De-Identification Guidelines.
+
+Authentication Logging
+All systems/applications must log success and failures of user authentication at all layers as well as log all user transactions at the database layer as required by regulation, policy or standard, and as prescribed for the given application/system. This logging must be included for all user privilege levels including, but not limited to, systems administrators. This requirement applies to systems that process, store, and/or interface with CDPH information.
+
+Reauthentication
+For any systems/applications that stores, processes, transmits, or visually presents confidential, sensitive, and/or personal information, it must comply the Reauthentication requirement, in which a session must be terminated (e.g., logged out) when the specified time is reached. Note: Reauthentication requirement does not apply to Authenticator Assurance Level (AAL) 0.
+
+AAL 1	AAL 2	AAL 3
+
+
+
+In addition, reauthentication of individuals is required in the following situations:
+	When authenticators change
+	When roles change
+	When the execution of privileged function occurs (e.g., performing a critical transaction)
+
+Audit (Access)
+All systems/applications will implement role-based access to auditing functions and audit trail information utilizing the principle of least privilege.
+
+Logs must be automatically forwarded to a secure (access restricted to authorized personnel) machine for storage and review, and not stored locally on the source machine or on shared file systems.
+Logs must be provided upon request of the CDPH ISO for investigations and risk assessments.
+
+Protection of Audit
+Project/Program must protect audit information and audit logging tools from unauthorized access, modification, and deletion.
+
+Project/Program must alert CDPH Security Operations Center (SOC) immediately upon detection of unauthorized access, modification, or deletion of audit information.
+
+Audit Event and Content
+The minimum log information below is required for any system that contains, or is involved in the transmission of, classified information. The log information should be available on every system running a production environment.
+
+All systems/applications must record, at minimum, the following events and any other events deemed appropriate by the CDPH ISO:
+Transaction Types
+All accesses or attempts to access a system/application
+Logoff activities
+Activities that might modify, bypass, or negate IT security safeguards
+Password changes
+Creation or modification of groups
+Privileged user actions
+
+Access to the system/application
+Creating and deleting files
+Change of permissions or privileges
+Changes made to an application or database
+Opening and/or closing of files
+Program execution activities
+Individual audit trail records must contain the information needed to associate each query transaction to its initiator and relevant business purpose. Individual audit trail records should capture, at a minimum, the following:
+
+Minimum Audit Trail Record Content
+Date and time stamp.
+Unique username of transaction initiator.
+Transaction recorded.
+Success or failure of transaction recorded.
+Relevant business process or application component involved.
+Data captured (if any) – Sensitive data like credential must not be logged.
+
+Audit Record Retention
+Audit Trail logs must be maintained at minimum for six (6) years after the occurrence, or a set period of time determined by the CDPH ISO that would not hinder a detailed forensic investigation of the occurrence. The CDPH ISO has final approval authority.
+
+Response to Audit Processing Failures
+Project/Program must provide monitor operational status and verify functions and performance of a system/application. Logs must be able to identify where system process failures have taken place and provide information relative to corrective actions to be taken by system administrators.
+
+In the event of an audit processing failure, CDPH Security Operations Center (SOC) must be alerted immediately.
+
+
+
+
+
+Secure Software Development Lifecycle (SDLC) Model
+
+
+
+For Project/Program adopting a traditional software development methodology (e.g., Waterfall, Scrum), the following CDPH Secure SDLC model must be complied. The model ensures security is integrated into a software development process:
+	SDLC-related roles and responsibilities must be defined for every member of the software development team, such as CDPH ISO and CDPH IT operations team that is involved in a project.
+	Track and manage changes to artifacts, such as requirements, software design, code, and configurations, must go through a change management authority for approval. All infrastructure related changes must go through the CDPH Change Control Board (CCB) process for approval.
+	Software design must be verified for CDPH security and privacy compliance, and it must be approved by CDPH ISO before code development begins. For high-impact systems (in accordance with FIPS-199 categorization), threat modeling must be performed (refer to OWASP Threat Modeling Cheat Sheet).
+	Azure DevOps Server (On-Prems Offering) must be used to cover the entire software development lifecycle.
+	Azure Repos (e.g., GIT, TFVC) must be used, with procedures to ensure that check-ins are accompanied by issues or change tickets. The source code control system should have access control and identifiable users to allow traceability of any changes.
+	Merging code between branches (e.g., pull request) is not authorized without security and quality code review being done by designated team reviewers.
+	Secrets (e.g., passwords, API keys, certificates) must be stored in a centralized secrets management solution within Azure DevOps pipelines (e.g., Delinea, Azure Key Vault).
+	Continuous Integration (CI) / Continuous Delivery (CD) automation within the Azure DevOps pipelines must be configured and setup in a secure and repeatable way.
+	Veracode Platform must be integrated within the Continuous Integration (CI) / Continuous Delivery (CD) automation to perform Static Application Security Testing (SAST) and Software Composition Analysis (SCA) for scanning and reporting security vulnerabilities. Also refer to the CDPH Application Security (AppSec) Requirements and CDPH OSS Requirements.
+	Veracode Platform is the CDPH SaaS solution for detecting software security vulnerabilities. The funding for acquiring Veracode licenses must come from the project/program based on the project needs.
+	Dynamic Application Security Testing (DAST) must be performed either during the CI / CD automation or manually performed by CDPH SOC team. Any medium, high, and critical security findings must be remediated.
+	Any verified vulnerabilities must be mitigated/remediated by the organization which
+
+developed the application, at no additional cost to CDPH. Unless an exception is granted by the CDPH ISO, vulnerabilities identified within third-party components must be remediated by the third-party vendor at no additional cost to CDPH. Otherwise, a different third-party component must be selected and implemented. CDPH ISO may disapprove the use of the application until the verified vulnerabilities are fully mitigated/remediated.
+	All toolchains integrated throughout the software development lifecycle must be configured securely with access control and audit logging enabled. Audit logs must be forwarded to CDPH SIEM.
+	CDPH ISO approval is required before any update and new features deployed into production.
+Penetration Testing
+Penetration testing against high-impact information systems and/or components (in accordance with FIPS-199 categorization) must be performed annually or whenever there are significant changes to the high-impact information systems, components and/or networks, such as a major software update or when new assets are added to the network. The penetration testing effort must be carried out collaboratively between Project/Program and CDPH Security Operations Center (SOC):
+
+Project/Program is responsible to the following activities:
+Determine the scope of the penetration testing.
+Unless approve by CDPH ISO, all identified vulnerabilities must be triaged and reviewed with the CDPH SOC team. All identified vulnerabilities must be remediated based on CDPH SOC team’s recommendations.
+
+CDPH SOC is responsible to the following activities:
+Define the rules of engagement (ROE) which are correlated with the tools, techniques, and procedures (TTPs) when performing on-prems penetration testing in production environments.
+If penetration testing will be performed against 3rd-party services, consult with the 3rd-party asset owners with written permission to ensure their ROE will be followed. For example, follow the Microsoft ROE when performing penetration testing on the Microsoft Cloud.
+Pretest analysis based on full knowledge of the target system.
+Pretest identification of potential vulnerabilities based on pretest analysis.
+Testing designed to determine exploitability of identified vulnerabilities.
+Summarize the results of the penetration testing, including what vulnerabilities were detected and exploited and how to remediate them. The results must report to CDPH ISO.
+Once the remediation is completed by the Project/Program, another penetration testing must be performed. The follow-up test would look for the same vulnerabilities found on the systems and/or components in the original penetration test. It is not required that the entire penetration test be re-performed. The intent is to confirm those vulnerabilities found in the original test were remediated successfully.
+
+
+Privileged Access Management (PAM)
+Project/Program must comply with the CDPH PAM Security Standard. The standard applied for all staff and contractors responsible for setting up and maintaining privileged accounts related to CDPH electronic information resources. Resources include user workstations as well as servers, databases, applications, and systems managed on both on-premises and in the cloud.
+
+NIST SP800-53 Revision 5 Compliance
+All information systems utilized within the Department (on-premises and in the cloud) must be designed, implemented, and operated in compliance with the security and privacy controls specified in NIST SP800-53 Revision 5.
+
+Project/Program must assess the security categorization of its information systems based on their impact level (low, moderate, or high) in accordance with the CDPH Categorization Procedure. Subsequently for each system, a set of security and privacy controls from NIST SP800-53 Revision 5 must be selected based on the identified impact level.
+Project/Program must implement the selected security and privacy controls from NIST SP800-53 Revision 5 within each information system. The implementation must adhere to the guidelines provided in NIST SP800-53A Revision 5 for assessing control effectiveness.
+
+Payment Card Industry Data Security Standard (PCI DSS) Compliance
+All payment card processing systems and related processes that involve storing or transmitting credit card information utilized within the Department (on-premises and in the cloud) must be designed, implemented, and operated in compliance with the latest version of the Payment Card Industry Data Security Standard. Any updates or revisions to the standard must be promptly implemented unless otherwise approved by the CDPH ISO.
+
+Offshore Remote Access to CDPH Resources
+All offshore personnel and third-party entities must establish remote connectivity through an encrypted private pathway (e.g., corporate-managed VPN) that routes traffic through U.S.-based (CONUS) egress point. Direct internet access usage from non-CONUS locations is strictly prohibited unless approved in advance by the State Chief Information Security Officer. Furthermore, all traffic initiated by offshore resources for administrative activities must originate from pre-approved, static IP addresses or CIDR blocks assigned by the corporate VPN infrastructure. These IP ranges must be disclosed in advance to CDPH for whitelisting and access validation purposes.
+
+Documentation of Solution
+
+System Configuration
+Project/Program must document and maintain documentation for the system/application. This should include the following:
+Detailed design.
+Description of hardware, software, and network components.
+Special system configurations.
+External interfaces.
+All layers of security controls.
+
+Information Asset Management
+In accordance with SAM 5305, Project/Program must establish and maintain an inventory of all its information assets, including information systems, information system components, and information repositories (both electronic and paper). The inventory must include categorization and classification of the information assets by program management, based on the Information Security Program Management Standard (SIMM 5305-A, California Public Records Act, Information Practices Act, FIPS Publication 199, and laws governing administration of the state entity’s programs).
+Each information asset for which the Project/Program has ownership responsibility must be inventoried and identified to include the following:
+
+Description and value of the information asset.
+Owner of the information asset.
+Custodians of the information asset.
+Users of the information asset.
+Classification of information.
+FIPS-199 categorization and level of protection (Low, Moderate, or High).
+Importance of information asset to the execution of the state entity’s mission and program function.
+Potential consequences and impacts if confidentiality, integrity, and availability of the information asset were compromised.
+
+Information System Security Plan
+Project/Program must document the CDPH Information System Security Plan (ISSP) that describe the security categorization and classification of information assets, and how the appropriate set of baseline security and privacy controls are being designed and implemented. ISSP must be approved by CDPH ISO prior to system implementation. Refer to CDPH Security Planning Policy and CDPH System Security Plan Guidelines.
+
+System Roles and Relationships
+Project/Program must document the following roles and ensure everyone understands their role and complies with all applicable policies and regulations.
+The designated owner of the system.
+The designated custodian(s) of the system.
+The users of the system.
+
+The security administrator for the system.
+Outside entities sending or receiving data to system.
+Project must document the organizational structure and relationships between these roles.
+
+Audit Method Documentation
+Project/Program must document the solution’s auditing features and provide samples of audit reporting.
+
+Retention of Documentation
+The system/application administrators must retain documentation, including audit and activity logs, for a period of six (6) years from the date of its creation or the date it was last in effect, whichever is later. Shorter retention periods must be allowed contingent upon applicable regulations, policies, and standards, and upon approval by the CDPH ISO. In certain circumstances the retention period must be lengthened to comply with regulatory requirements.
+
+Privacy Threshold Assessment (PTA) and Privacy Impact Assessment (PIA)
+Project/Program must work with CDPH Privacy Office to ensure a PTA and a PIA are being examined for assessing the impact on individual privacy of state information assets that collect or maintain personal identifiable information (PII). Refer to the CDPH Information Privacy Policy section 3.3 and SIMM 5310-C.
+
+ISO Notifications and Approvals
+
+Security Compliance Notification
+As part of each project, assigned staff will document how the proposed solution meets or addresses the requirements specified in this document. This documentation must be submitted to the CDPH ISO prior to taking custody of CDPH information.
+
+Notification of Changes to Solution
+Once a project is approved as final by the CDPH ISO, no changes will be made to the project scope, documentation, systems, or components without a change approval by the CDPH ISO.
+
+Notification of Breach
+The system/application administrators must immediately, and in writing, report to the CDPH ISO and CDPH Privacy Office any and all breaches or compromises of system and/or
+
+information security. They must also take such remedial steps as may be necessary to restore security and repair damage, if any.
+In the event of a breach or compromise of system and/or information security, the CDPH ISO and CDPH Privacy Office may require a system/application security audit. The CDPH ISO must review the recommendations from the security audit, and make final decisions on the steps necessary, to restore security and repair damage.
+
+The system/application administrators must properly implement any and all recommendations of the security audit, as approved by the CDPH ISO.
+
+CDPH and its business associates are required to provide notification following a breach of protected health information (PHI). CDPH and its contractors are also required to provide notification following a breach of personally identifiable information (PII). Project/program must comply to the notification requirements in accordance with CDPH Breach Notification Policy.
+
+Project Security Approvals
+In accordance with SAM Section 4921, Project Approval Lifecycle (PAL) Stage/Gate deliverables must be reviewed and approved in accordance with the general requirements of SAM Sections 4819.3 – 4819.42 (State Information Management Authority and Responsibility), as well as the specific requirements of Sections 4927 – 4928. See SIMM Section 19 for PAL Stage/Gate deliverable Preparation Instructions.
+
+Projects must ensure all applicable security requirements and deliverables are included in the project plan, and that ISO approvals are obtained, where required. The CDPH ISO must be given reasonable time to review and comment on these deliverables.
+
+[Table 1]
+Date | Author | Version | Change Description
+2/15/2023 | Cannic Hung; Ricardo Jarquin; Emily Tran; Sharmaine Caoile | 5 | Replaced the front-page logo with the new ISO logo.
+Added a Revision History section
+Updated ISO email contact info
+Updated the language related to Technology Recovery Plan
+Updated the Malware Protection section, and replaced anti-virus to endpoint protection solution
+Rewrote most of the Solution Architecture section based on NIST SP800-53 Revision 5, OWASP ASVS (Application Security Verification Standard) and OWASP MASVS
+Added references to our CDPH CSP and PAM security standards
+Removed the language about the requirement exemption
+Added Data Classification (FIPS-199) and Information System Security Plan
+requirements
+Updated Audit Logging requirements: Added Response to Audit Processing Failures and Protection of Audit
+Created Appendix A – CDPH Cryptographic Standards
+Added Live Data Usage requirement
+Added SR1 Key Dependencies Diagram
+Removed the broken link refers to FSR’s Questionnaire under the Project Security Approvals requirement. The questionnaire is obsolete, it has been replaced with CDT’s PAL (Project Approval Lifecycle) framework in accordance with SAM Section 4921
+Added Labeling of Information Assets requirement
+Expanded Notification of Breach section to reference to CDPH Breach Notification Policy
+Added a section for the Privacy Office’s PTA and PIA requirements
+Added Multi-factor Authentication Standard SIMM 5360-C requirement
+Updated the retention period for
+
+[Table 2]
+ |  |  | documentation and audit/system logs from three (3) years to six (6) years, based on HIPAA regulation and CDPH Information Classification Policy section 3.8
+Added a section for the Business Associate written contract requirement in accordance with CDPH Business Associate Policy
+Added a section for the CDPH DevSecOps requirements
+Added a section for the CDPH Secure SDLC requirements
+Added a section for low-code/no-code development requirement in accordance with OWASP low-code/no-code Top 10
+Added a section for Applicant Enrollment and Identity Proofing in accordance with NIST SP800-63A
+Added a section for application container security in accordance with NIST SP800-190
+Added a section for incident response compliance
+8/25/2023 | Cannic Hung | 5.1 | Added funding requirements about the cost associated with the following items. The funding must come from the Project / Program:
+FIDO Certified Devices (e.g., Yubikey)
+Veracode Platform Licenses for performing SAST and SCA scans during the SDLC
+F5 Silverline WAF consumption for public-facing web applications
+Added the Privileged Access Management (PAM) requirements by referencing our CDPH PAM Security Standard. The standard is applied for all staff and contractors responsible for setting up and maintaining privileged accounts related to CDPH electronic information resources.
+Updated Appendix A: CDPH Cryptographic Standard - Transitioning away from SHA-1 for all use cases, not limiting to generating digital signatures. In accordance to NIST
+announcement - NIST Transitioning Away
+
+[Table 3]
+ |  |  | from SHA-1 for All Applications | CSRC, NIST is encouraging to begin planning for the transition now.
+Pulled Appendix A CDPH Cryptographic Standard and it will be maintained separately. It is much cleaner when multiple standards need to reference the Cryptographic Standard.
+Removed and relocated DevSecOps
+Requirements section to the new standard called Containers Application Security Standard.
+Added the NIST SP800-53 Revision 5 Compliance section.
+Added the PCI Compliance section.
+Updated the Live Data Usage section to adhere to the CDPH Privacy Office’s direction of using CHHS Data De-
+Identification Guidelines.
+10/24/2023 | Cannic Hung | 5.2 | -	Updated the logo to the CDPH official logo
+07/23/2025 | Ricardo Jarquin | 5.3 | -	Updated the logo to the CDPH official logo
+7/29/2025 | Cannic Hung | 5.4 | -	Create a new requirement #25 about offshore remote access.
+9/29/2025 | Cannic Hung | 5.5 | -	Updated section 7: Multi-Factor Authentication - This section has been superseded by the MFA Policy #44, effective October 1st, 2025.
+
+[Table 4]
+Hard Copy Documents (Printed) | Information that can be printed (e.g., spreadsheets, files, reports, drawings, or handouts) should contain the classification in the document header or footer on every printed page. The exception for labeling is with marketing material, since marketing material is primarily developed for public
+release.
+Displayed | Confidential or Sensitive information that is displayed or viewed (e.g., websites,
+presentations, etc.) should be labeled with its classification as part of the display.
+Electronic Emails | E-mails are for the use of intended recipient
+only, and shall not be classified as Public.
+E-mails sent using CDPH’s email accounts are classified as Confidential by default.
+Indicate classification in subject line in e-mail or classification field, if classified as Confidential or Sensitive or Personal.
+Electronic Documents | Place information classification mark on top
+/ bottom of electronic documents.
+Database and Business Applications | Label classification in database tables or
+columns level.
+Other Media | If classified as Confidential or Sensitive or Personal, identify classification on adhesive labels applied to other media such as CDs, external hard drive, DVDs; and a message with the classification label may be displayed when the information stored on
+the media is accessed.
+
+[Table 5]
+Permitted Authenticato
+r Types | Memorized Secret
+Look-Up Secret | -	Multi-Factor OTP Device | -	Multi-Factor Cryptographic Device
+
+[Table 6]
+ | Out-of-Band
+Devices
+Single-Factor One-Time Password (OTP) Device
+Multi-Factor OTP Device
+Single-Factor Cryptographic Software
+Single-Factor Cryptographic Device
+Multi-Factor Cryptographic Software
+Multi-Factor Cryptographic Device | Multi-Factor
+Cryptographic Software
+Multi-Factor Cryptographic Device
+Memorized Secret
+plus:
+Look-Up Secret
+Out-of-Band Device
+Single-Factor OTP Device
+Single-Factor Cryptographic Software
+Single-Factor Cryptographic Device | Single-Factor
+Cryptographic Device used in conjunction with Memorized Secret
+Multi-Factor OTP device (software or hardware) used in conjunction with a Single-Factor Cryptographic Device
+Multi-Factor OTP device (hardware only) used in conjunction with a Single-Factor Cryptographic Software
+Single-Factor OTP device (hardware only) used in conjunction with a Multi-Factor Cryptographic Software Authenticator
+Single-Factor OTP device (hardware only) used in conjunction with a Single-Factor Cryptographic Software Authenticator and a Memorized Secret.
+
+[Table 7]
+V1: Architecture, Design and Threat
+Modeling | 
+ | V1.1: Secure Software Development
+Lifecycle
+ | V1.2: Authentication Architecture
+ | V1.4: Access Control Architecture
+
+[Table 8]
+ | V1.5: Input and Output Architecture
+ | V1.6: Cryptographic Architecture
+ | V1.7: Errors, Logging and Auditing
+Architecture
+ | V1.8: Data Protection and Privacy
+Architecture
+ | V1.9: Communications Architecture
+ | V1.10: Malicious Software Architecture
+ | V1.11: Business Logic Architecture
+ | V1.12: Secure File Upload Architecture
+ | V1.14: Configuration Architecture
+V2: Authentication | 
+ | V2.1: Password Security – Also refer to CDPH Privileged Access Management
+(PAM) Security Standard
+ | V2.2: General Authenticator Security
+ | V2.3: Authenticator Lifecycle
+ | V2.4: Credential Storage
+ | V2.5: Credential Recovery
+ | V2.6: Look-up Secret Verifier
+ | V2.7: Out of Band Verifier
+ | V2.8: One Time Verifier
+ | V2.9: Cryptographic Verifier
+V3: Session Management | 
+ | V3.1: Fundamental Session Management
+Security
+ | V3.2: Session Binding
+ | V3.3: Session Termination – Also refer to the
+SR1’s Reauthentication requirements
+ | V3.4: Cookie-based Session Management
+ | V3.5: Token-based Session Management
+ | V3.7: Defenses Against Session
+Management Exploits
+V4: Access Control | 
+ | V4.1: General Access Control Design
+ | V4.2: Operation Level Access Control
+ | V4.3: Other Access Control Considerations
+V5: Validation, Sanitization and Encoding | 
+ | V5.1: Input Validation
+ | V5.2: Sanitization and Sandboxing
+ | V5.3: Output Encoding and Injection
+Prevention
+ | V5.4: Memory, String, and Unmanaged
+Code
+ | V5.5: Deserialization Prevention
+V6: Stored Cryptography | 
+
+[Table 9]
+ | V6.1: Data Classification (Exclude #6.1.1)
+ | V6.2: Algorithms (also refer to the CDPH
+Cryptographic Standard)
+ | V6.3: Random Values
+ | V6.4: Secret Management
+V7: Error Handling and Logging | 
+ | V7.1: Log Content
+ | V7.2: Log Process
+ | V7.3: Log Protection
+ | V7.4: Error Handling
+V8: Data Protection | 
+ | V8.1: General Data Protection
+ | V8.2: Client-side Data Protection
+ | V8.3: Sensitive Private Data
+V9: Communication | 
+ | V9.1 Client Communication Security
+ | V9.2 Server Communication Security
+V10: Malicious Code | 
+ | V10.2: Malicious Code Search
+ | V10.3: Application Integrity
+V11: Business Logic | 
+ | V11.1: Business Logic Security
+V12: Files and Resources | 
+ | V12.1: File Upload
+ | V12.2: File Integrity
+ | V12.3: File Execution
+ | V12.4: File Storage
+ | V12.5: File Download
+ | V12.6: SSRF Protection
+V13: API and Web Service | 
+ | V13.1: Generic Web Service Security
+ | V13.2: RESTful Web Service
+ | V13.3: SOAP Web Service
+ | V13.4: GraphQL
+V14: Configuration | 
+ | V14.1: Build and Deploy
+ | V14.2: Dependency; Refer to CDPH Open-Source Software (OSS) Security
+Requirements
+ | V14.3: Unintended Security Disclosure
+ | V14.4: HTTP Security Headers
+ | V14.5: HTTP Request Header Validation
+
+[Table 10]
+Reauthentication | 30 Days – Fix Period of Time, regardless user
+activity | 12 hours – Fix Period of Time, regardless user activity; 30 minutes inactivity | 12 hours – Fix Period of Time regardless user activity; 15 minutes inactivity
+
+[Table 11]
+ |  | May use one of the authenticators to reauthenticate | Must use both authenticators to reauthenticate
