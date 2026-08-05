@@ -2,13 +2,19 @@ import { Injectable, inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ZerobiasClientApi } from '@zerobias-com/zerobias-client';
 import { ZerobiasClientOrgIdService } from '@zerobias-com/zerobias-angular-client';
-import { NewProject } from '@zerobias-com/platform-sdk';
-import { PROJECT_TYPE_ID } from '../constants/project-types';
+import { NewProject, ProjectType } from '@zerobias-com/platform-sdk';
 
 // SDK 2.x (Nic 2026-07-01): a project's tier IS its projectType. The old marketplace
 // engagement-identity tag machinery (Step A: TAG_TYPE / MARKETPLACE_OPERATOR_ORG_ID /
 // buildEngagementTagName / SME_MART_TIER_PROJECT_TAG_ID) is retired — engagement identity
-// is now projectType==engagement + ownerId, and the project tier is projectType==project.
+// is now projectType==Engagement + ownerId, and the project tier is projectType==Standard.
+//
+// platform-sdk 2.0.17: `projectTypeId` (a project-type TAG uuid) was REMOVED and replaced by
+// `projectType`, a first-class enum on the base Project —
+//   Standard | Program | Phase | Assessment | Engagement | Rfp | Pilot
+// The old tag-uuid table (`constants/project-types.ts`) is gone with it. Note the tag axis
+// `project` has no enum counterpart: a plain project tier is `Standard` (Clark, 2026-08-04).
+// Do not confuse `projectType` with `projectContext`, a separate TagView field.
 
 // Project.list() probe page-size. Covers single-engagement orgs (v1.4 norm).
 // When D-46 multi-engagement future state lands, switch to pagination loop —
@@ -134,7 +140,7 @@ export class PlatformEngagementProvisioner {
         .getProjectApi()
         .list(undefined, PROBE_PAGE_SIZE, undefined, orgId as never);
       const engagementProject = projects?.items?.find(
-        (p) => p.parentId == null && String(p.projectTypeId) === PROJECT_TYPE_ID.engagement,
+        (p) => p.parentId == null && p.projectType === ProjectType.Engagement,
       );
       return !!engagementProject;
     } catch (err) {
@@ -243,7 +249,7 @@ export class PlatformEngagementProvisioner {
       // SDK 2.x: identity = projectType==engagement + ownerId (list is ownerId-scoped);
       // the retired marketplace tagId is gone (Nic 2026-07-01).
       const existing = all?.items?.find(
-        (p) => p.parentId == null && String(p.projectTypeId) === PROJECT_TYPE_ID.engagement,
+        (p) => p.parentId == null && p.projectType === ProjectType.Engagement,
       );
       if (existing) {
         return String(existing.id);
@@ -259,7 +265,7 @@ export class PlatformEngagementProvisioner {
         ENGAGEMENT_PROJECT_DESCRIPTION_TEMPLATE(orgName),
       );
       newProject.parentId = null;
-      newProject.projectTypeId = PROJECT_TYPE_ID.engagement as never;
+      newProject.projectType = ProjectType.Engagement;
 
       const created = await this.clientApi.platformClient
         .getProjectApi()
@@ -321,7 +327,7 @@ export class PlatformEngagementProvisioner {
         PROJECT_TIER_DESCRIPTION_TEMPLATE(orgName),
       );
       newProject.parentId = engagementProjectId as never;
-      newProject.projectTypeId = PROJECT_TYPE_ID.project as never;
+      newProject.projectType = ProjectType.Standard;
 
       const created = await this.clientApi.platformClient
         .getProjectApi()
