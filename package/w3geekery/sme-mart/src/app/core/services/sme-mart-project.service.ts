@@ -7,10 +7,10 @@ import { SmeMartTagService } from './sme-mart-tag.service';
 import { SmeMartResourceService } from './sme-mart-resource.service';
 import { Memoize } from '../../shared/utils/memoize.decorator';
 import { SME_MART_PROJECT_FIELD_MAPPING, SME_MART_BOARD_FIELD_MAPPING, mapGqlToNeon, mapNeonToGql } from '../field-mappings';
-import { PROJECT_TYPE_ID } from '../constants/project-types';
 import { ZerobiasClientApi } from '@zerobias-com/zerobias-client';
 import { ZerobiasClientOrgIdService } from '@zerobias-com/zerobias-angular-client';
 import type { ProjectExtended } from '@zerobias-com/platform-sdk';
+import { ProjectType } from '@zerobias-com/platform-sdk';
 import type { QueryOptions } from '@zerobias-org/data-utils';
 import { PagedResults, UUID } from '@zerobias-org/types-core-js';
 import type {
@@ -183,12 +183,13 @@ export class SmeMartProjectService {
       ]);
 
       if (platformProjects) {
-        // Tier filter: keep only Project-tier rows (projectTypeId === project-type 'project').
+        // Tier filter: keep only Project-tier rows (projectType === Standard).
         // platform.Project.list has no server-side projectType filter, so we filter client-side.
         // Engagement-tier rows are listed at /engagements; other-type rows belong elsewhere.
-        // (SDK 2.x: tier is now Project.projectTypeId, not the old marketplace tagId — Nic 2026-07-01.)
+        // (platform-sdk 2.0.17: `projectTypeId` (tag uuid) removed; `projectType` is a first-class
+        // enum. A plain project tier is `Standard` — Clark, 2026-08-04.)
         const projectTier = platformProjects.items.filter(
-          proj => String((proj as ProjectExtended).projectTypeId ?? '') === PROJECT_TYPE_ID.project,
+          proj => (proj as ProjectExtended).projectType === ProjectType.Standard,
         );
 
         // Transform platform.Project[] to SmeMartProject[]
@@ -401,11 +402,12 @@ export class SmeMartProjectService {
       if (platformList) {
         // Children of the requested engagement Project, tier=Project (D-50).
         // platform.Project.list has no server-side parentId/projectType filter,
-        // so we filter client-side. (SDK 2.x: tier = projectTypeId, not old tagId.)
+        // so we filter client-side. (platform-sdk 2.0.17: tier = the `projectType` enum,
+        // not the removed `projectTypeId` tag uuid.)
         const children = platformList.items.filter(p => {
           const proj = p as ProjectExtended;
           return String(proj.parentId ?? '') === engagementId
-            && String(proj.projectTypeId ?? '') === PROJECT_TYPE_ID.project;
+            && proj.projectType === ProjectType.Standard;
         });
 
         if (children.length > 0) {

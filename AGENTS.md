@@ -187,12 +187,65 @@ small and scoped so PRs stay single-app and divergence never piles up.
 
 **The model:**
 - **One unit of work = one short-lived feature branch → one PR → `uat`.** Branch
-  off current `uat` (or, for cross-fork apps, the fork's uat-synced base), do the
+  off **`upstream/uat`** (see the rule below — never the fork's mirror), do the
   one thing, PR it, let it merge + deploy, then delete the branch.
 - **One app per PR** — hard rule; the pipeline deploys only the first changed app
   (see [Deploy](#deploy)).
 - **Promote per app** — `uat → qa` and `uat → main` are separate one-app
   promotion PRs.
+
+### 🛑 Always branch from `upstream/*`. Never from `origin/*`.
+
+```bash
+git fetch upstream
+git switch -c feat/my-thing upstream/uat     # ✅ the only correct base
+git switch -c feat/my-thing origin/uat       # ❌ silently stale
+git switch -c feat/my-thing uat              # ❌ your local mirror, staler still
+```
+
+**`origin/*` in a fork is a read-only mirror that nobody updates.** It only moves
+when someone remembers to run a sync. Measured across the w3geekery forks on
+2026-08-05:
+
+| Fork | Mirror drift behind upstream |
+|---|---|
+| `org/app` | `main` 26 · `qa` 27 · `dev` 3 · `uat` **11** |
+| `org/schema` | `main` 155 · `qa` 217 · `dev` 96 |
+| `org/module` | `main` 124 |
+| `com/tag` | `main` 20 |
+| `org/login` | `main` 1 |
+
+**Every one of them was `ahead: 0`** — no mirror branch has ever received a local
+commit. They exist only to be branched from, and they are stale, so they are a trap
+rather than a convenience.
+
+**The failure this prevents** is silent, which is why it needs a rule rather than
+care. Branching W13 (the Bid link repair) off `origin/uat` produced a branch missing
+11 upstream commits — including the UAT bootstrap-crash fix. Nothing errored; the
+build was green; the branch just quietly lacked a month of work. It was caught only
+by measuring `git rev-list --left-right --count upstream/uat...HEAD` and finding a
+non-zero left side.
+
+**Checks worth running before you open a PR:**
+
+```bash
+git rev-list --left-right --count upstream/uat...HEAD   # left MUST be 0
+```
+
+A non-zero left number means your branch is behind the real base — rebase onto
+`upstream/uat` before pushing.
+
+**Do not use `git diff origin/main` to reason about anything in this repo.** For
+SME Mart, `package/w3geekery/sme-mart` does not exist on `main` or `qa` at all
+(0 files; 747 on `uat`). Every file "differs from `main`", so that comparison cannot
+return a negative and proves nothing.
+
+**Syncing a mirror** (optional — the rule above makes it unnecessary, and it is
+always a clean fast-forward since nothing is ever ahead):
+
+```bash
+gh repo sync w3geekery/app --branch uat --source zerobias-org/app
+```
 
 **Anti-pattern — long-lived per-app "trunk" branches.** Do **not** keep a single
 never-merged branch as an app's de-facto trunk. It silently accumulates divergence

@@ -77,7 +77,7 @@ export const BID_FIELD_MAPPING = {
   neonToGql: {
     id: 'id',
     request_id: 'engagementId', // Legacy FK to Engagement
-    project_id: 'project', // Link to SmeMartProject (Plan 075)
+    project_id: 'projectId', // Scalar FK to platform Project
     provider_id: 'providerId',
     cover_letter: 'coverLetter',
     proposed_price: 'proposedPrice',
@@ -100,7 +100,7 @@ export const BID_FIELD_MAPPING = {
   gqlToNeon: {
     id: 'id',
     engagementId: 'request_id',
-    project: 'project_id', // SmeMartProject link (Plan 075)
+    projectId: 'project_id', // Scalar FK to platform Project
     providerId: 'provider_id',
     coverLetter: 'cover_letter',
     proposedPrice: 'proposed_price',

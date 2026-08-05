@@ -32,8 +32,8 @@ describe('BidsService Field Mapping Tests', () => {
     expect(mapping.dateCreated).toBe('created_at');
     expect(mapping.dateLastModified).toBe('updated_at');
 
-    // Verify project link mapping (Plan 075)
-    expect(mapping.project).toBe('project_id');
+    // Verify project mapping — scalar projectId, not a GQL link
+    expect(mapping.projectId).toBe('project_id');
 
     // Verify legacy engagement mapping
     expect(mapping.engagementId).toBe('request_id');
@@ -50,8 +50,8 @@ describe('BidsService Field Mapping Tests', () => {
     expect(mapping.created_at).toBe('createdAt');
     expect(mapping.updated_at).toBe('updatedAt');
 
-    // Verify project link mapping (Plan 075)
-    expect(mapping.project_id).toBe('project');
+    // Verify project mapping — scalar projectId, not a GQL link
+    expect(mapping.project_id).toBe('projectId');
 
     // Verify legacy engagement mapping
     expect(mapping.request_id).toBe('engagementId');
