@@ -13,8 +13,8 @@ import type { GqlBidResponse } from '../gql-types';
 /**
  * BidsService — Plan 075 Phase 2 refactor
  *
- * Bids now link to SmeMartProject (via `project` link field) instead of Engagement.
- * The `project` field is a GQL link — queries use rawQuery with `project { id }` syntax.
+ * Bids carry a scalar `projectId` (platform Project) instead of Engagement.
+ * It is a plain scalar, not a GQL link — queries filter on it directly, no rawQuery.
  *
  * All writes go through PipelineWriteService (fire-and-forget async).
  * All reads go through GraphqlReadService (from AuditgraphDB).
@@ -38,6 +38,7 @@ export class BidsService {
     'name',
     'description',
     'providerId',
+    'projectId',
     'coverLetter',
     'price',
     'status',
@@ -53,32 +54,32 @@ export class BidsService {
     'tag',
   ];
 
-  /** Fields including project link expansion — for rawQuery only */
-  private readonly allBidFields = [
-    ...this.scalarBidFields,
-    'project { id }',
-  ];
-
   // ---------------------------------------------------------------------------
   // Query by Project (Plan 075 — replaces query-by-engagement)
   // ---------------------------------------------------------------------------
 
   /**
    * List all bids for a given project (RFP).
-   * Uses rawQuery because `project` is a link field requiring nested filter.
    * Phase 24 Plan 03: Applies client-side demo-visibility post-filter before returning.
    */
   async listBidsByProject(projectId: string): Promise<Bid[]> {
-    const fieldStr = this.allBidFields.join(' ');
-    const query = `{ Bid(project: { id: ".eq.${projectId}" }) { ${fieldStr} } }`;
+    const gqlOptions: GqlQueryOptions = {
+      filters: { projectId: `.eq.${projectId}` },
+      pageSize: 100,
+    };
 
-    const data = await this.graphqlRead.rawQuery(query, 1, 100);
-    const rawItems = (data['Bid'] as Record<string, unknown>[]) ?? [];
+    const result = await this.graphqlRead.query<GqlBidResponse>(
+      'Bid',
+      this.scalarBidFields,
+      gqlOptions,
+    );
 
     // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
-    const filteredGql = this.demoVisibility.applyVisibility(rawItems as (Record<string, unknown> & { tag?: Array<{ value: string }> | null })[]);
+    const filteredGql = this.demoVisibility.applyVisibility(result.items as (GqlBidResponse & { tag?: Array<{ value: string }> | null })[]);
 
-    return filteredGql.map(gql => this.flattenAndMap(gql));
+    return filteredGql.map(gql =>
+      mapGqlToNeon<Bid>(gql, BID_FIELD_MAPPING.gqlToNeon),
+    );
   }
 
   /**
@@ -91,17 +92,26 @@ export class BidsService {
 
   /**
    * Find an existing draft bid for a provider on a project.
-   * Uses rawQuery with compound filter on project link + providerId + status.
+   * Compound filter on projectId + providerId + status — all scalars.
    */
   async findDraft(projectId: string, providerId: string): Promise<Bid | null> {
-    const fieldStr = this.allBidFields.join(' ');
-    const query = `{ Bid(project: { id: ".eq.${projectId}" }, providerId: ".eq.${providerId}", status: ".eq.draft") { ${fieldStr} } }`;
+    const gqlOptions: GqlQueryOptions = {
+      filters: {
+        projectId: `.eq.${projectId}`,
+        providerId: `.eq.${providerId}`,
+        status: '.eq.draft',
+      },
+      pageSize: 1,
+    };
 
-    const data = await this.graphqlRead.rawQuery(query, 1, 1);
-    const rawItems = (data['Bid'] as Record<string, unknown>[]) ?? [];
+    const result = await this.graphqlRead.query<GqlBidResponse>(
+      'Bid',
+      this.scalarBidFields,
+      gqlOptions,
+    );
 
-    if (!rawItems.length) return null;
-    return this.flattenAndMap(rawItems[0]);
+    if (!result.items.length) return null;
+    return mapGqlToNeon<Bid>(result.items[0], BID_FIELD_MAPPING.gqlToNeon);
   }
 
   // ---------------------------------------------------------------------------
@@ -384,19 +394,6 @@ export class BidsService {
       );
       throw err;
     }
-  }
-
-  /**
-   * Flatten GQL link field { project: { id: "..." } } → project_id
-   * then map to Neon model.
-   */
-  private flattenAndMap(gql: Record<string, unknown>): Bid {
-    const flat = { ...gql };
-    if (flat['project'] && typeof flat['project'] === 'object') {
-      flat['project'] = (flat['project'] as Record<string, unknown>)['id'];
-    }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return mapGqlToNeon<Bid>(flat as any, BID_FIELD_MAPPING.gqlToNeon);
   }
 
   private toBidSummary(bid: Bid): BidSummaryRow {
