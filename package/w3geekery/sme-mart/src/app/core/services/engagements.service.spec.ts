@@ -17,7 +17,7 @@ import { ProjectContextService } from './project-context.service';
 import { ENGAGEMENT_GQL_FIXTURE } from '../../test-helpers/gql-fixtures';
 import { fakePipelineWriteService, fakeGraphqlReadService, fakeProjectContextService, fakeClientApi } from '../../test-helpers/angular';
 import type { RequestStatus } from '../models/enums';
-import { PROJECT_TYPE_ID } from '../constants/project-types';
+import { ProjectType } from '@zerobias-com/platform-sdk';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 describe('EngagementsService (Plan 075)', () => {
@@ -374,14 +374,14 @@ describe('EngagementsService (Plan 075)', () => {
 
   describe('getProjectTierProject', () => {
     it('should return the project-tier child with matching tagId', async () => {
-      const tierTypeId = PROJECT_TYPE_ID.project; // SDK 2.x: tier = projectType, not marketplace tag
+      const tierType = ProjectType.Standard; // platform-sdk 2.0.17: tier is the projectType enum; a plain project is Standard
       const mockProjects = {
         items: [
           {
             id: 'proj-uuid-1',
             name: 'ZeroBias Platform',
             parentId: 'eng-uuid-1',
-            projectTypeId: tierTypeId,
+            projectType: tierType,
             ownerId: 'org-uuid',
             status: 'active',
             created: new Date(),
@@ -391,7 +391,7 @@ describe('EngagementsService (Plan 075)', () => {
             id: 'proj-uuid-2',
             name: 'Some Other Project',
             parentId: 'eng-uuid-1',
-            projectTypeId: 'different-uuid',
+            projectType: ProjectType.Program,
             ownerId: 'org-uuid',
             status: 'active',
             created: new Date(),
@@ -410,7 +410,7 @@ describe('EngagementsService (Plan 075)', () => {
 
       expect(result).toBeDefined();
       expect(result?.id).toBe('proj-uuid-1');
-      expect(result?.projectTypeId).toBe(tierTypeId);
+      expect(result?.projectType).toBe(tierType);
       expect(result?.parentId).toBe('eng-uuid-1');
     });
 
@@ -421,7 +421,7 @@ describe('EngagementsService (Plan 075)', () => {
             id: 'proj-uuid-2',
             name: 'Some Other Project',
             parentId: 'eng-uuid-1',
-            projectTypeId: 'different-uuid',
+            projectType: ProjectType.Program,
             ownerId: 'org-uuid',
             status: 'active',
             created: new Date(),

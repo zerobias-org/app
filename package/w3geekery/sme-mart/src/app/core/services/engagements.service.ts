@@ -7,6 +7,7 @@ import { Memoize } from '../../shared/utils/memoize.decorator';
 import { ENGAGEMENT_FIELD_MAPPING, mapNeonToGql, mapGqlToNeon } from '../field-mappings';
 import { ZerobiasClientApi } from '@zerobias-com/zerobias-client';
 import type { ProjectExtended } from '@zerobias-com/platform-sdk';
+import { ProjectType } from '@zerobias-com/platform-sdk';
 import type { QueryOptions } from '@zerobias-org/data-utils';
 import { PagedResults, UUID } from '@zerobias-org/types-core-js';
 import type {
@@ -16,7 +17,6 @@ import type {
 } from '../models';
 import type { RequestStatus } from '../models/enums';
 import type { GqlEngagementResponse } from '../gql-types';
-import { PROJECT_TYPE_ID } from '../constants/project-types';
 
 // D-15: Dual-read window timeout values (primary 5s, fallback 5s)
 const PRIMARY_READ_TIMEOUT_MS = 5000;
@@ -230,19 +230,21 @@ export class EngagementsService {
         return null;
       }
 
-      // Find the project-tier child: parentId = engagementId AND projectType = 'project'
-      // (SDK 2.x: tier is Project.projectTypeId, not the old marketplace tagId — Nic 2026-07-01.)
+      // Find the project-tier child: parentId = engagementId AND projectType = Standard
+      // (platform-sdk 2.0.17: `projectTypeId` (a tag uuid) was removed; `projectType` is now a
+      // first-class enum on Project. A plain project tier is `Standard` — the old `project` tag
+      // has no same-named enum member. Clark, 2026-08-04.)
       const projectTier = projects.items.find(
         (p) =>
           String(p.parentId) === engagementId &&
-          String((p as ProjectExtended).projectTypeId) === PROJECT_TYPE_ID.project
+          (p as ProjectExtended).projectType === ProjectType.Standard
       ) as ProjectExtended | undefined;
 
       if (!projectTier) {
         console.warn('[ENGAGEMENTS:GET_PROJECT_TIER_PROJECT]', {
           engagementId,
           reason: 'project_tier_not_found',
-          expectedProjectTypeId: PROJECT_TYPE_ID.project,
+          expectedProjectType: String(ProjectType.Standard),
         });
         return null;
       }
