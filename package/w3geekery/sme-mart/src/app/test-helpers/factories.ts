@@ -11,11 +11,9 @@ import type {
   Engagement,
   EngagementSummaryRow,
   EngagementDetailRow,
-  SmeMartProject,
   Note,
   NoteWithTags,
   Notification,
-  RfpTaskGroup,
 } from '../core/models';
 import type { OrgDocument, OrgDocumentDetail, OrgDocumentShare } from '../core/models/org-document.model';
 import type { EngagementDocument } from '../core/models/document.model';
@@ -83,29 +81,6 @@ export function makeEngagementDetailRow(overrides: Partial<EngagementDetailRow> 
     created_at: TEST_CREATED_AT,
     ...overrides,
   } as EngagementDetailRow;
-}
-
-// ---------------------------------------------------------------------------
-// SmeMartProject (Plan 075 — RFP + Project container)
-// ---------------------------------------------------------------------------
-
-export function makeSmeMartProject(overrides: Partial<SmeMartProject> = {}): SmeMartProject {
-  return {
-    id: TEST_ENG_ID,
-    name: 'HIPAA Assessment',
-    description: 'Full compliance review',
-    status: 'draft',
-    startDate: TEST_CREATED_AT,
-    targetEndDate: TEST_UPDATED_AT,
-    createdAt: TEST_CREATED_AT,
-    updatedAt: TEST_UPDATED_AT,
-    category: 'compliance',
-    budgetType: 'fixed',
-    budgetMin: 5000,
-    budgetMax: 15000,
-    timeline: '4 weeks',
-    ...overrides,
-  };
 }
 
 // ---------------------------------------------------------------------------
@@ -301,58 +276,13 @@ export function makeEngagementDocument(overrides: Partial<EngagementDocument> = 
 // ---------------------------------------------------------------------------
 
 export function makeTag(name: string, id = 'tag-001'): TagView {
-  return { id, name, description: `Tag: ${name}` } as any;
+  return { id, name, description: `Tag: ${name}` } as unknown as TagView;
 }
 
 // ---------------------------------------------------------------------------
 // RFP Wizard
 // ---------------------------------------------------------------------------
 
-export function makeTaskGroups(): RfpTaskGroup[] {
-  return [
-    {
-      taskType: 'security_requirements',
-      taskTypeTagId: 'tag-sec',
-      taskTypeTagName: 'SECURITY',
-      displayName: 'Security Requirements',
-      requirements: [
-        {
-          id: 'req-1',
-          taskType: 'security_requirements',
-          title: 'Workforce Confidentiality',
-          description: 'All personnel must sign NDAs',
-          evidenceType: 'document',
-          priority: 500,
-          sortOrder: 0,
-        },
-        {
-          id: 'req-2',
-          taskType: 'security_requirements',
-          title: 'Access Authorization',
-          evidenceType: 'certification',
-          priority: 1000,
-          sortOrder: 1,
-        },
-      ],
-    },
-    {
-      taskType: 'compliance',
-      taskTypeTagId: 'tag-comp',
-      taskTypeTagName: 'COMPLIANCE',
-      displayName: 'Compliance Requirements',
-      requirements: [
-        {
-          id: 'req-3',
-          taskType: 'compliance',
-          title: 'HIPAA Compliance',
-          evidenceType: 'certification',
-          priority: 1000,
-          sortOrder: 0,
-        },
-      ],
-    },
-  ];
-}
 
 // ---------------------------------------------------------------------------
 // Notifications
