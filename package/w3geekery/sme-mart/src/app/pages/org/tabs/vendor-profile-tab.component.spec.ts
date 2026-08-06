@@ -6,7 +6,6 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { of } from 'rxjs';
 import { vi } from 'vitest';
 import { VendorProfileService } from '../../../core/services/vendor-profile.service';
-import { VettingService } from '../../../core/services/vetting.service';
 import { PipelineWriteService } from '../../../core/services/pipeline-write.service';
 import { GraphqlReadService } from '../../../core/services/graphql-read.service';
 import { ImpersonationService } from '../../../core/services/impersonation.service';
@@ -28,10 +27,6 @@ describe('VendorProfileTab', () => {
     getProfileItemReferenceCount: vi.fn().mockResolvedValue(0),
   };
 
-  const vettingServiceMock = {
-    listVettingItems: vi.fn().mockResolvedValue([]),
-  };
-
   const zerobiasAppMock = {
     getCurrentOrg: vi.fn().mockReturnValue(of({ id: 'org-1', name: 'Test Org' })),
   };
@@ -49,7 +44,6 @@ describe('VendorProfileTab', () => {
       ],
       providers: [
         { provide: VendorProfileService, useValue: vendorProfileServiceMock },
-        { provide: VettingService, useValue: vettingServiceMock },
         { provide: ZerobiasClientApp, useValue: zerobiasAppMock },
         { provide: ZerobiasClientApi, useValue: {} },
         { provide: PipelineWriteService, useValue: {} },

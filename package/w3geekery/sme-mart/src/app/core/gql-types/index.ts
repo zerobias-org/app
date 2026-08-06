@@ -78,9 +78,5 @@ export type {
 } from './project-plan.types';
 
 export type {
-  GqlVettingItemResponse,
-} from './vetting-item.types';
-
-export type {
   GqlOrgProfileResponse,
 } from './org-profile.types';
