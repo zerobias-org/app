@@ -9,8 +9,6 @@ export { EngagementCard } from './components/engagement-card/engagement-card.com
 export { EngagementForm, type EngagementFormValues } from './components/engagement-form/engagement-form.component';
 export { BidForm, type BidFormData } from './components/bid-form/bid-form.component';
 export { BidCard, type BidCardData } from './components/bid-card/bid-card.component';
-export { DocumentShareDialog, type DocumentShareDialogData, type DocumentShareDialogResult } from './components/document-share-dialog/document-share-dialog.component';
-export { OrgDocumentChooser, type OrgDocumentChooserData, type OrgDocumentChooserResult, type ChooserScope } from './components/org-document-chooser/org-document-chooser.component';
 export { BidComparison, type ComparisonBid, type CategoryCompliance } from './components/bid-comparison/bid-comparison.component';
 export { BidReview, type RequirementGroup, type RequirementWithResponse } from './components/bid-review/bid-review.component';
 export { AcceptBidDialog, type AcceptBidDialogData, type AcceptBidDialogResult } from './components/accept-bid-dialog/accept-bid-dialog.component';

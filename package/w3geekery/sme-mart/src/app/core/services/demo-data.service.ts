@@ -12,25 +12,12 @@
  */
 
 import { Injectable, inject } from '@angular/core';
-import { PipelineWriteService } from './pipeline-write.service';
+import { PipelineWriteService, type SmeMartClassName } from './pipeline-write.service';
 import {
-  DEMO_ENGAGEMENTS,
   DEMO_PROJECTS,
-  DEMO_BIDS,
-  DEMO_BID_RESPONSES,
-  DEMO_NOTES,
-  DEMO_NOTE_FOLDERS,
-  DEMO_DOCUMENTS,
-  DEMO_SERVICE_OFFERINGS,
-  DEMO_REVIEWS,
   seedDemoBids,
   seedDemoBidResponses,
-  seedDemoNotes,
-  seedDemoNoteFolders,
-  seedDemoDocuments,
-  seedDemoServiceOfferings,
   seedDemoReviews,
-  seedDemoProjects,
 } from '../../test-helpers/demo-data-seeder';
 
 @Injectable({ providedIn: 'root' })
@@ -54,36 +41,17 @@ export class DemoDataService {
   async seedAllDemoData(): Promise<void> {
     console.info('⚡ Starting demo data seeding');
 
-    // Step 1: Engagements (corp-to-corp agreements)
-    await this.seedDemoEngagements();
-
-    // Step 2: Projects (scoped work under engagements)
-    await this.seedDemoProjects();
-
-    // Extract project IDs for downstream seeders
-    // (downstream entities reference project IDs via the engagementId field)
+    // Engagements, Projects, Notes, NoteFolders, Documents and ServiceOfferings no
+    // longer seed — their classes were retired in smemart 2.0.7 and the writes 500'd.
+    // Bids and Reviews still carry a scalar projectId, so the ids below stay as
+    // fixtures; they now reference platform Projects that this seeder does NOT
+    // create, so demo bids/reviews will point at ids with nothing behind them until
+    // the seeder is re-pointed at platform.Project.
     const projectIds = DEMO_PROJECTS.map(p => p.id);
     const bidIds = seedDemoBids(projectIds).map(b => b.id);
 
-    // Step 3: Bids (linked to projects)
     await this.seedDemoBids(projectIds);
-
-    // Step 4: BidResponses (linked to bids)
     await this.seedDemoBidResponses(bidIds);
-
-    // Step 5: ServiceOfferings (no dependencies)
-    await this.seedDemoServiceOfferings();
-
-    // Step 6: Notes (linked to projects)
-    await this.seedDemoNotes(projectIds);
-
-    // Step 7: NoteFolders (linked to projects)
-    await this.seedDemoNoteFolders(projectIds);
-
-    // Step 8: Documents (linked to projects)
-    await this.seedDemoDocuments(projectIds);
-
-    // Step 9: Reviews (linked to projects)
     await this.seedDemoReviews();
 
     console.info('✓ Demo data seeding complete.');
@@ -161,7 +129,7 @@ export class DemoDataService {
 
     for (const [className, ids] of deletions) {
       try {
-        await this.pipelineWrite.deleteEntities(className as any, ids);
+        await this.pipelineWrite.deleteEntities(className as SmeMartClassName, ids);
         console.info(`✓ Deleted ${ids.length} old ${className} entities`);
       } catch (err) {
         console.error(`Failed to delete old ${className} entities:`, err);
@@ -171,27 +139,7 @@ export class DemoDataService {
     console.info('🧹 Old demo data cleanup complete.');
   }
 
-  async seedDemoEngagements(): Promise<void> {
-    try {
-      const data = DEMO_ENGAGEMENTS || [];
-      if (data.length === 0) return;
-      await this.pipelineWrite.pushEntities('Engagement', data, []);
-      console.info(`✓ Seeded ${data.length} demo engagements (corp-to-corp agreements)`);
-    } catch (err) {
-      console.error('Failed to seed demo engagements:', err);
-    }
-  }
 
-  async seedDemoProjects(): Promise<void> {
-    try {
-      const data = seedDemoProjects() || [];
-      if (data.length === 0) return;
-      await this.pipelineWrite.pushEntities('SmeMartProject', data, []);
-      console.info(`✓ Seeded ${data.length} demo projects (scoped work)`);
-    } catch (err) {
-      console.error('Failed to seed demo projects:', err);
-    }
-  }
 
   async seedDemoBids(projectIds?: string[]): Promise<void> {
     try {
@@ -215,49 +163,9 @@ export class DemoDataService {
     }
   }
 
-  async seedDemoNotes(projectIds?: string[]): Promise<void> {
-    try {
-      const data = seedDemoNotes(projectIds) || [];
-      if (data.length === 0) return;
-      await this.pipelineWrite.pushEntities('Note', data, []);
-      console.info(`✓ Seeded ${data.length} demo notes`);
-    } catch (err) {
-      console.error('Failed to seed demo notes:', err);
-    }
-  }
 
-  async seedDemoNoteFolders(projectIds?: string[]): Promise<void> {
-    try {
-      const data = seedDemoNoteFolders(projectIds) || [];
-      if (data.length === 0) return;
-      await this.pipelineWrite.pushEntities('NoteFolder', data, []);
-      console.info(`✓ Seeded ${data.length} demo note folders`);
-    } catch (err) {
-      console.error('Failed to seed demo note folders:', err);
-    }
-  }
 
-  async seedDemoDocuments(projectIds?: string[]): Promise<void> {
-    try {
-      const data = seedDemoDocuments(projectIds) || [];
-      if (data.length === 0) return;
-      await this.pipelineWrite.pushEntities('SmeMartDocument', data, []);
-      console.info(`✓ Seeded ${data.length} demo documents`);
-    } catch (err) {
-      console.error('Failed to seed demo documents:', err);
-    }
-  }
 
-  async seedDemoServiceOfferings(): Promise<void> {
-    try {
-      const data = seedDemoServiceOfferings() || [];
-      if (data.length === 0) return;
-      await this.pipelineWrite.pushEntities('ServiceOffering', data, []);
-      console.info(`✓ Seeded ${data.length} demo service offerings`);
-    } catch (err) {
-      console.error('Failed to seed demo service offerings:', err);
-    }
-  }
 
   async seedDemoReviews(): Promise<void> {
     try {

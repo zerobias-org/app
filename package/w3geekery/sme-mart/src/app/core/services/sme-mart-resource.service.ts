@@ -4,13 +4,8 @@ import { GraphqlReadService, type GqlQueryOptions } from './graphql-read.service
 import { ImpersonationService } from './impersonation.service';
 import { EngagementHierarchyService } from './engagement-hierarchy.service';
 import {
-  ENGAGEMENT_FIELD_MAPPING,
   BID_FIELD_MAPPING,
-  NOTE_FIELD_MAPPING,
-  NOTE_FOLDER_FIELD_MAPPING,
-  SERVICE_OFFERING_FIELD_MAPPING,
   REVIEW_FIELD_MAPPING,
-  DOCUMENT_FIELD_MAPPING,
   mapGqlToNeon,
 } from '../field-mappings';
 import type { SmeMartClassName } from './pipeline-write.service';
@@ -24,13 +19,8 @@ import type {
   SmeMartLinkType,
 } from '../models';
 import {
-  noteToResource,
-  noteFolderToResource,
-  workRequestToResource,
   bidToResource,
   reviewToResource,
-  serviceOfferingToResource,
-  documentToResource,
 } from '../mappers';
 
 /**
@@ -72,9 +62,10 @@ export class SmeMartResourceService {
           zb_tag_name: tag.zbTagName,
           assigned_by: userId,
         });
-      } catch (err: any) {
+      } catch (err: unknown) {
         // Ignore duplicate key (tag already assigned)
-        if (err.message?.includes('duplicate') || err.message?.includes('unique')) {
+        const message = err instanceof Error ? err.message : String(err);
+        if (message.includes('duplicate') || message.includes('unique')) {
           continue;
         }
         throw err;
@@ -200,7 +191,7 @@ export class SmeMartResourceService {
       );
 
       return result.items.map(gqlObj => {
-        const neonShaped = mapGqlToNeon<Record<string, any>>(gqlObj, config.gqlToNeon);
+        const neonShaped = mapGqlToNeon<Record<string, unknown>>(gqlObj, config.gqlToNeon);
         return config.mapper(neonShaped);
       });
     } catch (err) {
@@ -217,39 +208,29 @@ export class SmeMartResourceService {
     limit = 20,
   ): Promise<SmeMartResource[]> {
     const tableMap: Record<SmeMartResourceType, string> = {
-      'sme-mart:note': 'notes',
-      'sme-mart:note-folder': 'note_folders',
-      'sme-mart:work-request': 'work_requests',
       'sme-mart:bid': 'bids',
       'sme-mart:review': 'reviews',
-      'sme-mart:service-offering': 'service_offerings',
-      'sme-mart:document': 'engagement_documents',
     };
-    const mapperMap: Record<SmeMartResourceType, (row: any) => SmeMartResource> = {
-      'sme-mart:note': noteToResource,
-      'sme-mart:note-folder': noteFolderToResource,
-      'sme-mart:work-request': workRequestToResource,
-      'sme-mart:bid': bidToResource,
-      'sme-mart:review': reviewToResource,
-      'sme-mart:service-offering': serviceOfferingToResource,
-      'sme-mart:document': documentToResource,
+    const mapperMap: Record<SmeMartResourceType, ResourceRowMapper> = {
+      'sme-mart:bid': bidToResource as unknown as ResourceRowMapper,
+      'sme-mart:review': reviewToResource as unknown as ResourceRowMapper,
     };
 
     const table = tableMap[type];
     const mapper = mapperMap[type];
 
     if (this.db.mode() === 'neon' && query) {
-      const nameCol = type === 'sme-mart:work-request' ? 'engagement_name'
-        : type === 'sme-mart:service-offering' ? 'title'
-        : 'name';
-      const rows = await this.db.neonQueryPublic<Record<string, any>>(
+      // The work-request ('engagement_name') and service-offering ('title') special
+      // cases went with those retired types; both survivors use 'name'.
+      const nameCol = 'name';
+      const rows = await this.db.neonQueryPublic<Record<string, unknown>>(
         `SELECT * FROM "${table}" WHERE LOWER("${nameCol}") LIKE LOWER('%${query.replace(/'/g, "''")}%') LIMIT ${limit}`,
       );
       return rows.map(mapper);
     }
 
     const filter = query ? `(name=*${query}*)` : '';
-    const result = await this.db.searchRows<Record<string, any>>(
+    const result = await this.db.searchRows<Record<string, unknown>>(
       table, filter, { pageNumber: 1, pageSize: limit },
     );
     return (result.items || []).map(mapper);
@@ -313,57 +294,32 @@ interface ResourceGqlConfig {
   fields: string[];
   nameField: string;
   gqlToNeon: Record<string, string>;
-  mapper: (row: any) => SmeMartResource;
+  mapper: ResourceRowMapper;
 }
 
+// Only the classes SME Mart still owns. The note / note-folder / work-request /
+// service-offering / document entries were removed with the smemart 2.0.7
+// retirements — their classes no longer exist, so those queries 500'd.
+/**
+ * Each mapper takes its own concrete row type (Bid, Review, ...), so the registry is
+ * heterogeneous by construction. The alias keeps the seam in one place and lets the
+ * entries cast individually instead of widening the field to `any`.
+ */
+type ResourceRowMapper = (row: Record<string, unknown>) => SmeMartResource;
+
 const RESOURCE_GQL_CONFIG: Record<SmeMartResourceType, ResourceGqlConfig> = {
-  'sme-mart:note': {
-    className: 'Note',
-    fields: ['id', 'name', 'content', 'authorZerobiasUserId', 'createdAt', 'updatedAt', 'folderId', 'archived', 'boundaryId', 'engagementId', 'projectId'],
-    nameField: 'name',
-    gqlToNeon: NOTE_FIELD_MAPPING.gqlToNeon,
-    mapper: noteToResource,
-  },
-  'sme-mart:note-folder': {
-    className: 'NoteFolder',
-    fields: ['id', 'name', 'description', 'createdByZerobiasUserId', 'createdAt', 'updatedAt', 'parentId', 'engagementId'],
-    nameField: 'name',
-    gqlToNeon: NOTE_FOLDER_FIELD_MAPPING.gqlToNeon,
-    mapper: noteFolderToResource,
-  },
-  'sme-mart:work-request': {
-    className: 'Engagement',
-    fields: ['id', 'name', 'description', 'buyerZerobiasUserId', 'createdAt', 'updatedAt'],
-    nameField: 'name',
-    gqlToNeon: ENGAGEMENT_FIELD_MAPPING.gqlToNeon,
-    mapper: workRequestToResource,
-  },
   'sme-mart:bid': {
     className: 'Bid',
     fields: ['id', 'engagementId', 'providerId', 'coverLetter', 'createdAt', 'updatedAt'],
     nameField: 'coverLetter',
     gqlToNeon: BID_FIELD_MAPPING.gqlToNeon,
-    mapper: bidToResource,
+    mapper: bidToResource as unknown as ResourceRowMapper,
   },
   'sme-mart:review': {
     className: 'Review',
     fields: ['id', 'engagementId', 'reviewerZerobiasUserId', 'reviewText', 'createdAt', 'updatedAt'],
     nameField: 'reviewText',
     gqlToNeon: REVIEW_FIELD_MAPPING.gqlToNeon,
-    mapper: reviewToResource,
-  },
-  'sme-mart:service-offering': {
-    className: 'ServiceOffering',
-    fields: ['id', 'name', 'description', 'providerId', 'createdAt', 'updatedAt', 'isActive'],
-    nameField: 'name',
-    gqlToNeon: SERVICE_OFFERING_FIELD_MAPPING.gqlToNeon,
-    mapper: serviceOfferingToResource,
-  },
-  'sme-mart:document': {
-    className: 'SmeMartDocument',
-    fields: ['id', 'displayName', 'filename', 'description', 'uploadedByZerobiasUserId', 'createdAt', 'updatedAt', 'zbTaskId', 'archived', 'engagementId'],
-    nameField: 'displayName',
-    gqlToNeon: DOCUMENT_FIELD_MAPPING.gqlToNeon,
-    mapper: documentToResource,
+    mapper: reviewToResource as unknown as ResourceRowMapper,
   },
 };

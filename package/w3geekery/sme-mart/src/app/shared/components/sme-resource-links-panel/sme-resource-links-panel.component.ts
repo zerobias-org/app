@@ -262,19 +262,15 @@ export class SmeResourceLinksPanel {
   }
 
   private getRouteForResource(id: string, type: SmeMartResourceType): string[] | null {
+    // Routes for the retired types (work-request -> /engagements,
+    // service-offering -> /services, notes) went with their classes; those surfaces
+    // are ComingSoon or gone. Only Bid still has somewhere to go, and /rfps is itself
+    // ComingSoon today.
     switch (type) {
-      case 'sme-mart:work-request':
-        return ['/engagements', id];
       case 'sme-mart:bid':
         return ['/rfps', id];
-      case 'sme-mart:note':
-      case 'sme-mart:note-folder':
-        // Notes are typically viewed in context of an engagement
-        return null;
       case 'sme-mart:review':
         return null;
-      case 'sme-mart:service-offering':
-        return ['/services'];
       default:
         return null;
     }

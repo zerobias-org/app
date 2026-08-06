@@ -11,8 +11,6 @@ import { Home } from './pages/home/home.component';
 // import { RfpWizard } from './pages/rfps/rfp-wizard/rfp-wizard.component';
 // import { BidWizard } from './pages/rfps/bid-wizard/bid-wizard.component';
 // import { BidComparisonPage } from './pages/rfps/bid-comparison-page.component';
-import { EngagementEdit } from './pages/engagements/engagement-edit.component';
-import { MyEngagementList } from './pages/my-engagements/my-engagement-list.component';
 import { ComingSoon } from './pages/coming-soon/coming-soon.component';
 import { CompanyProfileFormComponent } from './onboarding/company-profile-form.component';
 import { onboardingGuard } from './core/guards/onboarding.guard';
@@ -49,9 +47,16 @@ export const routes: Routes = [
       // 2026-05-14; lists are implicitly "yours" via the org-session header).
       // Engagements no longer drill in SME Mart. An engagement is a CARD here; all
       // detail (notes, documents, tasks, boards) lives in the Projects App, which the
-      // card links out to. Only the RFP surface — create/edit — stays local.
-      { path: 'engagements', component: MyEngagementList },
-      { path: 'engagements/:id/edit', component: EngagementEdit },
+      // card links out to.
+      //
+      // The local RFP create/edit surface is GONE as of the platform.Project cutover.
+      // It was never a separate write path — `createAsRfp`/`publishRfp` were thin
+      // wrappers over SmeMartProject CRUD, writing fields (category, budgetType,
+      // budgetMin/Max, timeline, status) that the retired class owned and
+      // platform.Project does not. There was nothing to port. RFP writes get minted
+      // fresh when the RFP surface is actually built, and may not be needed at all.
+      { path: 'engagements', component: ComingSoon, data: { title: 'Engagements' } },
+      { path: 'engagements/:id/edit', redirectTo: 'engagements' },
       // Board detail (L-2). Child of the guarded shell so ProjectContextService.isAdmin
       // is hydrated on hard-refresh/deep-link (admin gating in board-detail).
       {
@@ -108,11 +113,9 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./pages/orgs/orgs.routes').then((m) => m.ORGS_ROUTES),
       },
-      {
-        path: 'my/invitations',
-        loadChildren: () =>
-          import('./pages/my-invitations/my-invitations.routes').then((m) => m.MY_INVITATIONS_ROUTES),
-      },
+      // Invitations were RFP-invitation surfaces reading SmeMartProject. Gone with
+      // it; rebuilt against the RFP drawer when that lands.
+      { path: 'my/invitations', component: ComingSoon, data: { title: 'My Invitations' } },
       {
         path: 'my-profile',
         loadChildren: () =>

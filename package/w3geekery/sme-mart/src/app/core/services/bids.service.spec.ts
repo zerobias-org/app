@@ -15,10 +15,8 @@ import { DemoVisibilityService } from './demo-visibility.service';
 import { ProjectContextService } from './project-context.service';
 import { NotificationService } from './notification.service';
 import { RfpInvitationService } from './rfp-invitation.service';
-import { SmeMartProjectService } from './sme-mart-project.service';
 import { BID_FIELD_MAPPING } from '../field-mappings';
 import { fakeProjectContextService } from '../../test-helpers/angular';
-import type { SmeMartProject } from '../models';
 
 describe('BidsService Field Mapping Tests', () => {
   it('should have complete BID_FIELD_MAPPING for gqlToNeon conversion', () => {
@@ -66,10 +64,6 @@ describe('BidsService CRUD with Error Handling', () => {
   let mockGql: any;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockNotifications: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let mockRfpInvitations: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let mockSmeMartProjects: any;
   let mockSnackBar: { open: ReturnType<typeof vi.fn> };
   let mockProjectContext: ReturnType<typeof fakeProjectContextService>;
 
@@ -85,8 +79,6 @@ describe('BidsService CRUD with Error Handling', () => {
       rawQuery: vi.fn().mockResolvedValue({ Bid: [] }),
     };
     mockNotifications = { create: vi.fn().mockResolvedValue(undefined) };
-    mockRfpInvitations = { findByProjectAndVendor: vi.fn().mockResolvedValue(null) };
-    mockSmeMartProjects = { getProject: vi.fn().mockResolvedValue(null) };
     mockSnackBar = { open: vi.fn() };
     mockProjectContext = fakeProjectContextService(false); // non-admin by default
 
@@ -98,8 +90,6 @@ describe('BidsService CRUD with Error Handling', () => {
         { provide: GraphqlReadService, useValue: mockGql },
         { provide: ProjectContextService, useValue: mockProjectContext },
         { provide: NotificationService, useValue: mockNotifications },
-        { provide: RfpInvitationService, useValue: mockRfpInvitations },
-        { provide: SmeMartProjectService, useValue: mockSmeMartProjects },
         { provide: MatSnackBar, useValue: mockSnackBar },
       ],
     });
@@ -109,17 +99,6 @@ describe('BidsService CRUD with Error Handling', () => {
 
   describe('submitBid error handling', () => {
     it('should surface error to user on Pipeline rejection', async () => {
-      const mockProject: SmeMartProject = {
-        id: 'proj-1',
-        name: 'Test RFP',
-        status: 'published',
-        startDate: '2026-04-01',
-        createdAt: '2026-04-01T00:00:00Z',
-        updatedAt: '2026-04-01T00:00:00Z',
-        isInvitationOnly: false,
-      };
-      mockSmeMartProjects.getProject.mockResolvedValue(mockProject);
-
       const mockError = new Error('Network failure');
       mockPipeline.pushEntity.mockRejectedValueOnce(mockError);
 
@@ -140,124 +119,10 @@ describe('BidsService CRUD with Error Handling', () => {
   });
 });
 
-describe('BidsService Invitation Controls Logic (Plan 14 Wave 1)', () => {
-  // ──────────────────────────────────────────────────────────────────────────────
-  // Project Configuration Tests
-  // ──────────────────────────────────────────────────────────────────────────────
-
-  const PROJECT_OPEN: SmeMartProject = {
-    id: 'proj-001',
-    name: 'HIPAA Assessment RFP',
-    status: 'published',
-    startDate: '2026-04-01',
-    createdAt: '2026-04-01T10:00:00Z',
-    updatedAt: '2026-04-01T10:00:00Z',
-    isInvitationOnly: false,
-  };
-
-  const PROJECT_INVITATION_ONLY: SmeMartProject = {
-    ...PROJECT_OPEN,
-    id: 'proj-002',
-    isInvitationOnly: true,
-  };
-
-  it('should open projects allow bidding by any vendor', () => {
-    const openProject = PROJECT_OPEN;
-    expect(openProject.isInvitationOnly).toBe(false);
-  });
-
-  it('should invitation-only projects require accepted invitation for bidding', () => {
-    const invitationProject = PROJECT_INVITATION_ONLY;
-    expect(invitationProject.isInvitationOnly).toBe(true);
-  });
-
-  // ──────────────────────────────────────────────────────────────────────────────
-  // Access Control Gate Error Messages
-  // ──────────────────────────────────────────────────────────────────────────────
-
-  it('should gate validation throw "not invited" when no invitation record exists', () => {
-    const errorMessage = 'not invited';
-    expect(errorMessage).toBe('not invited');
-  });
-
-  it('should gate validation throw "status <status>" for non-accepted invitations', () => {
-    const statuses = ['pending', 'declined', 'revoked', 'expired', 'requested'];
-    statuses.forEach(status => {
-      const errorMessage = `status ${status}`;
-      expect(errorMessage).toContain('status');
-      expect(errorMessage).toContain(status);
-    });
-  });
-
-  it('should gate validation allow "accepted" status for bidding', () => {
-    const acceptedStatus = 'accepted';
-    const allowedStatuses = ['accepted'];
-    expect(allowedStatuses.includes(acceptedStatus)).toBe(true);
-  });
-
-  // ──────────────────────────────────────────────────────────────────────────────
-  // Gate Validation Scenarios
-  // ──────────────────────────────────────────────────────────────────────────────
-
-  it('should allow bid submission on open projects without checking invitations', () => {
-    // Open projects (isInvitationOnly: false) skip gate entirely
-    const shouldCheckGate = PROJECT_OPEN.isInvitationOnly;
-    expect(shouldCheckGate).toBe(false);
-  });
-
-  it('should require invitation check for invitation-only projects', () => {
-    // Invitation-only projects must verify vendor has accepted invitation
-    const shouldCheckGate = PROJECT_INVITATION_ONLY.isInvitationOnly;
-    expect(shouldCheckGate).toBe(true);
-  });
-
-  it('should have 4 distinct failure paths for invitation-only projects', () => {
-    const failurePaths = [
-      'not invited',              // No invitation record
-      'status pending',           // Invitation pending vendor response
-      'status declined',          // Vendor declined invitation
-      'status revoked',           // Buyer revoked invitation
-    ];
-
-    expect(failurePaths.length).toBe(4);
-    failurePaths.forEach(msg => {
-      if (msg === 'not invited') {
-        expect(msg).not.toContain('status');
-      } else {
-        expect(msg).toContain('status');
-      }
-    });
-  });
-
-  it('should handle expired status for closed RFPs with pending invitations', () => {
-    const expiredError = 'status expired';
-    expect(expiredError).toContain('status');
-    expect(expiredError).toContain('expired');
-  });
-
-  it('should handle requested status for vendor self-nominated invitations', () => {
-    const requestedError = 'status requested';
-    expect(requestedError).toContain('status');
-    expect(requestedError).toContain('requested');
-  });
-
-  // ──────────────────────────────────────────────────────────────────────────────
-  // RfpInvitation Status Integration
-  // ──────────────────────────────────────────────────────────────────────────────
-
-  it('should validate all 6 RfpInvitation status values against gate', () => {
-    const allStatuses = ['pending', 'accepted', 'declined', 'revoked', 'expired', 'requested'];
-    const allowedForBidding = ['accepted'];
-    const rejectedForBidding = ['pending', 'declined', 'revoked', 'expired', 'requested'];
-
-    expect(allStatuses.length).toBe(6);
-    expect(allowedForBidding.length + rejectedForBidding.length).toBe(6);
-
-    rejectedForBidding.forEach(status => {
-      expect(allStatuses.includes(status)).toBe(true);
-    });
-  });
-});
+// The Plan 14 Wave 1 invitation-controls suite was removed with the gate it tested.
+// submitBid no longer reads SmeMartProject.isInvitationOnly — that class is retired and
+// the field has no platform.Project equivalent, so the gate could not be ported. These
+// tests come back when the RFP surface re-establishes invitation-only bidding.
 
 describe('Demo visibility (Phase 24 Plan 03)', () => {
   let service: BidsService;
@@ -299,7 +164,6 @@ describe('Demo visibility (Phase 24 Plan 03)', () => {
         { provide: ProjectContextService, useValue: mockProjectContext },
         { provide: NotificationService, useValue: { create: vi.fn().mockResolvedValue(undefined) } },
         { provide: RfpInvitationService, useValue: { findByProjectAndVendor: vi.fn().mockResolvedValue(null) } },
-        { provide: SmeMartProjectService, useValue: { getProject: vi.fn().mockResolvedValue(null) } },
         { provide: MatSnackBar, useValue: { open: vi.fn() } },
       ],
     });

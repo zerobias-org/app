@@ -113,36 +113,12 @@
     </div>
   </zb-simple-panel>
 
-  <!-- Projects Panel -->
-  <zb-simple-panel title="Projects" mode="header-only">
-    <div class="panel-content">
-      @if (projectsLoading()) {
-        <div class="panel-spinner">
-          <mat-spinner diameter="40" />
-        </div>
-      } @else if (engagementGroups().length === 0) {
-        <p class="empty-message">No projects yet</p>
-      } @else {
-        <div class="projects-container">
-          @for (group of engagementGroups(); track group.engagementId) {
-            <div class="engagement-group">
-              <h4>
-                <a (click)="navigateToEngagement(group.engagementId)">
-                  {{ group.engagementName }}
-                </a>
-              </h4>
-              <zb-customizable-table
-                [data]="group.projects"
-                [columns]="['name', 'status']"
-                (rowClick)="navigateToProject($event.id)"
-              >
-              </zb-customizable-table>
-            </div>
-          }
-        </div>
-      }
-    </div>
-  </zb-simple-panel>
+  <!--
+    Projects panel removed with the platform.Project cutover. It read the retired
+    SmeMartProject and Engagement classes to group an org's projects under their
+    engagement. Projects live in the Projects App now; rebuild this as cards linking
+    out to /projects-app/projects/:projectId when that surface is wired.
+  -->
 
   <!-- Boundaries Panel -->
   <zb-simple-panel title="Boundaries" mode="header-only">

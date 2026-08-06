@@ -7,21 +7,9 @@ export const ORG_ROUTES: Routes = [
     component: OrgPage,
     children: [
       { path: '', redirectTo: 'profile', pathMatch: 'full' },
-      {
-        path: 'documents',
-        loadComponent: () =>
-          import('./tabs/documents-tab.component').then(m => m.DocumentsTab),
-      },
-      {
-        path: 'engagements',
-        loadComponent: () =>
-          import('./tabs/engagements-tab.component').then(m => m.EngagementsTab),
-      },
-      {
-        path: 'projects',
-        loadComponent: () =>
-          import('./tabs/projects-tab.component').then(m => m.ProjectsTab),
-      },
+      // documents / engagements / projects tabs deleted with the platform.Project
+      // cutover — Documents belongs to the Projects App (FileService-backed), and
+      // engagements/projects are cards that link out rather than surfaces we own.
       {
         path: 'members',
         loadComponent: () =>
