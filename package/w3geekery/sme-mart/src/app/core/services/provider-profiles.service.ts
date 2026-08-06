@@ -5,10 +5,10 @@ import { ExecuteRawGraphqlQuery } from '@zerobias-com/graphql-sdk';
 import { UUID, PagedResults } from '@zerobias-org/types-core-js';
 import { environment } from '../../../environments/environment';
 import type {
-  ProviderSkill,
+  ProviderSkillProficiency,
   ProviderRole,
-  ProviderProduct,
-  ProviderFramework,
+  ProviderProductProficiency,
+  ProviderFrameworkProficiency,
   ProviderSegment,
   ProviderServiceSegment,
   OrgProfile,
@@ -79,10 +79,10 @@ export class ProviderProfilesService {
    * Query expertise junctions for an orgId with nested selections.
    */
   private async queryExpertiseJunctions(orgId: string): Promise<{
-    skills: ProviderSkill[];
+    skills: ProviderSkillProficiency[];
     roles: ProviderRole[];
-    products: ProviderProduct[];
-    frameworks: ProviderFramework[];
+    products: ProviderProductProficiency[];
+    frameworks: ProviderFrameworkProficiency[];
     segments: ProviderSegment[];
     serviceSegments: ProviderServiceSegment[];
   }> {
@@ -91,19 +91,19 @@ export class ProviderProfilesService {
     // Query all 6 expertise junction types in parallel
     const [skillsResult, rolesResult, productsResult, frameworksResult, segmentsResult, ssResult] =
       await Promise.all([
-        this.queryJunctionType('ProviderSkill', filter),
+        this.queryJunctionType('ProviderSkillProficiency', filter),
         this.queryJunctionType('ProviderRole', filter),
-        this.queryJunctionType('ProviderProduct', filter),
-        this.queryJunctionType('ProviderFramework', filter),
+        this.queryJunctionType('ProviderProductProficiency', filter),
+        this.queryJunctionType('ProviderFrameworkProficiency', filter),
         this.queryJunctionType('ProviderSegment', filter),
         this.queryJunctionType('ProviderServiceSegment', filter),
       ]);
 
     return {
-      skills: skillsResult as ProviderSkill[],
+      skills: skillsResult as ProviderSkillProficiency[],
       roles: rolesResult as ProviderRole[],
-      products: productsResult as ProviderProduct[],
-      frameworks: frameworksResult as ProviderFramework[],
+      products: productsResult as ProviderProductProficiency[],
+      frameworks: frameworksResult as ProviderFrameworkProficiency[],
       segments: segmentsResult as ProviderSegment[],
       serviceSegments: ssResult as ProviderServiceSegment[],
     };
@@ -114,10 +114,10 @@ export class ProviderProfilesService {
    */
   private async queryJunctionType(className: string, filter: string): Promise<unknown[]> {
     const fieldsByClass: Record<string, string> = {
-      ProviderSkill: 'id orgId skillId proficiencyLevel yearsExperience verified verificationSource created_at',
+      ProviderSkillProficiency: 'id orgId skillId proficiencyLevel yearsExperience verified verificationSource created_at',
       ProviderRole: 'id orgId roleId isPrimary yearsInRole verified verificationSource created_at',
-      ProviderProduct: 'id orgId productId proficiencyLevel yearsExperience certified certificationDetails verified verificationSource created_at',
-      ProviderFramework: 'id orgId frameworkId proficiencyLevel yearsExperience assessorCertified implementationExperience auditExperience verified verificationSource created_at',
+      ProviderProductProficiency: 'id orgId productId proficiencyLevel yearsExperience certified certificationDetails verified verificationSource created_at',
+      ProviderFrameworkProficiency: 'id orgId frameworkId proficiencyLevel yearsExperience assessorCertified implementationExperience auditExperience verified verificationSource created_at',
       ProviderSegment: 'id orgId segmentId isPrimary verified verificationSource created_at',
       ProviderServiceSegment: 'id orgId serviceSegmentId isPrimary verified verificationSource created_at',
     };
@@ -311,7 +311,7 @@ export class ProviderProfilesService {
   // ─────────────────────────────────────────────────────────────────────────
 
   /**
-   * Update OrgProfile + optional HQ Address via Pipeline.
+   * Update OrgProfile via Pipeline.
    * Both writes scoped to orgId FK (not provider_id).
    * Defaults verified=false / verificationSource=null per D-53.
    * Pipeline.receive is full-replace — send complete object to avoid nulling unmapped fields.
@@ -347,39 +347,14 @@ export class ProviderProfilesService {
       throw err;
     }
 
-    // If hqLocation provided, write Address (1:1, owner-generic)
-    const hqLocation = (profileData as unknown as Record<string, unknown>)['hqLocation'];
-    if (hqLocation && typeof hqLocation === 'object') {
-      const hqLoc = hqLocation as Record<string, unknown>;
-      const addressPayload: Record<string, unknown> = {
-        id: `address-${orgId}-hq`,
-        name: `HQ Address - ${orgId}`,
-        ownerType: 'org',
-        ownerId: orgId,
-        addressType: 'registered',
-        isPrimary: true,
-        street1: hqLoc['street1'] ?? undefined,
-        street2: hqLoc['street2'] ?? undefined,
-        city: hqLoc['city'] ?? undefined,
-        region: hqLoc['region'] ?? undefined,
-        postalCode: hqLoc['postalCode'] ?? undefined,
-        country: hqLoc['country'] ?? undefined,
-        userLabel: 'Headquarters',
-        verified: profileData.verified ?? false,
-        verificationSource: profileData.verificationSource ?? null,
-      };
-
-      try {
-        await this.pipelineWrite.pushEntity('Address', addressPayload, [], 'provider-profiles.service:updateProfile.Address');
-      } catch (err) {
-        this.snackBar.open(
-          `Failed to update address: ${(err as Error).message}`,
-          'Dismiss',
-          { duration: 5000 },
-        );
-        throw err;
-      }
-    }
+    // The HQ-address write that lived here is gone. It targeted the Address class,
+    // retired in smemart 2.0.7 in favour of the platform base `address` document —
+    // which OrgProfile does not yet declare a property for, so there is nowhere to
+    // put an address today. Nothing fed this path (the sole caller,
+    // my-profile-overview, never passes hqLocation), so no data is lost by removing
+    // it; leaving it would only have meant a guaranteed runtime failure against a
+    // class that no longer exists. Restore address writes when OrgProfile adopts the
+    // platform document.
 
     return payload as unknown as OrgProfile;
   }
@@ -392,7 +367,7 @@ export class ProviderProfilesService {
    * Add skill expertise junction for org.
    * Org-scoped via orgId FK. Defaults verified=false / verificationSource=null per D-53.
    */
-  async addSkill(orgId: string, data: Omit<ProviderSkill, 'id' | 'created_at'>): Promise<ProviderSkill> {
+  async addSkill(orgId: string, data: Omit<ProviderSkillProficiency, 'id' | 'created_at'>): Promise<ProviderSkillProficiency> {
     const id = crypto.randomUUID();
     const payload: Record<string, unknown> = {
       id,
@@ -406,7 +381,7 @@ export class ProviderProfilesService {
     };
 
     try {
-      await this.pipelineWrite.pushEntity('ProviderSkill', payload, [], 'provider-profiles.service:addSkill');
+      await this.pipelineWrite.pushEntity('ProviderSkillProficiency', payload, [], 'provider-profiles.service:addSkill');
     } catch (err) {
       this.snackBar.open(
         `Failed to add skill: ${(err as Error).message}`,
@@ -416,7 +391,7 @@ export class ProviderProfilesService {
       throw err;
     }
 
-    return payload as unknown as ProviderSkill;
+    return payload as unknown as ProviderSkillProficiency;
   }
 
   /**
@@ -425,7 +400,7 @@ export class ProviderProfilesService {
    */
   async deleteSkill(recordId: string): Promise<void> {
     try {
-      await this.pipelineWrite.deleteEntity('ProviderSkill', recordId, 'provider-profiles.service:deleteSkill');
+      await this.pipelineWrite.deleteEntity('ProviderSkillProficiency', recordId, 'provider-profiles.service:deleteSkill');
     } catch (err) {
       this.snackBar.open(
         `Failed to delete skill: ${(err as Error).message}`,
@@ -488,7 +463,7 @@ export class ProviderProfilesService {
    * Add product expertise junction for org.
    * Org-scoped via orgId FK. Defaults verified=false / verificationSource=null per D-53.
    */
-  async addProduct(orgId: string, data: Omit<ProviderProduct, 'id' | 'created_at'>): Promise<ProviderProduct> {
+  async addProduct(orgId: string, data: Omit<ProviderProductProficiency, 'id' | 'created_at'>): Promise<ProviderProductProficiency> {
     const id = crypto.randomUUID();
     const payload: Record<string, unknown> = {
       id,
@@ -504,7 +479,7 @@ export class ProviderProfilesService {
     };
 
     try {
-      await this.pipelineWrite.pushEntity('ProviderProduct', payload, [], 'provider-profiles.service:addProduct');
+      await this.pipelineWrite.pushEntity('ProviderProductProficiency', payload, [], 'provider-profiles.service:addProduct');
     } catch (err) {
       this.snackBar.open(
         `Failed to add product: ${(err as Error).message}`,
@@ -514,7 +489,7 @@ export class ProviderProfilesService {
       throw err;
     }
 
-    return payload as unknown as ProviderProduct;
+    return payload as unknown as ProviderProductProficiency;
   }
 
   /**
@@ -523,7 +498,7 @@ export class ProviderProfilesService {
    */
   async deleteProduct(recordId: string): Promise<void> {
     try {
-      await this.pipelineWrite.deleteEntity('ProviderProduct', recordId, 'provider-profiles.service:deleteProduct');
+      await this.pipelineWrite.deleteEntity('ProviderProductProficiency', recordId, 'provider-profiles.service:deleteProduct');
     } catch (err) {
       this.snackBar.open(
         `Failed to delete product: ${(err as Error).message}`,
@@ -538,7 +513,7 @@ export class ProviderProfilesService {
    * Add framework expertise junction for org.
    * Org-scoped via orgId FK. Defaults verified=false / verificationSource=null per D-53.
    */
-  async addFramework(orgId: string, data: Omit<ProviderFramework, 'id' | 'created_at'>): Promise<ProviderFramework> {
+  async addFramework(orgId: string, data: Omit<ProviderFrameworkProficiency, 'id' | 'created_at'>): Promise<ProviderFrameworkProficiency> {
     const id = crypto.randomUUID();
     const payload: Record<string, unknown> = {
       id,
@@ -555,7 +530,7 @@ export class ProviderProfilesService {
     };
 
     try {
-      await this.pipelineWrite.pushEntity('ProviderFramework', payload, [], 'provider-profiles.service:addFramework');
+      await this.pipelineWrite.pushEntity('ProviderFrameworkProficiency', payload, [], 'provider-profiles.service:addFramework');
     } catch (err) {
       this.snackBar.open(
         `Failed to add framework: ${(err as Error).message}`,
@@ -565,7 +540,7 @@ export class ProviderProfilesService {
       throw err;
     }
 
-    return payload as unknown as ProviderFramework;
+    return payload as unknown as ProviderFrameworkProficiency;
   }
 
   /**
@@ -574,7 +549,7 @@ export class ProviderProfilesService {
    */
   async deleteFramework(recordId: string): Promise<void> {
     try {
-      await this.pipelineWrite.deleteEntity('ProviderFramework', recordId, 'provider-profiles.service:deleteFramework');
+      await this.pipelineWrite.deleteEntity('ProviderFrameworkProficiency', recordId, 'provider-profiles.service:deleteFramework');
     } catch (err) {
       this.snackBar.open(
         `Failed to delete framework: ${(err as Error).message}`,

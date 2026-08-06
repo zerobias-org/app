@@ -91,10 +91,10 @@ describe('ProviderProfilesService — MPI/GQL read path', () => {
     // Mock expertise junction queries (segments, skills, etc.)
     mockBoundaryApi.boundaryExecuteRawQuery.mockResolvedValue({
       data: {
-        ProviderSkill: [],
+        ProviderSkillProficiency: [],
         ProviderRole: [],
-        ProviderProduct: [],
-        ProviderFramework: [],
+        ProviderProductProficiency: [],
+        ProviderFrameworkProficiency: [],
         ProviderSegment: [],
         ProviderServiceSegment: [],
       },
@@ -152,10 +152,10 @@ describe('ProviderProfilesService — MPI/GQL read path', () => {
     // Mock expertise junctions (segments, skills, etc.)
     mockBoundaryApi.boundaryExecuteRawQuery.mockResolvedValue({
       data: {
-        ProviderSkill: [],
+        ProviderSkillProficiency: [],
         ProviderRole: [],
-        ProviderProduct: [],
-        ProviderFramework: [],
+        ProviderProductProficiency: [],
+        ProviderFrameworkProficiency: [],
         ProviderSegment: [],
         ProviderServiceSegment: [],
       },
@@ -204,10 +204,10 @@ describe('ProviderProfilesService — MPI/GQL read path', () => {
     // Mock expertise junctions
     mockBoundaryApi.boundaryExecuteRawQuery.mockResolvedValue({
       data: {
-        ProviderSkill: [],
+        ProviderSkillProficiency: [],
         ProviderRole: [],
-        ProviderProduct: [],
-        ProviderFramework: [],
+        ProviderProductProficiency: [],
+        ProviderFrameworkProficiency: [],
         ProviderSegment: [],
         ProviderServiceSegment: [],
       },
@@ -287,10 +287,10 @@ describe('ProviderProfilesService — MPI/GQL read path', () => {
     // Mock expertise junctions
     mockBoundaryApi.boundaryExecuteRawQuery.mockResolvedValue({
       data: {
-        ProviderSkill: [],
+        ProviderSkillProficiency: [],
         ProviderRole: [],
-        ProviderProduct: [],
-        ProviderFramework: [],
+        ProviderProductProficiency: [],
+        ProviderFrameworkProficiency: [],
         ProviderSegment: [],
         ProviderServiceSegment: [],
       },
@@ -357,10 +357,10 @@ describe('ProviderProfilesService — MPI/GQL read path', () => {
     // Mock expertise junctions
     mockBoundaryApi.boundaryExecuteRawQuery.mockResolvedValue({
       data: {
-        ProviderSkill: [],
+        ProviderSkillProficiency: [],
         ProviderRole: [],
-        ProviderProduct: [],
-        ProviderFramework: [],
+        ProviderProductProficiency: [],
+        ProviderFrameworkProficiency: [],
         ProviderSegment: [],
         ProviderServiceSegment: [],
       },
@@ -408,10 +408,10 @@ describe('ProviderProfilesService — MPI/GQL read path', () => {
     // Mock expertise junctions
     mockBoundaryApi.boundaryExecuteRawQuery.mockResolvedValue({
       data: {
-        ProviderSkill: [],
+        ProviderSkillProficiency: [],
         ProviderRole: [],
-        ProviderProduct: [],
-        ProviderFramework: [],
+        ProviderProductProficiency: [],
+        ProviderFrameworkProficiency: [],
         ProviderSegment: [],
         ProviderServiceSegment: [],
       },
@@ -458,10 +458,10 @@ describe('ProviderProfilesService — MPI/GQL read path', () => {
     // Mock expertise junctions
     mockBoundaryApi.boundaryExecuteRawQuery.mockResolvedValue({
       data: {
-        ProviderSkill: [],
+        ProviderSkillProficiency: [],
         ProviderRole: [],
-        ProviderProduct: [],
-        ProviderFramework: [],
+        ProviderProductProficiency: [],
+        ProviderFrameworkProficiency: [],
         ProviderSegment: [],
         ProviderServiceSegment: [],
       },
