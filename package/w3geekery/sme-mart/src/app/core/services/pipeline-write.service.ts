@@ -5,62 +5,58 @@ import { UUID } from '@zerobias-org/types-core-js';
 import { environment } from '../../../environments/environment';
 
 // ---------------------------------------------------------------------------
-// SME Mart AuditgraphDB class IDs (deterministic — same across all environments)
+// SME Mart AuditgraphDB class IDs
+//
+// Env-invariant: these are UUIDv5, derived from the class content, so a value
+// looked up in one environment is valid in all of them. Every id below was read
+// back from platform.Class.getClass rather than computed.
+//
+// 2026-08-05: 19 entries removed — 15 classes retired by the smemart schema batch,
+// plus 4 already dead since 2.0.7 (MarketplaceProfileItem and the three pre-rename
+// Provider* names). An entry for a retired class does not keep its readers working,
+// it only keeps them COMPILING — which is how the 2.0.7 four stayed broken on UAT
+// behind a green build.
 // ---------------------------------------------------------------------------
 export const SME_MART_CLASS_IDS = {
-  // Original 8 entities (migrated from Neon in Phases 2-4)
-  Engagement:      '7711aa41-e55b-5cda-9b7a-35844a2006a1',
-  Bid:             'ccddd2e5-e455-585e-9bb7-902903228b0d',
-  BidResponse:     'a024a0b5-50df-59cc-ba8e-25fcd82f69c3',
-  ServiceOffering: 'ff689173-4787-52c5-808b-6b2435a625a7',
-  Note:            'fe7c58a9-c13b-5a4b-817f-5c4b419ed28c',
-  NoteFolder:      '4d50975e-d4dc-5654-8e43-f3c5da01f49d',
-  Review:          'ef5d821a-46f5-5f44-8e59-0854777d803c',
-  SmeMartDocument: 'e1497ca8-a621-57f6-9263-f9a19fea3c34',
+  // Marketplace core
+  Bid:                          'ccddd2e5-e455-585e-9bb7-902903228b0d',
+  BidResponse:                  'a024a0b5-50df-59cc-ba8e-25fcd82f69c3',
+  Review:                       'ef5d821a-46f5-5f44-8e59-0854777d803c',
+  ProjectPrd:                   '920fca70-4dcf-5d9e-ba16-1dfd0f8061f0',
+  PrdSection:                   'd30445f3-e26d-5153-83be-fe810f63220c',
+  ProjectPlan:                  'bc6159da-19a3-51d0-89a8-f2147078c760',
+  PlanMilestone:                'ac1a1cc8-db44-5c1d-b359-5fb02e3d381d',
+  RfpInvitation:                '941cf01b-d260-5e45-8c6a-50f07b23f196',
+  ProviderRole:                 '6098fe68-f656-51fe-87d8-dde87b50efc6',
+  ProviderSegment:              '1b211929-39af-5d81-b205-3bf2c23d45d6',
+  ProviderServiceSegment:       '5d698106-3a8a-530d-9060-52e1aa7ab134',
+  OrgProfile:                   '8001e339-2609-54ae-b407-9c2ab7ebf413',
+  InsuranceCoverage:            '7b0b6b97-b99e-5267-9cf0-2dd3f5888997',
+  ClientReference:              '632ced7f-85d5-5f6e-9f99-8258001d14cc',
+  Personnel:                    '23dd60e6-100d-5d65-bc09-af594215e27e',
+  FinancialProfile:             '5b4cba20-be1c-5747-b355-5ff18b7b76b5',
+  OrgSegment:                   '780543c7-fbe5-5e8e-8bd5-5361689c1ce6',
 
-  // Phase 6 Bloom entities (greenfield — built directly on Pipeline+GQL)
-  SmeMartProject:  'c66114a2-48e2-5b93-b7d6-7ccd6ef45a03',
-  SmeMartBoard:    '20be589b-194e-5227-ba6e-c7edae42f34b',
-  SmeMartActivity: '36405d75-76f1-5f4b-ab3b-22c562d41e07',
-  SmeMartWorkflow: '295938d2-5c63-5140-a945-2ba28b88b268',
-  SmeMartTask:     'e15f1e0a-1bc9-5002-b4bc-3482d4499561',
-  ProjectPrd:      '920fca70-4dcf-5d9e-ba16-1dfd0f8061f0',
-  PrdSection:      'd30445f3-e26d-5153-83be-fe810f63220c',
-  ProjectPlan:     'bc6159da-19a3-51d0-89a8-f2147078c760',
-  PlanMilestone:   'ac1a1cc8-db44-5c1d-b359-5fb02e3d381d',
+  // Added 2026-08-05 — shipped in smemart 2.0.7; ids read from
+  // platform.Class.getClass on UAT and cross-checked via the portal REST endpoint.
+  // The three *Proficiency classes are NEW ids, not renames: the originals were
+  // retired whole and the replacements born as new class files, so there is no id
+  // continuity from ProviderSkill / ProviderProduct / ProviderFramework.
+  VendorListing:                'f7a997bd-6b9d-55be-ac82-6a5c56e2b1f3',
+  VendorListingSegment:         'f2ad9c7a-15bd-5b23-9320-495cd2b431f6',
+  ServiceCapability:            '047feaba-0624-5b92-a953-b10d77e892b7',
+  ProviderSkillProficiency:     'aa933d21-64c3-50ae-a40d-d989470a1ad0',
+  ProviderProductProficiency:   '8b392156-c572-540e-88db-fcecb08eead7',
+  ProviderFrameworkProficiency: 'cd2b61f1-36c6-5a83-b2f6-e91a6523a09e',
 
-  // Plan 063 — Corporate Vetting (canonical platform-assigned id, confirmed via platform.Class.getClass on UAT 2026-04-28)
-  EngagementVettingItem: '21f5841f-dd27-53ef-a0f5-6a816ec7f7e1',
-
-  // Plan 041 — Vendor Profile Service (canonical platform-assigned id, validated empirically by Plan 26-02 seed)
-  MarketplaceProfileItem: '7bcf86a5-91dc-520d-b9bf-e308b1078d46',
-
-  // Phase 14 — Invitation Controls
-  RfpInvitation: '941cf01b-d260-5e45-8c6a-50f07b23f196',
-
-  // Phase 15 — Document Templates
-  DocumentTemplate: 'd2493bf7-f28d-5d26-8858-58062d402012',
-  DocumentInstance: '3e1d232f-3105-535e-8ef5-70cb0f80d65f',
-
-  // Phase 16 — Form Builder
-  FormSubmission: '179bd4b1-d1b1-5afc-99be-a5465a662ec6',
-
-  // Phase 33 — Provider expertise junctions (org-scoped; UUIDv5, env-stable UAT==prod; MCP-verified 2026-06-26)
-  ProviderSkill:          '91a32787-5d86-5d58-9143-152d1bc5dad2',
-  ProviderRole:           '6098fe68-f656-51fe-87d8-dde87b50efc6',
-  ProviderProduct:        '63cd2a00-1dc8-5152-9d36-eaf98abfa8ee',
-  ProviderFramework:      '47a4ce15-d87c-5eb7-b4ce-b5057da882be',
-  ProviderSegment:        '1b211929-39af-5d81-b205-3bf2c23d45d6',
-  ProviderServiceSegment: '5d698106-3a8a-530d-9060-52e1aa7ab134',  // matches D-56 anchor
-
-  // Phase 33 — Corporate-profile + classification typed classes (MCP-verified UAT==prod 2026-06-26)
-  OrgProfile:             '8001e339-2609-54ae-b407-9c2ab7ebf413',
-  Address:                'cce4037a-ed62-5aec-bcd3-cbc8afb0546d',
-  InsuranceCoverage:      '7b0b6b97-b99e-5267-9cf0-2dd3f5888997',
-  ClientReference:        '632ced7f-85d5-5f6e-9f99-8258001d14cc',
-  Personnel:              '23dd60e6-100d-5d65-bc09-af594215e27e',
-  FinancialProfile:       '5b4cba20-be1c-5747-b355-5ff18b7b76b5',
-  OrgSegment:             '780543c7-fbe5-5e8e-8bd5-5361689c1ce6',
+  // NOT registered yet, deliberately: OrgCredential, SecurityCredential and
+  // UserCredential. They are a Brian ask, landed AHEAD of their consumers — so having
+  // no app readers is the expected state, not a symptom. Leave them alone until we need
+  // them, and do NOT read the missing entries as evidence they are retirement material.
+  //
+  // The asymmetry, since a retirement sweep will pass this way again: app coupling is
+  // never a reason to KEEP a class, and that does not invert — the absence of coupling
+  // is not on its own a reason to KILL one.
 } as const;
 
 export type SmeMartClassName = keyof typeof SME_MART_CLASS_IDS;

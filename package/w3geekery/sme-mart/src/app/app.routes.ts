@@ -11,11 +11,8 @@ import { Home } from './pages/home/home.component';
 // import { RfpWizard } from './pages/rfps/rfp-wizard/rfp-wizard.component';
 // import { BidWizard } from './pages/rfps/bid-wizard/bid-wizard.component';
 // import { BidComparisonPage } from './pages/rfps/bid-comparison-page.component';
-import { EngagementDetail } from './pages/engagements/engagement-detail.component';
 import { EngagementEdit } from './pages/engagements/engagement-edit.component';
-import { ENGAGEMENT_TAB_ROUTES } from './pages/engagements/engagement.routes';
 import { MyEngagementList } from './pages/my-engagements/my-engagement-list.component';
-import { MyProjectList } from './pages/my-projects/my-project-list.component';
 import { ComingSoon } from './pages/coming-soon/coming-soon.component';
 import { CompanyProfileFormComponent } from './onboarding/company-profile-form.component';
 import { onboardingGuard } from './core/guards/onboarding.guard';
@@ -50,10 +47,11 @@ export const routes: Routes = [
       { path: 'rfps/:id/:tail', redirectTo: 'rfps' },
       // Engagements + Projects (top-level — the /my/ prefix was dropped
       // 2026-05-14; lists are implicitly "yours" via the org-session header).
+      // Engagements no longer drill in SME Mart. An engagement is a CARD here; all
+      // detail (notes, documents, tasks, boards) lives in the Projects App, which the
+      // card links out to. Only the RFP surface — create/edit — stays local.
       { path: 'engagements', component: MyEngagementList },
-      { path: 'engagements/:id', component: EngagementDetail, children: ENGAGEMENT_TAB_ROUTES },
       { path: 'engagements/:id/edit', component: EngagementEdit },
-      { path: 'projects', component: MyProjectList },
       // Board detail (L-2). Child of the guarded shell so ProjectContextService.isAdmin
       // is hydrated on hard-refresh/deep-link (admin gating in board-detail).
       {
@@ -62,13 +60,6 @@ export const routes: Routes = [
       },
       // Legacy /my/* redirects (preserve any bookmarks / cached deep-links).
       { path: 'my/engagements', redirectTo: 'engagements', pathMatch: 'full' },
-      { path: 'my/engagements/:id', redirectTo: 'engagements/:id' },
-      { path: 'my/projects', redirectTo: 'projects', pathMatch: 'full' },
-      {
-        path: 'templates/:id',
-        loadComponent: () =>
-          import('./pages/templates/template-editor.component').then(m => m.TemplateEditorComponent),
-      },
       {
         path: 'onboarding',
         children: [
@@ -134,11 +125,6 @@ export const routes: Routes = [
         path: 'admin',
         loadChildren: () =>
           import('./pages/admin/admin.routes').then((m) => m.ADMIN_ROUTES),
-      },
-      {
-        path: 'project',
-        loadChildren: () =>
-          import('./pages/project/project.routes').then((m) => m.PROJECT_ROUTES),
       },
     ],
   },

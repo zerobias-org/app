@@ -13,11 +13,6 @@ export const ORG_ROUTES: Routes = [
           import('./tabs/documents-tab.component').then(m => m.DocumentsTab),
       },
       {
-        path: 'templates',
-        loadComponent: () =>
-          import('./tabs/org-document-templates-tab.component').then(m => m.OrgDocumentTemplatesTabComponent),
-      },
-      {
         path: 'engagements',
         loadComponent: () =>
           import('./tabs/engagements-tab.component').then(m => m.EngagementsTab),
