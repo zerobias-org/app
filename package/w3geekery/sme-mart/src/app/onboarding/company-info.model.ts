@@ -12,50 +12,56 @@ export enum BusinessClassification {
 }
 
 /**
- * employeeCount enum — 7 re-banded values per D-57 (published schema 2.0.6)
+ * employeeCount enum — 5 bands, keys verbatim from
+ * `enums/orgProfile.employeeCount.yml` in smemart 2.0.7.
+ *
+ * The stored value is the enum KEY (`BAND_1_10`), not the label — same
+ * convention as businessClassification above. The band boundary at 100 is
+ * load-bearing: it aligns with the Foundation/Guild eligibility cutoff so
+ * guildEligible is derivable, and it matches the contact-us CRM
+ * Number_of_Employees picklist 1:1. Do not re-band without updating both.
  */
-export const EMPLOYEE_COUNT_VALUES = ['1-10', '11-50', '51-100', '101-500', '501-1000', '1001-5000', '5000+'] as const;
-export type EmployeeCountValue = typeof EMPLOYEE_COUNT_VALUES[number];
+export enum EmployeeCountBand {
+  BAND_1_10 = 'BAND_1_10',
+  BAND_11_50 = 'BAND_11_50',
+  BAND_51_100 = 'BAND_51_100',
+  BAND_101_500 = 'BAND_101_500',
+  BAND_500_PLUS = 'BAND_500_PLUS',
+}
 
 /**
  * CompanyInfoStruct — the form's data model (struct-shaped, mirrors form bindings)
  * Uses camelCase field names for TypeScript/form binding convenience.
  */
 export interface CompanyInfoStruct {
-  legalName: string;           // required
-  dba?: string;                // optional
-  logoUrl?: string;            // optional, URL
-  shortBlurb?: string;         // optional, ≤ 500 chars (maps to tagline)
-  longDescription?: string;    // optional, ≤ 5000 chars
+  legalName: string;           // required -> OrgProfile.legalName
+  dba?: string;                // optional -> OrgProfile.dba
+  logoUrl?: string;            // optional, URL -> OrgProfile.logoUrl
+  shortBlurb?: string;         // optional, ≤ 500 chars -> OrgProfile.shortDescription
+  longDescription?: string;    // optional, ≤ 5000 chars -> OrgProfile.longDescription
   primaryContact?: {
-    userId?: string;           // UUID (maps to primaryContactUserId)
+    userId?: string;           // UUID -> OrgProfile.primaryContactUserId
+    // NO BACKING FIELD. OrgProfile stores only the user id; the schema resolves
+    // name/email from the platform User on read rather than denormalizing them.
+    // These two are collected by the form and dropped on save until the form
+    // shape is settled — see BACKLOG "profile form orphan fields".
     name?: string;
     email?: string;            // RFC5322
   };
-  website?: string;            // optional, URL
+  website?: string;            // optional, URL -> OrgProfile.website
+  // NO BACKING FIELDS. The Address class was retired in smemart 2.0.7 in favour
+  // of the platform base `address` document, and OrgProfile declares no address
+  // property, so none of these five persist today.
   hqLocation?: {
-    street?: string;           // maps to street1
+    street?: string;
     city?: string;
-    state?: string;            // maps to region
+    state?: string;
     country?: string;
     postalCode?: string;
   };
-  yearsInBusiness?: number;    // optional, integer ≥ 0 (maps to foundedYear)
-  employeeCount?: EmployeeCountValue;      // optional, one of 7 re-banded values
+  yearsInBusiness?: number;    // optional, integer ≥ 0 -> derived from OrgProfile.foundedYear
+  employeeCount?: EmployeeCountBand;                // optional -> OrgProfile.employeeCount
   businessClassification?: BusinessClassification;  // optional, one of 7 LOCKED values
-}
-
-/**
- * MarketplaceProfileItemRecord — the MPI record DTO for Pipeline.receive
- * Flat structure with plain-string data field (no JSON-encoded values).
- * Replace key is id only; per-section independence validated via UAT experiment.
- */
-export interface MarketplaceProfileItemRecord {
-  id: string;                  // deterministic: 'mpi-<orgId>-<section>'
-  orgId: string;
-  section: string;             // from company-info-sections.ts
-  data: string;                // always plain string
-  status: 'active' | 'archived'; // typically 'active'
 }
 
 /**

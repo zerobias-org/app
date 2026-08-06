@@ -79,3 +79,7 @@ export type {
 export type {
   GqlVettingItemResponse,
 } from './vetting-item.types';
+
+export type {
+  GqlOrgProfileResponse,
+} from './org-profile.types';

@@ -25,7 +25,7 @@ import { v4 as uuid } from 'uuid';
 import { MarketplaceProfileService } from '../core/services/marketplace-profile.service';
 import { PipelineWriteService } from '../core/services/pipeline-write.service';
 import { CompanyInfoStruct } from './company-info.model';
-import { BUSINESS_CLASSIFICATION_OPTIONS } from './company-info-sections';
+import { BUSINESS_CLASSIFICATION_OPTIONS, EMPLOYEE_COUNT_OPTIONS } from './company-info-options';
 
 /**
  * Custom validators for company profile form fields
@@ -88,6 +88,7 @@ export class CompanyProfileFormComponent implements OnInit {
 
   // Picklist options (LOCKED values per D-57)
   readonly businessClassificationOptions = BUSINESS_CLASSIFICATION_OPTIONS;
+  readonly employeeCountOptions = EMPLOYEE_COUNT_OPTIONS;
 
   ngOnInit(): void {
     this.initializeForm();

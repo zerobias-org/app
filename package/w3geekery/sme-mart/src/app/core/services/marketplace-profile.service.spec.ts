@@ -5,13 +5,12 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { MarketplaceProfileService } from './marketplace-profile.service';
 import { GraphqlReadService } from './graphql-read.service';
 import { PipelineWriteService } from './pipeline-write.service';
-import { CompanyInfoStruct } from '../../onboarding/company-info.model';
-import { SECTION_ONBOARDING_COMPLETE } from '../../onboarding/company-info-sections';
+import { CompanyInfoStruct, EmployeeCountBand } from '../../onboarding/company-info.model';
 
 describe('MarketplaceProfileService', () => {
   let service: MarketplaceProfileService;
   let mockGqlRead: { query: ReturnType<typeof vi.fn> };
-  let mockPipelineWrite: { pushEntities: ReturnType<typeof vi.fn> };
+  let mockPipelineWrite: { pushEntity: ReturnType<typeof vi.fn> };
   let mockClientApi: {
     danaClient: {
       getMeApi: () => { listMyOrgs: ReturnType<typeof vi.fn> };
@@ -20,6 +19,21 @@ describe('MarketplaceProfileService', () => {
   let mockSnackBar: { open: ReturnType<typeof vi.fn> };
 
   const testOrgId = 'cd7105df-523d-5392-9f9a-3f83d3f30107';
+  const testRowId = '7f1f2c9e-6b0a-4d3f-9a41-2c8f5e0b7d11';
+
+  /** A stored OrgProfile row, overridable per test. */
+  const row = (overrides: Record<string, unknown> = {}) => ({
+    id: testRowId,
+    name: `OrgProfile-${testOrgId}`,
+    orgId: testOrgId,
+    ...overrides,
+  });
+
+  /** GraphqlReadService.query result envelope. */
+  const page = (items: unknown[]) => ({
+    items,
+    page: { pageNumber: 1, pageSize: 1, totalCount: items.length },
+  });
 
   beforeEach(() => {
     mockGqlRead = {
@@ -27,7 +41,7 @@ describe('MarketplaceProfileService', () => {
     };
 
     mockPipelineWrite = {
-      pushEntities: vi.fn(),
+      pushEntity: vi.fn(),
     };
 
     mockClientApi = {
@@ -56,50 +70,19 @@ describe('MarketplaceProfileService', () => {
   });
 
   describe('readProfileForOrg (CP-02, CP-03, CP-04 pre-fill leg)', () => {
-    it('pre-fill from existing MPI records', async () => {
-      // Setup: GQL returns 5 MPI records
-      mockGqlRead.query.mockResolvedValueOnce({
-        items: [
-          {
-            id: `mpi-${testOrgId}-legal_name`,
-            section: 'legal_name',
-            data: 'Acme Inc',
-            status: 'active',
-            expiresAt: null,
-          },
-          {
-            id: `mpi-${testOrgId}-dba`,
-            section: 'dba',
-            data: 'Acme Trading',
-            status: 'active',
-            expiresAt: null,
-          },
-          {
-            id: `mpi-${testOrgId}-logo_url`,
-            section: 'logo_url',
-            data: 'https://logo.acme.com/logo.png',
-            status: 'active',
-            expiresAt: null,
-          },
-          {
-            id: `mpi-${testOrgId}-website`,
-            section: 'website',
-            data: 'https://acme.com',
-            status: 'active',
-            expiresAt: null,
-          },
-          {
-            id: `mpi-${testOrgId}-years_in_business`,
-            section: 'years_in_business',
-            data: '15',
-            status: 'active',
-            expiresAt: null,
-          },
-        ],
-        page: { pageNumber: 1, pageSize: 50, totalCount: 5 },
-      });
+    it('pre-fill from the stored OrgProfile row', async () => {
+      mockGqlRead.query.mockResolvedValueOnce(page([
+        row({
+          legalName: 'Acme Inc',
+          dba: 'Acme Trading',
+          logoUrl: 'https://logo.acme.com/logo.png',
+          website: 'https://acme.com',
+          shortDescription: 'We do compliance.',
+          foundedYear: new Date().getFullYear() - 15,
+        }),
+      ]));
 
-      // Org fallback fetch (shouldn't matter since MPI has the values)
+      // Org fallback fetch (shouldn't matter since the row has the values)
       mockClientApi.danaClient.getMeApi().listMyOrgs.mockResolvedValueOnce([
         {
           id: testOrgId,
@@ -108,47 +91,26 @@ describe('MarketplaceProfileService', () => {
         },
       ]);
 
-      // Act
       const result = await service.readProfileForOrg(testOrgId);
 
-      // Assert: form struct has those MPI values, no org fallbacks applied
       expect(result.legalName).toBe('Acme Inc');
       expect(result.dba).toBe('Acme Trading');
       expect(result.logoUrl).toBe('https://logo.acme.com/logo.png');
       expect(result.website).toBe('https://acme.com');
+      expect(result.shortBlurb).toBe('We do compliance.');
+      // yearsInBusiness is derived from foundedYear, not stored
       expect(result.yearsInBusiness).toBe(15);
     });
 
-    it('pre-fill with org fallback for legal_name + logo_url', async () => {
-      // Setup: GQL returns 3 records (no legal_name or logo_url)
-      mockGqlRead.query.mockResolvedValueOnce({
-        items: [
-          {
-            id: `mpi-${testOrgId}-dba`,
-            section: 'dba',
-            data: 'Acme LLC',
-            status: 'active',
-            expiresAt: null,
-          },
-          {
-            id: `mpi-${testOrgId}-website`,
-            section: 'website',
-            data: 'https://acme-llc.com',
-            status: 'active',
-            expiresAt: null,
-          },
-          {
-            id: `mpi-${testOrgId}-employee_count`,
-            section: 'employee_count',
-            data: '51-200',
-            status: 'active',
-            expiresAt: null,
-          },
-        ],
-        page: { pageNumber: 1, pageSize: 50, totalCount: 3 },
-      });
+    it('pre-fill with org fallback for legalName + logoUrl', async () => {
+      mockGqlRead.query.mockResolvedValueOnce(page([
+        row({
+          dba: 'Acme LLC',
+          website: 'https://acme-llc.com',
+          employeeCount: EmployeeCountBand.BAND_51_100,
+        }),
+      ]));
 
-      // Org fallback for legal_name and logo_url
       mockClientApi.danaClient.getMeApi().listMyOrgs.mockResolvedValueOnce([
         {
           id: testOrgId,
@@ -157,42 +119,39 @@ describe('MarketplaceProfileService', () => {
         },
       ]);
 
-      // Act
       const result = await service.readProfileForOrg(testOrgId);
 
-      // Assert: org fallbacks applied for legal_name + logo_url, MPI values for others
       expect(result.legalName).toBe('Acme Inc'); // org fallback
       expect(result.logoUrl).toBe('https://acme-avatar.png'); // org fallback
-      expect(result.dba).toBe('Acme LLC'); // from MPI
-      expect(result.website).toBe('https://acme-llc.com'); // from MPI
-      expect(result.employeeCount).toBe('51-200'); // from MPI
+      expect(result.dba).toBe('Acme LLC'); // from the row
+      expect(result.website).toBe('https://acme-llc.com'); // from the row
+      expect(result.employeeCount).toBe(EmployeeCountBand.BAND_51_100);
     });
 
     it('pre-fill with please-provide for empty fields', async () => {
-      // Setup: GQL returns 0 records
-      mockGqlRead.query.mockResolvedValueOnce({
-        items: [],
-        page: { pageNumber: 1, pageSize: 50, totalCount: 0 },
-      });
+      mockGqlRead.query.mockResolvedValueOnce(page([]));
 
       // Org fallback also missing/null (org not found)
       mockClientApi.danaClient.getMeApi().listMyOrgs.mockResolvedValueOnce([]);
 
-      // Act
       const result = await service.readProfileForOrg(testOrgId);
 
-      // Assert: all fields empty (caller will render "(please provide)" hints)
       expect(result.legalName).toBe('');
       expect(result.dba).toBeUndefined();
       expect(result.logoUrl).toBeUndefined();
       expect(result.shortBlurb).toBeUndefined();
       expect(result.website).toBeUndefined();
+      expect(result.yearsInBusiness).toBeUndefined();
     });
   });
 
   describe('save (CP-04, CP-05)', () => {
-    it('save writes only dirty fields with correct record shape', async () => {
-      // Setup: dirty fields
+    it('save overlays only dirty fields onto one OrgProfile upsert', async () => {
+      mockGqlRead.query.mockResolvedValueOnce(page([
+        row({ legalName: 'Acme Inc', dba: null, website: null }),
+      ]));
+      mockPipelineWrite.pushEntity.mockResolvedValueOnce(undefined);
+
       const original: Partial<CompanyInfoStruct> = {
         legalName: 'Acme Inc',
         dba: '',
@@ -205,176 +164,114 @@ describe('MarketplaceProfileService', () => {
         website: 'https://acme.com',
       };
 
-      mockPipelineWrite.pushEntities.mockResolvedValueOnce(undefined);
-
-      // Act
       await service.save(testOrgId, current, original);
 
-      // Assert: ONE call to pushEntities with 4 records (3 dirty + 1 onboarding_complete)
-      expect(mockPipelineWrite.pushEntities).toHaveBeenCalledTimes(1);
+      expect(mockPipelineWrite.pushEntity).toHaveBeenCalledTimes(1);
 
-      const [className, records, tagIds, callSiteTag] = mockPipelineWrite.pushEntities.mock.calls[0];
+      const [className, payload, tagIds, callSiteTag] = mockPipelineWrite.pushEntity.mock.calls[0];
 
-      expect(className).toBe('MarketplaceProfileItem');
+      expect(className).toBe('OrgProfile');
       expect(tagIds).toEqual([]);
-      expect(callSiteTag).toBe('mpi-company-profile-save');
+      expect(callSiteTag).toBe('org-profile-company-profile-save');
 
-      // Verify record count (3 dirty + 1 onboarding_complete)
-      expect(records).toHaveLength(4);
+      // One row, keyed to the org, reusing the stored row's id
+      expect(payload).toMatchObject({
+        id: testRowId,
+        orgId: testOrgId,
+        legalName: 'Acme Revised',
+        dba: 'Acme LLC',
+        website: 'https://acme.com',
+      });
+    });
 
-      // Verify record shapes
-      expect(records).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            id: expect.stringMatching(/^mpi-[a-f0-9-]+-legal_name$/),
-            orgId: testOrgId,
-            section: 'legal_name',
-            data: 'Acme Revised',
-            status: 'active',
-          }),
-          expect.objectContaining({
-            id: expect.stringMatching(/^mpi-[a-f0-9-]+-dba$/),
-            orgId: testOrgId,
-            section: 'dba',
-            data: 'Acme LLC',
-            status: 'active',
-          }),
-          expect.objectContaining({
-            id: expect.stringMatching(/^mpi-[a-f0-9-]+-website$/),
-            orgId: testOrgId,
-            section: 'website',
-            data: 'https://acme.com',
-            status: 'active',
-          }),
-          expect.objectContaining({
-            section: 'onboarding_complete',
-            data: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/),
-            status: 'active',
-          }),
-        ]),
-      );
+    it('save mints a row id when the org has no profile yet', async () => {
+      mockGqlRead.query.mockResolvedValueOnce(page([]));
+      mockPipelineWrite.pushEntity.mockResolvedValueOnce(undefined);
+
+      await service.save(testOrgId, { legalName: 'Acme' }, {});
+
+      const [, payload] = mockPipelineWrite.pushEntity.mock.calls[0];
+      expect(payload.id).toMatch(/^[0-9a-f-]{36}$/);
+      expect(payload.name).toBe(`OrgProfile-${testOrgId}`);
+      expect(payload.legalName).toBe('Acme');
     });
 
     it('save skips org-fallback pre-fills if user did not edit', async () => {
-      // Setup: legal_name came from Org.name, user did not edit
-      const original: Partial<CompanyInfoStruct> = {
-        legalName: 'Acme Inc', // came from Org.name, not MPI
-      };
+      mockGqlRead.query.mockResolvedValueOnce(page([row()]));
+      mockPipelineWrite.pushEntity.mockResolvedValueOnce(undefined);
 
-      const current: Partial<CompanyInfoStruct> = {
-        legalName: 'Acme Inc', // unchanged
-      };
+      // legalName came from Org.name, user did not edit
+      const original: Partial<CompanyInfoStruct> = { legalName: 'Acme Inc' };
+      const current: Partial<CompanyInfoStruct> = { legalName: 'Acme Inc' };
 
-      mockPipelineWrite.pushEntities.mockResolvedValueOnce(undefined);
-
-      // Act
       await service.save(testOrgId, current, original);
 
-      // Assert: NO record written for legal_name, only onboarding_complete
-      const [, records] = mockPipelineWrite.pushEntities.mock.calls[0];
-      expect(records).toHaveLength(1); // only onboarding_complete
-      expect(records[0].section).toBe('onboarding_complete');
-
-      // Verify no legal_name record
-      const legalNameRecord = records.find((r: { section: string }) => r.section === 'legal_name');
-      expect(legalNameRecord).toBeUndefined();
-    });
-
-    it('save includes onboarding_complete marker with ISO date', async () => {
-      // Setup: any save
-      const original: Partial<CompanyInfoStruct> = { legalName: 'Acme' };
-      const current: Partial<CompanyInfoStruct> = { legalName: 'Acme' };
-
-      mockPipelineWrite.pushEntities.mockResolvedValueOnce(undefined);
-
-      // Act
-      const beforeDate = new Date().toISOString().split('T')[0];
-      await service.save(testOrgId, current, original);
-      const afterDate = new Date().toISOString().split('T')[0];
-
-      // Assert: batch includes onboarding_complete with ISO date
-      const [, records] = mockPipelineWrite.pushEntities.mock.calls[0];
-      const marker = records.find((r: { section: string }) => r.section === 'onboarding_complete');
-
-      expect(marker).toBeDefined();
-      expect(marker?.id).toBe(`mpi-${testOrgId}-${SECTION_ONBOARDING_COMPLETE}`);
-      expect(marker?.data).toMatch(/^\d{4}-\d{2}-\d{2}$/);
-
-      // Date should be today (may have midnight boundary edge case, but within 1 day)
-      const markerDate = marker?.data;
-      expect([beforeDate, afterDate]).toContain(markerDate);
+      // The unedited fallback is not persisted — the row keeps its own (empty) value
+      const [, payload] = mockPipelineWrite.pushEntity.mock.calls[0];
+      expect(payload.legalName).toBeNull();
     });
 
     it('save error path: snackbar + re-throw', async () => {
-      // Setup: pipeline error
-      const pipelineError = new Error('Pipeline rejected');
-      mockPipelineWrite.pushEntities.mockRejectedValueOnce(pipelineError);
+      mockGqlRead.query.mockResolvedValueOnce(page([row()]));
+      mockPipelineWrite.pushEntity.mockRejectedValueOnce(new Error('Pipeline rejected'));
 
       const original: Partial<CompanyInfoStruct> = { legalName: 'Acme' };
       const current: Partial<CompanyInfoStruct> = { legalName: 'Acme Revised' };
 
-      // Act & Assert
       await expect(service.save(testOrgId, current, original)).rejects.toThrow('Pipeline rejected');
 
-      // Verify snackbar was called
       expect(mockSnackBar.open).toHaveBeenCalledWith(
         expect.stringContaining('Failed to save profile'),
         'Dismiss',
         { duration: 5000 },
       );
     });
+
+    it('save refuses to write when the current row cannot be read', async () => {
+      // A read failure would silently turn an update into an insert, orphaning
+      // the stored row — so it must abort rather than guess.
+      mockGqlRead.query.mockRejectedValueOnce(new Error('GQL boundary down'));
+
+      await expect(
+        service.save(testOrgId, { legalName: 'Acme' }, {}),
+      ).rejects.toThrow('GQL boundary down');
+
+      expect(mockPipelineWrite.pushEntity).not.toHaveBeenCalled();
+    });
   });
 
   describe('getCompletionStatus (CP-07)', () => {
-    it('returns true if onboarding_complete marker exists', async () => {
-      // Setup: GQL returns onboarding_complete record
-      mockGqlRead.query.mockResolvedValueOnce({
-        items: [
-          {
-            id: `mpi-${testOrgId}-${SECTION_ONBOARDING_COMPLETE}`,
-            section: SECTION_ONBOARDING_COMPLETE,
-            status: 'active',
-          },
-        ],
-        page: { pageNumber: 1, pageSize: 1, totalCount: 1 },
-      });
+    it('returns true when the org has a row with a legalName', async () => {
+      mockGqlRead.query.mockResolvedValueOnce(page([row({ legalName: 'Acme Inc' })]));
 
-      // Act
-      const result = await service.getCompletionStatus(testOrgId);
-
-      // Assert
-      expect(result).toBe(true);
+      expect(await service.getCompletionStatus(testOrgId)).toBe(true);
     });
 
-    it('returns false if onboarding_complete marker absent', async () => {
-      // Setup: GQL returns empty
-      mockGqlRead.query.mockResolvedValueOnce({
-        items: [],
-        page: { pageNumber: 1, pageSize: 1, totalCount: 0 },
-      });
+    it('returns false when the org has no row', async () => {
+      mockGqlRead.query.mockResolvedValueOnce(page([]));
 
-      // Act
-      const result = await service.getCompletionStatus(testOrgId);
+      expect(await service.getCompletionStatus(testOrgId)).toBe(false);
+    });
 
-      // Assert
-      expect(result).toBe(false);
+    it('returns false when the row exists but legalName is blank', async () => {
+      mockGqlRead.query.mockResolvedValueOnce(page([row({ legalName: '   ' })]));
+
+      expect(await service.getCompletionStatus(testOrgId)).toBe(false);
     });
 
     it('returns false on GQL error', async () => {
-      // Setup: GQL error
       mockGqlRead.query.mockRejectedValueOnce(new Error('Network error'));
 
-      // Act
-      const result = await service.getCompletionStatus(testOrgId);
-
-      // Assert: returns false on error (graceful degradation)
-      expect(result).toBe(false);
+      // Graceful degradation — the guard routes to the form and the user retries
+      expect(await service.getCompletionStatus(testOrgId)).toBe(false);
     });
   });
 
   describe('dirty-diff edge cases (CP-08)', () => {
     it('treats empty pre-fill + empty user input as not dirty', async () => {
-      // Setup: shortBlurb is empty in both original and current
+      mockGqlRead.query.mockResolvedValueOnce(page([row({ shortDescription: 'stored' })]));
+      mockPipelineWrite.pushEntity.mockResolvedValueOnce(undefined);
+
       const original: Partial<CompanyInfoStruct> = {
         legalName: 'Acme',
         shortBlurb: undefined,
@@ -385,99 +282,73 @@ describe('MarketplaceProfileService', () => {
         shortBlurb: undefined,
       };
 
-      mockPipelineWrite.pushEntities.mockResolvedValueOnce(undefined);
-
-      // Act
       await service.save(testOrgId, current, original);
 
-      // Assert: no short_blurb record written, only onboarding_complete
-      const [, records] = mockPipelineWrite.pushEntities.mock.calls[0];
-      const shortBlurbRecord = records.find((r: { section: string }) => r.section === 'short_blurb');
-      expect(shortBlurbRecord).toBeUndefined();
-      expect(records).toHaveLength(1); // only onboarding_complete
+      // Untouched by the diff, so the stored value survives the upsert
+      const [, payload] = mockPipelineWrite.pushEntity.mock.calls[0];
+      expect(payload.shortDescription).toBe('stored');
     });
 
     it('treats empty string and undefined consistently', async () => {
-      // Setup: dba is '' in original, '' in current
-      const original: Partial<CompanyInfoStruct> = {
-        legalName: 'Acme',
-        dba: '',
-      };
+      mockGqlRead.query.mockResolvedValueOnce(page([row({ dba: 'stored' })]));
+      mockPipelineWrite.pushEntity.mockResolvedValueOnce(undefined);
 
-      const current: Partial<CompanyInfoStruct> = {
-        legalName: 'Acme',
-        dba: '',
-      };
+      const original: Partial<CompanyInfoStruct> = { legalName: 'Acme', dba: '' };
+      const current: Partial<CompanyInfoStruct> = { legalName: 'Acme', dba: '' };
 
-      mockPipelineWrite.pushEntities.mockResolvedValueOnce(undefined);
-
-      // Act
       await service.save(testOrgId, current, original);
 
-      // Assert: no dba record written (not dirty)
-      const [, records] = mockPipelineWrite.pushEntities.mock.calls[0];
-      const dbaRecord = records.find((r: { section: string }) => r.section === 'dba');
-      expect(dbaRecord).toBeUndefined();
+      const [, payload] = mockPipelineWrite.pushEntity.mock.calls[0];
+      expect(payload.dba).toBe('stored');
     });
 
-    it('handles numeric fields correctly', async () => {
-      // Setup: yearsInBusiness changed
-      const original: Partial<CompanyInfoStruct> = {
-        legalName: 'Acme',
-        yearsInBusiness: 5,
-      };
+    it('clearing a field writes null rather than dropping the edit', async () => {
+      mockGqlRead.query.mockResolvedValueOnce(page([row({ dba: 'Acme LLC' })]));
+      mockPipelineWrite.pushEntity.mockResolvedValueOnce(undefined);
 
-      const current: Partial<CompanyInfoStruct> = {
-        legalName: 'Acme',
-        yearsInBusiness: 10,
-      };
+      const original: Partial<CompanyInfoStruct> = { legalName: 'Acme', dba: 'Acme LLC' };
+      const current: Partial<CompanyInfoStruct> = { legalName: 'Acme', dba: '' };
 
-      mockPipelineWrite.pushEntities.mockResolvedValueOnce(undefined);
-
-      // Act
       await service.save(testOrgId, current, original);
 
-      // Assert: years_in_business record written with string value
-      const [, records] = mockPipelineWrite.pushEntities.mock.calls[0];
-      const yearsRecord = records.find((r: { section: string }) => r.section === 'years_in_business');
-      expect(yearsRecord).toBeDefined();
-      expect(yearsRecord?.data).toBe('10');
+      const [, payload] = mockPipelineWrite.pushEntity.mock.calls[0];
+      expect(payload.dba).toBeNull();
     });
 
-    it('handles nested primaryContact fields correctly', async () => {
-      // Setup: user_id changed (other fields derived)
+    it('converts yearsInBusiness to foundedYear', async () => {
+      mockGqlRead.query.mockResolvedValueOnce(page([row()]));
+      mockPipelineWrite.pushEntity.mockResolvedValueOnce(undefined);
+
+      const original: Partial<CompanyInfoStruct> = { legalName: 'Acme', yearsInBusiness: 5 };
+      const current: Partial<CompanyInfoStruct> = { legalName: 'Acme', yearsInBusiness: 10 };
+
+      await service.save(testOrgId, current, original);
+
+      const [, payload] = mockPipelineWrite.pushEntity.mock.calls[0];
+      expect(payload.foundedYear).toBe(new Date().getFullYear() - 10);
+    });
+
+    it('writes primaryContact.userId and drops the resolved-on-read name/email', async () => {
+      mockGqlRead.query.mockResolvedValueOnce(page([row()]));
+      mockPipelineWrite.pushEntity.mockResolvedValueOnce(undefined);
+
       const original: Partial<CompanyInfoStruct> = {
         legalName: 'Acme',
-        primaryContact: {
-          userId: 'user-1',
-          name: 'John Doe',
-          email: 'john@acme.com',
-        },
+        primaryContact: { userId: 'user-1', name: 'John Doe', email: 'john@acme.com' },
       };
 
       const current: Partial<CompanyInfoStruct> = {
         legalName: 'Acme',
-        primaryContact: {
-          userId: 'user-2',
-          name: 'Jane Smith',
-          email: 'jane@acme.com',
-        },
+        primaryContact: { userId: 'user-2', name: 'Jane Smith', email: 'jane@acme.com' },
       };
 
-      mockPipelineWrite.pushEntities.mockResolvedValueOnce(undefined);
-
-      // Act
       await service.save(testOrgId, current, original);
 
-      // Assert: all three primary_contact fields written (all dirty from userId change)
-      const [, records] = mockPipelineWrite.pushEntities.mock.calls[0];
-      const userIdRecord = records.find((r: { section: string }) => r.section === 'primary_contact.user_id');
-      const nameRecord = records.find((r: { section: string }) => r.section === 'primary_contact.name');
-      const emailRecord = records.find((r: { section: string }) => r.section === 'primary_contact.email');
-
-      expect(userIdRecord).toBeDefined();
-      expect(nameRecord).toBeDefined();
-      expect(emailRecord).toBeDefined();
+      const [, payload] = mockPipelineWrite.pushEntity.mock.calls[0];
+      expect(payload.primaryContactUserId).toBe('user-2');
+      // OrgProfile resolves these from the platform User; there is nowhere to put them
+      expect(payload).not.toHaveProperty('primaryContactName');
+      expect(payload).not.toHaveProperty('primaryContactEmail');
     });
   });
 });

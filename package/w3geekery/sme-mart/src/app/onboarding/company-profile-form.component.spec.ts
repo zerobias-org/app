@@ -7,7 +7,7 @@ import { CompanyProfileFormComponent } from './company-profile-form.component';
 import { MarketplaceProfileService } from '../core/services/marketplace-profile.service';
 import { GraphqlReadService } from '../core/services/graphql-read.service';
 import { PipelineWriteService } from '../core/services/pipeline-write.service';
-import { CompanyInfoStruct } from './company-info.model';
+import { CompanyInfoStruct, EmployeeCountBand } from './company-info.model';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 
 describe('CompanyProfileFormComponent', () => {
@@ -43,7 +43,7 @@ describe('CompanyProfileFormComponent', () => {
       postalCode: '94105',
     },
     yearsInBusiness: 5,
-    employeeCount: '11-50',
+    employeeCount: EmployeeCountBand.BAND_11_50,
   };
 
   beforeEach(async () => {
@@ -283,19 +283,22 @@ describe('CompanyProfileFormComponent', () => {
 
   describe('routing integration (CP-07: repeat-login-skip)', () => {
     // Phase 27 owns the guard; this test verifies the service signal only.
-    it('should recognize when onboarding_complete marker is present (completion status true)', async () => {
+    it('should recognize a completed profile (completion status true)', async () => {
       // This test documents the assumption: Phase 27 will call marketplaceProfile.getCompletionStatus()
       // to decide routing. If true, route to /projects. If false, route to /onboarding/company-profile.
       //
       // Phase 28 does NOT test the actual Phase 27 guard (not built yet).
       // Phase 28 ONLY tests that the service correctly signals completion status.
+      //
+      // Completion is derived, not marked: an OrgProfile row carrying a legalName.
+      // The onboarding_complete marker section died with MarketplaceProfileItem.
 
       const mockGqlReadWithCompletion = {
         query: vi.fn().mockResolvedValue({
           items: [
-            { id: 'mpi-test-onboarding-complete', section: 'onboarding_complete', status: 'active', data: '2026-04-30' },
+            { id: '7f1f2c9e-6b0a-4d3f-9a41-2c8f5e0b7d11', orgId: mockOrgId, legalName: 'Acme Inc' },
           ],
-          page: { pageNumber: 1, pageSize: 50, totalCount: 1 },
+          page: { pageNumber: 1, pageSize: 1, totalCount: 1 },
         }),
       };
 
@@ -323,8 +326,8 @@ describe('CompanyProfileFormComponent', () => {
 
       expect(isComplete).toBe(true);
       expect(mockGqlReadWithCompletion.query).toHaveBeenCalledWith(
-        'MarketplaceProfileItem',
-        expect.arrayContaining(['id', 'section', 'status']),
+        'OrgProfile',
+        expect.arrayContaining(['id', 'orgId', 'legalName']),
         expect.objectContaining({
           filters: expect.objectContaining({
             orgId: `.eq.${mockOrgId}`,
@@ -333,7 +336,7 @@ describe('CompanyProfileFormComponent', () => {
       );
     });
 
-    it('should recognize when onboarding_complete marker is absent (completion status false)', async () => {
+    it('should recognize an absent profile (completion status false)', async () => {
       const mockGqlReadWithoutCompletion = {
         query: vi.fn().mockResolvedValue({
           items: [],

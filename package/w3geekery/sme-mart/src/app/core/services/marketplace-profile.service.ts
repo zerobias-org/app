@@ -3,61 +3,62 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { ZerobiasClientApi } from '@zerobias-com/zerobias-client';
 import { GraphqlReadService } from './graphql-read.service';
 import { PipelineWriteService } from './pipeline-write.service';
+import type { GqlOrgProfileResponse } from '../gql-types/org-profile.types';
 import {
+  BusinessClassification,
   CompanyInfoStruct,
-  MarketplaceProfileItemRecord,
+  EmployeeCountBand,
 } from '../../onboarding/company-info.model';
-import {
-  SECTION_LEGAL_NAME,
-  SECTION_LOGO_URL,
-  SECTION_ONBOARDING_COMPLETE,
-  USER_FACING_SECTIONS,
-} from '../../onboarding/company-info-sections';
+
+/** GQL field list for OrgProfile reads. */
+const ORG_PROFILE_FIELDS = [
+  'id',
+  'name',
+  'orgId',
+  'legalName',
+  'dba',
+  'tagline',
+  'shortDescription',
+  'longDescription',
+  'website',
+  'logoUrl',
+  'employeeCount',
+  'businessClassification',
+  'foundedYear',
+  'primaryContactUserId',
+] as const;
 
 /**
- * Maps CompanyInfoStruct field names to section constants.
- * Used for bidirectional conversion between form struct and MPI records.
- */
-interface StructFieldToSection {
-  [key: string]: string;
-}
-
-const STRUCT_TO_SECTION_MAP: StructFieldToSection = {
-  legalName: SECTION_LEGAL_NAME,
-  dba: 'dba',
-  logoUrl: SECTION_LOGO_URL,
-  shortBlurb: 'short_blurb',
-  longDescription: 'long_description',
-  'primaryContact.userId': 'primary_contact.user_id',
-  'primaryContact.name': 'primary_contact.name',
-  'primaryContact.email': 'primary_contact.email',
-  website: 'website',
-  'hqLocation.street': 'hq_location.street',
-  'hqLocation.city': 'hq_location.city',
-  'hqLocation.state': 'hq_location.state',
-  'hqLocation.country': 'hq_location.country',
-  'hqLocation.postalCode': 'hq_location.postal_code',
-  yearsInBusiness: 'years_in_business',
-  employeeCount: 'employee_count',
-};
-
-/**
- * MarketplaceProfileService — reads and writes company profile data for the onboarding flow.
+ * MarketplaceProfileService — reads and writes the company profile behind the
+ * onboarding flow.
+ *
+ * **Storage (rewritten for smemart 2.0.7):** one `OrgProfile` row per org
+ * (orgId is unique — 1:1). This replaces MarketplaceProfileItem, whose
+ * section-discriminated blob was retired along with the class itself. Each
+ * former section is now a real column, so there is no section vocabulary, no
+ * JSON payload, and no per-section record id.
  *
  * **Pre-fill logic (readProfileForOrg):**
- * - One GQL query → group by section → project to struct
- * - Org-level fallbacks: legal_name from Org.name, logo_url from Org.avatarUrl
- * - Fallback pre-fills are NOT written on save unless user edits them
+ * - One GQL query for the org's row → project to struct
+ * - Org-level fallbacks: legalName from Org.name, logoUrl from Org.avatarUrl
+ * - Fallback pre-fills are NOT written on save unless the user edits them
  *
  * **Save logic (save):**
- * - Dirty-diff: compare current form state against original pre-fill snapshot
- * - Build MPI records for each dirty field (deterministic id: mpi-<orgId>-<section>)
- * - Batch write via PipelineWriteService.pushEntities (Phase 20 telemetry + error contract)
- * - Append onboarding_complete marker with ISO date
+ * - Dirty-diff against the original pre-fill snapshot, overlaid onto the stored
+ *   row, so an unedited org fallback is never persisted as profile data
+ * - Single upsert via PipelineWriteService.pushEntity (telemetry + error contract)
  *
  * **Completion check (getCompletionStatus):**
- * - Query for onboarding_complete marker
- * - Used by Phase 27 routing guard to decide form skip
+ * - Derived, not marked: a row exists for the org and carries a legalName.
+ *   `onboarding_complete` was a marker section and died with the blob; a marker
+ *   drifts out of sync with reality, a derived check is self-healing.
+ *
+ * **Not stored here:** `hqLocation.*` and `primaryContact.name` / `.email`.
+ * OrgProfile declares no address property (the Address class was retired in
+ * favour of the platform base `address` document) and resolves contact
+ * name/email from the platform User rather than denormalizing them. The form
+ * still collects all seven; they are dropped on save until the form shape is
+ * settled.
  */
 @Injectable({ providedIn: 'root' })
 export class MarketplaceProfileService {
@@ -67,7 +68,7 @@ export class MarketplaceProfileService {
   private readonly snackBar = inject(MatSnackBar);
 
   /**
-   * Read profile for an org: one GQL query → group by section → project to struct.
+   * Read profile for an org: one GQL query → project to struct.
    *
    * @param orgId — The org UUID to read profile for
    * @returns CompanyInfoStruct with pre-fill values + org fallbacks
@@ -78,26 +79,10 @@ export class MarketplaceProfileService {
       throw new Error('Cannot read profile: orgId is undefined or empty');
     }
 
-    let mpiRecords: Array<{
-      id: string;
-      section: string;
-      data: string;
-      status: string;
-      expiresAt?: string | null;
-    }>;
+    let row: GqlOrgProfileResponse | null;
 
     try {
-      const result = await this.graphqlRead.query<{
-        id: string;
-        section: string;
-        data: string;
-        status: string;
-        expiresAt?: string | null;
-      }>('MarketplaceProfileItem', ['id', 'section', 'data', 'status', 'expiresAt'], {
-        filters: { orgId: `.eq.${orgId}` },
-        pageSize: 999,
-      });
-      mpiRecords = result.items.filter(r => r.status === 'active');
+      row = await this.findRowForOrg(orgId);
     } catch (err) {
       this.snackBar.open(
         'Failed to load profile data',
@@ -106,10 +91,6 @@ export class MarketplaceProfileService {
       );
       throw err;
     }
-
-    // Group by section for fast lookup
-    const bySection = new Map<string, string>();
-    mpiRecords.forEach(r => bySection.set(r.section, r.data));
 
     // Fetch org name and avatar for fallbacks
     let orgName: string | undefined;
@@ -127,41 +108,34 @@ export class MarketplaceProfileService {
 
     // Project to struct with fallbacks
     const struct: CompanyInfoStruct = {
-      legalName: bySection.get('legal_name') || orgName || '',
-      dba: bySection.get('dba'),
-      logoUrl: bySection.get('logo_url') || orgAvatarUrl,
-      shortBlurb: bySection.get('short_blurb'),
-      longDescription: bySection.get('long_description'),
+      legalName: row?.legalName || orgName || '',
+      dba: row?.dba ?? undefined,
+      logoUrl: row?.logoUrl || orgAvatarUrl,
+      shortBlurb: row?.shortDescription ?? undefined,
+      longDescription: row?.longDescription ?? undefined,
       primaryContact: {
-        userId: bySection.get('primary_contact.user_id'),
-        name: bySection.get('primary_contact.name'),
-        email: bySection.get('primary_contact.email'),
+        userId: row?.primaryContactUserId ?? undefined,
+        // name/email are resolved from the platform User, not stored — left
+        // empty here rather than faked from a value we do not have.
+        name: undefined,
+        email: undefined,
       },
-      website: bySection.get('website'),
-      hqLocation: {
-        street: bySection.get('hq_location.street'),
-        city: bySection.get('hq_location.city'),
-        state: bySection.get('hq_location.state'),
-        country: bySection.get('hq_location.country'),
-        postalCode: bySection.get('hq_location.postal_code'),
-      },
-      yearsInBusiness: bySection.get('years_in_business')
-        ? Number(bySection.get('years_in_business'))
-        : undefined,
-      employeeCount: bySection.get('employee_count') as CompanyInfoStruct['employeeCount'],
+      website: row?.website ?? undefined,
+      yearsInBusiness: yearsSince(row?.foundedYear),
+      employeeCount: (row?.employeeCount as EmployeeCountBand | null) ?? undefined,
+      businessClassification:
+        (row?.businessClassification as BusinessClassification | null) ?? undefined,
     };
 
     return struct;
   }
 
   /**
-   * Save profile: dirty-diff → batch write.
+   * Save profile: dirty-diff → overlay onto the stored row → one upsert.
    *
-   * Only fields where current[field] !== original[field] are written.
-   * Org-fallback pre-fills (legal_name from Org.name, logo_url from Org.avatarUrl) are
-   * NOT written unless the user explicitly edited them.
-   *
-   * Always appends onboarding_complete marker with ISO date.
+   * Only fields where current[field] !== original[field] are written. Org-fallback
+   * pre-fills (legalName from Org.name, logoUrl from Org.avatarUrl) are NOT
+   * written unless the user explicitly edited them.
    *
    * @param orgId — The org UUID to save for
    * @param current — Current form state (Partial<CompanyInfoStruct>)
@@ -173,29 +147,52 @@ export class MarketplaceProfileService {
     current: Partial<CompanyInfoStruct>,
     original: Partial<CompanyInfoStruct>,
   ): Promise<void> {
-    const records: MarketplaceProfileItemRecord[] = [];
+    if (!orgId) {
+      throw new Error('Cannot save profile: orgId is undefined or empty');
+    }
 
-    // Collect dirty fields
-    this.collectDirtyFields(orgId, current, original, records);
-
-    // Append onboarding_complete marker with today's ISO date
-    const isoDate = new Date().toISOString().split('T')[0];
-    records.push({
-      id: `mpi-${orgId}-${SECTION_ONBOARDING_COMPLETE}`,
-      orgId,
-      section: SECTION_ONBOARDING_COMPLETE,
-      data: isoDate,
-      status: 'active',
-    });
-
-    // Write via PipelineWriteService
-    // This wraps the SDK call with Phase 20 telemetry (callSiteTag, error logging, re-throw)
+    // The row is 1:1 with the org, so a write is a full-row upsert. Start from
+    // what is stored, overlay only the fields the user actually changed.
+    let existing: GqlOrgProfileResponse | null;
     try {
-      await this.pipelineWrite.pushEntities(
-        'MarketplaceProfileItem',
-        records,
+      existing = await this.findRowForOrg(orgId);
+    } catch (err) {
+      // A read failure here would silently turn an update into an insert and
+      // orphan the stored row, so treat it as fatal rather than guessing.
+      this.snackBar.open(
+        'Failed to save profile: could not read the current profile',
+        'Dismiss',
+        { duration: 5000 },
+      );
+      throw err;
+    }
+
+    const payload: Record<string, unknown> = {
+      id: existing?.id ?? crypto.randomUUID(),
+      name: existing?.name ?? `OrgProfile-${orgId}`,
+      orgId,
+      legalName: existing?.legalName ?? null,
+      dba: existing?.dba ?? null,
+      shortDescription: existing?.shortDescription ?? null,
+      longDescription: existing?.longDescription ?? null,
+      website: existing?.website ?? null,
+      logoUrl: existing?.logoUrl ?? null,
+      employeeCount: existing?.employeeCount ?? null,
+      businessClassification: existing?.businessClassification ?? null,
+      foundedYear: existing?.foundedYear ?? null,
+      primaryContactUserId: existing?.primaryContactUserId ?? null,
+      verified: false,
+      verificationSource: null,
+    };
+
+    this.overlayDirtyFields(payload, current, original);
+
+    try {
+      await this.pipelineWrite.pushEntity(
+        'OrgProfile',
+        payload,
         [],
-        'mpi-company-profile-save',
+        'org-profile-company-profile-save',
       );
     } catch (err) {
       this.snackBar.open(
@@ -208,134 +205,129 @@ export class MarketplaceProfileService {
   }
 
   /**
-   * Check if profile completion marker exists.
+   * Check whether the org's profile is complete.
+   *
+   * Derived rather than marked: an OrgProfile row exists and carries a
+   * legalName — the form's only required field.
    *
    * @param orgId — The org UUID to check
-   * @returns true if onboarding_complete marker exists and is active, false otherwise
+   * @returns true if the org has a profile row with a legalName, false otherwise
    */
   async getCompletionStatus(orgId: string): Promise<boolean> {
     try {
-      const result = await this.graphqlRead.query<{
-        id: string;
-        section: string;
-        status: string;
-      }>('MarketplaceProfileItem', ['id', 'section', 'status'], {
-        filters: {
-          orgId: `.eq.${orgId}`,
-          section: `.eq.${SECTION_ONBOARDING_COMPLETE}`,
-        },
-        pageSize: 1,
-      });
-
-      return result.items.length > 0 && result.items[0]?.status === 'active';
+      const row = await this.findRowForOrg(orgId);
+      return !!row?.legalName?.trim();
     } catch (err) {
       console.error('Failed to check onboarding completion status:', err);
       return false;
     }
   }
 
+  // ── Private helpers ──
+
   /**
-   * Collects dirty fields by comparing current form state against original snapshot.
-   * Builds MPI records for each dirty field.
+   * Fetch the org's single OrgProfile row, or null if it has none.
+   * @private
+   */
+  private async findRowForOrg(orgId: string): Promise<GqlOrgProfileResponse | null> {
+    const result = await this.graphqlRead.query<GqlOrgProfileResponse>(
+      'OrgProfile',
+      [...ORG_PROFILE_FIELDS],
+      {
+        filters: { orgId: `.eq.${orgId}` },
+        pageSize: 1,
+      },
+    );
+
+    return result.items[0] ?? null;
+  }
+
+  /**
+   * Overlay changed form values onto the upsert payload.
    *
    * **Dirty-diff semantics:**
-   * - If current[field] !== original[field], field is dirty
+   * - If current[field] !== original[field], the field is dirty
    * - Empty pre-fill + empty user input = not dirty
-   * - Org-fallback pre-fill + no user edit = not dirty (org field remains authoritative)
-   * - Nested fields (primaryContact, hqLocation) are compared at leaf level
+   * - Org-fallback pre-fill + no user edit = not dirty (the org field remains
+   *   authoritative and the profile row keeps whatever it already held)
    *
    * @private
    */
-  private collectDirtyFields(
-    orgId: string,
+  private overlayDirtyFields(
+    payload: Record<string, unknown>,
     current: Partial<CompanyInfoStruct>,
     original: Partial<CompanyInfoStruct>,
-    records: MarketplaceProfileItemRecord[],
   ): void {
-    // Flat iteration of all user-facing sections
-    USER_FACING_SECTIONS.forEach(sectionName => {
-      const structField = this.sectionToStructField(sectionName);
-      if (!structField) return; // Skip unknown sections
+    this.overlayIfDirty(payload, 'legalName', current.legalName, original.legalName);
+    this.overlayIfDirty(payload, 'dba', current.dba, original.dba);
+    this.overlayIfDirty(payload, 'logoUrl', current.logoUrl, original.logoUrl);
+    this.overlayIfDirty(payload, 'shortDescription', current.shortBlurb, original.shortBlurb);
+    this.overlayIfDirty(
+      payload,
+      'longDescription',
+      current.longDescription,
+      original.longDescription,
+    );
+    this.overlayIfDirty(payload, 'website', current.website, original.website);
+    this.overlayIfDirty(
+      payload,
+      'employeeCount',
+      current.employeeCount,
+      original.employeeCount,
+    );
+    this.overlayIfDirty(
+      payload,
+      'businessClassification',
+      current.businessClassification,
+      original.businessClassification,
+    );
+    this.overlayIfDirty(
+      payload,
+      'primaryContactUserId',
+      current.primaryContact?.userId,
+      original.primaryContact?.userId,
+    );
 
-      const currentValue = this.getNestedValue(current, structField);
-      const originalValue = this.getNestedValue(original, structField);
-
-      // Check if dirty: current !== original
-      const isDirty = currentValue !== originalValue;
-      if (!isDirty) return; // Skip unchanged fields
-
-      // Skip if both are empty (nothing to write)
-      if (
-        this.isEmpty(currentValue) &&
-        this.isEmpty(originalValue)
-      ) {
-        return;
-      }
-
-      // Build and append record
-      const dataValue = this.valueToString(currentValue);
-      records.push({
-        id: `mpi-${orgId}-${sectionName}`,
-        orgId,
-        section: sectionName,
-        data: dataValue,
-        status: 'active',
-      });
-    });
-  }
-
-  /**
-   * Map section name (snake_case) to struct field path (camelCase).
-   * @private
-   */
-  private sectionToStructField(section: string): string | undefined {
-    // Reverse lookup: find the struct field that maps to this section
-    for (const [field, sec] of Object.entries(STRUCT_TO_SECTION_MAP)) {
-      if (sec === section) return field;
+    // yearsInBusiness is a duration; the schema stores the year it started from.
+    if (current.yearsInBusiness !== original.yearsInBusiness) {
+      payload['foundedYear'] = foundedYearFrom(current.yearsInBusiness);
     }
-    return undefined;
   }
 
   /**
-   * Get nested value from struct (e.g., 'primaryContact.email' from { primaryContact: { email: '...' } }).
+   * Write `value` onto the payload under `field` when it differs from the
+   * snapshot. An empty-to-empty transition is not a change.
    * @private
    */
-  private getNestedValue(
-    obj: Partial<CompanyInfoStruct> | undefined,
-    path: string,
-  ): unknown {
-    if (!obj) return undefined;
+  private overlayIfDirty(
+    payload: Record<string, unknown>,
+    field: string,
+    value: string | undefined,
+    originalValue: string | undefined,
+  ): void {
+    if (value === originalValue) return;
+    if (isEmpty(value) && isEmpty(originalValue)) return;
 
-    const parts = path.split('.');
-    let current: unknown = obj;
-
-    for (const part of parts) {
-      if (current && typeof current === 'object') {
-        current = (current as Record<string, unknown>)[part];
-      } else {
-        return undefined;
-      }
-    }
-
-    return current;
+    payload[field] = isEmpty(value) ? null : value;
   }
+}
 
-  /**
-   * Convert value to string for MPI data field.
-   * @private
-   */
-  private valueToString(value: unknown): string {
-    if (value === null || value === undefined) return '';
-    if (typeof value === 'string') return value;
-    if (typeof value === 'number') return String(value);
-    return String(value);
-  }
+/** Empty means null, undefined, or the empty string. */
+function isEmpty(value: unknown): boolean {
+  return value === null || value === undefined || value === '';
+}
 
-  /**
-   * Check if value is empty (null, undefined, empty string).
-   * @private
-   */
-  private isEmpty(value: unknown): boolean {
-    return value === null || value === undefined || value === '';
-  }
+/** Derive years-in-business from the stored founding year. */
+function yearsSince(foundedYear: number | null | undefined): number | undefined {
+  if (foundedYear === null || foundedYear === undefined) return undefined;
+  const years = new Date().getFullYear() - foundedYear;
+  return years >= 0 ? years : undefined;
+}
+
+/** Convert an entered years-in-business duration back to a founding year. */
+function foundedYearFrom(yearsInBusiness: number | undefined): number | null {
+  if (yearsInBusiness === null || yearsInBusiness === undefined) return null;
+  const years = Number(yearsInBusiness);
+  if (!Number.isFinite(years) || years < 0) return null;
+  return new Date().getFullYear() - Math.floor(years);
 }
