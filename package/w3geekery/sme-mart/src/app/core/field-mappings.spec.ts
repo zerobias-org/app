@@ -9,7 +9,6 @@ import { describe, it, expect } from 'vitest';
 import {
   mapGqlToNeon,
   mapNeonToGql,
-  SME_MART_PROJECT_FIELD_MAPPING,
   SME_MART_BOARD_FIELD_MAPPING,
   SME_MART_ACTIVITY_FIELD_MAPPING,
   SME_MART_WORKFLOW_FIELD_MAPPING,
@@ -19,7 +18,6 @@ import {
   PROJECT_PLAN_FIELD_MAPPING,
   PLAN_MILESTONE_FIELD_MAPPING,
 } from './field-mappings';
-import type { SmeMartProject } from './models/sme-mart-project.model';
 import type { SmeMartBoard } from './models/sme-mart-board.model';
 import type { SmeMartActivity } from './models/sme-mart-activity.model';
 import type { SmeMartWorkflow } from './models/sme-mart-workflow.model';
@@ -27,7 +25,6 @@ import type { SmeMartTask } from './models/sme-mart-task.model';
 import type { ProjectPrd, PrdSection } from './models/project-prd.model';
 import type { ProjectPlan, PlanMilestone } from './models/project-plan.model';
 import type {
-  GqlSmeMartProjectResponse,
   GqlSmeMartBoardResponse,
   GqlSmeMartActivityResponse,
   GqlSmeMartWorkflowResponse,
@@ -39,48 +36,8 @@ import type {
 } from './gql-types';
 
 describe('Field Mapping Roundtrip Tests - Bloom Entities', () => {
-  // ────────────────────────────────────────────────────────────────────────────
-  // SmeMartProject Roundtrip
-  // ────────────────────────────────────────────────────────────────────────────
-
-  it('should roundtrip SmeMartProject fields without loss', () => {
-    const gqlProject: GqlSmeMartProjectResponse = {
-      id: 'proj-123',
-      name: 'Test Project',
-      description: 'Test project description',
-      status: 'draft',
-      startDate: '2026-03-19',
-      targetEndDate: '2026-06-19',
-      createdAt: '2026-03-19T00:00:00Z',
-      updatedAt: '2026-03-19T00:00:00Z',
-    };
-
-    // Map GQL → model
-    const model = mapGqlToNeon<SmeMartProject>(
-      gqlProject,
-      SME_MART_PROJECT_FIELD_MAPPING.gqlToNeon,
-    );
-
-    // Verify all fields present in model
-    expect(model.id).toBe('proj-123');
-    expect(model.name).toBe('Test Project');
-    expect(model.description).toBe('Test project description');
-    expect(model.status).toBe('draft');
-    expect(model.startDate).toBe('2026-03-19');
-    expect(model.targetEndDate).toBe('2026-06-19');
-
-    // Map model → GQL (reverse)
-    const gqlRoundtrip = mapNeonToGql<GqlSmeMartProjectResponse>(
-      model,
-      SME_MART_PROJECT_FIELD_MAPPING.neonToGql,
-    );
-
-    // Verify roundtrip preserves all fields
-    expect(gqlRoundtrip.id).toBe(gqlProject.id);
-    expect(gqlRoundtrip.name).toBe(gqlProject.name);
-    expect(gqlRoundtrip.description).toBe(gqlProject.description);
-    expect(gqlRoundtrip.status).toBe(gqlProject.status);
-  });
+  // The SmeMartProject roundtrip was dropped with the class, deleted in 99549cee:
+  // Project lives in platform.Project, surfaced by the Projects App.
 
   // ────────────────────────────────────────────────────────────────────────────
   // SmeMartBoard Roundtrip

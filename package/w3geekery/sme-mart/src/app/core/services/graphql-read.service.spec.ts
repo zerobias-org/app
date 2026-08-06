@@ -45,10 +45,10 @@ describe('GraphqlReadService', () => {
   describe('query()', () => {
     it('should build correct GQL query string with fields', async () => {
       mockBoundaryApi.boundaryExecuteRawQuery.mockResolvedValue(
-        makeGqlResult({ Engagement: [] }),
+        makeGqlResult({ Bid: [] }),
       );
 
-      await service.query('Engagement', ['id', 'name', 'status']);
+      await service.query('Bid', ['id', 'name', 'status']);
 
       expect(mockBoundaryApi.boundaryExecuteRawQuery).toHaveBeenCalledTimes(1);
       // Verify the first arg is an ExecuteRawGraphqlQuery
@@ -58,10 +58,10 @@ describe('GraphqlReadService', () => {
 
     it('should include filters in query via SDK call', async () => {
       mockBoundaryApi.boundaryExecuteRawQuery.mockResolvedValue(
-        makeGqlResult({ Engagement: [] }),
+        makeGqlResult({ Bid: [] }),
       );
 
-      await service.query('Engagement', ['id'], {
+      await service.query('Bid', ['id'], {
         filters: { status: '.eq.published', category: '.ilike.*SOC*' },
       });
 
@@ -70,10 +70,10 @@ describe('GraphqlReadService', () => {
 
     it('should pass pageNumber and pageSize to SDK call', async () => {
       mockBoundaryApi.boundaryExecuteRawQuery.mockResolvedValue(
-        makeGqlResult({ Engagement: [] }),
+        makeGqlResult({ Bid: [] }),
       );
 
-      await service.query('Engagement', ['id'], {
+      await service.query('Bid', ['id'], {
         pageNumber: 3,
         pageSize: 25,
       });
@@ -101,10 +101,10 @@ describe('GraphqlReadService', () => {
 
     it('should default to page 1 size 50 when not specified', async () => {
       mockBoundaryApi.boundaryExecuteRawQuery.mockResolvedValue(
-        makeGqlResult({ Engagement: [] }),
+        makeGqlResult({ Bid: [] }),
       );
 
-      await service.query('Engagement', ['id']);
+      await service.query('Bid', ['id']);
 
       const call = mockBoundaryApi.boundaryExecuteRawQuery.mock.calls[0];
       expect(call[3]).toBe(1);  // pageNumber
@@ -117,10 +117,10 @@ describe('GraphqlReadService', () => {
         { id: '2', name: 'Test2' },
       ];
       mockBoundaryApi.boundaryExecuteRawQuery.mockResolvedValue(
-        makeGqlResult({ Engagement: items }, { Engagement: 2 }),
+        makeGqlResult({ Bid: items }, { Bid: 2 }),
       );
 
-      const result = await service.query('Engagement', ['id', 'name']);
+      const result = await service.query('Bid', ['id', 'name']);
 
       expect(result.items).toEqual(items);
       expect(result.page.totalCount).toBe(2);
@@ -131,7 +131,7 @@ describe('GraphqlReadService', () => {
         makeGqlResult({}),
       );
 
-      const result = await service.query('Engagement', ['id']);
+      const result = await service.query('Bid', ['id']);
 
       expect(result.items).toEqual([]);
     });
@@ -141,17 +141,17 @@ describe('GraphqlReadService', () => {
         { data: null, gqlCount: {} },
       );
 
-      const result = await service.query('Engagement', ['id']);
+      const result = await service.query('Bid', ['id']);
 
       expect(result.items).toEqual([]);
     });
 
     it('should build query with no filters when none provided', async () => {
       mockBoundaryApi.boundaryExecuteRawQuery.mockResolvedValue(
-        makeGqlResult({ Note: [] }),
+        makeGqlResult({ Review: [] }),
       );
 
-      await service.query('Note', ['id', 'name']);
+      await service.query('Review', ['id', 'name']);
 
       // Just verify it was called — the query string is encapsulated in ExecuteRawGraphqlQuery
       expect(mockBoundaryApi.boundaryExecuteRawQuery).toHaveBeenCalledTimes(1);
@@ -159,10 +159,10 @@ describe('GraphqlReadService', () => {
 
     it('should pass sort to SDK call when specified', async () => {
       mockBoundaryApi.boundaryExecuteRawQuery.mockResolvedValue(
-        makeGqlResult({ Engagement: [] }),
+        makeGqlResult({ Bid: [] }),
       );
 
-      await service.query('Engagement', ['id'], {
+      await service.query('Bid', ['id'], {
         sortBy: ['name'],
         sortDir: ['Desc'],
       });
@@ -195,10 +195,10 @@ describe('GraphqlReadService', () => {
   describe('getById()', () => {
     it('should query with id filter and pageSize 1', async () => {
       mockBoundaryApi.boundaryExecuteRawQuery.mockResolvedValue(
-        makeGqlResult({ Engagement: [{ id: 'eng-001', name: 'Test' }] }),
+        makeGqlResult({ Bid: [{ id: 'eng-001', name: 'Test' }] }),
       );
 
-      const result = await service.getById('Engagement', 'eng-001', ['id', 'name']);
+      const result = await service.getById('Bid', 'eng-001', ['id', 'name']);
 
       expect(result).toEqual({ id: 'eng-001', name: 'Test' });
       const call = mockBoundaryApi.boundaryExecuteRawQuery.mock.calls[0];
@@ -207,10 +207,10 @@ describe('GraphqlReadService', () => {
 
     it('should return null when no items found', async () => {
       mockBoundaryApi.boundaryExecuteRawQuery.mockResolvedValue(
-        makeGqlResult({ Engagement: [] }),
+        makeGqlResult({ Bid: [] }),
       );
 
-      const result = await service.getById('Engagement', 'nonexistent', ['id']);
+      const result = await service.getById('Bid', 'nonexistent', ['id']);
 
       expect(result).toBeNull();
     });
@@ -221,12 +221,12 @@ describe('GraphqlReadService', () => {
   describe('rawQuery()', () => {
     it('should pass raw query string to SDK', async () => {
       mockBoundaryApi.boundaryExecuteRawQuery.mockResolvedValue(
-        makeGqlResult({ Engagement: [{ id: '1' }] }),
+        makeGqlResult({ Bid: [{ id: '1' }] }),
       );
 
-      const result = await service.rawQuery('{ Engagement { id name } }', 1, 100);
+      const result = await service.rawQuery('{ Bid { id name } }', 1, 100);
 
-      expect(result).toEqual({ Engagement: [{ id: '1' }] });
+      expect(result).toEqual({ Bid: [{ id: '1' }] });
       const call = mockBoundaryApi.boundaryExecuteRawQuery.mock.calls[0];
       expect(call[3]).toBe(1);   // pageNumber
       expect(call[4]).toBe(100); // pageSize
@@ -235,7 +235,7 @@ describe('GraphqlReadService', () => {
     it('should return empty object when response data is null', async () => {
       mockBoundaryApi.boundaryExecuteRawQuery.mockResolvedValue({ data: null });
 
-      const result = await service.rawQuery('{ Engagement { id } }');
+      const result = await service.rawQuery('{ Bid { id } }');
 
       expect(result).toEqual({});
     });

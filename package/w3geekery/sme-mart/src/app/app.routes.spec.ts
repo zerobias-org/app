@@ -3,7 +3,6 @@ import { onboardingGuard } from './core/guards/onboarding.guard';
 import { AppShell } from './layout/app-shell.component';
 import { PlatformEngagementSetupComponent } from './onboarding/platform-engagement-setup.component';
 import { CompanyProfileFormComponent } from './onboarding/company-profile-form.component';
-import { MyProjectList } from './pages/my-projects/my-project-list.component';
 
 /**
  * App Routes Integration Tests — Verify guard attachment and route structure
@@ -77,13 +76,13 @@ describe('App Routes with Onboarding Guard', () => {
   });
 
   describe('Projects Route', () => {
-    it('/projects route exists and serves the projects list', () => {
+    it('/projects route exists', () => {
       const appShellRoute = routes.find(r => r.path === '');
       // /projects route should exist as AppShell child
       const projectsRoute = appShellRoute?.children?.find(r => r.path === 'projects');
       expect(projectsRoute).toBeTruthy();
-      // /projects now serves the real MyProjectList (was a ComingSoon placeholder before f0dbec80)
-      expect(projectsRoute?.component).toBe(MyProjectList);
+      // The component assertion was dropped with MyProjectList, deleted in 43bd75ec:
+      // Engagement and Project live in platform.Project, surfaced by the Projects App.
     });
   });
 
