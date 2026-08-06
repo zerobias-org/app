@@ -15,7 +15,7 @@ import { ServiceCard } from '../../shared/components/service-card/service-card.c
 import { ProviderProfilesService } from '../../core/services/provider-profiles.service';
 import { ServiceOfferingsService } from '../../core/services/service-offerings.service';
 import { ReviewsService } from '../../core/services/reviews.service';
-import type { ServiceOffering, Review, ProviderDetailView } from '../../core/models';
+import type { VendorListing, Review, ProviderDetailView } from '../../core/models';
 
 @Component({
   selector: 'app-provider-detail',
@@ -50,7 +50,7 @@ export class ProviderDetail implements OnInit {
 
   readonly loading = signal(true);
   readonly provider = signal<ProviderDetailView | null>(null);
-  readonly services = signal<ServiceOffering[]>([]);
+  readonly services = signal<VendorListing[]>([]);
   readonly reviews = signal<Review[]>([]);
 
   readonly initials = signal('');

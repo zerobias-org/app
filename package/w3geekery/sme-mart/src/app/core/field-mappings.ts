@@ -271,52 +271,16 @@ export const NOTE_FOLDER_FIELD_MAPPING = {
   lastVerified: '2026-03-19',
 } as const;
 
-/**
- * ServiceOffering field mapping
+/*
+ * ServiceOffering field mapping REMOVED - the class was retired in smemart 2.0.8.
  *
- * Neon table: service_offerings (columns in snake_case)
- * GQL entity: ServiceOffering (provider catalog listing, uses 'name' not 'title')
- * Enum field: pricing_type (PricingType enum)
- * Array field: includes (string array of service inclusions, uses direct 'includes' name)
+ * Its successor, VendorListing, needs no entry here. This registry exists to translate
+ * Neon snake_case <-> GQL camelCase, and the VendorListing app model is camelCase on
+ * both sides, so the table would be an identity map. The real transforms it does need
+ * (enum defaults, offers normalization, includes[] -> includesSummary) are functions,
+ * not renames, and live in service-offerings.service.ts as mapGqlToVendorListing /
+ * mapVendorListingToGql.
  */
-export const SERVICE_OFFERING_FIELD_MAPPING = {
-  neonToGql: {
-    id: 'id',
-    provider_id: 'providerId',
-    title: 'name', // ServiceOffering.title → name (Object inherited field)
-    description: 'description',
-    category: 'category',
-    subcategory: 'subcategory',
-    pricing_type: 'pricingType',
-    price: 'price',
-    delivery_time: 'deliveryTime',
-    includes: 'includes', // Direct field name (no renaming)
-    requirements: 'requirements', // Direct field name (no renaming)
-    is_active: 'isActive',
-    created_at: 'createdAt',
-    updated_at: 'updatedAt',
-  },
-  gqlToNeon: {
-    id: 'id',
-    providerId: 'provider_id',
-    name: 'title',
-    description: 'description',
-    category: 'category',
-    subcategory: 'subcategory',
-    pricingType: 'pricing_type',
-    price: 'price',
-    deliveryTime: 'delivery_time',
-    includes: 'includes',
-    requirements: 'requirements',
-    isActive: 'is_active',
-    createdAt: 'created_at',
-    updatedAt: 'updated_at',
-    dateCreated: 'created_at',
-    dateLastModified: 'updated_at',
-  },
-  sourceSchema: 'zerobias-org/schema PR #7',
-  lastVerified: '2026-03-25',
-} as const;
 
 /**
  * Review field mapping
@@ -963,7 +927,6 @@ export const ALL_FIELD_MAPPINGS = {
   BidResponse: BID_RESPONSE_FIELD_MAPPING,
   Note: NOTE_FIELD_MAPPING,
   NoteFolder: NOTE_FOLDER_FIELD_MAPPING,
-  ServiceOffering: SERVICE_OFFERING_FIELD_MAPPING,
   Review: REVIEW_FIELD_MAPPING,
   SmeMartDocument: DOCUMENT_FIELD_MAPPING,
   SmeMartProject: SME_MART_PROJECT_FIELD_MAPPING,

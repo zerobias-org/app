@@ -19,35 +19,40 @@
           </mat-form-field>
 
           <mat-form-field appearance="outline">
-            <mat-label>Description</mat-label>
-            <textarea matInput formControlName="description" rows="3"></textarea>
+            <mat-label>Summary</mat-label>
+            <textarea matInput formControlName="summary" rows="3"></textarea>
           </mat-form-field>
 
           <div class="form-row">
             <mat-form-field appearance="outline">
-              <mat-label>Category</mat-label>
-              <input matInput formControlName="category" />
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Pricing Type</mat-label>
-              <mat-select formControlName="pricing_type">
-                @for (pt of pricingTypes; track pt.value) {
-                  <mat-option [value]="pt.value">{{ pt.label }}</mat-option>
+              <mat-label>Family</mat-label>
+              <mat-select formControlName="family" (selectionChange)="onFamilyChange($event.value)">
+                @for (f of families; track f.value) {
+                  <mat-option [value]="f.value">{{ f.label }}</mat-option>
                 }
               </mat-select>
             </mat-form-field>
 
             <mat-form-field appearance="outline">
-              <mat-label>Price ($)</mat-label>
-              <input matInput formControlName="price" type="number" />
+              <mat-label>Kind</mat-label>
+              <mat-select formControlName="kind">
+                @for (k of availableKinds(); track k.value) {
+                  <mat-option [value]="k.value">{{ k.label }}</mat-option>
+                }
+              </mat-select>
             </mat-form-field>
 
             <mat-form-field appearance="outline">
               <mat-label>Delivery Time</mat-label>
-              <input matInput formControlName="delivery_time" placeholder="e.g., 2 weeks" />
+              <input matInput formControlName="deliveryTime" placeholder="e.g., 2 weeks" />
             </mat-form-field>
           </div>
+
+          <!--
+            Pricing is deliberately absent: VendorListing stores no money. The Ledger owns
+            pricing and `offers` carries pointers to it; no Offer write path exists yet.
+          -->
+          <p class="pricing-note">Pricing is set separately once this listing is published.</p>
 
           <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || saving()">
             {{ saving() ? 'Creating...' : 'Create Service' }}
@@ -63,18 +68,18 @@
         <mat-card appearance="outlined" class="service-item">
           <mat-card-header>
             <mat-card-title>{{ svc.title }}</mat-card-title>
-            <mat-card-subtitle>{{ svc.category }}</mat-card-subtitle>
+            <mat-card-subtitle>{{ kindLabel(svc.kind) }}</mat-card-subtitle>
           </mat-card-header>
           <mat-card-content>
-            @if (svc.description) {
-              <p>{{ svc.description }}</p>
+            @if (svc.summary) {
+              <p>{{ svc.summary }}</p>
             }
             <div class="service-meta">
-              @if (svc.price) {
-                <span>${{ svc.price }} / {{ svc.pricing_type }}</span>
+              @if (svc.offers.length) {
+                <span>{{ svc.offers[0].label }}</span>
               }
-              @if (svc.delivery_time) {
-                <span>{{ svc.delivery_time }}</span>
+              @if (svc.deliveryTime) {
+                <span>{{ svc.deliveryTime }}</span>
               }
             </div>
           </mat-card-content>

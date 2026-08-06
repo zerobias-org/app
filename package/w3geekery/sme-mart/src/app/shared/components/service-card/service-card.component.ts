@@ -1,62 +1,65 @@
-import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, computed, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, computed, input, output } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
-import { TitleCasePipe } from '@angular/common';
-import type { ServiceOffering } from '../../../core/models';
+import type { VendorListing } from '../../../core/models';
+
+/** 'BESPOKE_SERVICE' -> 'Bespoke Service'. The enum values are SCREAMING_SNAKE on the wire. */
+function toDisplayLabel(value: string): string {
+  return value
+    .toLowerCase()
+    .split('_')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
 
 @Component({
   selector: 'app-service-card',
   standalone: true,
-  imports: [MatCardModule, MatChipsModule, MatIconModule, MatMenuModule, MatButtonModule, TitleCasePipe],
+  imports: [MatCardModule, MatChipsModule, MatIconModule, MatMenuModule, MatButtonModule],
   templateUrl: './service-card.component.html',
   styleUrl: './service-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ServiceCard {
-  private readonly _service = signal<ServiceOffering | null>(null);
+  readonly service = input.required<VendorListing>();
 
-  @Input({ required: true })
-  set service(value: ServiceOffering) {
-    this._service.set(value);
-  }
+  readonly serviceSelect = output<VendorListing>();
+  readonly viewProviderServices = output<string>();
+  readonly viewProviderProfile = output<string>();
 
-  @Output() serviceSelect = new EventEmitter<ServiceOffering>();
-  @Output() viewProviderServices = new EventEmitter<string>();
-  @Output() viewProviderProfile = new EventEmitter<string>();
-
-  readonly title = computed(() => this._service()?.title || '');
-  readonly category = computed(() => this._service()?.category || '');
+  readonly title = computed(() => this.service().title);
+  /** Was the free-text `category`; the listing's sub-type is the closest successor. */
+  readonly kindLabel = computed(() => toDisplayLabel(this.service().kind));
   readonly description = computed(() => {
-    const desc = this._service()?.description || '';
+    const desc = this.service().summary ?? '';
     return desc.length > 120 ? desc.slice(0, 120) + '...' : desc;
   });
-  readonly price = computed(() => {
-    const s = this._service();
-    if (!s?.price) return null;
-    return `$${parseFloat(s.price).toLocaleString()}`;
-  });
-  readonly pricingType = computed(() => this._service()?.pricing_type || '');
-  readonly deliveryTime = computed(() => this._service()?.delivery_time || null);
-  readonly providerId = computed(() => this._service()?.provider_id || null);
-  readonly providerName = computed(() => this._service()?.provider_display_name || null);
+  /**
+   * The listing stores no money - pricing lives in the Ledger and `offers` carries
+   * pointers with display labels. Show the first offer's label when one exists; there
+   * is deliberately no price/pricingType successor to render.
+   */
+  readonly offerLabel = computed(() => this.service().offers[0]?.label ?? null);
+  readonly deliveryTime = computed(() => this.service().deliveryTime);
+  readonly ownerId = computed(() => this.service().ownerId);
+  readonly ownerName = computed(() => this.service().ownerDisplayName ?? null);
 
   onClick(): void {
-    const s = this._service();
-    if (s) this.serviceSelect.emit(s);
+    this.serviceSelect.emit(this.service());
   }
 
   onViewProviderServices(event: MouseEvent): void {
     event.stopPropagation();
-    const pid = this.providerId();
-    if (pid) this.viewProviderServices.emit(pid);
+    const id = this.ownerId();
+    if (id) this.viewProviderServices.emit(id);
   }
 
   onViewProviderProfile(event: MouseEvent): void {
     event.stopPropagation();
-    const pid = this.providerId();
-    if (pid) this.viewProviderProfile.emit(pid);
+    const id = this.ownerId();
+    if (id) this.viewProviderProfile.emit(id);
   }
 }

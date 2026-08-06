@@ -3,21 +3,156 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService, type GqlQueryOptions } from './graphql-read.service';
 import { DemoVisibilityService } from './demo-visibility.service';
-import { SERVICE_OFFERING_FIELD_MAPPING, mapNeonToGql, mapGqlToNeon } from '../field-mappings';
 import type { QueryOptions } from '@zerobias-org/data-utils';
 import { PagedResults } from '@zerobias-org/types-core-js';
-import type { ServiceOffering } from '../models';
-import type { GqlServiceOfferingResponse } from '../gql-types';
+import {
+  fulfillmentFor,
+  type OfferRef,
+  type TermsRef,
+  type VendorListing,
+  type VendorListingFamily,
+  type VendorListingKind,
+  type VendorListingLifecycle,
+} from '../models';
+import type { GqlOfferRef, GqlVendorListingResponse } from '../gql-types/vendor-listing.types';
 
 /**
- * ServiceOfferingsService - FULLY MIGRATED TO PIPELINE (Phase 5)
+ * ServiceOfferingsService - reads and writes VendorListing.
+ *
+ * The ServiceOffering class was retired in smemart 2.0.8 and replaced by VendorListing.
+ * Per Clark's ruling the new shape is PROPAGATED to consumers rather than hidden behind
+ * an adapter, so this service now returns VendorListing directly.
+ *
+ * The service/file name still says "service offerings" - renaming it touches the barrel,
+ * four components and their specs, which is outside the handed-off scope. Flagged as a
+ * follow-up; the class it reads is VendorListing.
  *
  * All writes go through PipelineWriteService (fire-and-forget async).
  * All reads go through GraphqlReadService (from AuditgraphDB).
- *
- * Neon service_offerings table archived 2 weeks after Phase 5 completion (2026-04-02).
- * 2-week observation period for production stability verification.
  */
+
+/** Object-inherited + VendorListing-specific fields requested on every read. */
+const VENDOR_LISTING_FIELDS: string[] = [
+  'id',
+  'name',
+  'description',
+  'ownerId',
+  'family',
+  'kind',
+  'title',
+  'summary',
+  'catalogRef',
+  'fulfillment',
+  'lifecycle',
+  'active',
+  'offers',
+  'terms',
+  'includesSummary',
+  'deliveryTime',
+  'prerequisitesSummary',
+  'version',
+  'publishedAt',
+  'dateCreated',
+  'dateLastModified',
+  'tag',
+];
+
+function normalizeOffers(offers: GqlVendorListingResponse['offers']): OfferRef[] {
+  if (!offers) return [];
+  const list: GqlOfferRef[] = Array.isArray(offers) ? offers : [offers];
+  return list
+    .filter((o): o is GqlOfferRef & { offerId: string } => !!o?.offerId)
+    .map(o => ({ offerId: o.offerId, label: o.label ?? null }));
+}
+
+function normalizeTerms(terms: GqlVendorListingResponse['terms']): TermsRef | null {
+  if (!terms?.termsId) return null;
+  return { termsId: terms.termsId, label: terms.label ?? null };
+}
+
+/**
+ * Map a GQL response to the app-side model.
+ *
+ * The wire declares everything optional (the generated class does), so this is where
+ * absence is resolved once rather than at every call site.
+ *
+ * `title` falls back to the Object-inherited `name`: VendorListing carries both, and
+ * older rows written before the split populate only `name`.
+ */
+export function mapGqlToVendorListing(gql: GqlVendorListingResponse): VendorListing {
+  return {
+    id: gql.id,
+    ownerId: gql.ownerId ?? null,
+    family: (gql.family as VendorListingFamily | null) ?? 'SERVICE',
+    kind: (gql.kind as VendorListingKind | null) ?? 'BESPOKE_SERVICE',
+    title: gql.title ?? gql.name ?? '',
+    summary: gql.summary ?? gql.description ?? null,
+    catalogRef: gql.catalogRef ?? null,
+    fulfillment: fulfillmentFor((gql.family as VendorListingFamily | null) ?? 'SERVICE'),
+    lifecycle: (gql.lifecycle as VendorListingLifecycle | null) ?? 'DRAFT',
+    active: gql.active ?? false,
+    offers: normalizeOffers(gql.offers),
+    terms: normalizeTerms(gql.terms),
+    includesSummary: gql.includesSummary ?? null,
+    deliveryTime: gql.deliveryTime ?? null,
+    prerequisitesSummary: gql.prerequisitesSummary ?? null,
+    version: gql.version ?? 1,
+    publishedAt: gql.publishedAt ?? null,
+    createdAt: gql.dateCreated ?? '',
+    updatedAt: gql.dateLastModified ?? '',
+  };
+}
+
+/** Map the app-side model back to the GQL write payload. */
+export function mapVendorListingToGql(listing: VendorListing): GqlVendorListingResponse {
+  return {
+    id: listing.id,
+    // `name` is the Object-inherited field the platform indexes on; keep it in step with title.
+    name: listing.title,
+    description: listing.summary,
+    ownerId: listing.ownerId,
+    family: listing.family,
+    kind: listing.kind,
+    title: listing.title,
+    summary: listing.summary,
+    catalogRef: listing.catalogRef,
+    fulfillment: listing.fulfillment,
+    lifecycle: listing.lifecycle,
+    active: listing.active,
+    offers: listing.offers,
+    terms: listing.terms,
+    includesSummary: listing.includesSummary,
+    deliveryTime: listing.deliveryTime,
+    prerequisitesSummary: listing.prerequisitesSummary,
+    version: listing.version,
+    publishedAt: listing.publishedAt,
+    dateCreated: listing.createdAt,
+    dateLastModified: listing.updatedAt,
+  };
+}
+
+/**
+ * Fields a caller supplies when creating a listing.
+ *
+ * `fulfillment` is absent deliberately - it is derived from `family` via fulfillmentFor(),
+ * because the family<->fulfillment pairing is validated on write and is not free to set.
+ */
+export type NewVendorListing = Pick<VendorListing, 'family' | 'kind' | 'title'> &
+  Partial<
+    Pick<
+      VendorListing,
+      | 'summary'
+      | 'catalogRef'
+      | 'active'
+      | 'lifecycle'
+      | 'offers'
+      | 'terms'
+      | 'includesSummary'
+      | 'deliveryTime'
+      | 'prerequisitesSummary'
+    >
+  >;
+
 @Injectable({ providedIn: 'root' })
 export class ServiceOfferingsService {
   private readonly pipelineWrite = inject(PipelineWriteService);
@@ -26,188 +161,191 @@ export class ServiceOfferingsService {
   private readonly snackBar = inject(MatSnackBar);
 
   /**
-   * List all active service offerings.
-   * Queries GraphQL with isActive filter, transforms responses to ServiceOffering shape.
+   * List all buyer-visible listings.
+   * `active` is the buyer-visibility flag; `lifecycle` is editorial state and is not filtered here.
    */
-  async listServices(options?: QueryOptions): Promise<PagedResults<ServiceOffering>> {
+  async listServices(options?: QueryOptions): Promise<PagedResults<VendorListing>> {
     const pageNumber = options?.pageNumber ?? 1;
     const pageSize = options?.pageSize ?? 50;
 
     const gqlOptions: GqlQueryOptions = {
       filters: {
-        isActive: '.eq.true',
+        active: '.eq.true',
       },
       pageNumber,
       pageSize,
     };
 
-    const result = await this.graphqlRead.query<GqlServiceOfferingResponse>(
-      'ServiceOffering',
-      this.getServiceOfferingFields(),
+    const result = await this.graphqlRead.query<GqlVendorListingResponse>(
+      'VendorListing',
+      VENDOR_LISTING_FIELDS,
       gqlOptions,
     );
 
     // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
     const filteredGql = this.demoVisibility.applyVisibility(
-      result.items as (GqlServiceOfferingResponse & { tag?: Array<{ value: string }> | null })[],
+      result.items as (GqlVendorListingResponse & { tag?: Array<{ value: string }> | null })[],
     );
 
-    // Transform GQL responses to ServiceOffering (Neon shape)
-    const items = filteredGql.map(gql =>
-      mapGqlToNeon<ServiceOffering>(gql, SERVICE_OFFERING_FIELD_MAPPING.gqlToNeon),
-    );
+    const items = filteredGql.map(mapGqlToVendorListing);
 
     return PagedResults.fromArray(items, pageNumber, pageSize, result.page.totalCount ?? items.length);
   }
 
   /**
-   * Get all service offerings by a specific provider.
-   * Queries GraphQL with providerId filter, returns array (no pagination).
+   * Get all listings owned by a specific provider Org.
+   * Returns array (no pagination).
    */
-  async getServicesByProvider(providerId: string): Promise<ServiceOffering[]> {
+  async getServicesByProvider(ownerId: string): Promise<VendorListing[]> {
     const gqlOptions: GqlQueryOptions = {
-      filters: { providerId: `.eq.${providerId}` },
+      filters: { ownerId: `.eq.${ownerId}` },
       pageNumber: 1,
       pageSize: 100,
     };
 
-    const result = await this.graphqlRead.query<GqlServiceOfferingResponse>(
-      'ServiceOffering',
-      this.getServiceOfferingFields(),
+    const result = await this.graphqlRead.query<GqlVendorListingResponse>(
+      'VendorListing',
+      VENDOR_LISTING_FIELDS,
       gqlOptions,
     );
 
     // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
     const filteredGql = this.demoVisibility.applyVisibility(
-      result.items as (GqlServiceOfferingResponse & { tag?: Array<{ value: string }> | null })[],
+      result.items as (GqlVendorListingResponse & { tag?: Array<{ value: string }> | null })[],
     );
 
-    // Transform and return as array
-    return filteredGql.map(gql =>
-      mapGqlToNeon<ServiceOffering>(gql, SERVICE_OFFERING_FIELD_MAPPING.gqlToNeon),
-    );
+    return filteredGql.map(mapGqlToVendorListing);
   }
 
   /**
-   * Create a new service offering and push to Pipeline.
-   * Returns optimistic ServiceOffering immediately (doesn't wait for GQL indexing).
+   * Create a new listing and push to Pipeline.
+   * Returns the optimistic VendorListing immediately (doesn't wait for GQL indexing).
    */
-  async createService(
-    providerId: string,
-    data: Omit<ServiceOffering, 'id' | 'provider_id' | 'created_at' | 'updated_at'>,
-  ): Promise<ServiceOffering> {
-    // Generate UUID for new offering
+  async createService(ownerId: string, data: NewVendorListing): Promise<VendorListing> {
     const id = crypto.randomUUID();
     const now = new Date().toISOString();
+    const active = data.active ?? true;
 
-    // Build Neon-shaped ServiceOffering
-    const offering: ServiceOffering = {
+    const listing: VendorListing = {
       id,
-      provider_id: providerId,
+      ownerId,
+      family: data.family,
+      kind: data.kind,
       title: data.title,
-      description: data.description ?? null,
-      category: data.category,
-      subcategory: data.subcategory ?? null,
-      pricing_type: data.pricing_type,
-      price: data.price ?? null,
-      delivery_time: data.delivery_time ?? null,
-      includes: data.includes ?? null,
-      requirements: data.requirements ?? null,
-      is_active: data.is_active ?? true,
-      created_at: now,
-      updated_at: now,
+      summary: data.summary ?? null,
+      catalogRef: data.catalogRef ?? null,
+      // Derived, never caller-supplied - the pairing is validated on write.
+      fulfillment: fulfillmentFor(data.family),
+      lifecycle: data.lifecycle ?? (active ? 'LISTED' : 'DRAFT'),
+      active,
+      offers: data.offers ?? [],
+      terms: data.terms ?? null,
+      includesSummary: data.includesSummary ?? null,
+      deliveryTime: data.deliveryTime ?? null,
+      prerequisitesSummary: data.prerequisitesSummary ?? null,
+      version: 1,
+      publishedAt: active ? now : null,
+      createdAt: now,
+      updatedAt: now,
     };
 
-    // Transform to GQL shape and push to Pipeline
-    const gqlData = mapNeonToGql<GqlServiceOfferingResponse>(offering, SERVICE_OFFERING_FIELD_MAPPING.neonToGql);
+    const gqlData = mapVendorListingToGql(listing);
     try {
-      await this.pipelineWrite.pushEntity('ServiceOffering', gqlData as unknown as Record<string, unknown>, [], 'service-offerings.service:109');
+      await this.pipelineWrite.pushEntity(
+        'VendorListing',
+        gqlData as unknown as Record<string, unknown>,
+        [],
+        'service-offerings.service:createService',
+      );
     } catch (err) {
       this.snackBar.open(
-        `Failed to save service offering: ${(err as Error).message}`,
+        `Failed to save listing: ${(err as Error).message}`,
         'Dismiss',
         { duration: 5000 },
       );
       throw err;
     }
 
-    // Return optimistic response immediately
-    return offering;
+    return listing;
   }
 
   /**
-   * Update an existing service offering and push updates to Pipeline.
-   * Returns optimistic ServiceOffering immediately.
+   * Update an existing listing and push updates to Pipeline.
+   * Returns the optimistic VendorListing immediately.
+   *
+   * `version` bumps on every update: it is monotonic and pins what a buyer bought, so a
+   * buyer-visible edit that did not bump it would silently rewrite history.
    */
-  async updateService(serviceId: string, data: Partial<ServiceOffering>): Promise<ServiceOffering> {
+  async updateService(serviceId: string, data: Partial<VendorListing>): Promise<VendorListing> {
     // Check write-through cache first, fall back to GQL fetch
-    let current = this.pipelineWrite.getCached('ServiceOffering', serviceId) as GqlServiceOfferingResponse | null;
+    let current = this.pipelineWrite.getCached('VendorListing', serviceId) as GqlVendorListingResponse | null;
     if (!current) {
-      current = await this.graphqlRead.getById<GqlServiceOfferingResponse>(
-        'ServiceOffering',
+      current = await this.graphqlRead.getById<GqlVendorListingResponse>(
+        'VendorListing',
         serviceId,
-        this.getServiceOfferingFields(),
+        VENDOR_LISTING_FIELDS,
       );
-      if (!current) throw new Error(`ServiceOffering ${serviceId} not found`);
+      if (!current) throw new Error(`VendorListing ${serviceId} not found`);
     }
 
-    // Transform current GQL to Neon, merge updates, transform back to GQL
-    const neonCurrent = mapGqlToNeon<ServiceOffering>(current, SERVICE_OFFERING_FIELD_MAPPING.gqlToNeon);
-    const updated: ServiceOffering = { ...neonCurrent, ...data, updated_at: new Date().toISOString() };
+    const listing = mapGqlToVendorListing(current);
+    const updated: VendorListing = {
+      ...listing,
+      ...data,
+      // family drives fulfillment; recompute rather than trust a caller-supplied pair.
+      fulfillment: fulfillmentFor(data.family ?? listing.family),
+      version: listing.version + 1,
+      updatedAt: new Date().toISOString(),
+    };
 
-    // Push to Pipeline
-    const gqlData = mapNeonToGql<GqlServiceOfferingResponse>(updated, SERVICE_OFFERING_FIELD_MAPPING.neonToGql);
+    const gqlData = mapVendorListingToGql(updated);
     try {
-      await this.pipelineWrite.pushEntity('ServiceOffering', gqlData as unknown as Record<string, unknown>, [], 'service-offerings.service:148');
+      await this.pipelineWrite.pushEntity(
+        'VendorListing',
+        gqlData as unknown as Record<string, unknown>,
+        [],
+        'service-offerings.service:updateService',
+      );
     } catch (err) {
       this.snackBar.open(
-        `Failed to update service offering: ${(err as Error).message}`,
+        `Failed to update listing: ${(err as Error).message}`,
         'Dismiss',
         { duration: 5000 },
       );
       throw err;
     }
 
-    // Return optimistic response
     return updated;
   }
 
   /**
-   * Delete a service offering by pushing delete to Pipeline.
+   * Set a listing's buyer visibility.
+   *
+   * Turning a listing off maps to lifecycle SUSPENDED, not RETIRED: RETIRED is end-of-life
+   * and nothing in the UI expresses end-of-life, whereas "pulled from sale but not dead" is
+   * exactly the seller-paused case the enum documents. RETIRED stays reachable only through
+   * an explicit retire action, which does not exist yet.
+   */
+  async setActive(serviceId: string, active: boolean): Promise<VendorListing> {
+    return this.updateService(serviceId, {
+      active,
+      lifecycle: active ? 'LISTED' : 'SUSPENDED',
+    });
+  }
+
+  /**
+   * Delete a listing by pushing a delete to Pipeline.
    */
   async deleteService(serviceId: string): Promise<void> {
     try {
-      await this.pipelineWrite.deleteEntity('ServiceOffering', serviceId);
+      await this.pipelineWrite.deleteEntity('VendorListing', serviceId);
     } catch (err) {
       this.snackBar.open(
-        `Failed to delete service offering: ${(err as Error).message}`,
+        `Failed to delete listing: ${(err as Error).message}`,
         'Dismiss',
         { duration: 5000 },
       );
       throw err;
     }
-  }
-
-  /**
-   * Get standard field list for ServiceOffering GQL queries.
-   */
-  private getServiceOfferingFields(): string[] {
-    return [
-      'id',
-      'name',
-      'description',
-      'providerId',
-      'isActive',
-      'category',
-      'subcategory',
-      'pricingType',
-      'price',
-      'deliveryTime',
-      'serviceIncludes',
-      'serviceRequirements',
-      'dateCreated',
-      'dateLastModified',
-      'tag',
-    ];
   }
 }

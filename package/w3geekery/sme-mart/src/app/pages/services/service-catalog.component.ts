@@ -7,7 +7,7 @@ import { ListPage, SortOption } from '../../shared/components/list-page/list-pag
 import { ServiceOfferingsService } from '../../core/services/service-offerings.service';
 import { ProviderProfilesService } from '../../core/services/provider-profiles.service';
 import { CategoriesService } from '../../core/services/categories.service';
-import type { ServiceOffering, Category } from '../../core/models';
+import type { Category, VendorListing, VendorListingFamily } from '../../core/models';
 
 @Component({
   selector: 'app-service-catalog',
@@ -30,9 +30,15 @@ export class ServiceCatalog implements OnInit {
   private readonly categoriesService = inject(CategoriesService);
 
   readonly loading = signal(true);
-  readonly services = signal<ServiceOffering[]>([]);
+  readonly services = signal<VendorListing[]>([]);
   readonly categories = signal<Category[]>([]);
-  readonly selectedCategory = signal<string | null>(null);
+  /**
+   * Was `selectedCategory`, filtering the retired free-text ServiceOffering.category.
+   * VendorListing has no free-text category; `family` is the coarse browse facet that
+   * replaces it. The SME Mart Category taxonomy is a separate concept and does not map
+   * onto catalogRef, which points at a platform Catalog entry.
+   */
+  readonly selectedFamily = signal<VendorListingFamily | null>(null);
   readonly searchTerm = signal('');
   readonly sortBy = signal('title');
 
@@ -41,38 +47,38 @@ export class ServiceCatalog implements OnInit {
 
   readonly sortOptions: SortOption[] = [
     { value: 'title', label: 'Title' },
-    { value: 'category', label: 'Category' },
+    { value: 'kind', label: 'Kind' },
     { value: 'newest', label: 'Newest First' },
   ];
 
   readonly filteredServices = computed(() => {
     let items = this.services();
     const term = this.searchTerm().toLowerCase();
-    const cat = this.selectedCategory();
+    const family = this.selectedFamily();
     const pid = this.providerFilter();
 
     if (term) {
       items = items.filter(
         (s) =>
           s.title.toLowerCase().includes(term) ||
-          (s.description || '').toLowerCase().includes(term),
+          (s.summary || '').toLowerCase().includes(term),
       );
     }
-    if (cat) {
-      items = items.filter((s) => s.category === cat);
+    if (family) {
+      items = items.filter((s) => s.family === family);
     }
     if (pid) {
-      items = items.filter((s) => s.provider_id === pid);
+      items = items.filter((s) => s.ownerId === pid);
     }
 
     const sort = this.sortBy();
     if (sort === 'title') {
       items = [...items].sort((a, b) => a.title.localeCompare(b.title));
-    } else if (sort === 'category') {
-      items = [...items].sort((a, b) => (a.category || '').localeCompare(b.category || ''));
+    } else if (sort === 'kind') {
+      items = [...items].sort((a, b) => a.kind.localeCompare(b.kind));
     } else if (sort === 'newest') {
       items = [...items].sort((a, b) =>
-        new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime(),
+        new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime(),
       );
     }
 
@@ -80,8 +86,8 @@ export class ServiceCatalog implements OnInit {
   });
 
   async ngOnInit() {
-    const catId = this.route.snapshot.queryParams['category'];
-    if (catId) this.selectedCategory.set(catId);
+    const family = this.route.snapshot.queryParams['family'];
+    if (family) this.selectedFamily.set(family as VendorListingFamily);
 
     const providerId = this.route.snapshot.queryParams['provider'];
     if (providerId) {

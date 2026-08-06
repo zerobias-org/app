@@ -30,9 +30,10 @@ export type {
 } from './note-folder.types';
 
 export type {
-  GqlServiceOfferingResponse,
-  PricingType,
-} from './service-offering.types';
+  GqlVendorListingResponse,
+  GqlOfferRef,
+  GqlTermsRef,
+} from './vendor-listing.types';
 
 export type {
   GqlReviewResponse,

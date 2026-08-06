@@ -166,22 +166,12 @@ export interface GqlNoteResponse extends GqlBaseEntity {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// ServiceOffering Type
+// VendorListing Type
+//
+// ServiceOffering was retired in smemart 2.0.8 and replaced by VendorListing.
+// Its GQL response type lives in gql-types/vendor-listing.types.ts, following the
+// per-file convention the newer types use.
 // ─────────────────────────────────────────────────────────────────────────────
-
-export interface GqlServiceOfferingResponse extends GqlBaseEntity {
-  name: string;
-  description?: string | null;
-  providerId: string;
-  category?: string | null;
-  subcategory?: string | null;
-  pricingType?: PricingType | null;
-  price?: string | null;
-  deliveryTime?: string | null;
-  includes?: string[] | null;
-  requirements?: string | null;
-  isActive: boolean;
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Review Type

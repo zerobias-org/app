@@ -13,11 +13,11 @@ import type {
   GqlBidResponseResponse,
   GqlNoteResponse,
   GqlNoteFolderResponse,
-  GqlServiceOfferingResponse,
   GqlReviewResponse,
   GqlDocumentResponse,
   ComplianceStatus,
 } from '../core/gql-types';
+import type { GqlVendorListingResponse } from '../core/gql-types/vendor-listing.types';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Engagement Fixture (with nested Bids)
@@ -199,31 +199,37 @@ export const NOTE_GQL_FIXTURE_PERSONAL: GqlNoteResponse = {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// ServiceOffering Fixture
+// VendorListing Fixture (was ServiceOffering, retired in smemart 2.0.8)
+//
+// Note the two shape changes this fixture demonstrates: the old `includes` string[]
+// is now the free-text `includesSummary`, and price/pricingType have NO successor -
+// the listing stores no money, so `offers` carries a Ledger pointer instead.
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const SERVICE_OFFERING_GQL_FIXTURE: GqlServiceOfferingResponse = {
+export const VENDOR_LISTING_GQL_FIXTURE: GqlVendorListingResponse = {
   id: 'svc-001-uuid-hipaa-audit',
   name: 'HIPAA Compliance Audit and Documentation',
-  description:
+  title: 'HIPAA Compliance Audit and Documentation',
+  summary:
     'Complete HIPAA compliance audit with gap analysis, policy documentation, and remediation roadmap for healthcare organizations.',
-  providerId: 'provider-001-uuid',
-  category: 'compliance',
-  subcategory: 'healthcare',
-  pricingType: 'fixed',
-  price: '15000',
+  ownerId: 'provider-001-uuid',
+  family: 'SERVICE',
+  kind: 'BESPOKE_SERVICE',
+  fulfillment: 'ENGAGEMENT',
+  lifecycle: 'LISTED',
+  catalogRef: null,
+  active: true,
+  offers: [{ offerId: 'offer-001-uuid', label: 'Fixed price' }],
+  terms: null,
   deliveryTime: '30 days',
-  includes: [
-    'On-site assessment (2-3 days)',
-    'Gap analysis report',
-    'Documentation templates',
-    'Remediation roadmap',
-    'Executive briefing',
-  ],
-  requirements: 'Organization must have 20+ employees and existing healthcare systems',
-  isActive: true,
-  createdAt: '2026-02-01T09:00:00Z',
-  updatedAt: '2026-03-15T14:00:00Z',
+  includesSummary:
+    'On-site assessment (2-3 days); Gap analysis report; Documentation templates; Remediation roadmap; Executive briefing',
+  prerequisitesSummary:
+    'Organization must have 20+ employees and existing healthcare systems',
+  version: 1,
+  publishedAt: '2026-02-01T09:00:00Z',
+  dateCreated: '2026-02-01T09:00:00Z',
+  dateLastModified: '2026-03-15T14:00:00Z',
 };
 
 // ─────────────────────────────────────────────────────────────────────────────

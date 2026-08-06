@@ -6,7 +6,7 @@ export * from './engagement.model';
 export * from './bid.model';
 export * from './review.model';
 export * from './category.model';
-export * from './service-offering.model';
+export * from './vendor-listing.model';
 export * from './app-settings.model';
 export * from './catalog.model';
 export * from './filter-preferences.model';
