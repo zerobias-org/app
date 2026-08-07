@@ -9,7 +9,6 @@ import {
   ChangeDetectionStrategy,
   OnInit,
 } from '@angular/core';
-import { TitleCasePipe, DatePipe } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -18,35 +17,42 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatCardModule } from '@angular/material/card';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { ZbSnakeToSpacesPipe } from '@zerobias-org/ngx-library';
-import type {
-  MarketplaceProfileItem,
-  SectionType,
-  CreateMarketplaceProfileItemRequest,
-  CorporateIdentityData,
-  AttestationData,
-  InsuranceData,
-  ReferenceData,
-  PersonnelData,
-  FinancialData,
-} from '../../../core/models/marketplace-profile-item.model';
+import {
+  BUSINESS_CLASSIFICATION_LABELS,
+  EMPLOYEE_COUNT_LABELS,
+  SECTION_CARDINALITY,
+  SECTION_LABELS,
+  type BusinessClassification,
+  type EmployeeCountBand,
+  type InsuranceCoverageRecord,
+  type SectionType,
+  type VendorProfileRecord,
+} from '../../../core/models/vendor-profile.model';
 
-type SectionData =
-  | CorporateIdentityData
-  | AttestationData
-  | InsuranceData
-  | ReferenceData
-  | PersonnelData
-  | FinancialData;
-
+/**
+ * Side-drawer form for one vendor-profile section.
+ *
+ * Each section now maps to its own schema class rather than a JSON blob, so the controls
+ * are the class's real fields. Three of them are not renames of what the blob collected:
+ *
+ *   businessType      -> businessClassification   free text  -> closed 7-value enum
+ *   numberOfEmployees -> employeeCount            number     -> banded enum
+ *   serviceType       -> serviceSegmentId         free text  -> Catalog segment UUID
+ *
+ * The first two are selects here. The third needs a Catalog picker, which is deliberately
+ * NOT built this pass: the SecurityCredential/segment picker work is specced separately
+ * and a picker over an unloaded catalog demos as broken. The control accepts a segment
+ * UUID directly until that lands.
+ *
+ * `name` is not collected. Every class extends Object, where name is required, so the
+ * service derives it from each section's primary field.
+ */
 @Component({
   selector: 'app-vendor-profile-form',
   standalone: true,
   imports: [
-    TitleCasePipe,
-    DatePipe,
     ReactiveFormsModule,
     MatFormFieldModule,
     MatInputModule,
@@ -55,8 +61,8 @@ type SectionData =
     MatNativeDateModule,
     MatIconModule,
     MatSelectModule,
+    MatCheckboxModule,
     MatCardModule,
-    ZbSnakeToSpacesPipe,
   ],
   templateUrl: './vendor-profile-form.component.html',
   styleUrl: './vendor-profile-form.component.scss',
@@ -64,324 +70,170 @@ type SectionData =
 })
 export class VendorProfileForm implements OnInit {
   private readonly fb = inject(FormBuilder);
-  private readonly snackBar = inject(MatSnackBar);
 
-  // Input signals (per director FLAG-3)
   readonly mode = input<'create' | 'edit'>('create');
   readonly section = input<SectionType>('corporate_identity');
-  readonly item = input<MarketplaceProfileItem | null>(null);
+  readonly item = input<VendorProfileRecord | null>(null);
   readonly orgName = input<string>('');
 
-  // Output signals
-  readonly save = output<CreateMarketplaceProfileItemRequest>();
+  readonly save = output<Partial<VendorProfileRecord>>();
   readonly close = output<void>();
 
-  // Form state
   readonly form = signal<FormGroup | null>(null);
   readonly submitting = signal(false);
 
-  // Computed: is item expired
+  readonly sectionLabels = SECTION_LABELS;
+  readonly businessClassifications = Object.entries(BUSINESS_CLASSIFICATION_LABELS)
+    .map(([value, label]) => ({ value: value as BusinessClassification, label }));
+  readonly employeeCountBands = Object.entries(EMPLOYEE_COUNT_LABELS)
+    .map(([value, label]) => ({ value: value as EmployeeCountBand, label }));
+
+  /** Singleton sections read as "complete your X", not "add an X". */
+  readonly isSingleton = computed(() => SECTION_CARDINALITY[this.section()] === 'one');
+
+  readonly heading = computed(() => {
+    const label = SECTION_LABELS[this.section()];
+    if (this.isSingleton()) return label;
+    return this.mode() === 'edit' ? `Edit ${label}` : `Add ${label}`;
+  });
+
+  /** Only InsuranceCoverage carries its own expiry; everything else uses verification expiry. */
   readonly isItemExpired = computed(() => {
-    const item = this.item();
-    if (!item?.expires_at) return false;
-    return new Date(item.expires_at) < new Date();
+    const row = this.item();
+    if (!row) return false;
+    const expiry = (row as InsuranceCoverageRecord).expiresAt ?? row.verificationExpiresAt;
+    return expiry ? new Date(expiry) < new Date() : false;
   });
 
   constructor() {
-    // Phase 31-B: when orgName arrives after form init (parent's getCurrentOrg
-    // subscription resolves asynchronously), patch legalEntityName for new
-    // Corporate Identity entries. Edit mode is owned by populateForm().
+    // orgName arrives after form init (the parent's getCurrentOrg subscription resolves
+    // asynchronously), so seed legalName for a new corporate-identity record once it does.
+    // Edit mode is owned by populateForm().
     effect(() => {
       const name = this.orgName();
       if (!name) return;
       if (this.mode() !== 'create') return;
       if (this.section() !== 'corporate_identity') return;
-      const fg = this.form();
-      if (!fg) return;
-      const control = fg.get('legalEntityName');
-      if (control && !control.value) {
-        control.setValue(name);
-      }
+      const control = this.form()?.get('legalName');
+      if (control && !control.value) control.setValue(name);
     });
   }
 
   ngOnInit(): void {
     this.form.set(this.createForm());
-    // Populate form if in edit mode
-    if (this.mode() === 'edit') {
-      this.populateForm();
-    }
+    if (this.mode() === 'edit') this.populateForm();
   }
 
   private createForm(): FormGroup {
-    const section = this.section();
-    const baseFields = {
-      name: ['', Validators.required],
-      description: [''],
-    };
-
-    switch (section) {
+    switch (this.section()) {
       case 'corporate_identity':
         return this.fb.group({
-          ...baseFields,
-          legalEntityName: [this.mode() === 'create' ? this.orgName() : '', Validators.required],
-          businessType: [''],
-          foundedYear: [''],
-          yearsInBusiness: [''],
-          certifications: [''],
-          numberOfEmployees: [''],
+          legalName: [this.mode() === 'create' ? this.orgName() : '', Validators.required],
+          dba: [''],
+          tagline: [''],
+          shortDescription: [''],
+          longDescription: [''],
+          website: [''],
+          foundedYear: [null as number | null],
+          businessClassification: [null as BusinessClassification | null],
+          employeeCount: [null as EmployeeCountBand | null],
         });
 
       case 'attestation':
         return this.fb.group({
-          ...baseFields,
-          serviceType: ['', Validators.required],
-          yearsExperience: ['', Validators.required],
-          clientCount: [''],
+          serviceSegmentId: [''],
+          yearsExperience: [null as number | null],
+          clientCount: [null as number | null],
           avgProjectDuration: [''],
-          certifications: [''],
-          specializations: [''],
         });
 
       case 'insurance':
         return this.fb.group({
-          ...baseFields,
-          policyNumber: ['', Validators.required],
           carrier: ['', Validators.required],
+          policyNumber: ['', Validators.required],
           coverageType: [''],
-          coverageAmount: ['', Validators.required],
-          effectiveDate: ['', Validators.required],
-          expirationDate: ['', Validators.required],
-          limits: [''],
-          deductible: [''],
+          coverageAmount: [null as number | null],
+          currency: ['USD'],
+          effectiveDate: [null as string | null],
+          expiresAt: [null as string | null, Validators.required],
+          certificateUrl: [''],
         });
 
       case 'reference':
         return this.fb.group({
-          ...baseFields,
           clientName: ['', Validators.required],
-          contactPerson: ['', Validators.required],
-          email: ['', [Validators.required, Validators.email]],
-          phone: [''],
-          projectType: [''],
-          projectDuration: [''],
-          outcome: [''],
+          contactName: ['', Validators.required],
+          contactEmail: ['', [Validators.required, Validators.email]],
+          contactPhone: [''],
+          relationship: [''],
+          projectName: [''],
+          startDate: [null as string | null],
+          endDate: [null as string | null],
+          summary: [''],
         });
 
       case 'personnel':
         return this.fb.group({
-          ...baseFields,
-          name: ['', Validators.required],
+          fullName: ['', Validators.required],
           title: ['', Validators.required],
-          yearsExperience: ['', Validators.required],
+          email: ['', Validators.email],
           specialization: [''],
-          credentials: [''],
-          certifications: [''],
+          bio: [''],
+          linkedinUrl: [''],
+          isKeyPersonnel: [false],
+          backgroundCheckStatus: [''],
         });
 
       case 'financial':
         return this.fb.group({
-          ...baseFields,
-          annualRevenue: ['', Validators.required],
-          profitMargin: [''],
-          employeeCount: [''],
-          yearsOperating: [''],
-          revenueGrowth: [''],
+          annualRevenue: [null as number | null],
+          revenueCurrency: ['USD'],
+          creditScore: [null as number | null],
+          creditRatingAgency: [''],
+          bankName: [''],
+          dunsNumber: [''],
+          yearEndMonth: [null as number | null],
         });
-
-      default:
-        return this.fb.group(baseFields);
     }
   }
 
+  /**
+   * Fill the form from the row being edited.
+   *
+   * Reads the typed row directly. The blob version had to JSON.parse a `data` column and
+   * hope the shape matched the section.
+   */
   private populateForm(): void {
-    const item = this.item();
-    if (!item) return;
+    const row = this.item();
+    const fg = this.form();
+    if (!row || !fg) return;
 
-    try {
-      // Director FLAG-2: item.data is a string (JSON) — parse it before template use
-      let data: SectionData;
-      if (typeof item.data === 'string') {
-        data = JSON.parse(item.data) as SectionData;
-      } else {
-        data = item.data as SectionData;
-      }
-
-      const formValue = this.mapItemToForm(item, data);
-      const fg = this.form();
-      if (fg) {
-        fg.patchValue(formValue);
-      }
-    } catch (err) {
-      console.error('[VendorProfileForm] Failed to parse item data:', err);
-    }
-  }
-
-  private mapItemToForm(
-    item: MarketplaceProfileItem,
-    data: SectionData
-  ): Record<string, unknown> {
-    const result: Record<string, unknown> = {
-      name: item.name,
-      description: item.description || '',
-    };
-
-    // Handle array fields: join with ', '
-    for (const [key, value] of Object.entries(data)) {
-      if (Array.isArray(value)) {
-        result[key] = value.join(', ');
-      } else {
-        result[key] = value;
+    const source = row as unknown as Record<string, unknown>;
+    for (const key of Object.keys(fg.controls)) {
+      if (key in source && source[key] != null) {
+        fg.get(key)?.setValue(source[key]);
       }
     }
-
-    // Handle dates: format as YYYY-MM-DD for mat-datepicker
-    if (item.section === 'insurance' && item.expires_at) {
-      result['expirationDate'] = new Date(item.expires_at);
-    }
-
-    return result;
   }
 
   onSubmit(): void {
     const fg = this.form();
     if (!fg || fg.invalid) {
-      this.snackBar.open('Please fill in all required fields', 'OK');
+      fg?.markAllAsTouched();
       return;
     }
 
     this.submitting.set(true);
-
     try {
-      const request = this.mapFormToRequest(fg.value);
-      this.save.emit(request);
-    } catch (err) {
-      console.error('[VendorProfileForm] Failed to map form to request:', err);
-      this.snackBar.open('Failed to save form data', 'OK');
+      // Empty strings become null so an untouched optional control does not write "".
+      const raw = fg.getRawValue() as Record<string, unknown>;
+      const values = Object.fromEntries(
+        Object.entries(raw).map(([k, v]) => [k, v === '' ? null : v]),
+      ) as Partial<VendorProfileRecord>;
+      this.save.emit(values);
     } finally {
       this.submitting.set(false);
     }
-  }
-
-  private mapFormToRequest(
-    formValue: Record<string, unknown>
-  ): CreateMarketplaceProfileItemRequest {
-    const section = this.section();
-    const data = this.mapFormToData(formValue, section);
-
-    return {
-      section,
-      name: formValue['name'] as string,
-      description: (formValue['description'] as string) || undefined,
-      data,
-      expiresAt:
-        section === 'insurance'
-          ? this.formatDateForIso(formValue['expirationDate'])
-          : undefined,
-      status: 'active',
-    };
-  }
-
-  private mapFormToData(
-    formValue: Record<string, unknown>,
-    section: SectionType
-  ): SectionData {
-    const baseData = {
-      name: formValue['name'],
-      description: formValue['description'],
-    };
-
-    // Parse array fields back from comma-separated strings
-    const parseArrayField = (value: unknown): string[] => {
-      if (!value) return [];
-      const str = typeof value === 'string' ? value.trim() : '';
-      return str
-        .split(',')
-        .map(s => s.trim())
-        .filter(s => s.length > 0);
-    };
-
-    switch (section) {
-      case 'corporate_identity':
-        return {
-          legalEntityName: formValue['legalEntityName'] as string,
-          businessType: (formValue['businessType'] as string) || '',
-          foundedYear: this.parseNumber(formValue['foundedYear']),
-          yearsInBusiness: this.parseNumber(formValue['yearsInBusiness']),
-          certifications: parseArrayField(formValue['certifications']),
-          numberOfEmployees: this.parseNumber(formValue['numberOfEmployees']),
-        } as CorporateIdentityData;
-
-      case 'attestation':
-        return {
-          serviceType: formValue['serviceType'] as string,
-          yearsExperience: this.parseNumber(formValue['yearsExperience']),
-          clientCount: this.parseNumber(formValue['clientCount']),
-          avgProjectDuration: (formValue['avgProjectDuration'] as string) || '',
-          certifications: parseArrayField(formValue['certifications']),
-          specializations: parseArrayField(formValue['specializations']),
-        } as AttestationData;
-
-      case 'insurance':
-        return {
-          policyNumber: formValue['policyNumber'] as string,
-          carrier: formValue['carrier'] as string,
-          coverageType: (formValue['coverageType'] as string) || '',
-          coverageAmount: this.parseNumber(formValue['coverageAmount']),
-          effectiveDate: this.formatDateForIso(formValue['effectiveDate']),
-          expirationDate: this.formatDateForIso(formValue['expirationDate']),
-          limits: (formValue['limits'] as string) || '',
-          deductible: this.parseNumber(formValue['deductible']),
-        } as InsuranceData;
-
-      case 'reference':
-        return {
-          clientName: formValue['clientName'] as string,
-          contactPerson: formValue['contactPerson'] as string,
-          email: formValue['email'] as string,
-          phone: (formValue['phone'] as string) || '',
-          projectType: (formValue['projectType'] as string) || '',
-          projectDuration: (formValue['projectDuration'] as string) || '',
-          outcome: (formValue['outcome'] as string) || '',
-        } as ReferenceData;
-
-      case 'personnel':
-        return {
-          name: formValue['name'] as string,
-          title: formValue['title'] as string,
-          yearsExperience: this.parseNumber(formValue['yearsExperience']),
-          specialization: (formValue['specialization'] as string) || '',
-          credentials: parseArrayField(formValue['credentials']),
-          certifications: parseArrayField(formValue['certifications']),
-        } as PersonnelData;
-
-      case 'financial':
-        return {
-          annualRevenue: this.parseNumber(formValue['annualRevenue']),
-          profitMargin: this.parseNumber(formValue['profitMargin']),
-          employeeCount: this.parseNumber(formValue['employeeCount']),
-          yearsOperating: this.parseNumber(formValue['yearsOperating']),
-          revenueGrowth: formValue['revenueGrowth'] ? this.parseNumber(formValue['revenueGrowth']) : undefined,
-        } as FinancialData;
-
-      default:
-        return baseData as unknown as SectionData;
-    }
-  }
-
-  private parseNumber(value: unknown): number {
-    if (typeof value === 'number') return value;
-    if (typeof value === 'string' && value.trim()) return parseFloat(value);
-    return 0;
-  }
-
-  private formatDateForIso(value: unknown): string {
-    if (!value) return '';
-    if (typeof value === 'string') return value;
-    if (value instanceof Date) {
-      return value.toISOString().split('T')[0];
-    }
-    return '';
   }
 
   onCancel(): void {

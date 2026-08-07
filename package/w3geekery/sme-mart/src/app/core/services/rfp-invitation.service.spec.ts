@@ -222,7 +222,7 @@ describe('RfpInvitationService Error Handling (Phase 20 Wave 2)', () => {
       { ...baseInv, id: '4', tag: [{ value: 'd618b602-21cc-40a1-a9fa-534b7bc1672c' }] },
     ];
 
-    it('[DG-02] strips demo records for non-admin', async () => {
+    it('[DG-02] returns every record — demo filtering is bypassed', async () => {
       graphqlRead.query.mockResolvedValue({
         items: mockGqlReturn,
         page: { pageNumber: 1, pageSize: 100, totalCount: 4 },
@@ -230,10 +230,10 @@ describe('RfpInvitationService Error Handling (Phase 20 Wave 2)', () => {
 
       const result = await service.listByProject('proj-1');
 
-      expect(result.map((r: { id?: string }) => r.id)).toEqual(['1', '2']);
+      expect(result.map((r: { id?: string }) => r.id)).toEqual(['1', '2', '3', '4']);
     });
 
-    it('[DG-03] admin sees all records including demo', async () => {
+    it('[DG-03] returns every record for admins too', async () => {
       mockProjectContext.setIsAdmin(true);
       graphqlRead.query.mockResolvedValue({
         items: mockGqlReturn,

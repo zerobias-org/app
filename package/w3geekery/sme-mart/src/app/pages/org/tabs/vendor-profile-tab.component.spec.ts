@@ -13,18 +13,32 @@ import { ZerobiasClientApp, ZerobiasClientApi } from '@zerobias-com/zerobias-cli
 import { VendorProfileTab } from './vendor-profile-tab.component';
 import { VendorProfileForm } from './vendor-profile-form.component';
 import { By } from '@angular/platform-browser';
-import type { MarketplaceProfileItem } from '../../../core/models/marketplace-profile-item.model';
+import type {
+  InsuranceCoverageRecord,
+  OrgProfileRecord,
+  ServiceCapabilityRecord,
+  VendorProfileBundle,
+} from '../../../core/models/vendor-profile.model';
+
+const EMPTY_BUNDLE: VendorProfileBundle = {
+  corporate_identity: null,
+  financial: null,
+  attestation: [],
+  insurance: [],
+  reference: [],
+  personnel: [],
+};
 
 describe('VendorProfileTab', () => {
   let component: VendorProfileTab;
   let fixture: ComponentFixture<VendorProfileTab>;
 
   const vendorProfileServiceMock = {
-    listProfileItems: vi.fn().mockResolvedValue([]),
-    createProfileItem: vi.fn(),
-    updateProfileItem: vi.fn(),
-    deleteProfileItem: vi.fn(),
-    getProfileItemReferenceCount: vi.fn().mockResolvedValue(0),
+    loadBundle: vi.fn().mockResolvedValue(EMPTY_BUNDLE),
+    createRow: vi.fn(),
+    updateRow: vi.fn(),
+    upsertSingleton: vi.fn(),
+    deleteRow: vi.fn(),
   };
 
   const zerobiasAppMock = {
@@ -32,7 +46,7 @@ describe('VendorProfileTab', () => {
   };
 
   beforeEach(async () => {
-    vendorProfileServiceMock.listProfileItems.mockResolvedValue([]);
+    vendorProfileServiceMock.loadBundle.mockResolvedValue(EMPTY_BUNDLE);
     zerobiasAppMock.getCurrentOrg.mockReturnValue(of({ id: 'org-1', name: 'Test Org' }));
 
     await TestBed.configureTestingModule({
@@ -57,19 +71,36 @@ describe('VendorProfileTab', () => {
     component = fixture.componentInstance;
   });
 
-  function makeItem(section: MarketplaceProfileItem['section'], id: string): MarketplaceProfileItem {
+  const provenance = {
+    verified: false,
+    verificationSource: null,
+    verifiedAt: null,
+    verifiedBy: null,
+    verificationExpiresAt: null,
+  };
+
+  function makeIdentity(id: string): OrgProfileRecord {
     return {
-      id,
-      org_id: 'org-1',
-      section,
-      name: `item-${id}`,
-      description: '',
-      data: '{}',
-      status: 'active',
-      expires_at: null,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    } as MarketplaceProfileItem;
+      id, orgId: 'org-1', legalName: `org-${id}`, dba: null, tagline: null,
+      shortDescription: null, longDescription: null, website: null, logoUrl: null,
+      foundedYear: null, businessClassification: null, employeeCount: null,
+      primaryContactUserId: null, ...provenance,
+    };
+  }
+
+  function makeInsurance(id: string): InsuranceCoverageRecord {
+    return {
+      id, orgId: 'org-1', carrier: `carrier-${id}`, policyNumber: null, coverageType: null,
+      coverageAmount: null, currency: null, effectiveDate: null, expiresAt: null,
+      certificateUrl: null, ...provenance,
+    };
+  }
+
+  function makeCapability(id: string): ServiceCapabilityRecord {
+    return {
+      id, orgId: 'org-1', serviceSegmentId: null, yearsExperience: null,
+      clientCount: null, avgProjectDuration: null, ...provenance,
+    };
   }
 
   it('should create', () => {
@@ -101,7 +132,7 @@ describe('VendorProfileTab', () => {
   });
 
   it('welcome card renders regardless of items count (0 items)', async () => {
-    vendorProfileServiceMock.listProfileItems.mockResolvedValueOnce([]);
+    vendorProfileServiceMock.loadBundle.mockResolvedValueOnce(EMPTY_BUNDLE);
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();
@@ -111,31 +142,33 @@ describe('VendorProfileTab', () => {
   });
 
   it('welcome card renders regardless of items count (1 item)', async () => {
-    vendorProfileServiceMock.listProfileItems.mockResolvedValueOnce([
-      makeItem('corporate_identity', 'a'),
-    ]);
+    vendorProfileServiceMock.loadBundle.mockResolvedValueOnce({
+      ...EMPTY_BUNDLE,
+      corporate_identity: makeIdentity('a'),
+    });
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();
 
     const welcome = fixture.debugElement.nativeElement.querySelector('.welcome-card');
     expect(welcome).toBeTruthy();
-    expect(component.items().length).toBe(1);
+    expect(component.allRows().length).toBe(1);
   });
 
   it('welcome card renders regardless of items count (N items)', async () => {
-    vendorProfileServiceMock.listProfileItems.mockResolvedValueOnce([
-      makeItem('corporate_identity', 'a'),
-      makeItem('insurance', 'b'),
-      makeItem('attestation', 'c'),
-    ]);
+    vendorProfileServiceMock.loadBundle.mockResolvedValueOnce({
+      ...EMPTY_BUNDLE,
+      corporate_identity: makeIdentity('a'),
+      insurance: [makeInsurance('b')],
+      attestation: [makeCapability('c')],
+    });
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();
 
     const welcome = fixture.debugElement.nativeElement.querySelector('.welcome-card');
     expect(welcome).toBeTruthy();
-    expect(component.items().length).toBe(3);
+    expect(component.allRows().length).toBe(3);
   });
 
   it('does not expose a welcomeCardDismissed signal', () => {

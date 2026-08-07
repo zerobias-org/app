@@ -171,7 +171,7 @@ describe('Demo visibility (Phase 24 Plan 03)', () => {
     service = TestBed.inject(BidsService);
   });
 
-  it('[DG-02] strips demo records for non-admin', async () => {
+  it('[DG-02] returns every record — demo filtering is bypassed', async () => {
     mockGql.rawQuery.mockResolvedValue({ Bid: mockGqlReturn });
 
     await service.listBidsByProject('proj-001');
@@ -179,7 +179,7 @@ describe('Demo visibility (Phase 24 Plan 03)', () => {
     expect(mockGql.rawQuery).toHaveBeenCalled();
   });
 
-  it('[DG-03] admin sees all records including demo', async () => {
+  it('[DG-03] returns every record for admins too', async () => {
     mockGql.rawQuery.mockResolvedValue({ Bid: mockGqlReturn });
     mockProjectContext.setIsAdmin(true);
 

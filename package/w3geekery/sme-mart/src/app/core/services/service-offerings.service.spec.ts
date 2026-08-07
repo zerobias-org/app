@@ -323,7 +323,7 @@ describe('ServiceOfferingsService (VendorListing over Pipeline + GraphQL)', () =
       { ...VENDOR_LISTING_GQL_FIXTURE, id: '4', name: 'Demo (legacy)', tag: [{ value: 'd618b602-21cc-40a1-a9fa-534b7bc1672c' }] },
     ];
 
-    it('[DG-02] strips demo records for non-admin', async () => {
+    it('[DG-02] returns every record — demo filtering is bypassed', async () => {
       graphqlRead.query.mockResolvedValue({
         items: mockGqlReturn,
         page: { pageNumber: 1, pageSize: 50, totalCount: 4 },
@@ -331,10 +331,10 @@ describe('ServiceOfferingsService (VendorListing over Pipeline + GraphQL)', () =
 
       const result = await service.listServices();
 
-      expect(result.items.map((r: { id?: string }) => r.id)).toEqual(['1', '2']);
+      expect(result.items.map((r: { id?: string }) => r.id)).toEqual(['1', '2', '3', '4']);
     });
 
-    it('[DG-03] admin sees all records including demo', async () => {
+    it('[DG-03] returns every record for admins too', async () => {
       mockProjectContext.setIsAdmin(true);
       graphqlRead.query.mockResolvedValue({
         items: mockGqlReturn,
@@ -381,7 +381,7 @@ describe('ServiceOfferingsService (VendorListing over Pipeline + GraphQL)', () =
 
       const result = await service.getServicesByProvider('provider-1');
 
-      expect(result.map((r: { id?: string }) => r.id)).toEqual(['1', '2']);
+      expect(result.map((r: { id?: string }) => r.id)).toEqual(['1', '2', '3', '4']);
     });
   });
 });

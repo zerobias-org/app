@@ -49,11 +49,21 @@ export const SME_MART_CLASS_IDS = {
   ProviderProductProficiency:   '8b392156-c572-540e-88db-fcecb08eead7',
   ProviderFrameworkProficiency: 'cd2b61f1-36c6-5a83-b2f6-e91a6523a09e',
 
-  // NOT registered yet, deliberately: OrgCredential, SecurityCredential and
-  // UserCredential. They are a Brian ask, landed AHEAD of their consumers — so having
-  // no app readers is the expected state, not a symptom. Leave them alone until we need
-  // them, and do NOT read the missing entries as evidence they are retirement material.
+  // Added 2026-08-07 — the credential trio now HAS its consumer. Clark ruled the
+  // vendor-profile credential surface gets built (2026-08-06), which supersedes the
+  // "NOT registered yet, deliberately" note that stood here.
   //
+  // All three ids read back from platform.Class.getClass on PROD, not computed and not
+  // copied from a plan: getClass('SecurityCredential') returns its own id plus both
+  // junction ids on its orgCredentials/userCredentials link properties.
+  //
+  // SecurityCredential is the CATALOG entry; OrgCredential and UserCredential are the
+  // claim junctions, the same orgId/userId + catalog-ref + Verifiable shape as the six
+  // Provider* junctions in provider-profiles.service.
+  SecurityCredential:           'd07f97f8-8eab-597d-b8c3-b2161048228b',
+  OrgCredential:                '2af21665-5de0-5b6e-9312-797116f77db1',
+  UserCredential:               'c083eae2-42b4-5c31-a66b-c13225a9e182',
+
   // The asymmetry, since a retirement sweep will pass this way again: app coupling is
   // never a reason to KEEP a class, and that does not invert — the absence of coupling
   // is not on its own a reason to KILL one.
