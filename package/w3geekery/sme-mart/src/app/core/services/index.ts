@@ -16,7 +16,6 @@ export { AdminService } from './admin.service';
 export { ImpersonationService } from './impersonation.service';
 export { SmeMartResourceService } from './sme-mart-resource.service';
 export { UserPreferencesService } from './user-preferences.service';
-export { EngagementContextService } from './engagement-context.service';
 export { EngagementHierarchyService } from './engagement-hierarchy.service';
 export { EngagementTasksService } from './engagement-tasks.service';
 export { EngagementTimelineService } from './engagement-timeline.service';

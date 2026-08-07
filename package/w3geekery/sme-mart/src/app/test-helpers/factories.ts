@@ -18,8 +18,6 @@ import type {
 import type { OrgDocument, OrgDocumentDetail, OrgDocumentShare } from '../core/models/org-document.model';
 import type { EngagementDocument } from '../core/models/document.model';
 
-import type { BidCardData } from '../shared/components/bid-card/bid-card.component';
-import type { ComparisonBid } from '../shared/components/bid-comparison/bid-comparison.component';
 import type { TagView } from '@zerobias-com/platform-sdk';
 
 import {
@@ -102,22 +100,6 @@ export function makeBid(overrides: Partial<Bid> = {}): Bid {
   } as Bid;
 }
 
-export function makeBidCardData(overrides: Partial<BidCardData> = {}): BidCardData {
-  return {
-    id: TEST_BID_ID,
-    provider_id: TEST_PROVIDER_USER_ID,
-    provider_display_name: 'Jane Smith',
-    provider_headline: 'Security Consultant',
-    provider_rating: 4.5,
-    cover_letter: 'We are well positioned.',
-    proposed_price: '7500',
-    proposed_timeline: '3 weeks',
-    status: 'pending',
-    created_at: TEST_CREATED_AT,
-    ...overrides,
-  };
-}
-
 export function makeBidSummaryRow(overrides: Partial<BidSummaryRow> = {}): BidSummaryRow {
   return {
     id: TEST_BID_ID,
@@ -154,25 +136,6 @@ export function makeBidSummaryRow(overrides: Partial<BidSummaryRow> = {}): BidSu
     provider_rating: 4.8,
     ...overrides,
   } as BidSummaryRow;
-}
-
-export function makeComparisonBid(overrides: Partial<ComparisonBid> = {}): ComparisonBid {
-  return {
-    id: TEST_BID_ID,
-    provider_display_name: 'Alice Jones',
-    provider_headline: 'GRC Expert',
-    proposed_price: '10000',
-    proposed_timeline: '4 weeks',
-    total_estimated_hours: 80,
-    status: 'pending',
-    compliance: { met: 8, partially_met: 1, not_met: 1, not_applicable: 0, planned: 0, total: 10, responded: 10 },
-    categoryCompliance: [
-      { category: 'Security', met: 5, total: 6 },
-      { category: 'Privacy', met: 3, total: 4 },
-    ],
-    sum_estimated_cost: 10000,
-    ...overrides,
-  };
 }
 
 // ---------------------------------------------------------------------------
