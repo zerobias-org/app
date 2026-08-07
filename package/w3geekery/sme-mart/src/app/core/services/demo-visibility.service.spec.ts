@@ -1,21 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { DemoVisibilityService } from './demo-visibility.service';
-import { ProjectContextService } from './project-context.service';
-import { fakeProjectContextService } from '../../test-helpers/angular';
 
 describe('DemoVisibilityService', () => {
   let service: DemoVisibilityService;
-  let mockProjectContext: ReturnType<typeof fakeProjectContextService>;
 
   beforeEach(() => {
-    mockProjectContext = fakeProjectContextService(false); // Non-admin by default
-
     TestBed.configureTestingModule({
-      providers: [
-        DemoVisibilityService,
-        { provide: ProjectContextService, useValue: mockProjectContext },
-      ],
+      providers: [DemoVisibilityService],
     });
 
     service = TestBed.inject(DemoVisibilityService);
@@ -81,59 +73,31 @@ describe('DemoVisibilityService', () => {
   });
 
   // ===========================================================================
-  // Group 2: applyVisibility<T>(records) post-filter tests (admin signal)
+  // Group 2: applyVisibility<T>(records)
+  //
+  // BYPASSED 2026-08-06 (Clark): demo data is no longer a concept. applyVisibility
+  // now returns every record unchanged, so the admin/non-admin filtering cases are
+  // gone — there is no admin signal left to flip. The call sites and the
+  // isLocalDemoTagged predicate above survive for the later demo-removal pass.
   // ===========================================================================
 
   describe('applyVisibility()', () => {
-    // Test fixture setup
     const mockRecords = [
-      { id: '1', name: 'Real Engagement', tag: null },
-      { id: '2', name: 'Real Engagement w/ marketplace tag', tag: [{ value: 'a81cd320-243e-44eb-bdd9-9824019ef3dd' }] },
-      { id: '3', name: 'Demo Engagement (Global)', tag: [{ value: '81053c14-a8e5-4939-b538-c122c7d0eb1a' }] },
-      { id: '4', name: 'Demo Engagement (Legacy)', tag: [{ value: 'd618b602-21cc-40a1-a9fa-534b7bc1672c' }] },
+      { id: '1', name: 'Untagged', tag: null },
+      { id: '2', name: 'Marketplace tag', tag: [{ value: 'a81cd320-243e-44eb-bdd9-9824019ef3dd' }] },
+      { id: '3', name: 'Demo tag (Global)', tag: [{ value: '81053c14-a8e5-4939-b538-c122c7d0eb1a' }] },
+      { id: '4', name: 'Demo tag (Legacy)', tag: [{ value: 'd618b602-21cc-40a1-a9fa-534b7bc1672c' }] },
       { id: '5', name: 'Empty tag array', tag: [] },
     ];
 
-    // Case 1: Admin sees all records
-    it('should return all records unchanged for admin', () => {
-      mockProjectContext.setIsAdmin(true);
+    it('returns every record, including demo-tagged ones', () => {
       const result = service.applyVisibility(mockRecords);
 
       expect(result.length).toBe(5);
-      expect(result).toEqual(mockRecords);
+      expect(result.map(r => r.id)).toEqual(['1', '2', '3', '4', '5']);
     });
 
-    // Case 2: Non-admin sees only non-demo records
-    it('should filter out demo-tagged records for non-admin', () => {
-      mockProjectContext.setIsAdmin(false);
-      const result = service.applyVisibility(mockRecords);
-
-      expect(result.length).toBe(3);
-      const ids = result.map(r => r.id);
-      expect(ids).toEqual(['1', '2', '5']);
-    });
-
-    // Case 3: Signal flip mid-test
-    it('should respect admin signal flip (no caching)', () => {
-      // Start as non-admin
-      mockProjectContext.setIsAdmin(false);
-      let result = service.applyVisibility(mockRecords);
-      expect(result.length).toBe(3);
-
-      // Switch to admin
-      mockProjectContext.setIsAdmin(true);
-      result = service.applyVisibility(mockRecords);
-      expect(result.length).toBe(5);
-
-      // Switch back to non-admin
-      mockProjectContext.setIsAdmin(false);
-      result = service.applyVisibility(mockRecords);
-      expect(result.length).toBe(3);
-    });
-
-    // Case 4: Generic type preservation
-    it('should preserve generic type parameter', () => {
-      mockProjectContext.setIsAdmin(false);
+    it('preserves the generic type parameter', () => {
       interface TypedRecord {
         id: string;
         name: string;
@@ -142,15 +106,12 @@ describe('DemoVisibilityService', () => {
       const typedRecords: TypedRecord[] = mockRecords;
       const result = service.applyVisibility<TypedRecord>(typedRecords);
 
-      // Type check: result should be TypedRecord[], not widened
       expect(result[0]).toHaveProperty('id');
       expect(result[0]).toHaveProperty('name');
-      expect(result.length).toBe(3);
+      expect(result.length).toBe(5);
     });
 
-    // Case 5: Input array immutability
-    it('should not mutate the input array', () => {
-      mockProjectContext.setIsAdmin(false);
+    it('does not mutate the input array', () => {
       const inputCopy = [...mockRecords];
       service.applyVisibility(mockRecords);
 

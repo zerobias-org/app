@@ -45,10 +45,6 @@ export type {
 } from './document.types';
 
 export type {
-  GqlSmeMartProjectResponse,
-} from './sme-mart-project.types';
-
-export type {
   GqlSmeMartBoardResponse,
 } from './sme-mart-board.types';
 

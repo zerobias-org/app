@@ -6,7 +6,8 @@ import { Subject } from 'rxjs';
  *
  * The project slot itself is GONE — SmeMartProject was retired and the ProjectDetail
  * parent that pushed into it is deleted. What survives is the ambient context the
- * live surfaces actually read: isAdmin (onboarding guard, board-detail),
+ * live surfaces actually read: isAdmin has NO writer and NO reader as of 2026-08-06
+ * (the onboarding guard and board-detail were both deleted); it is dead pending the demo sweep,
  * engagementId, currentUserId, and the refresh channel.
  */
 @Injectable({ providedIn: 'root' })

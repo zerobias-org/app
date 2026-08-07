@@ -1,77 +1,45 @@
 import { routes } from './app.routes';
-import { onboardingGuard } from './core/guards/onboarding.guard';
 import { AppShell } from './layout/app-shell.component';
-import { PlatformEngagementSetupComponent } from './onboarding/platform-engagement-setup.component';
-import { CompanyProfileFormComponent } from './onboarding/company-profile-form.component';
 
 /**
- * App Routes Integration Tests — Verify guard attachment and route structure
+ * App Routes Integration Tests — verify route structure.
  *
- * These tests verify that:
- * 1. The onboarding guard is attached to the AppShell route (all authenticated routes flow through it)
- * 2. /onboarding/platform-engagement route exists without guard (provisioning failure surface)
- * 3. /onboarding/company-profile route exists (Phase 28 target)
- * 4. /projects placeholder route exists (Phase 30 will replace with full board)
- * 5. /admin route exists (Phase X — currently lazy-loaded)
- *
- * Per Phase 27 AR-02 (guard attachment) and AR-04 (routing structure).
+ * The onboarding guard and the /onboarding/* routes were deleted 2026-08-06:
+ * onboarding moved to the platform repo, and authentication is enforced upstream
+ * of the router by zerobias-client — a failed whoAmI triggers a cross-origin
+ * redirect to the branded login page, so an unauthenticated user never reaches
+ * the Angular router at all. There is no app-side auth guard to assert on.
  */
-describe('App Routes with Onboarding Guard', () => {
-  describe('Guard Attachment', () => {
-    it('AppShell route has canActivate with onboarding guard', () => {
-      // AppShell route (path: "") should exist
+describe('App Routes', () => {
+  describe('Route Structure Validation', () => {
+    it('AppShell is the root authenticated container', () => {
       const appShellRoute = routes.find(r => r.path === '');
-      expect(appShellRoute).toBeTruthy();
-      // Component should be AppShell
+      expect(appShellRoute?.path).toBe('');
       expect(appShellRoute?.component).toBe(AppShell);
-      // Should have canActivate array
-      expect(appShellRoute?.canActivate).toBeTruthy();
-      // canActivate array should not be empty
-      expect(appShellRoute?.canActivate?.length).toBeGreaterThan(0);
-      // canActivate should include onboardingGuard
-      expect(appShellRoute?.canActivate).toContain(onboardingGuard);
+      expect(appShellRoute?.children).toBeTruthy();
     });
 
-    it('All child routes are under AppShell with guard', () => {
+    it('AppShell has no canActivate — auth is enforced by the SDK, not a route guard', () => {
       const appShellRoute = routes.find(r => r.path === '');
-      // AppShell should have children routes
+      expect(appShellRoute?.canActivate).toBeFalsy();
+    });
+
+    it('All child routes are under AppShell', () => {
+      const appShellRoute = routes.find(r => r.path === '');
       expect(appShellRoute?.children).toBeTruthy();
-      // AppShell should have multiple child routes
       expect(appShellRoute?.children?.length).toBeGreaterThan(5);
     });
-  });
 
-  describe('Onboarding Routes', () => {
-    it('Onboarding parent route exists with nested children', () => {
-      const appShellRoute = routes.find(r => r.path === '');
-      // Onboarding parent path (path: 'onboarding') should exist
-      const onboardingParent = appShellRoute?.children?.find(r => r.path === 'onboarding');
-      expect(onboardingParent).toBeTruthy();
-      // Onboarding parent should have children
-      expect(onboardingParent?.children).toBeTruthy();
-      // Should have at least 2 child routes (platform-engagement + company-profile)
-      expect(onboardingParent?.children?.length).toBeGreaterThanOrEqual(2);
+    it('Routes array has expected top-level structure', () => {
+      expect(routes.length).toBeGreaterThan(0);
+      const topLevelRoutes = routes.filter(r => !r.path || r.path === '');
+      expect(topLevelRoutes.length).toBeGreaterThan(0);
     });
 
-    it('/onboarding/platform-engagement route exists without guard', () => {
+    it('No /onboarding route remains', () => {
       const appShellRoute = routes.find(r => r.path === '');
-      const onboardingParent = appShellRoute?.children?.find(r => r.path === 'onboarding');
-      const setupRoute = onboardingParent?.children?.find(r => r.path === 'platform-engagement');
-      expect(setupRoute).toBeTruthy();
-      // Component should be PlatformEngagementSetupComponent
-      expect(setupRoute?.component).toBe(PlatformEngagementSetupComponent);
-      // platform-engagement route should NOT have canActivate (it IS the guard error surface)
-      expect(setupRoute?.canActivate).toBeFalsy();
-    });
-
-    it('/onboarding/company-profile route exists', () => {
-      const appShellRoute = routes.find(r => r.path === '');
-      const onboardingParent = appShellRoute?.children?.find(r => r.path === 'onboarding');
-      // /onboarding/company-profile is nested under onboarding parent (path: 'company-profile')
-      const profileRoute = onboardingParent?.children?.find(r => r.path === 'company-profile');
-      expect(profileRoute).toBeTruthy();
-      // Component should be CompanyProfileFormComponent
-      expect(profileRoute?.component).toBe(CompanyProfileFormComponent);
+      const onboarding = appShellRoute?.children?.find(r => r.path === 'onboarding');
+      expect(onboarding).toBeUndefined();
     });
   });
 
@@ -94,52 +62,6 @@ describe('App Routes with Onboarding Guard', () => {
       expect(adminRoute).toBeTruthy();
       // /admin should use lazy-loading via loadChildren
       expect(adminRoute?.loadChildren).toBeTruthy();
-    });
-  });
-
-  describe('Protection Isolation', () => {
-    it('platform-engagement route does not have guard to prevent infinite redirects', () => {
-      const appShellRoute = routes.find(r => r.path === '');
-      const onboardingParent = appShellRoute?.children?.find(r => r.path === 'onboarding');
-      const setupRoute = onboardingParent?.children?.find(r => r.path === 'platform-engagement');
-      // If this route had a guard, the guard would redirect here on error,
-      // and the guard would fire again on this route, creating infinite loop.
-      expect(setupRoute?.canActivate).toBeFalsy();
-    });
-
-    it('Other onboarding routes inherit parent guard', () => {
-      const appShellRoute = routes.find(r => r.path === '');
-      const onboardingParent = appShellRoute?.children?.find(r => r.path === 'onboarding');
-      const profileRoute = onboardingParent?.children?.find(r => r.path === 'company-profile');
-      // Profile route does NOT have its own canActivate;
-      // it inherits the guard from AppShell parent via canActivateChild.
-      // Angular's router will check parent's canActivate first.
-      // Profile route should not duplicate guard; parent AppShell guard applies
-      expect(profileRoute?.canActivate).toBeFalsy();
-    });
-  });
-
-  describe('Route Structure Validation', () => {
-    it('AppShell is the root authenticated container', () => {
-      const appShellRoute = routes.find(r => r.path === '');
-      // Path should be empty string
-      expect(appShellRoute?.path).toBe('');
-      // Component should be AppShell
-      expect(appShellRoute?.component).toBe(AppShell);
-      // canActivate should exist
-      expect(appShellRoute?.canActivate?.length).toBeGreaterThan(0);
-      // AppShell should have children
-      expect(appShellRoute?.children).toBeTruthy();
-    });
-
-    it('Routes array has expected top-level structure', () => {
-      // Currently only AppShell at top level (no separate login route at top of routes array)
-      // Login is handled by the guard redirecting to /login URL
-      // Routes array should not be empty
-      expect(routes.length).toBeGreaterThan(0);
-      // Should have at least one top-level route
-      const topLevelRoutes = routes.filter(r => !r.path || r.path === '');
-      expect(topLevelRoutes.length).toBeGreaterThan(0);
     });
   });
 });

@@ -124,7 +124,8 @@ export class PlatformEngagementProvisioner {
    * Returns `false` on probe error — caller treats "no tag/project found" and
    * "probe failed" the same: route the user to the holding page; do not auto-create.
    *
-   * Used by `onboardingGuard` to decide whether the user can use the app.
+   * Used by the admin org-provisioning tab. (The onboarding guard that also called
+   * this was deleted 2026-08-06 — onboarding moved to the platform repo.)
    * NEVER triggers any create — pure read.
    */
   async isOrgProvisioned(orgId: string, orgName: string, _orgSlug?: string): Promise<boolean> {

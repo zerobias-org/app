@@ -12,16 +12,12 @@ import { Home } from './pages/home/home.component';
 // import { BidWizard } from './pages/rfps/bid-wizard/bid-wizard.component';
 // import { BidComparisonPage } from './pages/rfps/bid-comparison-page.component';
 import { ComingSoon } from './pages/coming-soon/coming-soon.component';
-import { CompanyProfileFormComponent } from './onboarding/company-profile-form.component';
-import { onboardingGuard } from './core/guards/onboarding.guard';
-import { PlatformEngagementSetupComponent } from './onboarding/platform-engagement-setup.component';
 import { FeatureComingSoonComponent } from './pages/default-project-board/feature-coming-soon.component';
 
 export const routes: Routes = [
   {
     path: '',
     component: AppShell,
-    canActivate: [onboardingGuard],
     children: [
       { path: '', component: Home },
       // Phase 31-A: surfaces hidden/Coming Soon for v1.4 dogfood. Original
@@ -57,23 +53,8 @@ export const routes: Routes = [
       // fresh when the RFP surface is actually built, and may not be needed at all.
       { path: 'engagements', component: ComingSoon, data: { title: 'Engagements' } },
       { path: 'engagements/:id/edit', redirectTo: 'engagements' },
-      // Board detail (L-2). Child of the guarded shell so ProjectContextService.isAdmin
-      // is hydrated on hard-refresh/deep-link (admin gating in board-detail).
-      {
-        path: 'boards',
-        loadChildren: () => import('./pages/boards/boards.routes').then((m) => m.BOARDS_ROUTES),
-      },
       // Legacy /my/* redirects (preserve any bookmarks / cached deep-links).
       { path: 'my/engagements', redirectTo: 'engagements', pathMatch: 'full' },
-      {
-        path: 'onboarding',
-        children: [
-          // Platform-engagement provisioning surface (no guard on this route —
-          // it IS the guard's error handler and explicit setup destination)
-          { path: 'platform-engagement', component: PlatformEngagementSetupComponent },
-          { path: 'company-profile', component: CompanyProfileFormComponent },
-        ],
-      },
       // Phase 30 placeholders — deep-link-only honest "coming soon" pages for
       // 046 / 066 / 065 (no nav entries; surfaced only when something deep-links).
       {

@@ -1,6 +1,5 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { DEMO_TAG_UUID_LIST } from '../constants/demo-tags';
-import { ProjectContextService } from './project-context.service';
 import type { Tag } from '@zerobias-com/platform-sdk';
 
 /**
@@ -43,7 +42,6 @@ type TagField = TagShape[] | null | Tag;
  */
 @Injectable({ providedIn: 'root' })
 export class DemoVisibilityService {
-  private readonly projectContext = inject(ProjectContextService);
 
   /**
    * Pure predicate: returns true iff a record's tag contains a demo UUID.
@@ -92,41 +90,31 @@ export class DemoVisibilityService {
   }
 
   /**
-   * Post-filter for arrays of records: strips demo-tagged records for non-admin users.
+   * Post-filter for arrays of records. BYPASSED — returns every record unchanged.
    *
-   * **Polymorphic tag shapes (D-24):**
-   * - Accepts records with GQL tag shape: `[{ value: string }]`
-   * - Accepts records with Platform tag shape: `Tag` object
-   * - Handler method `isLocalDemoTagged()` normalizes both shapes
-   *
-   * **Behavior:**
-   * - Admin (`isAdmin() === true`): returns input array unchanged (full visibility)
-   * - Non-admin (`isAdmin() === false`): returns new array with demo-tagged records removed
-   *
-   * **Signal reads:**
-   * - Calls `projectContext.isAdmin()` exactly once per invocation (no caching).
-   * - Each call respects the current admin signal value — signal changes are reflected on next call.
-   * - Suitable for re-reading the signal on every listing fetch (e.g., in a service method).
-   *
-   * **Immutability:**
-   * - Never mutates the input array.
-   * - Returns a new array via `Array.prototype.filter()` or the original reference (admin case).
+   * It previously stripped demo-tagged records for non-admin users and read the
+   * admin signal on each call. Both are gone; see the body for why. Call sites are
+   * left in place so the later demo-removal pass has one list to work from.
    *
    * **Type preservation:**
    * - Generic `<T>` preserves the domain type (Engagement[], Bid[], Note[], etc.).
    * - Caller does not need to cast or transform the result.
    *
-   * @param records - Array of records (may have optional `tag` field for polymorphic filtering)
-   * @returns Filtered array (new reference if non-admin; original reference if admin)
+   * @param records - Array of records
+   * @returns The same array reference, unfiltered
    */
   applyVisibility<T>(records: T[]): T[] {
-    // Admin bypass: return unfiltered
-    if (this.projectContext.isAdmin()) {
-      return records;
-    }
-
-    // Non-admin: filter out demo-tagged records
-    // Cast to { tag?: TagField } for isLocalDemoTagged to extract tag safely
-    return records.filter(record => !this.isLocalDemoTagged(record as unknown as { tag?: TagField }));
+    // BYPASSED 2026-08-06 (Clark): demo data is no longer a concept, so nothing
+    // should be hidden from anyone. Every record passes through unfiltered.
+    //
+    // A deliberate bypass at the chokepoint, not a deletion - removing the demo
+    // machinery outright touches 19 files, one of them under active rewrite
+    // elsewhere. That sweep is its own pass.
+    //
+    // The bypass is REQUIRED, not cosmetic: the onboarding guard was the only
+    // writer of ProjectContextService.setIsAdmin, so with the guard deleted
+    // isAdmin is pinned false. The old non-admin branch would then have stripped
+    // demo-tagged records from EVERY user.
+    return records;
   }
 }
