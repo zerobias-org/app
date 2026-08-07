@@ -1,9 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { ZerobiasClientApi } from '@zerobias-com/zerobias-client';
-import { ExecuteRawGraphqlQuery } from '@zerobias-com/graphql-sdk';
-import { UUID, PagedResults } from '@zerobias-org/types-core-js';
-import { environment } from '../../../environments/environment';
+import { PagedResults } from '@zerobias-org/types-core-js';
+import { GraphqlReadService } from './graphql-read.service';
 import type {
   ProviderSkillProficiency,
   ProviderRole,
@@ -19,23 +17,44 @@ import type {
 import { CatalogService } from './catalog.service';
 import { PipelineWriteService } from './pipeline-write.service';
 
+/** The six expertise junction classes, all registered in SME_MART_CLASS_IDS. */
+type JunctionClassName =
+  | 'ProviderSkillProficiency'
+  | 'ProviderRole'
+  | 'ProviderProductProficiency'
+  | 'ProviderFrameworkProficiency'
+  | 'ProviderSegment'
+  | 'ProviderServiceSegment';
+
+/** `created_at` dropped throughout — GQL exposes dateCreated and nothing consumed it. */
+const JUNCTION_FIELDS: Record<JunctionClassName, string[]> = {
+  ProviderSkillProficiency: ['id', 'orgId', 'skillId', 'proficiencyLevel', 'yearsExperience', 'verified', 'verificationSource'],
+  ProviderRole: ['id', 'orgId', 'roleId', 'isPrimary', 'yearsInRole', 'verified', 'verificationSource'],
+  ProviderProductProficiency: ['id', 'orgId', 'productId', 'proficiencyLevel', 'yearsExperience', 'certified', 'certificationDetails', 'verified', 'verificationSource'],
+  ProviderFrameworkProficiency: ['id', 'orgId', 'frameworkId', 'proficiencyLevel', 'yearsExperience', 'assessorCertified', 'implementationExperience', 'auditExperience', 'verified', 'verificationSource'],
+  ProviderSegment: ['id', 'orgId', 'segmentId', 'isPrimary', 'verified', 'verificationSource'],
+  ProviderServiceSegment: ['id', 'orgId', 'serviceSegmentId', 'isPrimary', 'verified', 'verificationSource'],
+};
+
 /**
- * Provider CRUD operations.
- * Wave 2 (Plan 26-03): Reads from MPI/GQL (no Neon VIEWs).
- * Writes still target individual Neon tables (provider_profiles, provider_skills, etc.) —
- * those are CRUD methods at the end of the file, unchanged.
+ * Provider CRUD operations. Reads OrgProfile and the six expertise junctions from GQL;
+ * writes go through PipelineWriteService.
  *
- * Wave 2 Decision (26-03 Director-locked):
- * - Call boundaryApi.boundaryExecuteRawQuery DIRECTLY (bypassing GraphqlReadService.query)
- * - Reason: GraphqlReadService has a demo-mode gate (lines 80-84) that short-circuits
- *   empty results when demo mode is OFF. This gate was appropriate when all GQL data was
- *   demo-seeded, but after 26-02, ZB is REAL (untagged) GQL data and the gate incorrectly
- *   hides it. Direct boundary calls see ZB regardless of demo-mode toggle position.
- * - Future: Phase 24 follow-up should replace the demo-mode gate with per-record tag filtering.
+ * Reads were re-hosted on GraphqlReadService 2026-08-07. They previously called
+ * boundaryExecuteRawQuery directly, hand-building `OrgProfile(filter: "orgId.eq.X")` —
+ * an argument the generated schema never declares, which is why those reads 500'd. The
+ * fenced path names the argument after the FIELD: `OrgProfile(orgId: ".eq.X")`.
+ *
+ * The four-claim justification that used to sit here was wrong on every count and has
+ * been deleted rather than patched: there is no demo-mode gate in GraphqlReadService
+ * (query() is the plain path); there is no MarketplaceProfileItem left to read from;
+ * the writes do not target Neon tables (all seven go through pipelineWrite.pushEntity);
+ * and the reads are not one nested request (they are one flat query plus six junction
+ * queries).
  */
 @Injectable({ providedIn: 'root' })
 export class ProviderProfilesService {
-  private readonly clientApi = inject(ZerobiasClientApi);
+  private readonly graphqlRead = inject(GraphqlReadService);
   private readonly catalog = inject(CatalogService);
   private readonly pipelineWrite = inject(PipelineWriteService);
   private readonly snackBar = inject(MatSnackBar);
@@ -49,34 +68,40 @@ export class ProviderProfilesService {
   // ─────────────────────────────────────────────────────────────────────────
 
   /**
-   * Query OrgProfile + expertise junctions via boundaryExecuteRawQuery.
-   * Nested selections return all expertise data in one request.
+   * Fields selected for a full OrgProfile read.
+   *
+   * `created_at` is deliberately absent: GQL exposes `dateCreated`, and the live path
+   * never requested it, so nothing consumes it. Add a mapping only if a real consumer
+   * turns up.
    */
-  private async queryOrgProfile(filter: string): Promise<OrgProfile | null> {
-    const query = `{
-      OrgProfile(${filter}) {
-        id orgId legalName dba tagline shortDescription longDescription website logoUrl
-        employeeCount businessClassification foundedYear primaryContactUserId
-        verified verificationSource created_at
-      }
-    }`;
+  private static readonly ORG_PROFILE_FIELDS = [
+    'id', 'orgId', 'legalName', 'dba', 'tagline', 'shortDescription', 'longDescription',
+    'website', 'logoUrl', 'employeeCount', 'businessClassification', 'foundedYear',
+    'primaryContactUserId', 'verified', 'verificationSource',
+  ];
 
-    const boundaryApi = this.clientApi.graphqlClient.getBoundaryApi();
-    const result = await boundaryApi.boundaryExecuteRawQuery(
-      new UUID(environment.boundaryId),
-      new ExecuteRawGraphqlQuery(query),
-      false, // includeRawData
-      1, // pageNumber
-      1, // pageSize
-      undefined, // sort
+  /** Fields selected for the directory listing — a narrower read than the detail page. */
+  private static readonly ORG_PROFILE_SUMMARY_FIELDS = [
+    'id', 'orgId', 'legalName', 'tagline', 'logoUrl', 'verified', 'verificationSource',
+  ];
+
+  /**
+   * Query a single OrgProfile by orgId.
+   *
+   * Takes an orgId rather than a filter string on purpose: a pre-built filter string is
+   * the shape that produced the malformed `filter:` argument in the first place.
+   */
+  private async queryOrgProfile(orgId: string): Promise<OrgProfile | null> {
+    const result = await this.graphqlRead.query<OrgProfile>(
+      'OrgProfile',
+      ProviderProfilesService.ORG_PROFILE_FIELDS,
+      { filters: { orgId: `.eq.${orgId}` }, pageNumber: 1, pageSize: 1 },
     );
-
-    const data = result.data as Record<string, unknown> | null;
-    return (data?.['OrgProfile'] as OrgProfile) ?? null;
+    return result.items[0] ?? null;
   }
 
   /**
-   * Query expertise junctions for an orgId with nested selections.
+   * Query all six expertise junctions for an orgId.
    */
   private async queryExpertiseJunctions(orgId: string): Promise<{
     skills: ProviderSkillProficiency[];
@@ -86,17 +111,15 @@ export class ProviderProfilesService {
     segments: ProviderSegment[];
     serviceSegments: ProviderServiceSegment[];
   }> {
-    const filter = `filter: "orgId.eq.${orgId}"`;
-
     // Query all 6 expertise junction types in parallel
     const [skillsResult, rolesResult, productsResult, frameworksResult, segmentsResult, ssResult] =
       await Promise.all([
-        this.queryJunctionType('ProviderSkillProficiency', filter),
-        this.queryJunctionType('ProviderRole', filter),
-        this.queryJunctionType('ProviderProductProficiency', filter),
-        this.queryJunctionType('ProviderFrameworkProficiency', filter),
-        this.queryJunctionType('ProviderSegment', filter),
-        this.queryJunctionType('ProviderServiceSegment', filter),
+        this.queryJunctionType('ProviderSkillProficiency', orgId),
+        this.queryJunctionType('ProviderRole', orgId),
+        this.queryJunctionType('ProviderProductProficiency', orgId),
+        this.queryJunctionType('ProviderFrameworkProficiency', orgId),
+        this.queryJunctionType('ProviderSegment', orgId),
+        this.queryJunctionType('ProviderServiceSegment', orgId),
       ]);
 
     return {
@@ -112,34 +135,16 @@ export class ProviderProfilesService {
   /**
    * Query a single junction type and return typed results.
    */
-  private async queryJunctionType(className: string, filter: string): Promise<unknown[]> {
-    const fieldsByClass: Record<string, string> = {
-      ProviderSkillProficiency: 'id orgId skillId proficiencyLevel yearsExperience verified verificationSource created_at',
-      ProviderRole: 'id orgId roleId isPrimary yearsInRole verified verificationSource created_at',
-      ProviderProductProficiency: 'id orgId productId proficiencyLevel yearsExperience certified certificationDetails verified verificationSource created_at',
-      ProviderFrameworkProficiency: 'id orgId frameworkId proficiencyLevel yearsExperience assessorCertified implementationExperience auditExperience verified verificationSource created_at',
-      ProviderSegment: 'id orgId segmentId isPrimary verified verificationSource created_at',
-      ProviderServiceSegment: 'id orgId serviceSegmentId isPrimary verified verificationSource created_at',
-    };
-
-    const fields = fieldsByClass[className];
-    if (!fields) return [];
-
-    const query = `{ ${className}(${filter}) { ${fields} } }`;
-    const boundaryApi = this.clientApi.graphqlClient.getBoundaryApi();
+  private async queryJunctionType(className: JunctionClassName, orgId: string): Promise<unknown[]> {
+    const fields = JUNCTION_FIELDS[className];
 
     try {
-      const result = await boundaryApi.boundaryExecuteRawQuery(
-        new UUID(environment.boundaryId),
-        new ExecuteRawGraphqlQuery(query),
-        false,
-        1,
-        1000,
-        undefined,
+      const result = await this.graphqlRead.query<unknown>(
+        className,
+        fields,
+        { filters: { orgId: `.eq.${orgId}` }, pageNumber: 1, pageSize: 1000 },
       );
-
-      const data = result.data as Record<string, unknown> | null;
-      return (data?.[className] as unknown[]) ?? [];
+      return result.items;
     } catch (err) {
       console.error(`[ProviderProfilesService] Query ${className} failed:`, err);
       return [];
@@ -219,28 +224,25 @@ export class ProviderProfilesService {
     this.loading.set(true);
     try {
       // Query all OrgProfile records (optionally filtered by orgId)
-      const filter = orgId ? `filter: "orgId.eq.${orgId}"` : '';
-      const query = `{ OrgProfile${filter ? `(${filter})` : ''} { id orgId legalName tagline logoUrl verified verificationSource created_at } }`;
-
-      const boundaryApi = this.clientApi.graphqlClient.getBoundaryApi();
-      const result = await boundaryApi.boundaryExecuteRawQuery(
-        new UUID(environment.boundaryId),
-        new ExecuteRawGraphqlQuery(query),
-        false,
-        1,
-        pageSize ?? 200,
-        undefined,
+      const result = await this.graphqlRead.query<OrgProfile>(
+        'OrgProfile',
+        ProviderProfilesService.ORG_PROFILE_SUMMARY_FIELDS,
+        {
+          filters: orgId ? { orgId: `.eq.${orgId}` } : {},
+          pageNumber: 1,
+          pageSize: pageSize ?? 200,
+        },
       );
+      const profiles = result.items;
 
-      const data = result.data as Record<string, unknown> | null;
-      const profiles = (data?.['OrgProfile'] as OrgProfile[]) ?? [];
-
-      // For each profile, load expertise counts
-      const items: ProviderDirectoryView[] = [];
-      for (const profile of profiles) {
-        const expertise = await this.queryExpertiseJunctions(profile.orgId);
-        items.push(this.toDirectoryRow(profile, expertise));
-      }
+      // Load each profile's expertise concurrently. This was a serial await inside a
+      // for-loop: 6 junction queries per provider, at pageSize 200 that is 1200 requests
+      // end to end.
+      const items: ProviderDirectoryView[] = await Promise.all(
+        profiles.map(async profile =>
+          this.toDirectoryRow(profile, await this.queryExpertiseJunctions(profile.orgId)),
+        ),
+      );
 
       this.providers.set(items);
       return PagedResults.fromArray(items, 1, pageSize ?? 200, items.length);
@@ -266,7 +268,7 @@ export class ProviderProfilesService {
 
   async getProvider(orgId: string): Promise<ProviderDetailView | null> {
     try {
-      const profile = await this.queryOrgProfile(`filter: "orgId.eq.${orgId}"`);
+      const profile = await this.queryOrgProfile(orgId);
       if (!profile) return null;
 
       const expertise = await this.queryExpertiseJunctions(orgId);
@@ -280,26 +282,17 @@ export class ProviderProfilesService {
   async getProviderByUserId(userId: string): Promise<ProviderDetailView | null> {
     try {
       // Query OrgProfile by primaryContactUserId
-      const filter = `filter: "primaryContactUserId.eq.${userId}"`;
-      const query = `{ OrgProfile(${filter}) { id orgId } }`;
-
-      const boundaryApi = this.clientApi.graphqlClient.getBoundaryApi();
-      const result = await boundaryApi.boundaryExecuteRawQuery(
-        new UUID(environment.boundaryId),
-        new ExecuteRawGraphqlQuery(query),
-        false,
-        1,
-        1,
-        undefined,
+      const result = await this.graphqlRead.query<{ orgId: string }>(
+        'OrgProfile',
+        ['id', 'orgId'],
+        { filters: { primaryContactUserId: `.eq.${userId}` }, pageNumber: 1, pageSize: 1 },
       );
 
-      const data = result.data as Record<string, unknown> | null;
-      const profiles = (data?.['OrgProfile'] as Array<{ orgId: string }>) ?? [];
-
-      if (profiles.length === 0) return null;
+      const first = result.items[0];
+      if (!first) return null;
 
       // Get the first matching org
-      return this.getProvider(profiles[0].orgId);
+      return this.getProvider(first.orgId);
     } catch (err) {
       console.error('[ProviderProfilesService] getProviderByUserId failed:', err);
       return null;
