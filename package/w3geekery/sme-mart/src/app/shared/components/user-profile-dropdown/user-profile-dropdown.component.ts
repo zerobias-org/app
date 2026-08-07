@@ -1,13 +1,13 @@
-import { Component, inject, signal, ChangeDetectionStrategy, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { Component, inject, signal, computed, ChangeDetectionStrategy, OnInit, OnDestroy } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
+import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
 import { Subscription } from 'rxjs';
 import { ZerobiasClientApp } from '@zerobias-com/zerobias-client';
 import { ZbAvatarLabelComponent, ZbStaticImageUrlPipe, ZbImgDefaultDirective } from '@zerobias-org/ngx-library';
-import { ImpersonationService } from '../../../core/services/impersonation.service';
 import { OrgSwitcherService } from '../../../core/services/org-switcher.service';
 import type { dana } from '@zerobias-com/zerobias-sdk';
 
@@ -30,18 +30,25 @@ import type { dana } from '@zerobias-com/zerobias-sdk';
 })
 export class UserProfileDropdown implements OnInit, OnDestroy {
   private readonly app = inject(ZerobiasClientApp);
-  readonly impersonation = inject(ImpersonationService);
   readonly orgSwitcher = inject(OrgSwitcherService);
   private readonly subs = new Subscription();
 
-  readonly userName = this.impersonation.effectiveUserName;
-  readonly userEmail = this.impersonation.effectiveUserEmail;
-  readonly avatarUrl = this.impersonation.effectiveAvatarUrl;
+  private readonly whoAmI = toSignal(this.app.getWhoAmI(), { initialValue: null });
+
+  // Same precedence the impersonation service used for the real user, so the
+  // dropdown does not regress to blank when name or email is absent.
+  readonly userName = computed(() => {
+    const who = this.whoAmI();
+    return who ? (who.name || String(who.email) || 'User') : '';
+  });
+  readonly userEmail = computed(() => String(this.whoAmI()?.email ?? ''));
+  readonly avatarUrl = computed(() => {
+    const url = this.whoAmI()?.avatarUrl;
+    return url ? String(url) : '';
+  });
   readonly orgName = signal('');
   readonly switchableOrgs = this.orgSwitcher.orgs$;
   readonly currentOrgId = signal('');
-
-  @ViewChild('orgMenu') orgMenu?: MatMenuTrigger;
 
   ngOnInit() {
     this.subs.add(

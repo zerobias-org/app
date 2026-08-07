@@ -11,7 +11,6 @@ import { ProjectPlanService } from './project-plan.service';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
 import { ProjectContextService } from './project-context.service';
-import { ImpersonationService } from './impersonation.service';
 import { fakeProjectContextService } from '../../test-helpers/angular';
 import type { GqlProjectPlanResponse, GqlPlanMilestoneResponse } from '../gql-types/project-plan.types';
 
@@ -19,7 +18,6 @@ describe('ProjectPlanService', () => {
   let service: ProjectPlanService;
   let mockPipelineWrite: { pushEntity: ReturnType<typeof vi.fn>; pushEntities: ReturnType<typeof vi.fn>; deleteEntity: ReturnType<typeof vi.fn>; deleteEntities: ReturnType<typeof vi.fn>; getCached: ReturnType<typeof vi.fn>; seedCache: ReturnType<typeof vi.fn> };
   let mockGraphqlRead: { query: ReturnType<typeof vi.fn>; getById: ReturnType<typeof vi.fn> };
-  let mockImpersonation: { effectiveUserId: ReturnType<typeof vi.fn> };
   let mockSnackBar: { open: ReturnType<typeof vi.fn> };
   let mockProjectContext: ReturnType<typeof fakeProjectContextService>;
 
@@ -36,9 +34,6 @@ describe('ProjectPlanService', () => {
       query: vi.fn().mockResolvedValue({ items: [] }),
       getById: vi.fn().mockResolvedValue(null),
     };
-    mockImpersonation = {
-      effectiveUserId: vi.fn().mockReturnValue('user-123'),
-    };
     mockSnackBar = {
       open: vi.fn(),
     };
@@ -49,7 +44,6 @@ describe('ProjectPlanService', () => {
         ProjectPlanService,
         { provide: PipelineWriteService, useValue: mockPipelineWrite },
         { provide: GraphqlReadService, useValue: mockGraphqlRead },
-        { provide: ImpersonationService, useValue: mockImpersonation },
         { provide: ProjectContextService, useValue: mockProjectContext },
         { provide: MatSnackBar, useValue: mockSnackBar },
       ],

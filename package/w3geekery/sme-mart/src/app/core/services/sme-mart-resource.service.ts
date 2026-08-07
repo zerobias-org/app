@@ -1,7 +1,8 @@
 import { Injectable, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { ZerobiasClientApp } from '@zerobias-com/zerobias-client';
 import { SmeMartDbService } from './sme-mart-db.service';
 import { GraphqlReadService, type GqlQueryOptions } from './graphql-read.service';
-import { ImpersonationService } from './impersonation.service';
 import { EngagementHierarchyService } from './engagement-hierarchy.service';
 import {
   BID_FIELD_MAPPING,
@@ -37,8 +38,13 @@ import {
 export class SmeMartResourceService {
   private readonly db = inject(SmeMartDbService);
   private readonly gql = inject(GraphqlReadService);
-  private readonly impersonation = inject(ImpersonationService);
+  private readonly whoAmI = toSignal(inject(ZerobiasClientApp).getWhoAmI(), { initialValue: null });
   private readonly hierarchy = inject(EngagementHierarchyService);
+
+  /** Signed-in user id, or '' before whoAmI resolves. */
+  private currentUserId(): string {
+    return String(this.whoAmI()?.id ?? '');
+  }
 
   // ── Tag Operations (Neon — AuditgraphDB objects lack Hydra resource identity) ──
 
@@ -52,7 +58,7 @@ export class SmeMartResourceService {
     resourceType: SmeMartResourceType,
     tags: Array<{ zbTagId: string; zbTagName: string }>,
   ): Promise<void> {
-    const userId = this.impersonation.effectiveUserId();
+    const userId = this.currentUserId();
     for (const tag of tags) {
       try {
         await this.db.createRow('sme_resource_tags', {
@@ -105,7 +111,7 @@ export class SmeMartResourceService {
     linkType: SmeMartLinkType,
     context?: Record<string, unknown>,
   ): Promise<SmeMartResourceLink> {
-    const userId = this.impersonation.effectiveUserId();
+    const userId = this.currentUserId();
     const row = await this.db.createRow<SmeMartResourceLinkRow>('sme_resource_links', {
       from_resource_id: fromId,
       from_resource_type: fromType,

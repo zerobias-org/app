@@ -1,7 +1,8 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Subject } from 'rxjs';
+import { ZerobiasClientApp } from '@zerobias-com/zerobias-client';
 import { SmeMartDbService } from './sme-mart-db.service';
-import { ImpersonationService } from './impersonation.service';
 import type {
   Notification,
   CreateNotificationRequest,
@@ -15,8 +16,13 @@ const POLL_INTERVAL_MS = 30_000;
 @Injectable({ providedIn: 'root' })
 export class NotificationService {
   private readonly db = inject(SmeMartDbService);
-  private readonly impersonation = inject(ImpersonationService);
+  private readonly whoAmI = toSignal(inject(ZerobiasClientApp).getWhoAmI(), { initialValue: null });
   private pollTimer: ReturnType<typeof setInterval> | null = null;
+
+  /** Signed-in user id, or '' before whoAmI resolves. */
+  private recipientId(): string {
+    return String(this.whoAmI()?.id ?? '');
+  }
 
   // ── State ──
   readonly notifications = signal<Notification[]>([]);
@@ -46,7 +52,7 @@ export class NotificationService {
   // ── Read ──
 
   async loadNotifications(): Promise<void> {
-    const recipientId = this.impersonation.effectiveUserId();
+    const recipientId = this.recipientId();
     if (!recipientId) return;
 
     this.loading.set(true);
@@ -63,7 +69,7 @@ export class NotificationService {
   }
 
   async loadByType(type: NotificationType): Promise<Notification[]> {
-    const recipientId = this.impersonation.effectiveUserId();
+    const recipientId = this.recipientId();
     if (!recipientId) return [];
 
     const result = await this.db.searchRows<Notification>(

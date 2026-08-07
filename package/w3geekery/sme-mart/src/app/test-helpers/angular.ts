@@ -5,6 +5,7 @@
 
 import { vi } from 'vitest';
 import { signal } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
 
 // ---------------------------------------------------------------------------
 // Core SME Mart service mocks
@@ -91,10 +92,19 @@ export function fakeSmeMartDb() {
   };
 }
 
-/** Mock ImpersonationService */
-export function fakeImpersonation(userId = 'u-100') {
+/**
+ * Mock ZerobiasClientApp for services that read the signed-in user.
+ *
+ * `whoAmI$` is exposed so a test can push `undefined` and drive the
+ * "no signed-in user yet" branch, which is reachable because toSignal starts
+ * before whoAmI resolves.
+ */
+export function fakeZerobiasApp(userId = 'u-100', orgId = 'org-100') {
+  const whoAmI$ = new BehaviorSubject<Record<string, unknown> | undefined>({ id: userId });
   return {
-    effectiveUserId: vi.fn().mockReturnValue(userId),
+    whoAmI$,
+    getWhoAmI: () => whoAmI$.asObservable(),
+    getCurrentOrgId: vi.fn().mockReturnValue(orgId),
   };
 }
 

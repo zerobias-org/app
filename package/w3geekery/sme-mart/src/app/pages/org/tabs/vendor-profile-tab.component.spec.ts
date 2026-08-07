@@ -8,7 +8,6 @@ import { vi } from 'vitest';
 import { VendorProfileService } from '../../../core/services/vendor-profile.service';
 import { PipelineWriteService } from '../../../core/services/pipeline-write.service';
 import { GraphqlReadService } from '../../../core/services/graphql-read.service';
-import { ImpersonationService } from '../../../core/services/impersonation.service';
 import { ZerobiasClientApp, ZerobiasClientApi } from '@zerobias-com/zerobias-client';
 import { VendorProfileTab } from './vendor-profile-tab.component';
 import { VendorProfileForm } from './vendor-profile-form.component';
@@ -62,7 +61,6 @@ describe('VendorProfileTab', () => {
         { provide: ZerobiasClientApi, useValue: {} },
         { provide: PipelineWriteService, useValue: {} },
         { provide: GraphqlReadService, useValue: {} },
-        { provide: ImpersonationService, useValue: {} },
         { provide: MatSnackBar, useValue: { open: vi.fn() } },
       ],
     }).compileComponents();

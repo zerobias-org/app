@@ -1,12 +1,12 @@
 import { Injectable, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { HttpClient, HttpEventType, HttpHeaders } from '@angular/common/http';
-import { ZerobiasClientApi, getZerobiasClientUrl } from '@zerobias-com/zerobias-client';
+import { ZerobiasClientApi, ZerobiasClientApp, getZerobiasClientUrl } from '@zerobias-com/zerobias-client';
 import type { FileView } from '@zerobias-com/fileservice-sdk';
 import { Nmtoken } from '@zerobias-org/types-core-js';
 import { Md5 } from 'ts-md5';
 import { Subject } from 'rxjs';
 import { SmeMartDbService } from './sme-mart-db.service';
-import { ImpersonationService } from './impersonation.service';
 import type { EngagementDocument, DocumentType } from '../models/document.model';
 import type { OrgDocument } from '../models/org-document.model';
 import { environment } from '../../../environments/environment';
@@ -23,7 +23,13 @@ export class DocumentService {
   private readonly clientApi = inject(ZerobiasClientApi);
   private readonly http = inject(HttpClient);
   private readonly db = inject(SmeMartDbService);
-  private readonly impersonation = inject(ImpersonationService);
+  private readonly app = inject(ZerobiasClientApp);
+  private readonly whoAmI = toSignal(this.app.getWhoAmI(), { initialValue: null });
+
+  /** Signed-in user id, or '' before whoAmI resolves. */
+  private currentUserId(): string {
+    return String(this.whoAmI()?.id ?? '');
+  }
 
   /** Emits progress updates during uploads */
   readonly uploadProgress$ = new Subject<UploadProgress>();
@@ -66,21 +72,21 @@ export class DocumentService {
           folderId: folderId ? this.clientApi.toUUID(folderId) : undefined,
           retentionPolicy: {},
           syncPolicy: {},
-        } as any);
+        } as never);
 
       zbFileId = fileView.id?.toString() || '';
 
       fileVersionId = await this.uploadBinary(
         fileView, arrayBuffer, file.type, checksum, filename,
       );
-    } catch (fsErr: any) {
-      console.warn('[DocumentService] FileService upload unavailable, storing metadata only:', fsErr.message);
+    } catch (fsErr: unknown) {
+      console.warn('[DocumentService] FileService upload unavailable, storing metadata only:', (fsErr as Error).message);
       this.uploadProgress$.next({ filename, percent: 50, done: false });
     }
 
     // 4. Insert into org_documents (single source of truth)
-    const userId = this.impersonation.effectiveUserId();
-    const orgId = this.impersonation.effectiveOrgId();
+    const userId = this.currentUserId();
+    const orgId = this.app.getCurrentOrgId() || '';
     const doc = await this.db.createRow<OrgDocument>('org_documents', {
       org_id: orgId,
       zb_file_id: zbFileId || null,
@@ -177,12 +183,12 @@ export class DocumentService {
     fileVersionId: string,
     commentText?: string,
   ): Promise<void> {
-    const attachment = await this.clientApi.platformClient
+    await this.clientApi.platformClient
       .getTaskApi()
       .addAttachment(this.clientApi.toUUID(taskId), {
         fileVersionId: this.clientApi.toUUID(fileVersionId),
         commentTxt: commentText || undefined,
-      } as any);
+      } as never);
 
     // Update org_documents row with task link
     await this.db.updateRow('org_documents', documentId, {
@@ -190,7 +196,7 @@ export class DocumentService {
     });
 
     // Create a task share
-    const userId = this.impersonation.effectiveUserId();
+    const userId = this.currentUserId();
     await this.db.createRow('org_document_shares', {
       document_id: documentId,
       shared_with_type: 'task',
@@ -296,7 +302,7 @@ export class DocumentService {
             const percent = Math.round(100 * event.loaded / event.total);
             this.uploadProgress$.next({ filename, percent, done: false });
           } else if (event.type === HttpEventType.Response) {
-            const body = event.body as any;
+            const body = event.body as { id?: { toString(): string } } | null;
             resolve(body?.id?.toString() || body?.toString() || '');
           }
         },
@@ -320,12 +326,12 @@ export class DocumentService {
           undefined,
           [new Nmtoken('folder')],
         );
-      const existing = results.items?.find((r: any) => r.name === folderName);
+      const existing = results.items?.find((r) => r.name === folderName);
       if (existing) return existing.id?.toString() || null;
 
       const folder = await this.clientApi.fileClient
         .getFolderApi()
-        .create({ name: folderName } as any);
+        .create({ name: folderName } as never);
       return folder.id?.toString() || null;
     } catch (err) {
       console.warn('[DocumentService] Failed to ensure folder, uploading to root:', err);

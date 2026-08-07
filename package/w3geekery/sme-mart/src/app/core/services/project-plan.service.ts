@@ -11,7 +11,6 @@ import { Injectable, inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
-import { ImpersonationService } from './impersonation.service';
 import { PROJECT_PLAN_FIELD_MAPPING, PLAN_MILESTONE_FIELD_MAPPING, mapGqlToNeon } from '../field-mappings';
 import type { GqlProjectPlanResponse, GqlPlanMilestoneResponse } from '../gql-types/project-plan.types';
 import type {
@@ -42,7 +41,6 @@ import { PagedResults } from '@zerobias-org/types-core-js';
 export class ProjectPlanService {
   private readonly pipelineWrite = inject(PipelineWriteService);
   private readonly graphqlRead = inject(GraphqlReadService);
-  private readonly impersonation = inject(ImpersonationService);
   private readonly snackBar = inject(MatSnackBar);
 
   // ────────────────────────────────────────────────────────────────────────────

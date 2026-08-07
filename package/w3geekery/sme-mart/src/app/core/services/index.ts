@@ -13,7 +13,6 @@ export { CatalogService } from './catalog.service';
 export { ProviderProfilesService } from './provider-profiles.service';
 export { CategoriesService } from './categories.service';
 export { AdminService } from './admin.service';
-export { ImpersonationService } from './impersonation.service';
 export { SmeMartResourceService } from './sme-mart-resource.service';
 export { UserPreferencesService } from './user-preferences.service';
 export { EngagementHierarchyService } from './engagement-hierarchy.service';

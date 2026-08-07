@@ -19,8 +19,6 @@ import { ZbSearchInputComponent, ZbEmptyStateContainerComponent } from '@zerobia
 import { StarRating } from '../../shared/components/star-rating/star-rating.component';
 import { OrgProvisioningTabComponent } from './tabs/org-provisioning-tab.component';
 import { AdminService } from '../../core/services/admin.service';
-import { DemoModeService } from '../../core/services/demo-mode.service';
-import { SmeMartDbService } from '../../core/services/sme-mart-db.service';
 import { CategoriesService, type CategoryTreeNode } from '../../core/services/categories.service';
 import { ReviewsService } from '../../core/services/reviews.service';
 import type {
@@ -67,8 +65,6 @@ export class AdminDashboard implements OnInit {
   private readonly reviewsService = inject(ReviewsService);
   private readonly snackBar = inject(MatSnackBar);
   private readonly dialog = inject(MatDialog);
-  readonly demoMode = inject(DemoModeService);
-  private readonly db = inject(SmeMartDbService);
 
   // Stats
   readonly stats = signal<AdminStats | null>(null);
@@ -265,14 +261,6 @@ export class AdminDashboard implements OnInit {
   // Settings
   // ===========================================================================
 
-  async toggleDemoMode(): Promise<void> {
-    try {
-      await this.demoMode.toggle(this.db);
-      this.snackBar.open(`Demo mode ${this.demoMode.enabled() ? 'enabled' : 'disabled'}`, 'OK', { duration: 3000 });
-    } catch (err) {
-      this.snackBar.open(`Failed: ${(err as Error).message}`, 'Dismiss', { duration: 5000 });
-    }
-  }
 
   async loadSettings(): Promise<void> {
     const result = await this.adminService.getSettings();
