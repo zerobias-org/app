@@ -7,7 +7,6 @@ import {
   OnInit,
   OnDestroy,
 } from '@angular/core';
-import { DatePipe } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -66,7 +65,6 @@ export interface SectionRow {
   selector: 'app-vendor-profile-tab',
   standalone: true,
   imports: [
-    DatePipe,
     ReactiveFormsModule,
     MatExpansionModule,
     MatSidenavModule,

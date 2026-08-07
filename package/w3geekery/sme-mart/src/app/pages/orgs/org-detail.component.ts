@@ -11,12 +11,11 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { ZbSimplePanelComponent, ZbAvatarLabelComponent, ZbCustomizableTableComponent } from '@zerobias-org/ngx-library';
+import { ZbSimplePanelComponent, ZbAvatarLabelComponent } from '@zerobias-org/ngx-library';
 import { ZerobiasClientApp } from '@zerobias-com/zerobias-client';
 import { map, switchMap, from, firstValueFrom } from 'rxjs';
 import { ZerobiasClientApi } from '@zerobias-com/zerobias-client';
 import { UUID } from '@zerobias-org/types-core-js';
-import { GraphqlReadService } from '../../core/services/graphql-read.service';
 
 interface OrgInfo {
   id: string;
@@ -88,7 +87,6 @@ function toOrgGroup(raw: Record<string, unknown>): OrgGroup {
     MatProgressSpinnerModule,
     ZbSimplePanelComponent,
     ZbAvatarLabelComponent,
-    ZbCustomizableTableComponent,
   ],
   templateUrl: './org-detail.component.html',
   styleUrl: './org-detail.component.scss',
@@ -99,7 +97,6 @@ export class OrgDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly clientApi = inject(ZerobiasClientApi);
   private readonly router = inject(Router);
-  private readonly graphqlRead = inject(GraphqlReadService);
   private readonly clipboard = inject(Clipboard);
   private readonly snackBar = inject(MatSnackBar);
 
