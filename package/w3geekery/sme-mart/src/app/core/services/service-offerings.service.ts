@@ -2,7 +2,6 @@ import { Injectable, inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService, type GqlQueryOptions } from './graphql-read.service';
-import { DemoVisibilityService } from './demo-visibility.service';
 import type { QueryOptions } from '@zerobias-org/data-utils';
 import { PagedResults } from '@zerobias-org/types-core-js';
 import {
@@ -157,7 +156,6 @@ export type NewVendorListing = Pick<VendorListing, 'family' | 'kind' | 'title'> 
 export class ServiceOfferingsService {
   private readonly pipelineWrite = inject(PipelineWriteService);
   private readonly graphqlRead = inject(GraphqlReadService);
-  private readonly demoVisibility = inject(DemoVisibilityService);
   private readonly snackBar = inject(MatSnackBar);
 
   /**
@@ -182,12 +180,7 @@ export class ServiceOfferingsService {
       gqlOptions,
     );
 
-    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
-    const filteredGql = this.demoVisibility.applyVisibility(
-      result.items as (GqlVendorListingResponse & { tag?: Array<{ value: string }> | null })[],
-    );
-
-    const items = filteredGql.map(mapGqlToVendorListing);
+    const items = result.items.map(mapGqlToVendorListing);
 
     return PagedResults.fromArray(items, pageNumber, pageSize, result.page.totalCount ?? items.length);
   }
@@ -209,12 +202,7 @@ export class ServiceOfferingsService {
       gqlOptions,
     );
 
-    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
-    const filteredGql = this.demoVisibility.applyVisibility(
-      result.items as (GqlVendorListingResponse & { tag?: Array<{ value: string }> | null })[],
-    );
-
-    return filteredGql.map(mapGqlToVendorListing);
+    return result.items.map(mapGqlToVendorListing);
   }
 
   /**

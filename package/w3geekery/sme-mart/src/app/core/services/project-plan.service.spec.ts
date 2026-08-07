@@ -10,7 +10,6 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ProjectPlanService } from './project-plan.service';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
-import { DemoVisibilityService } from './demo-visibility.service';
 import { ProjectContextService } from './project-context.service';
 import { ImpersonationService } from './impersonation.service';
 import { fakeProjectContextService } from '../../test-helpers/angular';
@@ -48,7 +47,6 @@ describe('ProjectPlanService', () => {
     TestBed.configureTestingModule({
       providers: [
         ProjectPlanService,
-        DemoVisibilityService,
         { provide: PipelineWriteService, useValue: mockPipelineWrite },
         { provide: GraphqlReadService, useValue: mockGraphqlRead },
         { provide: ImpersonationService, useValue: mockImpersonation },
@@ -318,75 +316,4 @@ describe('ProjectPlanService', () => {
 
   // ── Demo visibility (Phase 24 Plan 03) ──
 
-  describe('Demo visibility (Phase 24 Plan 03)', () => {
-    const basePlan = {
-      parentId: 'project-1', title: 'Plan', approach: 'agile', estimatedDuration: '4 weeks',
-      teamStructure: '[]', createdAt: '2026-05-05T00:00:00Z', updatedAt: '2026-05-05T00:00:00Z',
-    };
-    const mockGqlReturn = [
-      { ...basePlan, id: '1', title: 'Real', tag: null },
-      { ...basePlan, id: '2', title: 'Real w/ marketplace tag', tag: [{ value: 'a81cd320-243e-44eb-bdd9-9824019ef3dd' }] },
-      { ...basePlan, id: '3', title: 'Demo (global)', tag: [{ value: '81053c14-a8e5-4939-b538-c122c7d0eb1a' }] },
-      { ...basePlan, id: '4', title: 'Demo (legacy)', tag: [{ value: 'd618b602-21cc-40a1-a9fa-534b7bc1672c' }] },
-    ];
-
-    it('[DG-02] returns every record — demo filtering is bypassed', async () => {
-      mockGraphqlRead.query.mockResolvedValue({
-        items: mockGqlReturn,
-        page: { pageNumber: 1, pageSize: 50, totalCount: 4 },
-      });
-
-      const result = await service.listPlans('project-1');
-
-      expect(result.items.map((r: { id?: string }) => r.id)).toEqual(['1', '2', '3', '4']);
-    });
-
-    it('[DG-03] returns every record for admins too', async () => {
-      mockProjectContext.setIsAdmin(true);
-      mockGraphqlRead.query.mockResolvedValue({
-        items: mockGqlReturn,
-        page: { pageNumber: 1, pageSize: 50, totalCount: 4 },
-      });
-
-      const result = await service.listPlans('project-1');
-
-      expect(result.items.map((r: { id?: string }) => r.id)).toEqual(['1', '2', '3', '4']);
-    });
-
-    it('[DG-02] does NOT add server-side tag negation filter', async () => {
-      mockGraphqlRead.query.mockResolvedValue({
-        items: mockGqlReturn,
-        page: { pageNumber: 1, pageSize: 50, totalCount: 4 },
-      });
-
-      await service.listPlans('project-1');
-
-      const callArgs = mockGraphqlRead.query.mock.calls[0];
-      const filters = (callArgs[2] as { filters?: Record<string, string> })?.filters ?? {};
-      const filterValues = Object.values(filters).join(' ');
-      expect(filterValues).not.toContain('.not in.');
-      expect(filterValues).not.toContain('.ne.');
-    });
-
-    it('requests tag field in GQL query', async () => {
-      mockGraphqlRead.query.mockResolvedValue({
-        items: mockGqlReturn,
-        page: { pageNumber: 1, pageSize: 50, totalCount: 4 },
-      });
-
-      await service.listPlans('project-1');
-
-      const fields = mockGraphqlRead.query.mock.calls[0][1] as string[];
-      expect(fields).toContain('tag');
-    });
-
-    it('[DG-02] returns null when non-admin fetches a demo record by id', async () => {
-      const demoRecord = { ...basePlan, id: '3', title: 'Demo', tag: [{ value: '81053c14-a8e5-4939-b538-c122c7d0eb1a' }] };
-      mockGraphqlRead.getById.mockResolvedValueOnce(demoRecord);
-
-      const result = await service.getPlan('3');
-
-      expect(result).toBeNull();
-    });
-  });
 });

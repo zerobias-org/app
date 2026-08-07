@@ -178,9 +178,9 @@ export class GraphqlReadService {
 
     // `tag` is `[zerobias_zerobias_platform_schema_tag]` — an object list, not
     // a scalar. The boundary GQL parser rejects bare `tag` ("must have a
-    // selection of subfields"). Expand to `tag { value }` since DemoVisibility
-    // only reads `tag[i].value`. All other Object.tag consumers need only
-    // value too. If a future caller needs more tag fields, generalize.
+    // selection of subfields"), so any caller requesting `tag` needs it expanded.
+    // `value` is the only subfield any current consumer reads. If a future caller
+    // needs more tag fields, generalize.
     const expandedFields = fields.map(f => (f === 'tag' ? 'tag { value }' : f));
 
     const argStr = args.length > 0 ? `(${args.join(', ')})` : '';
