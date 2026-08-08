@@ -1,6 +1,5 @@
 // Core Services Index
 
-export { DemoDataService } from './demo-data.service';
 export { PipelineWriteService } from './pipeline-write.service';
 export { GraphqlReadService } from './graphql-read.service';
 export { NotificationService } from './notification.service';
