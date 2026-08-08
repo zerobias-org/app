@@ -28,7 +28,6 @@ import {
 import { routes } from './app.routes';
 import { environment } from '../environments/environment';
 import { AppInitService } from './core/app-init.service';
-import { PlatformEngagementProvisioner } from './core/services/platform-engagement-provisioner.service';
 import { PIN_STORAGE_TOKEN, type PinStorage } from './core/services/pin-storage.interface';
 import { LocalStoragePinStorage } from './core/services/pin-storage-local.service';
 import { PkvPinStorage } from './core/services/pin-storage-pkv.service';
@@ -59,9 +58,6 @@ export const appConfig: ApplicationConfig = {
 
     // Auth bootstrap — blocks Angular bootstrap until init() resolves
     provideAppInitializer(() => inject(AppInitService).init()),
-
-    // Org provisioning — used by the admin org-provisioning tab
-    PlatformEngagementProvisioner,
 
     // Board pin-state storage — PKV-primary (cross-device) with localStorage fallback when
     // prefsBackend='pkv'; localStorage-only otherwise. DI-only swap per D-Q10.

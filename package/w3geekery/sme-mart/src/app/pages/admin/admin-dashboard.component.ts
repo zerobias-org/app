@@ -17,7 +17,6 @@ import { DatePipe } from '@angular/common';
 import { ZerobiasClientApp } from '@zerobias-com/zerobias-client';
 import { ZbSearchInputComponent, ZbEmptyStateContainerComponent } from '@zerobias-org/ngx-library';
 import { StarRating } from '../../shared/components/star-rating/star-rating.component';
-import { OrgProvisioningTabComponent } from './tabs/org-provisioning-tab.component';
 import { AdminService } from '../../core/services/admin.service';
 import { CategoriesService, type CategoryTreeNode } from '../../core/services/categories.service';
 import { ReviewsService } from '../../core/services/reviews.service';
@@ -52,7 +51,6 @@ import type {
     ZbSearchInputComponent,
     ZbEmptyStateContainerComponent,
     StarRating,
-    OrgProvisioningTabComponent,
   ],
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.scss',
