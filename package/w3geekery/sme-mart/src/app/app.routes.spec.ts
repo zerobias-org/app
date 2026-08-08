@@ -43,17 +43,6 @@ describe('App Routes', () => {
     });
   });
 
-  describe('Projects Route', () => {
-    it('/projects route exists', () => {
-      const appShellRoute = routes.find(r => r.path === '');
-      // /projects route should exist as AppShell child
-      const projectsRoute = appShellRoute?.children?.find(r => r.path === 'projects');
-      expect(projectsRoute).toBeTruthy();
-      // The component assertion was dropped with MyProjectList, deleted in 43bd75ec:
-      // Engagement and Project live in platform.Project, surfaced by the Projects App.
-    });
-  });
-
   describe('Admin Route', () => {
     it('/admin route exists', () => {
       const appShellRoute = routes.find(r => r.path === '');

@@ -104,28 +104,15 @@ export class NotificationPanel implements OnInit, OnDestroy {
 
     const parentId = (notification.payload as Record<string, string>)?.['parent_id'];
 
+    // Only RFPs are navigable in SME Mart. The engagement / task / document / note
+    // cases used to deep-link into /engagements/:id, a route that no longer exists —
+    // they were navigating into NG04002 "cannot match any routes" at runtime. Those
+    // resources are managed in the Projects App; the event below still fires so a
+    // consumer can route them out when that link is wired.
     switch (resource_type) {
-      case 'engagement':
-        this.router.navigate(['/engagements', resource_id]);
-        break;
       case 'bid':
       case 'rfp':
         this.router.navigate(['/rfps', parentId || resource_id]);
-        break;
-      case 'task':
-        if (parentId) {
-          this.router.navigate(['/engagements', parentId], { fragment: 'tasks' });
-        }
-        break;
-      case 'document':
-        if (parentId) {
-          this.router.navigate(['/engagements', parentId], { fragment: 'documents' });
-        }
-        break;
-      case 'note':
-        if (parentId) {
-          this.router.navigate(['/engagements', parentId], { fragment: 'notes' });
-        }
         break;
     }
 
