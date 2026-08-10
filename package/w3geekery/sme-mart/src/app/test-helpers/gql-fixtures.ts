@@ -10,8 +10,6 @@
 import type {
   GqlBidResponse,
   GqlBidResponseResponse,
-  GqlNoteResponse,
-  GqlNoteFolderResponse,
   GqlReviewResponse,
   GqlDocumentResponse,
   ComplianceStatus,
@@ -116,70 +114,6 @@ export const BID_RESPONSE_GQL_FIXTURE: GqlBidResponseResponse = {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Note and NoteFolder Fixtures
-// ─────────────────────────────────────────────────────────────────────────────
-
-export const NOTE_FOLDER_GQL_FIXTURE: GqlNoteFolderResponse = {
-  id: 'folder-001-uuid-assessment-phase',
-  engagementId: 'eng-001-uuid-hipaa-assessment',
-  parentId: null,
-  name: 'Assessment Phase',
-  description: 'Notes from initial compliance assessment period',
-  createdByZerobiasUserId: 'user-buyer-001-uuid',
-  accessLevel: 'boundary',
-  sortOrder: 1,
-  color: '#3F51B5',
-  createdAt: '2026-03-18T10:30:00Z',
-  updatedAt: '2026-03-18T10:30:00Z',
-};
-
-export const NOTE_GQL_FIXTURE: GqlNoteResponse = {
-  id: 'note-001-uuid-kickoff-call',
-  name: 'Kickoff Call Notes',
-  content: '**Attendees:** Buyer team, Provider team lead\n\n**Key Findings:**\n- Organization has 250+ employees\n- Current systems: Epic EHR, MEDIDATA clinical trial management\n- Previous audits: SOC2 Type 2 in 2024\n\n**Next Steps:**\n1. Schedule technical deep-dives with IT team\n2. Collect documentation on data handling procedures\n3. Review current security policies',
-  engagementId: 'eng-001-uuid-hipaa-assessment',
-  folderId: 'folder-001-uuid-assessment-phase',
-  authorZerobiasUserId: 'user-buyer-001-uuid',
-  updatedByZerobiasUserId: 'user-buyer-001-uuid',
-  createdAt: '2026-03-18T10:35:00Z',
-  updatedAt: '2026-03-18T10:35:00Z',
-  archived: false,
-  accessLevel: 'boundary',
-  isMeetingMinutes: true,
-  meetingDate: '2026-03-18T09:00:00Z',
-  meetingDurationMinutes: 45,
-  backingTaskId: null,
-  injectedToTaskId: null,
-  injectedCommentId: null,
-  injectedAt: null,
-  boundaryId: '2842fab1-ceff-4ec4-bf09-ce5e7c33c3e2',
-  projectId: null,
-};
-
-export const NOTE_GQL_FIXTURE_PERSONAL: GqlNoteResponse = {
-  id: 'note-002-uuid-provider-questions',
-  name: 'Questions for Provider',
-  content: '**Review Comments from Ben:**\n- Need clarification on incident response procedures (page 3)\n- Encryption key management - ask about HSM implementation\n- Backup testing frequency and documentation\n\n**Follow-up Items:**\n1. Schedule call with provider security team\n2. Request additional documentation on disaster recovery',
-  engagementId: 'eng-001-uuid-hipaa-assessment',
-  folderId: 'folder-001-uuid-assessment-phase',
-  authorZerobiasUserId: 'user-buyer-001-uuid',
-  updatedByZerobiasUserId: 'user-buyer-001-uuid',
-  createdAt: '2026-03-18T11:00:00Z',
-  updatedAt: '2026-03-18T11:00:00Z',
-  archived: false,
-  accessLevel: 'personal', // Personal note, not shared
-  isMeetingMinutes: false,
-  meetingDate: null,
-  meetingDurationMinutes: null,
-  backingTaskId: null,
-  injectedToTaskId: null,
-  injectedCommentId: null,
-  injectedAt: null,
-  boundaryId: '2842fab1-ceff-4ec4-bf09-ce5e7c33c3e2',
-  projectId: null,
-};
-
-// ─────────────────────────────────────────────────────────────────────────────
 // VendorListing Fixture (was ServiceOffering, retired in smemart 2.0.8)
 //
 // Note the two shape changes this fixture demonstrates: the old `includes` string[]
@@ -275,17 +209,4 @@ export const DOCUMENT_GQL_FIXTURE_SOW: GqlDocumentResponse = {
   uploadedByZerobiasUserId: 'user-buyer-001-uuid',
   createdAt: '2026-03-18T09:30:00Z',
   updatedAt: '2026-03-18T09:30:00Z',
-};
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Composite Fixtures (with nested relationships)
-// ─────────────────────────────────────────────────────────────────────────────
-
-/**
- * NoteFolder with nested notes array and hierarchical folder structure
- */
-export const NOTE_FOLDER_WITH_NOTES_GQL_FIXTURE: GqlNoteFolderResponse = {
-  ...NOTE_FOLDER_GQL_FIXTURE,
-  notes: [NOTE_GQL_FIXTURE, NOTE_GQL_FIXTURE_PERSONAL],
-  children: [],
 };

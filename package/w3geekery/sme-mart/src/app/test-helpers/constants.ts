@@ -26,9 +26,6 @@ export const TEST_TAG_ID_2 = 'fdda765f-fc57-5604-a269-52a7df8164ec';
 export const TEST_RESOURCE_ID = '9125a8dc-52ee-365b-a5aa-81b0b3681cf6';
 export const TEST_DOC_ID = '9125a8dc-52ee-365b-a5aa-81b0b3681cf6';
 
-// Notes
-export const TEST_NOTE_ID = 'note-001';
-
 // Notifications
 export const TEST_NOTIFICATION_ID = 'notif-001';
 

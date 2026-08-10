@@ -2,7 +2,7 @@
  * Barrel export for all GQL response types
  *
  * Provides clean imports throughout the application:
- * import { GqlBidResponse, GqlNoteResponse } from '@/core/gql-types';
+ * import { GqlBidResponse, GqlReviewResponse } from '@/core/gql-types';
  */
 
 export type {
@@ -15,15 +15,6 @@ export type {
   GqlBidResponseResponse as GqlBidResponseEntity,
   ComplianceStatus,
 } from './bid-response.types';
-
-export type {
-  GqlNoteResponse,
-  NoteAccessLevel,
-} from './note.types';
-
-export type {
-  GqlNoteFolderResponse,
-} from './note-folder.types';
 
 export type {
   GqlVendorListingResponse,

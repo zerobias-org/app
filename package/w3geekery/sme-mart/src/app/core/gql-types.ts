@@ -15,8 +15,6 @@ export type ComplianceStatus = 'met' | 'partially_met' | 'not_met' | 'not_applic
 
 export type BidStatus = 'DRAFT' | 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'WITHDRAWN';
 
-export type NoteAccessLevel = 'personal' | 'boundary' | 'project';
-
 export type DocumentType = 'security_requirements' | 'sow' | 'budget' | 'legal_terms' | 'compliance' | 'functional_spec' | 'other';
 
 export type PricingType = 'fixed' | 'hourly' | 'subscription' | 'custom';
@@ -96,47 +94,6 @@ export interface GqlBidResponseResponse extends GqlBaseEntity {
   certificationRef?: string | null;
   readyDate?: string | null;
   respondedAt?: string | null;
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// NoteFolder Type
-// ─────────────────────────────────────────────────────────────────────────────
-
-export interface GqlNoteFolderResponse extends GqlBaseEntity {
-  engagementId: string;
-  parentId?: string | null;
-  name: string;
-  description?: string | null;
-  createdByZerobiasUserId: string;
-  accessLevel: NoteAccessLevel;
-  sortOrder?: number | null;
-  color?: string | null;
-  notes?: GqlNoteResponse[] | null;
-  children?: GqlNoteFolderResponse[] | null;
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Note Type
-// ─────────────────────────────────────────────────────────────────────────────
-
-export interface GqlNoteResponse extends GqlBaseEntity {
-  engagementId?: string | null;
-  folderId?: string | null;
-  name: string;          // Object base class — used as note title
-  content?: string | null; // Custom property — rich-text note body
-  authorZerobiasUserId: string;
-  updatedByZerobiasUserId?: string | null;
-  archived: boolean;
-  accessLevel: NoteAccessLevel;
-  isMeetingMinutes: boolean;
-  meetingDate?: string | null;
-  meetingDurationMinutes?: number | null;
-  backingTaskId?: string | null;
-  injectedToTaskId?: string | null;
-  injectedCommentId?: string | null;
-  injectedAt?: string | null;
-  boundaryId?: string | null;
-  projectId?: string | null;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

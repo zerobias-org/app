@@ -11,7 +11,6 @@ export * from './catalog.model';
 export * from './filter-preferences.model';
 export * from './timeline-event.model';
 export * from './timeline-filter.model';
-export * from './note.model';
 export * from './sme-mart-resource.model';
 export * from './document.model';
 export * from './org-document.model';

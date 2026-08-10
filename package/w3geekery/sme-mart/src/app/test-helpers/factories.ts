@@ -8,8 +8,6 @@
 import type {
   Bid,
   BidSummaryRow,
-  Note,
-  NoteWithTags,
   Notification,
 } from '../core/models';
 import type { OrgDocument, OrgDocumentDetail, OrgDocumentShare } from '../core/models/org-document.model';
@@ -22,7 +20,6 @@ import {
   TEST_BID_ID,
   TEST_USER_ID,
   TEST_PROVIDER_USER_ID,
-  TEST_NOTE_ID,
   TEST_DOC_ID,
   TEST_ORG_ID,
   TEST_TAG_ID,
@@ -87,31 +84,6 @@ export function makeBidSummaryRow(overrides: Partial<BidSummaryRow> = {}): BidSu
     provider_rating: 4.8,
     ...overrides,
   } as BidSummaryRow;
-}
-
-// ---------------------------------------------------------------------------
-// Notes
-// ---------------------------------------------------------------------------
-
-export function makeNote(overrides: Partial<Note> = {}): Note {
-  return {
-    id: TEST_NOTE_ID,
-    engagement_id: TEST_WR_ID,
-    author_zerobias_user_id: TEST_USER_ID,
-    title: 'Meeting Notes',
-    body: '# Notes\n\nDiscussed scope.',
-    folder_id: null,
-    access_level: 'boundary',
-    is_meeting_minutes: false,
-    archived: false,
-    created_at: TEST_CREATED_AT,
-    updated_at: TEST_UPDATED_AT,
-    ...overrides,
-  } as Note;
-}
-
-export function makeNoteWithTags(overrides: Partial<NoteWithTags> = {}): NoteWithTags {
-  return { ...makeNote(), tags: [], ...overrides } as NoteWithTags;
 }
 
 // ---------------------------------------------------------------------------
