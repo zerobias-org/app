@@ -2,12 +2,8 @@
  * Barrel export for all GQL response types
  *
  * Provides clean imports throughout the application:
- * import { GqlEngagementResponse, GqlBidResponse } from '@/core/gql-types';
+ * import { GqlBidResponse, GqlNoteResponse } from '@/core/gql-types';
  */
-
-export type {
-  GqlEngagementResponse,
-} from './engagement.types';
 
 export type {
   GqlBidResponse,

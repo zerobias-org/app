@@ -8,9 +8,6 @@
 import type {
   Bid,
   BidSummaryRow,
-  Engagement,
-  EngagementSummaryRow,
-  EngagementDetailRow,
   Note,
   NoteWithTags,
   Notification,
@@ -34,52 +31,6 @@ import {
   TEST_UPDATED_AT,
   TEST_NOTIFICATION_ID,
 } from './constants';
-
-// ---------------------------------------------------------------------------
-// Work Requests & Engagements
-// ---------------------------------------------------------------------------
-
-export function makeEngagement(overrides: Partial<Engagement> = {}): Engagement {
-  return {
-    id: TEST_WR_ID,
-    title: 'HIPAA Assessment',
-    status: 'open',
-    category: 'compliance',
-    buyer_zerobias_user_id: TEST_USER_ID,
-    created_at: TEST_CREATED_AT,
-    ...overrides,
-  } as Engagement;
-}
-
-export function makeEngagementSummaryRow(overrides: Partial<EngagementSummaryRow> = {}): EngagementSummaryRow {
-  return {
-    id: TEST_WR_ID,
-    title: 'HIPAA Assessment',
-    description: 'Full compliance review',
-    status: 'open',
-    category: 'compliance',
-    buyer_zerobias_user_id: TEST_USER_ID,
-    created_at: TEST_CREATED_AT,
-    budget_max: '15000',
-    engagement_tag: null,
-    accepted_provider_id: null,
-    ...overrides,
-  } as EngagementSummaryRow;
-}
-
-export function makeEngagementDetailRow(overrides: Partial<EngagementDetailRow> = {}): EngagementDetailRow {
-  return {
-    id: TEST_WR_ID,
-    title: 'HIPAA Assessment',
-    description: 'Full review',
-    status: 'open',
-    category: 'compliance',
-    buyer_zerobias_user_id: TEST_USER_ID,
-    engagement_tag: null,
-    created_at: TEST_CREATED_AT,
-    ...overrides,
-  } as EngagementDetailRow;
-}
 
 // ---------------------------------------------------------------------------
 // Bids

@@ -13,8 +13,6 @@
 
 export type ComplianceStatus = 'met' | 'partially_met' | 'not_met' | 'not_applicable' | 'planned';
 
-export type EngagementStatus = 'open' | 'in_progress' | 'completed' | 'cancelled';
-
 export type BidStatus = 'DRAFT' | 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'WITHDRAWN';
 
 export type NoteAccessLevel = 'personal' | 'boundary' | 'project';
@@ -34,30 +32,6 @@ export interface GqlBaseEntity {
   id: string;
   createdAt: string;
   updatedAt: string;
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Engagement Type
-// ─────────────────────────────────────────────────────────────────────────────
-
-export interface GqlEngagementResponse extends GqlBaseEntity {
-  name: string;
-  description?: string | null;
-  category?: string | null;
-  buyerZerobiasUserId: string;
-  buyerZerobiasOrgId?: string | null;
-  budgetType?: string | null;
-  budgetMin?: number | null;
-  budgetMax?: number | null;
-  timeline?: string | null;
-  status: EngagementStatus;
-  engagementTag?: string | null;
-  zerobiasTagId?: string | null;
-  zerobiasBoundaryId?: string | null;
-  zerobiasTaskId?: string | null;
-  facilitatorUserId?: string | null; // third-party consultant (Plan 056)
-  communicationMode?: string | null; // 'direct' | 'mediated' (Plan 056)
-  notes?: GqlNoteResponse[] | null;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

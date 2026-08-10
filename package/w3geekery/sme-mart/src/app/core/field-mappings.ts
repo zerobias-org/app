@@ -9,64 +9,6 @@
  */
 
 /**
- * Engagement field mapping (formerly WorkRequest in Neon)
- *
- * Neon table: work_requests (columns in snake_case)
- * GQL entity: Engagement (fields in camelCase)
- * Key rename: WorkRequest → Engagement (business alignment with "Engagement" terminology)
- * Field rename: title → name (GQL entity uses 'name' field inherited from Object base class)
- */
-export const ENGAGEMENT_FIELD_MAPPING = {
-  neonToGql: {
-    id: 'id',
-    title: 'name', // WorkRequest.title → Engagement.name (Object inherited field)
-    description: 'description',
-    category: 'category',
-    buyer_zerobias_user_id: 'buyerZerobiasUserId',
-    buyer_zerobias_org_id: 'buyerZerobiasOrgId',
-    budget_type: 'budgetType',
-    budget_min: 'budgetMin',
-    budget_max: 'budgetMax',
-    timeline: 'timeline',
-    status: 'status',
-    engagement_tag: 'engagementTag',
-    zerobias_tag_id: 'zerobiasTagId',
-    zerobias_boundary_id: 'zerobiasBoundaryId',
-    zerobias_task_id: 'zerobiasTaskId',
-    facilitator_user_id: 'facilitatorUserId', // Plan 056
-    communication_mode: 'communicationMode', // Plan 056
-    created_at: 'createdAt',
-    updated_at: 'updatedAt',
-  },
-  gqlToNeon: {
-    id: 'id',
-    name: 'title',
-    description: 'description',
-    category: 'category',
-    buyerZerobiasUserId: 'buyer_zerobias_user_id',
-    buyerZerobiasOrgId: 'buyer_zerobias_org_id',
-    budgetType: 'budget_type',
-    budgetMin: 'budget_min',
-    budgetMax: 'budget_max',
-    timeline: 'timeline',
-    status: 'status',
-    engagementTag: 'engagement_tag',
-    zerobiasTagId: 'zerobias_tag_id',
-    zerobiasBoundaryId: 'zerobias_boundary_id',
-    zerobiasTaskId: 'zerobias_task_id',
-    facilitatorUserId: 'facilitator_user_id', // Plan 056
-    communicationMode: 'communication_mode', // Plan 056
-    createdAt: 'created_at',
-    updatedAt: 'updated_at',
-    // Object base class date fields (GQL uses these names)
-    dateCreated: 'created_at',
-    dateLastModified: 'updated_at',
-  },
-  sourceSchema: 'zerobias-org/schema PR #28 (v1.0.9)',
-  lastVerified: '2026-03-27',
-} as const;
-
-/**
  * Bid field mapping
  *
  * Neon table: bids (columns in snake_case)
@@ -390,12 +332,12 @@ export const DOCUMENT_FIELD_MAPPING = {
  * @returns The transformed object with GQL camelCase field names
  *
  * @example
- * const neonWorkRequest = { id: '123', title: 'HIPAA Review', budget_min: '1000' };
- * const gqlData = mapNeonToGql<GqlEngagementResponse>(
- *   neonWorkRequest,
- *   ENGAGEMENT_FIELD_MAPPING.neonToGql
+ * const neonBid = { id: '123', cover_letter: 'We can help', provider_id: 'p-1' };
+ * const gqlData = mapNeonToGql<GqlBidResponse>(
+ *   neonBid,
+ *   BID_FIELD_MAPPING.neonToGql
  * );
- * // gqlData.name === 'HIPAA Review', gqlData.budgetMin === '1000'
+ * // gqlData.coverLetter === 'We can help', gqlData.providerId === 'p-1'
  */
 export function mapNeonToGql<T = Record<string, unknown>>(
   neonModel: unknown,
@@ -423,9 +365,9 @@ export function mapNeonToGql<T = Record<string, unknown>>(
  * @returns The transformed object with Neon snake_case field names
  *
  * @example
- * const gqlData = { id: '123', name: 'HIPAA Review', budgetMin: '1000' };
- * const neonData = mapGqlToNeon(gqlData, ENGAGEMENT_FIELD_MAPPING.gqlToNeon);
- * // neonData.title === 'HIPAA Review', neonData.budget_min === '1000'
+ * const gqlData = { id: '123', coverLetter: 'We can help', providerId: 'p-1' };
+ * const neonData = mapGqlToNeon(gqlData, BID_FIELD_MAPPING.gqlToNeon);
+ * // neonData.cover_letter === 'We can help', neonData.provider_id === 'p-1'
  */
 export function mapGqlToNeon<T = Record<string, unknown>>(
   gqlModel: unknown,
@@ -828,7 +770,6 @@ export const RFP_INVITATION_FIELD_MAPPING = {
  * All field mapping constants exported as a single object for easier iteration.
  */
 export const ALL_FIELD_MAPPINGS = {
-  Engagement: ENGAGEMENT_FIELD_MAPPING,
   Bid: BID_FIELD_MAPPING,
   BidResponse: BID_RESPONSE_FIELD_MAPPING,
   Note: NOTE_FIELD_MAPPING,
