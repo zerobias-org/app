@@ -11,7 +11,6 @@ import type {
   GqlBidResponse,
   GqlBidResponseResponse,
   GqlReviewResponse,
-  GqlDocumentResponse,
   ComplianceStatus,
 } from '../core/gql-types';
 import type { GqlVendorListingResponse } from '../core/gql-types/vendor-listing.types';
@@ -165,48 +164,4 @@ export const REVIEW_GQL_FIXTURE: GqlReviewResponse = {
   approvedBy: 'user-admin-uuid',
   createdAt: '2026-03-18T15:30:00Z',
   updatedAt: '2026-03-18T16:00:00Z',
-};
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Document Fixture
-// ─────────────────────────────────────────────────────────────────────────────
-
-export const DOCUMENT_GQL_FIXTURE: GqlDocumentResponse = {
-  id: 'doc-001-uuid-hipaa-audit-report',
-  name: 'HIPAA_Audit_Report_Final.pdf',
-  description: 'Final audit report with findings and recommendations',
-  engagementId: 'eng-001-uuid-hipaa-assessment',
-  zbFileId: 'file-uuid-001',
-  zbFileVersionId: 'file-version-uuid-001',
-  filename: 'HIPAA_Audit_Report_Final.pdf',
-  fileSizeBytes: 2457600, // 2.4 MB
-  mimeType: 'application/pdf',
-  documentType: 'compliance',
-  displayName: 'Final Audit Report',
-  zbTaskId: 'task-uuid-001',
-  zbTaskAttachmentId: 'attachment-uuid-001',
-  archived: false,
-  uploadedByZerobiasUserId: 'user-provider-001-uuid',
-  createdAt: '2026-03-18T14:30:00Z',
-  updatedAt: '2026-03-18T14:30:00Z',
-};
-
-export const DOCUMENT_GQL_FIXTURE_SOW: GqlDocumentResponse = {
-  id: 'doc-002-uuid-statement-of-work',
-  name: 'SOW_HIPAA_Audit.pdf',
-  description: 'Statement of Work for HIPAA compliance audit engagement',
-  engagementId: 'eng-001-uuid-hipaa-assessment',
-  zbFileId: 'file-uuid-002',
-  zbFileVersionId: 'file-version-uuid-002',
-  filename: 'SOW_HIPAA_Audit.pdf',
-  fileSizeBytes: 156800, // 150 KB
-  mimeType: 'application/pdf',
-  documentType: 'sow',
-  displayName: 'Statement of Work',
-  zbTaskId: 'task-uuid-002',
-  zbTaskAttachmentId: 'attachment-uuid-002',
-  archived: false,
-  uploadedByZerobiasUserId: 'user-buyer-001-uuid',
-  createdAt: '2026-03-18T09:30:00Z',
-  updatedAt: '2026-03-18T09:30:00Z',
 };

@@ -10,9 +10,6 @@ import type {
   BidSummaryRow,
   Notification,
 } from '../core/models';
-import type { OrgDocument, OrgDocumentDetail, OrgDocumentShare } from '../core/models/org-document.model';
-import type { EngagementDocument } from '../core/models/document.model';
-
 import type { TagView } from '@zerobias-com/platform-sdk';
 
 import {
@@ -20,10 +17,6 @@ import {
   TEST_BID_ID,
   TEST_USER_ID,
   TEST_PROVIDER_USER_ID,
-  TEST_DOC_ID,
-  TEST_ORG_ID,
-  TEST_TAG_ID,
-  TEST_ENG_ID,
   TEST_CREATED_AT,
   TEST_UPDATED_AT,
   TEST_NOTIFICATION_ID,
@@ -84,77 +77,6 @@ export function makeBidSummaryRow(overrides: Partial<BidSummaryRow> = {}): BidSu
     provider_rating: 4.8,
     ...overrides,
   } as BidSummaryRow;
-}
-
-// ---------------------------------------------------------------------------
-// Documents
-// ---------------------------------------------------------------------------
-
-export function makeOrgDocument(overrides: Partial<OrgDocument> = {}): OrgDocument {
-  return {
-    id: TEST_DOC_ID,
-    org_id: TEST_ORG_ID,
-    zb_file_id: 'file-001',
-    zb_file_version_id: 'ver-001',
-    filename: 'exhibit-f.pdf',
-    mime_type: 'application/pdf',
-    file_size_bytes: 102400,
-    document_type: 'security_requirements',
-    display_name: 'Exhibit F',
-    description: 'Security requirements document',
-    uploaded_by_zerobias_user_id: TEST_USER_ID,
-    created_at: '2026-03-10T00:00:00Z',
-    updated_at: '2026-03-10T00:00:00Z',
-    archived: false,
-    ...overrides,
-  };
-}
-
-export function makeOrgDocumentDetail(overrides: Partial<OrgDocumentDetail> = {}): OrgDocumentDetail {
-  return {
-    ...makeOrgDocument(),
-    project_share_count: 0,
-    engagement_share_count: 1,
-    task_share_count: 0,
-    has_restricted_shares: false,
-    ...overrides,
-  };
-}
-
-export function makeOrgDocumentShare(overrides: Partial<OrgDocumentShare> = {}): OrgDocumentShare {
-  return {
-    id: TEST_TAG_ID,
-    document_id: TEST_DOC_ID,
-    shared_with_type: 'engagement',
-    shared_with_id: TEST_ENG_ID,
-    visibility: 'all',
-    granted_at: '2026-03-10T00:00:00Z',
-    granted_by: TEST_USER_ID,
-    ...overrides,
-  };
-}
-
-export function makeEngagementDocument(overrides: Partial<EngagementDocument> = {}): EngagementDocument {
-  return {
-    id: 'doc-001',
-    org_id: TEST_ORG_ID,
-    engagement_id: TEST_WR_ID,
-    zb_file_id: 'file-001',
-    zb_file_version_id: 'ver-001',
-    zb_task_id: null,
-    zb_task_attachment_id: null,
-    filename: 'exhibit-f.pdf',
-    mime_type: 'application/pdf',
-    file_size_bytes: 102400,
-    document_type: 'security_requirements',
-    display_name: 'Exhibit F',
-    description: null,
-    uploaded_by_zerobias_user_id: TEST_USER_ID,
-    created_at: '2026-03-10T00:00:00Z',
-    updated_at: '2026-03-10T00:00:00Z',
-    archived: false,
-    ...overrides,
-  } as EngagementDocument;
 }
 
 // ---------------------------------------------------------------------------

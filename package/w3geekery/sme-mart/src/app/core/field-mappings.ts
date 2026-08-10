@@ -163,62 +163,6 @@ export const REVIEW_FIELD_MAPPING = {
   lastVerified: '2026-03-19',
 } as const;
 
-/**
- * SmeMartDocument field mapping
- *
- * Neon table: engagement_documents (columns in snake_case)
- * GQL entity: SmeMartDocument (extends File — inherits fileVersionId, size, mimeType, downloadUrl)
- * Relationship: engagement_id → engagement (linkTo Engagement.id.documents)
- * File identity: zb_file_id, zb_file_version_id (from ZB FileService)
- */
-export const DOCUMENT_FIELD_MAPPING = {
-  neonToGql: {
-    id: 'id',
-    engagement_id: 'engagementId',
-    zb_file_id: 'zbFileId',
-    zb_file_version_id: 'zbFileVersionId',
-    filename: 'filename',
-    mime_type: 'mimeType',
-    file_size_bytes: 'fileSizeBytes',
-    document_type: 'documentType',
-    display_name: 'displayName',
-    description: 'description',
-    zb_task_id: 'zbTaskId',
-    zb_task_attachment_id: 'zbTaskAttachmentId',
-    uploaded_by_zerobias_user_id: 'uploadedByZerobiasUserId',
-    created_at: 'createdAt',
-    updated_at: 'updatedAt',
-    archived: 'archived',
-  },
-  gqlToNeon: {
-    id: 'id',
-    engagementId: 'engagement_id',
-    zbFileId: 'zb_file_id',
-    zbFileVersionId: 'zb_file_version_id',
-    filename: 'filename',
-    mimeType: 'mime_type',
-    fileSizeBytes: 'file_size_bytes',
-    documentType: 'document_type',
-    displayName: 'display_name',
-    description: 'description',
-    zbTaskId: 'zb_task_id',
-    zbTaskAttachmentId: 'zb_task_attachment_id',
-    uploadedByZerobiasUserId: 'uploaded_by_zerobias_user_id',
-    createdAt: 'created_at',
-    updatedAt: 'updated_at',
-    archived: 'archived',
-    dateCreated: 'created_at',
-    dateLastModified: 'updated_at',
-    // File base class field mappings (GQL names → Neon names)
-    fileVersionId: 'zb_file_version_id',
-    size: 'file_size_bytes',
-    downloadUrl: 'download_url',
-    viewUrl: 'view_url',
-  },
-  sourceSchema: 'zerobias-org/schema PR #7',
-  lastVerified: '2026-03-19',
-} as const;
-
 // ─────────────────────────────────────────────────────────────────────────────
 // Helper Functions for Bidirectional Mapping
 // ─────────────────────────────────────────────────────────────────────────────

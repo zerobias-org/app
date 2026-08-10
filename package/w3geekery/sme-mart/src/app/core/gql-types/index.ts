@@ -27,11 +27,6 @@ export type {
 } from './review.types';
 
 export type {
-  GqlDocumentResponse,
-  DocumentType,
-} from './document.types';
-
-export type {
   GqlSmeMartBoardResponse,
 } from './sme-mart-board.types';
 

@@ -13,13 +13,8 @@ export { CategoriesService } from './categories.service';
 export { AdminService } from './admin.service';
 export { UserPreferencesService } from './user-preferences.service';
 export { BidResponseService } from './bid-response.service';
-export { DocumentService } from './document.service';
-export { SmeDocLinkService } from './sme-doc-link.service';
 
 // Project Bloom services (Phase 6)
 export { ProjectContextService } from './project-context.service';
 export { ProjectPrdService } from './project-prd.service';
 export { ProjectPlanService } from './project-plan.service';
-
-// Document Templates (Phase 15)
-export { VariableSubstitutionService } from './variable-substitution.service';

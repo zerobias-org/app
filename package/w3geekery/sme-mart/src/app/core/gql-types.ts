@@ -15,8 +15,6 @@ export type ComplianceStatus = 'met' | 'partially_met' | 'not_met' | 'not_applic
 
 export type BidStatus = 'DRAFT' | 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'WITHDRAWN';
 
-export type DocumentType = 'security_requirements' | 'sow' | 'budget' | 'legal_terms' | 'compliance' | 'functional_spec' | 'other';
-
 export type PricingType = 'fixed' | 'hourly' | 'subscription' | 'custom';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -118,27 +116,6 @@ export interface GqlReviewResponse extends GqlBaseEntity {
   approved: boolean;
   approvedAt?: string | null;
   approvedBy?: string | null;
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// SmeMartDocument (EngagementDocument) Type
-// ─────────────────────────────────────────────────────────────────────────────
-
-export interface GqlDocumentResponse extends GqlBaseEntity {
-  engagementId: string;
-  zbFileId: string;
-  zbFileVersionId?: string | null;
-  filename: string;
-  name: string;
-  mimeType?: string | null;
-  fileSizeBytes?: number | null;
-  documentType?: DocumentType | null;
-  displayName?: string | null;
-  description?: string | null;
-  zbTaskId?: string | null;
-  zbTaskAttachmentId?: string | null;
-  archived: boolean;
-  uploadedByZerobiasUserId?: string | null;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

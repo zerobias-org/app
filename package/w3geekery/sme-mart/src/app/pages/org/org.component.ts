@@ -64,13 +64,12 @@ export class OrgPage implements OnInit, OnDestroy {
 
   readonly orgName = signal('Organization');
 
+  // Only tabs with a matching child route in ORG_ROUTES belong here. The
+  // engagements / projects / documents / templates entries were left behind when
+  // their routes were deleted, so they rendered as links that navigated nowhere.
   readonly tabs: OrgTab[] = [
     { label: 'Corporate Profile', icon: 'business', path: 'profile' },
-    { label: 'Engagements', icon: 'work', path: 'engagements' },
-    { label: 'Projects', icon: 'assignment', path: 'projects' },
-    { label: 'Documents', icon: 'folder', path: 'documents' },
     { label: 'Members', icon: 'people', path: 'members' },
-    { label: 'Templates', icon: 'description', path: 'templates' },
     { label: 'Settings', icon: 'settings', path: 'settings' },
   ];
 

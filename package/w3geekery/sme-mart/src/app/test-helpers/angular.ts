@@ -138,20 +138,6 @@ export function fakeNotificationService() {
   };
 }
 
-/** Mock DocumentService */
-export function fakeDocumentService() {
-  return {
-    uploadProgress$: { subscribe: vi.fn() },
-    uploadDocument: vi.fn().mockResolvedValue({ id: 'doc-001' }),
-    uploadBinary: vi.fn().mockResolvedValue({ id: 'doc-001' }),
-    getPreviewUrl: vi.fn().mockReturnValue('https://preview.example.com'),
-    getDownloadUrl: vi.fn().mockReturnValue('https://download.example.com'),
-    isPreviewable: vi.fn().mockReturnValue(true),
-    getFileIcon: vi.fn().mockReturnValue('description'),
-    formatFileSize: vi.fn().mockReturnValue('1.2 MB'),
-  };
-}
-
 /**
  * Mock ZerobiasClientApi with nested Proxy-based client chains.
  * Pattern from zb/ui: auto-generates mocked methods on access.
