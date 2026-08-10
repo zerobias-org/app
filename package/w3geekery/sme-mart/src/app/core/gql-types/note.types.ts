@@ -5,9 +5,8 @@
  * Can be organized into hierarchical folders.
  */
 
-// Forward declare to avoid circular dependencies
-type GqlNoteFolderResponse = any;
-type GqlEngagementResponse = any;
+// Type-only import — erased at compile time, so the note <-> folder cycle is not a runtime concern
+import type { GqlNoteFolderResponse } from './note-folder.types';
 
 /**
  * Note access level enumeration
@@ -54,5 +53,4 @@ export interface GqlNoteResponse {
 
   // Optional nested relationships
   folder?: GqlNoteFolderResponse; // Parent folder (if queried)
-  engagement?: GqlEngagementResponse; // Engagement context (if queried)
 }

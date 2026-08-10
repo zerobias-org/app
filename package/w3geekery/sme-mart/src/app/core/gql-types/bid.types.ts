@@ -5,10 +5,6 @@
  * Contains pricing, timeline, and compliance response data.
  */
 
-// Forward declare to avoid circular dependency
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type GqlEngagementResponse = any;
-
 /**
  * Pricing breakdown for bid (JSON object from wizard_data.pricing.pricing_breakdown)
  */
@@ -59,7 +55,6 @@ export interface GqlBidResponse {
   updatedAt: string; // ISO 8601
 
   // Optional nested relationships
-  engagement?: GqlEngagementResponse; // Parent engagement (if queried)
   bidResponses?: GqlBidResponseResponse[]; // Compliance responses (if queried)
 }
 

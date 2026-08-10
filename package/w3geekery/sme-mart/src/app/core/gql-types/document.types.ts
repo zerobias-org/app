@@ -5,9 +5,6 @@
  * Extends the File base class (inherits fileVersionId, downloadUrl, etc.)
  */
 
-// Forward declare to avoid circular dependency
-type GqlEngagementResponse = any;
-
 /**
  * Document type enumeration
  */
@@ -57,7 +54,5 @@ export interface GqlDocumentResponse {
   createdAt: string; // ISO 8601
   updatedAt: string; // ISO 8601
 
-  // Optional nested relationships
-  engagement?: GqlEngagementResponse; // Parent engagement (if queried)
   // downloadUrl can be derived from zbFileVersionId or included from File base
 }

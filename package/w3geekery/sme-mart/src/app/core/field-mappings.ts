@@ -765,25 +765,3 @@ export const RFP_INVITATION_FIELD_MAPPING = {
   sourceSchema: 'zerobias-org/schema (Plan 14 Wave 1 — Invitation Controls)',
   lastVerified: '2026-04-06',
 } as const;
-
-/**
- * All field mapping constants exported as a single object for easier iteration.
- */
-export const ALL_FIELD_MAPPINGS = {
-  Bid: BID_FIELD_MAPPING,
-  BidResponse: BID_RESPONSE_FIELD_MAPPING,
-  Note: NOTE_FIELD_MAPPING,
-  NoteFolder: NOTE_FOLDER_FIELD_MAPPING,
-  Review: REVIEW_FIELD_MAPPING,
-  SmeMartDocument: DOCUMENT_FIELD_MAPPING,
-  SmeMartProject: SME_MART_PROJECT_FIELD_MAPPING,
-  SmeMartBoard: SME_MART_BOARD_FIELD_MAPPING,
-  SmeMartActivity: SME_MART_ACTIVITY_FIELD_MAPPING,
-  SmeMartWorkflow: SME_MART_WORKFLOW_FIELD_MAPPING,
-  SmeMartTask: SME_MART_TASK_FIELD_MAPPING,
-  ProjectPrd: PROJECT_PRD_FIELD_MAPPING,
-  PrdSection: PRD_SECTION_FIELD_MAPPING,
-  ProjectPlan: PROJECT_PLAN_FIELD_MAPPING,
-  PlanMilestone: PLAN_MILESTONE_FIELD_MAPPING,
-  RfpInvitation: RFP_INVITATION_FIELD_MAPPING,
-} as const;

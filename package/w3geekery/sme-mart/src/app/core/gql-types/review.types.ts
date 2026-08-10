@@ -5,10 +5,6 @@
  * May link to a ZB Task for approval workflow (future).
  */
 
-// Forward declare to avoid circular dependency
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type GqlEngagementResponse = any;
-
 /**
  * GQL Review response type
  *
@@ -37,6 +33,5 @@ export interface GqlReviewResponse {
   updatedAt: string; // ISO 8601
 
   // Optional nested relationships
-  engagement?: GqlEngagementResponse; // Parent engagement (if queried)
   // approvalTask?: GqlTaskResponse; // Link to approval Task (if implemented)
 }
