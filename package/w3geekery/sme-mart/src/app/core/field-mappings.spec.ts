@@ -208,10 +208,10 @@ describe('Field Mapping Roundtrip Tests - Bloom Entities', () => {
   it('should roundtrip ProjectPrd fields without loss', () => {
     const gqlPrd: GqlProjectPrdResponse = {
       id: 'prd-123',
-      parentId: 'proj-123',
+      name: 'PRD for Project 123',
+      projectId: 'proj-123',
       title: 'Product Requirements Document',
       summary: 'Core requirements for v1.0',
-      sourceDocuments: ['https://docs.example.com/prd', 'https://specs.example.com/v1'],
       createdAt: '2026-03-19T00:00:00Z',
       updatedAt: '2026-03-19T00:00:00Z',
     };
@@ -222,12 +222,8 @@ describe('Field Mapping Roundtrip Tests - Bloom Entities', () => {
     );
 
     expect(model.title).toBe('Product Requirements Document');
-    expect(model.parentId).toBe('proj-123');
+    expect(model.projectId).toBe('proj-123');
     expect(model.summary).toBe('Core requirements for v1.0');
-    expect(model.sourceDocuments).toEqual([
-      'https://docs.example.com/prd',
-      'https://specs.example.com/v1',
-    ]);
 
     const gqlRoundtrip = mapNeonToGql<GqlProjectPrdResponse>(
       model,
@@ -236,7 +232,6 @@ describe('Field Mapping Roundtrip Tests - Bloom Entities', () => {
 
     expect(gqlRoundtrip.id).toBe(gqlPrd.id);
     expect(gqlRoundtrip.title).toBe(gqlPrd.title);
-    expect(gqlRoundtrip.sourceDocuments).toEqual(gqlPrd.sourceDocuments);
   });
 
   // ────────────────────────────────────────────────────────────────────────────
@@ -246,11 +241,10 @@ describe('Field Mapping Roundtrip Tests - Bloom Entities', () => {
   it('should roundtrip PrdSection fields without loss', () => {
     const gqlSection: GqlPrdSectionResponse = {
       id: 'section-123',
-      parentId: 'prd-123',
-      type: 'functional_requirements',
+      name: 'Functional Requirements',
+      sectionType: 'functional_requirements',
       content: 'User must be able to login with email and password',
       sortOrder: 1,
-      sourceDocuments: ['https://docs.example.com/section1'],
       createdAt: '2026-03-19T00:00:00Z',
       updatedAt: '2026-03-19T00:00:00Z',
     };
@@ -260,8 +254,7 @@ describe('Field Mapping Roundtrip Tests - Bloom Entities', () => {
       PRD_SECTION_FIELD_MAPPING.gqlToNeon,
     );
 
-    expect(model.type).toBe('functional_requirements');
-    expect(model.parentId).toBe('prd-123');
+    expect(model.sectionType).toBe('functional_requirements');
     expect(model.content).toBe('User must be able to login with email and password');
     expect(model.sortOrder).toBe(1);
 
@@ -271,8 +264,7 @@ describe('Field Mapping Roundtrip Tests - Bloom Entities', () => {
     );
 
     expect(gqlRoundtrip.id).toBe(gqlSection.id);
-    expect(gqlRoundtrip.type).toBe(gqlSection.type);
-    expect(gqlRoundtrip.sourceDocuments).toEqual(gqlSection.sourceDocuments);
+    expect(gqlRoundtrip.sectionType).toBe(gqlSection.sectionType);
   });
 
   // ────────────────────────────────────────────────────────────────────────────
@@ -281,8 +273,9 @@ describe('Field Mapping Roundtrip Tests - Bloom Entities', () => {
 
   it('should roundtrip ProjectPlan fields without loss', () => {
     const gqlPlan: GqlProjectPlanResponse = {
+      name: 'Execution Plan',
       id: 'plan-123',
-      parentId: 'proj-123',
+      projectId: 'proj-123',
       title: 'Project Execution Plan',
       approach: 'Agile with 2-week sprints',
       estimatedDuration: '6 months',
@@ -301,7 +294,7 @@ describe('Field Mapping Roundtrip Tests - Bloom Entities', () => {
     );
 
     expect(model.title).toBe('Project Execution Plan');
-    expect(model.parentId).toBe('proj-123');
+    expect(model.projectId).toBe('proj-123');
     expect(model.approach).toBe('Agile with 2-week sprints');
     expect(model.estimatedDuration).toBe('6 months');
     expect(model.teamStructure).toEqual({
@@ -327,7 +320,7 @@ describe('Field Mapping Roundtrip Tests - Bloom Entities', () => {
   it('should roundtrip PlanMilestone fields without loss', () => {
     const gqlMilestone: GqlPlanMilestoneResponse = {
       id: 'milestone-123',
-      parentId: 'plan-123',
+      planId: 'plan-123',
       name: 'Phase 1 Complete',
       targetDate: '2026-06-19',
       status: 'in_progress',
@@ -342,7 +335,7 @@ describe('Field Mapping Roundtrip Tests - Bloom Entities', () => {
     );
 
     expect(model.name).toBe('Phase 1 Complete');
-    expect(model.parentId).toBe('plan-123');
+    expect(model.planId).toBe('plan-123');
     expect(model.targetDate).toBe('2026-06-19');
     expect(model.status).toBe('in_progress');
     expect(model.sortOrder).toBe(1);
@@ -395,11 +388,11 @@ describe('Field Mapping Roundtrip Tests - Bloom Entities', () => {
 
   it('should handle nullable array fields correctly in ProjectPrd', () => {
     const gqlPrd: GqlProjectPrdResponse = {
+      name: 'PRD',
       id: 'prd-789',
-      parentId: 'proj-123',
+      projectId: 'proj-123',
       title: 'Minimal PRD',
       summary: null,
-      sourceDocuments: undefined,
       createdAt: '2026-03-19T00:00:00Z',
       updatedAt: '2026-03-19T00:00:00Z',
     };
@@ -411,6 +404,5 @@ describe('Field Mapping Roundtrip Tests - Bloom Entities', () => {
 
     expect(model.summary).toBeNull();
     // sourceDocuments should either be undefined or empty array depending on mapping
-    expect(Array.isArray(model.sourceDocuments) || model.sourceDocuments === undefined).toBe(true);
   });
 });

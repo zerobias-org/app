@@ -12,7 +12,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
 import { PROJECT_PRD_FIELD_MAPPING, PRD_SECTION_FIELD_MAPPING, mapGqlToNeon } from '../field-mappings';
-import type { GqlProjectPrdResponse, GqlPrdSectionResponse } from '../gql-types/project-prd.types';
+import type { GqlProjectPrdResponse, GqlPrdSectionResponse } from '../gql-types';
 import type {
   ProjectPrd,
   PrdSection,
@@ -35,7 +35,7 @@ import { PagedResults } from '@zerobias-org/types-core-js';
  * - Write: Pipeline pushes individual entity changes (create/update/delete)
  * - Optimistic: Returns immediately, pushes in background
  *
- * Parent-child relationship: ProjectPrd.id → PrdSection.parentId
+ * Parent-child relationship: ProjectPrd.id → PrdSection.prd
  */
 @Injectable({ providedIn: 'root' })
 export class ProjectPrdService {
@@ -58,10 +58,9 @@ export class ProjectPrdService {
     // Build GQL data (camelCase for GraphQL)
     const gqlData: Record<string, unknown> = {
       id: this.generateUUID(),
-      parentId: request.parentId,
+      projectId: request.parentId,
       title: request.title,
       summary: request.summary ?? null,
-      sourceDocuments: request.sourceDocuments ?? [],
       createdAt: now,
       updatedAt: now,
     };
@@ -95,7 +94,7 @@ export class ProjectPrdService {
     const prd = await this.graphqlRead.getById<GqlProjectPrdResponse>(
       'ProjectPrd',
       id,
-      ['id', 'parentId', 'title', 'summary', 'sourceDocuments', 'createdAt', 'updatedAt', 'tag'],
+      ['id', 'projectId', 'title', 'summary', 'createdAt', 'updatedAt', 'tag'],
     );
 
     if (!prd) return null;
@@ -118,9 +117,9 @@ export class ProjectPrdService {
 
     const result = await this.graphqlRead.query<GqlProjectPrdResponse>(
       'ProjectPrd',
-      ['id', 'parentId', 'title', 'summary', 'sourceDocuments', 'createdAt', 'updatedAt', 'tag'],
+      ['id', 'projectId', 'title', 'summary', 'createdAt', 'updatedAt', 'tag'],
       {
-        filters: { parentId: `.eq.${projectId}` },
+        filters: { projectId: `.eq.${projectId}` },
         pageNumber,
         pageSize,
       },
@@ -211,11 +210,10 @@ export class ProjectPrdService {
     // Build GQL data
     const gqlData: Record<string, unknown> = {
       id: this.generateUUID(),
-      parentId: prdId,
-      type: request.type,
+      prdId,
+      sectionType: request.type,
       content: request.content ?? null,
       sortOrder: request.sortOrder ?? 0,
-      sourceDocuments: request.sourceDocuments ?? [],
       createdAt: now,
       updatedAt: now,
     };
@@ -248,9 +246,9 @@ export class ProjectPrdService {
   async getPrdSections(prdId: string): Promise<PrdSection[]> {
     const result = await this.graphqlRead.query<GqlPrdSectionResponse>(
       'PrdSection',
-      ['id', 'parentId', 'type', 'content', 'sortOrder', 'sourceDocuments', 'createdAt', 'updatedAt'],
+      ['id', 'prdId', 'sectionType', 'title', 'content', 'sortOrder', 'createdAt', 'updatedAt'],
       {
-        filters: { parentId: `.eq.${prdId}` },
+        filters: { prdId: `.eq.${prdId}` },
         pageSize: 1000, // Fetch all sections for this PRD
       },
     );

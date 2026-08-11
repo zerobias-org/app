@@ -216,49 +216,41 @@ export interface GqlSmeMartTaskResponse extends GqlBaseEntity {
   transparencyConfig?: string | null; // JSON publish/private controls (Plan 078)
 }
 
+// Shapes below follow smemart/classes/*.yml. Every class extends Object, so `name`
+// is required and id/createdAt/updatedAt come from GqlBaseEntity.
 export interface GqlProjectPrdResponse extends GqlBaseEntity {
-  parentId: string;
-  name?: string | null;
-  title?: string | null;
-  description?: string | null;
-  summary?: string | null;
-  content?: string | null;
-  sections?: GqlPrdSectionResponse[] | null;
-  sourceDocuments?: string[] | null;
+  name: string;
+  title?: string | null;      // prd.title
+  summary?: string | null;    // prd.summary
+  projectId?: string | null;  // prd.projectId
+  sections?: GqlPrdSectionResponse[] | null; // linkTo PrdSection.id.prd, multi
 }
 
 export interface GqlPrdSectionResponse extends GqlBaseEntity {
-  parentId: string;
-  title?: string | null;
-  name?: string | null;
-  content?: string | null;
-  sortOrder?: number | null;
-  type?: string | null;
-  sourceDocuments?: string[] | null;
+  name: string;
+  sectionType?: string | null; // prdSection.sectionType
+  title?: string | null;       // prdSection.title
+  content?: string | null;     // prdSection.content
+  sortOrder?: number | null;   // prdSection.sortOrder
+  prdId?: string | null; // scalar mirror of the prd link
 }
 
 export interface GqlProjectPlanResponse extends GqlBaseEntity {
-  parentId: string;
-  name?: string | null;
-  title?: string | null;
-  description?: string | null;
-  approach?: string | null;
-  estimatedDuration?: string | null;
-  content?: string | null;
-  startDate?: string | null;
-  endDate?: string | null;
-  milestones?: GqlPlanMilestoneResponse[] | null;
-  teamStructure?: string | { lead: string; team_size: number; roles: string[] } | null;
+  name: string;
+  title?: string | null;             // plan.title
+  approach?: string | null;          // plan.approach
+  estimatedDuration?: string | null; // plan.estimatedDuration
+  teamStructure?: Record<string, unknown> | null; // plan.teamStructure
+  projectId?: string | null;         // plan.projectId
+  milestones?: GqlPlanMilestoneResponse[] | null; // linkTo PlanMilestone.id.plan, multi
 }
 
 export interface GqlPlanMilestoneResponse extends GqlBaseEntity {
-  parentId: string;
   name: string;
-  title?: string | null;
-  description?: string | null;
-  targetDate?: string | null;
-  sortOrder?: number | null;
-  status?: string | null;
+  targetDate?: string | null; // milestone.targetDate
+  status?: string | null;     // milestone.status
+  sortOrder?: number | null;  // milestone.sortOrder
+  planId?: string | null; // scalar mirror of the plan link
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

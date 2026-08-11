@@ -12,7 +12,7 @@ import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
 import { ProjectContextService } from './project-context.service';
 import { fakeProjectContextService } from '../../test-helpers/angular';
-import type { GqlProjectPrdResponse, GqlPrdSectionResponse } from '../gql-types/project-prd.types';
+import type { GqlProjectPrdResponse, GqlPrdSectionResponse } from '../gql-types';
 
 describe('ProjectPrdService', () => {
   let service: ProjectPrdService;
@@ -66,11 +66,11 @@ describe('ProjectPrdService', () => {
     });
 
     expect(result).toBeDefined();
-    expect(result.parentId).toBe('project-1');
+    expect(result.projectId).toBe('project-1');
     expect(result.title).toBe('Product Requirements');
     expect(mockPipelineWrite.pushEntity).toHaveBeenCalledWith(
       'ProjectPrd',
-      expect.objectContaining({ parentId: 'project-1', title: 'Product Requirements' }),
+      expect.objectContaining({ projectId: 'project-1', title: 'Product Requirements' }),
       [],
       'project-prd.service:76',
     );
@@ -96,8 +96,9 @@ describe('ProjectPrdService', () => {
 
   it('should fetch a single PRD by ID', async () => {
     const gqlPrd: GqlProjectPrdResponse = {
+      name: 'PRD',
       id: 'prd-1',
-      parentId: 'project-1',
+      projectId: 'project-1',
       title: 'Product Requirements',
       summary: 'Requirements',
       createdAt: '2026-03-19T00:00:00Z',
@@ -125,8 +126,9 @@ describe('ProjectPrdService', () => {
   it('should list PRDs for a project', async () => {
     const gqlPrds: GqlProjectPrdResponse[] = [
       {
+      name: 'PRD',
         id: 'prd-1',
-        parentId: 'project-1',
+        projectId: 'project-1',
         title: 'Requirements',
         createdAt: '2026-03-19T00:00:00Z',
         updatedAt: '2026-03-19T00:00:00Z',
@@ -143,7 +145,7 @@ describe('ProjectPrdService', () => {
     expect(result.items).toHaveLength(1);
     expect(result.items[0].title).toBe('Requirements');
     expect(mockGraphqlRead.query).toHaveBeenCalledWith('ProjectPrd', expect.any(Array), expect.objectContaining({
-      filters: { parentId: '.eq.project-1' },
+      filters: { projectId: '.eq.project-1' },
     }));
   });
 
@@ -188,7 +190,7 @@ describe('ProjectPrdService', () => {
   // PrdSection CRUD (Child Entities)
   // ────────────────────────────────────────────────────────────────────────────
 
-  it('should create a PRD section with correct parentId', async () => {
+  it('should create a PRD section with correct prdId', async () => {
     mockPipelineWrite.pushEntity.mockResolvedValue(undefined);
 
     const result = await service.createPrdSection('prd-1', {
@@ -198,11 +200,11 @@ describe('ProjectPrdService', () => {
     });
 
     expect(result).toBeDefined();
-    expect(result.parentId).toBe('prd-1');
-    expect(result.type).toBe('functional_requirements');
+    expect(result.prdId).toBe('prd-1');
+    expect(result.sectionType).toBe('functional_requirements');
     expect(mockPipelineWrite.pushEntity).toHaveBeenCalledWith(
       'PrdSection',
-      expect.objectContaining({ parentId: 'prd-1', type: 'functional_requirements' }),
+      expect.objectContaining({ prdId: 'prd-1', sectionType: 'functional_requirements' }),
       [],
       'project-prd.service:216',
     );
@@ -231,8 +233,9 @@ describe('ProjectPrdService', () => {
     const gqlSections: GqlPrdSectionResponse[] = [
       {
         id: 'section-1',
-        parentId: 'prd-1',
-        type: 'functional_requirements',
+        name: 'Functional Requirements',
+        prdId: 'prd-1',
+        sectionType: 'functional_requirements',
         content: 'Requirements',
         sortOrder: 1,
         createdAt: '2026-03-19T00:00:00Z',
@@ -240,8 +243,9 @@ describe('ProjectPrdService', () => {
       },
       {
         id: 'section-2',
-        parentId: 'prd-1',
-        type: 'non_functional_requirements',
+        name: 'Non-Functional Requirements',
+        prdId: 'prd-1',
+        sectionType: 'non_functional_requirements',
         content: 'Performance',
         sortOrder: 2,
         createdAt: '2026-03-19T00:00:00Z',
@@ -257,10 +261,10 @@ describe('ProjectPrdService', () => {
     const result = await service.getPrdSections('prd-1');
 
     expect(result).toHaveLength(2);
-    expect(result[0].type).toBe('functional_requirements');
-    expect(result[1].type).toBe('non_functional_requirements');
+    expect(result[0].sectionType).toBe('functional_requirements');
+    expect(result[1].sectionType).toBe('non_functional_requirements');
     expect(mockGraphqlRead.query).toHaveBeenCalledWith('PrdSection', expect.any(Array), expect.objectContaining({
-      filters: { parentId: '.eq.prd-1' },
+      filters: { prdId: '.eq.prd-1' },
     }));
   });
 

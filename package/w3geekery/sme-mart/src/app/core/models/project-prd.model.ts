@@ -8,21 +8,22 @@
 
 export interface ProjectPrd {
   id: string;
-  parentId: string; // SmeMartProject reference
+  name: string;
+  projectId: string; // prd.projectId
   title: string;
   summary?: string | null;
-  sourceDocuments?: string[];
   createdAt: string;
   updatedAt: string;
 }
 
 export interface PrdSection {
   id: string;
-  parentId: string; // ProjectPrd reference
-  type: string;
+  name: string;
+  prdId: string; // scalar mirror of the prd link
+  sectionType: string;
+  title?: string | null;
   content?: string | null;
   sortOrder?: number;
-  sourceDocuments?: string[];
   createdAt: string;
   updatedAt: string;
 }

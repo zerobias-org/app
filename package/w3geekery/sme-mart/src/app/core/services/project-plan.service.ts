@@ -12,7 +12,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
 import { PROJECT_PLAN_FIELD_MAPPING, PLAN_MILESTONE_FIELD_MAPPING, mapGqlToNeon } from '../field-mappings';
-import type { GqlProjectPlanResponse, GqlPlanMilestoneResponse } from '../gql-types/project-plan.types';
+import type { GqlProjectPlanResponse, GqlPlanMilestoneResponse } from '../gql-types';
 import type {
   ProjectPlan,
   PlanMilestone,
@@ -35,7 +35,7 @@ import { PagedResults } from '@zerobias-org/types-core-js';
  * - Write: Pipeline pushes individual entity changes (create/update/delete)
  * - Optimistic: Returns immediately, pushes in background
  *
- * Parent-child relationship: ProjectPlan.id → PlanMilestone.parentId
+ * Parent-child relationship: ProjectPlan.id → PlanMilestone.plan
  */
 @Injectable({ providedIn: 'root' })
 export class ProjectPlanService {
@@ -58,7 +58,7 @@ export class ProjectPlanService {
     // Build GQL data (camelCase for GraphQL)
     const gqlData: Record<string, unknown> = {
       id: this.generateUUID(),
-      parentId: request.parentId,
+      projectId: request.parentId,
       title: request.title,
       approach: request.approach ?? null,
       estimatedDuration: request.estimatedDuration ?? null,
@@ -96,7 +96,7 @@ export class ProjectPlanService {
     const plan = await this.graphqlRead.getById<GqlProjectPlanResponse>(
       'ProjectPlan',
       id,
-      ['id', 'parentId', 'title', 'approach', 'estimatedDuration', 'teamStructure', 'createdAt', 'updatedAt', 'tag'],
+      ['id', 'projectId', 'title', 'approach', 'estimatedDuration', 'teamStructure', 'createdAt', 'updatedAt', 'tag'],
     );
 
     if (!plan) return null;
@@ -119,9 +119,9 @@ export class ProjectPlanService {
 
     const result = await this.graphqlRead.query<GqlProjectPlanResponse>(
       'ProjectPlan',
-      ['id', 'parentId', 'title', 'approach', 'estimatedDuration', 'teamStructure', 'createdAt', 'updatedAt', 'tag'],
+      ['id', 'projectId', 'title', 'approach', 'estimatedDuration', 'teamStructure', 'createdAt', 'updatedAt', 'tag'],
       {
-        filters: { parentId: `.eq.${projectId}` },
+        filters: { projectId: `.eq.${projectId}` },
         pageNumber,
         pageSize,
       },
@@ -212,7 +212,7 @@ export class ProjectPlanService {
     // Build GQL data
     const gqlData: Record<string, unknown> = {
       id: this.generateUUID(),
-      parentId: planId,
+      planId,
       name: request.name,
       targetDate: request.targetDate ?? null,
       status: request.status ?? 'todo',
@@ -249,9 +249,9 @@ export class ProjectPlanService {
   async getMilestones(planId: string): Promise<PlanMilestone[]> {
     const result = await this.graphqlRead.query<GqlPlanMilestoneResponse>(
       'PlanMilestone',
-      ['id', 'parentId', 'name', 'targetDate', 'status', 'sortOrder', 'createdAt', 'updatedAt'],
+      ['id', 'planId', 'name', 'targetDate', 'status', 'sortOrder', 'createdAt', 'updatedAt'],
       {
-        filters: { parentId: `.eq.${planId}` },
+        filters: { planId: `.eq.${planId}` },
         pageSize: 1000, // Fetch all milestones for this plan
       },
     );

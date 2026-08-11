@@ -449,24 +449,24 @@ export const SME_MART_TASK_FIELD_MAPPING = {
 export const PROJECT_PRD_FIELD_MAPPING = {
   neonToGql: {
     id: 'id',
-    parentId: 'parentId',
+    name: 'name',
+    projectId: 'projectId',
     title: 'title',
     summary: 'summary',
-    sourceDocuments: 'sourceDocuments',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
   },
   gqlToNeon: {
     id: 'id',
-    parentId: 'parentId',
+    name: 'name',
+    projectId: 'projectId',
     title: 'title',
     summary: 'summary',
-    sourceDocuments: 'sourceDocuments',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
   },
-  sourceSchema: 'zerobias-org/schema PR #8 (Bloom)',
-  lastVerified: '2026-03-19',
+  sourceSchema: 'smemart/classes/ProjectPrd.yml',
+  lastVerified: '2026-08-11',
 } as const;
 
 /**
@@ -481,26 +481,28 @@ export const PROJECT_PRD_FIELD_MAPPING = {
 export const PRD_SECTION_FIELD_MAPPING = {
   neonToGql: {
     id: 'id',
-    parentId: 'parentId',
-    type: 'type',
+    prdId: 'prdId',
+    name: 'name',
+    sectionType: 'sectionType',
+    title: 'title',
     content: 'content',
     sortOrder: 'sortOrder',
-    sourceDocuments: 'sourceDocuments',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
   },
   gqlToNeon: {
     id: 'id',
-    parentId: 'parentId',
-    type: 'type',
+    prdId: 'prdId',
+    name: 'name',
+    sectionType: 'sectionType',
+    title: 'title',
     content: 'content',
     sortOrder: 'sortOrder',
-    sourceDocuments: 'sourceDocuments',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
   },
-  sourceSchema: 'zerobias-org/schema PR #8 (Bloom)',
-  lastVerified: '2026-03-19',
+  sourceSchema: 'smemart/classes/PrdSection.yml',
+  lastVerified: '2026-08-11',
 } as const;
 
 /**
@@ -515,7 +517,8 @@ export const PRD_SECTION_FIELD_MAPPING = {
 export const PROJECT_PLAN_FIELD_MAPPING = {
   neonToGql: {
     id: 'id',
-    parentId: 'parentId',
+    name: 'name',
+    projectId: 'projectId',
     title: 'title',
     approach: 'approach',
     estimatedDuration: 'estimatedDuration',
@@ -525,7 +528,8 @@ export const PROJECT_PLAN_FIELD_MAPPING = {
   },
   gqlToNeon: {
     id: 'id',
-    parentId: 'parentId',
+    name: 'name',
+    projectId: 'projectId',
     title: 'title',
     approach: 'approach',
     estimatedDuration: 'estimatedDuration',
@@ -533,8 +537,8 @@ export const PROJECT_PLAN_FIELD_MAPPING = {
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
   },
-  sourceSchema: 'zerobias-org/schema PR #8 (Bloom)',
-  lastVerified: '2026-03-19',
+  sourceSchema: 'smemart/classes/ProjectPlan.yml',
+  lastVerified: '2026-08-11',
 } as const;
 
 /**
@@ -549,7 +553,7 @@ export const PROJECT_PLAN_FIELD_MAPPING = {
 export const PLAN_MILESTONE_FIELD_MAPPING = {
   neonToGql: {
     id: 'id',
-    parentId: 'parentId',
+    planId: 'planId',
     name: 'name',
     targetDate: 'targetDate',
     status: 'status',
@@ -559,7 +563,7 @@ export const PLAN_MILESTONE_FIELD_MAPPING = {
   },
   gqlToNeon: {
     id: 'id',
-    parentId: 'parentId',
+    planId: 'planId',
     name: 'name',
     targetDate: 'targetDate',
     status: 'status',
@@ -567,8 +571,8 @@ export const PLAN_MILESTONE_FIELD_MAPPING = {
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
   },
-  sourceSchema: 'zerobias-org/schema PR #8 (Bloom)',
-  lastVerified: '2026-03-19',
+  sourceSchema: 'smemart/classes/PlanMilestone.yml',
+  lastVerified: '2026-08-11',
 } as const;
 
 /**
