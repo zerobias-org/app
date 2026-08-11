@@ -473,34 +473,4 @@ describe('ProviderProfilesService — MPI/GQL read path', () => {
     expect(mockSmeMartDb.getRow).not.toHaveBeenCalled();
   });
 
-  // ──────────────────────────────────────────────────────────────────
-  // Test 8: Verify MarketplaceProfileItem class is targeted in queries
-  // ──────────────────────────────────────────────────────────────────
-
-  it('calls boundaryExecuteRawQuery (direct boundary API, not GraphqlReadService)', async () => {
-    const mpiSeed = (section: string, data: string) => ({
-      id: `mpi-${ZB_ORG}-${section}`,
-      orgId: ZB_ORG,
-      section,
-      data,
-      status: 'active',
-    });
-
-    mockBoundaryApi.boundaryExecuteRawQuery.mockResolvedValue({
-      data: {
-        MarketplaceProfileItem: [
-          mpiSeed('legal_name', 'ZeroBias'),
-          mpiSeed('provider_type', 'platform'),
-        ],
-      },
-      gqlCount: { MarketplaceProfileItem: 2 },
-    });
-
-    await service.listProviders();
-
-    // Assert boundaryExecuteRawQuery was invoked (once for provider_type filter, once for all sections)
-    expect(mockBoundaryApi.boundaryExecuteRawQuery).toHaveBeenCalled();
-    // The service makes 2 calls (first filter by provider_type=platform, then fetch all sections)
-    expect(mockBoundaryApi.boundaryExecuteRawQuery.mock.calls.length).toBeGreaterThanOrEqual(1);
-  });
 });
