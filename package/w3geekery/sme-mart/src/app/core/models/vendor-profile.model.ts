@@ -212,7 +212,7 @@ export interface SecurityCredentialRecord {
   ecosystemCode: string | null;
   proficiency: string | null;
   frameworkIds: string[];
-  issuerVendorId: string | null;
+  issuerVendorIds: string[];
   sourceUrl: string | null;
   status: string | null;
 }

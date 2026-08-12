@@ -74,7 +74,7 @@ const USER_CREDENTIAL_FIELDS = [
 
 const SECURITY_CREDENTIAL_FIELDS = [
   'id', 'name', 'code', 'scope', 'ecosystemCode', 'proficiency', 'frameworkIds',
-  'issuerVendorId', 'sourceUrl', 'status',
+  'issuerVendorIds', 'sourceUrl', 'status',
 ];
 
 /** GQL returns multi-valued fields as either a bare value or an array. */
@@ -238,6 +238,7 @@ export class VendorProfileService {
       return result.items.map(item => ({
         ...item,
         frameworkIds: toArray(item['frameworkIds']),
+        issuerVendorIds: toArray(item['issuerVendorIds']),
       }) as unknown as SecurityCredentialRecord);
     } catch (err) {
       console.error('[VendorProfileService] listCatalogCredentials failed:', err);
