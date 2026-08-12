@@ -9,7 +9,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { vi } from 'vitest';
 import { VendorProfileForm } from './vendor-profile-form.component';
-import type { MarketplaceProfileItem } from '../../../core/models/marketplace-profile-item.model';
+import type { OrgProfileRecord } from '../../../core/models/vendor-profile.model';
 
 describe('VendorProfileForm', () => {
   let fixture: ComponentFixture<VendorProfileForm>;
@@ -45,8 +45,8 @@ describe('VendorProfileForm', () => {
     expect(component).toBeTruthy();
   });
 
-  describe('Phase 31-B: legalEntityName pre-fill from orgName', () => {
-    it('pre-fills legalEntityName with orgName when create + corporate_identity', () => {
+  describe('Phase 31-B: legalName pre-fill from orgName', () => {
+    it('pre-fills legalName with orgName when create + corporate_identity', () => {
       fixture.componentRef.setInput('mode', 'create');
       fixture.componentRef.setInput('section', 'corporate_identity');
       fixture.componentRef.setInput('orgName', 'Acme Corp');
@@ -54,29 +54,31 @@ describe('VendorProfileForm', () => {
 
       const fg = component.form();
       expect(fg).toBeTruthy();
-      expect(fg!.get('legalEntityName')?.value).toBe('Acme Corp');
+      expect(fg!.get('legalName')?.value).toBe('Acme Corp');
     });
 
-    it('does NOT overwrite legalEntityName from item.data when mode=edit', () => {
-      const item: MarketplaceProfileItem = {
-        id: 'item-1',
-        org_id: 'org-1',
-        section: 'corporate_identity',
-        name: 'Existing Entry',
-        description: '',
-        data: JSON.stringify({
-          legalEntityName: 'Existing LLC',
-          businessType: '',
-          foundedYear: 0,
-          yearsInBusiness: 0,
-          certifications: [],
-          numberOfEmployees: 0,
-        }),
-        status: 'active',
-        expires_at: null,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      } as MarketplaceProfileItem;
+    it('does NOT overwrite legalName from the edited row when mode=edit', () => {
+      // The typed row is read field-by-field; there is no `data` blob to JSON.parse.
+      const item: OrgProfileRecord = {
+        id: 'org-profile-1',
+        orgId: 'org-1',
+        legalName: 'Existing LLC',
+        dba: null,
+        tagline: null,
+        shortDescription: null,
+        longDescription: null,
+        website: null,
+        logoUrl: null,
+        foundedYear: null,
+        businessClassification: null,
+        employeeCount: null,
+        primaryContactUserId: null,
+        verified: false,
+        verificationSource: null,
+        verifiedAt: null,
+        verifiedBy: null,
+        verificationExpiresAt: null,
+      };
 
       fixture.componentRef.setInput('mode', 'edit');
       fixture.componentRef.setInput('section', 'corporate_identity');
@@ -86,7 +88,7 @@ describe('VendorProfileForm', () => {
 
       const fg = component.form();
       expect(fg).toBeTruthy();
-      expect(fg!.get('legalEntityName')?.value).toBe('Existing LLC');
+      expect(fg!.get('legalName')?.value).toBe('Existing LLC');
     });
 
     it('orgName has no effect when section is not corporate_identity', () => {
@@ -97,20 +99,20 @@ describe('VendorProfileForm', () => {
 
       const fg = component.form();
       expect(fg).toBeTruthy();
-      // attestation form has no legalEntityName control at all.
-      expect(fg!.get('legalEntityName')).toBeNull();
-      // serviceType is empty as before.
-      expect(fg!.get('serviceType')?.value).toBe('');
+      // attestation maps to ServiceCapability, which has no legalName control at all.
+      expect(fg!.get('legalName')).toBeNull();
+      // serviceSegmentId (was the free-text serviceType) is empty as before.
+      expect(fg!.get('serviceSegmentId')?.value).toBe('');
     });
 
-    it('legalEntityName is empty when orgName is "" in create mode', () => {
+    it('legalName is empty when orgName is "" in create mode', () => {
       fixture.componentRef.setInput('mode', 'create');
       fixture.componentRef.setInput('section', 'corporate_identity');
       fixture.componentRef.setInput('orgName', '');
       fixture.detectChanges();
 
       const fg = component.form();
-      expect(fg!.get('legalEntityName')?.value).toBe('');
+      expect(fg!.get('legalName')?.value).toBe('');
     });
   });
 });

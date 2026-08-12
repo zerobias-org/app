@@ -11,10 +11,8 @@ import { Injectable, inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
-import { DemoVisibilityService } from './demo-visibility.service';
-import { ImpersonationService } from './impersonation.service';
 import { PROJECT_PRD_FIELD_MAPPING, PRD_SECTION_FIELD_MAPPING, mapGqlToNeon } from '../field-mappings';
-import type { GqlProjectPrdResponse, GqlPrdSectionResponse } from '../gql-types/project-prd.types';
+import type { GqlProjectPrdResponse, GqlPrdSectionResponse } from '../gql-types';
 import type {
   ProjectPrd,
   PrdSection,
@@ -37,14 +35,12 @@ import { PagedResults } from '@zerobias-org/types-core-js';
  * - Write: Pipeline pushes individual entity changes (create/update/delete)
  * - Optimistic: Returns immediately, pushes in background
  *
- * Parent-child relationship: ProjectPrd.id → PrdSection.parentId
+ * Parent-child relationship: ProjectPrd.id → PrdSection.prd
  */
 @Injectable({ providedIn: 'root' })
 export class ProjectPrdService {
   private readonly pipelineWrite = inject(PipelineWriteService);
   private readonly graphqlRead = inject(GraphqlReadService);
-  private readonly demoVisibility = inject(DemoVisibilityService);
-  private readonly impersonation = inject(ImpersonationService);
   private readonly snackBar = inject(MatSnackBar);
 
   // ────────────────────────────────────────────────────────────────────────────
@@ -62,10 +58,9 @@ export class ProjectPrdService {
     // Build GQL data (camelCase for GraphQL)
     const gqlData: Record<string, unknown> = {
       id: this.generateUUID(),
-      parentId: request.parentId,
+      projectId: request.parentId,
       title: request.title,
       summary: request.summary ?? null,
-      sourceDocuments: request.sourceDocuments ?? [],
       createdAt: now,
       updatedAt: now,
     };
@@ -99,19 +94,13 @@ export class ProjectPrdService {
     const prd = await this.graphqlRead.getById<GqlProjectPrdResponse>(
       'ProjectPrd',
       id,
-      ['id', 'parentId', 'title', 'summary', 'sourceDocuments', 'createdAt', 'updatedAt', 'tag'],
+      ['id', 'projectId', 'title', 'summary', 'createdAt', 'updatedAt', 'tag'],
     );
 
     if (!prd) return null;
 
-    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
-    const filtered = this.demoVisibility.applyVisibility(
-      [prd as GqlProjectPrdResponse & { tag?: Array<{ value: string }> | null }],
-    )[0] ?? null;
-    if (!filtered) return null;
-
     return mapGqlToNeon<ProjectPrd>(
-      filtered,
+      prd,
       PROJECT_PRD_FIELD_MAPPING.gqlToNeon,
     );
   }
@@ -128,20 +117,15 @@ export class ProjectPrdService {
 
     const result = await this.graphqlRead.query<GqlProjectPrdResponse>(
       'ProjectPrd',
-      ['id', 'parentId', 'title', 'summary', 'sourceDocuments', 'createdAt', 'updatedAt', 'tag'],
+      ['id', 'projectId', 'title', 'summary', 'createdAt', 'updatedAt', 'tag'],
       {
-        filters: { parentId: `.eq.${projectId}` },
+        filters: { projectId: `.eq.${projectId}` },
         pageNumber,
         pageSize,
       },
     );
 
-    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
-    const filteredGql = this.demoVisibility.applyVisibility(
-      result.items as (GqlProjectPrdResponse & { tag?: Array<{ value: string }> | null })[],
-    );
-
-    const items = filteredGql.map(gql =>
+    const items = result.items.map(gql =>
       mapGqlToNeon<ProjectPrd>(gql, PROJECT_PRD_FIELD_MAPPING.gqlToNeon),
     );
 
@@ -226,11 +210,10 @@ export class ProjectPrdService {
     // Build GQL data
     const gqlData: Record<string, unknown> = {
       id: this.generateUUID(),
-      parentId: prdId,
-      type: request.type,
+      prdId,
+      sectionType: request.type,
       content: request.content ?? null,
       sortOrder: request.sortOrder ?? 0,
-      sourceDocuments: request.sourceDocuments ?? [],
       createdAt: now,
       updatedAt: now,
     };
@@ -263,9 +246,9 @@ export class ProjectPrdService {
   async getPrdSections(prdId: string): Promise<PrdSection[]> {
     const result = await this.graphqlRead.query<GqlPrdSectionResponse>(
       'PrdSection',
-      ['id', 'parentId', 'type', 'content', 'sortOrder', 'sourceDocuments', 'createdAt', 'updatedAt'],
+      ['id', 'prdId', 'sectionType', 'title', 'content', 'sortOrder', 'createdAt', 'updatedAt'],
       {
-        filters: { parentId: `.eq.${prdId}` },
+        filters: { prdId: `.eq.${prdId}` },
         pageSize: 1000, // Fetch all sections for this PRD
       },
     );

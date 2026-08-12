@@ -8,7 +8,8 @@
 
 export interface ProjectPlan {
   id: string;
-  parentId: string; // SmeMartProject reference
+  name: string;
+  projectId: string; // plan.projectId
   title: string;
   approach?: string | null;
   estimatedDuration?: string | null;
@@ -19,7 +20,7 @@ export interface ProjectPlan {
 
 export interface PlanMilestone {
   id: string;
-  parentId: string; // ProjectPlan reference
+  planId: string; // scalar mirror of the plan link
   name: string;
   targetDate?: string | null;
   status?: string;

@@ -5,8 +5,8 @@ import { ProficiencyLevel } from './enums';
  * and verification provenance per D-53.
  */
 
-// ProviderSkill: expertise junction (org-scoped)
-export interface ProviderSkill {
+// ProviderSkillProficiency: expertise junction (org-scoped)
+export interface ProviderSkillProficiency {
   id: string;
   orgId: string;                           // org-scoped (not provider_id)
   skillId: string;                         // Catalog FK (not zerobias_skill_id)
@@ -29,8 +29,8 @@ export interface ProviderRole {
   created_at: string;
 }
 
-// ProviderProduct: expertise junction (org-scoped)
-export interface ProviderProduct {
+// ProviderProductProficiency: expertise junction (org-scoped)
+export interface ProviderProductProficiency {
   id: string;
   orgId: string;
   productId: string;
@@ -43,8 +43,8 @@ export interface ProviderProduct {
   created_at: string;
 }
 
-// ProviderFramework: expertise junction (org-scoped)
-export interface ProviderFramework {
+// ProviderFrameworkProficiency: expertise junction (org-scoped)
+export interface ProviderFrameworkProficiency {
   id: string;
   orgId: string;
   frameworkId: string;

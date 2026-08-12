@@ -12,35 +12,24 @@
 // ── Resource types ──
 
 /** Resource types — each becomes a ZB resource type on migration */
+// note / note-folder / work-request / service-offering / document were dropped with
+// the smemart 2.0.7 retirements — Note+NoteFolder+SmeMartDocument went to FileService,
+// Engagement to platform.Project, ServiceOffering to VendorListing. Only classes SME
+// Mart still owns remain.
 export type SmeMartResourceType =
-  | 'sme-mart:note'
-  | 'sme-mart:note-folder'
-  | 'sme-mart:work-request'
   | 'sme-mart:bid'
-  | 'sme-mart:review'
-  | 'sme-mart:service-offering'
-  | 'sme-mart:document';
+  | 'sme-mart:review';
 
 /** Human-readable labels for resource types */
 export const RESOURCE_TYPE_LABELS: Record<SmeMartResourceType, string> = {
-  'sme-mart:note': 'Note',
-  'sme-mart:note-folder': 'Notebook',
-  'sme-mart:work-request': 'Engagement',
   'sme-mart:bid': 'Bid',
   'sme-mart:review': 'Review',
-  'sme-mart:service-offering': 'Service Offering',
-  'sme-mart:document': 'Document',
 };
 
 /** Material icon for each resource type */
 export const RESOURCE_TYPE_ICONS: Record<SmeMartResourceType, string> = {
-  'sme-mart:note': 'description',
-  'sme-mart:note-folder': 'folder',
-  'sme-mart:work-request': 'handshake',
   'sme-mart:bid': 'request_quote',
   'sme-mart:review': 'rate_review',
-  'sme-mart:service-offering': 'storefront',
-  'sme-mart:document': 'attach_file',
 };
 
 // ── Base resource interface ──
@@ -123,9 +112,7 @@ export const ALL_LINK_TYPES: SmeMartLinkType[] = [
 
 /** All resource types as array for dropdowns */
 export const ALL_RESOURCE_TYPES: SmeMartResourceType[] = [
-  'sme-mart:note', 'sme-mart:note-folder', 'sme-mart:work-request',
-  'sme-mart:bid', 'sme-mart:review', 'sme-mart:service-offering',
-  'sme-mart:document',
+  'sme-mart:bid', 'sme-mart:review',
 ];
 
 /** Resource link (Neon-backed, migrates to ResourceApi.linkResources) */

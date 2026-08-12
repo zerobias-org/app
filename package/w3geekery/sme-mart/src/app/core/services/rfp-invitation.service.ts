@@ -12,7 +12,6 @@ import { Injectable, inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService, type GqlQueryOptions } from './graphql-read.service';
-import { DemoVisibilityService } from './demo-visibility.service';
 import { RFP_INVITATION_FIELD_MAPPING, mapNeonToGql, mapGqlToNeon } from '../field-mappings';
 import type { RfpInvitation, CreateRfpInvitationRequest, RequestInvitationRequest } from '../models';
 import type { GqlRfpInvitationResponse } from '../gql-types';
@@ -21,7 +20,6 @@ import type { GqlRfpInvitationResponse } from '../gql-types';
 export class RfpInvitationService {
   private readonly pipelineWrite = inject(PipelineWriteService);
   private readonly graphqlRead = inject(GraphqlReadService);
-  private readonly demoVisibility = inject(DemoVisibilityService);
   private readonly snackBar = inject(MatSnackBar);
 
   /** Scalar fields for standard queries (no link fields) */
@@ -58,12 +56,7 @@ export class RfpInvitationService {
       gqlOptions,
     );
 
-    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
-    const filteredGql = this.demoVisibility.applyVisibility(
-      result.items as (GqlRfpInvitationResponse & { tag?: Array<{ value: string }> | null })[],
-    );
-
-    return filteredGql.map(gql => mapGqlToNeon<RfpInvitation>(gql, RFP_INVITATION_FIELD_MAPPING.gqlToNeon));
+    return result.items.map(gql => mapGqlToNeon<RfpInvitation>(gql, RFP_INVITATION_FIELD_MAPPING.gqlToNeon));
   }
 
   /**
@@ -81,12 +74,7 @@ export class RfpInvitationService {
       gqlOptions,
     );
 
-    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
-    const filteredGql = this.demoVisibility.applyVisibility(
-      result.items as (GqlRfpInvitationResponse & { tag?: Array<{ value: string }> | null })[],
-    );
-
-    return filteredGql.map(gql => mapGqlToNeon<RfpInvitation>(gql, RFP_INVITATION_FIELD_MAPPING.gqlToNeon));
+    return result.items.map(gql => mapGqlToNeon<RfpInvitation>(gql, RFP_INVITATION_FIELD_MAPPING.gqlToNeon));
   }
 
   /**
@@ -109,12 +97,7 @@ export class RfpInvitationService {
     );
 
     if (!result.items.length) return null;
-    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
-    const filtered = this.demoVisibility.applyVisibility(
-      [result.items[0] as GqlRfpInvitationResponse & { tag?: Array<{ value: string }> | null }],
-    )[0] ?? null;
-    if (!filtered) return null;
-    return mapGqlToNeon<RfpInvitation>(filtered, RFP_INVITATION_FIELD_MAPPING.gqlToNeon);
+    return mapGqlToNeon<RfpInvitation>(result.items[0], RFP_INVITATION_FIELD_MAPPING.gqlToNeon);
   }
 
   /**
@@ -134,14 +117,8 @@ export class RfpInvitationService {
     );
     if (!invitation) return null;
 
-    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
-    const filtered = this.demoVisibility.applyVisibility(
-      [invitation as GqlRfpInvitationResponse & { tag?: Array<{ value: string }> | null }],
-    )[0] ?? null;
-    if (!filtered) return null;
-
-    this.pipelineWrite.seedCache('RfpInvitation', id, filtered as unknown as Record<string, unknown>);
-    return mapGqlToNeon<RfpInvitation>(filtered, RFP_INVITATION_FIELD_MAPPING.gqlToNeon);
+    this.pipelineWrite.seedCache('RfpInvitation', id, invitation as unknown as Record<string, unknown>);
+    return mapGqlToNeon<RfpInvitation>(invitation, RFP_INVITATION_FIELD_MAPPING.gqlToNeon);
   }
 
   // ---------------------------------------------------------------------------

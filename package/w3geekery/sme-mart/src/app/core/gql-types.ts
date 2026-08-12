@@ -13,13 +13,7 @@
 
 export type ComplianceStatus = 'met' | 'partially_met' | 'not_met' | 'not_applicable' | 'planned';
 
-export type EngagementStatus = 'open' | 'in_progress' | 'completed' | 'cancelled';
-
 export type BidStatus = 'DRAFT' | 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'WITHDRAWN';
-
-export type NoteAccessLevel = 'personal' | 'boundary' | 'project';
-
-export type DocumentType = 'security_requirements' | 'sow' | 'budget' | 'legal_terms' | 'compliance' | 'functional_spec' | 'other';
 
 export type PricingType = 'fixed' | 'hourly' | 'subscription' | 'custom';
 
@@ -34,30 +28,6 @@ export interface GqlBaseEntity {
   id: string;
   createdAt: string;
   updatedAt: string;
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Engagement Type
-// ─────────────────────────────────────────────────────────────────────────────
-
-export interface GqlEngagementResponse extends GqlBaseEntity {
-  name: string;
-  description?: string | null;
-  category?: string | null;
-  buyerZerobiasUserId: string;
-  buyerZerobiasOrgId?: string | null;
-  budgetType?: string | null;
-  budgetMin?: number | null;
-  budgetMax?: number | null;
-  timeline?: string | null;
-  status: EngagementStatus;
-  engagementTag?: string | null;
-  zerobiasTagId?: string | null;
-  zerobiasBoundaryId?: string | null;
-  zerobiasTaskId?: string | null;
-  facilitatorUserId?: string | null; // third-party consultant (Plan 056)
-  communicationMode?: string | null; // 'direct' | 'mediated' (Plan 056)
-  notes?: GqlNoteResponse[] | null;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -125,63 +95,12 @@ export interface GqlBidResponseResponse extends GqlBaseEntity {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// NoteFolder Type
+// VendorListing Type
+//
+// ServiceOffering was retired in smemart 2.0.8 and replaced by VendorListing.
+// Its GQL response type lives in gql-types/vendor-listing.types.ts, following the
+// per-file convention the newer types use.
 // ─────────────────────────────────────────────────────────────────────────────
-
-export interface GqlNoteFolderResponse extends GqlBaseEntity {
-  engagementId: string;
-  parentId?: string | null;
-  name: string;
-  description?: string | null;
-  createdByZerobiasUserId: string;
-  accessLevel: NoteAccessLevel;
-  sortOrder?: number | null;
-  color?: string | null;
-  notes?: GqlNoteResponse[] | null;
-  children?: GqlNoteFolderResponse[] | null;
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Note Type
-// ─────────────────────────────────────────────────────────────────────────────
-
-export interface GqlNoteResponse extends GqlBaseEntity {
-  engagementId?: string | null;
-  folderId?: string | null;
-  name: string;          // Object base class — used as note title
-  content?: string | null; // Custom property — rich-text note body
-  authorZerobiasUserId: string;
-  updatedByZerobiasUserId?: string | null;
-  archived: boolean;
-  accessLevel: NoteAccessLevel;
-  isMeetingMinutes: boolean;
-  meetingDate?: string | null;
-  meetingDurationMinutes?: number | null;
-  backingTaskId?: string | null;
-  injectedToTaskId?: string | null;
-  injectedCommentId?: string | null;
-  injectedAt?: string | null;
-  boundaryId?: string | null;
-  projectId?: string | null;
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// ServiceOffering Type
-// ─────────────────────────────────────────────────────────────────────────────
-
-export interface GqlServiceOfferingResponse extends GqlBaseEntity {
-  name: string;
-  description?: string | null;
-  providerId: string;
-  category?: string | null;
-  subcategory?: string | null;
-  pricingType?: PricingType | null;
-  price?: string | null;
-  deliveryTime?: string | null;
-  includes?: string[] | null;
-  requirements?: string | null;
-  isActive: boolean;
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Review Type
@@ -197,27 +116,6 @@ export interface GqlReviewResponse extends GqlBaseEntity {
   approved: boolean;
   approvedAt?: string | null;
   approvedBy?: string | null;
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// SmeMartDocument (EngagementDocument) Type
-// ─────────────────────────────────────────────────────────────────────────────
-
-export interface GqlDocumentResponse extends GqlBaseEntity {
-  engagementId: string;
-  zbFileId: string;
-  zbFileVersionId?: string | null;
-  filename: string;
-  name: string;
-  mimeType?: string | null;
-  fileSizeBytes?: number | null;
-  documentType?: DocumentType | null;
-  displayName?: string | null;
-  description?: string | null;
-  zbTaskId?: string | null;
-  zbTaskAttachmentId?: string | null;
-  archived: boolean;
-  uploadedByZerobiasUserId?: string | null;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -318,49 +216,41 @@ export interface GqlSmeMartTaskResponse extends GqlBaseEntity {
   transparencyConfig?: string | null; // JSON publish/private controls (Plan 078)
 }
 
+// Shapes below follow smemart/classes/*.yml. Every class extends Object, so `name`
+// is required and id/createdAt/updatedAt come from GqlBaseEntity.
 export interface GqlProjectPrdResponse extends GqlBaseEntity {
-  parentId: string;
-  name?: string | null;
-  title?: string | null;
-  description?: string | null;
-  summary?: string | null;
-  content?: string | null;
-  sections?: GqlPrdSectionResponse[] | null;
-  sourceDocuments?: string[] | null;
+  name: string;
+  title?: string | null;      // prd.title
+  summary?: string | null;    // prd.summary
+  projectId?: string | null;  // prd.projectId
+  sections?: GqlPrdSectionResponse[] | null; // linkTo PrdSection.id.prd, multi
 }
 
 export interface GqlPrdSectionResponse extends GqlBaseEntity {
-  parentId: string;
-  title?: string | null;
-  name?: string | null;
-  content?: string | null;
-  sortOrder?: number | null;
-  type?: string | null;
-  sourceDocuments?: string[] | null;
+  name: string;
+  sectionType?: string | null; // prdSection.sectionType
+  title?: string | null;       // prdSection.title
+  content?: string | null;     // prdSection.content
+  sortOrder?: number | null;   // prdSection.sortOrder
+  prdId?: string | null; // scalar mirror of the prd link
 }
 
 export interface GqlProjectPlanResponse extends GqlBaseEntity {
-  parentId: string;
-  name?: string | null;
-  title?: string | null;
-  description?: string | null;
-  approach?: string | null;
-  estimatedDuration?: string | null;
-  content?: string | null;
-  startDate?: string | null;
-  endDate?: string | null;
-  milestones?: GqlPlanMilestoneResponse[] | null;
-  teamStructure?: string | { lead: string; team_size: number; roles: string[] } | null;
+  name: string;
+  title?: string | null;             // plan.title
+  approach?: string | null;          // plan.approach
+  estimatedDuration?: string | null; // plan.estimatedDuration
+  teamStructure?: Record<string, unknown> | null; // plan.teamStructure
+  projectId?: string | null;         // plan.projectId
+  milestones?: GqlPlanMilestoneResponse[] | null; // linkTo PlanMilestone.id.plan, multi
 }
 
 export interface GqlPlanMilestoneResponse extends GqlBaseEntity {
-  parentId: string;
   name: string;
-  title?: string | null;
-  description?: string | null;
-  targetDate?: string | null;
-  sortOrder?: number | null;
-  status?: string | null;
+  targetDate?: string | null; // milestone.targetDate
+  status?: string | null;     // milestone.status
+  sortOrder?: number | null;  // milestone.sortOrder
+  planId?: string | null; // scalar mirror of the plan link
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

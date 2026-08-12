@@ -11,10 +11,8 @@ import { Injectable, inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
-import { DemoVisibilityService } from './demo-visibility.service';
-import { ImpersonationService } from './impersonation.service';
 import { PROJECT_PLAN_FIELD_MAPPING, PLAN_MILESTONE_FIELD_MAPPING, mapGqlToNeon } from '../field-mappings';
-import type { GqlProjectPlanResponse, GqlPlanMilestoneResponse } from '../gql-types/project-plan.types';
+import type { GqlProjectPlanResponse, GqlPlanMilestoneResponse } from '../gql-types';
 import type {
   ProjectPlan,
   PlanMilestone,
@@ -37,14 +35,12 @@ import { PagedResults } from '@zerobias-org/types-core-js';
  * - Write: Pipeline pushes individual entity changes (create/update/delete)
  * - Optimistic: Returns immediately, pushes in background
  *
- * Parent-child relationship: ProjectPlan.id → PlanMilestone.parentId
+ * Parent-child relationship: ProjectPlan.id → PlanMilestone.plan
  */
 @Injectable({ providedIn: 'root' })
 export class ProjectPlanService {
   private readonly pipelineWrite = inject(PipelineWriteService);
   private readonly graphqlRead = inject(GraphqlReadService);
-  private readonly demoVisibility = inject(DemoVisibilityService);
-  private readonly impersonation = inject(ImpersonationService);
   private readonly snackBar = inject(MatSnackBar);
 
   // ────────────────────────────────────────────────────────────────────────────
@@ -62,7 +58,7 @@ export class ProjectPlanService {
     // Build GQL data (camelCase for GraphQL)
     const gqlData: Record<string, unknown> = {
       id: this.generateUUID(),
-      parentId: request.parentId,
+      projectId: request.parentId,
       title: request.title,
       approach: request.approach ?? null,
       estimatedDuration: request.estimatedDuration ?? null,
@@ -100,19 +96,13 @@ export class ProjectPlanService {
     const plan = await this.graphqlRead.getById<GqlProjectPlanResponse>(
       'ProjectPlan',
       id,
-      ['id', 'parentId', 'title', 'approach', 'estimatedDuration', 'teamStructure', 'createdAt', 'updatedAt', 'tag'],
+      ['id', 'projectId', 'title', 'approach', 'estimatedDuration', 'teamStructure', 'createdAt', 'updatedAt', 'tag'],
     );
 
     if (!plan) return null;
 
-    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
-    const filtered = this.demoVisibility.applyVisibility(
-      [plan as GqlProjectPlanResponse & { tag?: Array<{ value: string }> | null }],
-    )[0] ?? null;
-    if (!filtered) return null;
-
     return mapGqlToNeon<ProjectPlan>(
-      filtered,
+      plan,
       PROJECT_PLAN_FIELD_MAPPING.gqlToNeon,
     );
   }
@@ -129,20 +119,15 @@ export class ProjectPlanService {
 
     const result = await this.graphqlRead.query<GqlProjectPlanResponse>(
       'ProjectPlan',
-      ['id', 'parentId', 'title', 'approach', 'estimatedDuration', 'teamStructure', 'createdAt', 'updatedAt', 'tag'],
+      ['id', 'projectId', 'title', 'approach', 'estimatedDuration', 'teamStructure', 'createdAt', 'updatedAt', 'tag'],
       {
-        filters: { parentId: `.eq.${projectId}` },
+        filters: { projectId: `.eq.${projectId}` },
         pageNumber,
         pageSize,
       },
     );
 
-    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
-    const filteredGql = this.demoVisibility.applyVisibility(
-      result.items as (GqlProjectPlanResponse & { tag?: Array<{ value: string }> | null })[],
-    );
-
-    const items = filteredGql.map(gql =>
+    const items = result.items.map(gql =>
       mapGqlToNeon<ProjectPlan>(gql, PROJECT_PLAN_FIELD_MAPPING.gqlToNeon),
     );
 
@@ -227,7 +212,7 @@ export class ProjectPlanService {
     // Build GQL data
     const gqlData: Record<string, unknown> = {
       id: this.generateUUID(),
-      parentId: planId,
+      planId,
       name: request.name,
       targetDate: request.targetDate ?? null,
       status: request.status ?? 'todo',
@@ -264,9 +249,9 @@ export class ProjectPlanService {
   async getMilestones(planId: string): Promise<PlanMilestone[]> {
     const result = await this.graphqlRead.query<GqlPlanMilestoneResponse>(
       'PlanMilestone',
-      ['id', 'parentId', 'name', 'targetDate', 'status', 'sortOrder', 'createdAt', 'updatedAt'],
+      ['id', 'planId', 'name', 'targetDate', 'status', 'sortOrder', 'createdAt', 'updatedAt'],
       {
-        filters: { parentId: `.eq.${planId}` },
+        filters: { planId: `.eq.${planId}` },
         pageSize: 1000, // Fetch all milestones for this plan
       },
     );

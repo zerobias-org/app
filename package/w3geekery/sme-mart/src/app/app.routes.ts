@@ -11,22 +11,13 @@ import { Home } from './pages/home/home.component';
 // import { RfpWizard } from './pages/rfps/rfp-wizard/rfp-wizard.component';
 // import { BidWizard } from './pages/rfps/bid-wizard/bid-wizard.component';
 // import { BidComparisonPage } from './pages/rfps/bid-comparison-page.component';
-import { EngagementDetail } from './pages/engagements/engagement-detail.component';
-import { EngagementEdit } from './pages/engagements/engagement-edit.component';
-import { ENGAGEMENT_TAB_ROUTES } from './pages/engagements/engagement.routes';
-import { MyEngagementList } from './pages/my-engagements/my-engagement-list.component';
-import { MyProjectList } from './pages/my-projects/my-project-list.component';
 import { ComingSoon } from './pages/coming-soon/coming-soon.component';
-import { CompanyProfileFormComponent } from './onboarding/company-profile-form.component';
-import { onboardingGuard } from './core/guards/onboarding.guard';
-import { PlatformEngagementSetupComponent } from './onboarding/platform-engagement-setup.component';
 import { FeatureComingSoonComponent } from './pages/default-project-board/feature-coming-soon.component';
 
 export const routes: Routes = [
   {
     path: '',
     component: AppShell,
-    canActivate: [onboardingGuard],
     children: [
       { path: '', component: Home },
       // Phase 31-A: surfaces hidden/Coming Soon for v1.4 dogfood. Original
@@ -48,36 +39,28 @@ export const routes: Routes = [
       { path: 'rfps', component: ComingSoon, data: { title: 'RFPs' } },
       { path: 'rfps/:id', redirectTo: 'rfps' },
       { path: 'rfps/:id/:tail', redirectTo: 'rfps' },
-      // Engagements + Projects (top-level — the /my/ prefix was dropped
-      // 2026-05-14; lists are implicitly "yours" via the org-session header).
-      { path: 'engagements', component: MyEngagementList },
-      { path: 'engagements/:id', component: EngagementDetail, children: ENGAGEMENT_TAB_ROUTES },
-      { path: 'engagements/:id/edit', component: EngagementEdit },
-      { path: 'projects', component: MyProjectList },
-      // Board detail (L-2). Child of the guarded shell so ProjectContextService.isAdmin
-      // is hydrated on hard-refresh/deep-link (admin gating in board-detail).
-      {
-        path: 'boards',
-        loadChildren: () => import('./pages/boards/boards.routes').then((m) => m.BOARDS_ROUTES),
-      },
-      // Legacy /my/* redirects (preserve any bookmarks / cached deep-links).
-      { path: 'my/engagements', redirectTo: 'engagements', pathMatch: 'full' },
-      { path: 'my/engagements/:id', redirectTo: 'engagements/:id' },
-      { path: 'my/projects', redirectTo: 'projects', pathMatch: 'full' },
-      {
-        path: 'templates/:id',
-        loadComponent: () =>
-          import('./pages/templates/template-editor.component').then(m => m.TemplateEditorComponent),
-      },
-      {
-        path: 'onboarding',
-        children: [
-          // Platform-engagement provisioning surface (no guard on this route —
-          // it IS the guard's error handler and explicit setup destination)
-          { path: 'platform-engagement', component: PlatformEngagementSetupComponent },
-          { path: 'company-profile', component: CompanyProfileFormComponent },
-        ],
-      },
+      // NO Projects or Engagements surface in SME Mart (Clark, 2026-08-07). Not a
+      // list, not a Coming Soon placeholder, not a redirect — nothing, until we prove
+      // we need one for something legitimate rather than "just because". Both are
+      // managed in the Projects App.
+      //
+      // The only project Marketplace cares about is an RFP, which the `rfps` route
+      // above owns. An RFP wizard may build the project out later, but managing it
+      // stays in the Projects App — apart from whatever marketplace-specific aspects
+      // of the RFP make sense to manage here.
+      //
+      // ENGAGEMENTS HAVE A PLAUSIBLE WAY BACK, so this is a deletion, not a verdict:
+      // when a vendor wants to bid there are vetting requirements to satisfy, and a
+      // limited Engagement may need to be minted for that. If it returns it returns as
+      // basic CARDS only, still pointing the user at the Projects App to manage them.
+      // Projects have no such path — they are not ours.
+      //
+      // The local RFP create/edit surface is GONE as of the platform.Project cutover.
+      // It was never a separate write path — `createAsRfp`/`publishRfp` were thin
+      // wrappers over SmeMartProject CRUD, writing fields (category, budgetType,
+      // budgetMin/Max, timeline, status) that the retired class owned and
+      // platform.Project does not. There was nothing to port. RFP writes get minted
+      // fresh when the RFP surface is actually built, and may not be needed at all.
       // Phase 30 placeholders — deep-link-only honest "coming soon" pages for
       // 046 / 066 / 065 (no nav entries; surfaced only when something deep-links).
       {
@@ -87,15 +70,6 @@ export const routes: Routes = [
           title: 'Org Documents — Coming Soon',
           description: 'Centralized document management and sharing for your organization is on the roadmap. Once available, you\'ll be able to upload, organize, and share documents across engagements.',
           featureKey: '046',
-        },
-      },
-      {
-        path: 'engagement-dashboard',
-        component: FeatureComingSoonComponent,
-        data: {
-          title: 'Engagement Dashboard — Coming Soon',
-          description: 'Aggregated metrics and progress views across all your engagements are coming soon. You\'ll see status, milestones, and key activity at a glance.',
-          featureKey: '066',
         },
       },
       {
@@ -117,11 +91,9 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./pages/orgs/orgs.routes').then((m) => m.ORGS_ROUTES),
       },
-      {
-        path: 'my/invitations',
-        loadChildren: () =>
-          import('./pages/my-invitations/my-invitations.routes').then((m) => m.MY_INVITATIONS_ROUTES),
-      },
+      // Invitations were RFP-invitation surfaces reading SmeMartProject. Gone with
+      // it; rebuilt against the RFP drawer when that lands.
+      { path: 'my/invitations', component: ComingSoon, data: { title: 'My Invitations' } },
       {
         path: 'my-profile',
         loadChildren: () =>
@@ -134,11 +106,6 @@ export const routes: Routes = [
         path: 'admin',
         loadChildren: () =>
           import('./pages/admin/admin.routes').then((m) => m.ADMIN_ROUTES),
-      },
-      {
-        path: 'project',
-        loadChildren: () =>
-          import('./pages/project/project.routes').then((m) => m.PROJECT_ROUTES),
       },
     ],
   },

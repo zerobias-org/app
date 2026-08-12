@@ -39,10 +39,10 @@
           <div class="renewal-section">
             <p class="renewal-title"><strong>Expired items:</strong></p>
             <ul>
-              @for (item of expiredItems(); track item.id) {
+              @for (entry of expiredItems(); track entry.row.id) {
                 <li class="renewal-item">
-                  <span>{{ item.name }} ({{ item.section | snakeToSpaces | titlecase }})</span>
-                  <button mat-stroked-button (click)="openEditForm(item); dismissRenewalCard()" type="button">
+                  <span>{{ getItemTitle(entry.section, entry.row) }} ({{ sectionLabels[entry.section] }})</span>
+                  <button mat-stroked-button (click)="openEditForm(entry.section, entry.row); dismissRenewalCard()" type="button">
                     Update Now
                   </button>
                 </li>
@@ -54,10 +54,10 @@
           <div class="renewal-section">
             <p class="renewal-title"><strong>Expiring soon (within 30 days):</strong></p>
             <ul>
-              @for (item of expiringSoonItems(); track item.id) {
+              @for (entry of expiringSoonItems(); track entry.row.id) {
                 <li class="renewal-item">
-                  <span>{{ item.name }} ({{ item.section | snakeToSpaces | titlecase }}) — Expires: {{ item.expires_at | date }}</span>
-                  <button mat-stroked-button (click)="openEditForm(item); dismissRenewalCard()" type="button">
+                  <span>{{ getItemTitle(entry.section, entry.row) }} ({{ sectionLabels[entry.section] }})</span>
+                  <button mat-stroked-button (click)="openEditForm(entry.section, entry.row); dismissRenewalCard()" type="button">
                     Renew Soon
                   </button>
                 </li>
@@ -96,8 +96,8 @@
           <mat-expansion-panel class="section-panel">
             <mat-expansion-panel-header class="section-header">
               <div class="section-summary">
-                <span class="section-name">{{ section | snakeToSpaces | titlecase }}</span>
-                <span class="item-count">{{ getItemsBySection(section).length }} items</span>
+                <span class="section-name">{{ sectionLabels[section] }}</span>
+                <span class="item-count">{{ isSingleton(section) ? (getItemsBySection(section).length ? "Set" : "Not set") : getItemsBySection(section).length + " items" }}</span>
                 @if (getExpiredCount(section) > 0) {
                   <mat-chip class="expired-badge" disabled="true">
                     ⚠ {{ getExpiredCount(section) }} expired
@@ -107,7 +107,7 @@
               <button
                 mat-icon-button
                 (click)="openAddForm(section); $event.stopPropagation()"
-                [title]="'Add ' + (section | snakeToSpaces | titlecase) + ' Item'"
+                [title]="'Add ' + sectionLabels[section]"
                 type="button">
                 <mat-icon>add</mat-icon>
               </button>
@@ -115,7 +115,7 @@
 
             <ng-template matExpansionPanelContent>
               @if (getItemsBySection(section).length === 0) {
-                <p class="no-items-message">No items in this section. Click + to add one.</p>
+                <p class="no-items-message">{{ isSingleton(section) ? "Not filled in yet. Click + to complete it." : "No items in this section. Click + to add one." }}</p>
               } @else {
                 <div class="items-list">
                   @for (item of getItemsBySection(section); track item.id) {
@@ -123,13 +123,13 @@
                       <!-- Delete Confirmation Row -->
                       <div class="item-row confirming">
                         <div class="confirmation-content">
-                          <span>{{ item.name }} — Are you sure?</span>
+                          <span>{{ getItemTitle(section, item) }} — Are you sure?</span>
                         </div>
                         <div class="confirmation-buttons">
                           <button mat-stroked-button (click)="cancelDelete()" type="button">
                             Cancel
                           </button>
-                          <button mat-stroked-button class="delete-btn" (click)="confirmDelete(item)" type="button">
+                          <button mat-stroked-button class="delete-btn" (click)="confirmDelete(section, item)" type="button">
                             Delete
                           </button>
                         </div>
@@ -138,9 +138,9 @@
                       <!-- Normal Item Row -->
                       <div class="item-row">
                         <div class="item-main">
-                          <div class="item-name">{{ item.name }}</div>
-                          @if (getItemDetail(item)) {
-                            <div class="item-detail">{{ getItemDetail(item) }}</div>
+                          <div class="item-name">{{ getItemTitle(section, item) }}</div>
+                          @if (getItemDetail(section, item)) {
+                            <div class="item-detail">{{ getItemDetail(section, item) }}</div>
                           }
                         </div>
 
@@ -155,11 +155,11 @@
 
                           <!-- Per-item Renewal Button -->
                           @if (isExpired(item)) {
-                            <button mat-stroked-button class="renew-btn" (click)="openEditForm(item)" type="button">
+                            <button mat-stroked-button class="renew-btn" (click)="openEditForm(section, item)" type="button">
                               Update Now
                             </button>
                           } @else if (isExpiringSoon(item)) {
-                            <button mat-stroked-button class="renew-soon-btn" (click)="openEditForm(item)" type="button">
+                            <button mat-stroked-button class="renew-soon-btn" (click)="openEditForm(section, item)" type="button">
                               Renew Soon
                             </button>
                           }
@@ -169,7 +169,7 @@
                             <mat-icon>more_vert</mat-icon>
                           </button>
                           <mat-menu #itemMenu="matMenu">
-                            <button mat-menu-item (click)="openEditForm(item)" type="button">
+                            <button mat-menu-item (click)="openEditForm(section, item)" type="button">
                               <mat-icon>edit</mat-icon>
                               <span>Edit</span>
                             </button>

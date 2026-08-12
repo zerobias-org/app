@@ -9,64 +9,6 @@
  */
 
 /**
- * Engagement field mapping (formerly WorkRequest in Neon)
- *
- * Neon table: work_requests (columns in snake_case)
- * GQL entity: Engagement (fields in camelCase)
- * Key rename: WorkRequest → Engagement (business alignment with "Engagement" terminology)
- * Field rename: title → name (GQL entity uses 'name' field inherited from Object base class)
- */
-export const ENGAGEMENT_FIELD_MAPPING = {
-  neonToGql: {
-    id: 'id',
-    title: 'name', // WorkRequest.title → Engagement.name (Object inherited field)
-    description: 'description',
-    category: 'category',
-    buyer_zerobias_user_id: 'buyerZerobiasUserId',
-    buyer_zerobias_org_id: 'buyerZerobiasOrgId',
-    budget_type: 'budgetType',
-    budget_min: 'budgetMin',
-    budget_max: 'budgetMax',
-    timeline: 'timeline',
-    status: 'status',
-    engagement_tag: 'engagementTag',
-    zerobias_tag_id: 'zerobiasTagId',
-    zerobias_boundary_id: 'zerobiasBoundaryId',
-    zerobias_task_id: 'zerobiasTaskId',
-    facilitator_user_id: 'facilitatorUserId', // Plan 056
-    communication_mode: 'communicationMode', // Plan 056
-    created_at: 'createdAt',
-    updated_at: 'updatedAt',
-  },
-  gqlToNeon: {
-    id: 'id',
-    name: 'title',
-    description: 'description',
-    category: 'category',
-    buyerZerobiasUserId: 'buyer_zerobias_user_id',
-    buyerZerobiasOrgId: 'buyer_zerobias_org_id',
-    budgetType: 'budget_type',
-    budgetMin: 'budget_min',
-    budgetMax: 'budget_max',
-    timeline: 'timeline',
-    status: 'status',
-    engagementTag: 'engagement_tag',
-    zerobiasTagId: 'zerobias_tag_id',
-    zerobiasBoundaryId: 'zerobias_boundary_id',
-    zerobiasTaskId: 'zerobias_task_id',
-    facilitatorUserId: 'facilitator_user_id', // Plan 056
-    communicationMode: 'communication_mode', // Plan 056
-    createdAt: 'created_at',
-    updatedAt: 'updated_at',
-    // Object base class date fields (GQL uses these names)
-    dateCreated: 'created_at',
-    dateLastModified: 'updated_at',
-  },
-  sourceSchema: 'zerobias-org/schema PR #28 (v1.0.9)',
-  lastVerified: '2026-03-27',
-} as const;
-
-/**
  * Bid field mapping
  *
  * Neon table: bids (columns in snake_case)
@@ -170,153 +112,16 @@ export const BID_RESPONSE_FIELD_MAPPING = {
   lastVerified: '2026-03-19',
 } as const;
 
-/**
- * Note field mapping
+/*
+ * ServiceOffering field mapping REMOVED - the class was retired in smemart 2.0.8.
  *
- * Neon table: notes (columns in snake_case)
- * GQL entity: Note (fields in camelCase, but uses 'title' and 'body' directly, not 'name'/'content')
- * Access level enum: 'personal' | 'boundary' | 'project'
- * Relationship: folder_id → folder (bidirectional linkTo NoteFolder.id.notes)
+ * Its successor, VendorListing, needs no entry here. This registry exists to translate
+ * Neon snake_case <-> GQL camelCase, and the VendorListing app model is camelCase on
+ * both sides, so the table would be an identity map. The real transforms it does need
+ * (enum defaults, offers normalization, includes[] -> includesSummary) are functions,
+ * not renames, and live in service-offerings.service.ts as mapGqlToVendorListing /
+ * mapVendorListingToGql.
  */
-export const NOTE_FIELD_MAPPING = {
-  neonToGql: {
-    id: 'id',
-    engagement_id: 'engagementId',
-    folder_id: 'folderId',
-    title: 'name',    // Neon title → GQL name (Object base class)
-    body: 'content',  // Neon body → GQL content (custom property)
-    author_zerobias_user_id: 'authorZerobiasUserId',
-    created_at: 'createdAt',
-    updated_at: 'updatedAt',
-    updated_by_zerobias_user_id: 'updatedByZerobiasUserId',
-    archived: 'archived',
-    access_level: 'accessLevel',
-    meeting_date: 'meetingDate',
-    meeting_duration_minutes: 'meetingDurationMinutes',
-    backing_task_id: 'backingTaskId',
-    injected_to_task_id: 'injectedToTaskId',
-    injected_comment_id: 'injectedCommentId',
-    injected_at: 'injectedAt',
-    is_meeting_minutes: 'isMeetingMinutes',
-    boundary_id: 'boundaryId',
-    project_id: 'projectId',
-  },
-  gqlToNeon: {
-    id: 'id',
-    engagementId: 'engagement_id',
-    folderId: 'folder_id',
-    name: 'title',     // GQL Object base class `name` → Neon `title`
-    content: 'body',   // GQL custom property `content` → Neon `body`
-    authorZerobiasUserId: 'author_zerobias_user_id',
-    createdAt: 'created_at',
-    updatedAt: 'updated_at',
-    updatedByZerobiasUserId: 'updated_by_zerobias_user_id',
-    archived: 'archived',
-    accessLevel: 'access_level',
-    meetingDate: 'meeting_date',
-    meetingDurationMinutes: 'meeting_duration_minutes',
-    backingTaskId: 'backing_task_id',
-    injectedToTaskId: 'injected_to_task_id',
-    injectedCommentId: 'injected_comment_id',
-    injectedAt: 'injected_at',
-    isMeetingMinutes: 'is_meeting_minutes',
-    boundaryId: 'boundary_id',
-    projectId: 'project_id',
-    // Object base class date fields (GQL uses these names)
-    dateCreated: 'created_at',
-    dateLastModified: 'updated_at',
-  },
-  sourceSchema: 'zerobias-org/schema PR #7',
-  lastVerified: '2026-03-25',
-} as const;
-
-/**
- * NoteFolder field mapping
- *
- * Neon table: note_folders (columns in snake_case)
- * GQL entity: NoteFolder (hierarchical structure for notes)
- * Relationship: parent_id → parent (bidirectional linkTo NoteFolder.id.children)
- * Relationship: children (reverse of parent_id, multi: true)
- */
-export const NOTE_FOLDER_FIELD_MAPPING = {
-  neonToGql: {
-    id: 'id',
-    engagement_id: 'engagementId',
-    parent_id: 'parentId',
-    name: 'name',
-    description: 'description',
-    created_by_zerobias_user_id: 'createdByZerobiasUserId',
-    created_at: 'createdAt',
-    updated_at: 'updatedAt',
-    access_level: 'accessLevel',
-    sort_order: 'sortOrder',
-    color: 'color',
-  },
-  gqlToNeon: {
-    id: 'id',
-    engagementId: 'engagement_id',
-    parentId: 'parent_id',
-    name: 'name',
-    description: 'description',
-    createdByZerobiasUserId: 'created_by_zerobias_user_id',
-    createdAt: 'created_at',
-    updatedAt: 'updated_at',
-    accessLevel: 'access_level',
-    sortOrder: 'sort_order',
-    color: 'color',
-    dateCreated: 'created_at',
-    dateLastModified: 'updated_at',
-  },
-  sourceSchema: 'zerobias-org/schema PR #7',
-  lastVerified: '2026-03-19',
-} as const;
-
-/**
- * ServiceOffering field mapping
- *
- * Neon table: service_offerings (columns in snake_case)
- * GQL entity: ServiceOffering (provider catalog listing, uses 'name' not 'title')
- * Enum field: pricing_type (PricingType enum)
- * Array field: includes (string array of service inclusions, uses direct 'includes' name)
- */
-export const SERVICE_OFFERING_FIELD_MAPPING = {
-  neonToGql: {
-    id: 'id',
-    provider_id: 'providerId',
-    title: 'name', // ServiceOffering.title → name (Object inherited field)
-    description: 'description',
-    category: 'category',
-    subcategory: 'subcategory',
-    pricing_type: 'pricingType',
-    price: 'price',
-    delivery_time: 'deliveryTime',
-    includes: 'includes', // Direct field name (no renaming)
-    requirements: 'requirements', // Direct field name (no renaming)
-    is_active: 'isActive',
-    created_at: 'createdAt',
-    updated_at: 'updatedAt',
-  },
-  gqlToNeon: {
-    id: 'id',
-    providerId: 'provider_id',
-    name: 'title',
-    description: 'description',
-    category: 'category',
-    subcategory: 'subcategory',
-    pricingType: 'pricing_type',
-    price: 'price',
-    deliveryTime: 'delivery_time',
-    includes: 'includes',
-    requirements: 'requirements',
-    isActive: 'is_active',
-    createdAt: 'created_at',
-    updatedAt: 'updated_at',
-    dateCreated: 'created_at',
-    dateLastModified: 'updated_at',
-  },
-  sourceSchema: 'zerobias-org/schema PR #7',
-  lastVerified: '2026-03-25',
-} as const;
 
 /**
  * Review field mapping
@@ -358,62 +163,6 @@ export const REVIEW_FIELD_MAPPING = {
   lastVerified: '2026-03-19',
 } as const;
 
-/**
- * SmeMartDocument field mapping
- *
- * Neon table: engagement_documents (columns in snake_case)
- * GQL entity: SmeMartDocument (extends File — inherits fileVersionId, size, mimeType, downloadUrl)
- * Relationship: engagement_id → engagement (linkTo Engagement.id.documents)
- * File identity: zb_file_id, zb_file_version_id (from ZB FileService)
- */
-export const DOCUMENT_FIELD_MAPPING = {
-  neonToGql: {
-    id: 'id',
-    engagement_id: 'engagementId',
-    zb_file_id: 'zbFileId',
-    zb_file_version_id: 'zbFileVersionId',
-    filename: 'filename',
-    mime_type: 'mimeType',
-    file_size_bytes: 'fileSizeBytes',
-    document_type: 'documentType',
-    display_name: 'displayName',
-    description: 'description',
-    zb_task_id: 'zbTaskId',
-    zb_task_attachment_id: 'zbTaskAttachmentId',
-    uploaded_by_zerobias_user_id: 'uploadedByZerobiasUserId',
-    created_at: 'createdAt',
-    updated_at: 'updatedAt',
-    archived: 'archived',
-  },
-  gqlToNeon: {
-    id: 'id',
-    engagementId: 'engagement_id',
-    zbFileId: 'zb_file_id',
-    zbFileVersionId: 'zb_file_version_id',
-    filename: 'filename',
-    mimeType: 'mime_type',
-    fileSizeBytes: 'file_size_bytes',
-    documentType: 'document_type',
-    displayName: 'display_name',
-    description: 'description',
-    zbTaskId: 'zb_task_id',
-    zbTaskAttachmentId: 'zb_task_attachment_id',
-    uploadedByZerobiasUserId: 'uploaded_by_zerobias_user_id',
-    createdAt: 'created_at',
-    updatedAt: 'updated_at',
-    archived: 'archived',
-    dateCreated: 'created_at',
-    dateLastModified: 'updated_at',
-    // File base class field mappings (GQL names → Neon names)
-    fileVersionId: 'zb_file_version_id',
-    size: 'file_size_bytes',
-    downloadUrl: 'download_url',
-    viewUrl: 'view_url',
-  },
-  sourceSchema: 'zerobias-org/schema PR #7',
-  lastVerified: '2026-03-19',
-} as const;
-
 // ─────────────────────────────────────────────────────────────────────────────
 // Helper Functions for Bidirectional Mapping
 // ─────────────────────────────────────────────────────────────────────────────
@@ -426,12 +175,12 @@ export const DOCUMENT_FIELD_MAPPING = {
  * @returns The transformed object with GQL camelCase field names
  *
  * @example
- * const neonWorkRequest = { id: '123', title: 'HIPAA Review', budget_min: '1000' };
- * const gqlData = mapNeonToGql<GqlEngagementResponse>(
- *   neonWorkRequest,
- *   ENGAGEMENT_FIELD_MAPPING.neonToGql
+ * const neonBid = { id: '123', cover_letter: 'We can help', provider_id: 'p-1' };
+ * const gqlData = mapNeonToGql<GqlBidResponse>(
+ *   neonBid,
+ *   BID_FIELD_MAPPING.neonToGql
  * );
- * // gqlData.name === 'HIPAA Review', gqlData.budgetMin === '1000'
+ * // gqlData.coverLetter === 'We can help', gqlData.providerId === 'p-1'
  */
 export function mapNeonToGql<T = Record<string, unknown>>(
   neonModel: unknown,
@@ -459,9 +208,9 @@ export function mapNeonToGql<T = Record<string, unknown>>(
  * @returns The transformed object with Neon snake_case field names
  *
  * @example
- * const gqlData = { id: '123', name: 'HIPAA Review', budgetMin: '1000' };
- * const neonData = mapGqlToNeon(gqlData, ENGAGEMENT_FIELD_MAPPING.gqlToNeon);
- * // neonData.title === 'HIPAA Review', neonData.budget_min === '1000'
+ * const gqlData = { id: '123', coverLetter: 'We can help', providerId: 'p-1' };
+ * const neonData = mapGqlToNeon(gqlData, BID_FIELD_MAPPING.gqlToNeon);
+ * // neonData.cover_letter === 'We can help', neonData.provider_id === 'p-1'
  */
 export function mapGqlToNeon<T = Record<string, unknown>>(
   gqlModel: unknown,
@@ -700,24 +449,24 @@ export const SME_MART_TASK_FIELD_MAPPING = {
 export const PROJECT_PRD_FIELD_MAPPING = {
   neonToGql: {
     id: 'id',
-    parentId: 'parentId',
+    name: 'name',
+    projectId: 'projectId',
     title: 'title',
     summary: 'summary',
-    sourceDocuments: 'sourceDocuments',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
   },
   gqlToNeon: {
     id: 'id',
-    parentId: 'parentId',
+    name: 'name',
+    projectId: 'projectId',
     title: 'title',
     summary: 'summary',
-    sourceDocuments: 'sourceDocuments',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
   },
-  sourceSchema: 'zerobias-org/schema PR #8 (Bloom)',
-  lastVerified: '2026-03-19',
+  sourceSchema: 'smemart/classes/ProjectPrd.yml',
+  lastVerified: '2026-08-11',
 } as const;
 
 /**
@@ -732,26 +481,28 @@ export const PROJECT_PRD_FIELD_MAPPING = {
 export const PRD_SECTION_FIELD_MAPPING = {
   neonToGql: {
     id: 'id',
-    parentId: 'parentId',
-    type: 'type',
+    prdId: 'prdId',
+    name: 'name',
+    sectionType: 'sectionType',
+    title: 'title',
     content: 'content',
     sortOrder: 'sortOrder',
-    sourceDocuments: 'sourceDocuments',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
   },
   gqlToNeon: {
     id: 'id',
-    parentId: 'parentId',
-    type: 'type',
+    prdId: 'prdId',
+    name: 'name',
+    sectionType: 'sectionType',
+    title: 'title',
     content: 'content',
     sortOrder: 'sortOrder',
-    sourceDocuments: 'sourceDocuments',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
   },
-  sourceSchema: 'zerobias-org/schema PR #8 (Bloom)',
-  lastVerified: '2026-03-19',
+  sourceSchema: 'smemart/classes/PrdSection.yml',
+  lastVerified: '2026-08-11',
 } as const;
 
 /**
@@ -766,7 +517,8 @@ export const PRD_SECTION_FIELD_MAPPING = {
 export const PROJECT_PLAN_FIELD_MAPPING = {
   neonToGql: {
     id: 'id',
-    parentId: 'parentId',
+    name: 'name',
+    projectId: 'projectId',
     title: 'title',
     approach: 'approach',
     estimatedDuration: 'estimatedDuration',
@@ -776,7 +528,8 @@ export const PROJECT_PLAN_FIELD_MAPPING = {
   },
   gqlToNeon: {
     id: 'id',
-    parentId: 'parentId',
+    name: 'name',
+    projectId: 'projectId',
     title: 'title',
     approach: 'approach',
     estimatedDuration: 'estimatedDuration',
@@ -784,8 +537,8 @@ export const PROJECT_PLAN_FIELD_MAPPING = {
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
   },
-  sourceSchema: 'zerobias-org/schema PR #8 (Bloom)',
-  lastVerified: '2026-03-19',
+  sourceSchema: 'smemart/classes/ProjectPlan.yml',
+  lastVerified: '2026-08-11',
 } as const;
 
 /**
@@ -800,7 +553,7 @@ export const PROJECT_PLAN_FIELD_MAPPING = {
 export const PLAN_MILESTONE_FIELD_MAPPING = {
   neonToGql: {
     id: 'id',
-    parentId: 'parentId',
+    planId: 'planId',
     name: 'name',
     targetDate: 'targetDate',
     status: 'status',
@@ -810,7 +563,7 @@ export const PLAN_MILESTONE_FIELD_MAPPING = {
   },
   gqlToNeon: {
     id: 'id',
-    parentId: 'parentId',
+    planId: 'planId',
     name: 'name',
     targetDate: 'targetDate',
     status: 'status',
@@ -818,102 +571,8 @@ export const PLAN_MILESTONE_FIELD_MAPPING = {
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
   },
-  sourceSchema: 'zerobias-org/schema PR #8 (Bloom)',
-  lastVerified: '2026-03-19',
-} as const;
-
-// ── EngagementVettingItem (Plan 063) ──
-
-export const VETTING_ITEM_FIELD_MAPPING = {
-  neonToGql: {
-    id: 'id',
-    name: 'name',
-    description: 'description',
-    engagement_id: 'engagementId',
-    category: 'category',
-    vetting_type: 'vettingType',
-    evidence_type: 'evidenceType',
-    status: 'status',
-    direction: 'direction',
-    condition_trigger: 'conditionTrigger',
-    document_ids: 'documentIds',
-    submitted_at: 'submittedAt',
-    verified_at: 'verifiedAt',
-    verified_by: 'verifiedBy',
-    expires_at: 'expiresAt',
-    rejection_reason: 'rejectionReason',
-    waived_reason: 'waivedReason',
-    notes: 'notes',
-    created_at: 'createdAt',
-    updated_at: 'updatedAt',
-    profile_item_id: 'profileItemId',
-  },
-  gqlToNeon: {
-    id: 'id',
-    name: 'name',
-    description: 'description',
-    engagementId: 'engagement_id',
-    category: 'category',
-    vettingType: 'vetting_type',
-    evidenceType: 'evidence_type',
-    status: 'status',
-    direction: 'direction',
-    conditionTrigger: 'condition_trigger',
-    documentIds: 'document_ids',
-    submittedAt: 'submitted_at',
-    verifiedAt: 'verified_at',
-    verifiedBy: 'verified_by',
-    expiresAt: 'expires_at',
-    rejectionReason: 'rejection_reason',
-    waivedReason: 'waived_reason',
-    notes: 'notes',
-    profileItemId: 'profile_item_id',
-    dateCreated: 'created_at',
-    dateLastModified: 'updated_at',
-  },
-  sourceSchema: 'zerobias-org/schema (Plan 063 — Corporate Vetting)',
-  lastVerified: '2026-03-26',
-} as const;
-
-// ── MarketplaceProfileItem (Plan 041) ──
-
-/**
- * MarketplaceProfileItem field mapping
- *
- * Neon table: marketplace_profile_items (columns in snake_case)
- * GQL entity: MarketplaceProfileItem (fields in camelCase)
- * JSON field: data → needs JSON.parse() on read, JSON.stringify() on write
- *
- * Section discriminator: corporate_identity, attestation, insurance, reference, personnel, financial
- * Org-scoped: scalar orgId field (no bidirectional link)
- */
-export const MARKETPLACE_PROFILE_ITEM_FIELD_MAPPING = {
-  neonToGql: {
-    id: 'id',
-    org_id: 'orgId',
-    section: 'section',
-    name: 'name',
-    description: 'description',
-    data: 'data',                    // JSON string — needs parsing
-    expires_at: 'expiresAt',
-    status: 'status',
-    created_at: 'createdAt',
-    updated_at: 'updatedAt',
-  },
-  gqlToNeon: {
-    id: 'id',
-    orgId: 'org_id',
-    section: 'section',
-    name: 'name',
-    description: 'description',
-    data: 'data',                    // JSON string — needs parsing
-    expiresAt: 'expires_at',
-    status: 'status',
-    dateCreated: 'created_at',
-    dateLastModified: 'updated_at',
-  },
-  sourceSchema: 'zerobias-org/schema PR #31 (Phase 8)',
-  lastVerified: '2026-04-01',
+  sourceSchema: 'smemart/classes/PlanMilestone.yml',
+  lastVerified: '2026-08-11',
 } as const;
 
 /**
@@ -952,30 +611,4 @@ export const RFP_INVITATION_FIELD_MAPPING = {
   },
   sourceSchema: 'zerobias-org/schema (Plan 14 Wave 1 — Invitation Controls)',
   lastVerified: '2026-04-06',
-} as const;
-
-/**
- * All field mapping constants exported as a single object for easier iteration.
- */
-export const ALL_FIELD_MAPPINGS = {
-  Engagement: ENGAGEMENT_FIELD_MAPPING,
-  Bid: BID_FIELD_MAPPING,
-  BidResponse: BID_RESPONSE_FIELD_MAPPING,
-  Note: NOTE_FIELD_MAPPING,
-  NoteFolder: NOTE_FOLDER_FIELD_MAPPING,
-  ServiceOffering: SERVICE_OFFERING_FIELD_MAPPING,
-  Review: REVIEW_FIELD_MAPPING,
-  SmeMartDocument: DOCUMENT_FIELD_MAPPING,
-  SmeMartProject: SME_MART_PROJECT_FIELD_MAPPING,
-  SmeMartBoard: SME_MART_BOARD_FIELD_MAPPING,
-  SmeMartActivity: SME_MART_ACTIVITY_FIELD_MAPPING,
-  SmeMartWorkflow: SME_MART_WORKFLOW_FIELD_MAPPING,
-  SmeMartTask: SME_MART_TASK_FIELD_MAPPING,
-  ProjectPrd: PROJECT_PRD_FIELD_MAPPING,
-  PrdSection: PRD_SECTION_FIELD_MAPPING,
-  ProjectPlan: PROJECT_PLAN_FIELD_MAPPING,
-  PlanMilestone: PLAN_MILESTONE_FIELD_MAPPING,
-  EngagementVettingItem: VETTING_ITEM_FIELD_MAPPING,
-  MarketplaceProfileItem: MARKETPLACE_PROFILE_ITEM_FIELD_MAPPING,
-  RfpInvitation: RFP_INVITATION_FIELD_MAPPING,
 } as const;

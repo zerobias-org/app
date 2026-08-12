@@ -5,6 +5,7 @@
 
 import { vi } from 'vitest';
 import { signal } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
 
 // ---------------------------------------------------------------------------
 // Core SME Mart service mocks
@@ -91,25 +92,19 @@ export function fakeSmeMartDb() {
   };
 }
 
-/** Mock ImpersonationService */
-export function fakeImpersonation(userId = 'u-100') {
+/**
+ * Mock ZerobiasClientApp for services that read the signed-in user.
+ *
+ * `whoAmI$` is exposed so a test can push `undefined` and drive the
+ * "no signed-in user yet" branch, which is reachable because toSignal starts
+ * before whoAmI resolves.
+ */
+export function fakeZerobiasApp(userId = 'u-100', orgId = 'org-100') {
+  const whoAmI$ = new BehaviorSubject<Record<string, unknown> | undefined>({ id: userId });
   return {
-    effectiveUserId: vi.fn().mockReturnValue(userId),
-  };
-}
-
-/** Mock SmeMartTagService */
-export function fakeSmeMartTagService() {
-  return {
-    generateEngagementTag: vi.fn().mockReturnValue('sme-mart.eng.amber-circuit'),
-    generateUniqueTag: vi.fn().mockReturnValue('sme-mart.eng.blue-wave'),
-    isRfpPhase: vi.fn().mockReturnValue(true),
-    isEngagementPhase: vi.fn().mockReturnValue(false),
-    createTag: vi.fn().mockResolvedValue({ id: 'tag-uuid', name: 'sme-mart.eng.amber-circuit' }),
-    searchTags: vi.fn().mockResolvedValue({ items: [] }),
-    tagResource: vi.fn().mockResolvedValue(undefined),
-    untagResource: vi.fn().mockResolvedValue(undefined),
-    getTagsForResource: vi.fn().mockResolvedValue([]),
+    whoAmI$,
+    getWhoAmI: () => whoAmI$.asObservable(),
+    getCurrentOrgId: vi.fn().mockReturnValue(orgId),
   };
 }
 
@@ -121,15 +116,6 @@ export function fakeEngagementContext() {
     setCurrentProviderId: vi.fn(),
     clear: vi.fn(),
     refresh$: { subscribe: vi.fn().mockReturnValue({ unsubscribe: vi.fn() }) },
-  };
-}
-
-/** Mock EngagementHierarchyService */
-export function fakeEngagementHierarchy() {
-  return {
-    buildBreadcrumbs: vi.fn().mockResolvedValue([
-      { level: 'engagement', label: 'Test Engagement', active: true },
-    ]),
   };
 }
 
@@ -149,20 +135,6 @@ export function fakeNotificationService() {
     markAllAsRead: vi.fn().mockResolvedValue(undefined),
     dismiss: vi.fn().mockResolvedValue(undefined),
     dismissAll: vi.fn().mockResolvedValue(undefined),
-  };
-}
-
-/** Mock DocumentService */
-export function fakeDocumentService() {
-  return {
-    uploadProgress$: { subscribe: vi.fn() },
-    uploadDocument: vi.fn().mockResolvedValue({ id: 'doc-001' }),
-    uploadBinary: vi.fn().mockResolvedValue({ id: 'doc-001' }),
-    getPreviewUrl: vi.fn().mockReturnValue('https://preview.example.com'),
-    getDownloadUrl: vi.fn().mockReturnValue('https://download.example.com'),
-    isPreviewable: vi.fn().mockReturnValue(true),
-    getFileIcon: vi.fn().mockReturnValue('description'),
-    formatFileSize: vi.fn().mockReturnValue('1.2 MB'),
   };
 }
 
@@ -246,7 +218,7 @@ export function fakePipelineWriteService() {
  * Usage:
  *   const mockGql = fakeGraphqlReadService();
  *   mockGql.query.mockResolvedValue({
- *     items: [ENGAGEMENT_GQL_FIXTURE],
+ *     items: [BID_GQL_FIXTURE],
  *     page: { pageNumber: 1, pageSize: 50, totalCount: 1 }
  *   });
  */

@@ -10,17 +10,14 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ProjectPlanService } from './project-plan.service';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
-import { DemoVisibilityService } from './demo-visibility.service';
 import { ProjectContextService } from './project-context.service';
-import { ImpersonationService } from './impersonation.service';
 import { fakeProjectContextService } from '../../test-helpers/angular';
-import type { GqlProjectPlanResponse, GqlPlanMilestoneResponse } from '../gql-types/project-plan.types';
+import type { GqlProjectPlanResponse, GqlPlanMilestoneResponse } from '../gql-types';
 
 describe('ProjectPlanService', () => {
   let service: ProjectPlanService;
   let mockPipelineWrite: { pushEntity: ReturnType<typeof vi.fn>; pushEntities: ReturnType<typeof vi.fn>; deleteEntity: ReturnType<typeof vi.fn>; deleteEntities: ReturnType<typeof vi.fn>; getCached: ReturnType<typeof vi.fn>; seedCache: ReturnType<typeof vi.fn> };
   let mockGraphqlRead: { query: ReturnType<typeof vi.fn>; getById: ReturnType<typeof vi.fn> };
-  let mockImpersonation: { effectiveUserId: ReturnType<typeof vi.fn> };
   let mockSnackBar: { open: ReturnType<typeof vi.fn> };
   let mockProjectContext: ReturnType<typeof fakeProjectContextService>;
 
@@ -37,9 +34,6 @@ describe('ProjectPlanService', () => {
       query: vi.fn().mockResolvedValue({ items: [] }),
       getById: vi.fn().mockResolvedValue(null),
     };
-    mockImpersonation = {
-      effectiveUserId: vi.fn().mockReturnValue('user-123'),
-    };
     mockSnackBar = {
       open: vi.fn(),
     };
@@ -48,10 +42,8 @@ describe('ProjectPlanService', () => {
     TestBed.configureTestingModule({
       providers: [
         ProjectPlanService,
-        DemoVisibilityService,
         { provide: PipelineWriteService, useValue: mockPipelineWrite },
         { provide: GraphqlReadService, useValue: mockGraphqlRead },
-        { provide: ImpersonationService, useValue: mockImpersonation },
         { provide: ProjectContextService, useValue: mockProjectContext },
         { provide: MatSnackBar, useValue: mockSnackBar },
       ],
@@ -74,11 +66,11 @@ describe('ProjectPlanService', () => {
     });
 
     expect(result).toBeDefined();
-    expect(result.parentId).toBe('project-1');
+    expect(result.projectId).toBe('project-1');
     expect(result.title).toBe('Project Execution Plan');
     expect(mockPipelineWrite.pushEntity).toHaveBeenCalledWith(
       'ProjectPlan',
-      expect.objectContaining({ parentId: 'project-1', title: 'Project Execution Plan' }),
+      expect.objectContaining({ projectId: 'project-1', title: 'Project Execution Plan' }),
       [],
       'project-plan.service:77',
     );
@@ -104,8 +96,9 @@ describe('ProjectPlanService', () => {
 
   it('should fetch a single plan by ID', async () => {
     const gqlPlan: GqlProjectPlanResponse = {
+      name: 'Execution Plan',
       id: 'plan-1',
-      parentId: 'project-1',
+      projectId: 'project-1',
       title: 'Project Execution Plan',
       approach: 'Agile',
       estimatedDuration: '6 months',
@@ -134,8 +127,9 @@ describe('ProjectPlanService', () => {
   it('should list plans for a project', async () => {
     const gqlPlans: GqlProjectPlanResponse[] = [
       {
+      name: 'Execution Plan',
         id: 'plan-1',
-        parentId: 'project-1',
+        projectId: 'project-1',
         title: 'Project Execution Plan',
         approach: 'Agile',
         createdAt: '2026-03-19T00:00:00Z',
@@ -153,7 +147,7 @@ describe('ProjectPlanService', () => {
     expect(result.items).toHaveLength(1);
     expect(result.items[0].title).toBe('Project Execution Plan');
     expect(mockGraphqlRead.query).toHaveBeenCalledWith('ProjectPlan', expect.any(Array), expect.objectContaining({
-      filters: { parentId: '.eq.project-1' },
+      filters: { projectId: '.eq.project-1' },
     }));
   });
 
@@ -200,7 +194,7 @@ describe('ProjectPlanService', () => {
   // PlanMilestone CRUD (Child Entities)
   // ────────────────────────────────────────────────────────────────────────────
 
-  it('should create a milestone with correct parentId', async () => {
+  it('should create a milestone with correct planId', async () => {
     mockPipelineWrite.pushEntity.mockResolvedValue(undefined);
 
     const result = await service.createMilestone('plan-1', {
@@ -210,11 +204,11 @@ describe('ProjectPlanService', () => {
     });
 
     expect(result).toBeDefined();
-    expect(result.parentId).toBe('plan-1');
+    expect(result.planId).toBe('plan-1');
     expect(result.name).toBe('Phase 1 Complete');
     expect(mockPipelineWrite.pushEntity).toHaveBeenCalledWith(
       'PlanMilestone',
-      expect.objectContaining({ parentId: 'plan-1', name: 'Phase 1 Complete' }),
+      expect.objectContaining({ planId: 'plan-1', name: 'Phase 1 Complete' }),
       [],
       'project-plan.service:217',
     );
@@ -242,7 +236,7 @@ describe('ProjectPlanService', () => {
     const gqlMilestones: GqlPlanMilestoneResponse[] = [
       {
         id: 'milestone-1',
-        parentId: 'plan-1',
+        planId: 'plan-1',
         name: 'Phase 1 Complete',
         targetDate: '2026-06-30',
         status: 'in_progress',
@@ -252,7 +246,7 @@ describe('ProjectPlanService', () => {
       },
       {
         id: 'milestone-2',
-        parentId: 'plan-1',
+        planId: 'plan-1',
         name: 'Phase 2 Complete',
         targetDate: '2026-12-31',
         status: 'todo',
@@ -273,7 +267,7 @@ describe('ProjectPlanService', () => {
     expect(result[0].name).toBe('Phase 1 Complete');
     expect(result[1].name).toBe('Phase 2 Complete');
     expect(mockGraphqlRead.query).toHaveBeenCalledWith('PlanMilestone', expect.any(Array), expect.objectContaining({
-      filters: { parentId: '.eq.plan-1' },
+      filters: { planId: '.eq.plan-1' },
     }));
   });
 
@@ -318,75 +312,4 @@ describe('ProjectPlanService', () => {
 
   // ── Demo visibility (Phase 24 Plan 03) ──
 
-  describe('Demo visibility (Phase 24 Plan 03)', () => {
-    const basePlan = {
-      parentId: 'project-1', title: 'Plan', approach: 'agile', estimatedDuration: '4 weeks',
-      teamStructure: '[]', createdAt: '2026-05-05T00:00:00Z', updatedAt: '2026-05-05T00:00:00Z',
-    };
-    const mockGqlReturn = [
-      { ...basePlan, id: '1', title: 'Real', tag: null },
-      { ...basePlan, id: '2', title: 'Real w/ marketplace tag', tag: [{ value: 'a81cd320-243e-44eb-bdd9-9824019ef3dd' }] },
-      { ...basePlan, id: '3', title: 'Demo (global)', tag: [{ value: '81053c14-a8e5-4939-b538-c122c7d0eb1a' }] },
-      { ...basePlan, id: '4', title: 'Demo (legacy)', tag: [{ value: 'd618b602-21cc-40a1-a9fa-534b7bc1672c' }] },
-    ];
-
-    it('[DG-02] strips demo records for non-admin', async () => {
-      mockGraphqlRead.query.mockResolvedValue({
-        items: mockGqlReturn,
-        page: { pageNumber: 1, pageSize: 50, totalCount: 4 },
-      });
-
-      const result = await service.listPlans('project-1');
-
-      expect(result.items.map((r: { id?: string }) => r.id)).toEqual(['1', '2']);
-    });
-
-    it('[DG-03] admin sees all records including demo', async () => {
-      mockProjectContext.setIsAdmin(true);
-      mockGraphqlRead.query.mockResolvedValue({
-        items: mockGqlReturn,
-        page: { pageNumber: 1, pageSize: 50, totalCount: 4 },
-      });
-
-      const result = await service.listPlans('project-1');
-
-      expect(result.items.map((r: { id?: string }) => r.id)).toEqual(['1', '2', '3', '4']);
-    });
-
-    it('[DG-02] does NOT add server-side tag negation filter', async () => {
-      mockGraphqlRead.query.mockResolvedValue({
-        items: mockGqlReturn,
-        page: { pageNumber: 1, pageSize: 50, totalCount: 4 },
-      });
-
-      await service.listPlans('project-1');
-
-      const callArgs = mockGraphqlRead.query.mock.calls[0];
-      const filters = (callArgs[2] as { filters?: Record<string, string> })?.filters ?? {};
-      const filterValues = Object.values(filters).join(' ');
-      expect(filterValues).not.toContain('.not in.');
-      expect(filterValues).not.toContain('.ne.');
-    });
-
-    it('requests tag field in GQL query', async () => {
-      mockGraphqlRead.query.mockResolvedValue({
-        items: mockGqlReturn,
-        page: { pageNumber: 1, pageSize: 50, totalCount: 4 },
-      });
-
-      await service.listPlans('project-1');
-
-      const fields = mockGraphqlRead.query.mock.calls[0][1] as string[];
-      expect(fields).toContain('tag');
-    });
-
-    it('[DG-02] returns null when non-admin fetches a demo record by id', async () => {
-      const demoRecord = { ...basePlan, id: '3', title: 'Demo', tag: [{ value: '81053c14-a8e5-4939-b538-c122c7d0eb1a' }] };
-      mockGraphqlRead.getById.mockResolvedValueOnce(demoRecord);
-
-      const result = await service.getPlan('3');
-
-      expect(result).toBeNull();
-    });
-  });
 });

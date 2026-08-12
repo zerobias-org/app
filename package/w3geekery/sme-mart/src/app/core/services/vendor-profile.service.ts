@@ -1,380 +1,350 @@
-/**
- * VendorProfileService — CRUD for marketplace vendor profile items.
- *
- * All writes go through PipelineWriteService (fire-and-forget async).
- * All reads go through GraphqlReadService (from AuditgraphDB).
- *
- * Handles JSON serialization/deserialization for 6 section types:
- * - corporate_identity, attestation, insurance, reference, personnel, financial
- *
- * Plan 041: Vendor Profile Service
- */
-
 import { Injectable, inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
-import { DemoVisibilityService } from './demo-visibility.service';
-import { MARKETPLACE_PROFILE_ITEM_FIELD_MAPPING, mapGqlToNeon, mapNeonToGql } from '../field-mappings';
-import type { GqlMarketplaceProfileItemResponse } from '../gql-types/marketplace-profile-item.types';
-import type {
-  MarketplaceProfileItem,
-  SectionType,
-  CreateMarketplaceProfileItemRequest,
-  CorporateIdentityData,
-  AttestationData,
-  InsuranceData,
-  ReferenceData,
-  PersonnelData,
-  FinancialData,
-} from '../models/marketplace-profile-item.model';
+import { PipelineWriteService, type SmeMartClassName } from './pipeline-write.service';
+import {
+  SECTION_CLASS,
+  type ClientReferenceRecord,
+  type FinancialProfileRecord,
+  type InsuranceCoverageRecord,
+  type OrgCredentialRecord,
+  type OrgProfileRecord,
+  type PersonnelRecord,
+  type SectionType,
+  type SecurityCredentialRecord,
+  type ServiceCapabilityRecord,
+  type UserCredentialRecord,
+  type VendorProfileBundle,
+  type VendorProfileRecord,
+} from '../models/vendor-profile.model';
 
-// Type union for all section data types
-type SectionData =
-  | CorporateIdentityData
-  | AttestationData
-  | InsuranceData
-  | ReferenceData
-  | PersonnelData
-  | FinancialData;
+/**
+ * Vendor profile CRUD over the six typed classes that replaced MarketplaceProfileItem.
+ *
+ * The blob stored six section-discriminated JSON payloads behind one class and one set
+ * of CRUD methods. Each section now reads and writes its own class, so the payload is
+ * queryable and each row carries its own provenance from Verifiable.
+ *
+ * THERE WAS NO TYPED-WRITE PRECEDENT TO COPY. The only one had been
+ * saveCorporateProfileSections in the onboarding form, and it was insert-only — a fresh
+ * uuid() on every save with no read-back, so editing produced duplicate rows rather than
+ * an update. This builds real read + update per class instead of reconstructing that.
+ */
+
+/** Provenance fields, requested on every read. */
+const VERIFIABLE_FIELDS = ['verified', 'verificationSource', 'verifiedAt', 'verifiedBy', 'verificationExpiresAt'];
+
+const SECTION_FIELDS: Record<SectionType, string[]> = {
+  corporate_identity: [
+    'id', 'orgId', 'legalName', 'dba', 'tagline', 'shortDescription', 'longDescription',
+    'website', 'logoUrl', 'foundedYear', 'businessClassification', 'employeeCount',
+    'primaryContactUserId', ...VERIFIABLE_FIELDS,
+  ],
+  attestation: [
+    'id', 'orgId', 'serviceSegmentId', 'yearsExperience', 'clientCount',
+    'avgProjectDuration', ...VERIFIABLE_FIELDS,
+  ],
+  insurance: [
+    'id', 'orgId', 'carrier', 'policyNumber', 'coverageType', 'coverageAmount',
+    'currency', 'effectiveDate', 'expiresAt', 'certificateUrl', ...VERIFIABLE_FIELDS,
+  ],
+  reference: [
+    'id', 'orgId', 'clientName', 'contactName', 'contactEmail', 'contactPhone',
+    'relationship', 'projectName', 'startDate', 'endDate', 'summary', ...VERIFIABLE_FIELDS,
+  ],
+  personnel: [
+    'id', 'orgId', 'fullName', 'title', 'email', 'specialization', 'bio', 'linkedinUrl',
+    'isKeyPersonnel', 'backgroundCheckStatus', 'userId', 'roleId', ...VERIFIABLE_FIELDS,
+  ],
+  financial: [
+    'id', 'orgId', 'annualRevenue', 'revenueCurrency', 'creditScore', 'creditRatingAgency',
+    'bankName', 'dunsNumber', 'yearEndMonth', ...VERIFIABLE_FIELDS,
+  ],
+};
+
+const ORG_CREDENTIAL_FIELDS = [
+  'id', 'orgId', 'securityCredential', 'credentialNumber', 'issuedAt', 'expiresAt',
+  'notes', ...VERIFIABLE_FIELDS,
+];
+
+const USER_CREDENTIAL_FIELDS = [
+  'id', 'userId', 'securityCredential', 'credentialNumber', 'issuedAt', 'expiresAt',
+  'notes', ...VERIFIABLE_FIELDS,
+];
+
+const SECURITY_CREDENTIAL_FIELDS = [
+  'id', 'name', 'code', 'scope', 'ecosystemCode', 'proficiency', 'frameworkIds',
+  'issuerVendorIds', 'sourceUrl', 'status',
+];
+
+/** GQL returns multi-valued fields as either a bare value or an array. */
+function toArray(value: unknown): string[] {
+  if (value == null) return [];
+  return Array.isArray(value) ? value.map(String) : [String(value)];
+}
+
+/**
+ * Every one of these classes extends Object, where `name` is REQUIRED. The form does not
+ * collect a separate name — asking for one on top of "Carrier" or "Full name" is a field
+ * the user would have to invent — so it is derived from each section's primary field.
+ */
+function deriveName(section: SectionType, row: Record<string, unknown>): string {
+  const pick = (key: string): string | null => {
+    const v = row[key];
+    return typeof v === 'string' && v.trim() ? v.trim() : null;
+  };
+  switch (section) {
+    case 'corporate_identity': return pick('legalName') ?? 'Corporate identity';
+    case 'financial': return pick('bankName') ?? 'Financial profile';
+    case 'insurance': return pick('carrier') ?? pick('policyNumber') ?? 'Insurance coverage';
+    case 'reference': return pick('clientName') ?? 'Client reference';
+    case 'personnel': return pick('fullName') ?? 'Personnel';
+    case 'attestation': return pick('avgProjectDuration') ?? 'Service capability';
+  }
+}
 
 @Injectable({ providedIn: 'root' })
 export class VendorProfileService {
-  private readonly pipelineWrite = inject(PipelineWriteService);
   private readonly graphqlRead = inject(GraphqlReadService);
-  private readonly demoVisibility = inject(DemoVisibilityService);
+  private readonly pipelineWrite = inject(PipelineWriteService);
   private readonly snackBar = inject(MatSnackBar);
 
-  // ── Query ──
+  // ── Reads ─────────────────────────────────────────────────────────────────
 
   /**
-   * List all profile items for a given org, optionally filtered by section.
-   * Returns items sorted by name.
+   * Load every section for an org in one pass.
    *
-   * @param orgId — Organization ID (passed explicitly, not auto-detected)
-   * @param section — Optional section filter (corporate_identity, attestation, etc.)
-   * @returns Profile items for the org, excluding soft-deleted items
+   * The six queries are independent, so they run concurrently. The two singleton
+   * sections collapse to a single row or null; the other four stay arrays.
    */
-  async listProfileItems(orgId: string, section?: SectionType): Promise<MarketplaceProfileItem[]> {
-    const filters: Record<string, string> = {
-      orgId: `.eq.${orgId}`,
+  async loadBundle(orgId: string): Promise<VendorProfileBundle> {
+    const [identity, financial, capabilities, insurance, references, personnel] = await Promise.all([
+      this.readSection<OrgProfileRecord>('corporate_identity', orgId),
+      this.readSection<FinancialProfileRecord>('financial', orgId),
+      this.readSection<ServiceCapabilityRecord>('attestation', orgId),
+      this.readSection<InsuranceCoverageRecord>('insurance', orgId),
+      this.readSection<ClientReferenceRecord>('reference', orgId),
+      this.readSection<PersonnelRecord>('personnel', orgId),
+    ]);
+
+    return {
+      corporate_identity: identity[0] ?? null,
+      financial: financial[0] ?? null,
+      attestation: capabilities,
+      insurance,
+      reference: references,
+      personnel,
     };
-    if (section) {
-      filters['section'] = `.eq.${section}`;
+  }
+
+  /** Read one section's rows for an org. */
+  async readSection<T>(section: SectionType, orgId: string): Promise<T[]> {
+    try {
+      const result = await this.graphqlRead.query<T>(
+        SECTION_CLASS[section],
+        SECTION_FIELDS[section],
+        { filters: { orgId: `.eq.${orgId}` }, pageNumber: 1, pageSize: 200 },
+      );
+      return result.items;
+    } catch (err) {
+      console.error(`[VendorProfileService] read ${section} failed:`, err);
+      return [];
     }
-
-    const result = await this.graphqlRead.query<GqlMarketplaceProfileItemResponse>(
-      'MarketplaceProfileItem',
-      this.getFields(),
-      {
-        filters,
-        pageSize: 200,
-      },
-    );
-
-    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
-    const filteredGql = this.demoVisibility.applyVisibility(
-      result.items as (GqlMarketplaceProfileItemResponse & { tag?: Array<{ value: string }> | null })[],
-    );
-
-    const items = filteredGql
-      .filter(gql => !(gql as unknown as Record<string, unknown>)['dateDeleted'])
-      .map(gql => this.fromGql(gql));
-
-    // Sort by name
-    items.sort((a, b) => a.name.localeCompare(b.name));
-
-    return items;
   }
 
-  /**
-   * Get a single profile item by ID.
-   *
-   * @param id — Item ID
-   * @returns Profile item or null if not found
-   */
-  async getProfileItem(id: string): Promise<MarketplaceProfileItem | null> {
-    // Check cache first
-    const cached = this.pipelineWrite.getCached('MarketplaceProfileItem', id);
-    if (cached) return this.fromGql(cached as unknown as GqlMarketplaceProfileItemResponse);
-
-    const gql = await this.graphqlRead.getById<GqlMarketplaceProfileItemResponse>(
-      'MarketplaceProfileItem',
-      id,
-      this.getFields(),
-    );
-    if (!gql) return null;
-
-    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
-    const filtered = this.demoVisibility.applyVisibility(
-      [gql as GqlMarketplaceProfileItemResponse & { tag?: Array<{ value: string }> | null }],
-    )[0] ?? null;
-    if (!filtered) return null;
-
-    this.pipelineWrite.seedCache('MarketplaceProfileItem', id, filtered as unknown as Record<string, unknown>);
-    return this.fromGql(filtered);
-  }
-
-  // ── Create ──
+  // ── Writes ────────────────────────────────────────────────────────────────
 
   /**
-   * Create a new profile item.
+   * Create a row in a section.
    *
-   * @param orgId — Organization ID (required, explicit)
-   * @param req — Creation request with name, section, description, data, optional expiresAt/status
-   * @returns Created profile item
-   * @throws Error if validation fails (missing name, invalid section, invalid data)
+   * Singleton sections go through upsertSingleton instead — creating a second
+   * OrgProfile or FinancialProfile for one org is the duplicate-row bug the old
+   * insert-only path produced.
    */
-  async createProfileItem(
+  async createRow<T extends VendorProfileRecord>(
+    section: SectionType,
     orgId: string,
-    req: CreateMarketplaceProfileItemRequest,
-  ): Promise<MarketplaceProfileItem> {
-    // Validate required fields
-    if (!req.name || !req.name.trim()) {
-      throw new Error('Profile item name is required');
-    }
+    data: Partial<T>,
+  ): Promise<T> {
+    const base = {
+      ...data,
+      id: crypto.randomUUID(),
+      orgId,
+      verified: false,
+      verificationSource: null,
+    } as Record<string, unknown>;
+    const row = { ...base, name: deriveName(section, base) } as unknown as T;
 
-    if (!this.isValidSection(req.section)) {
-      throw new Error(`Invalid section: ${req.section}`);
-    }
-
-    // Validate data is not empty
-    if (!req.data || typeof req.data !== 'object') {
-      throw new Error('Profile item data must be a non-empty object');
-    }
-
-    const now = new Date().toISOString();
-    const id = crypto.randomUUID();
-
-    const item: MarketplaceProfileItem = {
-      id,
-      org_id: orgId,
-      section: req.section,
-      name: req.name.trim(),
-      description: req.description?.trim() ?? null,
-      data: this.serializeData(req.data),
-      expires_at: req.expiresAt ?? null,
-      status: req.status ?? 'active',
-      created_at: now,
-      updated_at: now,
-    };
-
-    const gqlData = this.toGql(item);
-    try {
-      await this.pipelineWrite.pushEntity('MarketplaceProfileItem', gqlData, [], 'vendor-profile.service:149');
-    } catch (err) {
-      this.snackBar.open(
-        `Failed to save profile item: ${(err as Error).message}`,
-        'Dismiss',
-        { duration: 5000 },
-      );
-      throw err;
-    }
-
-    return item;
+    await this.push(SECTION_CLASS[section], row, `vendor-profile.service:create:${section}`);
+    return row;
   }
 
-  // ── Update ──
-
-  /**
-   * Update an existing profile item (partial update).
-   *
-   * @param id — Item ID
-   * @param req — Update request with optional fields (all fields partial)
-   * @returns Updated profile item
-   * @throws Error if item not found or update invalid
-   */
-  async updateProfileItem(
-    id: string,
-    req: Partial<CreateMarketplaceProfileItemRequest>,
-  ): Promise<MarketplaceProfileItem> {
-    // Fetch current (cache-aware)
-    const cached = this.pipelineWrite.getCached('MarketplaceProfileItem', id);
-    let current: MarketplaceProfileItem | null;
-    if (cached) {
-      current = this.fromGql(cached as unknown as GqlMarketplaceProfileItemResponse);
-    } else {
-      const gql = await this.graphqlRead.getById<GqlMarketplaceProfileItemResponse>(
-        'MarketplaceProfileItem',
-        id,
-        this.getFields(),
-      );
-      if (!gql) throw new Error(`Profile item ${id} not found`);
-      current = this.fromGql(gql);
-    }
-    if (!current) throw new Error(`Profile item ${id} not found`);
-
-    const now = new Date().toISOString();
-    const updated: MarketplaceProfileItem = {
-      ...current,
-      name: req.name?.trim() ?? current.name,
-      description: req.description !== undefined ? (req.description?.trim() ?? null) : current.description,
-      section: req.section ?? current.section,
-      data: req.data ? this.serializeData(req.data) : current.data,
-      expires_at: req.expiresAt ?? current.expires_at,
-      status: req.status ?? current.status,
-      updated_at: now,
-    };
-
-    // Validate updated state
-    if (!this.isValidSection(updated.section)) {
-      throw new Error(`Invalid section: ${updated.section}`);
-    }
-
-    const gqlData = this.toGql(updated);
-    try {
-      await this.pipelineWrite.pushEntity('MarketplaceProfileItem', gqlData, [], 'vendor-profile.service:204');
-    } catch (err) {
-      this.snackBar.open(
-        `Failed to update profile item: ${(err as Error).message}`,
-        'Dismiss',
-        { duration: 5000 },
-      );
-      throw err;
-    }
-
+  /** Update an existing row in place, preserving its id and provenance. */
+  async updateRow<T extends VendorProfileRecord>(
+    section: SectionType,
+    current: T,
+    changes: Partial<T>,
+  ): Promise<T> {
+    const merged = { ...current, ...changes, id: current.id } as Record<string, unknown>;
+    const updated = { ...merged, name: deriveName(section, merged) } as unknown as T;
+    await this.push(SECTION_CLASS[section], updated, `vendor-profile.service:update:${section}`);
     return updated;
   }
 
-  // ── Delete ──
-
   /**
-   * Soft-delete a profile item.
+   * Write the singleton for a section, updating the existing row when there is one.
    *
-   * @param id — Item ID
+   * This is the whole reason the old path produced duplicates: it minted a new id on
+   * every save. Read first, reuse the id when a row exists.
    */
-  async deleteProfileItem(id: string): Promise<void> {
-    const cached = this.pipelineWrite.getCached('MarketplaceProfileItem', id);
-    const current = cached ?? await this.graphqlRead.getById<GqlMarketplaceProfileItemResponse>(
-      'MarketplaceProfileItem',
-      id,
-      this.getFields(),
-    );
+  async upsertSingleton<T extends VendorProfileRecord>(
+    section: 'corporate_identity' | 'financial',
+    orgId: string,
+    data: Partial<T>,
+  ): Promise<T> {
+    const existing = (await this.readSection<T>(section, orgId))[0];
+    return existing
+      ? this.updateRow<T>(section, existing, data)
+      : this.createRow<T>(section, orgId, data);
+  }
 
-    const today = new Date().toISOString().split('T')[0];
-    const gqlData: Record<string, unknown> = {
-      ...(current ?? { id }),
-      dateDeleted: today,
-    };
-
+  /** Delete a row from a section. */
+  async deleteRow(section: SectionType, id: string): Promise<void> {
     try {
-      await this.pipelineWrite.pushEntity('MarketplaceProfileItem', gqlData, [], 'vendor-profile.service:232');
+      await this.pipelineWrite.deleteEntity(SECTION_CLASS[section], id);
     } catch (err) {
-      this.snackBar.open(
-        `Failed to delete profile item: ${(err as Error).message}`,
-        'Dismiss',
-        { duration: 5000 },
-      );
+      this.snackBar.open(`Failed to delete: ${(err as Error).message}`, 'Dismiss', { duration: 5000 });
       throw err;
     }
   }
 
-  // ── Private helpers ──
+  // ── Credential claims ─────────────────────────────────────────────────────
 
   /**
-   * Check if a section value is valid.
-   */
-  private isValidSection(section: string): section is SectionType {
-    const validSections: SectionType[] = [
-      'corporate_identity',
-      'attestation',
-      'insurance',
-      'reference',
-      'personnel',
-      'financial',
-    ];
-    return validSections.includes(section as SectionType);
-  }
-
-  /**
-   * Parse JSON data string into typed section object.
-   * On parse error, logs warning and returns empty object matching section type.
+   * Catalog entries claimable at a given scope.
    *
-   * @param dataStr — JSON string from GQL response
-   * @param section — Section type (for default object shape)
-   * @returns Typed section data object
+   * Scope is not cosmetic — it decides which junction is legal. An individual-scope
+   * entry is claimable via UserCredential, an org-scope one via OrgCredential, and the
+   * curated catalog is overwhelmingly individual-scope. An unfiltered org-side list
+   * would be almost entirely unclaimable options.
    */
-  private parseData(dataStr: string): SectionData {
-    if (!dataStr) return {} as SectionData;
+  async listCatalogCredentials(scope: 'individual' | 'org'): Promise<SecurityCredentialRecord[]> {
     try {
-      return JSON.parse(dataStr) as SectionData;
+      const result = await this.graphqlRead.query<Record<string, unknown>>(
+        'SecurityCredential',
+        SECURITY_CREDENTIAL_FIELDS,
+        { filters: { scope: `.eq.${scope}` }, pageNumber: 1, pageSize: 500 },
+      );
+      return result.items.map(item => ({
+        ...item,
+        frameworkIds: toArray(item['frameworkIds']),
+        issuerVendorIds: toArray(item['issuerVendorIds']),
+      }) as unknown as SecurityCredentialRecord);
     } catch (err) {
-      console.warn('[VendorProfileService] Failed to parse data JSON:', dataStr, err);
-      return {} as SectionData;
+      console.error('[VendorProfileService] listCatalogCredentials failed:', err);
+      return [];
     }
   }
 
-  /**
-   * Serialize section data to JSON string.
-   *
-   * @param data — Typed section data object
-   * @returns JSON string for storage
-   */
-  private serializeData(data: unknown): string {
-    return JSON.stringify(data ?? {});
-  }
-
-  /**
-   * Transform GQL response → domain model.
-   * Special handling: parse `data` field from JSON string to typed object.
-   */
-  private fromGql(gql: GqlMarketplaceProfileItemResponse): MarketplaceProfileItem {
-    const mapped = mapGqlToNeon<MarketplaceProfileItem>(
-      gql,
-      MARKETPLACE_PROFILE_ITEM_FIELD_MAPPING.gqlToNeon,
-    );
-
-    // Parse data field from JSON string
-    const rawData = (gql as unknown as Record<string, unknown>)['data'];
-    if (typeof rawData === 'string') {
-      try {
-        mapped.data = rawData; // Keep as string in domain model
-      } catch {
-        mapped.data = '{}';
-      }
-    } else {
-      mapped.data = '{}';
+  /** An org's credential claims. */
+  async listOrgCredentials(orgId: string): Promise<OrgCredentialRecord[]> {
+    try {
+      const result = await this.graphqlRead.query<OrgCredentialRecord>(
+        'OrgCredential',
+        ORG_CREDENTIAL_FIELDS,
+        { filters: { orgId: `.eq.${orgId}` }, pageNumber: 1, pageSize: 200 },
+      );
+      return result.items;
+    } catch (err) {
+      console.error('[VendorProfileService] listOrgCredentials failed:', err);
+      return [];
     }
-
-    return mapped;
   }
 
-  /**
-   * Transform domain model → GQL data for pipeline push.
-   * Special handling: ensure `data` is JSON string.
-   */
-  private toGql(item: MarketplaceProfileItem): Record<string, unknown> {
-    const gql = mapNeonToGql<GqlMarketplaceProfileItemResponse>(
-      item,
-      MARKETPLACE_PROFILE_ITEM_FIELD_MAPPING.neonToGql,
-    ) as unknown as Record<string, unknown>;
-
-    // Ensure data is a JSON string
-    if (typeof gql['data'] !== 'string') {
-      gql['data'] = this.serializeData(gql['data']);
+  /** A user's credential claims. Keyed on userId — Personnel.userId may be null. */
+  async listUserCredentials(userId: string): Promise<UserCredentialRecord[]> {
+    try {
+      const result = await this.graphqlRead.query<UserCredentialRecord>(
+        'UserCredential',
+        USER_CREDENTIAL_FIELDS,
+        { filters: { userId: `.eq.${userId}` }, pageNumber: 1, pageSize: 200 },
+      );
+      return result.items;
+    } catch (err) {
+      console.error('[VendorProfileService] listUserCredentials failed:', err);
+      return [];
     }
-
-    return gql;
   }
 
-  /**
-   * Get array of all GQL field names for this entity.
-   * Used in query() calls to select which fields to fetch.
-   */
-  private getFields(): string[] {
-    return [
-      'id',
-      'orgId',
-      'section',
-      'name',
-      'description',
-      'data',
-      'expiresAt',
-      'status',
-      'dateCreated',
-      'dateLastModified',
-      'dateDeleted',
-      'tag',
-    ];
+  /** Claim an org-scope catalog credential for an org. */
+  async addOrgCredential(
+    orgId: string,
+    securityCredential: string,
+    data: Partial<OrgCredentialRecord> = {},
+  ): Promise<OrgCredentialRecord> {
+    const row: OrgCredentialRecord = {
+      id: crypto.randomUUID(),
+      orgId,
+      securityCredential,
+      credentialNumber: data.credentialNumber ?? null,
+      issuedAt: data.issuedAt ?? null,
+      expiresAt: data.expiresAt ?? null,
+      notes: data.notes ?? null,
+      verified: false,
+      verificationSource: null,
+      verifiedAt: null,
+      verifiedBy: null,
+      verificationExpiresAt: null,
+    };
+    await this.push('OrgCredential', row, 'vendor-profile.service:addOrgCredential');
+    return row;
+  }
+
+  /** Claim an individual-scope catalog credential for a user. */
+  async addUserCredential(
+    userId: string,
+    securityCredential: string,
+    data: Partial<UserCredentialRecord> = {},
+  ): Promise<UserCredentialRecord> {
+    const row: UserCredentialRecord = {
+      id: crypto.randomUUID(),
+      userId,
+      securityCredential,
+      credentialNumber: data.credentialNumber ?? null,
+      issuedAt: data.issuedAt ?? null,
+      expiresAt: data.expiresAt ?? null,
+      notes: data.notes ?? null,
+      verified: false,
+      verificationSource: null,
+      verifiedAt: null,
+      verifiedBy: null,
+      verificationExpiresAt: null,
+    };
+    await this.push('UserCredential', row, 'vendor-profile.service:addUserCredential');
+    return row;
+  }
+
+  async removeOrgCredential(id: string): Promise<void> {
+    await this.pipelineWrite.deleteEntity('OrgCredential', id);
+  }
+
+  async removeUserCredential(id: string): Promise<void> {
+    await this.pipelineWrite.deleteEntity('UserCredential', id);
+  }
+
+  // ── Internals ─────────────────────────────────────────────────────────────
+
+  private async push(className: SmeMartClassName, row: unknown, source: string): Promise<void> {
+    try {
+      await this.pipelineWrite.pushEntity(
+        className,
+        row as Record<string, unknown>,
+        [],
+        source,
+      );
+    } catch (err) {
+      this.snackBar.open(`Failed to save: ${(err as Error).message}`, 'Dismiss', { duration: 5000 });
+      throw err;
+    }
   }
 }

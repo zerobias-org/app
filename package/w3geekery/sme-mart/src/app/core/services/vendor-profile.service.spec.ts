@@ -1,628 +1,260 @@
 /**
- * Unit Tests for VendorProfileService (Plan 041 — Vendor Profile Service)
+ * Unit tests for VendorProfileService — the six typed classes that replaced the
+ * MarketplaceProfileItem blob.
  *
- * Tests verify CRUD operations, field mapping, JSON serialization, and error handling.
+ * The old suite tested one CRUD surface over a JSON `data` column. These test the
+ * behaviours the typed rewrite introduced: per-class reads, singleton upsert (the bug
+ * the old insert-only path had), derived `name`, and the credential claim junctions.
  */
 
 import { TestBed } from '@angular/core/testing';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { VendorProfileService } from './vendor-profile.service';
-import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
-import { DemoVisibilityService } from './demo-visibility.service';
-import { ProjectContextService } from './project-context.service';
-import { fakePipelineWriteService, fakeGraphqlReadService, fakeProjectContextService } from '../../test-helpers/angular';
-import type { GqlMarketplaceProfileItemResponse } from '../gql-types/marketplace-profile-item.types';
-import type { InsuranceData, AttestationData, SectionType } from '../models/marketplace-profile-item.model';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { PipelineWriteService } from './pipeline-write.service';
+import { fakePipelineWriteService, fakeGraphqlReadService } from '../../test-helpers/angular';
+import type { OrgProfileRecord } from '../models/vendor-profile.model';
 
-// ── Test Fixtures ──
-
-function createMockInsuranceData(): InsuranceData {
-  return {
-    policyNumber: 'POL-2024-001',
-    carrier: 'Zurich North America',
-    coverageType: 'general_liability',
-    coverageAmount: 2000000,
-    effectiveDate: '2024-01-01',
-    expirationDate: '2025-12-31',
-    limits: '2M/5M/2M',
-    deductible: 5000,
-  };
+function page<T>(items: T[]) {
+  return { items, page: { pageNumber: 1, pageSize: 200, totalCount: items.length } };
 }
 
-function createMockAttestationData(): AttestationData {
-  return {
-    serviceType: 'security_audit',
-    yearsExperience: 12,
-    clientCount: 45,
-    avgProjectDuration: '8 weeks',
-    certifications: ['ISO 27001', 'CEH'],
-    specializations: ['cloud_security'],
-  };
-}
+const provenance = {
+  verified: false,
+  verificationSource: null,
+  verifiedAt: null,
+  verifiedBy: null,
+  verificationExpiresAt: null,
+};
 
-function createMockGqlItem(
-  overrides?: Partial<GqlMarketplaceProfileItemResponse>,
-): GqlMarketplaceProfileItemResponse {
+function identity(overrides: Partial<OrgProfileRecord> = {}): OrgProfileRecord {
   return {
-    id: 'profile-001',
-    orgId: 'org-001',
-    name: 'Insurance Profile',
-    description: 'D&O insurance coverage',
-    section: 'insurance',
-    data: JSON.stringify(createMockInsuranceData()),
-    expiresAt: '2026-12-31T23:59:59Z',
-    status: 'active',
-    dateCreated: '2026-03-18T10:00:00Z',
-    dateLastModified: '2026-03-18T10:00:00Z',
-    ...overrides,
+    id: 'identity-1', orgId: 'org-1', legalName: 'Acme Corp', dba: null, tagline: null,
+    shortDescription: null, longDescription: null, website: null, logoUrl: null,
+    foundedYear: null, businessClassification: null, employeeCount: null,
+    primaryContactUserId: null, ...provenance, ...overrides,
   };
 }
 
 describe('VendorProfileService', () => {
   let service: VendorProfileService;
-  let pipelineWrite: ReturnType<typeof fakePipelineWriteService>;
   let graphqlRead: ReturnType<typeof fakeGraphqlReadService>;
-  let mockProjectContext: ReturnType<typeof fakeProjectContextService>;
+  let pipelineWrite: ReturnType<typeof fakePipelineWriteService>;
 
   beforeEach(() => {
-    pipelineWrite = fakePipelineWriteService();
     graphqlRead = fakeGraphqlReadService();
-    mockProjectContext = fakeProjectContextService(false);
+    pipelineWrite = fakePipelineWriteService();
+    graphqlRead.query.mockResolvedValue(page([]));
 
     TestBed.configureTestingModule({
       providers: [
         VendorProfileService,
-        DemoVisibilityService,
-        { provide: PipelineWriteService, useValue: pipelineWrite },
         { provide: GraphqlReadService, useValue: graphqlRead },
-        { provide: ProjectContextService, useValue: mockProjectContext },
+        { provide: PipelineWriteService, useValue: pipelineWrite },
+        { provide: MatSnackBar, useValue: { open: vi.fn() } },
       ],
     });
 
     service = TestBed.inject(VendorProfileService);
   });
 
-  // ── listProfileItems ──
+  describe('loadBundle()', () => {
+    it('queries each section against its own class', async () => {
+      await service.loadBundle('org-1');
 
-  describe('listProfileItems()', () => {
-    it('should return list of profile items for given orgId', async () => {
-      const fixture1 = createMockGqlItem({ id: 'profile-001' });
-      const fixture2 = createMockGqlItem({ id: 'profile-002', name: 'Attestation' });
+      const classes = graphqlRead.query.mock.calls.map(c => c[0]);
+      expect(classes).toContain('OrgProfile');
+      expect(classes).toContain('FinancialProfile');
+      expect(classes).toContain('ServiceCapability');
+      expect(classes).toContain('InsuranceCoverage');
+      expect(classes).toContain('ClientReference');
+      expect(classes).toContain('Personnel');
+    });
 
-      graphqlRead.query.mockResolvedValue({
-        items: [fixture1, fixture2],
-        page: { pageNumber: 1, pageSize: 200, totalCount: 2 },
-      });
+    it('filters every section by orgId', async () => {
+      await service.loadBundle('org-1');
 
-      const result = await service.listProfileItems('org-001');
+      for (const call of graphqlRead.query.mock.calls) {
+        expect((call[2] as { filters: Record<string, string> }).filters)
+          .toEqual({ orgId: '.eq.org-1' });
+      }
+    });
 
-      expect(graphqlRead.query).toHaveBeenCalledWith(
-        'MarketplaceProfileItem',
-        expect.any(Array),
-        expect.objectContaining({
-          filters: { orgId: '.eq.org-001' },
-        }),
+    it('collapses the two singleton sections to a row or null', async () => {
+      graphqlRead.query.mockImplementation((className: string) =>
+        Promise.resolve(className === 'OrgProfile' ? page([identity()]) : page([])),
       );
-      expect(result).toHaveLength(2);
-      expect(result[0].name).toBe('Attestation'); // Sorted alphabetically
+
+      const bundle = await service.loadBundle('org-1');
+
+      expect(bundle.corporate_identity?.id).toBe('identity-1');
+      expect(bundle.financial).toBeNull();
+      expect(bundle.insurance).toEqual([]);
     });
 
-    it('should return filtered list when section parameter provided', async () => {
-      const fixture = createMockGqlItem({ section: 'attestation' });
-      graphqlRead.query.mockResolvedValue({
-        items: [fixture],
-        page: { pageNumber: 1, pageSize: 200, totalCount: 1 },
-      });
-
-      const result = await service.listProfileItems('org-001', 'attestation');
-
-      expect(graphqlRead.query).toHaveBeenCalledWith(
-        'MarketplaceProfileItem',
-        expect.any(Array),
-        expect.objectContaining({
-          filters: expect.objectContaining({
-            orgId: '.eq.org-001',
-            section: '.eq.attestation',
-          }),
-        }),
-      );
-      expect(result).toHaveLength(1);
-      expect(result[0].section).toBe('attestation');
-    });
-
-    it('should filter out soft-deleted items', async () => {
-      graphqlRead.query.mockResolvedValue({
-        items: [
-          createMockGqlItem(),
-          { ...createMockGqlItem(), dateDeleted: '2026-03-20' } as unknown as GqlMarketplaceProfileItemResponse,
-        ],
-        page: { pageNumber: 1, pageSize: 200, totalCount: 2 },
-      });
-
-      const result = await service.listProfileItems('org-001');
-
-      expect(result).toHaveLength(1);
-    });
-
-    it('should parse JSON data field for each item', async () => {
-      graphqlRead.query.mockResolvedValue({
-        items: [createMockGqlItem()],
-        page: { pageNumber: 1, pageSize: 200, totalCount: 1 },
-      });
-
-      const result = await service.listProfileItems('org-001');
-
-      expect(result[0].data).toBeTruthy();
-      const parsed = JSON.parse(result[0].data) as InsuranceData;
-      expect(parsed.policyNumber).toBe('POL-2024-001');
-    });
-
-    it('should return empty array when no items found', async () => {
-      graphqlRead.query.mockResolvedValue({
-        items: [],
-        page: { pageNumber: 1, pageSize: 200, totalCount: 0 },
-      });
-
-      const result = await service.listProfileItems('org-001');
-
-      expect(result).toHaveLength(0);
-    });
-  });
-
-  // ── getProfileItem ──
-
-  describe('getProfileItem()', () => {
-    it('should return cached item if available', async () => {
-      const gqlFixture = createMockGqlItem();
-      pipelineWrite.getCached.mockReturnValue(gqlFixture as unknown as Record<string, unknown>);
-
-      const result = await service.getProfileItem('profile-001');
-
-      expect(result?.id).toBe('profile-001');
-      expect(graphqlRead.getById).not.toHaveBeenCalled();
-    });
-
-    it('should fetch from GQL if not cached', async () => {
-      const gqlFixture = createMockGqlItem();
-      pipelineWrite.getCached.mockReturnValue(null);
-      graphqlRead.getById.mockResolvedValue(gqlFixture);
-
-      const result = await service.getProfileItem('profile-001');
-
-      expect(result?.id).toBe('profile-001');
-      expect(graphqlRead.getById).toHaveBeenCalledWith(
-        'MarketplaceProfileItem',
-        'profile-001',
-        expect.any(Array),
-      );
-    });
-
-    it('should return null if item not found', async () => {
-      pipelineWrite.getCached.mockReturnValue(null);
-      graphqlRead.getById.mockResolvedValue(null);
-
-      const result = await service.getProfileItem('nonexistent');
-
-      expect(result).toBeNull();
-    });
-
-    it('should seed cache after fetch', async () => {
-      const gqlFixture = createMockGqlItem();
-      pipelineWrite.getCached.mockReturnValue(null);
-      graphqlRead.getById.mockResolvedValue(gqlFixture);
-
-      await service.getProfileItem('profile-001');
-
-      expect(pipelineWrite.seedCache).toHaveBeenCalledWith(
-        'MarketplaceProfileItem',
-        'profile-001',
-        expect.any(Object),
-      );
-    });
-  });
-
-  // ── createProfileItem ──
-
-  describe('createProfileItem()', () => {
-    it('should validate required fields (name, section)', async () => {
-      await expect(
-        service.createProfileItem('org-001', {
-          section: 'insurance',
-          name: '',
-          data: createMockInsuranceData(),
-        }),
-      ).rejects.toThrow('name is required');
-
-      await expect(
-        service.createProfileItem('org-001', {
-          section: 'insurance',
-          name: 'Test',
-          data: createMockInsuranceData(),
-        } as Parameters<typeof service.createProfileItem>[1]),
-      ).resolves.toBeTruthy(); // Should not throw
-    });
-
-    it('should validate section is one of 6 valid values', async () => {
-      await expect(
-        service.createProfileItem('org-001', {
-          section: 'invalid_section' as SectionType,
-          name: 'Test',
-          data: createMockInsuranceData(),
-        }),
-      ).rejects.toThrow('Invalid section');
-    });
-
-    it('should generate UUID for new item', async () => {
-      const result = await service.createProfileItem('org-001', {
-        section: 'insurance',
-        name: 'Test',
-        data: createMockInsuranceData(),
-      });
-
-      expect(result.id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
-    });
-
-    it('should serialize section data to JSON', async () => {
-      const result = await service.createProfileItem('org-001', {
-        section: 'insurance',
-        name: 'Test',
-        data: createMockInsuranceData(),
-      });
-
-      expect(typeof result.data).toBe('string');
-      const parsed = JSON.parse(result.data) as InsuranceData;
-      expect(parsed.policyNumber).toBe('POL-2024-001');
-    });
-
-    it('should call pushEntity with correct class ID', async () => {
-      await service.createProfileItem('org-001', {
-        section: 'insurance',
-        name: 'Test Item',
-        data: createMockInsuranceData(),
-      });
-
-      expect(pipelineWrite.pushEntity).toHaveBeenCalledWith(
-        'MarketplaceProfileItem',
-        expect.objectContaining({
-          name: 'Test Item',
-          section: 'insurance',
-        }),
-        [],
-        expect.any(String), // callSiteTag
-      );
-    });
-
-    it('should return created item with all fields', async () => {
-      const result = await service.createProfileItem('org-001', {
-        section: 'insurance',
-        name: 'Test Item',
-        description: 'Test description',
-        data: createMockInsuranceData(),
-        expiresAt: '2026-12-31',
-        status: 'active',
-      });
-
-      expect(result).toHaveProperty('id');
-      expect(result.name).toBe('Test Item');
-      expect(result.org_id).toBe('org-001');
-      expect(result.section).toBe('insurance');
-      expect(result.status).toBe('active');
-      expect(result.expires_at).toBe('2026-12-31');
-      expect(result.created_at).toBeTruthy();
-      expect(result.updated_at).toBeTruthy();
-    });
-  });
-
-  // ── updateProfileItem ──
-
-  describe('updateProfileItem()', () => {
-    beforeEach(() => {
-      pipelineWrite.getCached.mockReturnValue(null);
-    });
-
-    it('should fetch current item before update', async () => {
-      const fixture = createMockGqlItem();
-      graphqlRead.getById.mockResolvedValue(fixture);
-
-      await service.updateProfileItem('profile-001', { name: 'Updated' });
-
-      expect(graphqlRead.getById).toHaveBeenCalledWith(
-        'MarketplaceProfileItem',
-        'profile-001',
-        expect.any(Array),
-      );
-    });
-
-    it('should merge partial update into current item', async () => {
-      const fixture = createMockGqlItem({
-        name: 'Original',
-        description: 'Original description',
-      });
-      graphqlRead.getById.mockResolvedValue(fixture);
-
-      const result = await service.updateProfileItem('profile-001', {
-        name: 'Updated',
-      });
-
-      expect(result.name).toBe('Updated');
-      expect(result.description).toBe('Original description');
-    });
-
-    it('should re-serialize data if provided in update', async () => {
-      const fixture = createMockGqlItem({
-        data: JSON.stringify(createMockInsuranceData()),
-      });
-      graphqlRead.getById.mockResolvedValue(fixture);
-
-      const newData = createMockAttestationData();
-      const result = await service.updateProfileItem('profile-001', {
-        data: newData,
-      });
-
-      const parsed = JSON.parse(result.data) as AttestationData;
-      expect(parsed.serviceType).toBe('security_audit');
-    });
-
-    it('should call pushEntity with full object', async () => {
-      const fixture = createMockGqlItem();
-      graphqlRead.getById.mockResolvedValue(fixture);
-
-      await service.updateProfileItem('profile-001', { status: 'archived' });
-
-      expect(pipelineWrite.pushEntity).toHaveBeenCalledWith(
-        'MarketplaceProfileItem',
-        expect.objectContaining({
-          id: 'profile-001',
-          status: 'archived',
-        }),
-        [],
-        expect.any(String), // callSiteTag
-      );
-    });
-
-    it('should return updated item', async () => {
-      const fixture = createMockGqlItem();
-      graphqlRead.getById.mockResolvedValue(fixture);
-
-      const result = await service.updateProfileItem('profile-001', {
-        name: 'Updated Name',
-      });
-
-      expect(result.name).toBe('Updated Name');
-      expect(result.id).toBe('profile-001');
-    });
-  });
-
-  // ── deleteProfileItem ──
-
-  describe('deleteProfileItem()', () => {
-    beforeEach(() => {
-      pipelineWrite.getCached.mockReturnValue(null);
-    });
-
-    it('should fetch current item', async () => {
-      const fixture = createMockGqlItem();
-      graphqlRead.getById.mockResolvedValue(fixture);
-
-      await service.deleteProfileItem('profile-001');
-
-      expect(graphqlRead.getById).toHaveBeenCalledWith(
-        'MarketplaceProfileItem',
-        'profile-001',
-        expect.any(Array),
-      );
-    });
-
-    it('should mark for deletion via dateDeleted', async () => {
-      const fixture = createMockGqlItem();
-      graphqlRead.getById.mockResolvedValue(fixture);
-
-      await service.deleteProfileItem('profile-001');
-
-      expect(pipelineWrite.pushEntity).toHaveBeenCalledWith(
-        'MarketplaceProfileItem',
-        expect.objectContaining({
-          dateDeleted: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/),
-        }),
-        [],
-        expect.any(String), // callSiteTag
-      );
-    });
-
-    it('should return successfully', async () => {
-      const fixture = createMockGqlItem();
-      graphqlRead.getById.mockResolvedValue(fixture);
-
-      await expect(service.deleteProfileItem('profile-001')).resolves.toBeUndefined();
-    });
-  });
-
-  // ── Field Mapping ──
-
-  describe('Field Mapping', () => {
-    it('should apply camelCase→snake_case mapping (fromGql)', async () => {
-      graphqlRead.query.mockResolvedValue({
-        items: [createMockGqlItem()],
-        page: { pageNumber: 1, pageSize: 200, totalCount: 1 },
-      });
-
-      const result = await service.listProfileItems('org-001');
-      const item = result[0];
-
-      expect(item).toHaveProperty('org_id', 'org-001');
-      expect(item).toHaveProperty('created_at');
-      expect(item).toHaveProperty('updated_at');
-      expect(item).not.toHaveProperty('orgId');
-      expect(item).not.toHaveProperty('dateCreated');
-    });
-
-    it('should apply snake_case→camelCase mapping (toGql)', async () => {
-      await service.createProfileItem('org-001', {
-        section: 'insurance',
-        name: 'Test',
-        data: createMockInsuranceData(),
-      });
-
-      const call = pipelineWrite.pushEntity.mock.calls[0];
-      const pushed = call[1] as Record<string, unknown>;
-
-      expect(pushed).toHaveProperty('orgId');
-      expect(pushed).not.toHaveProperty('org_id');
-    });
-
-    it('should preserve all fields in bidirectional round-trip', async () => {
-      const gqlFixture = createMockGqlItem({
-        id: 'profile-round-trip',
-        orgId: 'org-test',
-        section: 'corporate_identity',
-        name: 'Test Name',
-        description: 'Test Desc',
-        status: 'active',
-        expiresAt: '2026-12-31',
-      });
-      graphqlRead.getById.mockResolvedValue(gqlFixture);
-
-      const domain = await service.getProfileItem('profile-round-trip');
-      if (!domain) throw new Error('Item not found');
-
-      // Verify domain has snake_case fields
-      expect(domain.org_id).toBe('org-test');
-      expect(domain.name).toBe('Test Name');
-      expect(domain.section).toBe('corporate_identity');
-
-      // Update (triggers toGql transformation)
-      await service.updateProfileItem('profile-round-trip', { status: 'archived' });
-
-      // Verify Pipeline push had camelCase fields
-      const call = pipelineWrite.pushEntity.mock.calls[0];
-      const pushed = call[1] as Record<string, unknown>;
-      expect(pushed['orgId']).toBe('org-test');
-      expect(pushed['name']).toBe('Test Name');
-    });
-  });
-
-  // ── Error Handling ──
-
-  describe('Error Handling', () => {
-    it('should handle malformed JSON in data field', async () => {
-      const malformed = createMockGqlItem({
-        data: 'not json',
-      });
-      graphqlRead.query.mockResolvedValue({
-        items: [malformed],
-        page: { pageNumber: 1, pageSize: 200, totalCount: 1 },
-      });
-
-      const result = await service.listProfileItems('org-001');
-
-      // Service keeps raw data string — consumer handles parse errors
-      expect(result[0].data).toBe('not json');
-    });
-
-    it('should throw ValidationError for invalid section', async () => {
-      await expect(
-        service.createProfileItem('org-001', {
-          section: 'invalid' as SectionType,
-          name: 'Test',
-          data: createMockInsuranceData(),
-        }),
-      ).rejects.toThrow('Invalid section');
-    });
-
-    it('should throw ValidationError for missing name', async () => {
-      await expect(
-        service.createProfileItem('org-001', {
-          section: 'insurance',
-          name: '   ',
-          data: createMockInsuranceData(),
-        }),
-      ).rejects.toThrow('name is required');
-    });
-
-    it('should propagate GQL query errors', async () => {
-      graphqlRead.query.mockRejectedValue(new Error('GQL Error'));
-
-      await expect(service.listProfileItems('org-001')).rejects.toThrow('GQL Error');
-    });
-
-    it('should throw error when updating nonexistent item', async () => {
-      pipelineWrite.getCached.mockReturnValue(null);
-      graphqlRead.getById.mockResolvedValue(null);
-
-      await expect(service.updateProfileItem('nonexistent', { name: 'Test' })).rejects.toThrow('not found');
-    });
-  });
-
-  // ── Demo visibility (Phase 24 Plan 03) ──
-
-  describe('Demo visibility (Phase 24 Plan 03)', () => {
-    const mockGqlReturn = [
-      createMockGqlItem({ id: '1', name: 'Real', tag: null } as Partial<GqlMarketplaceProfileItemResponse> & { tag: null }),
-      createMockGqlItem({ id: '2', name: 'Real w/ marketplace tag', tag: [{ value: 'a81cd320-243e-44eb-bdd9-9824019ef3dd' }] } as Partial<GqlMarketplaceProfileItemResponse> & { tag: Array<{ value: string }> }),
-      createMockGqlItem({ id: '3', name: 'Demo (global)', tag: [{ value: '81053c14-a8e5-4939-b538-c122c7d0eb1a' }] } as Partial<GqlMarketplaceProfileItemResponse> & { tag: Array<{ value: string }> }),
-      createMockGqlItem({ id: '4', name: 'Demo (legacy)', tag: [{ value: 'd618b602-21cc-40a1-a9fa-534b7bc1672c' }] } as Partial<GqlMarketplaceProfileItemResponse> & { tag: Array<{ value: string }> }),
-    ];
-
-    it('[DG-02] strips demo records for non-admin', async () => {
-      graphqlRead.query.mockResolvedValue({
-        items: mockGqlReturn,
-        page: { pageNumber: 1, pageSize: 200, totalCount: 4 },
-      });
-
-      const result = await service.listProfileItems('org-001');
-
-      // Service sorts by name; non-admin sees only id 1 ('Real') + id 2 ('Real w/...').
-      expect(result.map(r => r.id)).toEqual(['1', '2']);
-    });
-
-    it('[DG-03] admin sees all records including demo', async () => {
-      mockProjectContext.setIsAdmin(true);
-      graphqlRead.query.mockResolvedValue({
-        items: mockGqlReturn,
-        page: { pageNumber: 1, pageSize: 200, totalCount: 4 },
-      });
-
-      const result = await service.listProfileItems('org-001');
-
-      // Service sorts by name alphabetically: 'Demo (global)', 'Demo (legacy)', 'Real', 'Real w/ marketplace tag'
-      expect(result.map(r => r.id)).toEqual(['3', '4', '1', '2']);
-    });
-
-    it('[DG-02] does NOT add server-side tag negation filter', async () => {
-      graphqlRead.query.mockResolvedValue({
-        items: mockGqlReturn,
-        page: { pageNumber: 1, pageSize: 200, totalCount: 4 },
-      });
-
-      await service.listProfileItems('org-001');
-
-      const callArgs = graphqlRead.query.mock.calls[0];
-      const filters = (callArgs[2] as { filters?: Record<string, string> })?.filters ?? {};
-      const filterValues = Object.values(filters).join(' ');
-      expect(filterValues).not.toContain('.not in.');
-      expect(filterValues).not.toContain('.ne.');
-    });
-
-    it('requests tag field in GQL query', async () => {
-      graphqlRead.query.mockResolvedValue({
-        items: mockGqlReturn,
-        page: { pageNumber: 1, pageSize: 200, totalCount: 4 },
-      });
-
-      await service.listProfileItems('org-001');
+    it('requests the provenance fields every attestation row carries', async () => {
+      await service.loadBundle('org-1');
 
       const fields = graphqlRead.query.mock.calls[0][1] as string[];
-      expect(fields).toContain('tag');
+      expect(fields).toContain('verified');
+      expect(fields).toContain('verificationSource');
+      expect(fields).toContain('verificationExpiresAt');
     });
 
-    it('[DG-02] returns null when non-admin fetches a demo record by id', async () => {
-      const demoRecord = createMockGqlItem({ id: '3', name: 'Demo', tag: [{ value: '81053c14-a8e5-4939-b538-c122c7d0eb1a' }] } as Partial<GqlMarketplaceProfileItemResponse> & { tag: Array<{ value: string }> });
-      graphqlRead.getById.mockResolvedValueOnce(demoRecord);
+    it('returns an empty section rather than throwing when a read fails', async () => {
+      graphqlRead.query.mockRejectedValue(new Error('boom'));
 
-      const result = await service.getProfileItem('3');
+      const bundle = await service.loadBundle('org-1');
 
-      expect(result).toBeNull();
+      expect(bundle.corporate_identity).toBeNull();
+      expect(bundle.personnel).toEqual([]);
+    });
+  });
+
+  describe('createRow()', () => {
+    it('writes to the section class with a generated id and the orgId', async () => {
+      const row = await service.createRow('insurance', 'org-1', { carrier: 'Lloyds' });
+
+      expect(pipelineWrite.pushEntity).toHaveBeenCalledWith(
+        'InsuranceCoverage',
+        expect.objectContaining({ orgId: 'org-1', carrier: 'Lloyds' }),
+        [],
+        'vendor-profile.service:create:insurance',
+      );
+      expect(row.id).toBeTruthy();
+    });
+
+    it('derives the required Object.name from the section primary field', async () => {
+      await service.createRow('insurance', 'org-1', { carrier: 'Lloyds' });
+
+      expect(pipelineWrite.pushEntity).toHaveBeenCalledWith(
+        'InsuranceCoverage',
+        expect.objectContaining({ name: 'Lloyds' }),
+        [],
+        expect.any(String),
+      );
+    });
+
+    it('falls back to a section label when the primary field is empty', async () => {
+      await service.createRow('personnel', 'org-1', {});
+
+      expect(pipelineWrite.pushEntity).toHaveBeenCalledWith(
+        'Personnel',
+        expect.objectContaining({ name: 'Personnel' }),
+        [],
+        expect.any(String),
+      );
+    });
+
+    it('starts a new row unverified', async () => {
+      const row = await service.createRow('reference', 'org-1', { clientName: 'Initech' });
+      expect(row.verified).toBe(false);
+    });
+  });
+
+  describe('upsertSingleton()', () => {
+    it('creates when the org has no row yet', async () => {
+      graphqlRead.query.mockResolvedValue(page([]));
+
+      await service.upsertSingleton('corporate_identity', 'org-1', { legalName: 'Acme' });
+
+      const [, payload] = pipelineWrite.pushEntity.mock.calls[0];
+      expect((payload as { id: string }).id).toBeTruthy();
+    });
+
+    it('REUSES the existing id rather than minting a new one', async () => {
+      // The old insert-only path generated a fresh uuid on every save, so editing
+      // produced a duplicate row instead of updating the first.
+      graphqlRead.query.mockResolvedValue(page([identity()]));
+
+      await service.upsertSingleton('corporate_identity', 'org-1', { legalName: 'Renamed' });
+
+      const [, payload] = pipelineWrite.pushEntity.mock.calls[0];
+      expect((payload as { id: string }).id).toBe('identity-1');
+      expect((payload as { legalName: string }).legalName).toBe('Renamed');
+    });
+
+    it('preserves provenance already on the row when updating', async () => {
+      graphqlRead.query.mockResolvedValue(page([
+        identity({ verified: true, verificationSource: 'manual-review' }),
+      ]));
+
+      await service.upsertSingleton('corporate_identity', 'org-1', { tagline: 'New tagline' });
+
+      const [, payload] = pipelineWrite.pushEntity.mock.calls[0];
+      expect((payload as { verified: boolean }).verified).toBe(true);
+      expect((payload as { verificationSource: string }).verificationSource).toBe('manual-review');
+    });
+  });
+
+  describe('deleteRow()', () => {
+    it('deletes against the section class', async () => {
+      await service.deleteRow('personnel', 'p-1');
+      expect(pipelineWrite.deleteEntity).toHaveBeenCalledWith('Personnel', 'p-1');
+    });
+  });
+
+  describe('credential claims', () => {
+    it('filters the catalog by scope', async () => {
+      await service.listCatalogCredentials('org');
+
+      expect(graphqlRead.query).toHaveBeenCalledWith(
+        'SecurityCredential',
+        expect.any(Array),
+        expect.objectContaining({ filters: { scope: '.eq.org' } }),
+      );
+    });
+
+    it('normalizes frameworkIds to an array when GQL returns a bare value', async () => {
+      graphqlRead.query.mockResolvedValue(page([
+        { id: 'sc-1', name: 'CISSP', frameworkIds: 'framework-1' },
+      ]));
+
+      const [entry] = await service.listCatalogCredentials('individual');
+
+      expect(entry.frameworkIds).toEqual(['framework-1']);
+    });
+
+    it('treats an absent frameworkIds as empty, not malformed', async () => {
+      graphqlRead.query.mockResolvedValue(page([{ id: 'sc-1', name: 'CISSP' }]));
+
+      const [entry] = await service.listCatalogCredentials('individual');
+
+      expect(entry.frameworkIds).toEqual([]);
+    });
+
+    it('claims an org-scope credential against OrgCredential', async () => {
+      const claim = await service.addOrgCredential('org-1', 'sc-1', { credentialNumber: 'X-9' });
+
+      expect(pipelineWrite.pushEntity).toHaveBeenCalledWith(
+        'OrgCredential',
+        expect.objectContaining({ orgId: 'org-1', securityCredential: 'sc-1', credentialNumber: 'X-9' }),
+        [],
+        'vendor-profile.service:addOrgCredential',
+      );
+      expect(claim.verified).toBe(false);
+    });
+
+    it('claims an individual-scope credential against UserCredential, keyed on userId', async () => {
+      await service.addUserCredential('user-1', 'sc-2');
+
+      expect(pipelineWrite.pushEntity).toHaveBeenCalledWith(
+        'UserCredential',
+        expect.objectContaining({ userId: 'user-1', securityCredential: 'sc-2' }),
+        [],
+        'vendor-profile.service:addUserCredential',
+      );
+    });
+
+    it('lists a user\'s claims by userId', async () => {
+      await service.listUserCredentials('user-1');
+
+      expect(graphqlRead.query).toHaveBeenCalledWith(
+        'UserCredential',
+        expect.any(Array),
+        expect.objectContaining({ filters: { userId: '.eq.user-1' } }),
+      );
     });
   });
 });

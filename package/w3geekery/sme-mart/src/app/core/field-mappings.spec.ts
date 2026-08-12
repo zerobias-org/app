@@ -9,7 +9,6 @@ import { describe, it, expect } from 'vitest';
 import {
   mapGqlToNeon,
   mapNeonToGql,
-  SME_MART_PROJECT_FIELD_MAPPING,
   SME_MART_BOARD_FIELD_MAPPING,
   SME_MART_ACTIVITY_FIELD_MAPPING,
   SME_MART_WORKFLOW_FIELD_MAPPING,
@@ -19,7 +18,6 @@ import {
   PROJECT_PLAN_FIELD_MAPPING,
   PLAN_MILESTONE_FIELD_MAPPING,
 } from './field-mappings';
-import type { SmeMartProject } from './models/sme-mart-project.model';
 import type { SmeMartBoard } from './models/sme-mart-board.model';
 import type { SmeMartActivity } from './models/sme-mart-activity.model';
 import type { SmeMartWorkflow } from './models/sme-mart-workflow.model';
@@ -27,7 +25,6 @@ import type { SmeMartTask } from './models/sme-mart-task.model';
 import type { ProjectPrd, PrdSection } from './models/project-prd.model';
 import type { ProjectPlan, PlanMilestone } from './models/project-plan.model';
 import type {
-  GqlSmeMartProjectResponse,
   GqlSmeMartBoardResponse,
   GqlSmeMartActivityResponse,
   GqlSmeMartWorkflowResponse,
@@ -39,48 +36,8 @@ import type {
 } from './gql-types';
 
 describe('Field Mapping Roundtrip Tests - Bloom Entities', () => {
-  // ────────────────────────────────────────────────────────────────────────────
-  // SmeMartProject Roundtrip
-  // ────────────────────────────────────────────────────────────────────────────
-
-  it('should roundtrip SmeMartProject fields without loss', () => {
-    const gqlProject: GqlSmeMartProjectResponse = {
-      id: 'proj-123',
-      name: 'Test Project',
-      description: 'Test project description',
-      status: 'draft',
-      startDate: '2026-03-19',
-      targetEndDate: '2026-06-19',
-      createdAt: '2026-03-19T00:00:00Z',
-      updatedAt: '2026-03-19T00:00:00Z',
-    };
-
-    // Map GQL → model
-    const model = mapGqlToNeon<SmeMartProject>(
-      gqlProject,
-      SME_MART_PROJECT_FIELD_MAPPING.gqlToNeon,
-    );
-
-    // Verify all fields present in model
-    expect(model.id).toBe('proj-123');
-    expect(model.name).toBe('Test Project');
-    expect(model.description).toBe('Test project description');
-    expect(model.status).toBe('draft');
-    expect(model.startDate).toBe('2026-03-19');
-    expect(model.targetEndDate).toBe('2026-06-19');
-
-    // Map model → GQL (reverse)
-    const gqlRoundtrip = mapNeonToGql<GqlSmeMartProjectResponse>(
-      model,
-      SME_MART_PROJECT_FIELD_MAPPING.neonToGql,
-    );
-
-    // Verify roundtrip preserves all fields
-    expect(gqlRoundtrip.id).toBe(gqlProject.id);
-    expect(gqlRoundtrip.name).toBe(gqlProject.name);
-    expect(gqlRoundtrip.description).toBe(gqlProject.description);
-    expect(gqlRoundtrip.status).toBe(gqlProject.status);
-  });
+  // The SmeMartProject roundtrip was dropped with the class, deleted in 99549cee:
+  // Project lives in platform.Project, surfaced by the Projects App.
 
   // ────────────────────────────────────────────────────────────────────────────
   // SmeMartBoard Roundtrip
@@ -251,10 +208,10 @@ describe('Field Mapping Roundtrip Tests - Bloom Entities', () => {
   it('should roundtrip ProjectPrd fields without loss', () => {
     const gqlPrd: GqlProjectPrdResponse = {
       id: 'prd-123',
-      parentId: 'proj-123',
+      name: 'PRD for Project 123',
+      projectId: 'proj-123',
       title: 'Product Requirements Document',
       summary: 'Core requirements for v1.0',
-      sourceDocuments: ['https://docs.example.com/prd', 'https://specs.example.com/v1'],
       createdAt: '2026-03-19T00:00:00Z',
       updatedAt: '2026-03-19T00:00:00Z',
     };
@@ -265,12 +222,8 @@ describe('Field Mapping Roundtrip Tests - Bloom Entities', () => {
     );
 
     expect(model.title).toBe('Product Requirements Document');
-    expect(model.parentId).toBe('proj-123');
+    expect(model.projectId).toBe('proj-123');
     expect(model.summary).toBe('Core requirements for v1.0');
-    expect(model.sourceDocuments).toEqual([
-      'https://docs.example.com/prd',
-      'https://specs.example.com/v1',
-    ]);
 
     const gqlRoundtrip = mapNeonToGql<GqlProjectPrdResponse>(
       model,
@@ -279,7 +232,6 @@ describe('Field Mapping Roundtrip Tests - Bloom Entities', () => {
 
     expect(gqlRoundtrip.id).toBe(gqlPrd.id);
     expect(gqlRoundtrip.title).toBe(gqlPrd.title);
-    expect(gqlRoundtrip.sourceDocuments).toEqual(gqlPrd.sourceDocuments);
   });
 
   // ────────────────────────────────────────────────────────────────────────────
@@ -289,11 +241,10 @@ describe('Field Mapping Roundtrip Tests - Bloom Entities', () => {
   it('should roundtrip PrdSection fields without loss', () => {
     const gqlSection: GqlPrdSectionResponse = {
       id: 'section-123',
-      parentId: 'prd-123',
-      type: 'functional_requirements',
+      name: 'Functional Requirements',
+      sectionType: 'functional_requirements',
       content: 'User must be able to login with email and password',
       sortOrder: 1,
-      sourceDocuments: ['https://docs.example.com/section1'],
       createdAt: '2026-03-19T00:00:00Z',
       updatedAt: '2026-03-19T00:00:00Z',
     };
@@ -303,8 +254,7 @@ describe('Field Mapping Roundtrip Tests - Bloom Entities', () => {
       PRD_SECTION_FIELD_MAPPING.gqlToNeon,
     );
 
-    expect(model.type).toBe('functional_requirements');
-    expect(model.parentId).toBe('prd-123');
+    expect(model.sectionType).toBe('functional_requirements');
     expect(model.content).toBe('User must be able to login with email and password');
     expect(model.sortOrder).toBe(1);
 
@@ -314,8 +264,7 @@ describe('Field Mapping Roundtrip Tests - Bloom Entities', () => {
     );
 
     expect(gqlRoundtrip.id).toBe(gqlSection.id);
-    expect(gqlRoundtrip.type).toBe(gqlSection.type);
-    expect(gqlRoundtrip.sourceDocuments).toEqual(gqlSection.sourceDocuments);
+    expect(gqlRoundtrip.sectionType).toBe(gqlSection.sectionType);
   });
 
   // ────────────────────────────────────────────────────────────────────────────
@@ -324,8 +273,9 @@ describe('Field Mapping Roundtrip Tests - Bloom Entities', () => {
 
   it('should roundtrip ProjectPlan fields without loss', () => {
     const gqlPlan: GqlProjectPlanResponse = {
+      name: 'Execution Plan',
       id: 'plan-123',
-      parentId: 'proj-123',
+      projectId: 'proj-123',
       title: 'Project Execution Plan',
       approach: 'Agile with 2-week sprints',
       estimatedDuration: '6 months',
@@ -344,7 +294,7 @@ describe('Field Mapping Roundtrip Tests - Bloom Entities', () => {
     );
 
     expect(model.title).toBe('Project Execution Plan');
-    expect(model.parentId).toBe('proj-123');
+    expect(model.projectId).toBe('proj-123');
     expect(model.approach).toBe('Agile with 2-week sprints');
     expect(model.estimatedDuration).toBe('6 months');
     expect(model.teamStructure).toEqual({
@@ -370,7 +320,7 @@ describe('Field Mapping Roundtrip Tests - Bloom Entities', () => {
   it('should roundtrip PlanMilestone fields without loss', () => {
     const gqlMilestone: GqlPlanMilestoneResponse = {
       id: 'milestone-123',
-      parentId: 'plan-123',
+      planId: 'plan-123',
       name: 'Phase 1 Complete',
       targetDate: '2026-06-19',
       status: 'in_progress',
@@ -385,7 +335,7 @@ describe('Field Mapping Roundtrip Tests - Bloom Entities', () => {
     );
 
     expect(model.name).toBe('Phase 1 Complete');
-    expect(model.parentId).toBe('plan-123');
+    expect(model.planId).toBe('plan-123');
     expect(model.targetDate).toBe('2026-06-19');
     expect(model.status).toBe('in_progress');
     expect(model.sortOrder).toBe(1);
@@ -438,11 +388,11 @@ describe('Field Mapping Roundtrip Tests - Bloom Entities', () => {
 
   it('should handle nullable array fields correctly in ProjectPrd', () => {
     const gqlPrd: GqlProjectPrdResponse = {
+      name: 'PRD',
       id: 'prd-789',
-      parentId: 'proj-123',
+      projectId: 'proj-123',
       title: 'Minimal PRD',
       summary: null,
-      sourceDocuments: undefined,
       createdAt: '2026-03-19T00:00:00Z',
       updatedAt: '2026-03-19T00:00:00Z',
     };
@@ -454,6 +404,5 @@ describe('Field Mapping Roundtrip Tests - Bloom Entities', () => {
 
     expect(model.summary).toBeNull();
     // sourceDocuments should either be undefined or empty array depending on mapping
-    expect(Array.isArray(model.sourceDocuments) || model.sourceDocuments === undefined).toBe(true);
   });
 });

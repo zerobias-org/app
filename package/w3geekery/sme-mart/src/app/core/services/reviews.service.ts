@@ -2,7 +2,6 @@ import { Injectable, inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService, type GqlQueryOptions } from './graphql-read.service';
-import { DemoVisibilityService } from './demo-visibility.service';
 import { REVIEW_FIELD_MAPPING, mapNeonToGql, mapGqlToNeon } from '../field-mappings';
 import type { QueryOptions } from '@zerobias-org/data-utils';
 import { PagedResults } from '@zerobias-org/types-core-js';
@@ -23,12 +22,10 @@ export class ReviewsService {
   private readonly pipelineWrite = inject(PipelineWriteService);
   private readonly graphqlRead = inject(GraphqlReadService);
   private readonly snackBar = inject(MatSnackBar);
-  private readonly demoVisibility = inject(DemoVisibilityService);
 
   /**
    * List reviews for a specific provider, optionally filtered to approved only.
    * Queries GraphQL with providerId and optional approved filter, returns array (no pagination).
-   * Phase 24 Plan 03: Applies client-side demo-visibility post-filter before returning.
    */
   async listReviewsByProvider(providerId: string, approvedOnly = true): Promise<Review[]> {
     const filters: Record<string, string> = {
@@ -50,11 +47,8 @@ export class ReviewsService {
       gqlOptions,
     );
 
-    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
-    const filteredGql = this.demoVisibility.applyVisibility(result.items as (GqlReviewResponse & { tag?: Array<{ value: string }> | null })[]);
-
     // Transform and return as array
-    return filteredGql.map(gql =>
+    return result.items.map(gql =>
       mapGqlToNeon<Review>(gql, REVIEW_FIELD_MAPPING.gqlToNeon),
     );
   }
@@ -62,7 +56,6 @@ export class ReviewsService {
   /**
    * List all reviews for admin dashboard (no v_admin_reviews VIEW, use GQL query instead).
    * Queries GraphQL with pagination support.
-   * Phase 24 Plan 03: Applies client-side demo-visibility post-filter before returning.
    */
   async listAdminReviews(options?: QueryOptions): Promise<PagedResults<Review>> {
     const pageNumber = options?.pageNumber ?? 1;
@@ -80,11 +73,8 @@ export class ReviewsService {
       gqlOptions,
     );
 
-    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
-    const filteredGql = this.demoVisibility.applyVisibility(result.items as (GqlReviewResponse & { tag?: Array<{ value: string }> | null })[]);
-
     // Transform GQL responses to Review (Neon shape)
-    const items = filteredGql.map(gql =>
+    const items = result.items.map(gql =>
       mapGqlToNeon<Review>(gql, REVIEW_FIELD_MAPPING.gqlToNeon),
     );
 
@@ -94,7 +84,6 @@ export class ReviewsService {
   /**
    * List pending (unapproved) reviews for admin review workflow.
    * Queries GraphQL with approved=false filter.
-   * Phase 24 Plan 03: Applies client-side demo-visibility post-filter before returning.
    */
   async listPendingReviews(options?: QueryOptions): Promise<PagedResults<Review>> {
     const pageNumber = options?.pageNumber ?? 1;
@@ -112,11 +101,8 @@ export class ReviewsService {
       gqlOptions,
     );
 
-    // DG-02/DG-03: Client-side demo-visibility post-filter (admin bypasses; per Option X, Decision-Probe-1 2026-05-01)
-    const filteredGql = this.demoVisibility.applyVisibility(result.items as (GqlReviewResponse & { tag?: Array<{ value: string }> | null })[]);
-
     // Transform GQL responses to Review (Neon shape)
-    const items = filteredGql.map(gql =>
+    const items = result.items.map(gql =>
       mapGqlToNeon<Review>(gql, REVIEW_FIELD_MAPPING.gqlToNeon),
     );
 

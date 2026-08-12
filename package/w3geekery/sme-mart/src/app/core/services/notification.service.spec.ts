@@ -2,15 +2,15 @@ import { TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
 import { NotificationService } from './notification.service';
 import { SmeMartDbService } from './sme-mart-db.service';
-import { ImpersonationService } from './impersonation.service';
-import { fakeSmeMartDb, fakeImpersonation } from '../../test-helpers/angular';
+import { ZerobiasClientApp } from '@zerobias-com/zerobias-client';
+import { fakeSmeMartDb, fakeZerobiasApp } from '../../test-helpers/angular';
 import { makeNotification, makeListResult } from '../../test-helpers/factories';
 import { TEST_USER_ID, TEST_NOTIFICATION_ID } from '../../test-helpers/constants';
 
 describe('NotificationService', () => {
   let service: NotificationService;
   let mockDb: ReturnType<typeof fakeSmeMartDb>;
-  let mockImpersonation: ReturnType<typeof fakeImpersonation>;
+  let mockApp: ReturnType<typeof fakeZerobiasApp>;
 
   const notification1 = makeNotification();
   const notification2 = makeNotification({
@@ -22,13 +22,13 @@ describe('NotificationService', () => {
 
   beforeEach(() => {
     mockDb = fakeSmeMartDb();
-    mockImpersonation = fakeImpersonation(TEST_USER_ID);
+    mockApp = fakeZerobiasApp(TEST_USER_ID);
 
     TestBed.configureTestingModule({
       providers: [
         NotificationService,
         { provide: SmeMartDbService, useValue: mockDb },
-        { provide: ImpersonationService, useValue: mockImpersonation },
+        { provide: ZerobiasClientApp, useValue: mockApp },
       ],
     });
 
@@ -91,7 +91,7 @@ describe('NotificationService', () => {
     });
 
     it('should not fetch if no user id', async () => {
-      mockImpersonation.effectiveUserId.mockReturnValue(null);
+      mockApp.whoAmI$.next(undefined);
       await service.loadNotifications();
       expect(mockDb.searchRows).not.toHaveBeenCalled();
     });
@@ -129,7 +129,7 @@ describe('NotificationService', () => {
     });
 
     it('should return empty if no user', async () => {
-      mockImpersonation.effectiveUserId.mockReturnValue(null);
+      mockApp.whoAmI$.next(undefined);
       const result = await service.loadByType('bid_received');
       expect(result).toEqual([]);
     });

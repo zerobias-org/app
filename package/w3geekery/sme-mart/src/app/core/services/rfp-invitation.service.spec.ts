@@ -11,7 +11,6 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { RfpInvitationService } from './rfp-invitation.service';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
-import { DemoVisibilityService } from './demo-visibility.service';
 import { ProjectContextService } from './project-context.service';
 import { RFP_INVITATION_FIELD_MAPPING } from '../field-mappings';
 import { fakePipelineWriteService, fakeGraphqlReadService, fakeProjectContextService } from '../../test-helpers/angular';
@@ -153,7 +152,6 @@ describe('RfpInvitationService Error Handling (Phase 20 Wave 2)', () => {
     TestBed.configureTestingModule({
       providers: [
         RfpInvitationService,
-        DemoVisibilityService,
         { provide: PipelineWriteService, useValue: pipelineWrite },
         { provide: GraphqlReadService, useValue: graphqlRead },
         { provide: ProjectContextService, useValue: mockProjectContext },
@@ -209,76 +207,4 @@ describe('RfpInvitationService Error Handling (Phase 20 Wave 2)', () => {
 
   // ── Demo visibility (Phase 24 Plan 03) ──
 
-  describe('Demo visibility (Phase 24 Plan 03)', () => {
-    const baseInv = {
-      projectId: 'proj-1', vendorOrgId: 'vendor-1', status: 'sent', invitedAt: '2026-05-05T00:00:00Z',
-      respondedAt: null, invitationMessage: '', requestReason: '',
-      createdAt: '2026-05-05T00:00:00Z', updatedAt: '2026-05-05T00:00:00Z',
-    };
-    const mockGqlReturn = [
-      { ...baseInv, id: '1', tag: null },
-      { ...baseInv, id: '2', tag: [{ value: 'a81cd320-243e-44eb-bdd9-9824019ef3dd' }] },
-      { ...baseInv, id: '3', tag: [{ value: '81053c14-a8e5-4939-b538-c122c7d0eb1a' }] },
-      { ...baseInv, id: '4', tag: [{ value: 'd618b602-21cc-40a1-a9fa-534b7bc1672c' }] },
-    ];
-
-    it('[DG-02] strips demo records for non-admin', async () => {
-      graphqlRead.query.mockResolvedValue({
-        items: mockGqlReturn,
-        page: { pageNumber: 1, pageSize: 100, totalCount: 4 },
-      });
-
-      const result = await service.listByProject('proj-1');
-
-      expect(result.map((r: { id?: string }) => r.id)).toEqual(['1', '2']);
-    });
-
-    it('[DG-03] admin sees all records including demo', async () => {
-      mockProjectContext.setIsAdmin(true);
-      graphqlRead.query.mockResolvedValue({
-        items: mockGqlReturn,
-        page: { pageNumber: 1, pageSize: 100, totalCount: 4 },
-      });
-
-      const result = await service.listByProject('proj-1');
-
-      expect(result.map((r: { id?: string }) => r.id)).toEqual(['1', '2', '3', '4']);
-    });
-
-    it('[DG-02] does NOT add server-side tag negation filter', async () => {
-      graphqlRead.query.mockResolvedValue({
-        items: mockGqlReturn,
-        page: { pageNumber: 1, pageSize: 100, totalCount: 4 },
-      });
-
-      await service.listByProject('proj-1');
-
-      const callArgs = graphqlRead.query.mock.calls[0];
-      const filters = (callArgs[2] as { filters?: Record<string, string> })?.filters ?? {};
-      const filterValues = Object.values(filters).join(' ');
-      expect(filterValues).not.toContain('.not in.');
-      expect(filterValues).not.toContain('.ne.');
-    });
-
-    it('requests tag field in GQL query', async () => {
-      graphqlRead.query.mockResolvedValue({
-        items: mockGqlReturn,
-        page: { pageNumber: 1, pageSize: 100, totalCount: 4 },
-      });
-
-      await service.listByProject('proj-1');
-
-      const fields = graphqlRead.query.mock.calls[0][1] as string[];
-      expect(fields).toContain('tag');
-    });
-
-    it('[DG-02] returns null when non-admin fetches a demo record by id', async () => {
-      const demoRecord = { ...baseInv, id: '3', tag: [{ value: '81053c14-a8e5-4939-b538-c122c7d0eb1a' }] };
-      graphqlRead.getById.mockResolvedValueOnce(demoRecord);
-
-      const result = await service.getInvitation('3');
-
-      expect(result).toBeNull();
-    });
-  });
 });
