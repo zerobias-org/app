@@ -83,25 +83,3 @@
     </div>
   </section>
 }
-
-<!-- Featured Providers (hidden for now) -->
-@if (false) {
-  <section class="featured-section">
-    <div class="section-header">
-      <h2>Featured Providers</h2>
-      <a mat-button routerLink="/providers">View all</a>
-    </div>
-
-    @if (loading()) {
-      <zb-empty-state-container [loading]="true" />
-    } @else if (featuredProviders().length) {
-      <div class="provider-grid">
-        @for (provider of featuredProviders(); track provider.id) {
-          <app-provider-card [provider]="provider" />
-        }
-      </div>
-    } @else {
-      <zb-empty-state-container [loading]="false" emptyText="No providers yet" />
-    }
-  </section>
-}
