@@ -43,16 +43,22 @@ export const SME_MART_CLASS_IDS = {
   VendorListingSegment:         'f2ad9c7a-15bd-5b23-9320-495cd2b431f6',
   ServiceCapability:            '047feaba-0624-5b92-a953-b10d77e892b7',
 
-  // 2026-08-13: the six expertise junctions are GONE from this registry, not renamed in
-  // place. Provider{Role,Segment,ServiceSegment,SkillProficiency,ProductProficiency,
-  // FrameworkProficiency} -> Vendor* retires each old class and mints a NEW one, and these
-  // ids are UUIDv5 over class content — so every old id is invalid the moment the rename
-  // publishes, and the new ones cannot be known until then.
+  // The six expertise junctions, re-added 2026-08-14 after smemart 2.0.11 published the
+  // Provider* -> Vendor* rename. These are NOT the old ids: the rename retires each
+  // Provider* class whole and mints a new one, and class ids are UUIDv5 over content, so
+  // there is no id continuity. The Provider* entries were removed from this registry
+  // rather than renamed precisely because the new ids could not be known until publish.
   //
-  // Re-add the six Vendor* entries ONLY after the schema publishes, with ids read back from
-  // platform.Class.getClass — never computed, never copied from a plan. Carrying a stale id
-  // here would repeat exactly what lines 14-18 above describe: readers that COMPILE while
-  // broken. They had zero consumers at removal time, so nothing regresses in the meantime.
+  // All six read back from the live UAT catalog after publish, never computed and never
+  // copied from a plan — GET /api/platform/catalog/classes/<name>. Each reports
+  // created=2026-08-14T03:25:12, confirming they were minted by that publish. VendorRole
+  // and VendorSegment were cross-checked against platform.Class.getClass via MCP and match.
+  VendorRole:                   'fcbc021e-f84e-54fa-ba7d-2defc086c5ff',
+  VendorSegment:                '5d81defc-3442-53fc-afa5-2f78ef6655da',
+  VendorServiceSegment:         'ecfc9619-9a22-5d0c-bad9-dbaddf063590',
+  VendorSkillProficiency:       'fff1c8a8-41a9-5b95-b1c0-83edb3a11f6e',
+  VendorProductProficiency:     '53ada1e4-81eb-5def-9dc1-63c4ba40a560',
+  VendorFrameworkProficiency:   'd3136e24-e10e-58fd-a83c-029d74f1dc5a',
 
   // Added 2026-08-07 — the credential trio now HAS its consumer. Clark ruled the
   // vendor-profile credential surface gets built (2026-08-06), which supersedes the
