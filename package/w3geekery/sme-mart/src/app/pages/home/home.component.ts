@@ -3,9 +3,7 @@ import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { ZbSearchInputComponent, ZbEmptyStateContainerComponent } from '@zerobias-org/ngx-library';
-import { ProviderCard } from '../../shared/components/provider-card/provider-card.component';
-import { ProviderProfilesService } from '../../core/services/provider-profiles.service';
+import { ZbSearchInputComponent } from '@zerobias-org/ngx-library';
 import { CategoriesService } from '../../core/services/categories.service';
 import type { Category } from '../../core/models';
 
@@ -17,8 +15,6 @@ import type { Category } from '../../core/models';
     MatIconModule,
     MatButtonModule,
     ZbSearchInputComponent,
-    ZbEmptyStateContainerComponent,
-    ProviderCard,
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
@@ -26,11 +22,8 @@ import type { Category } from '../../core/models';
 })
 export class Home implements OnInit {
   private readonly router = inject(Router);
-  private readonly providerProfiles = inject(ProviderProfilesService);
   private readonly categoriesService = inject(CategoriesService);
 
-  readonly loading = signal(true);
-  readonly featuredProviders = signal<Array<{ id: string }>>([]);
   readonly categories = signal<Category[]>([]);
 
   readonly categoryIcons: Record<string, string> = {
@@ -46,22 +39,16 @@ export class Home implements OnInit {
 
   async ngOnInit() {
     try {
-      const [providers] = await Promise.all([
-        this.providerProfiles.listProviders(undefined, 6),
-        this.categoriesService.loadCategories(),
-      ]);
-      this.featuredProviders.set(providers.items || []);
+      await this.categoriesService.loadCategories();
       this.categories.set(this.categoriesService.getRootCategories().slice(0, 6));
     } catch (err) {
       console.warn('[Home] Failed to load:', err);
-    } finally {
-      this.loading.set(false);
     }
   }
 
   onSearch(term: string | null): void {
     if (term) {
-      this.router.navigate(['/providers'], { queryParams: { q: term } });
+      this.router.navigate(['/vendors'], { queryParams: { q: term } });
     }
   }
 
@@ -77,7 +64,7 @@ export class Home implements OnInit {
     this.router.navigate(['/org']);
   }
 
-  goToProvider(): void {
+  goToVendor(): void {
     this.router.navigate(['/my-profile']);
   }
 

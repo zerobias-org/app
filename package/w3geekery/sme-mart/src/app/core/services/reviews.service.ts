@@ -24,12 +24,12 @@ export class ReviewsService {
   private readonly snackBar = inject(MatSnackBar);
 
   /**
-   * List reviews for a specific provider, optionally filtered to approved only.
-   * Queries GraphQL with providerId and optional approved filter, returns array (no pagination).
+   * List reviews for a specific vendor, optionally filtered to approved only.
+   * Queries GraphQL with vendorId and optional approved filter, returns array (no pagination).
    */
-  async listReviewsByProvider(providerId: string, approvedOnly = true): Promise<Review[]> {
+  async listReviewsByVendor(vendorId: string, approvedOnly = true): Promise<Review[]> {
     const filters: Record<string, string> = {
-      providerId: `.eq.${providerId}`,
+      vendorId: `.eq.${vendorId}`,
     };
     if (approvedOnly) {
       filters['status'] = '.eq.approved';
@@ -252,7 +252,7 @@ export class ReviewsService {
       'id',
       'name',
       'description',
-      'providerId',
+      'vendorId',
       'engagementId',
       'reviewerZerobiasUserId',
       'rating',

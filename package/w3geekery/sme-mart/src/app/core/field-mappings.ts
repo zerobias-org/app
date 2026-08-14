@@ -20,7 +20,7 @@ export const BID_FIELD_MAPPING = {
     id: 'id',
     request_id: 'engagementId', // Legacy FK to Engagement
     project_id: 'projectId', // Scalar FK to platform Project
-    provider_id: 'providerId',
+    provider_id: 'vendorId',
     cover_letter: 'coverLetter',
     proposed_price: 'proposedPrice',
     proposed_timeline: 'proposedTimeline',
@@ -43,7 +43,7 @@ export const BID_FIELD_MAPPING = {
     id: 'id',
     engagementId: 'request_id',
     projectId: 'project_id', // Scalar FK to platform Project
-    providerId: 'provider_id',
+    vendorId: 'provider_id',
     coverLetter: 'cover_letter',
     proposedPrice: 'proposed_price',
     proposedTimeline: 'proposed_timeline',
@@ -127,13 +127,13 @@ export const BID_RESPONSE_FIELD_MAPPING = {
  * Review field mapping
  *
  * Neon table: reviews (columns in snake_case)
- * GQL entity: Review (post-engagement provider review/rating)
+ * GQL entity: Review (post-engagement vendor review/rating)
  * Relationship: request_id → engagement (linkTo Engagement.id.reviews)
  */
 export const REVIEW_FIELD_MAPPING = {
   neonToGql: {
     id: 'id',
-    provider_id: 'providerId',
+    provider_id: 'vendorId',
     reviewer_zerobias_user_id: 'reviewerZerobiasUserId',
     request_id: 'engagementId',
     rating: 'rating',
@@ -146,7 +146,7 @@ export const REVIEW_FIELD_MAPPING = {
   },
   gqlToNeon: {
     id: 'id',
-    providerId: 'provider_id',
+    vendorId: 'provider_id',
     reviewerZerobiasUserId: 'reviewer_zerobias_user_id',
     engagementId: 'request_id',
     rating: 'rating',
@@ -180,7 +180,7 @@ export const REVIEW_FIELD_MAPPING = {
  *   neonBid,
  *   BID_FIELD_MAPPING.neonToGql
  * );
- * // gqlData.coverLetter === 'We can help', gqlData.providerId === 'p-1'
+ * // gqlData.coverLetter === 'We can help', gqlData.vendorId === 'p-1'
  */
 export function mapNeonToGql<T = Record<string, unknown>>(
   neonModel: unknown,
@@ -208,7 +208,7 @@ export function mapNeonToGql<T = Record<string, unknown>>(
  * @returns The transformed object with Neon snake_case field names
  *
  * @example
- * const gqlData = { id: '123', coverLetter: 'We can help', providerId: 'p-1' };
+ * const gqlData = { id: '123', coverLetter: 'We can help', vendorId: 'p-1' };
  * const neonData = mapGqlToNeon(gqlData, BID_FIELD_MAPPING.gqlToNeon);
  * // neonData.cover_letter === 'We can help', neonData.provider_id === 'p-1'
  */

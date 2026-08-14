@@ -8,8 +8,8 @@
 import { describe, it, expect } from 'vitest';
 import { mapNeonToGql, mapGqlToNeon, BID_FIELD_MAPPING } from '@/core/field-mappings';
 import { BID_GQL_FIXTURE } from '@/test-helpers/gql-fixtures';
-import type { GqlBidResponse, GqlTaskTypePricing } from '@/core/gql-types';
-import type { Bid, TaskTypePricing } from '@/core/models/bid.model';
+import type { GqlBidResponse } from '@/core/gql-types';
+import type { Bid } from '@/core/models/bid.model';
 
 /**
  * Test factory to create a Neon Bid object with all fields populated
@@ -65,7 +65,7 @@ describe('INFRA-04: Bid Roundtrip Field Validation', () => {
       // Verify critical fields are mapped correctly
       expect(gqlData.id).toBe('bid-001');
       expect(gqlData.engagementId).toBe('eng-001'); // request_id → engagementId
-      expect(gqlData.providerId).toBe('provider-001');
+      expect(gqlData.vendorId).toBe('provider-001');
       expect(gqlData.coverLetter).toBe('We specialize in healthcare compliance...');
       expect(gqlData.proposedPrice).toBe('18000');
       expect(gqlData.proposedTimeline).toBe('4 weeks');
@@ -92,7 +92,9 @@ describe('INFRA-04: Bid Roundtrip Field Validation', () => {
       // Verify JSON object is preserved
       expect(gqlData.wizardData).toBeDefined();
       expect(typeof gqlData.wizardData).toBe('object');
-      expect((gqlData.wizardData as any)?.approach?.cover_letter).toBeDefined();
+      expect(
+        (gqlData.wizardData as { approach?: { cover_letter?: unknown } })?.approach?.cover_letter,
+      ).toBeDefined();
     });
 
     it('should not lose fields in Neon → GQL mapping', () => {
@@ -107,7 +109,7 @@ describe('INFRA-04: Bid Roundtrip Field Validation', () => {
       // Verify no undefined values for critical fields
       expect(gqlData.id).toBeDefined();
       expect(gqlData.engagementId).toBeDefined();
-      expect(gqlData.providerId).toBeDefined();
+      expect(gqlData.vendorId).toBeDefined();
       expect(gqlData.status).toBeDefined();
       expect(gqlData.createdAt).toBeDefined();
     });
@@ -149,7 +151,6 @@ describe('INFRA-04: Bid Roundtrip Field Validation', () => {
     it('should not lose fields in GQL → Neon mapping', () => {
       const gqlData = BID_GQL_FIXTURE;
       const neonModel = mapGqlToNeon<Bid>(gqlData, BID_FIELD_MAPPING.gqlToNeon);
-      const neonKeys = Object.keys(neonModel);
 
       // Verify critical Neon fields are present after mapping
       expect(neonModel.id).toBeDefined();

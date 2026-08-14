@@ -80,7 +80,7 @@ export class AdminDashboard implements OnInit {
   readonly reviews = signal<AdminReviewRow[]>([]);
   readonly reviewStatusFilter = signal<'all' | 'pending' | 'approved' | 'rejected'>('all');
   readonly selectedReviews = signal<Set<string>>(new Set());
-  readonly reviewColumns = ['select', 'provider', 'rating', 'review_text', 'status', 'created_at', 'actions'];
+  readonly reviewColumns = ['select', 'vendor', 'rating', 'review_text', 'status', 'created_at', 'actions'];
 
   // Settings tab
   readonly settings = signal<AppSetting[]>([]);

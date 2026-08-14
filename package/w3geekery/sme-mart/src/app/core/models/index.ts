@@ -1,7 +1,6 @@
 export * from './enums';
 export { ResourceType } from './enums';  // Explicit export for ResourceTypeEnum
 export * from './marketplace-user.model';
-export * from './provider.model';
 export * from './bid.model';
 export * from './review.model';
 export * from './category.model';

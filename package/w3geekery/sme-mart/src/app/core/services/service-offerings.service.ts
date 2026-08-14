@@ -186,10 +186,10 @@ export class ServiceOfferingsService {
   }
 
   /**
-   * Get all listings owned by a specific provider Org.
+   * Get all listings owned by a specific vendor Org.
    * Returns array (no pagination).
    */
-  async getServicesByProvider(ownerId: string): Promise<VendorListing[]> {
+  async getServicesByVendor(ownerId: string): Promise<VendorListing[]> {
     const gqlOptions: GqlQueryOptions = {
       filters: { ownerId: `.eq.${ownerId}` },
       pageNumber: 1,

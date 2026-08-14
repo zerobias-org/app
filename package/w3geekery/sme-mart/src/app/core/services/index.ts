@@ -8,7 +8,6 @@ export { ServiceOfferingsService } from './service-offerings.service';
 export { ReviewsService } from './reviews.service';
 export { SmeMartDbService } from './sme-mart-db.service';
 export { CatalogService } from './catalog.service';
-export { ProviderProfilesService } from './provider-profiles.service';
 export { CategoriesService } from './categories.service';
 export { AdminService } from './admin.service';
 export { UserPreferencesService } from './user-preferences.service';

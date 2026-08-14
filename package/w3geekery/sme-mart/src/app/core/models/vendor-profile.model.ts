@@ -172,7 +172,7 @@ export interface FinancialProfileRecord extends VerifiableFields {
 /**
  * An org's claim on an org-scope catalog credential.
  *
- * Same shape as the six Provider* expertise junctions: owner id + catalog ref +
+ * Same shape as the six Vendor* expertise junctions: owner id + catalog ref +
  * attributes + provenance. `securityCredential` is the SecurityCredential catalog UUID.
  */
 export interface OrgCredentialRecord extends VerifiableFields {

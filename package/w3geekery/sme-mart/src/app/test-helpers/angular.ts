@@ -108,17 +108,6 @@ export function fakeZerobiasApp(userId = 'u-100', orgId = 'org-100') {
   };
 }
 
-/** Mock EngagementContextService */
-export function fakeEngagementContext() {
-  return {
-    setEngagement: vi.fn(),
-    setCurrentUserId: vi.fn(),
-    setCurrentProviderId: vi.fn(),
-    clear: vi.fn(),
-    refresh$: { subscribe: vi.fn().mockReturnValue({ unsubscribe: vi.fn() }) },
-  };
-}
-
 /** Mock NotificationService */
 export function fakeNotificationService() {
   return {
