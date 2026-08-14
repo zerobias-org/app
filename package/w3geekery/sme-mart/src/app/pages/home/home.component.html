@@ -13,7 +13,7 @@
   <div class="hero-search">
     <zb-search-input
       label="Search"
-      placeholder="Search providers, services, or skills..."
+      placeholder="Search vendors, services, or skills..."
       message=""
       (search)="onSearch($event)"
     />
@@ -35,21 +35,21 @@
         <h3>I'm a Buyer</h3>
         <p>
           Looking for compliance experts to help your organization.
-          Set up your org profile so providers can find you.
+          Set up your org profile so vendors can find you.
         </p>
         <a mat-button color="primary">Set up org profile</a>
       </mat-card-content>
     </mat-card>
 
-    <mat-card appearance="outlined" class="path-card" (click)="goToProvider()">
+    <mat-card appearance="outlined" class="path-card" (click)="goToVendor()">
       <mat-card-content>
         <mat-icon class="path-icon">support_agent</mat-icon>
-        <h3>I'm a Provider</h3>
+        <h3>I'm a Vendor</h3>
         <p>
-          Offering compliance expertise for hire. Build out your provider profile
+          Offering compliance expertise for hire. Build out your vendor profile
           so buyers can find and engage you.
         </p>
-        <a mat-button color="primary">Build provider profile</a>
+        <a mat-button color="primary">Build vendor profile</a>
       </mat-card-content>
     </mat-card>
 
@@ -58,7 +58,7 @@
         <mat-icon class="path-icon">swap_horiz</mat-icon>
         <h3>Both</h3>
         <p>
-          You can be both &mdash; toggle buyer/provider/both in your profile settings
+          You can be both &mdash; toggle buyer/vendor/both in your profile settings
           and we'll surface both paths.
         </p>
         <a mat-button color="primary">Open settings</a>

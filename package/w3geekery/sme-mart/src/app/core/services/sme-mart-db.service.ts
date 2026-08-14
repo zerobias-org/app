@@ -22,7 +22,7 @@ import { environment } from '../../../environments/environment';
  * Target archival date: 2026-04-02
  *
  * REMAINING IN NEON (still use SmeMartDbService):
- * - Categories, Notifications, Provider Profiles
+ * - Categories, Notifications, Vendor Profiles
  * - Impersonation context, Note hierarchy cache
  * - Admin settings, Resource management, Marketplace users
  *
@@ -31,7 +31,7 @@ import { environment } from '../../../environments/environment';
  *   - 'neon' — Direct Neon HTTP queries via @neondatabase/serverless (dev fallback)
  *
  * The public API is identical in both modes. All domain services
- * (ProviderProfilesService, EngagementsService, etc.) are unaware of the mode.
+ * (VendorProfileService, BidsService, etc.) are unaware of the mode.
  */
 @Injectable({ providedIn: 'root' })
 export class SmeMartDbService {

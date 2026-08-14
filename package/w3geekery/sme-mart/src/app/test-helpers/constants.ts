@@ -4,8 +4,8 @@
 
 // Users
 export const TEST_USER_ID = 'u-100';
-export const TEST_PROVIDER_USER_ID = 'u-300';
-export const TEST_PROVIDER_ID = 'prov-001';
+export const TEST_VENDOR_USER_ID = 'u-300';
+export const TEST_VENDOR_ID = 'prov-001';
 
 // Work requests / Engagements
 export const TEST_WR_ID = 'wr-001';

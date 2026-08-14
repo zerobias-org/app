@@ -38,7 +38,7 @@ describe('INFRA-04: Review Roundtrip Field Validation', () => {
       const gqlData = mapNeonToGql<GqlReviewResponse>(neonModel, REVIEW_FIELD_MAPPING.neonToGql);
 
       expect(gqlData.id).toBe('review-001');
-      expect(gqlData.providerId).toBe('provider-001');
+      expect(gqlData.vendorId).toBe('provider-001');
       expect(gqlData.reviewerZerobiasUserId).toBe('user-buyer-001');
       expect(gqlData.engagementId).toBe('eng-001'); // request_id → engagementId
       expect(gqlData.rating).toBe(5);
@@ -59,7 +59,7 @@ describe('INFRA-04: Review Roundtrip Field Validation', () => {
       expect(gqlKeys.length).toBe(expectedFieldCount);
 
       expect(gqlData.id).toBeDefined();
-      expect(gqlData.providerId).toBeDefined();
+      expect(gqlData.vendorId).toBeDefined();
       expect(gqlData.reviewerZerobiasUserId).toBeDefined();
       expect(gqlData.engagementId).toBeDefined();
       expect(gqlData.rating).toBeDefined();

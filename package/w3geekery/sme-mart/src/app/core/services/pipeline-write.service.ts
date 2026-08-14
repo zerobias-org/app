@@ -27,9 +27,6 @@ export const SME_MART_CLASS_IDS = {
   ProjectPlan:                  'bc6159da-19a3-51d0-89a8-f2147078c760',
   PlanMilestone:                'ac1a1cc8-db44-5c1d-b359-5fb02e3d381d',
   RfpInvitation:                '941cf01b-d260-5e45-8c6a-50f07b23f196',
-  ProviderRole:                 '6098fe68-f656-51fe-87d8-dde87b50efc6',
-  ProviderSegment:              '1b211929-39af-5d81-b205-3bf2c23d45d6',
-  ProviderServiceSegment:       '5d698106-3a8a-530d-9060-52e1aa7ab134',
   OrgProfile:                   '8001e339-2609-54ae-b407-9c2ab7ebf413',
   InsuranceCoverage:            '7b0b6b97-b99e-5267-9cf0-2dd3f5888997',
   ClientReference:              '632ced7f-85d5-5f6e-9f99-8258001d14cc',
@@ -45,9 +42,17 @@ export const SME_MART_CLASS_IDS = {
   VendorListing:                'f7a997bd-6b9d-55be-ac82-6a5c56e2b1f3',
   VendorListingSegment:         'f2ad9c7a-15bd-5b23-9320-495cd2b431f6',
   ServiceCapability:            '047feaba-0624-5b92-a953-b10d77e892b7',
-  ProviderSkillProficiency:     'aa933d21-64c3-50ae-a40d-d989470a1ad0',
-  ProviderProductProficiency:   '8b392156-c572-540e-88db-fcecb08eead7',
-  ProviderFrameworkProficiency: 'cd2b61f1-36c6-5a83-b2f6-e91a6523a09e',
+
+  // 2026-08-13: the six expertise junctions are GONE from this registry, not renamed in
+  // place. Provider{Role,Segment,ServiceSegment,SkillProficiency,ProductProficiency,
+  // FrameworkProficiency} -> Vendor* retires each old class and mints a NEW one, and these
+  // ids are UUIDv5 over class content — so every old id is invalid the moment the rename
+  // publishes, and the new ones cannot be known until then.
+  //
+  // Re-add the six Vendor* entries ONLY after the schema publishes, with ids read back from
+  // platform.Class.getClass — never computed, never copied from a plan. Carrying a stale id
+  // here would repeat exactly what lines 14-18 above describe: readers that COMPILE while
+  // broken. They had zero consumers at removal time, so nothing regresses in the meantime.
 
   // Added 2026-08-07 — the credential trio now HAS its consumer. Clark ruled the
   // vendor-profile credential surface gets built (2026-08-06), which supersedes the
@@ -59,7 +64,7 @@ export const SME_MART_CLASS_IDS = {
   //
   // SecurityCredential is the CATALOG entry; OrgCredential and UserCredential are the
   // claim junctions, the same orgId/userId + catalog-ref + Verifiable shape as the six
-  // Provider* junctions in provider-profiles.service.
+  // Vendor* expertise junctions (see the removal note above).
   SecurityCredential:           'd07f97f8-8eab-597d-b8c3-b2161048228b',
   OrgCredential:                '2af21665-5de0-5b6e-9312-797116f77db1',
   UserCredential:               'c083eae2-42b4-5c31-a66b-c13225a9e182',

@@ -31,7 +31,7 @@ export class BidsService {
     'id',
     'name',
     'description',
-    'providerId',
+    'vendorId',
     'projectId',
     'coverLetter',
     'price',
@@ -81,14 +81,14 @@ export class BidsService {
   }
 
   /**
-   * Find an existing draft bid for a provider on a project.
-   * Compound filter on projectId + providerId + status — all scalars.
+   * Find an existing draft bid for a vendor on a project.
+   * Compound filter on projectId + vendorId + status — all scalars.
    */
-  async findDraft(projectId: string, providerId: string): Promise<Bid | null> {
+  async findDraft(projectId: string, vendorId: string): Promise<Bid | null> {
     const gqlOptions: GqlQueryOptions = {
       filters: {
         projectId: `.eq.${projectId}`,
-        providerId: `.eq.${providerId}`,
+        vendorId: `.eq.${vendorId}`,
         status: '.eq.draft',
       },
       pageSize: 1,
@@ -198,14 +198,14 @@ export class BidsService {
    * Create a draft bid for the wizard flow.
    * Links to SmeMartProject (the RFP).
    */
-  async createDraft(projectId: string, providerId: string): Promise<Bid> {
+  async createDraft(projectId: string, vendorId: string): Promise<Bid> {
     const id = `bid-${Date.now()}-${Math.random().toString(36).substring(7)}`;
 
     const bid: Bid = {
       id,
       request_id: null,
       project_id: projectId,
-      provider_id: providerId,
+      provider_id: vendorId,
       cover_letter: null,
       proposed_price: null,
       proposed_timeline: null,
@@ -314,13 +314,13 @@ export class BidsService {
     return this.updateBidStatus(id, 'accepted');
   }
 
-  async rejectBid(id: string, context?: { providerId: string; rfpTitle: string }): Promise<Bid> {
+  async rejectBid(id: string, context?: { vendorId: string; rfpTitle: string }): Promise<Bid> {
     const bid = await this.updateBidStatus(id, 'rejected');
 
     const resourceId = bid.project_id || bid.request_id;
     if (context && resourceId) {
       this.notifications.create({
-        recipient_id: context.providerId,
+        recipient_id: context.vendorId,
         type: 'bid_rejected',
         severity: 'info',
         title: 'Your bid was not selected',

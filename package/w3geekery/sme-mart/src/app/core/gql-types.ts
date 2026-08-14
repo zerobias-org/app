@@ -60,7 +60,7 @@ export interface GqlBidWizardData {
 export interface GqlBidResponse extends GqlBaseEntity {
   engagementId: string;
   project?: string | null;
-  providerId: string;
+  vendorId: string;
   coverLetter?: string | null;
   proposedPrice?: string | null;
   proposedTimeline?: string | null;
@@ -108,7 +108,7 @@ export interface GqlBidResponseResponse extends GqlBaseEntity {
 
 export interface GqlReviewResponse extends GqlBaseEntity {
   name: string;
-  providerId: string;
+  vendorId: string;
   reviewerZerobiasUserId: string;
   engagementId: string;
   rating: number;

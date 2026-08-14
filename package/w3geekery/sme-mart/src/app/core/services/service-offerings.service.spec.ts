@@ -88,14 +88,14 @@ describe('ServiceOfferingsService (VendorListing over Pipeline + GraphQL)', () =
     });
   });
 
-  describe('getServicesByProvider()', () => {
+  describe('getServicesByVendor()', () => {
     it('should query GQL with an ownerId filter', async () => {
       graphqlRead.query.mockResolvedValue({
         items: [VENDOR_LISTING_GQL_FIXTURE],
         page: { pageNumber: 1, pageSize: 100, totalCount: 1 },
       });
 
-      const result = await service.getServicesByProvider('provider-001-uuid');
+      const result = await service.getServicesByVendor('provider-001-uuid');
 
       expect(graphqlRead.query).toHaveBeenCalledWith(
         'VendorListing',
@@ -114,7 +114,7 @@ describe('ServiceOfferingsService (VendorListing over Pipeline + GraphQL)', () =
         page: { pageNumber: 1, pageSize: 100, totalCount: 1 },
       });
 
-      const result = await service.getServicesByProvider('provider-001-uuid');
+      const result = await service.getServicesByVendor('provider-001-uuid');
 
       expect(Array.isArray(result)).toBe(true);
       expect(result[0]).toHaveProperty('ownerId', 'provider-001-uuid');

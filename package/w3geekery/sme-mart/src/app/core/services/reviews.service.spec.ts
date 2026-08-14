@@ -43,21 +43,21 @@ describe('ReviewsService (Pipeline + GraphQL)', () => {
     service = TestBed.inject(ReviewsService);
   });
 
-  describe('listReviewsByProvider()', () => {
-    it('should query GQL with providerId filter and status=approved by default', async () => {
+  describe('listReviewsByVendor()', () => {
+    it('should query GQL with vendorId filter and status=approved by default', async () => {
       graphqlRead.query.mockResolvedValue({
         items: [REVIEW_GQL_FIXTURE],
         page: { pageNumber: 1, pageSize: 100, totalCount: 1 },
       });
 
-      const result = await service.listReviewsByProvider('provider-001-uuid');
+      const result = await service.listReviewsByVendor('provider-001-uuid');
 
       expect(graphqlRead.query).toHaveBeenCalledWith(
         'Review',
         expect.any(Array),
         expect.objectContaining({
           filters: expect.objectContaining({
-            providerId: '.eq.provider-001-uuid',
+            vendorId: '.eq.provider-001-uuid',
             status: '.eq.approved',
           }),
         }),
@@ -71,14 +71,14 @@ describe('ReviewsService (Pipeline + GraphQL)', () => {
         page: { pageNumber: 1, pageSize: 100, totalCount: 1 },
       });
 
-      await service.listReviewsByProvider('provider-001-uuid', false);
+      await service.listReviewsByVendor('provider-001-uuid', false);
 
       expect(graphqlRead.query).toHaveBeenCalledWith(
         'Review',
         expect.any(Array),
         expect.objectContaining({
           filters: {
-            providerId: '.eq.provider-001-uuid',
+            vendorId: '.eq.provider-001-uuid',
             // No 'approved' filter when approvedOnly=false
           },
         }),
@@ -91,10 +91,10 @@ describe('ReviewsService (Pipeline + GraphQL)', () => {
         page: { pageNumber: 1, pageSize: 100, totalCount: 1 },
       });
 
-      const result = await service.listReviewsByProvider('provider-001-uuid');
+      const result = await service.listReviewsByVendor('provider-001-uuid');
 
       expect(result[0]).toHaveProperty('provider_id');
-      expect(result[0]).not.toHaveProperty('providerId');
+      expect(result[0]).not.toHaveProperty('vendorId');
       expect(result[0]).toHaveProperty('reviewer_zerobias_user_id');
       expect(result[0]).not.toHaveProperty('reviewerZerobiasUserId');
     });
@@ -182,7 +182,7 @@ describe('ReviewsService (Pipeline + GraphQL)', () => {
       expect(pipelineWrite.pushEntity).toHaveBeenCalledWith(
         'Review',
         expect.objectContaining({
-          providerId: 'provider-001-uuid',
+          vendorId: 'provider-001-uuid',
           reviewerZerobiasUserId: 'user-buyer-001-uuid',
           engagementId: 'eng-001-uuid',
         }),
@@ -206,7 +206,7 @@ describe('ReviewsService (Pipeline + GraphQL)', () => {
       expect(pipelineWrite.pushEntity).toHaveBeenCalledWith(
         'Review',
         expect.objectContaining({
-          providerId: 'provider-001-uuid',
+          vendorId: 'provider-001-uuid',
           reviewerZerobiasUserId: 'user-001-uuid',
           approved: false,
         }),

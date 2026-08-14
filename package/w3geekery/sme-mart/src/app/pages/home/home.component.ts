@@ -48,7 +48,7 @@ export class Home implements OnInit {
 
   onSearch(term: string | null): void {
     if (term) {
-      this.router.navigate(['/providers'], { queryParams: { q: term } });
+      this.router.navigate(['/vendors'], { queryParams: { q: term } });
     }
   }
 
@@ -64,7 +64,7 @@ export class Home implements OnInit {
     this.router.navigate(['/org']);
   }
 
-  goToProvider(): void {
+  goToVendor(): void {
     this.router.navigate(['/my-profile']);
   }
 

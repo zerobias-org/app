@@ -22,7 +22,7 @@ import type { GqlVendorListingResponse } from '../core/gql-types/vendor-listing.
 export const BID_GQL_FIXTURE: GqlBidResponse = {
   id: 'bid-001-uuid-compliance-experts',
   engagementId: 'eng-001-uuid-hipaa-assessment',
-  providerId: 'provider-001-uuid',
+  vendorId: 'provider-001-uuid',
   coverLetter:
     'Our firm specializes in healthcare compliance with 15+ years of HIPAA audit experience. We have assisted over 50 healthcare providers in achieving and maintaining HIPAA compliance.',
   proposedPrice: '18000',
@@ -79,7 +79,7 @@ export const BID_GQL_FIXTURE: GqlBidResponse = {
 export const BID_GQL_FIXTURE_DRAFT: GqlBidResponse = {
   id: 'bid-002-uuid-draft',
   engagementId: 'eng-001-uuid-hipaa-assessment',
-  providerId: 'provider-002-uuid',
+  vendorId: 'provider-002-uuid',
   coverLetter: 'We have cybersecurity expertise...',
   status: 'DRAFT',
   wizardData: {
@@ -153,7 +153,7 @@ export const VENDOR_LISTING_GQL_FIXTURE: GqlVendorListingResponse = {
 export const REVIEW_GQL_FIXTURE: GqlReviewResponse = {
   id: 'review-001-uuid',
   name: 'Excellent HIPAA Audit by Compliance Experts',
-  providerId: 'provider-001-uuid',
+  vendorId: 'provider-001-uuid',
   reviewerZerobiasUserId: 'user-buyer-001-uuid',
   engagementId: 'eng-001-uuid-hipaa-assessment',
   rating: 5,

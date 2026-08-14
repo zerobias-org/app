@@ -47,7 +47,7 @@ export interface TermsRef {
 
 export interface VendorListing {
   id: string;
-  /** UUID of the provider Org that owns this listing. Was ServiceOffering.provider_id. */
+  /** UUID of the vendor Org that owns this listing. Was ServiceOffering.provider_id. */
   ownerId: string | null;
   family: VendorListingFamily;
   kind: VendorListingKind;

@@ -16,7 +16,7 @@ import {
   TEST_WR_ID,
   TEST_BID_ID,
   TEST_USER_ID,
-  TEST_PROVIDER_USER_ID,
+  TEST_VENDOR_USER_ID,
   TEST_CREATED_AT,
   TEST_UPDATED_AT,
   TEST_NOTIFICATION_ID,
@@ -30,7 +30,7 @@ export function makeBid(overrides: Partial<Bid> = {}): Bid {
   return {
     id: TEST_BID_ID,
     request_id: TEST_WR_ID,
-    provider_id: TEST_PROVIDER_USER_ID,
+    provider_id: TEST_VENDOR_USER_ID,
     status: 'pending',
     cover_letter: 'We can help.',
     proposed_price: '5000',
@@ -45,7 +45,7 @@ export function makeBidSummaryRow(overrides: Partial<BidSummaryRow> = {}): BidSu
   return {
     id: TEST_BID_ID,
     request_id: TEST_WR_ID,
-    provider_id: TEST_PROVIDER_USER_ID,
+    provider_id: TEST_VENDOR_USER_ID,
     cover_letter: 'Our approach covers all requirements.',
     proposed_price: '12000',
     proposed_timeline: '6 weeks',

@@ -22,7 +22,7 @@ describe('BidsService Field Mapping Tests', () => {
 
     // Verify core bid fields
     expect(mapping.id).toBe('id');
-    expect(mapping.providerId).toBe('provider_id');
+    expect(mapping.vendorId).toBe('provider_id');
     expect(mapping.coverLetter).toBe('cover_letter');
     expect(mapping.status).toBe('status');
     expect(mapping.dateCreated).toBe('created_at');
@@ -40,7 +40,7 @@ describe('BidsService Field Mapping Tests', () => {
 
     // Verify core bid fields
     expect(mapping.id).toBe('id');
-    expect(mapping.provider_id).toBe('providerId');
+    expect(mapping.provider_id).toBe('vendorId');
     expect(mapping.cover_letter).toBe('coverLetter');
     expect(mapping.status).toBe('status');
     expect(mapping.created_at).toBe('createdAt');

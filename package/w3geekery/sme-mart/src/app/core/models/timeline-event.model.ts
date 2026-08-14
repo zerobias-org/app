@@ -35,7 +35,7 @@ export interface AttachmentPayload {
 export interface BidSubmittedPayload {
   type: 'bid_submitted';
   bidId: string;
-  providerName: string;
+  vendorName: string;
   proposedPrice?: string;
   coverLetterPreview?: string;
 }
@@ -43,7 +43,7 @@ export interface BidSubmittedPayload {
 export interface BidAcceptedPayload {
   type: 'bid_accepted';
   bidId: string;
-  providerName: string;
+  vendorName: string;
 }
 
 export type TimelinePayload =

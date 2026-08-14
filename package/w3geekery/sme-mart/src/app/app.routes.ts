@@ -3,8 +3,6 @@ import { AppShell } from './layout/app-shell.component';
 import { Home } from './pages/home/home.component';
 // Phase 31-A: imports removed alongside hidden route components. Re-import
 // when restoring post-BACKLOG-099 architectural decision + errata 039 fix.
-// import { ProviderList } from './pages/providers/provider-list.component';
-// import { ProviderDetail } from './pages/providers/provider-detail.component';
 // import { ServiceCatalog } from './pages/services/service-catalog.component';
 // import { RfpList } from './pages/rfps/rfp-list.component';
 // import { RfpDetail } from './pages/rfps/rfp-detail.component';
@@ -23,8 +21,6 @@ export const routes: Routes = [
       // Phase 31-A: surfaces hidden/Coming Soon for v1.4 dogfood. Original
       // routes preserved as comments for one-line restoration post-BACKLOG-099
       // architectural decision + errata 039 fix.
-      // { path: 'providers', component: ProviderList },
-      // { path: 'providers/:id', component: ProviderDetail },
       // { path: 'services', component: ServiceCatalog },
       // { path: 'rfps', component: RfpList },
       // { path: 'rfps/new', component: RfpWizard },
@@ -33,8 +29,8 @@ export const routes: Routes = [
       // { path: 'rfps/:id/compare', component: BidComparisonPage },
       // { path: 'rfps/:id/bid', component: BidWizard },
       // { path: 'rfps/:id/bid/:bidId', component: BidWizard },
-      { path: 'providers', component: ComingSoon, data: { title: 'Browse Providers' } },
-      { path: 'providers/:id', component: ComingSoon, data: { title: 'Provider Detail' } },
+      { path: 'vendors', component: ComingSoon, data: { title: 'Browse Vendors' } },
+      { path: 'vendors/:id', component: ComingSoon, data: { title: 'Vendor Detail' } },
       { path: 'services', component: ComingSoon, data: { title: 'Services' } },
       { path: 'rfps', component: ComingSoon, data: { title: 'RFPs' } },
       { path: 'rfps/:id', redirectTo: 'rfps' },

@@ -2,7 +2,7 @@ import { Injectable, inject, signal, computed } from '@angular/core';
 import { ZerobiasClientApi } from '@zerobias-com/zerobias-client';
 import { ZbThemeService } from '@zerobias-org/ngx-library';
 import { Pkv } from '@zerobias-com/dana-sdk';
-import type { UserRole } from '../models';
+import type { UserRole, PersistedUserRole } from '../models';
 import {
   DEFAULT_ENABLED_FILTERS,
   DEFAULT_CATALOG_FILTERS,
@@ -26,6 +26,32 @@ const SAVE_DEBOUNCE_MS = 500;
 export type FolderColorMap = Record<string, string>;
 
 type ThemePreference = 'light' | 'dark' | 'system';
+
+/**
+ * Shape of a stored PKV preference blob. Declared as named optional properties
+ * rather than an index signature so call sites keep dot access — the codebase
+ * runs with noPropertyAccessFromIndexSignature, which would force bracket
+ * notation on every read. Each value is narrowed by its own call site.
+ */
+interface PkvPayload {
+  role?: unknown;
+  enabledFilters?: unknown;
+  catalogFilters?: unknown;
+  theme?: unknown;
+  colors?: unknown;
+}
+
+/**
+ * Migrate a persisted role value onto the current UserRole union.
+ *
+ * 'provider' was renamed to 'vendor' on 2026-08-13, but PKV still holds 'provider'
+ * for anyone whose preference predates the rename. Casting straight to UserRole
+ * would set a value outside the union and leave the settings toggle with nothing
+ * selected, with no compile error to catch it.
+ */
+function normalizeUserRole(role: PersistedUserRole): UserRole {
+  return role === 'provider' ? 'vendor' : role;
+}
 
 /**
  * User preferences with configurable backend (localStorage or PKV).
@@ -64,7 +90,7 @@ export class UserPreferencesService {
     try {
       await Promise.all([
         this.loadPkv(ROLE_KEY, (val) => {
-          if (val?.role) this.userRole.set(val.role as UserRole);
+          if (val?.role) this.userRole.set(normalizeUserRole(val.role as PersistedUserRole));
         }),
         this.loadPkv(FILTERS_KEY, (val) => {
           if (val?.enabledFilters) this.enabledFilters.set(val.enabledFilters as EnabledFilters);
@@ -197,7 +223,7 @@ export class UserPreferencesService {
     });
   }
 
-  private async loadPkv(key: string, apply: (val: any) => void): Promise<void> {
+  private async loadPkv(key: string, apply: (val: PkvPayload | undefined) => void): Promise<void> {
     const backend = this.flags.get('prefsBackend');
 
     if (backend === 'pkv') {
