@@ -305,9 +305,18 @@ export class PipelineWriteService {
   ): Promise<void> {
     const classId = SME_MART_CLASS_IDS[className];
     const pipelineApi = this.clientApi.platformClient.getPipelineApi();
+
+    // A pure-delete batch is REJECTED: "Simple batch must have at least one item."
+    // The doomed record must appear in BOTH `data` and `markDeleted` — the differential
+    // pipeline upserts then deletes it within the same batch. The stub only has to pass
+    // schema validation, and every SME Mart class extends `Object`, whose one required
+    // field is `name`; `{ id, name }` was verified sufficient against UAT 2026-08-18.
+    // If some class ever needs more, the 400 names the missing property.
+    const stubs = ids.map(id => ({ id, name: 'deleted' }));
+
     const batch = new SimpleBatch(
       new UUID(classId),
-      [],       // no data to add
+      stubs,    // REQUIRED — an empty data array is rejected outright
       [],       // no tags
       ids,      // markDeleted
     );
