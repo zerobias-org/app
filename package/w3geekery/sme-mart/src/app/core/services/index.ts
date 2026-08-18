@@ -15,5 +15,3 @@ export { BidResponseService } from './bid-response.service';
 
 // Project Bloom services (Phase 6)
 export { ProjectContextService } from './project-context.service';
-export { ProjectPrdService } from './project-prd.service';
-export { ProjectPlanService } from './project-plan.service';
