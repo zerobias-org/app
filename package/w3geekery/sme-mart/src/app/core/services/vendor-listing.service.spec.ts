@@ -1,5 +1,5 @@
 /**
- * Unit Tests for ServiceOfferingsService (VendorListing over Pipeline + GraphQL)
+ * Unit Tests for VendorListingService (VendorListing over Pipeline + GraphQL)
  *
  * ServiceOffering was retired in smemart 2.0.8; this service now reads and writes
  * VendorListing. Tests verify the service works with mocked PipelineWriteService and
@@ -9,7 +9,7 @@
 
 import { TestBed } from '@angular/core/testing';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { ServiceOfferingsService, mapGqlToVendorListing } from './service-offerings.service';
+import { VendorListingService, mapGqlToVendorListing } from './vendor-listing.service';
 import { PipelineWriteService } from './pipeline-write.service';
 import { GraphqlReadService } from './graphql-read.service';
 import { ProjectContextService } from './project-context.service';
@@ -17,8 +17,8 @@ import { VENDOR_LISTING_GQL_FIXTURE } from '../../test-helpers/gql-fixtures';
 import { fakePipelineWriteService, fakeGraphqlReadService, fakeProjectContextService } from '../../test-helpers/angular';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
-describe('ServiceOfferingsService (VendorListing over Pipeline + GraphQL)', () => {
-  let service: ServiceOfferingsService;
+describe('VendorListingService (VendorListing over Pipeline + GraphQL)', () => {
+  let service: VendorListingService;
   let pipelineWrite: ReturnType<typeof fakePipelineWriteService>;
   let graphqlRead: ReturnType<typeof fakeGraphqlReadService>;
   let mockSnackBar: { open: ReturnType<typeof vi.fn> };
@@ -32,7 +32,7 @@ describe('ServiceOfferingsService (VendorListing over Pipeline + GraphQL)', () =
 
     TestBed.configureTestingModule({
       providers: [
-        ServiceOfferingsService,
+        VendorListingService,
         { provide: PipelineWriteService, useValue: pipelineWrite },
         { provide: GraphqlReadService, useValue: graphqlRead },
         { provide: ProjectContextService, useValue: mockProjectContext },
@@ -40,7 +40,7 @@ describe('ServiceOfferingsService (VendorListing over Pipeline + GraphQL)', () =
       ],
     });
 
-    service = TestBed.inject(ServiceOfferingsService);
+    service = TestBed.inject(VendorListingService);
   });
 
   describe('listServices()', () => {
@@ -134,7 +134,7 @@ describe('ServiceOfferingsService (VendorListing over Pipeline + GraphQL)', () =
         'VendorListing',
         expect.objectContaining({ name: 'New Service', title: 'New Service' }),
         [],
-        'service-offerings.service:createService',
+        'vendor-listing.service:createService',
       );
       expect(result).toHaveProperty('id');
       expect(result).toHaveProperty('title', 'New Service');
@@ -203,7 +203,7 @@ describe('ServiceOfferingsService (VendorListing over Pipeline + GraphQL)', () =
         'VendorListing',
         expect.any(Object),
         [],
-        'service-offerings.service:updateService',
+        'vendor-listing.service:updateService',
       );
       expect(result).toHaveProperty('active', false);
     });

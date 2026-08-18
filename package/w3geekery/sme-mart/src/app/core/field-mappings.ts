@@ -119,7 +119,7 @@ export const BID_RESPONSE_FIELD_MAPPING = {
  * Neon snake_case <-> GQL camelCase, and the VendorListing app model is camelCase on
  * both sides, so the table would be an identity map. The real transforms it does need
  * (enum defaults, offers normalization, includes[] -> includesSummary) are functions,
- * not renames, and live in service-offerings.service.ts as mapGqlToVendorListing /
+ * not renames, and live in vendor-listing.service.ts as mapGqlToVendorListing /
  * mapVendorListingToGql.
  */
 

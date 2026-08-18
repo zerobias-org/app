@@ -4,7 +4,7 @@ export { PipelineWriteService } from './pipeline-write.service';
 export { GraphqlReadService } from './graphql-read.service';
 export { NotificationService } from './notification.service';
 export { BidsService } from './bids.service';
-export { ServiceOfferingsService } from './service-offerings.service';
+export { VendorListingService } from './vendor-listing.service';
 export { ReviewsService } from './reviews.service';
 export { SmeMartDbService } from './sme-mart-db.service';
 export { CatalogService } from './catalog.service';
