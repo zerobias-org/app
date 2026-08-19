@@ -40,7 +40,7 @@ SME Mart is a **marketplace for Subject Matter Experts** in compliance/cybersecu
 | **E2E Testing Guide** | [`.planning/notes/e2e-testing-guide.md`](.planning/notes/e2e-testing-guide.md) — **READ before writing Playwright tests.** Stack, auth model, gotchas, page object patterns, debugging playbook |
 | **Schema repo** | [`zerobias-org/schema`](https://github.com/zerobias-org/schema) — YAML schema packages (source of truth for GQL entities) |
 | **Post-mortems** | [`../../../.claude/sme-mart/post-mortems/`](../../../.claude/sme-mart/post-mortems/) — failure reports (see [`INDEX.md`](../../../.claude/sme-mart/post-mortems/INDEX.md)). **Read before starting any schema change.** |
-| **zb-dx (Developer Experience)** | `~/Projects/zb/zerobias-org/zb-dx` — shared knowledge base for all ZB platform developers. **File friction with `/friction`, browse patterns, find integration guides.** See below. |
+| **zb-dx (Developer Experience)** | `~/Projects/zb/org/zb-dx` — shared knowledge base for all ZB platform developers. **File friction with `/friction`, browse patterns, find integration guides.** See below. |
 | **LSP routing** | `~/.claude/rules/common/lsp-registry.md` — built-in `LSP` is the default for symbol queries; `mcp__vscode-mcp__*` only for specific triggers (see below) |
 
 ## LSP routing — three routes, route by operation
@@ -72,7 +72,7 @@ Full routing table, failure-mode anchors, empirical findings, and detailed ratio
 
 ## zb-dx — ZeroBias Developer Experience
 
-**Repo:** `~/Projects/zb/zerobias-org/zb-dx` | **Slack:** `#zb-dx` (zerobias.org workspace)
+**Repo:** `~/Projects/zb/org/zb-dx` | **Slack:** `#zb-dx` (zerobias.org workspace)
 
 A shared knowledge base for any developer building on `zerobias-sdk` / `zerobias-client` / `zerobias-angular-client`. Patterns, guides, skills, and friction logs contributed by the community. The best artifacts graduate into customer-facing KB articles, dev guides, and LLM skills.
 
