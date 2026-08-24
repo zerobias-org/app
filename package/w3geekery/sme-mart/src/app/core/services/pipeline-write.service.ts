@@ -60,20 +60,23 @@ export const SME_MART_CLASS_IDS = {
   VendorProductProficiency:     '53ada1e4-81eb-5def-9dc1-63c4ba40a560',
   VendorFrameworkProficiency:   'd3136e24-e10e-58fd-a83c-029d74f1dc5a',
 
-  // Added 2026-08-07 — the credential trio now HAS its consumer. Clark ruled the
-  // vendor-profile credential surface gets built (2026-08-06), which supersedes the
-  // "NOT registered yet, deliberately" note that stood here.
+  // The two certification claim junctions — same orgId/userId + catalog-ref + Verifiable
+  // shape as the six Vendor* expertise junctions above.
   //
-  // All three ids read back from platform.Class.getClass on PROD, not computed and not
-  // copied from a plan: getClass('SecurityCredential') returns its own id plus both
-  // junction ids on its orgCredentials/userCredentials link properties.
+  // Renamed from OrgCredential/UserCredential in smemart 2.0.12: "credential" means
+  // secrets in this platform (base schema owns AccessCredential), so the word is reserved
+  // for the user/password/access sense and never used for accreditations or certifications.
   //
-  // SecurityCredential is the CATALOG entry; OrgCredential and UserCredential are the
-  // claim junctions, the same orgId/userId + catalog-ref + Verifiable shape as the six
-  // Vendor* expertise junctions (see the removal note above).
-  SecurityCredential:           'd07f97f8-8eab-597d-b8c3-b2161048228b',
-  OrgCredential:                '2af21665-5de0-5b6e-9312-797116f77db1',
-  UserCredential:               'c083eae2-42b4-5c31-a66b-c13225a9e182',
+  // These ids are NEW — a rename mints a new class id, since the id is UUIDv5 over the
+  // NAME alone. Read back from the live catalog after 2.0.12 published, not computed and
+  // not copied from a plan.
+  OrgCertification:             '69e2ceff-3727-5aa2-8108-2240ad16eedf',
+  UserCertification:            'c57876d8-be05-5074-9df9-c38eb747626e',
+
+  // The catalog entry itself is NOT registered here. SecurityCredential was retired from
+  // smemart in 2.0.12 and lives on as QualificationResource in the shared
+  // zerobias.schemas.qualifications package — a different schema, owned by the Content
+  // Team, so it is not a SME Mart class and gets no id in this map.
 
   // The asymmetry, since a retirement sweep will pass this way again: app coupling is
   // never a reason to KEEP a class, and that does not invert — the absence of coupling

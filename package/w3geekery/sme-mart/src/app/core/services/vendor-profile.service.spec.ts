@@ -4,7 +4,7 @@
  *
  * The old suite tested one CRUD surface over a JSON `data` column. These test the
  * behaviours the typed rewrite introduced: per-class reads, singleton upsert (the bug
- * the old insert-only path had), derived `name`, and the credential claim junctions.
+ * the old insert-only path had), derived `name`, and the certification claim junctions.
  */
 
 import { TestBed } from '@angular/core/testing';
@@ -195,14 +195,14 @@ describe('VendorProfileService', () => {
     });
   });
 
-  describe('credential claims', () => {
+  describe('certification claims', () => {
     it('filters the catalog by scope', async () => {
-      await service.listCatalogCredentials('org');
+      await service.listCatalogQualifications('organizational');
 
       expect(graphqlRead.query).toHaveBeenCalledWith(
-        'SecurityCredential',
+        'QualificationResource',
         expect.any(Array),
-        expect.objectContaining({ filters: { scope: '.eq.org' } }),
+        expect.objectContaining({ filters: { scope: '.eq.organizational' } }),
       );
     });
 
@@ -211,7 +211,7 @@ describe('VendorProfileService', () => {
         { id: 'sc-1', name: 'CISSP', frameworkIds: 'framework-1' },
       ]));
 
-      const [entry] = await service.listCatalogCredentials('individual');
+      const [entry] = await service.listCatalogQualifications('individual');
 
       expect(entry.frameworkIds).toEqual(['framework-1']);
     });
@@ -219,39 +219,39 @@ describe('VendorProfileService', () => {
     it('treats an absent frameworkIds as empty, not malformed', async () => {
       graphqlRead.query.mockResolvedValue(page([{ id: 'sc-1', name: 'CISSP' }]));
 
-      const [entry] = await service.listCatalogCredentials('individual');
+      const [entry] = await service.listCatalogQualifications('individual');
 
       expect(entry.frameworkIds).toEqual([]);
     });
 
-    it('claims an org-scope credential against OrgCredential', async () => {
-      const claim = await service.addOrgCredential('org-1', 'sc-1', { credentialNumber: 'X-9' });
+    it('claims an organizational-scope certification against OrgCertification', async () => {
+      const claim = await service.addOrgCertification('org-1', 'CMMC.C3PAO', { certificationNumber: 'X-9' });
 
       expect(pipelineWrite.pushEntity).toHaveBeenCalledWith(
-        'OrgCredential',
-        expect.objectContaining({ orgId: 'org-1', securityCredential: 'sc-1', credentialNumber: 'X-9' }),
+        'OrgCertification',
+        expect.objectContaining({ orgId: 'org-1', certificationCode: 'CMMC.C3PAO', certificationNumber: 'X-9' }),
         [],
-        'vendor-profile.service:addOrgCredential',
+        'vendor-profile.service:addOrgCertification',
       );
       expect(claim.verified).toBe(false);
     });
 
-    it('claims an individual-scope credential against UserCredential, keyed on userId', async () => {
-      await service.addUserCredential('user-1', 'sc-2');
+    it('claims an individual-scope certification against UserCertification, keyed on userId', async () => {
+      await service.addUserCertification('user-1', 'ISC2.CISSP');
 
       expect(pipelineWrite.pushEntity).toHaveBeenCalledWith(
-        'UserCredential',
-        expect.objectContaining({ userId: 'user-1', securityCredential: 'sc-2' }),
+        'UserCertification',
+        expect.objectContaining({ userId: 'user-1', certificationCode: 'ISC2.CISSP' }),
         [],
-        'vendor-profile.service:addUserCredential',
+        'vendor-profile.service:addUserCertification',
       );
     });
 
     it('lists a user\'s claims by userId', async () => {
-      await service.listUserCredentials('user-1');
+      await service.listUserCertifications('user-1');
 
       expect(graphqlRead.query).toHaveBeenCalledWith(
-        'UserCredential',
+        'UserCertification',
         expect.any(Array),
         expect.objectContaining({ filters: { userId: '.eq.user-1' } }),
       );

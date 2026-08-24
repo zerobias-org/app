@@ -42,7 +42,7 @@ import {
  *   serviceType       -> serviceSegmentId         free text  -> Catalog segment UUID
  *
  * The first two are selects here. The third needs a Catalog picker, which is deliberately
- * NOT built this pass: the SecurityCredential/segment picker work is specced separately
+ * NOT built this pass: the QualificationResource/segment picker work is specced separately
  * and a picker over an unloaded catalog demos as broken. The control accepts a segment
  * UUID directly until that lands.
  *
