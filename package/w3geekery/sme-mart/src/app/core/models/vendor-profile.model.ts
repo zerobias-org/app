@@ -147,8 +147,8 @@ export interface PersonnelRecord extends VerifiableFields {
   isKeyPersonnel: boolean | null;
   backgroundCheckStatus: string | null;
   /**
-   * Platform User this person maps to. NULLABLE — and load-bearing: UserCredential is
-   * keyed on userId, so a Personnel row without one cannot hold credentials.
+   * Platform User this person maps to. NULLABLE — and load-bearing: UserCertification is
+   * keyed on userId, so a Personnel row without one cannot hold certifications.
    */
   userId: string | null;
   roleId: string | null;
@@ -167,52 +167,59 @@ export interface FinancialProfileRecord extends VerifiableFields {
   yearEndMonth: number | null;
 }
 
-// ── Credential claim junctions ──────────────────────────────────────────────
+// ── Certification claim junctions ───────────────────────────────────────────
 
 /**
- * An org's claim on an org-scope catalog credential.
+ * An org's claim on an org-scope catalog certification.
  *
  * Same shape as the six Vendor* expertise junctions: owner id + catalog ref +
- * attributes + provenance. `securityCredential` is the SecurityCredential catalog UUID.
+ * attributes + provenance. `certificationCode` is the QualificationResource's `code`
+ * (e.g. "CMMC.C3PAO"), a plain string — the catalog lives in a separate schema package,
+ * so this is not a link and GQL returns it flat.
  */
-export interface OrgCredentialRecord extends VerifiableFields {
+export interface OrgCertificationRecord extends VerifiableFields {
   id: string;
   orgId: string;
-  securityCredential: string | null;
-  credentialNumber: string | null;
+  certificationCode: string | null;
+  certificationNumber: string | null;
   issuedAt: string | null;
   expiresAt: string | null;
   notes: string | null;
 }
 
-/** A user's claim on an individual-scope catalog credential. Keyed on userId, not orgId. */
-export interface UserCredentialRecord extends VerifiableFields {
+/** A user's claim on an individual-scope catalog certification. Keyed on userId, not orgId. */
+export interface UserCertificationRecord extends VerifiableFields {
   id: string;
   userId: string;
-  securityCredential: string | null;
-  credentialNumber: string | null;
+  certificationCode: string | null;
+  certificationNumber: string | null;
   issuedAt: string | null;
   expiresAt: string | null;
   notes: string | null;
 }
 
 /**
- * Catalog entry a credential claim points at.
+ * Catalog entry a certification claim points at. Lives in `zerobias.schemas.qualifications`,
+ * not in smemart — it is a shared ZeroBias dataset owned by the Content Team.
  *
  * `scope` gates which junction is legal: an individual-scope entry is claimable via
- * UserCredential, an org-scope one via OrgCredential. A picker MUST filter on it.
+ * UserCertification, an organizational one via OrgCertification. A picker MUST filter on it.
  * `frameworkIds` is legitimately empty on most entries — treat empty as normal, not as
- * missing data.
+ * missing data. `qualifiesForRoleIds` is empty on every entry today; build nothing on it.
  */
-export interface SecurityCredentialRecord {
+export interface QualificationResourceRecord {
   id: string;
   name: string;
   code: string | null;
-  scope: 'individual' | 'org' | 'product' | null;
+  scope: 'individual' | 'organizational' | null;
   ecosystemCode: string | null;
   proficiency: string | null;
   frameworkIds: string[];
+  standardIds: string[];
   issuerVendorIds: string[];
+  prerequisiteCertificationIds: string[];
+  qualifiesForRoleIds: string[];
+  supersedesCode: string | null;
   sourceUrl: string | null;
   status: string | null;
 }

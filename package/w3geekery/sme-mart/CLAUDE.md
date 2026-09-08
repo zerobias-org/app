@@ -18,18 +18,18 @@ SME Mart is a **marketplace for Subject Matter Experts** in compliance/cybersecu
 | **Backlog (all pending work)** | [`.planning/BACKLOG.md`](.planning/BACKLOG.md) — select items for next GSD milestone |
 | **Project & Milestone State** | [`.planning/PROJECT.md`](.planning/PROJECT.md), [`.planning/ROADMAP.md`](.planning/ROADMAP.md) |
 | **Plan Archive (historical)** | `../../../.claude/sme-mart/plans-archive/` — old PLAN.md + 55 plan files (local-only, gitignored — not in any branch) |
-| **Source Paths (SDKs, repos)** | [`.planning/docs/SOURCE_PATHS.md`](.planning/docs/SOURCE_PATHS.md) |
-| **🛑 SDK / API Verification — READ FIRST for any "what's the API for X" question** | [`.planning/docs/SDK_VERIFICATION_SOURCES.md`](.planning/docs/SDK_VERIFICATION_SOURCES.md) — authoritative sources are ZB MCP (`zerobias_search`/`zerobias_describe`), actual ZB platform source, and actual SDK source. The deprecated Next.js prototype is NOT authoritative. Memory entries can be wrong — verify against MCP/SDK before citing. |
-| **🧭 RDF Compass — long-term shape constraint** | [`.planning/docs/RDF-COMPASS.md`](.planning/docs/RDF-COMPASS.md) — every Engagement / Project / Task / Vetting / Record design MUST satisfy the 5-question compass checklist (C-1..C-5) so SME Mart doesn't paint corners blocking the future OWL/SHACL/RDF/Holon/Hologram audit-trail container (Brian directive 2026-05-19). Apply at plan-phase + design review. |
+| **Source Paths (SDKs, repos)** | [`~/Projects/zb-mesh/_coord/docs/sme-mart/SOURCE_PATHS.md`](~/Projects/zb-mesh/_coord/docs/sme-mart/SOURCE_PATHS.md) |
+| **🛑 SDK / API Verification — READ FIRST for any "what's the API for X" question** | [`~/Projects/zb-mesh/_coord/docs/sme-mart/SDK_VERIFICATION_SOURCES.md`](~/Projects/zb-mesh/_coord/docs/sme-mart/SDK_VERIFICATION_SOURCES.md) — authoritative sources are ZB MCP (`zerobias_search`/`zerobias_describe`), actual ZB platform source, and actual SDK source. The deprecated Next.js prototype is NOT authoritative. Memory entries can be wrong — verify against MCP/SDK before citing. |
+| **🧭 RDF Compass — long-term shape constraint** | [`~/Projects/zb-mesh/_coord/docs/sme-mart/RDF-COMPASS.md`](~/Projects/zb-mesh/_coord/docs/sme-mart/RDF-COMPASS.md) — every Engagement / Project / Task / Vetting / Record design MUST satisfy the 5-question compass checklist (C-1..C-5) so SME Mart doesn't paint corners blocking the future OWL/SHACL/RDF/Holon/Hologram audit-trail container (Brian directive 2026-05-19). Apply at plan-phase + design review. |
 | **📋 Requirements feature architecture (DEFERRED pending Kevin) — READ FIRST before any Requirements/Readiness schema or backend work** | [`.planning/notes/requirements-architecture-2026-05-27-pending-kevin.md`](.planning/notes/requirements-architecture-2026-05-27-pending-kevin.md) — 3-layer model (OrgFrameworkAdoption + ProjectFrameworkTarget + ProjectRequirement), naming-collision finding (use `ProjectRequirement` not `Requirement` — collides with platform `BoundaryRequirement`), proposed schema shapes, carrier-rule application, 7 open questions for Kevin/Daniel/Nic. Tracked as [[BACKLOG-123]]. Don't redo this analysis — read the capture doc and resume from there. |
 | **Angular 21 Docs** | [`AGENTS.md`](AGENTS.md) — local docs index in `.angular-docs/` (refresh: `npx angular-agents-md`) |
 | **Next.js prototype** (archived) | `../sme-mart-nextjs-deprecated/` |
 | **ZeroBias UI** (Angular 21 reference) | `~/Projects/zb/com/ui` |
 | **SDK source** | `~/Projects/zb/clients/packages/` |
 | **Neon DB reference** | [`.planning/notes/neon-mcp-reference.md`](.planning/notes/neon-mcp-reference.md) — project ID, tables, common SQL queries |
-| **Hub Connection Setup (Neon)** | [`.planning/docs/HUB_CONNECTION_SETUP_NEON.md`](.planning/docs/HUB_CONNECTION_SETUP_NEON.md) — step-by-step playbook: generic-sql deployment + managed secret + connection via ZB MCP |
-| **UAT CloudFront Cache Invalidation** | [`.planning/docs/UAT_CLOUDFRONT_CACHE_INVALIDATION.md`](.planning/docs/UAT_CLOUDFRONT_CACHE_INVALIDATION.md) — when `uat.zerobias.com/sme-mart/` shows stale code after deploy: SSO prod account → distribution `E23VJPBBDUCHBQ` → Invalidations → `/*` |
-| **ZB Portal API curl Fallback** | [`.planning/docs/ZB_PORTAL_CURL_FALLBACK.md`](.planning/docs/ZB_PORTAL_CURL_FALLBACK.md) — recipe for querying `portal.*` endpoints (frameworks, vendors) when ZB MCP doesn't index the service |
+| **Hub Connection Setup (Neon)** | [`~/Projects/zb-mesh/_coord/docs/sme-mart/HUB_CONNECTION_SETUP_NEON.md`](~/Projects/zb-mesh/_coord/docs/sme-mart/HUB_CONNECTION_SETUP_NEON.md) — step-by-step playbook: generic-sql deployment + managed secret + connection via ZB MCP |
+| **UAT CloudFront Cache Invalidation** | [`~/Projects/zb-mesh/_coord/docs/sme-mart/UAT_CLOUDFRONT_CACHE_INVALIDATION.md`](~/Projects/zb-mesh/_coord/docs/sme-mart/UAT_CLOUDFRONT_CACHE_INVALIDATION.md) — when `uat.zerobias.com/sme-mart/` shows stale code after deploy: SSO prod account → distribution `E23VJPBBDUCHBQ` → Invalidations → `/*` |
+| **ZB Portal API curl Fallback** | [`~/Projects/zb-mesh/_coord/docs/sme-mart/ZB_PORTAL_CURL_FALLBACK.md`](~/Projects/zb-mesh/_coord/docs/sme-mart/ZB_PORTAL_CURL_FALLBACK.md) — recipe for querying `portal.*` endpoints (frameworks, vendors) when ZB MCP doesn't index the service |
 | **Demo data guide** | [`.planning/notes/demo-data-guide.md`](.planning/notes/demo-data-guide.md) — buyers, providers, engagements, ZB Tasks, demo scenarios |
 | **GQL Schema Extension (howto)** | [`.planning/notes/zb-graphql-custom-schema-howto.md`](.planning/notes/zb-graphql-custom-schema-howto.md) — customer-facing guide: YAML schema packages, querying, filtering |
 | **GQL Schema Extension (internals)** | [`.planning/notes/zb-graphql-schema-extension-guide.md`](.planning/notes/zb-graphql-schema-extension-guide.md) — platform internals: SchemaBuilder, catalog tables, source files |
@@ -39,8 +39,9 @@ SME Mart is a **marketplace for Subject Matter Experts** in compliance/cybersecu
 | **Permissions / RBAC** | [`.planning/notes/zb-permissions-reference.md`](.planning/notes/zb-permissions-reference.md) — **READ before any admin/permission check.** System roles (Organization Admin, Boundary Admin, etc.), auto-created groups per Org/Boundary, `searchRolesByPrincipal` / `searchRoles` / `searchOrgMembers` APIs with `via` resolution. Don't invent new roles — system roles cover the cases. |
 | **E2E Testing Guide** | [`.planning/notes/e2e-testing-guide.md`](.planning/notes/e2e-testing-guide.md) — **READ before writing Playwright tests.** Stack, auth model, gotchas, page object patterns, debugging playbook |
 | **Schema repo** | [`zerobias-org/schema`](https://github.com/zerobias-org/schema) — YAML schema packages (source of truth for GQL entities) |
+| **⛔ zbb / dataloader — READ BEFORE ANY CHANGE TO `org/schema`, EVERY TIME** | memex `[[zbb — ZeroBias Build CLI (living reference)]]` + [`~/.claude/docs/zbb-reference.md`](~/.claude/docs/zbb-reference.md). **Read them BEFORE the branch and BEFORE the YAML — not when you reach the gate.** First action is updating BOTH global CLIs (`npm i -g @zerobias-org/zbb@latest`, `npm i -g @zerobias-com/platform-dataloader@latest`); **if that fails, it is a BLOCKER — stop and fix it, never a note to Clark.** A skipped precondition costs a 20-35 min gate round trip. The schema repo's own `CLAUDE.md` is wrong about `./gradlew` and about `NEON_API_KEY`. |
 | **Post-mortems** | [`../../../.claude/sme-mart/post-mortems/`](../../../.claude/sme-mart/post-mortems/) — failure reports (see [`INDEX.md`](../../../.claude/sme-mart/post-mortems/INDEX.md)). **Read before starting any schema change.** |
-| **zb-dx (Developer Experience)** | `~/Projects/zb/zerobias-org/zb-dx` — shared knowledge base for all ZB platform developers. **File friction with `/friction`, browse patterns, find integration guides.** See below. |
+| **zb-dx (Developer Experience)** | `~/Projects/zb/org/zb-dx` — shared knowledge base for all ZB platform developers. **File friction with `/friction`, browse patterns, find integration guides.** See below. |
 | **LSP routing** | `~/.claude/rules/common/lsp-registry.md` — built-in `LSP` is the default for symbol queries; `mcp__vscode-mcp__*` only for specific triggers (see below) |
 
 ## LSP routing — three routes, route by operation
@@ -72,7 +73,7 @@ Full routing table, failure-mode anchors, empirical findings, and detailed ratio
 
 ## zb-dx — ZeroBias Developer Experience
 
-**Repo:** `~/Projects/zb/zerobias-org/zb-dx` | **Slack:** `#zb-dx` (zerobias.org workspace)
+**Repo:** `~/Projects/zb/org/zb-dx` | **Slack:** `#zb-dx` (zerobias.org workspace)
 
 A shared knowledge base for any developer building on `zerobias-sdk` / `zerobias-client` / `zerobias-angular-client`. Patterns, guides, skills, and friction logs contributed by the community. The best artifacts graduate into customer-facing KB articles, dev guides, and LLM skills.
 
@@ -110,13 +111,13 @@ A shared knowledge base for any developer building on `zerobias-sdk` / `zerobias
 
 ## Angular 21 Patterns
 
-**READ [`.planning/docs/MODERNIZATION_GUIDE.md`](.planning/docs/MODERNIZATION_GUIDE.md) before writing any component.** `@Input`/`@Output`/constructor injection are banned — use `input()`/`output()`/`inject()`. See the guide for the full pattern list.
+**READ [`~/Projects/zb-mesh/_coord/docs/sme-mart/MODERNIZATION_GUIDE.md`](~/Projects/zb-mesh/_coord/docs/sme-mart/MODERNIZATION_GUIDE.md) before writing any component.** `@Input`/`@Output`/constructor injection are banned — use `input()`/`output()`/`inject()`. See the guide for the full pattern list.
 
 **Machine-enforced (Phase 27.5, 2026-05-01):** ESLint config at [`eslint.config.js`](eslint.config.js) encodes the modernization rules. Every commit is gated by the pre-commit hook ([`../../../.husky/pre-commit`](../../../.husky/pre-commit) + [`.lintstagedrc.json`](.lintstagedrc.json)); every PR/push is gated by [`../../../.github/workflows/lint.yml`](../../../.github/workflows/lint.yml). Both gates run **diff-based** — they only check files in your change. Warnings are treated as failures (`--max-warnings=0`).
 
 **Touch It = Fix It.** When you modify a file, fix every modernization-rule violation in that file as part of the same change. Pre-existing violations in **untouched** files do not block your PR — they're tracked in [`.planning/phases/27.5-modernization-enforcement/INITIAL-AUDIT.md`](.planning/phases/27.5-modernization-enforcement/INITIAL-AUDIT.md) and `MODERN-CLEANUP-1` ([`.planning/BACKLOG.md`](.planning/BACKLOG.md)) for organic migration.
 
-**If lint fires on you,** see the troubleshooting section in [MODERNIZATION_GUIDE.md](.planning/docs/MODERNIZATION_GUIDE.md#if-lint-fires-on-you--troubleshooting-common-violations) for before/after fixes for the common rules.
+**If lint fires on you,** see the troubleshooting section in [MODERNIZATION_GUIDE.md](~/Projects/zb-mesh/_coord/docs/sme-mart/MODERNIZATION_GUIDE.md#if-lint-fires-on-you--troubleshooting-common-violations) for before/after fixes for the common rules.
 
 **Emergency bypass** (`git commit --no-verify`) is human-only and requires explicit authorization. Agents must never use it. If used, file an errata immediately under `.planning/director/errata/`.
 
