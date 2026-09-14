@@ -17,6 +17,4 @@ export * from './sme-mart-board.model';
 export * from './sme-mart-activity.model';
 export * from './sme-mart-workflow.model';
 export * from './sme-mart-task.model';
-export * from './project-prd.model';
-export * from './project-plan.model';
 export * from './rfp-invitation.model';

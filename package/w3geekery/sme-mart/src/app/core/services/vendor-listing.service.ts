@@ -16,15 +16,11 @@ import {
 import type { GqlOfferRef, GqlVendorListingResponse } from '../gql-types/vendor-listing.types';
 
 /**
- * ServiceOfferingsService - reads and writes VendorListing.
+ * VendorListingService - reads and writes VendorListing.
  *
  * The ServiceOffering class was retired in smemart 2.0.8 and replaced by VendorListing.
  * Per Clark's ruling the new shape is PROPAGATED to consumers rather than hidden behind
  * an adapter, so this service now returns VendorListing directly.
- *
- * The service/file name still says "service offerings" - renaming it touches the barrel,
- * four components and their specs, which is outside the handed-off scope. Flagged as a
- * follow-up; the class it reads is VendorListing.
  *
  * All writes go through PipelineWriteService (fire-and-forget async).
  * All reads go through GraphqlReadService (from AuditgraphDB).
@@ -153,7 +149,7 @@ export type NewVendorListing = Pick<VendorListing, 'family' | 'kind' | 'title'> 
   >;
 
 @Injectable({ providedIn: 'root' })
-export class ServiceOfferingsService {
+export class VendorListingService {
   private readonly pipelineWrite = inject(PipelineWriteService);
   private readonly graphqlRead = inject(GraphqlReadService);
   private readonly snackBar = inject(MatSnackBar);
@@ -243,7 +239,7 @@ export class ServiceOfferingsService {
         'VendorListing',
         gqlData as unknown as Record<string, unknown>,
         [],
-        'service-offerings.service:createService',
+        'vendor-listing.service:createService',
       );
     } catch (err) {
       this.snackBar.open(
@@ -292,7 +288,7 @@ export class ServiceOfferingsService {
         'VendorListing',
         gqlData as unknown as Record<string, unknown>,
         [],
-        'service-offerings.service:updateService',
+        'vendor-listing.service:updateService',
       );
     } catch (err) {
       this.snackBar.open(

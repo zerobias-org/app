@@ -13,26 +13,16 @@ import {
   SME_MART_ACTIVITY_FIELD_MAPPING,
   SME_MART_WORKFLOW_FIELD_MAPPING,
   SME_MART_TASK_FIELD_MAPPING,
-  PROJECT_PRD_FIELD_MAPPING,
-  PRD_SECTION_FIELD_MAPPING,
-  PROJECT_PLAN_FIELD_MAPPING,
-  PLAN_MILESTONE_FIELD_MAPPING,
 } from './field-mappings';
 import type { SmeMartBoard } from './models/sme-mart-board.model';
 import type { SmeMartActivity } from './models/sme-mart-activity.model';
 import type { SmeMartWorkflow } from './models/sme-mart-workflow.model';
 import type { SmeMartTask } from './models/sme-mart-task.model';
-import type { ProjectPrd, PrdSection } from './models/project-prd.model';
-import type { ProjectPlan, PlanMilestone } from './models/project-plan.model';
 import type {
   GqlSmeMartBoardResponse,
   GqlSmeMartActivityResponse,
   GqlSmeMartWorkflowResponse,
   GqlSmeMartTaskResponse,
-  GqlProjectPrdResponse,
-  GqlPrdSectionResponse,
-  GqlProjectPlanResponse,
-  GqlPlanMilestoneResponse,
 } from './gql-types';
 
 describe('Field Mapping Roundtrip Tests - Bloom Entities', () => {
@@ -202,155 +192,6 @@ describe('Field Mapping Roundtrip Tests - Bloom Entities', () => {
   });
 
   // ────────────────────────────────────────────────────────────────────────────
-  // ProjectPrd Roundtrip
-  // ────────────────────────────────────────────────────────────────────────────
-
-  it('should roundtrip ProjectPrd fields without loss', () => {
-    const gqlPrd: GqlProjectPrdResponse = {
-      id: 'prd-123',
-      name: 'PRD for Project 123',
-      projectId: 'proj-123',
-      title: 'Product Requirements Document',
-      summary: 'Core requirements for v1.0',
-      createdAt: '2026-03-19T00:00:00Z',
-      updatedAt: '2026-03-19T00:00:00Z',
-    };
-
-    const model = mapGqlToNeon<ProjectPrd>(
-      gqlPrd,
-      PROJECT_PRD_FIELD_MAPPING.gqlToNeon,
-    );
-
-    expect(model.title).toBe('Product Requirements Document');
-    expect(model.projectId).toBe('proj-123');
-    expect(model.summary).toBe('Core requirements for v1.0');
-
-    const gqlRoundtrip = mapNeonToGql<GqlProjectPrdResponse>(
-      model,
-      PROJECT_PRD_FIELD_MAPPING.neonToGql,
-    );
-
-    expect(gqlRoundtrip.id).toBe(gqlPrd.id);
-    expect(gqlRoundtrip.title).toBe(gqlPrd.title);
-  });
-
-  // ────────────────────────────────────────────────────────────────────────────
-  // PrdSection Roundtrip
-  // ────────────────────────────────────────────────────────────────────────────
-
-  it('should roundtrip PrdSection fields without loss', () => {
-    const gqlSection: GqlPrdSectionResponse = {
-      id: 'section-123',
-      name: 'Functional Requirements',
-      sectionType: 'functional_requirements',
-      content: 'User must be able to login with email and password',
-      sortOrder: 1,
-      createdAt: '2026-03-19T00:00:00Z',
-      updatedAt: '2026-03-19T00:00:00Z',
-    };
-
-    const model = mapGqlToNeon<PrdSection>(
-      gqlSection,
-      PRD_SECTION_FIELD_MAPPING.gqlToNeon,
-    );
-
-    expect(model.sectionType).toBe('functional_requirements');
-    expect(model.content).toBe('User must be able to login with email and password');
-    expect(model.sortOrder).toBe(1);
-
-    const gqlRoundtrip = mapNeonToGql<GqlPrdSectionResponse>(
-      model,
-      PRD_SECTION_FIELD_MAPPING.neonToGql,
-    );
-
-    expect(gqlRoundtrip.id).toBe(gqlSection.id);
-    expect(gqlRoundtrip.sectionType).toBe(gqlSection.sectionType);
-  });
-
-  // ────────────────────────────────────────────────────────────────────────────
-  // ProjectPlan Roundtrip
-  // ────────────────────────────────────────────────────────────────────────────
-
-  it('should roundtrip ProjectPlan fields without loss', () => {
-    const gqlPlan: GqlProjectPlanResponse = {
-      name: 'Execution Plan',
-      id: 'plan-123',
-      projectId: 'proj-123',
-      title: 'Project Execution Plan',
-      approach: 'Agile with 2-week sprints',
-      estimatedDuration: '6 months',
-      teamStructure: {
-        lead: 'john.doe@example.com',
-        team_size: 8,
-        roles: ['frontend', 'backend', 'qa'],
-      },
-      createdAt: '2026-03-19T00:00:00Z',
-      updatedAt: '2026-03-19T00:00:00Z',
-    };
-
-    const model = mapGqlToNeon<ProjectPlan>(
-      gqlPlan,
-      PROJECT_PLAN_FIELD_MAPPING.gqlToNeon,
-    );
-
-    expect(model.title).toBe('Project Execution Plan');
-    expect(model.projectId).toBe('proj-123');
-    expect(model.approach).toBe('Agile with 2-week sprints');
-    expect(model.estimatedDuration).toBe('6 months');
-    expect(model.teamStructure).toEqual({
-      lead: 'john.doe@example.com',
-      team_size: 8,
-      roles: ['frontend', 'backend', 'qa'],
-    });
-
-    const gqlRoundtrip = mapNeonToGql<GqlProjectPlanResponse>(
-      model,
-      PROJECT_PLAN_FIELD_MAPPING.neonToGql,
-    );
-
-    expect(gqlRoundtrip.id).toBe(gqlPlan.id);
-    expect(gqlRoundtrip.title).toBe(gqlPlan.title);
-    expect(gqlRoundtrip.teamStructure).toEqual(gqlPlan.teamStructure);
-  });
-
-  // ────────────────────────────────────────────────────────────────────────────
-  // PlanMilestone Roundtrip
-  // ────────────────────────────────────────────────────────────────────────────
-
-  it('should roundtrip PlanMilestone fields without loss', () => {
-    const gqlMilestone: GqlPlanMilestoneResponse = {
-      id: 'milestone-123',
-      planId: 'plan-123',
-      name: 'Phase 1 Complete',
-      targetDate: '2026-06-19',
-      status: 'in_progress',
-      sortOrder: 1,
-      createdAt: '2026-03-19T00:00:00Z',
-      updatedAt: '2026-03-19T00:00:00Z',
-    };
-
-    const model = mapGqlToNeon<PlanMilestone>(
-      gqlMilestone,
-      PLAN_MILESTONE_FIELD_MAPPING.gqlToNeon,
-    );
-
-    expect(model.name).toBe('Phase 1 Complete');
-    expect(model.planId).toBe('plan-123');
-    expect(model.targetDate).toBe('2026-06-19');
-    expect(model.status).toBe('in_progress');
-    expect(model.sortOrder).toBe(1);
-
-    const gqlRoundtrip = mapNeonToGql<GqlPlanMilestoneResponse>(
-      model,
-      PLAN_MILESTONE_FIELD_MAPPING.neonToGql,
-    );
-
-    expect(gqlRoundtrip.id).toBe(gqlMilestone.id);
-    expect(gqlRoundtrip.name).toBe(gqlMilestone.name);
-    expect(gqlRoundtrip.targetDate).toBe(gqlMilestone.targetDate);
-  });
-
-  // ────────────────────────────────────────────────────────────────────────────
   // Optional/Nullable Fields
   // ────────────────────────────────────────────────────────────────────────────
 
@@ -384,25 +225,5 @@ describe('Field Mapping Roundtrip Tests - Bloom Entities', () => {
     );
 
     expect(gqlRoundtrip.parentId).toBeNull();
-  });
-
-  it('should handle nullable array fields correctly in ProjectPrd', () => {
-    const gqlPrd: GqlProjectPrdResponse = {
-      name: 'PRD',
-      id: 'prd-789',
-      projectId: 'proj-123',
-      title: 'Minimal PRD',
-      summary: null,
-      createdAt: '2026-03-19T00:00:00Z',
-      updatedAt: '2026-03-19T00:00:00Z',
-    };
-
-    const model = mapGqlToNeon<ProjectPrd>(
-      gqlPrd,
-      PROJECT_PRD_FIELD_MAPPING.gqlToNeon,
-    );
-
-    expect(model.summary).toBeNull();
-    // sourceDocuments should either be undefined or empty array depending on mapping
   });
 });

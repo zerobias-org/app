@@ -218,40 +218,6 @@ export interface GqlSmeMartTaskResponse extends GqlBaseEntity {
 
 // Shapes below follow smemart/classes/*.yml. Every class extends Object, so `name`
 // is required and id/createdAt/updatedAt come from GqlBaseEntity.
-export interface GqlProjectPrdResponse extends GqlBaseEntity {
-  name: string;
-  title?: string | null;      // prd.title
-  summary?: string | null;    // prd.summary
-  projectId?: string | null;  // prd.projectId
-  sections?: GqlPrdSectionResponse[] | null; // linkTo PrdSection.id.prd, multi
-}
-
-export interface GqlPrdSectionResponse extends GqlBaseEntity {
-  name: string;
-  sectionType?: string | null; // prdSection.sectionType
-  title?: string | null;       // prdSection.title
-  content?: string | null;     // prdSection.content
-  sortOrder?: number | null;   // prdSection.sortOrder
-  prdId?: string | null; // scalar mirror of the prd link
-}
-
-export interface GqlProjectPlanResponse extends GqlBaseEntity {
-  name: string;
-  title?: string | null;             // plan.title
-  approach?: string | null;          // plan.approach
-  estimatedDuration?: string | null; // plan.estimatedDuration
-  teamStructure?: Record<string, unknown> | null; // plan.teamStructure
-  projectId?: string | null;         // plan.projectId
-  milestones?: GqlPlanMilestoneResponse[] | null; // linkTo PlanMilestone.id.plan, multi
-}
-
-export interface GqlPlanMilestoneResponse extends GqlBaseEntity {
-  name: string;
-  targetDate?: string | null; // milestone.targetDate
-  status?: string | null;     // milestone.status
-  sortOrder?: number | null;  // milestone.sortOrder
-  planId?: string | null; // scalar mirror of the plan link
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // RfpInvitation Type (Plan 14 Wave 1 — Invitation Controls)
