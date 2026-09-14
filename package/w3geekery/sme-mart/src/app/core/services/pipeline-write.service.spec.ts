@@ -183,6 +183,38 @@ describe('PipelineWriteService', () => {
 
       expect(mockPipelineApi.receive).toHaveBeenCalledTimes(1);
     });
+
+    // A pure-delete batch (`data: []`) is rejected outright by the platform with
+    // "Simple batch must have at least one item." That shipped: this suite only ever
+    // asserted receive() was CALLED, never what it was called with, so every delete
+    // path 400'd in the live app while the tests stayed green.
+    it('should send a non-empty data array — an empty one is rejected by the platform', async () => {
+      await service.deleteEntities('Review', ['n1', 'n2']);
+
+      const batch = mockPipelineApi.receive.mock.calls[0][1];
+      expect(batch.data).toHaveLength(2);
+    });
+
+    it('should stub each doomed row with its id and a name', async () => {
+      await service.deleteEntities('Review', ['n1', 'n2']);
+
+      const batch = mockPipelineApi.receive.mock.calls[0][1];
+      // `name` is required on every SME Mart class (all extend `Object`); a stub
+      // without it fails schema validation before markDeleted is ever reached.
+      expect(batch.data).toEqual([
+        { id: 'n1', name: expect.any(String) },
+        { id: 'n2', name: expect.any(String) },
+      ]);
+      expect(batch.data[0].name).toBeTruthy();
+    });
+
+    it('should mark exactly the ids it stubs', async () => {
+      await service.deleteEntities('Review', ['n1', 'n2']);
+
+      const batch = mockPipelineApi.receive.mock.calls[0][1];
+      const stubbed = (batch.data as Array<{ id: string }>).map(d => d.id);
+      expect(stubbed).toEqual(['n1', 'n2']);
+    });
   });
 
   // ── getCached ──

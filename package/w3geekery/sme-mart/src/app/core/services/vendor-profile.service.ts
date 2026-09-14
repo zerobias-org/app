@@ -7,13 +7,13 @@ import {
   type ClientReferenceRecord,
   type FinancialProfileRecord,
   type InsuranceCoverageRecord,
-  type OrgCredentialRecord,
+  type OrgCertificationRecord,
   type OrgProfileRecord,
   type PersonnelRecord,
   type SectionType,
-  type SecurityCredentialRecord,
+  type QualificationResourceRecord,
   type ServiceCapabilityRecord,
-  type UserCredentialRecord,
+  type UserCertificationRecord,
   type VendorProfileBundle,
   type VendorProfileRecord,
 } from '../models/vendor-profile.model';
@@ -62,19 +62,20 @@ const SECTION_FIELDS: Record<SectionType, string[]> = {
   ],
 };
 
-const ORG_CREDENTIAL_FIELDS = [
-  'id', 'orgId', 'securityCredential', 'credentialNumber', 'issuedAt', 'expiresAt',
+const ORG_CERTIFICATION_FIELDS = [
+  'id', 'orgId', 'certificationCode', 'certificationNumber', 'issuedAt', 'expiresAt',
   'notes', ...VERIFIABLE_FIELDS,
 ];
 
-const USER_CREDENTIAL_FIELDS = [
-  'id', 'userId', 'securityCredential', 'credentialNumber', 'issuedAt', 'expiresAt',
+const USER_CERTIFICATION_FIELDS = [
+  'id', 'userId', 'certificationCode', 'certificationNumber', 'issuedAt', 'expiresAt',
   'notes', ...VERIFIABLE_FIELDS,
 ];
 
-const SECURITY_CREDENTIAL_FIELDS = [
+const QUALIFICATION_RESOURCE_FIELDS = [
   'id', 'name', 'code', 'scope', 'ecosystemCode', 'proficiency', 'frameworkIds',
-  'issuerVendorIds', 'sourceUrl', 'status',
+  'standardIds', 'issuerVendorIds', 'prerequisiteCertificationIds', 'qualifiesForRoleIds',
+  'supersedesCode', 'sourceUrl', 'status',
 ];
 
 /** GQL returns multi-valued fields as either a bare value or an array. */
@@ -218,75 +219,84 @@ export class VendorProfileService {
     }
   }
 
-  // ── Credential claims ─────────────────────────────────────────────────────
+  // ── Certification claims ──────────────────────────────────────────────────
 
   /**
    * Catalog entries claimable at a given scope.
    *
    * Scope is not cosmetic — it decides which junction is legal. An individual-scope
-   * entry is claimable via UserCredential, an org-scope one via OrgCredential, and the
-   * curated catalog is overwhelmingly individual-scope. An unfiltered org-side list
+   * entry is claimable via UserCertification, an organizational one via OrgCertification,
+   * and the catalog is 100 individual / 26 organizational. An unfiltered org-side list
    * would be almost entirely unclaimable options.
+   *
+   * ⚠️ QualificationResource lives in `zerobias.schemas.qualifications`, NOT in smemart,
+   * so this reads across a package boundary. That package is not published yet
+   * (zerobias-org/schema#79) — until it is, this returns [] rather than rows.
    */
-  async listCatalogCredentials(scope: 'individual' | 'org'): Promise<SecurityCredentialRecord[]> {
+  async listCatalogQualifications(
+    scope: 'individual' | 'organizational',
+  ): Promise<QualificationResourceRecord[]> {
     try {
       const result = await this.graphqlRead.query<Record<string, unknown>>(
-        'SecurityCredential',
-        SECURITY_CREDENTIAL_FIELDS,
+        'QualificationResource',
+        QUALIFICATION_RESOURCE_FIELDS,
         { filters: { scope: `.eq.${scope}` }, pageNumber: 1, pageSize: 500 },
       );
       return result.items.map(item => ({
         ...item,
         frameworkIds: toArray(item['frameworkIds']),
+        standardIds: toArray(item['standardIds']),
         issuerVendorIds: toArray(item['issuerVendorIds']),
-      }) as unknown as SecurityCredentialRecord);
+        prerequisiteCertificationIds: toArray(item['prerequisiteCertificationIds']),
+        qualifiesForRoleIds: toArray(item['qualifiesForRoleIds']),
+      }) as unknown as QualificationResourceRecord);
     } catch (err) {
-      console.error('[VendorProfileService] listCatalogCredentials failed:', err);
+      console.error('[VendorProfileService] listCatalogQualifications failed:', err);
       return [];
     }
   }
 
-  /** An org's credential claims. */
-  async listOrgCredentials(orgId: string): Promise<OrgCredentialRecord[]> {
+  /** An org's certification claims. */
+  async listOrgCertifications(orgId: string): Promise<OrgCertificationRecord[]> {
     try {
-      const result = await this.graphqlRead.query<OrgCredentialRecord>(
-        'OrgCredential',
-        ORG_CREDENTIAL_FIELDS,
+      const result = await this.graphqlRead.query<OrgCertificationRecord>(
+        'OrgCertification',
+        ORG_CERTIFICATION_FIELDS,
         { filters: { orgId: `.eq.${orgId}` }, pageNumber: 1, pageSize: 200 },
       );
       return result.items;
     } catch (err) {
-      console.error('[VendorProfileService] listOrgCredentials failed:', err);
+      console.error('[VendorProfileService] listOrgCertifications failed:', err);
       return [];
     }
   }
 
-  /** A user's credential claims. Keyed on userId — Personnel.userId may be null. */
-  async listUserCredentials(userId: string): Promise<UserCredentialRecord[]> {
+  /** A user's certification claims. Keyed on userId — Personnel.userId may be null. */
+  async listUserCertifications(userId: string): Promise<UserCertificationRecord[]> {
     try {
-      const result = await this.graphqlRead.query<UserCredentialRecord>(
-        'UserCredential',
-        USER_CREDENTIAL_FIELDS,
+      const result = await this.graphqlRead.query<UserCertificationRecord>(
+        'UserCertification',
+        USER_CERTIFICATION_FIELDS,
         { filters: { userId: `.eq.${userId}` }, pageNumber: 1, pageSize: 200 },
       );
       return result.items;
     } catch (err) {
-      console.error('[VendorProfileService] listUserCredentials failed:', err);
+      console.error('[VendorProfileService] listUserCertifications failed:', err);
       return [];
     }
   }
 
-  /** Claim an org-scope catalog credential for an org. */
-  async addOrgCredential(
+  /** Claim an organizational-scope catalog certification for an org. */
+  async addOrgCertification(
     orgId: string,
-    securityCredential: string,
-    data: Partial<OrgCredentialRecord> = {},
-  ): Promise<OrgCredentialRecord> {
-    const row: OrgCredentialRecord = {
+    certificationCode: string,
+    data: Partial<OrgCertificationRecord> = {},
+  ): Promise<OrgCertificationRecord> {
+    const row: OrgCertificationRecord = {
       id: crypto.randomUUID(),
       orgId,
-      securityCredential,
-      credentialNumber: data.credentialNumber ?? null,
+      certificationCode,
+      certificationNumber: data.certificationNumber ?? null,
       issuedAt: data.issuedAt ?? null,
       expiresAt: data.expiresAt ?? null,
       notes: data.notes ?? null,
@@ -296,21 +306,21 @@ export class VendorProfileService {
       verifiedBy: null,
       verificationExpiresAt: null,
     };
-    await this.push('OrgCredential', row, 'vendor-profile.service:addOrgCredential');
+    await this.push('OrgCertification', row, 'vendor-profile.service:addOrgCertification');
     return row;
   }
 
-  /** Claim an individual-scope catalog credential for a user. */
-  async addUserCredential(
+  /** Claim an individual-scope catalog certification for a user. */
+  async addUserCertification(
     userId: string,
-    securityCredential: string,
-    data: Partial<UserCredentialRecord> = {},
-  ): Promise<UserCredentialRecord> {
-    const row: UserCredentialRecord = {
+    certificationCode: string,
+    data: Partial<UserCertificationRecord> = {},
+  ): Promise<UserCertificationRecord> {
+    const row: UserCertificationRecord = {
       id: crypto.randomUUID(),
       userId,
-      securityCredential,
-      credentialNumber: data.credentialNumber ?? null,
+      certificationCode,
+      certificationNumber: data.certificationNumber ?? null,
       issuedAt: data.issuedAt ?? null,
       expiresAt: data.expiresAt ?? null,
       notes: data.notes ?? null,
@@ -320,16 +330,16 @@ export class VendorProfileService {
       verifiedBy: null,
       verificationExpiresAt: null,
     };
-    await this.push('UserCredential', row, 'vendor-profile.service:addUserCredential');
+    await this.push('UserCertification', row, 'vendor-profile.service:addUserCertification');
     return row;
   }
 
-  async removeOrgCredential(id: string): Promise<void> {
-    await this.pipelineWrite.deleteEntity('OrgCredential', id);
+  async removeOrgCertification(id: string): Promise<void> {
+    await this.pipelineWrite.deleteEntity('OrgCertification', id);
   }
 
-  async removeUserCredential(id: string): Promise<void> {
-    await this.pipelineWrite.deleteEntity('UserCredential', id);
+  async removeUserCertification(id: string): Promise<void> {
+    await this.pipelineWrite.deleteEntity('UserCertification', id);
   }
 
   // ── Internals ─────────────────────────────────────────────────────────────

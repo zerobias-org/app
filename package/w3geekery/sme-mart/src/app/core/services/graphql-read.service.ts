@@ -6,10 +6,33 @@ import { environment } from '../../../environments/environment';
 
 import type { SmeMartClassName } from './pipeline-write.service';
 
+/**
+ * Classes we READ but never WRITE, so they carry no entry in SME_MART_CLASS_IDS —
+ * that map exists to supply pipeline write ids, and these live in other schema
+ * packages.
+ *
+ * `QualificationResource` is the shared certification catalog in
+ * `zerobias.schemas.qualifications`, owned by the Content Team. The claim junctions
+ * that point at it (OrgCertification / UserCertification) ARE ours and are written.
+ */
+export type ExternalReadClassName = 'QualificationResource';
+
+/** Any class the read path will accept. Writes stay narrowed to SmeMartClassName. */
+export type ReadableClassName = SmeMartClassName | ExternalReadClassName;
+
 // ---------------------------------------------------------------------------
 // Boundary ID (from environment — per-environment, NOT deterministic)
 // ---------------------------------------------------------------------------
 const BOUNDARY_ID = environment.boundaryId;
+
+/**
+ * Fields that are links to other objects rather than scalars. Requesting one bare
+ * is a 500 from the boundary GQL parser, so every entry here is expanded to the
+ * subfield its consumers read. Add a field here the moment a query names it.
+ */
+const LINK_FIELD_EXPANSIONS: Record<string, string> = {
+  tag: 'tag { value }',
+};
 
 /**
  * Page info returned alongside query results.
@@ -71,7 +94,7 @@ export class GraphqlReadService {
    * ```
    */
   async query<T>(
-    className: SmeMartClassName,
+    className: ReadableClassName,
     fields: string[],
     options: GqlQueryOptions = {},
   ): Promise<GqlQueryResult<T>> {
@@ -114,7 +137,7 @@ export class GraphqlReadService {
    * ```
    */
   async getById<T>(
-    className: SmeMartClassName,
+    className: ReadableClassName,
     id: string,
     fields: string[],
   ): Promise<T | null> {
@@ -176,12 +199,12 @@ export class GraphqlReadService {
       }
     }
 
-    // `tag` is `[zerobias_zerobias_platform_schema_tag]` — an object list, not
-    // a scalar. The boundary GQL parser rejects bare `tag` ("must have a
-    // selection of subfields"), so any caller requesting `tag` needs it expanded.
-    // `value` is the only subfield any current consumer reads. If a future caller
-    // needs more tag fields, generalize.
-    const expandedFields = fields.map(f => (f === 'tag' ? 'tag { value }' : f));
+    // Link fields resolve to OBJECTS, not scalars, and the boundary GQL parser
+    // rejects them bare ("must have a selection of subfields"). Any caller naming
+    // one gets it expanded to the single subfield consumers actually read.
+    //   tag -> the `value` uuid (see pipeline-write:220, which merges `tag` onto
+    //          write payloads, so narrowing is not a removal)
+    const expandedFields = fields.map(f => LINK_FIELD_EXPANSIONS[f] ?? f);
 
     const argStr = args.length > 0 ? `(${args.join(', ')})` : '';
     const fieldStr = expandedFields.join(' ');
